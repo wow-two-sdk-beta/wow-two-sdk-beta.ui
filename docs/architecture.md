@@ -1,6 +1,6 @@
 # Architecture
 
-The single architectural rule of `@wow-two/ui-beta`: **layered imports**.
+The single architectural rule of `@wow-two-beta/ui`: **layered imports**.
 
 ## Layers
 

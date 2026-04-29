@@ -1,4 +1,4 @@
-# @wow-two/ui-beta
+# @wow-two-beta/ui
 
 > ⚠️ **Beta-forever.** No semver, no API stability, no graduation roadmap. Ship fast, fix-forward.
 
@@ -7,22 +7,22 @@ Cross-project React UI library for the wow-two ecosystem. Lives in this single r
 ## Install
 
 ```bash
-pnpm add @wow-two/ui-beta
+pnpm add @wow-two-beta/ui
 ```
 
 ## Use
 
 ```tsx
-import { Button } from '@wow-two/ui-beta';
-import '@wow-two/ui-beta/styles.css';
+import { Button } from '@wow-two-beta/ui';
+import '@wow-two-beta/ui/styles.css';
 ```
 
 Subpath imports for tree-shake-friendly consumption:
 
 ```tsx
-import { Button } from '@wow-two/ui-beta/actions';
-import { wowTwoPreset } from '@wow-two/ui-beta/tailwind';
-import { cn } from '@wow-two/ui-beta/utils';
+import { Button } from '@wow-two-beta/ui/actions';
+import { wowTwoPreset } from '@wow-two-beta/ui/tailwind';
+import { cn } from '@wow-two-beta/ui/utils';
 ```
 
 ## Develop

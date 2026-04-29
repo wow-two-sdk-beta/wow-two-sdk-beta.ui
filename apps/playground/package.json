@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@wow-two/ui-beta": "workspace:*",
+    "@wow-two-beta/ui": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

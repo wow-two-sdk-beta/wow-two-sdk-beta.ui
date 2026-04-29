@@ -1,8 +1,8 @@
-# wow-two-sdk.ui.beta
+# wow-two-sdk-beta.ui
 
 ## What is this
 
-The `@wow-two/ui-beta` package — beta-forever React UI library for the wow-two ecosystem. Intentionally pre-1.0. Ship as much as possible to feed real consumers (haven first); distill into a clean `@wow-two/ui` only after the platform layer below stabilizes.
+The `@wow-two-beta/ui` package — beta-forever React UI library for the wow-two ecosystem. Intentionally pre-1.0. Ship as much as possible to feed real consumers (haven first); distill into a clean `@wow-two/ui` only after the platform layer below stabilizes.
 
 > **Beta-forever rules**: no CHANGELOG, no PR gates, no required tests, push directly to main, fix-forward when broken. CI builds + auto-bumps `0.0.y` on each main push.
 
