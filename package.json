@@ -3,11 +3,21 @@
   "version": "0.0.1",
   "description": "Beta-forever React UI library for the wow-two ecosystem.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wow-two-sdk/wow-two-sdk.ui.beta.git"
+  },
+  "homepage": "https://github.com/wow-two-sdk/wow-two-sdk.ui.beta#readme",
+  "bugs": {
+    "url": "https://github.com/wow-two-sdk/wow-two-sdk.ui.beta/issues"
+  },
+  "keywords": ["react", "ui", "components", "tailwind", "wow-two", "beta"],
+  "sideEffects": ["**/*.css"],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": ["dist", "README.md", "LICENSE"],
   "exports": {
     ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
     "./tokens": { "import": "./dist/tokens/index.js", "types": "./dist/tokens/index.d.ts" },
@@ -23,13 +33,14 @@
     "./styles.css": "./dist/index.css"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && cp src/index.css dist/index.css",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build -o storybook-static",
-    "playground": "pnpm --filter playground dev"
+    "playground": "pnpm --filter playground dev",
+    "prepublishOnly": "pnpm typecheck && pnpm build"
   },
   "peerDependencies": {
     "react": "^19.0.0",
