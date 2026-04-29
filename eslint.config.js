@@ -26,7 +26,7 @@ export default tseslint.config(
       'boundaries/elements': [
         {
           type: 'foundation',
-          pattern: 'src/(tokens|tailwind|utils|hooks|icons)/**',
+          pattern: 'src/(tokens|tailwind|utils|hooks|icons|primitives)/**',
         },
         {
           type: 'domain',

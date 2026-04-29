@@ -6,11 +6,30 @@ The single architectural rule of `@wow-two-beta/ui`: **layered imports**.
 
 | Layer | Folders | May import | May NOT import |
 |---|---|---|---|
-| **Foundation** | `tokens` `tailwind` `utils` `hooks` `icons` | other foundation | anything else |
+| **Foundation** | `tokens` `tailwind` `utils` `hooks` `icons` `primitives` | other foundation | anything else |
 | **Domain** | `actions` `display` `feedback` `forms` `layout` | foundation, components in **same** domain | sibling domains, root barrel |
 | **Root** | `src/index.ts` | foundation, all domains | nothing else |
 
 Foundation never reaches up. Domains never reach sideways. Root only assembles.
+
+## Foundation sub-layers
+
+Foundation is internally ordered (informal — not ESLint-enforced, but respected by convention):
+
+```
+tokens   →  tailwind   ─┐
+                        ├─→  primitives  →  domain
+utils    →  hooks       ─┘
+                        ↑
+icons   ────────────────┘
+```
+
+- **`tokens`** — pure data. CSS values exposed as TypeScript objects + Tailwind preset.
+- **`tailwind`** — preset that maps tokens to Tailwind theme. No JS at runtime.
+- **`utils`** — pure helpers (`cn`, ref/event composition, polymorphic types, `tv` wrapper).
+- **`hooks`** — pure React hooks (state, refs, observers). May use `utils`.
+- **`icons`** — `<Icon>` registry. May use `utils`.
+- **`primitives`** — headless components (Slot, Portal, FocusScope, etc.). Behavior + a11y only, no visuals beyond layout. May use `utils` + `hooks`. **This is L2.**
 
 ## Why this rule
 
@@ -22,7 +41,7 @@ Enforcing the rule from day 1 costs nothing. Letting it rot for 6 months costs w
 
 `eslint-plugin-boundaries` configured in `eslint.config.js`. Two element types:
 
-- `foundation` — `src/(tokens|tailwind|utils|hooks|icons)/**`
+- `foundation` — `src/(tokens|tailwind|utils|hooks|icons|primitives)/**`
 - `domain` — `src/(actions|display|feedback|forms|layout)/*/**` with captured `domain` segment
 
 Rules:
@@ -35,17 +54,27 @@ root       → foundation + any domain
 
 Violations fail `pnpm lint`. CI runs lint on every push.
 
+## Atom rule (within domains)
+
+A domain component lives in one of three tiers:
+
+- **L3 atom** — imports only foundation. May not import another component.
+- **L4 molecule / L5 organism** — imports foundation + sibling components in the same domain.
+- A component that wants a sibling-domain piece is the signal that the piece belongs in `primitives/` (or `utils`/`hooks`).
+
+L3 atoms can use **L1 Icon** (it's foundation) and **L2 primitives** (Slot, Portal, FocusScope, etc.). They cannot use other L3 atoms — when atom-on-atom composition is wanted, the result is L4.
+
 ## Anti-patterns this prevents
 
 - `actions/button/Button.tsx` importing from `forms/input` → caught
 - `tokens/colors.ts` importing from `actions/button` → caught
-- Two domains both reaching for a shared helper → forces it to be promoted to `utils/` or `hooks/`, which is the right answer
+- Two domains both reaching for a shared helper → forces it to be promoted to `utils/`, `hooks/`, or `primitives/`, which is the right answer
 
 ## When the rule needs to bend
 
 It doesn't. If you find yourself wanting to cross domains, the answer is one of:
 
-1. The thing belongs in `utils/` or `hooks/` — promote it
+1. The thing belongs in `utils/`, `hooks/`, or `primitives/` — promote it
 2. You have a domain misnamed — rename
 3. You have two responsibilities glued together — split them
 
@@ -66,4 +95,4 @@ It doesn't. If you find yourself wanting to cross domains, the answer is one of:
 └── index.ts
 ```
 
-Spec before code. Stories cover every visual state in spec.
+Spec before code. Stories cover every visual state in spec. Components without visual variants may omit `*.variants.ts`. Primitives (foundation) typically omit `*.stories.tsx` since they're headless.
