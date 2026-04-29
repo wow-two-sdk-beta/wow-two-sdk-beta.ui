@@ -1,0 +1,14 @@
+node_modules/
+dist/
+storybook-static/
+coverage/
+.turbo/
+.cache/
+.DS_Store
+*.log
+*.tsbuildinfo
+.pnpm-store/
+.env
+.env.local
+.vscode/
+.idea/

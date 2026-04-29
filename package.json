@@ -1,0 +1,68 @@
+{
+  "name": "@wow-two/ui-beta",
+  "version": "0.0.1",
+  "description": "Beta-forever React UI library for the wow-two ecosystem.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "README.md"],
+  "exports": {
+    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
+    "./tokens": { "import": "./dist/tokens/index.js", "types": "./dist/tokens/index.d.ts" },
+    "./tailwind": { "import": "./dist/tailwind/index.js", "types": "./dist/tailwind/index.d.ts" },
+    "./utils": { "import": "./dist/utils/index.js", "types": "./dist/utils/index.d.ts" },
+    "./hooks": { "import": "./dist/hooks/index.js", "types": "./dist/hooks/index.d.ts" },
+    "./icons": { "import": "./dist/icons/index.js", "types": "./dist/icons/index.d.ts" },
+    "./actions": { "import": "./dist/actions/index.js", "types": "./dist/actions/index.d.ts" },
+    "./display": { "import": "./dist/display/index.js", "types": "./dist/display/index.d.ts" },
+    "./feedback": { "import": "./dist/feedback/index.js", "types": "./dist/feedback/index.d.ts" },
+    "./forms": { "import": "./dist/forms/index.js", "types": "./dist/forms/index.d.ts" },
+    "./layout": { "import": "./dist/layout/index.js", "types": "./dist/layout/index.d.ts" },
+    "./styles.css": "./dist/index.css"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "storybook": "storybook dev -p 6006",
+    "build:storybook": "storybook build -o storybook-static",
+    "playground": "pnpm --filter playground dev"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4",
+    "tailwind-variants": "^0.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@storybook/addon-essentials": "^8.4.0",
+    "@storybook/react-vite": "^8.4.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.14.0",
+    "eslint-plugin-boundaries": "^5.0.1",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "postcss": "^8.4.49",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "storybook": "^8.4.0",
+    "tailwindcss": "^3.4.14",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0",
+    "vite": "^6.0.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,1 @@
+export { wowTwoPreset } from './preset';
