@@ -1,6 +1,6 @@
 {
   "name": "@wow-two-beta/ui",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Beta-forever React UI library for the wow-two ecosystem.",
   "license": "MIT",
   "repository": {
@@ -11,25 +11,71 @@
   "bugs": {
     "url": "https://github.com/wow-two-sdk-beta/wow-two-sdk-beta.ui/issues"
   },
-  "keywords": ["react", "ui", "components", "tailwind", "wow-two", "beta"],
-  "sideEffects": ["**/*.css"],
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "tailwind",
+    "wow-two",
+    "beta"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
-    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
-    "./tokens": { "import": "./dist/tokens/index.js", "types": "./dist/tokens/index.d.ts" },
-    "./tailwind": { "import": "./dist/tailwind/index.js", "types": "./dist/tailwind/index.d.ts" },
-    "./utils": { "import": "./dist/utils/index.js", "types": "./dist/utils/index.d.ts" },
-    "./hooks": { "import": "./dist/hooks/index.js", "types": "./dist/hooks/index.d.ts" },
-    "./icons": { "import": "./dist/icons/index.js", "types": "./dist/icons/index.d.ts" },
-    "./actions": { "import": "./dist/actions/index.js", "types": "./dist/actions/index.d.ts" },
-    "./display": { "import": "./dist/display/index.js", "types": "./dist/display/index.d.ts" },
-    "./feedback": { "import": "./dist/feedback/index.js", "types": "./dist/feedback/index.d.ts" },
-    "./forms": { "import": "./dist/forms/index.js", "types": "./dist/forms/index.d.ts" },
-    "./layout": { "import": "./dist/layout/index.js", "types": "./dist/layout/index.d.ts" },
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./tokens": {
+      "import": "./dist/tokens/index.js",
+      "types": "./dist/tokens/index.d.ts"
+    },
+    "./tailwind": {
+      "import": "./dist/tailwind/index.js",
+      "types": "./dist/tailwind/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks/index.js",
+      "types": "./dist/hooks/index.d.ts"
+    },
+    "./icons": {
+      "import": "./dist/icons/index.js",
+      "types": "./dist/icons/index.d.ts"
+    },
+    "./actions": {
+      "import": "./dist/actions/index.js",
+      "types": "./dist/actions/index.d.ts"
+    },
+    "./display": {
+      "import": "./dist/display/index.js",
+      "types": "./dist/display/index.d.ts"
+    },
+    "./feedback": {
+      "import": "./dist/feedback/index.js",
+      "types": "./dist/feedback/index.d.ts"
+    },
+    "./forms": {
+      "import": "./dist/forms/index.js",
+      "types": "./dist/forms/index.d.ts"
+    },
+    "./layout": {
+      "import": "./dist/layout/index.js",
+      "types": "./dist/layout/index.d.ts"
+    },
     "./styles.css": "./dist/index.css"
   },
   "scripts": {
