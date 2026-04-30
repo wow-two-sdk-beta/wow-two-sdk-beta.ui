@@ -1,4 +1,3 @@
-export { useIsomorphicLayoutEffect } from './useIsomorphicLayoutEffect';
 export { useId } from './useId';
 export { useControlled } from './useControlled';
 export { useDisclosure, type DisclosureControls } from './useDisclosure';

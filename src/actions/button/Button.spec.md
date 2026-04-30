@@ -47,10 +47,6 @@ Plain native `<button>`. No `asChild` slot in v0 — add only if a real consumer
 - Disabled state visible AND announced via native `disabled`
 - Color-contrast: variants tested against WCAG AA on the default theme
 
-## SSR / RSC
-
-Fully server-safe. No client-only logic, no hooks.
-
 ## Dependencies
 
 - Foundation: `utils/cn`

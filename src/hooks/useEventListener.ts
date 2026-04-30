@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react';
-import { useIsomorphicLayoutEffect } from './useIsomorphicLayoutEffect';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 type Target = Window | Document | HTMLElement | null;
 
@@ -10,11 +9,11 @@ type Target = Window | Document | HTMLElement | null;
 export function useEventListener<K extends string>(
   event: K,
   handler: (event: Event) => void,
-  target: Target = typeof document !== 'undefined' ? document : null,
+  target: Target = document,
   options?: boolean | AddEventListenerOptions,
 ): void {
   const handlerRef = useRef(handler);
-  useIsomorphicLayoutEffect(() => {
+  useLayoutEffect(() => {
     handlerRef.current = handler;
   }, [handler]);
 

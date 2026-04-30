@@ -55,11 +55,6 @@ ASCII or visual diagram of the component's parts.
 - Known gaps (and the plan to close them)
 - Screen-reader expectations
 
-## SSR / RSC
-
-- Client-only? Server-safe? Hydration concerns?
-- If client-only, why and what's the cost?
-
 ## Dependencies
 
 - Foundation pieces consumed (`utils/cn`, `tokens/colors`, ...)

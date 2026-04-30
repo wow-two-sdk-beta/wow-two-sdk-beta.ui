@@ -1,6 +1,16 @@
 // L2 — headless primitives. Behavior + a11y, no visual styling beyond layout.
 // Foundation layer; cannot import upward (enforced by ESLint boundaries).
-//
-// Sub-exports added as primitives ship; barrel kept tidy.
 
-export {};
+export * from './slot';
+export * from './portal';
+export * from './visuallyHidden';
+export * from './presence';
+export * from './directionProvider';
+export * from './accessibleIcon';
+export * from './focusScope';
+export * from './dismissableLayer';
+export * from './anchoredPositioner';
+export * from './rovingFocusGroup';
+export * from './collection';
+export * from './formControlContext';
+export * from './scrollLockProvider';

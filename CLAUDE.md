@@ -29,7 +29,7 @@ forms/numberInput/
 
 ## Layout
 
-- `src/tokens` `src/tailwind` `src/utils` `src/hooks` `src/icons` — **foundation** (no upward deps; ESLint enforces)
+- `src/tokens` `src/tailwind` `src/utils` `src/hooks` `src/icons` `src/primitives` — **foundation** (no upward deps; ESLint enforces). `src/primitives` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.).
 - `src/actions` `src/display` `src/feedback` `src/forms` `src/layout` — **domains** (may import foundation; may NOT import sibling domains; ESLint enforces)
 - `docs/component-standard.md` — meta-template every `*.spec.md` fills
 - `docs/architecture.md` — full layering rule + ESLint mechanics
