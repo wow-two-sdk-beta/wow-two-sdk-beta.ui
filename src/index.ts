@@ -1,5 +1,4 @@
 // Foundation — preferred via subpath imports, also namespaced from root for convenience
-export * as tokens from './tokens';
 export * as utils from './utils';
 export * as hooks from './hooks';
 export * as icons from './icons';
