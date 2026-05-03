@@ -19,7 +19,7 @@ export const Separator = forwardRef<HTMLDivElement, SeparatorProps>(
       role={decorative ? 'none' : 'separator'}
       aria-orientation={decorative ? undefined : orientation}
       className={cn(
-        'bg-neutral-200',
+        'bg-border',
         orientation === 'horizontal' ? 'h-px w-full' : 'w-px self-stretch',
         className,
       )}

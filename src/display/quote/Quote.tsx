@@ -11,7 +11,7 @@ export const Quote = forwardRef<HTMLQuoteElement, QuoteProps>(
     <blockquote
       ref={ref}
       className={cn(
-        'border-l-4 border-neutral-200 pl-4 italic text-neutral-700',
+        'border-l-4 border-border pl-4 italic text-muted-foreground',
         className,
       )}
       {...props}

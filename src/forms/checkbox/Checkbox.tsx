@@ -44,11 +44,11 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         <span
           aria-hidden="true"
           className={cn(
-            'pointer-events-none grid h-full w-full place-items-center rounded-sm border border-neutral-300 bg-white text-white transition-colors',
-            'peer-checked:border-brand-600 peer-checked:bg-brand-600',
-            'peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 peer-focus-visible:ring-offset-1',
+            'pointer-events-none grid h-full w-full place-items-center rounded-sm border border-input bg-background text-primary-foreground transition-colors',
+            'peer-checked:border-primary peer-checked:bg-primary',
+            'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1',
             'peer-disabled:opacity-50',
-            indeterminate && 'border-brand-600 bg-brand-600',
+            indeterminate && 'border-primary bg-primary',
           )}
         >
           {indeterminate ? (

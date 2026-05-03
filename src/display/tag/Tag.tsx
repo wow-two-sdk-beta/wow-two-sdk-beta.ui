@@ -27,7 +27,7 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(
           type="button"
           aria-label={closeLabel}
           onClick={onClose}
-          className="-mr-1 inline-flex h-4 w-4 items-center justify-center rounded-sm text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-500"
+          className="-mr-1 inline-flex h-4 w-4 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <Icon icon={X} size={12} />
         </button>

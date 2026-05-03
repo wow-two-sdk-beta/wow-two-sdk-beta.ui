@@ -17,7 +17,7 @@ export const FormErrorMessage = forwardRef<HTMLParagraphElement, FormErrorMessag
         ref={ref}
         id={id ?? ctx?.errorId}
         role="alert"
-        className={cn('text-sm text-danger-600', className)}
+        className={cn('text-sm text-destructive', className)}
         {...props}
       />
     );

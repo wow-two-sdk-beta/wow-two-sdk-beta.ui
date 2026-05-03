@@ -1,12 +1,12 @@
 import { tv, type VariantProps } from 'tailwind-variants';
 
 export const buttonVariants = tv({
-  base: 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:pointer-events-none disabled:opacity-50',
+  base: 'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
   variants: {
     variant: {
-      primary: 'bg-brand-600 text-white hover:bg-brand-700',
-      secondary: 'bg-neutral-200 text-neutral-900 hover:bg-neutral-100',
-      ghost: 'bg-transparent text-neutral-900 hover:bg-neutral-100',
+      primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+      secondary: 'bg-muted text-foreground hover:bg-muted/80',
+      ghost: 'bg-transparent text-foreground hover:bg-muted',
     },
     size: {
       sm: 'h-8 px-3 text-sm rounded-md',

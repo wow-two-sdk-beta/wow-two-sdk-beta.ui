@@ -10,7 +10,7 @@ export const Legend = forwardRef<HTMLLegendElement, LegendProps>(
   ({ className, ...props }, ref) => (
     <legend
       ref={ref}
-      className={cn('mb-2 text-sm font-medium text-neutral-900', className)}
+      className={cn('mb-2 text-sm font-medium text-foreground', className)}
       {...props}
     />
   ),

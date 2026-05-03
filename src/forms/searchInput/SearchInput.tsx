@@ -70,7 +70,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         <Icon
           icon={Search}
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground"
         />
         <input
           ref={inputRef}
@@ -101,7 +101,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             disabled={isDisabled}
             onClick={handleClear}
             aria-label="Clear search"
-            className="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+            className="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-subtle-foreground hover:bg-muted hover:text-muted-foreground"
           >
             <Icon icon={X} size={14} />
           </button>

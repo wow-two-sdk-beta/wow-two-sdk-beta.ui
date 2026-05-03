@@ -1,14 +1,14 @@
 import { tv, type VariantProps } from '../../utils';
 
 export const iconButtonVariants = tv({
-  base: 'inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:pointer-events-none disabled:opacity-50',
+  base: 'inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
   variants: {
     variant: {
-      solid: 'bg-brand-600 text-white hover:bg-brand-700',
-      soft: 'bg-brand-50 text-brand-700 hover:bg-brand-100',
-      outline: 'border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50',
-      ghost: 'bg-transparent text-neutral-900 hover:bg-neutral-100',
-      danger: 'bg-danger-600 text-white hover:bg-danger-700',
+      solid: 'bg-primary text-primary-foreground hover:bg-primary/90',
+      soft: 'bg-primary-soft text-primary-soft-foreground hover:bg-primary-soft/80',
+      outline: 'border border-input bg-background text-foreground hover:bg-muted',
+      ghost: 'bg-transparent text-foreground hover:bg-muted',
+      danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
     },
     size: {
       xs: 'h-6 w-6 rounded-sm',

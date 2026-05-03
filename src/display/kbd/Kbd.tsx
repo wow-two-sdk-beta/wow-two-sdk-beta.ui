@@ -11,8 +11,8 @@ export const Kbd = forwardRef<HTMLElement, KbdProps>(({ className, ...props }, r
   <kbd
     ref={ref}
     className={cn(
-      'inline-flex h-5 min-w-5 items-center justify-center rounded-sm border border-neutral-300',
-      'bg-neutral-100 px-1.5 font-mono text-xs text-neutral-700 shadow-[inset_0_-1px_0_0_rgb(0_0_0/0.05)]',
+      'inline-flex h-5 min-w-5 items-center justify-center rounded-sm border border-border',
+      'bg-muted px-1.5 font-mono text-xs text-muted-foreground shadow-[inset_0_-1px_0_0_rgb(0_0_0/0.05)]',
       className,
     )}
     {...props}

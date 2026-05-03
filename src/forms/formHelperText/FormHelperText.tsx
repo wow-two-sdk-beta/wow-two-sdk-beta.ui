@@ -15,7 +15,7 @@ export const FormHelperText = forwardRef<HTMLParagraphElement, FormHelperTextPro
       <p
         ref={ref}
         id={id ?? ctx?.helperId}
-        className={cn('text-sm text-neutral-500', className)}
+        className={cn('text-sm text-muted-foreground', className)}
         {...props}
       />
     );

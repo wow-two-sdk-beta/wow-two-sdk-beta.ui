@@ -10,7 +10,7 @@ export type MarkProps = ComponentPropsWithoutRef<'mark'>;
 export const Mark = forwardRef<HTMLElement, MarkProps>(({ className, ...props }, ref) => (
   <mark
     ref={ref}
-    className={cn('rounded-sm bg-warning-100 px-0.5 text-warning-900', className)}
+    className={cn('rounded-sm bg-warning-soft px-0.5 text-warning-soft-foreground', className)}
     {...props}
   />
 ));

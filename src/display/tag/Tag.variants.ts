@@ -1,15 +1,15 @@
 import { tv, type VariantProps } from '../../utils';
 
 export const tagVariants = tv({
-  base: 'inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2 py-0.5 text-xs font-medium text-neutral-800',
+  base: 'inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-0.5 text-xs font-medium text-card-foreground',
   variants: {
     variant: {
       neutral: '',
-      brand: 'border-brand-200 bg-brand-50 text-brand-800',
-      success: 'border-success-100 bg-success-50 text-success-700',
-      warning: 'border-warning-100 bg-warning-50 text-warning-700',
-      danger: 'border-danger-100 bg-danger-50 text-danger-700',
-      info: 'border-info-100 bg-info-50 text-info-700',
+      brand: 'border-transparent bg-primary-soft text-primary-soft-foreground',
+      success: 'border-transparent bg-success-soft text-success-soft-foreground',
+      warning: 'border-transparent bg-warning-soft text-warning-soft-foreground',
+      danger: 'border-transparent bg-destructive-soft text-destructive-soft-foreground',
+      info: 'border-transparent bg-info-soft text-info-soft-foreground',
     },
   },
   defaultVariants: {

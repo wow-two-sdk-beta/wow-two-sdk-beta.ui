@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from '../../utils';
 
 export const skeletonVariants = tv({
-  base: 'animate-pulse bg-neutral-200',
+  base: 'animate-pulse bg-muted',
   variants: {
     shape: {
       rect: 'rounded-md',

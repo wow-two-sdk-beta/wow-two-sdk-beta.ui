@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from '../../utils';
 
 export const progressTrackVariants = tv({
-  base: 'h-2 w-full overflow-hidden rounded-full bg-neutral-200',
+  base: 'h-2 w-full overflow-hidden rounded-full bg-muted',
   variants: {
     size: {
       sm: 'h-1',
@@ -18,11 +18,11 @@ export const progressFillVariants = tv({
   base: 'h-full rounded-full transition-[width] duration-300',
   variants: {
     tone: {
-      brand: 'bg-brand-600',
-      success: 'bg-success-500',
-      warning: 'bg-warning-500',
-      danger: 'bg-danger-500',
-      neutral: 'bg-neutral-500',
+      brand: 'bg-primary',
+      success: 'bg-success',
+      warning: 'bg-warning',
+      danger: 'bg-destructive',
+      neutral: 'bg-muted-foreground',
     },
   },
   defaultVariants: {

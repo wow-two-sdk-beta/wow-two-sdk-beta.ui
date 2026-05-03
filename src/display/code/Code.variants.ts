@@ -4,8 +4,8 @@ export const codeVariants = tv({
   base: 'font-mono text-sm',
   variants: {
     variant: {
-      inline: 'rounded-sm bg-neutral-100 px-1 py-0.5 text-neutral-900',
-      block: 'block w-full overflow-x-auto rounded-md bg-neutral-100 p-4 text-neutral-900',
+      inline: 'rounded-sm bg-muted px-1 py-0.5 text-foreground',
+      block: 'block w-full overflow-x-auto rounded-md bg-muted p-4 text-foreground',
     },
   },
   defaultVariants: {

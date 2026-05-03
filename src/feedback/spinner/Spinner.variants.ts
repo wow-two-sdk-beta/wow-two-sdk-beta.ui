@@ -11,9 +11,9 @@ export const spinnerVariants = tv({
       xl: 'h-12 w-12 border-[3px]',
     },
     tone: {
-      default: 'text-neutral-500',
-      brand: 'text-brand-600',
-      muted: 'text-neutral-300',
+      default: 'text-muted-foreground',
+      brand: 'text-primary',
+      muted: 'text-border',
       current: '',
     },
   },

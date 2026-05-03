@@ -41,15 +41,15 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
         <span
           aria-hidden="true"
           className={cn(
-            'pointer-events-none flex h-full w-full items-center rounded-full bg-neutral-300 px-0.5 transition-colors',
-            'peer-checked:bg-brand-600',
-            'peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 peer-focus-visible:ring-offset-1',
+            'pointer-events-none flex h-full w-full items-center rounded-full bg-input px-0.5 transition-colors',
+            'peer-checked:bg-primary',
+            'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1',
             'peer-disabled:opacity-50',
           )}
         >
           <span
             className={cn(
-              'rounded-full bg-white shadow-sm transition-transform duration-150',
+              'rounded-full bg-background shadow-sm transition-transform duration-150',
               THUMB_CLASS[size],
             )}
           />

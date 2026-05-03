@@ -12,11 +12,11 @@ export interface ProgressCircleProps extends Omit<ComponentPropsWithoutRef<'div'
 }
 
 const TONE_CLASS: Record<NonNullable<ProgressCircleProps['tone']>, string> = {
-  brand: 'text-brand-600',
-  success: 'text-success-500',
-  warning: 'text-warning-500',
-  danger: 'text-danger-500',
-  neutral: 'text-neutral-500',
+  brand: 'text-primary',
+  success: 'text-success',
+  warning: 'text-warning',
+  danger: 'text-destructive',
+  neutral: 'text-muted-foreground',
 };
 
 /**

@@ -63,7 +63,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
             disabled={isDisabled}
             onClick={() => adjust(-1)}
             aria-label="Decrement"
-            className="grid h-7 w-6 place-items-center rounded text-neutral-500 hover:bg-neutral-100 disabled:opacity-50"
+            className="grid h-7 w-6 place-items-center rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
           >
             <Icon icon={Minus} size={14} />
           </button>
@@ -72,7 +72,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
             disabled={isDisabled}
             onClick={() => adjust(1)}
             aria-label="Increment"
-            className="grid h-7 w-6 place-items-center rounded text-neutral-500 hover:bg-neutral-100 disabled:opacity-50"
+            className="grid h-7 w-6 place-items-center rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
           >
             <Icon icon={Plus} size={14} />
           </button>

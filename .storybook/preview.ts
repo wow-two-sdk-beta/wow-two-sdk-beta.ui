@@ -2,6 +2,22 @@ import type { Preview } from '@storybook/react';
 import '../src/index.css';
 
 const preview: Preview = {
+  globalTypes: {
+    theme: {
+      name: 'Theme',
+      description: 'Light / dark mode',
+      defaultValue: 'light',
+      toolbar: {
+        icon: 'circlehollow',
+        items: [
+          { value: 'light', icon: 'sun', title: 'Light' },
+          { value: 'dark', icon: 'moon', title: 'Dark' },
+        ],
+        showName: true,
+        dynamicTitle: true,
+      },
+    },
+  },
   parameters: {
     controls: {
       matchers: {
@@ -10,14 +26,14 @@ const preview: Preview = {
       },
     },
     layout: 'centered',
-    backgrounds: {
-      default: 'light',
-      values: [
-        { name: 'light', value: '#ffffff' },
-        { name: 'dark', value: '#18181b' },
-      ],
-    },
   },
+  decorators: [
+    (Story, context) => {
+      const isDark = context.globals.theme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      return Story();
+    },
+  ],
 };
 
 export default preview;

@@ -5,13 +5,19 @@
 
 /* ---------------------------------------------------------------------------
  * Theme tokens — single source of truth for colors, radii, motion.
+ *
+ * Two layers live here:
+ *   1. RAW SCALES (`--color-brand-*`, `--color-success-*`, …) — full palettes
+ *      kept as escape hatches. Use directly when you need a specific shade.
+ *   2. SEMANTIC TOKENS (`--color-background`, `--color-primary`, …) — the
+ *      24-token surface every atom should consume. These flip in `.dark { }`
+ *      below; consumers can override either layer in their own CSS.
+ *
  * Tailwind v4 emits each `--*` here as a CSS variable AND uses it to generate
- * utility classes (e.g. `--color-brand-500` → `bg-brand-500 text-brand-500 …`).
- * Override any of these in consumer CSS by re-defining the variable; for dark
- * mode, override inside `.dark { … }`.
+ * utility classes (e.g. `--color-primary` → `bg-primary text-primary border-primary …`).
  * ------------------------------------------------------------------------- */
 @theme {
-  /* Brand — custom blue scale */
+  /* ---------- raw color scales ---------- */
   --color-brand-50: #eff6ff;
   --color-brand-100: #dbeafe;
   --color-brand-200: #bfdbfe;
@@ -24,7 +30,6 @@
   --color-brand-900: #1e3a8a;
   --color-brand-950: #172554;
 
-  /* Severity aliases — semantic names mapped onto Tailwind palettes */
   --color-success-50: #f0fdf4;
   --color-success-100: #dcfce7;
   --color-success-500: #22c55e;
@@ -53,6 +58,54 @@
   --color-info-700: #0e7490;
   --color-info-900: #164e63;
 
+  /* ---------- semantic tokens (light mode defaults) ---------- */
+
+  /* Surfaces */
+  --color-background: #ffffff;
+  --color-foreground: #18181b;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-subtle-foreground: #a1a1aa;
+  --color-card: #ffffff;
+  --color-card-foreground: #18181b;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #18181b;
+  --color-inverse: #18181b;
+  --color-inverse-foreground: #fafafa;
+
+  /* Borders & focus */
+  --color-border: #e4e4e7;
+  --color-border-strong: #d4d4d8;
+  --color-input: #d4d4d8;
+  --color-ring: #3b82f6;
+
+  /* Brand (primary) */
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
+  --color-primary-soft: #dbeafe;
+  --color-primary-soft-foreground: #1d4ed8;
+
+  /* Severity solids + softs */
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-destructive-soft: #fef2f2;
+  --color-destructive-soft-foreground: #b91c1c;
+
+  --color-success: #16a34a;
+  --color-success-foreground: #ffffff;
+  --color-success-soft: #f0fdf4;
+  --color-success-soft-foreground: #15803d;
+
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #78350f;
+  --color-warning-soft: #fffbeb;
+  --color-warning-soft-foreground: #b45309;
+
+  --color-info: #0891b2;
+  --color-info-foreground: #ffffff;
+  --color-info-soft: #ecfeff;
+  --color-info-soft-foreground: #0e7490;
+
   /* Radii — preserve our pre-v4 scale (some values shift in v4 defaults) */
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -61,6 +114,60 @@
 
   /* Indeterminate progress animation — keyframes defined below */
   --animate-indeterminate: indeterminate 1.4s ease-in-out infinite;
+}
+
+/* ---------- dark mode semantic overrides ----------
+ * Toggle by setting `class="dark"` on <html> or <body>.
+ * Raw scales stay constant; only semantic tokens flip.
+ * ------------------------------------------------ */
+.dark {
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-muted: #18181b;
+  --color-muted-foreground: #a1a1aa;
+  --color-subtle-foreground: #71717a;
+  --color-card: #18181b;
+  --color-card-foreground: #fafafa;
+  --color-popover: #18181b;
+  --color-popover-foreground: #fafafa;
+  --color-inverse: #fafafa;
+  --color-inverse-foreground: #09090b;
+
+  --color-border: #27272a;
+  --color-border-strong: #3f3f46;
+  --color-input: #3f3f46;
+  --color-ring: #60a5fa;
+
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-primary-soft: #1e3a8a;
+  --color-primary-soft-foreground: #dbeafe;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-destructive-soft: #7f1d1d;
+  --color-destructive-soft-foreground: #fee2e2;
+
+  --color-success: #22c55e;
+  --color-success-foreground: #ffffff;
+  --color-success-soft: #14532d;
+  --color-success-soft-foreground: #dcfce7;
+
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #78350f;
+  --color-warning-soft: #78350f;
+  --color-warning-soft-foreground: #fef3c7;
+
+  --color-info: #06b6d4;
+  --color-info-foreground: #ffffff;
+  --color-info-soft: #164e63;
+  --color-info-soft-foreground: #cffafe;
+}
+
+/* Body defaults so consumers get sane page colors out of the box. */
+html, body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 @keyframes indeterminate {

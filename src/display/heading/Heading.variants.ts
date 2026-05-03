@@ -1,7 +1,7 @@
 import { tv, type VariantProps } from '../../utils';
 
 export const headingVariants = tv({
-  base: 'font-semibold tracking-tight text-neutral-900',
+  base: 'font-semibold tracking-tight text-foreground',
   variants: {
     size: {
       xs: 'text-sm',

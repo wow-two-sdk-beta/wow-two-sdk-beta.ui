@@ -21,14 +21,14 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(
         htmlFor={htmlFor ?? ctx?.id}
         id={id ?? ctx?.labelId}
         className={cn(
-          'text-sm font-medium text-neutral-900',
+          'text-sm font-medium text-foreground',
           ctx?.isDisabled && 'opacity-60',
           className,
         )}
         {...props}
       >
         {children}
-        {isRequired && <span className="ml-0.5 text-danger-500" aria-hidden="true">*</span>}
+        {isRequired && <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>}
       </label>
     );
   },
