@@ -11,6 +11,7 @@ const folders = [
   'forms',
   'layout',
   'nav',
+  'overlays',
 ];
 
 export default defineConfig({

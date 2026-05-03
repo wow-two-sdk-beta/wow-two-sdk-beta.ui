@@ -7,7 +7,7 @@ The single architectural rule of `@wow-two-beta/ui`: **layered imports**.
 | Layer | Folders | May import | May NOT import |
 |---|---|---|---|
 | **Foundation** | `tokens` `tailwind` `utils` `hooks` `icons` `primitives` | other foundation | anything else |
-| **Domain** | `actions` `display` `feedback` `forms` `layout` `nav` | foundation, components in **same** domain | sibling domains, root barrel |
+| **Domain** | `actions` `display` `feedback` `forms` `layout` `nav` `overlays` | foundation, components in **same** domain | sibling domains, root barrel |
 | **Root** | `src/index.ts` | foundation, all domains | nothing else |
 
 Foundation never reaches up. Domains never reach sideways. Root only assembles.
@@ -42,7 +42,7 @@ Enforcing the rule from day 1 costs nothing. Letting it rot for 6 months costs w
 `eslint-plugin-boundaries` configured in `eslint.config.js`. Two element types:
 
 - `foundation` — `src/(tokens|tailwind|utils|hooks|icons|primitives)/**`
-- `domain` — `src/(actions|display|feedback|forms|layout|nav)/*/**` with captured `domain` segment
+- `domain` — `src/(actions|display|feedback|forms|layout|nav|overlays)/*/**` with captured `domain` segment
 
 Rules:
 

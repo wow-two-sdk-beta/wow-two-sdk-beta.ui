@@ -76,6 +76,10 @@
       "import": "./dist/nav/index.js",
       "types": "./dist/nav/index.d.ts"
     },
+    "./overlays": {
+      "import": "./dist/overlays/index.js",
+      "types": "./dist/overlays/index.d.ts"
+    },
     "./styles.css": "./dist/index.css"
   },
   "scripts": {
