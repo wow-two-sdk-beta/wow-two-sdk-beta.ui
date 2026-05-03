@@ -30,7 +30,7 @@ forms/numberInput/
 ## Layout
 
 - `src/tokens` `src/tailwind` `src/utils` `src/hooks` `src/icons` `src/primitives` — **foundation** (no upward deps; ESLint enforces). `src/primitives` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.).
-- `src/actions` `src/display` `src/feedback` `src/forms` `src/layout` — **domains** (may import foundation; may NOT import sibling domains; ESLint enforces)
+- `src/actions` `src/display` `src/feedback` `src/forms` `src/layout` `src/nav` — **domains** (may import foundation; may NOT import sibling domains; ESLint enforces)
 - `docs/component-standard.md` — meta-template every `*.spec.md` fills
 - `docs/architecture.md` — full layering rule + ESLint mechanics
 - `docs/decisions/` — cross-component ADRs
@@ -45,8 +45,8 @@ forms/numberInput/
 
 ## Stack
 
-- React 19 · TypeScript strict · Tailwind v3 · Radix primitives (added per component)
-- Build: `tsup` · Dev: `vite` (in playground) · Catalog: Storybook 8 · Lint: ESLint 9 flat config + `eslint-plugin-boundaries`
+- React 19 · TypeScript strict · **Tailwind v4** (CSS-first via `@theme`) · `@floating-ui/react` · `@radix-ui/react-focus-scope` · `lucide-react`
+- Build: `tsup` (ESM) + `tsc --emitDeclarationOnly` (DTS) · Dev: `vite` (in playground) · Catalog: Storybook 8 + `@tailwindcss/vite` plugin · Lint: ESLint 9 flat config + `eslint-plugin-boundaries`
 - Pkg manager: `pnpm` workspace (root pkg + `apps/playground`)
 
 ## Working rules

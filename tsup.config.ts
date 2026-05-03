@@ -10,6 +10,7 @@ const folders = [
   'feedback',
   'forms',
   'layout',
+  'nav',
 ];
 
 export default defineConfig({

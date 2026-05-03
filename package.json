@@ -72,6 +72,10 @@
       "import": "./dist/layout/index.js",
       "types": "./dist/layout/index.d.ts"
     },
+    "./nav": {
+      "import": "./dist/nav/index.js",
+      "types": "./dist/nav/index.d.ts"
+    },
     "./styles.css": "./dist/index.css"
   },
   "scripts": {

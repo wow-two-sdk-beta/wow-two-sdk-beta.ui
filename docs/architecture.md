@@ -7,7 +7,7 @@ The single architectural rule of `@wow-two-beta/ui`: **layered imports**.
 | Layer | Folders | May import | May NOT import |
 |---|---|---|---|
 | **Foundation** | `tokens` `tailwind` `utils` `hooks` `icons` `primitives` | other foundation | anything else |
-| **Domain** | `actions` `display` `feedback` `forms` `layout` | foundation, components in **same** domain | sibling domains, root barrel |
+| **Domain** | `actions` `display` `feedback` `forms` `layout` `nav` | foundation, components in **same** domain | sibling domains, root barrel |
 | **Root** | `src/index.ts` | foundation, all domains | nothing else |
 
 Foundation never reaches up. Domains never reach sideways. Root only assembles.
@@ -42,7 +42,7 @@ Enforcing the rule from day 1 costs nothing. Letting it rot for 6 months costs w
 `eslint-plugin-boundaries` configured in `eslint.config.js`. Two element types:
 
 - `foundation` — `src/(tokens|tailwind|utils|hooks|icons|primitives)/**`
-- `domain` — `src/(actions|display|feedback|forms|layout)/*/**` with captured `domain` segment
+- `domain` — `src/(actions|display|feedback|forms|layout|nav)/*/**` with captured `domain` segment
 
 Rules:
 
@@ -54,15 +54,17 @@ root       → foundation + any domain
 
 Violations fail `pnpm lint`. CI runs lint on every push.
 
-## Atom rule (within domains)
+## Atom & molecule rule (within domains)
 
 A domain component lives in one of three tiers:
 
-- **L3 atom** — imports only foundation. May not import another component.
-- **L4 molecule / L5 organism** — imports foundation + sibling components in the same domain.
-- A component that wants a sibling-domain piece is the signal that the piece belongs in `primitives/` (or `utils`/`hooks`).
+- **L3 atom** — imports only foundation. May not import another component (atoms never compose atoms).
+- **L4 molecule** — composes L3 atoms or other L4s in the **same** domain. May import foundation freely.
+- **L5 organism / L6 pattern** — composes L4s + atoms in the same domain.
 
-L3 atoms can use **L1 Icon** (it's foundation) and **L2 primitives** (Slot, Portal, FocusScope, etc.). They cannot use other L3 atoms — when atom-on-atom composition is wanted, the result is L4.
+ESLint enforces *same domain* boundaries; the L3-doesn't-import-L3 rule is convention (not lint-enforced) — when you find yourself wanting to compose two atoms, that composition is L4.
+
+L3 atoms can use **L1 Icon** (it's foundation) and **L2 primitives** (Slot, Portal, FocusScope, etc.). When atom-on-atom composition is wanted, the result is L4.
 
 ## Anti-patterns this prevents
 

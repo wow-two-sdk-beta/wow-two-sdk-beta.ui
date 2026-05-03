@@ -30,7 +30,7 @@ export default tseslint.config(
         },
         {
           type: 'domain',
-          pattern: 'src/(actions|display|feedback|forms|layout)/*/**',
+          pattern: 'src/(actions|display|feedback|forms|layout|nav)/*/**',
           capture: ['domain'],
         },
         { type: 'root', pattern: 'src/index.ts' },

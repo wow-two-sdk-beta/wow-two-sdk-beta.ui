@@ -9,3 +9,7 @@ export * from './aspectRatio';
 export * from './spacer';
 export * from './center';
 export * from './scrollArea';
+export * from './inline';
+export * from './cluster';
+export * from './frame';
+export * from './twoColumn';

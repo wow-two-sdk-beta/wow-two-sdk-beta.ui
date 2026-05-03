@@ -8,3 +8,4 @@ export { useFocusTrap } from './useFocusTrap';
 export { useScrollLock } from './useScrollLock';
 export { useResizeObserver } from './useResizeObserver';
 export { useMediaQuery } from './useMediaQuery';
+export { useClipboard, type UseClipboardOptions, type ClipboardControls } from './useClipboard';
