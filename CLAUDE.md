@@ -41,20 +41,22 @@ Every component lives in its own folder with this exact shape:
 
 ```
 forms/numberInput/
-├── NumberInput.tsx           ← implementation
-├── NumberInput.spec.md       ← spec — written FIRST, fills docs/component-standard.md
+├── NumberInput.standard.md   ← behavioral contract (what it MUST/SHOULD do — RFC 2119 rules + rationale)
+├── NumberInput.spec.md       ← concrete API (enums, prop signatures, anatomy)
+├── NumberInput.tsx           ← implementation (must satisfy both standard and spec)
 ├── NumberInput.stories.tsx   ← Storybook stories (1 per visual state at minimum)
 ├── NumberInput.variants.ts   ← tailwind-variants config
 └── index.ts                  ← barrel
 ```
 
-**Spec before code.** A new component begins as a `*.spec.md` filling out `docs/component-standard.md`. Implementation must satisfy spec. Stories cover every visual state in spec.
+**Standard + spec before code.** A new component begins as `*.standard.md` (using [`docs/templates/component-standard.md`](./docs/templates/component-standard.md)) and `*.spec.md` (using [`docs/templates/component-spec.md`](./docs/templates/component-spec.md)). Implementation must satisfy both. Stories cover every visual state in spec.
 
 ## Layout
 
 - `src/tokens` `src/tailwind` `src/utils` `src/hooks` `src/icons` `src/primitives` — **foundation** (no upward deps; ESLint enforces). `src/primitives` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.).
 - `src/actions` `src/display` `src/feedback` `src/forms` `src/layout` `src/nav` `src/overlays` — **domains** (may import foundation **and any sibling domain**; ESLint enforces only that domains may not reach upward into root)
-- `docs/component-standard.md` — meta-template every `*.spec.md` fills
+- `docs/templates/component-standard.md` — template every `*.standard.md` fills
+- `docs/templates/component-spec.md` — template every `*.spec.md` fills
 - `docs/architecture.md` — full layering rule + ESLint mechanics
 - `docs/decisions/` — cross-component ADRs
 - `.storybook/` — catalog config
@@ -74,7 +76,7 @@ forms/numberInput/
 
 ## Working rules
 
-- **Spec before code.** No `Component.tsx` without its `Component.spec.md`.
+- **Standard + spec before code.** No `Component.tsx` without its `Component.standard.md` *and* `Component.spec.md`.
 - **Foundation cannot import domains.** ESLint enforces.
 - **Domains can import any sibling domain.** Convention: L3 atoms / L4 molecules should stay in-domain when natural; L5+ organisms compose freely across domains. The lint rule is permissive — judgment calls go to the spec.
 - **Subpath exports per top-level src/ folder.** Consumers can pull just the slice they need.

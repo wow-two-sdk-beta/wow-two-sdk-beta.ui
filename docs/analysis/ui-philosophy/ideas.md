@@ -22,8 +22,12 @@
 | 6 | Delegate / extension API surface | Designing customization hooks |
 | 7 | i18n leak point inventory | Speccing components with embedded text |
 | 8 | Browser APIs (MDN) | Considering native API integration |
-| 9 | React / client-side ecosystem | (Sketch — to expand) |
-| 10 | Tooling ecosystem | (Sketch — to expand) |
+| 9 | React / client-side ecosystem | Picking complementary libs (state / routing / data / forms / animation / DnD / virt / dates / i18n / icons / variants / utils / state machines / reactivity / rendering & hydration strategies) |
+| 10 | Tooling ecosystem | Build / dev server / test / lint / format / type / docs / monorepo / CI / bundle analysis / CSS tooling / scaffolding |
+| 11 | Cross-framework UI ecosystem | Vue / Svelte / Solid / Angular / Web Components / Cross-platform / Resumability (Qwik) / Server-driven (HTMX / LiveView / Hotwire) |
+| 12 | Modern CSS landscape | Capabilities to leverage *today* — container queries · `:has()` · View Transitions · Anchor Positioning · OKLCH · `@layer` · `@scope` · `@property` · scroll-driven animations · math fns |
+| 13 | Anti-patterns / what to avoid | Component-design · a11y · perf · theming · i18n · DX patterns to skip |
+| 14 | Domain-specific component deep dives | High-complexity clusters: payment · identity/auth · address+contact · date/time deep · maps · editors · AI/LLM · e-commerce · banking · comm/collab · media · education · onboarding · privacy · DevOps |
 
 ---
 
@@ -709,6 +713,616 @@ Per category, the hidden complexity *beyond* "render pixels".
 
 Tiles · markers · clusters · geocoding · routing · drawing · GeoJSON · choropleth · WebGL layers (deck.gl) · accessibility (table fallback). Libs: Mapbox GL, MapLibre GL, Leaflet, Google Maps, OpenLayers.
 
+### 5.10 User-flagged additions during capture
+
+Live "noted but not yet sorted" list. Anything captured here gets re-homed into a numbered section once classified.
+
+| Item | Note (verbatim/derived) | Closest existing entry / candidate name |
+|---|---|---|
+| "tooltip → menu" (user note) | Simple floating btn that opens a menu / radial menu to choose options | Overlaps `actions/SpeedDial` (FAB + radial). Likely worth a *non-FAB, contextual, hover-revealed* sibling — call it `FloatingMenuButton` or `HoverMenuButton` (Notion-style "+" on hover; smaller than FAB; doesn't claim a fixed corner). Capture as a distinct candidate in §5.7 / §5.13 once shape is decided. |
+
+### 5.11 Editorial / content creation
+
+| Component | Vectors |
+|---|---|
+| RichTextEditor | Engine choice (Tiptap / ProseMirror / Lexical / Slate / Quill / Draft) · floating toolbar · slash-command menu · paste-as-plain · markdown shortcuts · image embed · table embed · mention/hashtag · collaborative cursors · undo/redo · history persistence · output: HTML / Markdown / JSON |
+| MarkdownEditor | Live preview · split / unified · toolbar · KaTeX/MathJax · mermaid · syntax-highlighted code blocks · file drop · image upload pipeline · slash commands · word count |
+| CodeEditor | Engine (Monaco / CodeMirror 6 / Ace) · per-language syntax · linting · IntelliSense · diff view · multi-cursor · folding · find/replace · command palette · vim/emacs keymap · theme · LSP / language services |
+| JSONEditor | Tree mode / text mode toggle · per-type icons · path breadcrumbs · search · inline validation against schema · copy path / value · expand/collapse all · array reorder |
+| YAMLEditor | Variant of CodeEditor; schema-aware validation (yaml-language-server) · YAML-specific folding |
+| TomlEditor | TOML-aware variant |
+| DiffViewer | Side-by-side / unified · word-level / char-level highlight · syntax-aware · collapsible context · line-number gutter · "X+ / Y-" stats · in-line comment slot |
+| ThreeWayMerge | Local · base · remote — conflict markers + per-hunk pick · final preview |
+| WhitespaceRevealer | Show tabs / spaces / line endings · variant toggle |
+| FormulaEditor | Spreadsheet formula bar w/ tokenization · function help · cell-ref autocomplete · circular-ref detection |
+| RegexBuilder | Group preview · sample-text live highlight · cheat-sheet panel · explain-mode |
+| CronEditor | Field-by-field cron string builder · "every Monday at 9am" preview · schedule visualization |
+| RRuleEditor | iCal RRULE: frequency · interval · byday · count/until · preview list · timezone |
+| EquationEditor | LaTeX input + KaTeX/MathJax preview · hand-recognition (mobile) |
+| QueryEditor (SQL/SPARQL/etc.) | Syntax · auto-complete from schema · result preview · saved queries |
+| MarkdownTableEditor | Visual table with row/column add · alignment · paste-from-spreadsheet |
+| Outliner | Indented bullet tree · drag-reorder · keyboard outdent/indent · Workflowy-style |
+
+### 5.12 Visual / drawing / canvas (free-form)
+
+| Component | Vectors |
+|---|---|
+| Whiteboard | Excalidraw-style: shapes · arrows · sticky notes · freehand · multi-select · grouping · zoom/pan · grid snap · export PNG/SVG · collab cursors · unlimited canvas |
+| InfiniteCanvas | Pan/zoom layer + viewport state · cull off-screen · world↔screen coords · grid overlay · keyboard zoom |
+| ZoomPanContainer | Single-image zoom/pan · pinch/wheel · double-click reset · max/min zoom |
+| Minimap | Reduced-scale viewport indicator · drag-to-pan · zoom-to-region |
+| ImageAnnotator | Rectangles · arrows · text labels · redaction · layer order · per-shape style · undo |
+| ImageEditor | Crop · rotate · flip · filters (brightness/contrast/saturation/blur) · before/after slider · undo |
+| ImageCropper | Aspect lock · zoom · rotate · multi-zone crop · per-corner drag |
+| BeforeAfterSlider | Two images · drag handle · vertical/horizontal |
+| SignaturePad | Pressure (Pointer Events) · undo · clear · export PNG/SVG · stroke smoothing |
+| DrawingCanvas | Brush size/color/opacity · eraser · undo stack · save state (PNG/SVG/path data) |
+| ColorEyedropper | EyeDropper API (Chromium) — fallback canvas-pick |
+| StickyNote | Draggable card on canvas · resizable · color · author |
+| ShapeLibrary | Pre-canned arrow / rect / ellipse / star / polygon insertion |
+
+### 5.13 Diagrams & graph visualization (structured)
+
+| Component | Vectors |
+|---|---|
+| NodeEditor | (React Flow / Rete / Litegraph): nodes + edges · ports · drag/connect · auto-layout (dagre / elk) · minimap · zoom · undo · sub-flows · custom node renderers |
+| FlowchartEditor | BPMN-flavored: start/end/decision/activity nodes · swim lanes · per-shape rules |
+| MindMap | Radial / horizontal · drag to add · keyboard add (Tab/Enter) · collapse subtree |
+| OrgChart | Hierarchical card layout · zoom/pan · search/highlight · expand/collapse · printable layout |
+| DecisionTree | Branching node tree · per-edge label · canonical layout |
+| StateMachineViz | Nodes = states · edges = transitions · highlight current · history overlay |
+| FamilyTree | Pedigree layout · partner edges · multi-generation · birth/death dates |
+| EventTimeline | (Beyond display Timeline): horizontal time axis · zoomable · per-track event bars · drag-to-resize · clustering at zoom-out |
+| Gantt | Tasks × time · dependencies (FS/SS/FF/SF arrows) · milestone diamonds · drag-to-move/resize · critical path · weekend shading |
+| Sankey | Flow widths · multi-step · highlight path on hover |
+| TreeMap | Nested rectangles · color by metric · drill-down · breadcrumb |
+| Heatmap (calendar) | GitHub-contributions style: day-cell grid · intensity color · hover tooltip · year/week navigation |
+| Heatmap (matrix) | X × Y · cell color · row/col labels · clustering option · zoom |
+| NetworkGraph | Force-directed · node clustering · edge bundling · zoom · search · highlight-neighbors-on-hover |
+| ScatterMatrix | All-pair scatter · brush-link |
+| ParallelCoordinates | Multi-axis line traces · brush per axis |
+| RadarChart | Multi-axis polygon · multi-series overlay |
+| GaugeChart | Half-circle / full-circle dial · threshold zones · animated needle |
+| FunnelChart | Conversion stages · drop-off labels |
+| Sunburst | Hierarchical pie · zoom-to-segment |
+| ChordDiagram | Inter-relationship arcs · interactive ribbon highlight |
+| ChromaSpectrum | Colored bars / strips for color-data viz |
+
+### 5.14 Tabular advanced (beyond DataTable)
+
+| Component | Vectors |
+|---|---|
+| DataGrid | Spreadsheet-grade: cell editor per column · range selection (drag) · fill handle · copy/paste TSV · undo · cell formatting · cell validation · frozen rows/cols · cell merge · cell comments · keyboard nav (cell + row) |
+| Spreadsheet | DataGrid + formulas (HyperFormula / fortune-sheet / Univer) · function bar · sheet tabs · named ranges · charts · pivot integration |
+| PivotTable | Drag fields to rows/cols/values/filters · aggregations (sum/avg/count/min/max/median/p95) · subtotals · custom calc fields |
+| TreeGrid | Tree + table hybrid · expandable rows showing children · per-level indent · selection inheritance |
+| QueryBuilder | AND/OR groups · per-field operator · type-aware operators (text vs number vs date) · collapsible groups · save/load · SQL preview |
+| FilterPillBar | Active filter chips · click-to-edit · clear-all · "+N more" overflow |
+| FacetedSearch | Per-facet checkbox / range / search · count badges · "show more" |
+| GroupBySummary | Collapsible group rows · per-group totals · sticky group header on scroll |
+| ColumnChooser | Show/hide columns · drag-reorder · search · save view |
+| SavedView | Per-user named filter+sort+columns combos · share view URL |
+
+### 5.15 Time-bounded & scheduling
+
+| Component | Vectors |
+|---|---|
+| EventCalendar | Month / week / day / agenda views · drag-create event · drag-move/resize · all-day vs timed · timezone display · recurring events (RRULE) · per-event color · double-booking visual |
+| ScheduleView | Multi-resource timeline (rooms × hours) · drag-to-assign · busy/free slots · conflict detection |
+| AvailabilityMatrix | Day × hour grid · per-cell availability click · drag-paint range |
+| BookingSlots | List of slots · time-zone aware · per-slot reserve button · sold-out indication |
+| TimePicker (advanced) | (Beyond §5.1 simple): clock face UI · 12h/24h · seconds · AM/PM toggle · stepper-driven for accessibility |
+| DurationInput | "1h 30m" style · clamp to range · units toggle (h/m/s) · negative durations |
+| RecurrenceEditor | (See §5.11 RRuleEditor) — schedule-app variant with end-mode toggle (forever / count / until) |
+| TimezonePicker | Searchable IANA list · current-time preview · "Use system" toggle |
+| CountdownTimer | Stop/start/reset · format (HH:MM:SS) · expiry callback · visibility-pause |
+| Stopwatch | Lap times · pause/resume · keyboard control |
+| YearHeatmap | (See §5.13 calendar heatmap) — aliased here for time-domain context |
+
+### 5.16 Document & media playback
+
+| Component | Vectors |
+|---|---|
+| PDFViewer | (PDF.js wrapper): page list · zoom · rotate · search · text selection · thumbnail strip · annotations · keyboard nav · download · print |
+| PDFAnnotator | Highlight · note pin · drawing · stamp · per-annotation reply · export annotated PDF |
+| DocViewer | Multi-format (PDF / DOCX / PPTX / images): viewer abstraction · zoom · page nav |
+| EpubReader | Pagination · font size · theme · TOC · bookmarks · highlight · reading progress |
+| VideoPlayer | Custom controls · keyboard scrub · captions/subtitles toggle · quality selector · playback speed · PiP toggle · fullscreen · poster · keyboard shortcuts (`Space`/`F`/`M`/`←/→`) · chapter markers · loop · skip-intro |
+| AudioPlayer | Custom controls · waveform optional · playback speed · loop · A-B repeat · keyboard (`Space`/`←/→`/`M`) · queue / playlist |
+| AudioWaveform | Visualization · region select · zoom · playhead · loop region · spectrogram option |
+| LiveStreamPlayer | Buffer indicator · live indicator · DVR seek-back · low-latency mode · chat sidebar slot |
+| VTTCaptions | Render WebVTT · style options · pop-out window · keyboard scrub-to-cue |
+| SubtitleEditor | Timestamp + text rows · waveform sync · drag-resize duration · export VTT/SRT |
+| ImageGallery / Lightbox | Grid + full-screen viewer · keyboard nav · pinch zoom · captions · slideshow |
+| MediaCarousel | Mixed-media (image/video) variant of Carousel |
+
+### 5.17 Communication & collaboration
+
+| Component | Vectors |
+|---|---|
+| ChatList | Threads sidebar · unread badge · last-message preview · search · pin · archive |
+| ChatComposer | Multi-line input · mentions (`@`) · emoji picker · file attach · reply quoting · format toolbar · send-on-Enter / Shift+Enter newline · slash commands · draft persistence |
+| MessageList | Bubble layout · per-side (own / theirs) · grouped by sender · timestamp clusters · read receipts · reactions · editable · deletable · scroll-to-bottom button · jump-to-unread divider |
+| ChatBubble | Single-message rendering · markdown · link preview · code blocks · per-status (sent/delivered/read/failed) |
+| ThreadView | Reply chain · collapsible · "view in main" |
+| Mentions input | Trigger char · async list · arrow-pick · escape · paste-without-trigger |
+| EmojiPicker | Categorized · search · skin-tone variants · recent · custom emoji set · keyboard nav · category jumper |
+| GIFPicker | Tenor/Giphy search · grid · loading · accessibility (alt text) |
+| StickerPicker | Per-pack browse · favorites · categorize |
+| ReactionPicker | Quick picker (top-N) · "more" expander · per-emoji count tooltip |
+| ReactionBar | Emoji + count · click-to-toggle-own · users-list popover |
+| LiveCursor | Per-user colored cursor · name label · trailing fade · throttle |
+| PresenceIndicator | Avatar dot (online/away/busy/offline) · "X people viewing" · typing dots |
+| AnnotationMarker | Pin on document/image · click to expand thread · resolve toggle · per-state styling |
+| CommentThread | Top comment + replies · resolve · reopen · @mention · markdown · edit/delete |
+| DiscussionThread | Forum-style · upvote · reply tree · sort options |
+| ActivityFeed | Per-event row (user did X) · grouped by day · filterable · infinite scroll |
+| NotificationCenter / Inbox | Inline list · unread/read · mark-all-read · per-type icon · grouping · empty state |
+| TypingIndicator | "X is typing…" · debounced · multi-user |
+| ReadReceipt | Per-message indicator · privacy-aware ("hide for me") |
+| VoiceNote | Record + waveform preview + send · transcript optional |
+| VideoCallTile | Self/peer tile · mute/cam controls · pin / spotlight · mosaic vs speaker view |
+
+### 5.18 Workflow / multi-step / form-builder
+
+| Component | Vectors |
+|---|---|
+| Wizard | Multi-step form · linear vs branching · per-step validation · save-and-resume · summary step · jump-back-to-edit |
+| StepperWizard | Stepper UI + Wizard logic combined |
+| FormBuilder | Drag-drop field palette → preview canvas · per-field config · conditional logic editor · layout grid · save schema · live preview |
+| SchemaForm | Render form from JSON Schema / Zod / custom schema · per-type widget map · validation pipeline · array fields · conditional `if` |
+| FieldArray | Add/remove rows · reorder · max items · per-row delete · empty state |
+| ConditionalField | Show/hide based on other field's value · animate transition · exclude from submit when hidden |
+| MultiPageForm | Section-by-section nav · per-section progress · "back to top" · errors-summary banner |
+| ApprovalChain | Sequential / parallel approvers · per-step status · re-route on rejection |
+| Pipeline / Stages | Sales-pipeline-style horizontal stages · drag deal between stages · per-stage list |
+| ProcessTracker | Multi-stage with sub-steps · per-stage status (not-started/in-progress/blocked/done) |
+
+### 5.19 Mobile / touch-first surfaces
+
+| Component | Vectors |
+|---|---|
+| BottomSheet | Snap points · drag handle · scrollable content · backdrop tap · safe-area aware |
+| ActionSheet | iOS-style: list of actions · destructive · cancel · titled |
+| SwipeActions | Swipe row left/right to reveal actions · per-side actions · auto-dismiss on action |
+| PullToRefresh | Drag-down threshold · spinner · async callback · resistance feel |
+| LongPressMenu | Long-press triggers context menu — coordinates with §5.3 ContextMenu |
+| Toast (mobile placement) | Top vs bottom; safe-area aware |
+| BottomNav | 3–5 tabs · active highlight · icon + label · safe-area aware |
+| TabBar (iOS-style) | Bottom or top placement · scrolling · pinned active |
+| FloatingActionButton (mobile) | Single FAB or extended FAB; touch-target sized |
+| StatusBarSpacer | Top safe-area filler |
+| KeyboardAvoidance | Push content above software keyboard |
+| DragHandle | Visual affordance for drag ("===" or rounded bar) |
+| HapticFeedback hook | `navigator.vibrate(...)` wrapper |
+| ShareSheet | Wrapper for `navigator.share` · OS-native share menu · fallback to in-app modal |
+
+### 5.20 App shell / page frames
+
+| Component | Vectors |
+|---|---|
+| AppShell | Header / Sidebar / Main / Aside / Footer slots · responsive collapse · sidebar drawer on mobile · keyboard skip-links · landmark roles |
+| AppBar / TopBar | Title · nav links · actions · search · avatar menu · sticky · transparent-on-scroll variant |
+| TitleBar | Window-style: traffic lights · minimize/maximize/close · drag region |
+| Sidebar / NavSection | Collapsible · pinned · resizable · multi-level · active route · scroll-restore · "expand on hover" mode |
+| NavigationRail | Vertical icon strip (MD3) |
+| BreadcrumbBar | Path-style · responsive truncate · current-page indicator |
+| PageHeader | Title · description · breadcrumb · action buttons · tabs slot |
+| PageFooter | Site footer · multi-column · social icons · newsletter · copyright |
+| BackToTopButton | Appears after scroll threshold · smooth scroll · keyboard-accessible |
+| ScrollSpy | Highlight active anchor in TOC as user scrolls |
+| TableOfContents | Per-heading anchor list · current-section highlight · collapsible · sticky |
+| AnchorLinkList | Sibling list of anchors with "→" indicator |
+| RouteAwareNav | Highlights current route · nested route awareness |
+| WindowChrome | Custom title bar in PWA (Window Controls Overlay API) |
+| SafeAreaProvider | iOS safe-area inset CSS vars |
+| DesktopFrame | Mac/Win desktop-app frame with title bar + traffic lights (Tauri/Electron-style) |
+
+### 5.21 Onboarding / empty / error states
+
+| Component | Vectors |
+|---|---|
+| Tour / Walkthrough | Step queue · spotlight · skip · don't-show-again |
+| SpotlightOverlay | Cutout around target · backdrop · arrow + tooltip |
+| HintCard | Single tip card · dismissible · "Got it" |
+| OnboardingChecklist | Per-task progress · completed strikethrough · dismiss-when-100% · expandable |
+| WelcomeModal / WelcomeBanner | First-run greeter · "What's new" cards |
+| FeatureCallout | Highlight a single feature with badge ("New") + tooltip |
+| WhatsNewModal | Versioned changelog viewer |
+| ConfirmDialog (destructive) | Pre-built `"Delete account?"` flow w/ type-to-confirm option |
+| InlineConfirm | Confirm without modal — replace button with "Are you sure? Yes/No" |
+| UndoBar | Snackbar with "Undo" — common after destructive delete |
+| EmptyState (variants) | First-time · no-results · all-done · all-clear · error · per-context illustrations |
+| ErrorState | 404 / 500 / network / permission — illustrated · retry CTA |
+| OfflineBanner | Top of viewport · network-status integrated |
+| MaintenanceBanner | Scheduled-downtime warning |
+| ProgressGate | "Loading important data" before reveal |
+| TrashView | Soft-deleted items · restore / permanent-delete |
+| VersionHistory | Per-version row · diff button · restore-to button |
+| ChecklistGate | "Complete N tasks before continuing" — blocking |
+
+### 5.22 Marketing / landing-page
+
+| Component | Vectors |
+|---|---|
+| HeroSection | Title · subtitle · CTA buttons · media (image / video / illustration) · variants (centered / split / overlay) |
+| FeatureGrid | 3 / 4 column feature cards · icon + title + description |
+| BentoGrid | Apple-style asymmetric tile grid · responsive |
+| PricingTable | Per-tier card · features list · "Most popular" highlight · monthly/yearly toggle · per-tier CTA |
+| ComparisonTable | Feature-by-product matrix · ✓ / × cells · sticky header · responsive (collapse to per-product cards) |
+| TestimonialCard | Quote · author · role · company · avatar |
+| TestimonialCarousel | Carousel + TestimonialCard |
+| LogoCloud | Grid of customer logos · grayscale-on-default · color-on-hover |
+| TeamSection | Member cards · social links · bio |
+| FAQ | Accordion of question/answer pairs · search · "Was this helpful?" |
+| CallToAction (block) | Banner-style block · gradient bg · CTA + dismiss |
+| NewsletterForm | Email input + subscribe · success state · GDPR consent checkbox |
+| CookieBanner | Bottom-sticky · accept / reject / customize · regional variant |
+| CookiePreferences | Per-category toggle · save · reject all |
+| SocialProof | "X happy customers" · live counter · review aggregator (4.8 ★) |
+| CountUp | Animated number on scroll-into-view |
+| StatGrid | KPI cards row (vs Stat single — already at L4) |
+| Roadmap | Timeline of upcoming features · status (planned / in-progress / shipped) |
+| Changelog | Version-grouped release notes |
+| BlogList / BlogPost | Card-style index · article-shaped post |
+| AuthorByline | Photo · name · date · reading time · share |
+| ShareButtons | Twitter/Mastodon/LinkedIn/copy-link · native Web Share fallback |
+
+### 5.23 Settings / admin patterns
+
+| Component | Vectors |
+|---|---|
+| SettingsPage | Side-nav + per-section forms · search settings · "Save / Discard" sticky bar |
+| SettingsSection | Title + description + form rows · per-row save vs section-save |
+| PreferencesPanel | Live preview pane (e.g., theme) · revert button |
+| PermissionsMatrix | Roles × permissions checkbox grid · row/col select-all · custom-role create |
+| RoleSelector | Predefined roles · custom permissions composer |
+| InviteByEmail | Multi-email input (split on comma/space) · per-email role · resend · revoke |
+| TeamMemberList | Avatar + name + role + status · per-member actions menu |
+| AccountSwitcher | Multi-tenant: org dropdown · per-org avatar · "Add another" · workspace icons |
+| BillingSummary | Plan card · usage meters · upgrade CTA · invoices table · payment methods · cancel-flow |
+| UsageMeter | Per-resource bar · soft/hard limits · upgrade prompt at threshold |
+| APIKeyManager | Create / revoke · per-key permissions · last-used · "reveal once" pattern |
+| SecretInput | Initially masked · "click to reveal" once · copy-to-clipboard · regenerate |
+| AuditLog | Per-event row · actor · action · target · diff · filter by date/user/action |
+| DataRetention | Per-class retention slider · purge schedule preview |
+| FeatureFlagToggle | Per-flag switch · scope (all/percentage/per-user) · history |
+| WebhookManager | Per-hook URL · events subscription · secret · last-delivery status |
+| IntegrationCard | Per-integration card · connect/disconnect · last-sync · scopes |
+| OAuthAppList | App name + scopes · revoke |
+| AuthorizedDeviceList | Per-device row · last-active · revoke session |
+| TwoFactorSetup | TOTP QR · backup codes · WebAuthn passkey enroll |
+
+### 5.24 Specialty inputs (beyond §5.1)
+
+| Component | Vectors |
+|---|---|
+| AddressForm | Country picker → swaps state/zip-code field config · postal-code format per country · region/state dropdown |
+| AddressAutocomplete | Geocoding API (Google Places / Mapbox) · suggestion list · selected-address fields fill |
+| CreditCardInput | (Stripe Elements-style): number with auto-format `XXXX XXXX XXXX XXXX` · brand detection (Visa/MC/AmEx) · cvv · expiry · postal · iframe-isolated for PCI |
+| BankAccountInput / IBANInput | IBAN format per country · checksum validation · BIC/SWIFT lookup |
+| RoutingNumberInput | US ABA format · checksum |
+| TaxIDInput | Per-country format (US EIN, EU VAT, GB UTR) · validation |
+| PhoneInput (intl) | Country code dropdown w/ flags · libphonenumber for format/validate · E.164 emit |
+| GeolocationPicker | Map embed · marker drag · "Use my location" · address sync |
+| GradientPicker | Color stops + position · linear/radial/conic · angle (linear) · CSS string output |
+| PatternPicker | SVG-pattern library · color swap |
+| FontPicker | Family list · loading states · weight/style preview · "Use your own URL" |
+| IconPicker | Searchable icon grid · category filter · selection emits icon name + svg |
+| EmojiPicker (form input) | (Also see §5.17) — non-chat usage |
+| KeyboardShortcutPicker | Record-key UI: user presses chord, captured · conflict detection |
+| ColorEyedropper button | EyeDropper API trigger |
+| RegexInput | Regex with live-test sample text · syntax highlight |
+| CronInput | Cron string input + human preview |
+| RangeNumericSlider | Two-thumb slider for numeric range (vs date) |
+| Knob / Dial | Rotational input · arc-track · keyboard arrow nudges |
+| StarRating | 5-star (or N) · half-precision · keyboard arrow · clearable |
+| OTPInput | (Have PinInput) — note variants for SMS OTP autofill (`autocomplete="one-time-code"`) |
+| BarcodeScanner | Camera + Barcode Detection API · USB scanner pass-through · keyboard-emulated scanner support |
+| CaptchaWidget | Privacy-aware: hCaptcha / Cloudflare Turnstile / Friendly Captcha / honeypot — wrappers |
+| DeviceFingerprintInput | (Anti-fraud) — typically headless |
+| JSONSchemaInput | Type-aware nested form for arbitrary JSON Schema |
+| QueryStringInput | URL-style key=value · multi-value · type-coercion |
+| BiometricButton | WebAuthn passkey trigger · per-state UX (not-registered/registered/verifying) |
+| MagicLinkInput | Email + send link · sent-state · resend timer |
+| InvitationCodeInput | Format-validated code · paste-friendly |
+| LicenseKeyInput | Group-formatted (`XXXX-XXXX-XXXX`) · validation |
+| AltTextInput | Image-paired alt-text input · placeholder reminders |
+| ARIALabelInput | Authoring tool: aria-label hint with context |
+| CSSColorInput | Any valid CSS color string (hex/rgb/hsl/named) · validates · normalizes |
+| SizeInput | px/rem/em/% unit toggle · clamp |
+| BorderRadiusInput | Per-corner unlinked · linked toggle · CSS string output |
+| ShadowEditor | Per-shadow params (x/y/blur/spread/color/inset) · multi-shadow stack · CSS preview |
+| TransformEditor | translate/rotate/scale/skew · matrix preview |
+| EasingPicker | Cubic-bezier visual editor · presets · steps() |
+| AspectRatioInput | Common presets (16:9, 4:3, 1:1) + custom |
+| LanguagePicker | ISO list · native-name display · flag (with care: politically charged) |
+| LocalePicker | Language + region (en-US / en-GB / pt-BR) · auto-detect option |
+
+### 5.25 Animated / decorative
+
+| Component | Vectors |
+|---|---|
+| CountUp | Animated number on mount or scroll-into-view · easing · format · pluralized suffix |
+| Marquee | Horizontal/vertical scroll · pause-on-hover · seamless loop · `prefers-reduced-motion` honor |
+| TickerTape | Stock-ticker style · per-symbol up/down color · auto-scroll |
+| TypewriterEffect | Type one char at a time · cursor blink · loop · phrase array |
+| GradientText | Text with gradient fill · animated gradient-shift |
+| TextShimmer | Skeleton-style shimmer over text · color-cycling |
+| AnimatedNumber | Smooth tween between values · format-aware |
+| SpotlightCursor | Cursor trail w/ glow / particle |
+| ParticleBackground | Canvas-based particle system · constellations · density tied to `prefers-reduced-data` |
+| ParallaxLayer | Per-layer scroll-multiplier · Z-axis depth feel |
+| BackgroundBeams | Animated SVG / canvas ambient |
+| Confetti | Burst on success · physics fall · color array |
+| Fireworks | Click-burst effect for celebrations |
+| MagicMove / SharedElement | (Also in §5.7) — animate same logical element across mount points (FLIP) |
+| ScrollReveal | Fade/slide-in on enter viewport · stagger children |
+| Tilt | 3D card tilt on mouse position |
+| Glow | Animated edge glow on focus / active |
+| AnimatedBorder | Conic-gradient rotating border |
+| TextScramble | Letters scramble before settling |
+
+### 5.26 Status / monitoring / DevOps surfaces
+
+| Component | Vectors |
+|---|---|
+| StatusBoard | Service grid w/ per-service health · uptime % · response-time spark · last-incident link |
+| StatusPill | Single-service indicator · color + text |
+| IncidentBanner | Top-of-app outage banner · severity color · ETA · link to status page |
+| MaintenanceWindow | Scheduled-downtime announcement · countdown timer |
+| BuildList | CI builds per commit · status (queued/running/passed/failed) · duration · re-run · log link |
+| BuildLog | Streaming log · ANSI color · expandable groups · search · download |
+| LogStream | Tail-style log viewer · color per level · pause/resume · filter · save |
+| LogTable | Searchable log rows · per-row expand · severity filter · time-range · live tail |
+| StackTraceViewer | Per-frame · file + line · "open in editor" link · collapse vendor frames · syntax highlight |
+| MetricSparkline | Tiny line for single metric · last-N-min · click → full chart |
+| AlertCard | Per-alert · severity · time fired · ack/resolve · runbook link |
+| OnCallScheduleView | Who's on-call now · upcoming rotations · "page X" button (escalation flow lives elsewhere) |
+| HealthCheckPanel | Per-check pass/fail · response time · last-check time |
+| CostExplorer | Spend over time · per-service breakdown · forecast · budget alert |
+| RateLimitMeter | Per-key usage vs quota · time-window bar |
+| QuotaBar | Same shape, less time-bound |
+| DeploymentTimeline | Per-environment deploys · rollback button · diff vs previous |
+| FeatureFlagDashboard | Per-flag rollout state · audience targeting · history |
+| ErrorListView | Per-exception group · count · last-seen · sample frames |
+| TraceViewer | Distributed-trace span tree · timing bars · per-span tags |
+| SpanDetailPanel | Single-span attributes · logs · events |
+
+### 5.27 DX / dev-tooling surfaces
+
+| Component | Vectors |
+|---|---|
+| DebugPanel | Toggleable overlay · per-tab debug surfaces · keybind to open |
+| InspectorPanel | Figma-style: select element → show properties · per-property edit |
+| LayersPanel | Tree of objects on canvas · visibility toggle · lock toggle · reorder via drag |
+| PropertiesPanel | Per-selection form · grouped sections (Layout / Style / Effects) |
+| HistoryPanel | Undo stack list · click any state to revert |
+| OutlinePanel | Document/page hierarchy (vs Tree-as-data) |
+| MinimapPanel | Reduced canvas overview (already in §5.12) |
+| BreakpointBadge | Current Tailwind/CSS breakpoint indicator (dev-only) |
+| ResponsiveModeFrame | Iframe wrapping app · resize handles · device presets (iPhone / iPad / desktop) |
+| DeviceFrame | iPhone/iPad/Mac outline · for marketing screenshots or design previews |
+| GridOverlay | Visual 12-col grid overlay · alignment debug |
+| BaselineGrid | Vertical-rhythm overlay |
+| FocusRingOverlay | Highlight current focus on every keypress (dev) |
+| A11yPanel | axe-core results · per-violation jump · "highlight on page" |
+| ColorContrastChecker | FG/BG → ratio + WCAG AA/AAA labels |
+| ColorBlindnessSimulator | Toggle filters: protanopia / deuteranopia / tritanopia |
+| ConsoleReplica | In-app console mirror · same filtering as DevTools |
+| ReactDevtoolsBadge | Component-tree mini-overlay |
+| StorybookFloater | Open-in-Storybook button per component (dev) |
+| SourceLink | "View source" button (dev) — file:line link |
+| RenderCounter | Per-component render count badge (dev) |
+| StateDiff | Show prev → next state diff for store updates (dev) |
+| NetworkPanel | In-app fetch/XHR log (dev) |
+| StorePanel | Live-state explorer for Zustand/Jotai/Redux (dev) |
+| QueryPanel | TanStack Query devtools wrapper |
+| RoutePanel | Current route + matches (dev) |
+| EventLog | DOM event firehose (dev) |
+| PerformancePanel | LCP / INP / CLS / FPS overlays |
+| EnvSwitcher | Toggle dev/staging/prod (dev) |
+
+### 5.28 AI / chat-specific (LLM era)
+
+| Component | Vectors |
+|---|---|
+| AIChatBubble | User vs assistant style · markdown · code blocks · streaming cursor · per-state (sending/streaming/done/error) |
+| StreamingTextRenderer | Char-stream with typewriter cadence · auto-scroll-to-bottom · pause on user scroll |
+| ToolCallCard | Display tool name + args + result · expand/collapse · per-state (running/success/error) · "view raw" |
+| ChainOfThoughtToggle | "Show thinking" expand · streaming-aware |
+| CitationFootnote | Numbered superscript · click → source preview |
+| SourcePill | Linked source chip · favicon · title · domain |
+| ReferenceList | Numbered/lettered list of cited sources |
+| TokenCounter | Live count vs budget · per-message and per-conversation |
+| TokenUsageBar | In/out/total · cost estimate · per-model rates |
+| ModelPicker | Dropdown of models · per-model badge (fast/smart/cheap) · capability matrix |
+| ParameterPanel | Temperature / top-p / max-tokens / system-prompt · per-param tooltip |
+| PromptSuggestionChip | Quick-start prompts · click to insert · regenerate set |
+| PromptLibrary | Browseable saved-prompt list · per-prompt edit · run · share |
+| ConversationList | Past chats sidebar · search · pin · rename · delete |
+| BranchPicker | Conversation branch tree · "new branch from here" · merge variants |
+| RegenerateButton | "Try again" · per-message |
+| FeedbackVote | 👍/👎 per assistant message · optional comment · sent to feedback API |
+| AgentTrace | Step-by-step agent execution log · per-step expand · inputs/outputs · timing |
+| AgentExecutionGraph | Node-based view of agent steps (composes §5.13 NodeEditor) |
+| SafetyFlag | "This response was modified for safety" banner · expand for details |
+| ContextWindow | Visual context window: pinned + tokens + remaining |
+| KnowledgeBasePicker | Per-source toggle (web / docs / files) · per-source status |
+| FileAttachInput | Drag + paste images for multimodal · per-file token-count preview |
+| ImageGenPrompt | Specialized: prompt + negative-prompt + style · seed · aspect-ratio · count |
+| ImageGenResult | Grid of generated images · per-image variation/upscale/edit |
+| RAGSourcePanel | "From this document" cards · per-citation jump |
+| InteractiveCanvas | "Live HTML/SVG preview from LLM-generated code" — iframe-isolated |
+| ArtifactRenderer | Render an LLM artifact (markdown/code/html/react) — Claude.ai-style |
+| CodeBlockWithRun | LLM-generated code block + "Run" button · sandbox iframe |
+| MultimodalUpload | Image / audio / file → embed-as-input · per-modality preview |
+| ChatHandoff | Switch from agent to human · in-thread transition card |
+| AssistantHeader | Avatar + name + role + status · system-prompt summary |
+| WelcomeSuggestions | Initial-state grid of starter prompts |
+
+### 5.29 Maps & geo (sketch — companion package candidate)
+
+(See §5.9 for the breadth note. Captured here for component-level enumeration.)
+
+| Component | Vectors |
+|---|---|
+| MapView | Tile source (Mapbox / MapLibre / Leaflet) · pan/zoom · per-marker · clusters · choropleth · heatmap · navigation control · scale bar · rotation lock toggle |
+| Marker | Static · clusterable · custom DOM/SVG · drag-to-update |
+| MarkerCluster | Density-bucket aggregation · zoom-to-expand |
+| Polyline / Polygon / Circle | Drawn shapes · style · click handlers |
+| GeoJSONLayer | Render GeoJSON · per-feature style |
+| HeatmapLayer | Density visualization |
+| 3DTerrainLayer | DEM rendering · pitch/bearing |
+| Geocoder | Search → coordinates · autocomplete · reverse geocode |
+| RouteLine | A → B route · turn-by-turn · animated traversal |
+| DrawingTools | Add polygon/route/circle by clicking |
+| MiniMap | Inset overview |
+| Legend | Per-layer color/symbol key |
+| StreetViewPanel | 360° street imagery embed |
+| TimeAnimatedLayer | Per-frame data over time · scrub |
+
+### 5.30 3D / XR (sketch — out of scope for core)
+
+| Component | Vectors |
+|---|---|
+| ModelViewer | Wrap `<model-viewer>` (GLB / GLTF) · pan/zoom/rotate · environment lighting · animations |
+| 360Viewer | Equirectangular image · pan/zoom |
+| ARButton | Trigger WebXR AR session (Quick Look / Scene Viewer) |
+| VRButton | Trigger WebXR VR session |
+| Three.js wrapper | Scene · camera · controls · OrbitControls / TrackballControls |
+| react-three-fiber wrapper | Declarative Three.js binding |
+| GaussianSplatViewer | Modern photogrammetry format |
+| PointCloudViewer | LiDAR scan visualizer |
+
+### 5.31 Educational / quiz / e-learning
+
+| Component | Vectors |
+|---|---|
+| QuizQuestion | Single-question card · multiple-choice / multi-select / fill-blank / drag-match / order |
+| QuizProgress | Per-question dot row · current highlight · completed checkmark |
+| AnswerExplanation | Reveal-after-answer · correct/incorrect color · "why?" expand |
+| FlashCard | Front / back flip · keyboard arrow · spaced-repetition status |
+| FlashCardDeck | Carousel + progress + shuffle |
+| MatchingPairs | Drag connect lines between two columns |
+| OrderingQuiz | Drag to reorder items |
+| HotspotImage | Click-on-image quiz · per-region answer |
+| TimedQuiz | Countdown timer + auto-submit on expiry |
+| LeaderBoard | Score table · current-user highlight · paginated |
+| BadgeAchievement | Unlocked badge w/ animation |
+| ProgressCertificate | Course completion certificate (printable) |
+| LessonReader | Page-by-page content + nav · mark-complete · resume |
+
+### 5.32 Commerce-specific
+
+| Component | Vectors |
+|---|---|
+| ProductCard | Image · title · price · rating · CTA |
+| ProductGrid | Responsive grid · skeleton · infinite scroll |
+| PriceTag | Currency-formatted · per-strikethrough sale display · per-region tax inclusion |
+| StarRatingDisplay | Aggregate ★★★★☆ · count · click-to-jump-to-reviews |
+| ReviewList | Per-review · helpful votes · photos · verified-purchase badge |
+| AddToCartButton | Loading + success transitions · stock-check · animation to cart icon |
+| CartSummary | Line-items · subtotal · shipping · tax · total |
+| CartDrawer | Slide-in mini-cart · per-line edit · checkout CTA |
+| Checkout (multi-step) | Wizard: Address → Shipping → Payment → Review |
+| OrderTracker | Status timeline · ETA · carrier integration · "where's my order?" |
+| WishlistButton | Heart toggle · counter · routing-aware |
+| CompareTray | Bottom-pinned compare bar · max items · clear |
+| ProductGallery | Main image + thumbnail strip · zoom-on-hover · pinch-zoom |
+| VariantPicker | Color swatch + size dropdown · stock-aware · auto-select-first-available |
+| SizeChart | Modal table · per-region (US/UK/EU) toggle · "find your size" helper |
+| StockBadge | "Only 3 left" · "In stock" · "Pre-order" |
+| ShippingEstimator | ZIP/postcode + estimated delivery date |
+| CouponInput | Apply / remove · per-code state (valid/expired/min-order) |
+| RecentlyViewed | Horizontal scroll · per-product mini-card |
+| Recommendations | "Customers also bought" carousel · personalization-aware |
+| TrustBadges | SSL/return-policy/secure-checkout icons row |
+
+### 5.33 Auth / identity flows
+
+| Component | Vectors |
+|---|---|
+| SignInForm | Email + password · forgot-password link · social-sign-in row · "remember me" |
+| SignUpForm | Email + password (+ confirm) · password-strength · terms-checkbox · CAPTCHA |
+| SocialSignInRow | Per-provider button (Google/Apple/GitHub/etc.) · branded · privacy-aware |
+| MagicLinkSentState | "Check your inbox" confirmation · resend timer |
+| OTPVerify | (Have PinInput) — full UX with timer + resend |
+| TOTPSetup | QR + manual code · "I've set this up" verify |
+| PasskeyEnroll | WebAuthn enroll button · per-state UX |
+| PasskeyLogin | Conditional UI (browser autocomplete) · button-fallback |
+| ResetPasswordForm | New password + confirm · meet-policy hints |
+| ChangePasswordForm | Current + new + confirm |
+| EmailVerifyState | Pending/verified/expired state UX |
+| ConsentForm | Per-scope checkboxes · highlight required · accept-all |
+| LogoutConfirm | "Are you sure you want to sign out?" |
+| SessionList | Active sessions · per-device · revoke |
+| AccountDeleteFlow | Multi-step destructive flow · type-to-confirm · cooldown |
+
+### 5.34 Privacy / consent / legal
+
+| Component | Vectors |
+|---|---|
+| CookieBanner / CookiePreferences | (Also in §5.22) |
+| GDPRRequestForm | Data-export / data-delete / opt-out request · status tracking |
+| ConsentManager | Per-purpose toggles · "save preferences" · audit trail |
+| TrackingOptOut | "Do not track" preference UI |
+| LegalAcceptanceCheckbox | TOS / Privacy / age-gate · per-version log |
+| AgeGate | Birthdate input · per-region rules |
+| RegionGate | Geo-restriction message · per-region routing |
+
+### 5.35 Aggregate component-list summary (cross-section)
+
+> A flat enumerable list of every distinct component name surfaced in §5.1–§5.34. Used as the seed for the *standardize-each-component* pass.
+
+(Generated lazily; expect this list to grow as later sections add. Curate during the analyze-and-spec phase.)
+
+**Inputs (§5.1, §5.24)**: TextField · NumberField · CurrencyInput · PercentInput · MaskedInput · PinInput · OTPInput · PhoneInput · EmailInput · URLInput · TelInput · PasswordInput · SearchField · Textarea · NativeSelect · Select · MultiSelect · Combobox · Listbox · Radio · Checkbox · Switch · Slider · RangeNumericSlider · AngleSlider · Knob · ColorPicker · ColorSwatch · ColorField · ColorSlider · ColorArea · ColorWheel · ColorSwatchPicker · ColorEyedropper · DatePicker · TimePicker · DateRangePicker · Calendar · DateField · TimeField · RangeCalendar · DurationInput · TimezonePicker · RecurrenceEditor · CronInput · RegexInput · FileUpload · FilePicker · Rating / StarRating · TagsInput · Mentions · RichTextEditor · CodeEditor · MarkdownEditor · JSONEditor · YAMLEditor · TomlEditor · DiffViewer · ThreeWayMerge · FormulaEditor · EquationEditor · QueryEditor · MarkdownTableEditor · Outliner · WhitespaceRevealer · SignaturePad · DrawingCanvas · BarcodeScanner · CaptchaWidget · GeolocationPicker · GradientPicker · PatternPicker · FontPicker · IconPicker · EmojiPicker · GIFPicker · StickerPicker · ReactionPicker · KeyboardShortcutPicker · AddressForm · AddressAutocomplete · CreditCardInput · BankAccountInput / IBANInput · RoutingNumberInput · TaxIDInput · BiometricButton · MagicLinkInput · InvitationCodeInput · LicenseKeyInput · AltTextInput · ARIALabelInput · CSSColorInput · SizeInput · BorderRadiusInput · ShadowEditor · TransformEditor · EasingPicker · AspectRatioInput · LanguagePicker · LocalePicker · JSONSchemaInput · QueryStringInput · SecretInput · APIKeyManager input · DeviceFingerprintInput · Editable
+
+**Display (§5.2)**: Heading · Text · Code · Kbd · Image · Avatar · AvatarGroup · Badge · Tag · Separator · Mark · Quote · Card · NotificationDot · CountBadge · Status · KeyboardShortcut · DescriptionList · InfoRow · BadgeOverlay · SectionHeader · Highlight · Tooltip · HoverCard · Stat · StatGrid · Snippet · EmptyState · List · Timeline · Tree · Sparkline · QRCode · MeterBar · TrendIndicator · ProgressCircle · ProgressBar · Skeleton · Spinner · TagCloud · WordCloud · PersonCard
+
+**Navigation (§5.3, §5.20)**: Breadcrumb · Pagination · NavItem · Menu · DropdownMenu · ContextMenu · Menubar · NavigationMenu · Tabs · Sidebar · NavSection · NavigationRail · BottomNav · TabBar · CommandPalette · BackToTopButton · ScrollSpy · TableOfContents · AnchorLinkList · BreadcrumbBar · PageHeader · PageFooter · TitleBar · WindowChrome · DesktopFrame · AppShell · AppBar / TopBar · TabbedHeader · RouteAwareNav · Anchor / Link
+
+**Feedback (§5.4)**: Alert · AlertSimple · Banner · BannerSimple · Toast · ToastSimple · Toaster · Callout · LoadingState · LoadingOverlay · InlineSpinner · ProgressSteps · StatusIndicator · Modal / Dialog · AlertDialog · Drawer · BottomSheet · ActionSheet · ErrorBoundary · OfflineBanner · MaintenanceBanner · IncidentBanner · UndoBar · ConfirmDialog · InlineConfirm · ProgressGate
+
+**Layout (§5.5, §5.20)**: Box · Stack · HStack · VStack · Cluster · Inline · Grid · Flex · Container · Center · Spacer · Divider · AspectRatio · ScrollArea · ResizablePanels · Frame · TwoColumn · Sticky / Affix · Masonry · BentoGrid · OverflowList · SafeAreaProvider
+
+**Data (§5.6, §5.14)**: Table · DataTable · DataGrid · Spreadsheet · PivotTable · TreeGrid · QueryBuilder · FilterPillBar · FacetedSearch · GroupBySummary · ColumnChooser · SavedView · Calendar (event) · ScheduleView · AvailabilityMatrix · BookingSlots · Kanban · Carousel · MediaCarousel · Gallery / Lightbox · TreeView
+
+**Charts/Diagrams (§5.8, §5.13)**: Chart · LineChart · BarChart · PieChart · DonutChart · RadarChart · ScatterChart · BubbleChart · Heatmap · Heatmap (calendar) · Heatmap (matrix) · Sankey · TreeMap · Sunburst · Funnel · Gauge · Candlestick · BoxPlot · NetworkGraph · ScatterMatrix · ParallelCoordinates · ChordDiagram · OrgChart · MindMap · DecisionTree · StateMachineViz · FamilyTree · NodeEditor · FlowchartEditor · EventTimeline · Gantt · Sparkline · ChromaSpectrum
+
+**Visual / canvas (§5.12)**: Whiteboard · InfiniteCanvas · ZoomPanContainer · Minimap · ImageAnnotator · ImageEditor · ImageCropper · BeforeAfterSlider · StickyNote · ShapeLibrary
+
+**Document & media (§5.16)**: PDFViewer · PDFAnnotator · DocViewer · EpubReader · VideoPlayer · AudioPlayer · AudioWaveform · LiveStreamPlayer · VTTCaptions · SubtitleEditor · ImageGallery / Lightbox
+
+**Communication / collab (§5.17)**: ChatList · ChatComposer · MessageList · ChatBubble · ThreadView · CommentThread · DiscussionThread · Mentions · EmojiPicker · GIFPicker · StickerPicker · ReactionPicker · ReactionBar · LiveCursor · PresenceIndicator · AnnotationMarker · ActivityFeed · NotificationCenter · TypingIndicator · ReadReceipt · VoiceNote · VideoCallTile · ShareSheet
+
+**Workflow (§5.18)**: Wizard · Stepper · StepperWizard · FormBuilder · SchemaForm · FieldArray · ConditionalField · MultiPageForm · ApprovalChain · Pipeline / Stages · ProcessTracker
+
+**Mobile (§5.19)**: BottomSheet · ActionSheet · SwipeActions · PullToRefresh · LongPressMenu · BottomNav · TabBar · FAB · DragHandle · KeyboardAvoidance · HapticFeedback hook · ShareSheet · StatusBarSpacer
+
+**Onboarding / states (§5.21)**: Tour · SpotlightOverlay · HintCard · OnboardingChecklist · WelcomeModal · WelcomeBanner · FeatureCallout · WhatsNewModal · ConfirmDialog · InlineConfirm · UndoBar · EmptyState · ErrorState · OfflineBanner · MaintenanceBanner · ProgressGate · TrashView · VersionHistory · ChecklistGate
+
+**Marketing / landing (§5.22)**: HeroSection · FeatureGrid · BentoGrid · PricingTable · ComparisonTable · TestimonialCard · TestimonialCarousel · LogoCloud · TeamSection · FAQ · CallToAction · NewsletterForm · CookieBanner · CookiePreferences · SocialProof · CountUp · StatGrid · Roadmap · Changelog · BlogList · BlogPost · AuthorByline · ShareButtons
+
+**Settings / admin (§5.23, §5.33)**: SettingsPage · SettingsSection · PreferencesPanel · PermissionsMatrix · RoleSelector · InviteByEmail · TeamMemberList · AccountSwitcher · BillingSummary · UsageMeter · APIKeyManager · SecretInput · AuditLog · DataRetention · FeatureFlagToggle · WebhookManager · IntegrationCard · OAuthAppList · AuthorizedDeviceList · TwoFactorSetup · SessionList · ConsentForm · LegalAcceptanceCheckbox · AgeGate · RegionGate · GDPRRequestForm · ConsentManager · TrackingOptOut · SignInForm · SignUpForm · SocialSignInRow · MagicLinkSentState · OTPVerify · TOTPSetup · PasskeyEnroll · PasskeyLogin · ResetPasswordForm · ChangePasswordForm · EmailVerifyState · LogoutConfirm · AccountDeleteFlow
+
+**Animated / decorative (§5.25)**: CountUp · Marquee · TickerTape · TypewriterEffect · GradientText · TextShimmer · AnimatedNumber · SpotlightCursor · ParticleBackground · ParallaxLayer · BackgroundBeams · Confetti · Fireworks · MagicMove / SharedElement · ScrollReveal · Tilt · Glow · AnimatedBorder · TextScramble
+
+**Status / DevOps (§5.26)**: StatusBoard · StatusPill · IncidentBanner · MaintenanceWindow · BuildList · BuildLog · LogStream · LogTable · StackTraceViewer · MetricSparkline · AlertCard · OnCallScheduleView · HealthCheckPanel · CostExplorer · RateLimitMeter · QuotaBar · DeploymentTimeline · FeatureFlagDashboard · ErrorListView · TraceViewer · SpanDetailPanel
+
+**DX (§5.27)**: DebugPanel · InspectorPanel · LayersPanel · PropertiesPanel · HistoryPanel · OutlinePanel · MinimapPanel · BreakpointBadge · ResponsiveModeFrame · DeviceFrame · GridOverlay · BaselineGrid · FocusRingOverlay · A11yPanel · ColorContrastChecker · ColorBlindnessSimulator · ConsoleReplica · ReactDevtoolsBadge · StorybookFloater · SourceLink · RenderCounter · StateDiff · NetworkPanel · StorePanel · QueryPanel · RoutePanel · EventLog · PerformancePanel · EnvSwitcher
+
+**AI / chat (§5.28)**: AIChatBubble · StreamingTextRenderer · ToolCallCard · ChainOfThoughtToggle · CitationFootnote · SourcePill · ReferenceList · TokenCounter · TokenUsageBar · ModelPicker · ParameterPanel · PromptSuggestionChip · PromptLibrary · ConversationList · BranchPicker · RegenerateButton · FeedbackVote · AgentTrace · AgentExecutionGraph · SafetyFlag · ContextWindow · KnowledgeBasePicker · FileAttachInput · ImageGenPrompt · ImageGenResult · RAGSourcePanel · InteractiveCanvas · ArtifactRenderer · CodeBlockWithRun · MultimodalUpload · ChatHandoff · AssistantHeader · WelcomeSuggestions
+
+**Maps / 3D (§5.29, §5.30)**: MapView · Marker · MarkerCluster · Polyline · Polygon · Circle · GeoJSONLayer · HeatmapLayer · 3DTerrainLayer · Geocoder · RouteLine · DrawingTools · Legend · StreetViewPanel · TimeAnimatedLayer · ModelViewer · 360Viewer · ARButton · VRButton · GaussianSplatViewer · PointCloudViewer
+
+**Education (§5.31)**: QuizQuestion · QuizProgress · AnswerExplanation · FlashCard · FlashCardDeck · MatchingPairs · OrderingQuiz · HotspotImage · TimedQuiz · LeaderBoard · BadgeAchievement · ProgressCertificate · LessonReader
+
+**Commerce (§5.32)**: ProductCard · ProductGrid · PriceTag · StarRatingDisplay · ReviewList · AddToCartButton · CartSummary · CartDrawer · Checkout · OrderTracker · WishlistButton · CompareTray · ProductGallery · VariantPicker · SizeChart · StockBadge · ShippingEstimator · CouponInput · RecentlyViewed · Recommendations · TrustBadges
+
+> **Component count from this enumeration: ~340.** This is the full search-space the library will reckon with — most ship as core, several land in companion packages (charts, advanced grid, editor, calendar, maps, 3D), some as patterns (compositions of existing primitives) rather than dedicated exports.
+
 ---
 
 ## 6. Delegate / extension API surface
@@ -1141,216 +1755,1179 @@ Every named API at [developer.mozilla.org/en-US/docs/Web/API](https://developer.
 
 ---
 
-## 9. React / client-side ecosystem (sketch — to expand)
+## 9. React / client-side ecosystem
 
-> Sketch only. To be fleshed out later when scope expands beyond styles + components.
+What's available in the React orbit that an UI lib consumer might combine with `@wow-two-beta/ui`. Verdicts on adoption live in `targets.md`.
 
 ### 9.1 React 19 features
 
-| Feature | Description |
-|---|---|
-| `use(promise)` | Read promises in render (Suspense-aware) |
-| `useOptimistic` | Optimistic state during pending |
-| `useFormStatus` | Read parent form's pending state |
-| `useActionState` | Action-based form state |
-| `<Form action={...}>` | Server action form (RSC) |
-| `ref` as prop | No more `forwardRef` boilerplate |
-| Document metadata | `<title>`, `<meta>` in components |
-| Stylesheet preloading | `<link rel="stylesheet" precedence="..."/>` |
-| Improved Suspense | Sibling pre-warming |
-| Async transitions | Pending state during async |
+Native primitives that change what UI libs need to ship:
 
-### 9.2 State management
-
-| Lib | Model | Notes |
+| Feature | What it does | Implication for UI lib |
 |---|---|---|
-| useState / useReducer | Built-in | Local component |
-| useContext | Built-in | Implicit DI |
-| Zustand | Hook + store | Most popular external |
-| Jotai | Atoms (Recoil-style) | Fine-grained |
-| Valtio | Proxy mutation | Mutable feel |
-| Redux Toolkit | Redux + slices | Enterprise legacy |
-| MobX | Observable + reactive | OOP-friendly |
-| TC39 Signals | Standard signals (proposal) | Future-native |
-| Effector | Effects + stores + events | FRP |
-| Nanostores | Tiny atoms | Astro-friendly |
-| XState | State machines / statecharts | Complex flows |
-| Recoil | Atoms (Meta) | Deprecated |
+| `use(promise)` | Read promises in render — pairs with Suspense | Async components don't need bespoke loading hooks; `<Suspense>` at boundary suffices |
+| `useOptimistic(state, reducer)` | Optimistic state during pending mutation | Form/list optimistic updates without external state lib |
+| `useFormStatus()` | Read parent `<form>`'s pending state | Submit button knows it's submitting without prop-drilling |
+| `useActionState(action, initial)` | Action-based form state w/ pending + error | Form root can be lighter — React owns the state machine |
+| `<form action={fn}>` | Server actions or local actions | UI primitives wrap `<form>` and forward `action` |
+| `ref` as prop | No `forwardRef()` boilerplate | All component signatures simplify |
+| Document metadata in render | `<title>`, `<meta>`, `<link>` hoist to `<head>` | Not directly UI-lib facing but RSC story relies on it |
+| Stylesheet preloading | `<link rel="stylesheet" precedence="..."/>` orders + dedupes | UI lib can co-locate stylesheets without stomping consumer order |
+| Resource preloading | `preload` / `preinit` / `prefetchDNS` / `preconnect` from `react-dom` | Hover-prefetch routes from Menu items |
+| Async transitions | `startTransition(async () => …)` | Non-urgent updates async without separate state |
+| Improved Suspense | Sibling pre-warming (siblings of suspended branch render eagerly) | Lazy Modal content can render in background before open |
+| Context as hook | `use(MyContext)` works conditionally | Read context inside `if`/loops |
+| Hydration error diagnostics | Diff-based, more readable | Dev-only |
 
-### 9.3 Routing
+**React Compiler** (formerly React Forget) — adjacent: auto-memoization, omits manual `memo`/`useMemo`/`useCallback`. Opt-in via Babel plugin; experimental but nearing stable. UI libs relying on stable identity for renders need to verify compatibility.
+
+### 9.2 React 18 carryover (still relevant)
+
+| Feature | Notes |
+|---|---|
+| `useId()` | Stable cross-render IDs (SSR-safe). UI lib uses for ARIA `aria-labelledby` / `aria-describedby` linkage |
+| `useTransition()` | Mark non-urgent updates; pairs with `useDeferredValue` |
+| `useDeferredValue()` | Debounce-by-render for expensive reads |
+| `useSyncExternalStore()` | Subscribe to external stores (Zustand/Redux) safely under concurrent rendering |
+| `Suspense` | Code-splitting + data fetching boundaries |
+| `<StrictMode>` | Dev-only double-invocation to catch impurities |
+| Concurrent rendering | Yields to browser; interruptible commits |
+| Automatic batching | All state updates batched, including in promises/timeouts |
+
+### 9.3 React patterns & idioms
+
+| Pattern | Shape | Strength | Trade-off |
+|---|---|---|---|
+| Compound components | `<Tabs><Tabs.List/><Tabs.Trigger/><Tabs.Content/></Tabs>` | Discoverable; composable | Implicit context coupling |
+| Slot / `asChild` | `<Tooltip.Trigger asChild><MyButton/></Tooltip.Trigger>` | No DOM wrapper; props merge onto child | One child only; merge rules subtle |
+| Polymorphic `as` | `<Box as="a" href="...">` | Single component, multiple targets | TS complexity |
+| Render props | `<Listbox>{({ selected }) => …}</Listbox>` | Maximum flexibility | Verbose; nesting hell |
+| Hook factories | `const { isOpen, getTriggerProps, getContentProps } = useDisclosure()` | DIY assembly, full control | Consumer reassembles; Headless UI / Aria style |
+| Provider + Hook | `<ThemeProvider>` + `useTheme()` | Implicit DI | Context cost for high-frequency reads |
+| Headless component | All behavior + a11y + state, no styles | Pure-style override | Two libs to wire (behavior + style) |
+| Controlled prop pair | `value` + `onChange` (controlled), `defaultValue` (uncontrolled) | Standard React contract | Both modes must work |
+| Imperative handle | `useImperativeHandle(ref, () => ({ focus, scrollTo }))` | Escape hatch | Must justify; prefer declarative |
+| Forwarded refs | `forwardRef` (legacy) → `ref` as prop (R19) | Refs reach DOM | One-deep only by default |
+| Render-as-children-fn | `<List items={items}>{(item) => <Row {...item}/>}</List>` | Iterable customization | vs `renderItem` prop — pick one convention |
+| Inverted control | `<Form>{({ values, errors }) => …}</Form>` | Consumer drives layout | Hard to wire validation |
+| Server / Client split (RSC) | `"use client"` boundary | Server-only data fetch + auth | Bundler/host complexity |
+| Error boundary | Class component or `react-error-boundary` lib | Catch render errors | Doesn't catch async — pair w/ Suspense |
+| Suspense boundary | `<Suspense fallback>` | Catches thrown promises | Throw-promise = magic |
+| Higher-order components | `withRouter(Component)` | Compose behaviors | Largely superseded by hooks |
+
+### 9.4 Rendering strategies
+
+| Strategy | Where it runs | Output | Trade-off |
+|---|---|---|---|
+| **CSR (Client-Side Rendering)** | Browser only | Empty shell + JS hydrates | Slow first paint; simplest mental model. **Our target.** |
+| **SSR (Server-Side Rendering)** | Per-request server | Full HTML | TTFB cost; needs server |
+| **SSG (Static Site Generation)** | Build time | Pre-rendered HTML files | Stale data; fastest |
+| **ISR (Incremental Static Regeneration)** | Build + revalidate on demand | HTML + revalidation | Next-specific; cache-tuned |
+| **Streaming SSR** | Server, chunked | HTML in stages via `Suspense` | Improves TTFB+TTI; needs streaming-capable host |
+| **RSC (React Server Components)** | Server, never sent to client | Serialized component tree (RSC payload) + client islands | Bundler-coupled; `"use client"` boundaries |
+| **Islands** | Mixed: static HTML + selective client hydration | HTML + small JS islands | Astro / Fresh / Marko model |
+| **Resumability** | Server outputs serialized state; client *resumes* without hydration | Almost-zero JS at startup | Qwik model; novel mental shift |
+| **Edge SSR** | Server at edge POP | Same as SSR but geo-distributed | Smaller compute envelope |
+| **Pre-rendering + CSR hydrate** | Build + browser | "JAMstack" classic | Mostly superseded by RSC/Islands |
+
+### 9.5 Hydration strategies
+
+| Strategy | Notes |
+|---|---|
+| **Full hydration** | Default React — every component re-runs to attach handlers |
+| **Partial hydration** | Only some trees hydrate (Astro, Marko islands) |
+| **Progressive hydration** | Hydrate in priority order (above-fold first) |
+| **Selective hydration** | React 18 — Suspense boundaries hydrate independently, can be interrupted by user input |
+| **Lazy hydration** | Hydrate on visibility / interaction (Astro `client:visible`, `client:idle`) |
+| **No hydration (resumability)** | Qwik — serialize state instead of re-running |
+| **Client-only** | `<NoSSR>` — skip server render, render only on client |
+| **Streaming hydration** | Server streams HTML; client hydrates as chunks arrive |
+
+Common bugs:
+- **Hydration mismatch** — server HTML differs from client first render (theme class, locale, time-now, random IDs). React 19 has better diagnostics
+- **Theme flash (FART — Flash of Wrong Theme)** — mitigate w/ inline pre-paint script setting `<html data-theme>`
+- **Locale flash** — same idea for `dir` / `lang`
+- **Layout shift (CLS)** — fonts loading after first paint
+
+### 9.6 State management
+
+#### 9.6.1 Paradigms
+
+| Paradigm | How updates work | Examples |
+|---|---|---|
+| **Imperative reducer** | Dispatch action → reducer returns new state | Redux, useReducer |
+| **Imperative store** | `store.set(...)` mutates | Zustand |
+| **Atoms** | Smallest unit of state, derived via selectors | Recoil, Jotai, Nanostores |
+| **Proxies / mutable** | Direct mutation, library tracks | Valtio, MobX |
+| **Signals** | Value that auto-tracks reads in computations | Solid, Preact Signals, TC39 Signals proposal |
+| **FRP (events + stores)** | Streams transform into state | Effector, RxJS-based |
+| **State machines** | Statechart with finite states + transitions | XState, Robot, Stately |
+| **CQRS / Event sourcing** | Commands + events; state = fold of events | Effect-ts, custom |
+| **Persistence-first** | LocalStorage / IndexedDB-backed | Yjs (CRDT), Replicache, RxDB |
+
+#### 9.6.2 Libs (React)
+
+| Lib | Model | Bundle | Notes |
+|---|---|---|---|
+| useState / useReducer | Built-in | 0 | Default for local state |
+| useContext | Built-in | 0 | Implicit DI; cost per consumer on every change |
+| Zustand | Hook + store | ~1 KB | Most popular external; minimal API |
+| Jotai | Atoms | ~3 KB | Recoil successor; granular updates |
+| Valtio | Proxy mutation | ~3 KB | Mutable feel; async-aware |
+| Redux Toolkit (RTK) | Redux + slices | ~12 KB | Enterprise; stable patterns |
+| RTK Query | Data layer on RTK | + | Auto-generated caching hooks |
+| MobX | Observable + reactive | ~16 KB | OOP-friendly; decorator-style |
+| React Tracked / use-context-selector | Selector-based context | ~1 KB | Avoids context cost |
+| Preact Signals (`@preact/signals-react`) | Fine-grained signals | ~3 KB | Auto-track in render |
+| TC39 Signals proposal polyfill | Future-native signals | TBD | Stage 1, evolving |
+| Effector | Effects + stores + events | ~10 KB | FRP-style |
+| Nanostores | Tiny atoms | ~300 B | Astro-friendly, framework-agnostic |
+| XState | State machines / charts | ~15 KB | Complex flows, visualizable |
+| Robot / Stately | State machines (lighter) | ~2 KB | Smaller alt to XState |
+| Hookstate | Plugin-based | ~3 KB | Niche |
+| Pullstate | Hook stores | ~3 KB | Niche |
+| Easy-peasy | Redux wrapper | — | Redux-lite |
+| Recoil | Atoms (Meta) | — | Deprecated |
+
+### 9.7 Reactivity models
+
+| Model | Read tracking | Update propagation | Used by |
+|---|---|---|---|
+| **VDOM diff** | Re-render whole subtree | React reconciles | React |
+| **Signals (fine-grained)** | Effect tracks reads at runtime | Only dependents re-run | Solid, Vue 3, Preact Signals |
+| **Proxies** | Get/set traps | Notify proxied paths | MobX, Valtio, Vue 2 reactivity |
+| **Atoms + selectors** | Subscribers register | Atoms notify on set | Recoil, Jotai |
+| **Push-pull / observables** | Stream subscribe | Stream emits | RxJS, Bacon, MobX-observable |
+| **Resumable serialization** | Read state directly | App resumes without hydration | Qwik |
+| **Compile-time reactivity** | Transformed at build | Direct DOM updates | Svelte (compiled), Solid |
+
+### 9.8 State machines
 
 | Lib | Notes |
 |---|---|
-| React Router | Most popular (v7 = Remix merger) |
-| TanStack Router | Type-safe |
-| Next.js (App Router) | RSC + file-based |
-| Wouter | Tiny |
-| Reach Router | Deprecated → React Router |
+| **XState** | Statecharts (incl. parallel, history, hierarchical), visualizer at stately.ai |
+| **Stately** | XState v5 — same authors; refined API |
+| **Robot** | Lightweight FSM (~1 KB) |
+| **Zag** | UI-component-focused FSMs; powers Ark UI / Park UI |
+| **Effect-ts STM** | Software Transactional Memory (broader Effect lib) |
+| **react-states** | Lightweight; opinionated |
+| **valtio-with-machine** | Hybrid |
 
-### 9.4 Data fetching
+### 9.9 Routing
+
+#### 9.9.1 Patterns
+
+| Pattern | Examples |
+|---|---|
+| **Config-based** | React Router classic, TanStack Router |
+| **File-based** | Next.js App Router, Remix, Nuxt, SvelteKit |
+| **Layouts / nested routes** | Next/Remix layout files; React Router `<Outlet>` |
+| **Parallel routes** | Next.js `@named` slots — render multiple independent panels |
+| **Intercepting routes** | Next.js `(.)folder` — modal-style interception |
+| **Type-safe params** | TanStack Router (Zod schema per route) |
+| **Loaders** | Remix `loader()` / Next.js `generateStaticParams` |
+| **Actions** | Remix `action()` — POST handlers per route |
+| **Streaming** | Defer slow data with `<Suspense>` per loader |
+| **Search-as-state** | URL search params as primary state store (TanStack) |
+
+#### 9.9.2 Libs
 
 | Lib | Notes |
 |---|---|
-| TanStack Query | Most popular, normalized cache |
-| SWR | Vercel, simpler |
-| Apollo Client | GraphQL |
-| urql | Lightweight GraphQL |
-| Relay | Meta GraphQL |
-| RSC + use() | Native React |
-| tRPC | TypeScript RPC |
-| Convex / Liveblocks / Firestore | Realtime sync |
+| **React Router v7** | Merged with Remix; loader/action/streaming. Most popular |
+| **TanStack Router** | Type-safe params, loaders, search-as-state |
+| **Next.js App Router** | RSC + file-based + layouts |
+| **Wouter** | ~1.5 KB minimal |
+| **react-location** | Predecessor to TanStack Router (deprecated) |
+| **Reach Router** | Predecessor to React Router (deprecated) |
 
-### 9.5 Form libs
+### 9.10 Data fetching
+
+#### 9.10.1 Patterns
+
+| Pattern | Notes |
+|---|---|
+| **Cache-first** | Return cache instantly, refetch in bg | TanStack Query model |
+| **Network-first** | Always hit server; fall back to cache |
+| **Stale-while-revalidate** | Show stale, fetch fresh, swap | SWR, TanStack Query |
+| **Optimistic update** | UI reflects mutation before server confirms; rollback on error |
+| **Mutation queue** | Queue offline mutations |
+| **Normalization** | Single source for entities, denormalize per query | Apollo, Relay, RTK Query, normalizr |
+| **Document-cache** | Per-query cached doc, no normalization | TanStack Query default, SWR |
+| **Subscription / live data** | Polling, WS, SSE, GraphQL Subscriptions, CRDT |
+| **Pagination** | Offset-based, cursor-based, time-based |
+| **Infinite scroll** | Cursor pagination + auto-fetch on visible-end |
+| **Prefetch on hover** | Anticipate clicks |
+
+#### 9.10.2 Libs
+
+| Lib | Style | Bundle | Notes |
+|---|---|---|---|
+| **TanStack Query** | Hook + cache | ~13 KB | Most popular; framework-agnostic |
+| **SWR** | Hook | ~4 KB | Vercel; simpler |
+| **Apollo Client** | GraphQL + normalized | ~30 KB | Mature, opinionated |
+| **urql** | GraphQL lightweight | ~7 KB | Alt to Apollo |
+| **Relay** | GraphQL + Meta-grade | ~25 KB | Schema-driven, pagination conventions |
+| **RTK Query** | Redux Toolkit add-on | + | Bundled with RTK |
+| **tRPC** | Typed RPC over HTTP | ~10 KB | TS end-to-end types |
+| **Convex** | Reactive backend + client | + | Realtime + queries |
+| **Liveblocks** | Realtime presence + storage | + | Collab features |
+| **Firestore / Firebase** | Realtime backend | + | Google-hosted |
+| **Replicache / Rocicorp Zero** | Sync-engine | + | Offline-first |
+| **PowerSync / ElectricSQL** | Postgres → SQLite sync | + | Local-first |
+| **Yjs / Automerge** | CRDTs | + | Collab text |
+| **PartyKit / Cloudflare Durable Objects** | Realtime infra | + | Edge sync |
+
+### 9.11 Form patterns & libs
+
+#### 9.11.1 Patterns
+
+| Pattern | Notes |
+|---|---|
+| **Uncontrolled** | Read via `ref` + native FormData; no React state per keystroke (RHF default; performant) |
+| **Controlled** | `value` + `onChange` per field; React state per stroke (Formik default; explicit) |
+| **Hybrid** | Uncontrolled storage + watch when needed (RHF `useWatch`) |
+| **Schema-first** | Validation derives from schema; types follow (Zod / Valibot + RHF) |
+| **Imperative validation** | Per-field rules attached at registration (Formik / classic) |
+| **Field array** | Add/remove/reorder w/ stable keys |
+| **Multi-step / wizard** | Step state external; per-step validation |
+| **Async validation** | With cancellation (AbortSignal) |
+| **Cross-field validation** | Confirm-password, date-range |
+| **Server errors** | Inject into field state on submit failure |
+| **Auto-save** | Debounced submit; conflict UI |
+| **Dirty / touched / submitted** | Status flags; navigate-away guard |
+| **Server actions integration** | RSC / `useActionState` |
+| **Conform pattern** | Standard Schema + native `<form>` + progressive enhancement |
+
+#### 9.11.2 Libs
+
+| Lib | Storage model | Schema integration | Bundle | Notes |
+|---|---|---|---|---|
+| **React Hook Form (RHF)** | Uncontrolled (refs) | Resolvers (Zod/Yup/Valibot/etc.) | ~9 KB | Most popular; performant |
+| **TanStack Form** | Controlled, typed | Standard Schema native | ~14 KB | Modern, framework-agnostic |
+| **Conform** | Hybrid (FormData first) | Standard Schema | ~5 KB | Progressive enhancement; pairs with server actions |
+| **Formik** | Controlled | Yup integration | ~13 KB | Legacy popular |
+| **Final Form / React Final Form** | Subscriptions | Custom | ~10 KB | Functional, low rerender |
+| **Felte** | Headless | Yup/Zod | ~3 KB | Lightweight |
+| **Effect Form** | Effect-ts ecosystem | Effect Schema | + | FRP-style |
+| **HookForm Devtools** | RHF inspector | — | dev | Debug tool |
+
+### 9.12 Validation libs
+
+The **Standard Schema spec** ([standard-schema.dev](https://standard-schema.dev)) lets form libs / validation libs interop without per-library adapters. Adopted by Zod, Valibot, ArkType, etc. — pick a schema lib that conforms to ship one adapter and inherit all.
+
+| Lib | Style | Bundle | Standard Schema | Notes |
+|---|---|---|---|---|
+| **Zod** | Schema-first chainable | ~13 KB (v3) / ~6 KB (v4) | ✓ | Most popular; runtime + types |
+| **Valibot** | Modular fns (no chaining) | ~1 KB tree-shaken | ✓ | Modern; size-conscious |
+| **ArkType** | TS-native syntax | ~10 KB | ✓ | Type-level; "if it parses, it types" |
+| **Effect Schema** | Effect-ts ecosystem | + | ✓ | FRP-style |
+| **Yup** | Schema-first | ~25 KB | ✓ (adapter) | Legacy with Formik |
+| **Joi** | Server-side Node | ~150 KB | — | Server-leaning |
+| **Superstruct** | Tiny, expression-style | ~3 KB | ✓ | Niche |
+| **runtypes** | Type-checking runtime | ~3 KB | ✓ | Niche |
+| **io-ts** | fp-ts / FRP | ~10 KB | ✓ | Functional |
+| **TypeBox** | JSON Schema generator | ~8 KB | ✓ | Schema → types via JSON Schema |
+| **myzod** | Zod alt | — | — | Mostly historical |
+
+### 9.13 Animation libs & paradigms
+
+#### 9.13.1 Paradigms
+
+| Paradigm | Examples |
+|---|---|
+| **Declarative w/ JSX** | `<motion.div animate={{...}}/>` (Framer) |
+| **Variants API** | Named animation states triggered by parent |
+| **Spring physics** | Stiffness/damping/mass tunables |
+| **Tween / keyframes** | Duration + easing |
+| **Layout animations (FLIP)** | First-Last-Invert-Play; auto on layout change |
+| **Shared element transitions** | Element morphs between mount points |
+| **Gesture-driven** | Drag/swipe/pinch trigger animation |
+| **Scroll-driven** | `animation-timeline: scroll()` (CSS) or IntersectionObserver |
+| **Native CSS** | `@keyframes` + `transition` only |
+| **WAAPI** | Web Animations API — JS-driven, GPU |
+| **View Transitions API** | Native cross-DOM transitions on URL/state change |
+| **Native popover transitions** | `@starting-style` for entry; `transition-behavior: allow-discrete` |
+
+#### 9.13.2 Libs
+
+| Lib | Bundle | Notes |
+|---|---|---|
+| **Framer Motion / Motion** | ~50 KB | Most popular; gestures, layout, variants |
+| **Motion One** | ~5 KB | WAAPI-first lighter alt |
+| **React Spring** | ~25 KB | Physics-based |
+| **AutoAnimate (FormKit)** | ~3 KB | One-line drop-in for list reorder |
+| **GSAP** | ~50 KB | Most powerful; commercial license required for some uses |
+| **React Transition Group** | ~6 KB | Lower-level; mount/unmount transitions |
+| **Theatre.js** | + | Visual editor; complex sequences |
+| **Anime.js** | ~16 KB | Simple imperative |
+| **Popmotion** | ~10 KB | Underlies Framer's spring math |
+| **Lottie / lottie-web** | ~250 KB | After Effects → JSON → web |
+| **Rive** | + | Modern Lottie alt; runtime-driven state machines for art |
+| **react-flip-toolkit** | ~10 KB | FLIP-only |
+| **@use-gesture/react** | ~10 KB | Gesture hooks (pairs with Spring) |
+
+### 9.14 Drag-and-drop libs & paradigms
+
+#### 9.14.1 Paradigms
+
+| Paradigm | Notes |
+|---|---|
+| **HTML5 native** | `draggable="true"` + `dragstart`/`dragover`/`drop` — limited mobile support, no a11y |
+| **Pointer-events-based** | Custom; works mobile + desktop |
+| **Sensor-based** | Multiple input modes (mouse, touch, keyboard, screen reader) — dnd-kit, React Aria |
+| **Transform-based** | Drag preview = CSS transform on original; cheap |
+| **Clone-based** | Render a clone in a portal at pointer; original stays |
+| **List-only reorder** | Specialized API for ordered lists (Framer Reorder) |
+| **Cross-list / multi-bucket** | Kanban-shaped |
+| **External drop** | Files from OS — File API + DataTransfer |
+| **Accessible** | Live-region announce, keyboard reorder mode (move-up/down), screen-reader instructions |
+
+#### 9.14.2 Libs
+
+| Lib | Status | Notes |
+|---|---|---|
+| **dnd-kit** | Active | Modern, sensors, accessible, performant |
+| **Pragmatic Drag-and-Drop** | Active | Atlassian; lighter, framework-agnostic |
+| **react-beautiful-dnd** | Deprecated | Atlassian original; still widely used |
+| **react-dnd** | Active | HTML5 backend; older mental model |
+| **Framer Motion `Reorder`** | Active | List reorder only; simplest |
+| **React Aria DnD** | Active | Best a11y; built into RAC |
+| **SortableJS** | Active | Vanilla; React wrappers exist |
+| **react-grid-layout** | Active | Grid-specific (dashboards) |
+| **react-rnd** | Active | Resize-and-drag (floating windows) |
+
+### 9.15 Virtualization libs & strategies
+
+#### 9.15.1 Strategies
+
+| Strategy | Notes |
+|---|---|
+| **Window** | Render only visible items + overscan; rest is virtual gap |
+| **Variable height** | Measure on render or estimate + correct |
+| **Fixed height** | Cheapest; index × itemHeight for offset |
+| **Dynamic measurement** | ResizeObserver per item, cache heights |
+| **Sticky headers** | Section heads pin at top while scrolling within section |
+| **Anchor-preserving** | Keep specific row visible across data updates |
+| **Bidirectional** | Virtualize both directions (2D grid) |
+| **Reverse scroll** | Chat-style — anchor at bottom |
+| **Animated sort** | Reorder items with FLIP under virtualization (hard) |
+
+#### 9.15.2 Libs
 
 | Lib | Notes |
 |---|---|
-| React Hook Form | Most popular, performant |
-| TanStack Form | Type-safe modern |
-| Formik | Legacy |
-| Felte | Headless |
-| Final Form | Functional |
-| Effect Form | Effect-ts ecosystem |
+| **TanStack Virtual** | Latest, framework-agnostic, hooks-only |
+| **react-window** | Brian Vaughn; simple, fixed/variable height |
+| **react-virtuoso** | Variable-height-friendly, table support |
+| **react-virtualized** | Older, heavier predecessor of react-window |
+| **AG Grid virtualization** | Built into AG Grid only |
+| **MUI Data Grid virtualization** | Built into MUI X only |
 
-### 9.6 Validation libs
+### 9.16 Date / Number / Color / Currency libs
+
+| Domain | Lib | Notes |
+|---|---|---|
+| Date | **date-fns** | Functional; tree-shake-friendly; most popular |
+| Date | **dayjs** | Moment-like API, smaller |
+| Date | **luxon** | Intl-aware, immutable |
+| Date | **moment** | Legacy; not recommended for new code |
+| Date | **Temporal API** | TC39 stage 3; native replacement; polyfill available |
+| Date | **@internationalized/date** | React Aria; calendar systems (Hijri/Buddhist/Persian/etc.) |
+| Date | **js-joda** | Java JSR-310 port |
+| Date | **chrono-node** | Natural language date parser |
+| Number | **Native `Intl.NumberFormat`** | Most cases |
+| Number | **big.js** | Arbitrary precision decimals |
+| Number | **decimal.js / decimal.js-light** | Same niche; richer |
+| Number | **bignumber.js** | Same niche |
+| Number | **fraction.js** | Rational numbers |
+| Number | **mathjs** | Full math library |
+| Color | **chroma-js** | Color manipulation, scales |
+| Color | **culori** | Modern, OKLCH/OKLab support |
+| Color | **colord** | Tiny (~1.7 KB), modern |
+| Color | **tinycolor / tinycolor2** | Older popular |
+| Color | **color** | Older popular |
+| Color | **@adobe/leonardo-contrast-colors** | Adobe — accessibility-aware palette generation |
+| Currency | **Native `Intl.NumberFormat({style:'currency'})`** | Most cases |
+| Currency | **dinero.js** | Money objects, immutable |
+| Currency | **currency.js** | Lightweight money math |
+| Units | **convert-units / @sindresorhus/convert** | Unit conversion |
+
+### 9.17 i18n libs & strategies
+
+#### 9.17.1 Strategies
+
+| Strategy | Notes |
+|---|---|
+| **Runtime lookup** | Dictionary loaded at boot; `t(key)` looks up (react-i18next) |
+| **Compile-time** | Macro replaces `t(key)` w/ string literal at build (Lingui, Paraglide) |
+| **ICU MessageFormat** | Standardized plural/select/ordinal (FormatJS) |
+| **Gettext-style** | Source-string-as-key (legacy) |
+| **Locale-chained fallback** | `en-GB → en → default` |
+| **Per-route lazy load** | Load locale chunk on route enter |
+| **Inline rich text** | `<Trans>` allows JSX inside translation |
+| **Pseudo-localization** | Dev-mode `Ḧëłłö` to catch unwrapped strings |
+| **Translation Management Systems (TMS)** | Crowdin, Lokalise, Phrase, Transifex, Tolgee, Locize |
+
+#### 9.17.2 Libs
 
 | Lib | Notes |
 |---|---|
-| Zod | Most popular |
-| Yup | Forms-traditional |
-| Valibot | Modular, tree-shakeable |
-| ArkType | Type-level |
-| Effect Schema | Effect-ts |
-| Joi | Server-side legacy |
-| Superstruct | Tiny |
-| Standard Schema spec | Cross-validator interop |
+| **react-i18next** | Most popular; runtime + namespaces |
+| **FormatJS / react-intl** | ICU MessageFormat; richest |
+| **Lingui** | Compile-time macro; small runtime |
+| **next-intl** | Next.js-aware |
+| **Tolgee** | In-context editing |
+| **Polyglot.js** (Airbnb) | Tiny runtime |
+| **i18next** | Engine under react-i18next |
+| **typesafe-i18n** | Type-safe keys |
+| **Paraglide** (Inlang) | Compile-time, tree-shake per locale |
 
-### 9.7 Animation libs
+### 9.18 Icon libs & delivery
 
-| Lib | Notes |
-|---|---|
-| Framer Motion / Motion | Most popular, gestures |
-| React Spring | Physics-based |
-| AutoAnimate | One-line drop-in |
-| GSAP | Most powerful, license |
-| React Transition Group | Lower-level |
-| Theatre.js | Visual editor |
-| Anime.js | Simple |
+#### 9.18.1 Delivery patterns
 
-### 9.8 Drag-and-drop libs
+| Pattern | Pros | Cons |
+|---|---|---|
+| **Per-icon ESM import** | Tree-shake-friendly | Import-list grows |
+| **Single component + name prop** | Easy ergonomics | Can't tree-shake; full set bundled |
+| **SVG sprite sheet** | One HTTP request; cache; `<use>` ref | Coloring quirks |
+| **Icon font** | Universal browser support; ligatures | A11y issues; coloring; sizing precision |
+| **Inline SVG (per-render)** | Color via `currentColor`; no requests | Larger HTML |
+| **Iconify universal API** | 100+ icon sets; on-demand fetch | Runtime cost |
+| **CSS `mask-image`** | Color via `background-color` | Older browser quirks |
 
-| Lib | Notes |
-|---|---|
-| dnd-kit | Modern, sensors |
-| Pragmatic Drag-and-Drop | Atlassian, lighter |
-| react-beautiful-dnd | Deprecated |
-| react-dnd | HTML5 backend |
-| Framer Motion Reorder | Simple list reorder |
-| React Aria DnD | Built-in a11y |
+#### 9.18.2 Libraries
 
-### 9.9 Virtualization libs
+| Lib | Style | Notes |
+|---|---|---|
+| **Lucide** | Outline | Default for shadcn; we use |
+| **Heroicons** | Outline + solid | Tailwind team |
+| **Phosphor Icons** | Multi-weight (thin/regular/bold/fill/duotone) | Versatile |
+| **Tabler Icons** | Outline + filled | Free, large set |
+| **Radix Icons** | Geometric | Compact set |
+| **Material Symbols** | Variable font | Google MD3 |
+| **Fluent UI Icons** | Outline + filled | Microsoft |
+| **Ionicons** | Outline + filled | Ionic |
+| **BoxIcons / Feather Icons / Octicons** | Older popular | Less active |
+| **Iconify** | Aggregator (100+ sets) | On-demand fetch via API |
+| **react-icons** | Aggregator (Font Awesome, etc.) | Bigger bundle |
+| **Hugeicons** | Many weights | Newer |
+| **Mingcute / Akar / Solar / Hugeicons** | Modern alternatives | Niche |
 
-| Lib | Notes |
-|---|---|
-| TanStack Virtual | Latest, framework-agnostic |
-| react-window | Brian Vaughn, simple |
-| react-virtuoso | Variable-height-friendly |
-| react-virtualized | Legacy |
+### 9.19 Variants / styling helpers
 
-### 9.10 Date / Number / Color libs
+| Lib | Role | Notes |
+|---|---|---|
+| **class-variance-authority (cva)** | Variant API | Most popular Tailwind variant lib |
+| **tailwind-variants** | Tailwind-aware variants | We use; cva successor |
+| **clsx** | Class joiner | Tiny; conditional classes |
+| **classnames** | Class joiner (older) | Functional clone |
+| **tailwind-merge** | Conflict resolver | We use; resolves Tailwind conflicts |
+| **Panda CSS recipes** | Vanilla Extract-style recipes | Build-time |
+| **Stitches variants** | Legacy CSS-in-JS | Deprecated |
+| **vanilla-extract recipes** | Type-safe runtime-zero | Used w/ vanilla-extract |
+| **emotion + styled-system** | Theme-driven prop API | Older |
+| **theme-ui** | Theme-driven JSX prop API | Older |
 
-| Lib | Domain |
-|---|---|
-| date-fns | Date — most popular |
-| dayjs | Date — moment-like, smaller |
-| luxon | Date — Intl-aware |
-| moment | Date — legacy |
-| Temporal API | Date — TC39 stage 3 |
-| @internationalized/date | Date — React Aria |
-| big.js / decimal.js | Number — arbitrary precision |
-| chroma-js / culori / colord / tinycolor | Color |
+### 9.20 Utility libs
 
-### 9.11 i18n libs
+| Lib | Role | Notes |
+|---|---|---|
+| **immer** | Immutable mutation | `produce(state, draft => …)` |
+| **nanoid** | ID generation | Tiny, URL-safe |
+| **uuid** | UUIDv4/v7 | Standard |
+| **ts-pattern** | Pattern matching | Exhaustive `match()` |
+| **type-fest** | TS utility types | Common types lib |
+| **es-toolkit** | Modern Lodash alternative | Tree-shake-friendly |
+| **lodash / lodash-es / lodash-fp** | FP utils | Older popular |
+| **ramda** | FP utils, currying | Functional |
+| **remeda** | Modern FP utils | Lodash-style + types |
+| **dot-prop** | Get/set by string path | `'a.b.c'` |
+| **fast-deep-equal** | Deep equality | Tiny |
+| **mitt** | Event emitter | Tiny |
+| **just-*** | One-fn-per-pkg utilities | Granular |
+| **fp-ts / Effect** | FP runtime | Bigger ecosystem |
+| **rxjs** | Observables | FRP |
+| **@total-typescript/ts-reset** | TS-default-tightening | Type quality |
 
-| Lib | Notes |
-|---|---|
-| react-i18next | Most popular |
-| FormatJS / react-intl | ICU MessageFormat |
-| Lingui | Compact |
-| next-intl | Next.js-aware |
+### 9.21 Server-driven UI alternatives (anti-React patterns)
 
-### 9.12 Icon libraries
+For completeness — UI paradigms that *don't* use React. Worth knowing because they constrain what a React UI lib has to do.
 
-| Lib | Style |
-|---|---|
-| Lucide | Outline (shadcn default) |
-| Heroicons | Tailwind team |
-| Phosphor | Multi-weight |
-| Tabler | Outline + filled |
-| Radix Icons | Geometric |
-| Material Symbols | Google |
-| Fluent UI Icons | Microsoft |
-| Ionicons | Ionic |
-| BoxIcons / Feather | Older popular |
+| Approach | Origin | How |
+|---|---|---|
+| **HTMX** | Vanilla web | Attributes (`hx-get`, `hx-swap`) drive partial server-rendered HTML swaps. Tiny client. |
+| **Hotwire (Turbo + Stimulus)** | Rails / Basecamp | Turbo Frames + Streams replace HTML; Stimulus sprinkles JS |
+| **Phoenix LiveView** | Elixir | WebSocket-driven server-rendered diffs |
+| **Laravel Livewire** | PHP | Same idea on Laravel |
+| **Inertia.js** | Stack-agnostic | Bridge for SPA-feel without API; ships server-rendered controllers + React/Vue/Svelte client |
+| **Blazor Server** | .NET | Server SignalR-driven Razor renders |
+| **Marko** | eBay | Streaming partial hydration |
+| **Hyperview** | Native | XML-driven mobile UI |
 
-### 9.13 Variants / styling helpers
-
-| Lib | Role |
-|---|---|
-| class-variance-authority (cva) | Variant API |
-| tailwind-variants (we use) | Tailwind-aware variants |
-| clsx | Class joiner |
-| tailwind-merge (we use) | Conflict resolver |
-| Panda CSS recipes | Vanilla Extract-style |
-| Stitches variants | Legacy CSS-in-JS |
-
-### 9.14 Utility libs
-
-| Lib | Role |
-|---|---|
-| immer | Immutable mutation |
-| nanoid | ID generation |
-| ts-pattern | Pattern matching |
-| zod (already noted) | Schema |
-| ramda / lodash / lodash-fp | FP utils |
-| date-fns (already noted) | Dates |
+These compete with React for "build a UI app" but make different trade-offs. UI lib design needn't accommodate them, but understanding the alternative model sharpens framing.
 
 ---
 
-## 10. Tooling ecosystem (sketch — to expand)
+## 10. Tooling ecosystem
 
-| Domain | Options |
+### 10.1 Bundlers & dev servers
+
+| Tool | Style | Notes |
+|---|---|---|
+| **Vite** | Dev: ESM + esbuild; Prod: Rollup | Most popular for libs/apps |
+| **esbuild** | Bundler + transpiler | Fast; underused alone |
+| **swc** | Rust transpiler | Used by Vite, Next, others |
+| **Rollup** | Library bundler | ESM-first; we use indirectly via tsup |
+| **tsup** | Wrapper around esbuild + Rollup | We use; library-friendly |
+| **unbuild** | Wrapper around Rollup | Nuxt-friendly |
+| **Bun** | All-in-one: runtime + bundler + test + pkg mgr | Fast; React 19 support evolving |
+| **Webpack** | Legacy bundler | Still used |
+| **Turbopack** | Rust webpack successor | Next.js dev server |
+| **Rspack** | Rust webpack-compatible | ByteDance |
+| **Parcel** | Zero-config | Niche |
+| **Farm** | Rust bundler | Newer |
+| **Rolldown** | Rust Rollup successor | Vite's future bundler |
+| **Snowpack** | Native ESM dev | Deprecated |
+
+### 10.2 Test runners
+
+| Tool | Notes |
 |---|---|
-| Bundlers | Vite, esbuild, swc, Rollup, Webpack, Turbopack, Rspack, tsup, unbuild, parcel, bun |
-| Test runners | Vitest, Jest, Bun test, Mocha, Playwright Test |
-| Test libs | Testing Library, user-event, msw, axe-core |
-| Visual regression | Chromatic, Percy, Playwright snapshots, Loki |
-| Linters | ESLint, Biome, Oxlint, dprint |
-| Formatters | Prettier, Biome, dprint |
-| Type checkers | tsc, vtsc-fast (deprecated), isolatedDeclarations |
-| Storybook | Storybook 8+, Ladle (alt) |
-| Docs sites | Docusaurus, Nextra, Vocs, Mintlify, Starlight, VitePress |
-| Package managers | pnpm, npm, yarn, bun |
-| Versioning | Changesets, lerna (legacy), semantic-release |
-| Monorepo | pnpm workspaces, Nx, Turborepo, Rush |
-| Cli scaffolding | create-vite, create-next-app, plop, hygen |
+| **Vitest** | Vite-aware; fastest for Vite apps; Jest-API-compatible |
+| **Jest** | Most installed; older; ESM is rough |
+| **Bun test** | Bun-native; fast; smaller ecosystem |
+| **Mocha + Chai** | Classic; à la carte |
+| **Node test runner** | Native (Node 20+) `node:test` |
+| **Playwright Test** | E2E + component testing |
+| **Cypress** | E2E + component testing |
+| **WebdriverIO** | E2E |
+| **Storybook test runner** | Runs play functions as tests |
+
+### 10.3 Test libraries
+
+| Tool | Layer | Notes |
+|---|---|---|
+| **Testing Library (React)** | Unit/integration | DOM-via-role queries; APG-aligned |
+| **user-event** | Interaction | Simulates real user (focus, keypresses) |
+| **MSW (Mock Service Worker)** | Network mocking | API-level stubs |
+| **happy-dom / jsdom** | DOM emulation | Vitest defaults |
+| **@storybook/test** | Story play assertions | Vitest-bridge |
+| **@testing-library/react-hooks** | Hook unit tests | Mostly subsumed by `renderHook` |
+
+### 10.4 Visual regression
+
+| Tool | Notes |
+|---|---|
+| **Chromatic** | Storybook-native; UI flow per PR |
+| **Percy** | Storybook-native; BrowserStack |
+| **Playwright snapshots** | E2E + visual; self-hosted |
+| **Loki** | Storybook + Docker; self-hosted |
+| **Argos CI** | Modern visual review |
+| **happo** | Per-component; self-hostable |
+| **BackstopJS** | Standalone; older |
+
+### 10.5 Accessibility testing
+
+| Tool | Notes |
+|---|---|
+| **axe-core** | Core ruleset; integrate w/ Storybook addon, Cypress, Playwright |
+| **@storybook/addon-a11y** | axe per story panel |
+| **pa11y / pa11y-ci** | CLI runner |
+| **Lighthouse CI** | Includes axe + perf budget |
+| **Accessibility Insights** | MS desktop tool |
+| **Wave** | Browser ext, in-page report |
+| **NVDA / JAWS / VoiceOver** | Screen-reader smoke tests (manual) |
+| **axe-playwright** | Playwright integration |
+
+### 10.6 Linters
+
+| Tool | Notes |
+|---|---|
+| **ESLint** | Standard JS/TS linter; flat config |
+| **eslint-plugin-react / react-hooks / jsx-a11y** | React ecosystem rules |
+| **eslint-plugin-boundaries** | Architectural layer enforcement (we use) |
+| **eslint-plugin-import** | Import order/cycle |
+| **typescript-eslint** | TS rules layer |
+| **Biome** | All-in-one Rust linter+formatter |
+| **Oxlint** | Rust ESLint-compatible (alpha-fast) |
+| **dprint** | Pluggable formatter (and lint via plugins) |
+| **Stylelint** | CSS lint |
+
+### 10.7 Formatters
+
+| Tool | Notes |
+|---|---|
+| **Prettier** | Most popular |
+| **Biome** | All-in-one Rust |
+| **dprint** | Pluggable Rust |
+| **EditorConfig** | Cross-editor spacing/tab |
+
+### 10.8 Type tooling
+
+| Tool | Notes |
+|---|---|
+| **tsc** | The TypeScript compiler |
+| **isolatedDeclarations** | TS 5.5+; faster decl emit (we use) |
+| **type-coverage** | % of code typed |
+| **typesync** | Sync `@types/*` with deps |
+| **tshy** | Hybrid CJS+ESM publisher |
+| **type-fest / utility-types** | Reusable utility types |
+| **@total-typescript/ts-reset** | TS-default-tightening lib |
+| **API Extractor (Microsoft)** | Generate API report + d.ts rollup |
+| **arethetypeswrong** | Verify dual-export type correctness |
+
+### 10.9 Storybook & catalog tools
+
+| Tool | Notes |
+|---|---|
+| **Storybook 8+** | We use; Vite + addon ecosystem |
+| **Ladle** | Vite-only Storybook alt; simpler |
+| **Histoire** | Vue-leaning Storybook alt; works for React |
+| **react-styleguidist** | Older |
+| **Docz** | Older MDX-driven |
+
+### 10.10 Documentation sites
+
+| Tool | Notes |
+|---|---|
+| **Docusaurus** | Most popular for project docs |
+| **Nextra** | Next.js-based MDX |
+| **Vocs** | Modern, fast docs (used by Wagmi etc.) |
+| **Mintlify** | Hosted commercial |
+| **Starlight** | Astro-based |
+| **VitePress** | Vue-flavored Vite |
+| **Fumadocs** | Next.js-based, opinionated |
+| **GitBook** | Hosted commercial |
+| **MkDocs / Material** | Python-flavored |
+
+### 10.11 Package managers
+
+| Tool | Notes |
+|---|---|
+| **pnpm** | We use; symlinked workspace |
+| **npm** | Default Node bundled |
+| **yarn (Berry/v4)** | Plug'n'Play, zero-installs |
+| **bun** | Faster install; pnpm-compat |
+| **deno** | Rust-based; URL imports + npm: |
+
+### 10.12 Versioning / release
+
+| Tool | Notes |
+|---|---|
+| **Changesets** | Most popular monorepo versioning + changelog |
+| **semantic-release** | Conventional commits → auto-publish |
+| **release-please (Google)** | Conventional commits → release PR |
+| **lerna / @lerna-lite** | Older monorepo |
+| **np** | Wrap `npm publish` w/ checks |
+| **pkg-pr-new** | Pre-release per-PR previews |
+
+### 10.13 Monorepo tooling
+
+| Tool | Notes |
+|---|---|
+| **pnpm workspaces** | We use |
+| **Nx** | Cache-aware tasks; opinionated |
+| **Turborepo (Vercel)** | Cache-aware tasks; lighter |
+| **Rush (Microsoft)** | Enterprise scale |
+| **Lerna** | Legacy |
+| **Bun workspaces** | Bun-native |
+| **moonrepo** | Rust-based, language-agnostic |
+
+### 10.14 CI / CD
+
+| Tool | Notes |
+|---|---|
+| **GitHub Actions** | We use |
+| **GitLab CI** | Common alt |
+| **CircleCI / Travis / Drone** | Older popular |
+| **Buildkite** | Self-hosted runners |
+| **Jenkins** | Legacy |
+| **Vercel / Netlify build pipelines** | Hosted |
+
+### 10.15 Bundle / perf analysis
+
+| Tool | Notes |
+|---|---|
+| **size-limit** | CI gate for bundle size |
+| **bundlejs.com** | Online bundle inspector |
+| **bundlephobia.com** | Per-package size lookup |
+| **Webpack Bundle Analyzer** | Treemap |
+| **Rollup Plugin Visualizer** | Treemap |
+| **why-did-you-render** | Render tracking |
+| **React DevTools Profiler** | Built-in profiler |
+| **Lighthouse CI** | Perf budget gate |
+| **web-vitals** | Library to send Core Web Vitals to analytics |
+
+### 10.16 CSS tooling
+
+| Tool | Notes |
+|---|---|
+| **PostCSS** | CSS transformer ecosystem |
+| **Lightning CSS (Parcel)** | Rust postcss-compatible; vendor prefixing + minify |
+| **autoprefixer** | Vendor prefix postcss plugin |
+| **postcss-preset-env** | Future CSS → today |
+| **CSSnano** | CSS minifier |
+| **PurgeCSS** | Remove unused (mostly superseded by Tailwind JIT) |
+| **Tailwind v4 + `@tailwindcss/vite`** | We use |
+| **UnoCSS** | Atomic CSS engine alt |
+
+### 10.17 Static site generators (for component docs)
+
+| Tool | Notes |
+|---|---|
+| **Astro** | Islands; great for docs+marketing |
+| **Next.js (static export)** | Same framework as RSC apps |
+| **Eleventy / 11ty** | Simple Node SSG |
+| **Hugo** | Go SSG; very fast |
+| **Jekyll** | Ruby SSG |
+| **Gatsby** | React SSG (now stagnant) |
+
+### 10.18 Scaffolding / generators
+
+| Tool | Notes |
+|---|---|
+| **create-vite** | Vite project starter |
+| **create-next-app** | Next starter |
+| **plop** | Hygen-like, lightweight |
+| **hygen** | Code-gen via templates |
+| **scaffdog** | Markdown-driven generator |
+| **degit** | Git repo cloner (no `.git`) |
+
+---
+
+## 11. Cross-framework UI ecosystem (beyond React)
+
+The wow-two ecosystem is React-first, but knowing what other framework communities ship sharpens design decisions. Each framework has its own headless/styled split.
+
+### 11.1 Vue ecosystem
+
+| Lib | Type | Notes |
+|---|---|---|
+| **Vuetify** | Styled (Material) | Largest Vue lib |
+| **PrimeVue** | Styled multi-theme | Component-rich |
+| **Element Plus** | Styled | China-popular successor to Element UI |
+| **Ant Design Vue** | Styled | Ant's Vue port |
+| **Naive UI** | Styled | TS-first, modern |
+| **Quasar** | Styled (cross-platform) | Vue + mobile + desktop |
+| **Headless UI (Vue)** | Headless | Tailwind team, Vue port |
+| **Reka UI / Radix Vue** | Headless | Radix-shaped for Vue |
+| **shadcn-vue** | Hybrid | shadcn for Vue (uses Reka UI) |
+| **Nuxt UI** | Styled | Nuxt-flavored |
+| **Inkline / Oruga / Vuestic** | Niche | |
+
+### 11.2 Svelte ecosystem
+
+| Lib | Type | Notes |
+|---|---|---|
+| **Skeleton** | Styled (Tailwind) | Modern Svelte |
+| **Bits UI** | Headless | Radix-shaped |
+| **Melt UI** | Headless | Builder-pattern |
+| **shadcn-svelte** | Hybrid | shadcn port |
+| **Flowbite Svelte** | Styled (Tailwind) | Flowbite port |
+| **Carbon Svelte** | Styled (Carbon) | IBM port |
+| **Smelte / Svelte Material UI** | Styled (Material) | Niche |
+
+### 11.3 SolidJS ecosystem
+
+| Lib | Type | Notes |
+|---|---|---|
+| **Kobalte** | Headless | Radix-shaped, very accessible |
+| **Hope UI** | Styled (Chakra-like) | Modern |
+| **Suid** | Styled (Material) | Material port |
+| **Park UI Solid** | Hybrid (Ark) | Cross-framework |
+| **corvu** | Headless | Newer |
+| **solid-aria** | Headless | React Aria port |
+
+### 11.4 Angular ecosystem
+
+| Lib | Type | Notes |
+|---|---|---|
+| **Angular Material** | Styled (Material) | Default |
+| **PrimeNG** | Styled | Component-rich |
+| **NG-ZORRO** | Styled (Ant Design) | Ant for Angular |
+| **Nebular** | Styled | Akveo |
+| **Clarity** | Styled | VMware |
+| **Onsen UI** | Cross-platform | Hybrid mobile |
+| **ngx-bootstrap** | Styled (Bootstrap) | Bootstrap port |
+| **Taiga UI** | Styled | Modern |
+| **Spartan UI** | Hybrid | shadcn for Angular |
+
+### 11.5 Web Components ecosystem
+
+| Lib | Type | Notes |
+|---|---|---|
+| **Lit** | Library | Smallest; Google-maintained |
+| **Stencil** | Compiler | Generates standalone web components |
+| **FAST (Microsoft)** | Library | Adaptive UI |
+| **Adobe Spectrum Web Components** | Styled (Spectrum) | Adobe |
+| **Material Web** | Styled (MD3) | Google |
+| **Shoelace** | Styled | Framework-agnostic |
+| **Carbon Web Components** | Styled (Carbon) | IBM |
+| **Fluent UI Web Components** | Styled (Fluent) | Microsoft |
+| **Vaadin** | Enterprise | Java integration |
+
+### 11.6 Cross-platform UI
+
+| Lib | Targets | Notes |
+|---|---|---|
+| **React Native + Web** | iOS, Android, Web | Native-first; bridges to Web |
+| **Tamagui** | iOS, Android, Web | Compile-time optimization, single codebase |
+| **NativeBase** | iOS, Android, Web | Styled |
+| **RN Paper** | Native first | Material-flavored |
+| **Lynx (ByteDance)** | Native + Web | New cross-platform |
+| **Kuikly (Tencent)** | Multi-platform | Newer |
+| **Gluestack UI** | Native + Web | Modern |
+| **Flutter** | iOS, Android, Web, Desktop | Dart-based; not React |
+| **.NET MAUI Hybrid** | Native + Web | Microsoft |
+
+### 11.7 Resumability (Qwik)
+
+Qwik avoids hydration entirely. Components serialize state on the server; the client picks up handlers lazily, on demand.
+
+| Lib | Notes |
+|---|---|
+| **Qwik UI** | Headless Qwik components |
+| **Qwik** | Framework |
+
+### 11.8 Server-driven UI (anti-SPA)
+
+Already covered in §9.21. Worth listing as alternatives:
+
+- HTMX
+- Hotwire (Turbo + Stimulus)
+- Phoenix LiveView (Elixir)
+- Laravel Livewire (PHP)
+- Inertia.js (Stack-agnostic SPA bridge)
+- Blazor Server (.NET)
+- Marko (eBay)
+- Hyperview (Native)
+
+### 11.9 Other / niche
+
+| Framework | Notes |
+|---|---|
+| **Preact** | React-API smaller |
+| **Astro Islands** | Per-component selective hydration |
+| **Marko** | Streaming partial-hydration |
+| **Lit-HTML** | Lit's templating, sans components |
+| **Mitosis** | One source → many framework outputs |
+| **Fresh (Deno)** | Islands-based |
+| **Leptos / Yew (Rust)** | WASM-first |
+
+---
+
+## 12. Modern CSS landscape — capabilities to leverage
+
+CSS in 2026 has caught up with most use cases that previously required JS. UI lib design should lean into these where browser support allows.
+
+### 12.1 Layout primitives
+
+| Feature | What it does | Status |
+|---|---|---|
+| **Container queries** (`@container`) | Style based on container size, not viewport | Universal |
+| **`:has()`** | Parent / sibling-aware selectors | Universal |
+| **Subgrid** | Child grid aligns to parent's tracks | Universal |
+| **`overflow: clip`** | Clip without creating scroll context (vs `hidden`) | Universal |
+| **`aspect-ratio`** | Replace JS aspect math | Universal |
+| **`gap` for flex** | Replace `margin` between children | Universal |
+| **`align-content` for flex** | Multi-line alignment | Universal |
+| **`writing-mode`** | Vertical writing | Universal |
+| **Container query units** (`cqw` / `cqh` / `cqi` / `cqb`) | Size relative to container | Universal |
+| **Logical properties** (`inline-start`, `block-end`, etc.) | RTL/vertical-aware spacing | Universal |
+
+### 12.2 Color & gradient
+
+| Feature | Notes | Status |
+|---|---|---|
+| **`color-mix()`** | Mix two colors at runtime | Universal |
+| **OKLCH / OKLab** | Perceptually uniform color spaces | Universal |
+| **Display-P3** | Wide gamut | Modern |
+| **Relative color syntax** | `color: rgb(from var(--c) r g b / 0.5)` | Modern |
+| **`color-scheme`** | Browser knows light/dark intent | Universal |
+| **`accent-color`** | Replace native check/radio brand color | Universal |
+| **`@property --c`** | Typed custom prop; animatable colors | Modern |
+| **Conic gradients** | `conic-gradient(...)` | Universal |
+| **`color()` function** | Specify color in any space | Modern |
+
+### 12.3 Animation & interaction
+
+| Feature | Notes | Status |
+|---|---|---|
+| **View Transitions API** | Cross-DOM animated transitions on URL/state change | Chrome+Safari; FF coming |
+| **`@starting-style`** | Initial state for entry transitions | Universal |
+| **`transition-behavior: allow-discrete`** | Animate `display`, `popover` | Modern |
+| **Scroll-driven animations** (`animation-timeline`) | Animation tied to scroll position | Chromium; FF/Safari coming |
+| **`scroll-snap`** | Native carousel snap | Universal |
+| **`scroll-padding`/`scroll-margin`** | Snap offsets | Universal |
+| **`overscroll-behavior`** | Prevent body bounce | Universal |
+| **`touch-action`** | Disable browser gestures per element | Universal |
+| **`anchor-name` / anchor positioning** | Native popover positioning | Chromium |
+| **CSS Houdini Paint / Layout / Animation** | Worklets | Niche; partial |
+| **Native HTML `popover` attr** | Top-layer rendering w/o portal | Universal |
+| **Native `<dialog>`** | Modal w/ inert backdrop | Universal |
+| **`field-sizing: content`** | Auto-grow input/textarea | Modern |
+
+### 12.4 Cascade & scoping
+
+| Feature | Notes | Status |
+|---|---|---|
+| **`@layer`** | Cascade layers — explicit ordering | Universal |
+| **`@scope`** | Scope CSS to a subtree | Modern |
+| **CSS Nesting (native)** | `&` selector | Universal |
+| **`@supports`** | Feature detection | Universal |
+| **`@media (forced-colors: active)`** | High-contrast mode | Universal |
+| **`@media (prefers-color-scheme)`** | Light/dark intent | Universal |
+| **`@media (prefers-reduced-motion)`** | Reduced motion | Universal |
+| **`@media (prefers-reduced-transparency)`** | Disable backdrop-blur | Modern |
+| **`@media (prefers-reduced-data)`** | Defer images | Niche |
+| **`@media (dynamic-range: high)`** | HDR display | Modern |
+| **`@media (pointer: coarse)`** | Touch vs mouse | Universal |
+| **`@media (any-hover)`** | Capable of hover | Universal |
+| **`@media (resolution: 2dppx)`** | Retina detect | Universal |
+
+### 12.5 Custom properties / variables
+
+| Feature | Notes | Status |
+|---|---|---|
+| **`--var`** | CSS variables | Universal |
+| **`@property`** | Typed custom props (animatable) | Modern |
+| **`var()` w/ fallback** | `var(--c, red)` | Universal |
+| **Inheritance / cascade** | Standard | Universal |
+| **`env()`** | Environment variables (`safe-area-insets`) | Universal |
+
+### 12.6 Anchor positioning
+
+| Feature | Notes | Status |
+|---|---|---|
+| **`anchor-name` / `position-anchor`** | Native floating positioning | Chromium |
+| **`position-try`** | Fallback positions (vs Floating UI's `flip`) | Chromium |
+| **`anchor-size()`** | Size relative to anchor | Chromium |
+
+### 12.7 Misc useful
+
+| Feature | Notes | Status |
+|---|---|---|
+| **`text-wrap: balance`** | Distribute lines evenly (titles) | Modern |
+| **`text-wrap: pretty`** | Avoid orphans (paragraphs) | Modern |
+| **`hyphens: auto`** | Native hyphenation | Universal |
+| **`line-clamp`** | Truncate at N lines | Universal |
+| **`accent-color`** | Native control color | Universal |
+| **`caret-color`** | Cursor color | Universal |
+| **`user-select`** | Text selection control | Universal |
+| **`pointer-events`** | Click-through control | Universal |
+| **`will-change`** | GPU promote hint | Universal |
+| **`backdrop-filter`** | Blur backdrop | Universal |
+| **`mask-image`** | SVG mask color via CSS | Universal |
+| **`mix-blend-mode`** | Photoshop-style blending | Universal |
+| **`isolation: isolate`** | Create stacking context cleanly | Universal |
+| **`contain`** | Layout/paint/style containment | Universal |
+| **`content-visibility: auto`** | Defer offscreen render | Universal |
+| **`@font-face` w/ `font-display`** | Font fallback strategy | Universal |
+| **Variable fonts** | One font, many axes | Universal |
+| **`:user-valid` / `:user-invalid`** | Form state aware of interaction | Modern |
+| **`:focus-visible`** | Keyboard focus only | Universal |
+| **`:focus-within`** | Has-focused-descendant | Universal |
+| **`outline-offset`** | Distance focus ring from element | Universal |
+
+### 12.8 Math functions
+
+| Function | Notes |
+|---|---|
+| `calc()` | Arithmetic |
+| `min(a, b)` / `max(a, b)` | Compare |
+| `clamp(min, val, max)` | Bounded |
+| `round()` / `mod()` / `rem()` | Niche |
+| Trig: `sin()` / `cos()` / `tan()` / `asin()` etc. | Recently shipped |
+| `pow()` / `sqrt()` / `log()` / `exp()` / `hypot()` | Recently shipped |
+| `abs()` / `sign()` | Recently shipped |
+
+---
+
+## 13. Anti-patterns / what to avoid
+
+A reverse catalog: patterns / habits that show up across UI libs but should be skipped.
+
+### 13.1 Component-design anti-patterns
+
+| Anti-pattern | Why bad | Better |
+|---|---|---|
+| One mega-component w/ 30+ props | API churn; hard to override | Compound w/ slotted parts |
+| Forcing controlled-only | Breaks native form semantics | Support uncontrolled too via `useControlled` |
+| Wrapping `<form>` and stealing `submit` | Blocks native FormData / server actions | Forward `action` + co-exist w/ native |
+| Re-implementing native semantics | `<dialog>`, `popover`, `<details>` already exist | Adopt natives where possible |
+| Accepting `style` but not `className` | Inflexible | Both, plus a clear override order |
+| Imperative open/close as default | Hard to compose | Controlled + uncontrolled both |
+| `forwardRef` boilerplate everywhere | Verbose pre-React 19 | Use `ref` as prop in React 19 |
+| Per-component theme provider | Theme fragmentation | One provider per scope, components consume |
+| Per-component i18n built-in | Bundle bloat | Provider + delegate |
+| Bypass focus management | Breaks a11y in modals | FocusScope + return-focus |
+| Tooltip on touch devices | No hover; doesn't work | Long-press fallback or skip |
+| HoverCard as primary affordance | A11y exclusion | Pair w/ Popover or click |
+| Custom focus rings overriding `:focus-visible` | Accessibility regression | Style `:focus-visible` instead |
+| Hardcoded RTL detection in JS | Buggy | `dir` attribute + logical CSS |
+| `aria-label` for everything | Hides real labels | Prefer `<label>` |
+| Pre-rendered HTML structure differs from runtime | Hydration mismatch | Same render path |
+| Children as required configuration | `<Tabs items={...}/>` is rigid | Children = composition |
+| Breaking changes via prop renames silent | Caller surprise | Major-bump or alias deprecate |
+
+### 13.2 Accessibility anti-patterns
+
+| Anti-pattern | Why bad |
+|---|---|
+| `tabindex="100"` to "fix" tab order | Layout, not tabindex |
+| Missing focus indicators | Keyboard users blind |
+| `outline: none` w/o replacement | Same |
+| `aria-hidden="true"` on focusable | Trapped invisible focus |
+| `role="button"` on `<div>` w/o keyboard handlers | Half-implemented |
+| Click on non-button elements | Keyboard inaccessible |
+| Color-only state indicators | Color-blind users excluded |
+| Auto-play audio/video w/ sound | Assistive tech overlap |
+| Pop-ups w/o focus trap | Loses keyboard users |
+| Modal w/o ARIA dialog role | SR doesn't announce |
+| Accordion w/ same `aria-controls` for multiple panels | Confusing |
+| Live region "announces" hidden content | Screen reader spam |
+| Carousel w/o pause | Cognitive overload |
+| `<a>` as button | Wrong semantic |
+| Form submit w/o `<form>` | No native validation |
+| Required indicator only via color | Same color-only |
+| Drag without keyboard alternative | WCAG 2.5.7 fail |
+| Touch targets < 24px | WCAG 2.5.8 fail |
+
+### 13.3 Performance anti-patterns
+
+| Anti-pattern | Why bad |
+|---|---|
+| Re-creating callbacks per render | Memo invalidates downstream |
+| Context updates triggering wide re-renders | Use selectors / split |
+| Inline objects/arrays in props | Same |
+| Loading entire icon set | Per-icon import or sprite |
+| CSS-in-JS at runtime in hot paths | Style recompute |
+| `useState` for derived data | Use `useMemo` or compute |
+| Effect that re-runs on every render | Missing dep array |
+| 1000-row table without virtualization | Layout thrash |
+| Auto-focus on mount in modal | Loses scroll position |
+| Animated layout w/o `transform` | Triggers layout |
+| `position: fixed` w/o `will-change` | GPU stays cold |
+| Synchronous heavy work in render | Block paint |
+| Barrel `index.ts` re-exporting everything | Tree-shake-hostile |
+| Side effects on import | Same |
+
+### 13.4 Theming anti-patterns
+
+| Anti-pattern | Why bad |
+|---|---|
+| Hardcoded colors | No theming possible |
+| Color tokens w/o semantic role | "blue-500" meaningless |
+| Two semantic tokens for same intent | Confusing |
+| Token names containing values (`color-red-500`) at semantic tier | Couples tier to value |
+| Per-component color override (`<Button color="red">`) | Fragments theme |
+| `dark:` modifier on every component | Coupling |
+| Theme provider w/o CSS-vars fallback | SSR theme flash |
+| Z-index magic numbers | Stacking-context bugs |
+| Density per-component instead of theme-level | Drift |
+
+### 13.5 i18n anti-patterns
+
+| Anti-pattern | Why bad |
+|---|---|
+| String concatenation w/ variables | Word order varies (de/jp) |
+| Pluralization via if/else (`count === 1`) | Russian/Arabic plural rules differ |
+| Date format hardcoded (`MM/DD/YYYY`) | Wrong outside US |
+| Number format hardcoded (`.` decimal) | Wrong in EU/RU |
+| RTL handled by reversing flexbox | Use `dir` + logical props |
+| Translation w/o context | "Sign" — contract or zodiac? |
+| English fallback as fixed default | Should be document-defined |
+| Truncating w/o accounting for char width | CJK is 2× width |
+| Trans with embedded HTML lost | Use `<Trans>` w/ slots |
+| Locale detected from `navigator.language` only | Should respect explicit user pref |
+
+### 13.6 DX anti-patterns
+
+| Anti-pattern | Why bad |
+|---|---|
+| Magic strings instead of typed enums | No autocomplete |
+| Per-feature flag everywhere | Version skew |
+| Lib-internal APIs leaked via barrel | Consumers depend on internals |
+| Breaking changes w/o major bump | Caller surprise |
+| Docs lagging behind code | Trust-erosion |
+| API consistency violations across components | Cognitive load |
+| Required props w/ no default | Boilerplate |
+| Default values that hide bugs | Hard to trace |
+| `console.log` in production builds | Noise |
+| Stack traces hidden inside lib internals | Hard to debug |
+| Single huge `index.ts` re-export | Tree-shake-hostile |
+| Side effects on import | Tree-shake-hostile |
+| Implicit React version peer dep | Mismatch silently |
+| Deep prop names (`size_xl_with_icon`) | Combinatorial |
+| Magic context values w/o provider | Runtime crash |
 
 ---
 
 ## References
 
-- Companion: [`targets.md`](./targets.md) — what *we'll* implement
+### Companion docs
+- [`targets.md`](./targets.md) — what *we'll* implement (verdicts)
 - Workspace audit: [`docs/audits/library-references.md`](../../../../../../docs/audits/library-references.md) — component coverage matrix
+
+### Standards & specs
 - WAI-ARIA APG — w3.org/WAI/ARIA/apg/
+- WCAG 2.2 Quick Reference — w3.org/WAI/WCAG22/quickref/
 - MDN Web APIs index — developer.mozilla.org/en-US/docs/Web/API
 - Intl API — developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
-- Standard Schema — github.com/standard-schema/standard-schema
-- W3C Design Tokens — design-tokens.github.io/community-group/format/
+- Standard Schema — standard-schema.dev
+- W3C Design Tokens (DTCG) — design-tokens.github.io/community-group/format/
+- TC39 Signals proposal — github.com/tc39/proposal-signals
+- Temporal API — tc39.es/proposal-temporal/docs/
+- View Transitions API — developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API
+- CSS Anchor Positioning — developer.mozilla.org/en-US/docs/Web/CSS/CSS_anchor_positioning
+
+### Design systems
 - Material Design 3 — m3.material.io
 - Carbon — carbondesignsystem.com
-- Spectrum — spectrum.adobe.com
+- Adobe Spectrum — spectrum.adobe.com
 - Atlassian Design Tokens — atlassian.design/tokens
-- shadcn — ui.shadcn.com
+- USWDS — designsystem.digital.gov
+- GOV.UK Design System — design-system.service.gov.uk
+- Primer (GitHub) — primer.style
+- Polaris (Shopify) — polaris.shopify.com
+- Fluent 2 — fluent2.microsoft.design
+
+### React ecosystem hubs
+- React — react.dev
+- TanStack — tanstack.com
+- Floating UI — floating-ui.com
+- React Aria / Spectrum — react-spectrum.adobe.com/react-aria
+- shadcn/ui — ui.shadcn.com
+- Radix Primitives — radix-ui.com
+- Headless UI — headlessui.com
+- Ariakit — ariakit.org
+- Ark UI — ark-ui.com
+
+### Cross-framework
+- Lit — lit.dev
+- Stencil — stenciljs.com
+- Shoelace — shoelace.style
+- Material Web — material-web.dev
+- Kobalte (Solid) — kobalte.dev
+- Reka UI (Vue) — reka-ui.com
+- Bits UI (Svelte) — bits-ui.com
+- Melt UI (Svelte) — melt-ui.com
+- Qwik UI — qwikui.com
+
+### Server-driven UI
+- HTMX — htmx.org
+- Hotwire — hotwired.dev
+- Phoenix LiveView — hexdocs.pm/phoenix_live_view
+- Inertia.js — inertiajs.com
+
+### Tailwind ecosystem
+- Tailwind CSS v4 — tailwindcss.com
+- tailwind-variants — tailwind-variants.org
+- tailwind-merge — github.com/dcastil/tailwind-merge
+- cva — cva.style
 
 ---
 
-*Sketch sections (§9 React ecosystem, §10 Tooling) are placeholders for later expansion. Update as scope widens beyond styles + components.*
+*Pure inventory — no decisions. When `targets.md` adopts an item, this file stays unchanged. When a new vector / lib / API is encountered, add it here first; verdict on adoption goes in `targets.md`.*
