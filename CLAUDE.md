@@ -18,7 +18,7 @@ When scope expansion is considered, walk `targets.md` first. If the desired vect
 ## Casing convention
 
 - Folders: `camelCase` (`numberInput/`, `actions/`, `inputPrimitives/`)
-- Files: `PascalCase` (`Button.tsx`, `Button.spec.md`, `Button.stories.tsx`, `Button.variants.ts`)
+- Files: `PascalCase` (`Button.tsx`, `Button.stories.tsx`, `Button.variants.ts`)
 - Index files: lowercase (`index.ts`)
 
 ### Shared/internal helper files (within a domain)
@@ -37,19 +37,24 @@ The `*Extensions.ts` postfix is borrowed from .NET extension methods — files o
 
 ## Per-component pattern
 
-Every component lives in its own folder with this exact shape:
+Every component lives in its own folder with this minimal shape:
 
 ```
 forms/numberInput/
-├── NumberInput.standard.md   ← behavioral contract (what it MUST/SHOULD do — RFC 2119 rules + rationale)
-├── NumberInput.spec.md       ← concrete API (enums, prop signatures, anatomy)
-├── NumberInput.tsx           ← implementation (must satisfy both standard and spec)
-├── NumberInput.stories.tsx   ← Storybook stories (1 per visual state at minimum)
-├── NumberInput.variants.ts   ← tailwind-variants config
+├── NumberInput.tsx           ← implementation
+├── NumberInput.stories.tsx   ← Storybook stories (≥ 1 per key visual state)
+├── NumberInput.variants.ts   ← tailwind-variants config (when needed)
 └── index.ts                  ← barrel
 ```
 
-**Standard + spec before code.** A new component begins as `*.standard.md` (using [`docs/templates/component-standard.md`](./docs/templates/component-standard.md)) and `*.spec.md` (using [`docs/templates/component-spec.md`](./docs/templates/component-spec.md)). Implementation must satisfy both. Stories cover every visual state in spec.
+**Build first; standardize later.** First-generation components ship code + stories + barrel only. The per-component standardization pass (separate chat per component, in a later phase) adds:
+
+- `Component.standard.md` — behavioral contract (RFC 2119 rules + rationale)
+- `Component.spec.md` — concrete API (enums, prop signatures, anatomy)
+
+Templates exist at [`docs/templates/component-standard.md`](./docs/templates/component-standard.md) and [`docs/templates/component-spec.md`](./docs/templates/component-spec.md) — they're picked up during the standardization pass, not during first-gen build.
+
+> **Note**: many existing components still have a legacy `*.spec.md` from earlier iterations. These will be rewritten (or replaced by the dual-doc pair) when the standardization pass walks each component. Don't author new ones during build batches.
 
 ## Layout
 
@@ -76,7 +81,7 @@ forms/numberInput/
 
 ## Working rules
 
-- **Standard + spec before code.** No `Component.tsx` without its `Component.standard.md` *and* `Component.spec.md`.
+- **Build first, standardize later.** First-gen components ship code + stories + barrel only. The standardization pass (per-component, separate chats, later phase) adds `*.standard.md` + `*.spec.md`.
 - **Foundation cannot import domains.** ESLint enforces.
 - **Domains can import any sibling domain.** Convention: L3 atoms / L4 molecules should stay in-domain when natural; L5+ organisms compose freely across domains. The lint rule is permissive — judgment calls go to the spec.
 - **Subpath exports per top-level src/ folder.** Consumers can pull just the slice they need.
