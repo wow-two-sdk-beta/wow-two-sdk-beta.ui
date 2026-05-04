@@ -190,7 +190,33 @@ Mutually exclusive — if both are set, `skeleton` takes precedence + a dev-mode
 </Button>
 ```
 
-(Future `<Overlay position="top-right" appearOn="hover">` layout helper may absorb the className boilerplate.)
+(Future `<Overlay position="top-right" appearOn="hover">` layout helper may absorb the className boilerplate. `OverlayButton` is the slim wrapper that supplies these classnames + sets `variant="glass" shape="circle"`.)
+
+**React 19 form auto-pending** — wire `loading` to `useFormStatus()`:
+
+```tsx
+import { useFormStatus } from 'react-dom';
+
+function SubmitButton({ children }) {
+  const { pending } = useFormStatus();
+  return <Button type="submit" loading={pending}>{children}</Button>;
+}
+
+<form action={serverAction}>
+  <SubmitButton>Save</SubmitButton>
+</form>
+```
+
+Not built-in (would force the hook on every Button instance and lock us to React 19).
+
+**Declarative popover toggling** — Button forwards the native [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) attributes:
+
+```tsx
+<Button popoverTarget="prefs-menu" popoverTargetAction="toggle">Preferences</Button>
+<div id="prefs-menu" popover>…</div>
+```
+
+No JS needed; browser handles the toggle. Falls through `...rest`.
 
 **ButtonGroup** — composition rules deferred to `ButtonGroup.standard.md` / `ButtonGroup.spec.md`.
 
@@ -214,7 +240,7 @@ Mutually exclusive — if both are set, `skeleton` takes precedence + a dev-mode
 | `disabled` | `boolean` | `false` | Native attr; emits `data-state="disabled"` |
 | `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | Native attr (defaults to `button`, not `submit`) |
 | `asChild` | `boolean` | `false` | Render as child via `Slot` |
-| `...rest` | `ButtonHTMLAttributes<HTMLButtonElement>` | — | All native button attrs forwarded |
+| `...rest` | `ButtonHTMLAttributes<HTMLButtonElement>` | — | All native button attrs forwarded — including form attrs (`name`, `value`, `formAction`, `formMethod`, `formNoValidate`, `formTarget`, `formEnctype`), [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) (`popoverTarget`, `popoverTargetAction`), [Invoker Commands API](https://open-ui.org/components/invokers.explainer/) (`commandFor`, `command`), focus (`autoFocus`, `tabIndex`, `accesskey`), all pointer/keyboard/mouse events, [`inert`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert), `title`, View Transitions (`view-transition-name` via `style`), and arbitrary `data-*` attributes (except `data-state`, which Button owns) |
 
 ## Storybook coverage
 

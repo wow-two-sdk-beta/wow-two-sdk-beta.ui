@@ -68,3 +68,5 @@ export * from './gradientPicker';
 export * from './addressForm';
 export * from './phoneInput';
 export * from './emojiPicker';
+export * from './reactionPicker';
+export * from './chatComposer';

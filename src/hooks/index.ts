@@ -8,4 +8,5 @@ export { useFocusTrap } from './useFocusTrap';
 export { useScrollLock } from './useScrollLock';
 export { useResizeObserver } from './useResizeObserver';
 export { useMediaQuery } from './useMediaQuery';
+export { useReducedMotion } from './useReducedMotion';
 export { useClipboard, type UseClipboardOptions, type ClipboardControls } from './useClipboard';
