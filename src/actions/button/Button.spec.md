@@ -242,6 +242,32 @@ No JS needed; browser handles the toggle. Falls through `...rest`.
 | `asChild` | `boolean` | `false` | Render as child via `Slot` |
 | `...rest` | `ButtonHTMLAttributes<HTMLButtonElement>` | — | All native button attrs forwarded — including form attrs (`name`, `value`, `formAction`, `formMethod`, `formNoValidate`, `formTarget`, `formEnctype`), [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) (`popoverTarget`, `popoverTargetAction`), [Invoker Commands API](https://open-ui.org/components/invokers.explainer/) (`commandFor`, `command`), focus (`autoFocus`, `tabIndex`, `accesskey`), all pointer/keyboard/mouse events, [`inert`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert), `title`, View Transitions (`view-transition-name` via `style`), and arbitrary `data-*` attributes (except `data-state`, which Button owns) |
 
+## Planned (post-v1)
+
+API surface documented now so it can't be retrofitted incompatibly later. Implementation deferred — props absent from `Button.tsx` until shipped.
+
+**Press detection** — unified pointer + keyboard activation events with consistent shape, à la React Aria. `onPressStart` / `onPressEnd` fire on both pointer-down/up AND Space/Enter keydown/keyup; useful for analytics (timing how long a user held the button) and custom press feedback.
+
+```ts
+onPressStart?: (event: React.PointerEvent | React.KeyboardEvent) => void
+onPressEnd?:   (event: React.PointerEvent | React.KeyboardEvent) => void
+```
+
+**Long-press** — triggers after the button has been held for `longPressDelay` ms. Common pattern: open a context menu on touch (right-click equivalent). Cancels if the user releases or moves outside the button bounds before the delay.
+
+```ts
+onLongPress?:    (event: React.PointerEvent) => void
+longPressDelay?: number   // ms, default 500
+```
+
+**Debounce** — collapses rapid-fire clicks into one. Different from `loading=true` (which is reactive — set after first click); `debounceMs` is preventive (swallows clicks within the window). Skipped when `loading` or `skeleton` is active (they already block).
+
+```ts
+debounceMs?: number   // ms, default undefined (no debounce)
+```
+
+When implemented, all five props will move into the main props summary; this section will be removed.
+
 ## Storybook coverage
 
 **Parked.** See [`system/sessions/ui-beta-build/context.md`](../../../../system/sessions/ui-beta-build/context.md) — to be designed after Button implementation lands. Likely shape: playground (controls-driven) + variant×tone matrix + states matrix (with `@storybook/addon-pseudo-states`) + composition recipes (asChild as link, leading/trailing icons, fullWidth, density preview).

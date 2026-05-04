@@ -1,2 +1,6 @@
-export { OverlayButton, type OverlayButtonProps } from './OverlayButton';
-export { overlayButtonVariants, type OverlayButtonVariants } from './OverlayButton.variants';
+export {
+  OverlayButton,
+  type OverlayButtonProps,
+  type OverlayPosition,
+  type OverlayAppearOn,
+} from './OverlayButton';
