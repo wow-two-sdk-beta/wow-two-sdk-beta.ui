@@ -58,3 +58,4 @@ export * from './wizard';
 export * from './codeEditor';
 export * from './markdownEditor';
 export * from './jsonEditor';
+export * from './recurrenceEditor';

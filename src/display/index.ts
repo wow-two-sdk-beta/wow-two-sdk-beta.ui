@@ -43,3 +43,6 @@ export * from './audioWaveform';
 export * from './audioPlayer';
 export * from './videoPlayer';
 export * from './pdfViewer';
+export * from './scheduleView';
+export * from './gantt';
+export * from './eventCalendar';
