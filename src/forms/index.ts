@@ -54,3 +54,4 @@ export * from './stepper';
 export * from './tagsInput';
 export * from './fileUpload';
 export * from './editable';
+export * from './wizard';

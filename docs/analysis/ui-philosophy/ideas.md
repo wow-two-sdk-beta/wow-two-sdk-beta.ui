@@ -1735,13 +1735,105 @@ Every named API at [developer.mozilla.org/en-US/docs/Web/API](https://developer.
 
 ### 8.26 Web Components
 
-| API | Description | Rel |
+A collection of standards rather than a single API. UI libs may consume them sparingly today (consumer's choice) but should at least *not break* under shadow DOM, slot projection, etc. MDN reference: developer.mozilla.org/en-US/docs/Web/API/Web_components.
+
+#### 8.26.1 Custom Elements
+
+| Capability | Detail |
+|---|---|
+| Define | `customElements.define(name, ctor, options?)` — name MUST contain a hyphen (e.g. `my-button`) |
+| Autonomous | `class MyEl extends HTMLElement {}` — fresh element type |
+| Customized built-in | `class MyButton extends HTMLButtonElement {}` + `{ extends: 'button' }` + `<button is="my-button">` (Safari support gap; partially abandoned) |
+| Lookup | `customElements.get(name)`, `customElements.whenDefined(name)`, `customElements.upgrade(node)`, `customElements.getName(ctor)` |
+| Observed attrs | `static observedAttributes = ['x', 'y']` — only these trigger `attributeChangedCallback` |
+| Lifecycle: `connectedCallback()` | Inserted into a connected document |
+| Lifecycle: `disconnectedCallback()` | Removed from DOM |
+| Lifecycle: `connectedMoveCallback()` | Moved within DOM (newer; fires in lieu of disconnect+connect) |
+| Lifecycle: `adoptedCallback(oldDoc, newDoc)` | Moved between documents |
+| Lifecycle: `attributeChangedCallback(name, oldVal, newVal)` | Observed attr changed |
+| Form-associated lifecycle | `formAssociatedCallback(form)`, `formDisabledCallback(disabled)`, `formResetCallback()`, `formStateRestoreCallback(state, mode)` |
+| Pseudo-class | `:defined` matches once registered — useful for FOUC prevention |
+| Type extension | `is="my-button"` attribute on built-in (deprecated path) |
+| Upgrade timing | Element parsed before `define()` → upgraded later (handle via `whenDefined`) |
+
+#### 8.26.2 Shadow DOM
+
+| Capability | Detail |
+|---|---|
+| Attach | `el.attachShadow({ mode: 'open' \| 'closed', delegatesFocus?, slotAssignment?, clonable?, serializable? })` |
+| Mode `open` | Exposes `el.shadowRoot` |
+| Mode `closed` | `el.shadowRoot === null` for outsiders (still inspectable in DevTools — not a privacy boundary) |
+| Slot projection | `<slot>`, `<slot name="...">`, default content as fallback |
+| Manual slot assignment | `slotAssignment: 'manual'` + `slot.assign(el1, el2)` — explicit control over which lights go where |
+| Slot events | `slotchange` event on slot — fires when assigned children change |
+| Slot inspection | `slot.assignedNodes({flatten})`, `slot.assignedElements()` |
+| Style isolation | Outside CSS doesn't penetrate (except inheritable: `color`, `font-*`, etc.) |
+| `:host` | Style the host from inside shadow |
+| `:host(.foo)` / `:host([attr])` | Conditional host styling |
+| `:host-context(...)` | Match host's ancestor — used for theme propagation (`:host-context(.theme-dark)`) |
+| `::slotted(selector)` | Style projected light-DOM children (only direct children of slot) |
+| `::part(name)` | Style exposed parts (`<el part="title">` inside shadow → `host::part(title)` outside) |
+| `exportparts` attribute | Forward parts up through nested shadow |
+| `::theme()` | (proposal) cross-tree theming primitive |
+| Adopted stylesheets | `shadow.adoptedStyleSheets = [sheet1, sheet2]` — share constructable CSSStyleSheets across roots |
+| Constructable CSSStyleSheet | `new CSSStyleSheet().replaceSync(cssText)` — parse once, mount many |
+| Focus delegation | `delegatesFocus: true` — `:focus` on host when child focused; `host.focus()` forwards to first focusable inside |
+| Composed events | `event.composedPath()` lists path through shadow boundaries |
+| Event retargeting | Events from inside shadow retarget at boundary (`event.target` is the host) |
+| `composed: true` | Event opt-in to cross shadow boundaries |
+| `getRootNode({ composed: true })` | Walk up past shadow boundaries |
+| Declarative Shadow DOM | `<template shadowrootmode="open">` — SSR-safe shadow DOM (no JS to attach) |
+| Clonable shadow | `<template shadowrootclonable>` — re-clone across uses |
+| Declarative focus delegation | `<template shadowrootdelegatesfocus>` |
+| Serializable shadow | `getHTML({serializableShadowRoots, shadowRoots})` — opt-in DOM serialization |
+
+#### 8.26.3 HTML Templates
+
+| Capability | Detail |
+|---|---|
+| `<template>` | Inert content not rendered until `cloneNode(true)` |
+| `template.content` | DocumentFragment holding template's children |
+| `<slot>` inside template | Slot projection definition |
+| Performance | Parse once, clone many — fast instantiation |
+
+#### 8.26.4 Element Internals (form association + ARIA reflection)
+
+The cleanest path to making custom elements participate as form controls.
+
+| Capability | Detail |
+|---|---|
+| Opt-in | `static formAssociated = true` + `this._internals = this.attachInternals()` in constructor |
+| `setFormValue(value, state?)` | Participate in `<form>` submit; `state` for restore (string / FormData / File) |
+| Validation API | `setValidity(flags, message?, anchor?)` + `checkValidity()` + `reportValidity()` |
+| Validity flags | `valueMissing` / `typeMismatch` / `patternMismatch` / `tooLong` / `tooShort` / `rangeUnderflow` / `rangeOverflow` / `stepMismatch` / `badInput` / `customError` |
+| Validity message | `internals.validationMessage` |
+| Reflected pseudo | `:invalid` / `:valid` / `:user-invalid` / `:user-valid` |
+| Custom states | `internals.states.add('checked')`, `delete()` → match via `:state(checked)` |
+| ARIA reflection | `internals.role`, `internals.ariaLabel`, `internals.ariaPressed`, `internals.ariaActiveDescendantElement`, etc. — properties not attributes; not visible in DOM inspector |
+| Form access | `internals.form`, `internals.labels` (NodeList of `<label>` elements pointing here) |
+| Disabled tracking | Inherits `disabled` from `<fieldset>` ancestor via `formDisabledCallback` |
+| Reset participation | `formResetCallback()` fires on form reset |
+| State restoration | `formStateRestoreCallback(state, mode)` for bfcache + autofill |
+
+#### 8.26.5 Newer / proposal-stage
+
+| Capability | Detail | Status |
 |---|---|---|
-| Custom Elements | `customElements.define(...)` | A |
-| Shadow DOM | Encapsulated subtrees | A |
-| HTML Templates | `<template>` element | A |
-| Element Internals | (Already in §8.4) — form/ARIA association | A |
-| Slot/Slottable | `<slot>` projection | A |
+| Scoped Custom Element Registry | `new CustomElementRegistry()` per shadow root — avoid global namespace clash | Proposal/early |
+| Element ARIA references | `el.ariaActiveDescendantElement = otherEl` (vs string IDREF) | Shipping |
+| DOM Parts API | Templating primitives — pre-mark template slots for fast updates | Proposal |
+| Element Capture / Region Capture | Capture specific element to ImageBitmap | Chromium |
+| `:has-slotted` | Style based on slot content presence | Proposal |
+| `customStateSet` typed | Type-safe state strings | Proposal |
+
+#### 8.26.6 Interop notes
+
+- React 19 fixes most prop-vs-attribute mismatches with custom elements (boolean props, function event listeners auto-bound) — earlier versions needed wrappers (`@lit/react`, `@adobe/react-spectrum-web-component-wrappers`)
+- `<slot>` content lives in *light DOM* but renders via shadow — events bubble through shadow boundary (must be `composed: true` to escape)
+- Pierce shadow with `el.shadowRoot.querySelector('...')` only on `mode: 'open'`
+- Form-associated CEs participate with `FormData`, `<form>.elements`, `:user-valid`, etc. — drop-in for form patterns
+- Lazy-define for code-split: register only when used (`whenDefined` to await)
+- FOUC prevention: style `:not(:defined)` to hide unregistered elements
 
 ### 8.27 Devtools / Standards
 
@@ -2862,6 +2954,794 @@ A reverse catalog: patterns / habits that show up across UI libs but should be s
 | Implicit React version peer dep | Mismatch silently |
 | Deep prop names (`size_xl_with_icon`) | Combinatorial |
 | Magic context values w/o provider | Runtime crash |
+
+---
+
+## 14. Domain-specific component deep dives
+
+Some domains have hidden complexity that doesn't fit a single component spec — they're clusters of inputs, validations, standards, and edge cases. This chapter catalogs that complexity per domain so component specs can reference it rather than re-derive.
+
+### 14.1 Payment & checkout
+
+#### Standards / APIs
+- **Payment Request API** — `new PaymentRequest(methods, details)` for browser-managed payment sheet (deprecated in Chrome for `basic-card`; still used for wallets)
+- **Payment Handler API** — register a service worker as a payment app
+- **Apple Pay JS** — first-party SDK; specific button styling per HIG required
+- **Google Pay API** — first-party SDK; specific button styling per branding guide
+- **W3C Payment Method Manifest** — declare a domain accepts a payment method
+- **PCI-DSS** — Payment Card Industry standard; SAQ-A scope when card data never touches your server
+- **PSD2 / SCA** — EU Strong Customer Authentication (3DS2 mandate)
+
+#### Card form anatomy
+| Field | Detail |
+|---|---|
+| Card number | Luhn validation (mod 10) · BIN detection (network from prefix) · 13–19 digits · format groups (4-4-4-4 default; 4-6-5 Amex; 4-4-4-4-3 Diners) · `inputmode="numeric"` · `autocomplete="cc-number"` |
+| Expiry | MM/YY with auto-format · must be ≥ today, ≤ ~10 years · `autocomplete="cc-exp"` |
+| CVC / CVV / CID | 3 digits (most), 4 digits (Amex CID) · `inputmode="numeric"` · `autocomplete="cc-csc"` · obscure-on-blur option |
+| Cardholder name | UTF-8 (some networks restrict to ASCII) · `autocomplete="cc-name"` |
+| Billing postal code | required for US; optional for many EU · `autocomplete="postal-code"` |
+| Save card toggle | PCI implications; require explicit consent |
+
+#### Networks (BIN ranges)
+| Network | Prefix |
+|---|---|
+| Visa | 4xxx |
+| Mastercard | 51–55, 2221–2720 |
+| Amex | 34, 37 |
+| Discover | 60, 64, 65 |
+| JCB | 35 |
+| UnionPay | 62 |
+| Diners | 30, 36, 38, 39 |
+| Mir | 2200–2204 |
+| Maestro | 5018, 5020, 5038, 6304, 6759, 6761, 6763 |
+| RuPay | 60, 65 (overlap) |
+| Elo / Hipercard | Brazil-specific |
+| Bancontact | BE-specific |
+
+#### 3D Secure (3DS / 3DS2)
+- Issuer-rendered iframe challenge (frictionless if low-risk)
+- Out-of-band challenges (push to mobile app)
+- SCA mandate in EU (PSD2)
+- 3DS Method URL + Challenge URL + Result URL
+
+#### PCI / tokenization
+- **Never store raw PAN in your backend** — use Stripe Elements / Adyen / Braintree / Checkout.com iframes for SAQ-A scope
+- Token vs card number — server only sees token (`pm_xyz`, `tok_xyz`)
+- Apple Pay / Google Pay tokenize at OS level (DPAN — Device PAN)
+
+#### Wallet buttons
+| Provider | Notes |
+|---|---|
+| Apple Pay | HIG-strict styling/sizing; `.apple-pay-button` CSS class or SDK |
+| Google Pay | Branding guide; SDK-rendered |
+| PayPal | Branding rules per region |
+| Alipay / WeChat | China |
+| iDEAL | Netherlands |
+| Klarna / Afterpay / Affirm | BNPL |
+| Boleto / Pix | Brazil |
+| UPI | India |
+| SEPA | EU bank transfer |
+
+#### Subscription specifics
+- Free trial countdown / converting state
+- Plan comparison cards
+- Proration on upgrade/downgrade
+- Cancel flow (retention offers, "your access ends Y")
+- Dunning UI (failed payment retry)
+
+#### a11y / i18n / pitfalls
+- `autocomplete="cc-*"` is critical for password manager + browser autofill
+- `inputmode="numeric"` for numeric inputs (mobile keyboard)
+- Currency display: locale-aware (USD: $1,234.56; EUR-de: 1.234,56 €; JPY: ¥1,234)
+- "Pay with Card" wording per region
+- RTL card form layout
+- Pay Now button text MUST include amount + currency (PSD2 SCA requirement)
+- BIN lookup via API can leak typed numbers — debounce + truncate
+
+---
+
+### 14.2 Identity / Auth flows
+
+#### Browser APIs
+- **WebAuthn** (`navigator.credentials.create/get`) — passkeys, security keys, biometrics
+- **FedCM** (`navigator.credentials.get({identity})`) — federated login w/o redirects
+- **Credential Management** (`PasswordCredential`, `FederatedCredential`)
+- **Digital Credentials API** — verifiable credentials, government IDs (early)
+- **`autocomplete` tokens** — `username`, `current-password`, `new-password`, `one-time-code`, `webauthn`
+
+#### Sign-in form anatomy
+| Element | Detail |
+|---|---|
+| Username/email | `type="email"` or `type="text"` · `autocomplete="username"` · `inputmode="email"` |
+| Password | `type="password"` · `autocomplete="current-password"` · show/hide toggle · capslock detect via `getModifierState('CapsLock')` |
+| Submit | Loading state · error display · double-submit guard |
+| "Remember me" | Pairs with longer session; GDPR/CCPA disclosure |
+| "Forgot password" link | Inline or below |
+| Social login buttons | Branding-strict (Apple HIG, Google guide, Microsoft brand) |
+| WebAuthn "Sign in with passkey" | Conditional UI: `autocomplete="username webauthn"` triggers passkey suggestion |
+
+#### Sign-up form additions
+- Confirm password (or rely on show/hide)
+- Strength meter (zxcvbn-ts) — advisory only, don't block weak-but-correct
+- Terms-of-service accept checkbox (versioned)
+- Email verification follow-up
+
+#### Magic link flow
+- Email entered → "Check your email" empty state → click link → "Signed in" state
+- Token in URL: validate, single-use, expire in ~15min
+- Anti-enumeration: identical UX whether email exists or not
+
+#### Email verification
+- Link click → loading → success / already-verified / expired
+- Resend link with rate limit + cooldown timer
+- Auto-redirect to app on success
+
+#### Forgot password
+- Email entry → generic "if it exists, you'll get an email" (avoid enumeration)
+- Reset form (token in URL) → password rules + confirm → success
+- Token expires in ~1h
+- Don't allow same password re-use (history check)
+
+#### 2FA / MFA
+| Flow | UI |
+|---|---|
+| Setup TOTP | QR code (otpauth URI) + manual entry secret + first verification + recovery codes display ("save these!") |
+| Verify TOTP | 6-digit OTP input (auto-advance, paste-to-fill, `autocomplete="one-time-code"`) |
+| Recovery code | Single-use; display N codes once |
+| WebAuthn / FIDO2 | "Add a passkey" → browser prompt → success w/ credential metadata (device name, created at) |
+| SMS / push | Less secure; phishable |
+| Email OTP | Last-resort |
+
+#### Session management
+- **Session timeout warning** — modal at T-60s, "Stay signed in" extend button, auto-logout
+- **Sudo mode / re-auth** — gate sensitive actions behind recent auth (GitHub-style)
+- **Account chooser** — multi-account selection
+- **Device list** — sessions overview, revoke per-device
+- **Trust this device** toggle (extends session beyond default)
+
+#### Captcha / bot mitigation
+| Provider | Notes |
+|---|---|
+| reCAPTCHA v2 (checkbox) / v3 (score) | Google; privacy concerns |
+| hCaptcha | Privacy-respecting alt |
+| Cloudflare Turnstile | Free, privacy-respecting, often invisible |
+| Friendly Captcha | EU-friendly |
+| Arkose Labs | Enterprise (puzzle-based) |
+| Privacy Pass | Token-based |
+| Custom puzzle | Drag-to-position (image), maths question |
+
+#### a11y / i18n / pitfalls
+- `autocomplete` attrs critical for password manager compat
+- Caps-lock warning via `getModifierState`
+- DON'T disable paste in password fields (anti-pattern; bypass with right-click anyway)
+- DON'T limit password max-length aggressively (block long passphrases)
+- Strength meters as advisory only — pass requirements are server-enforced
+- Localize error messages (don't leak account-existence)
+- Support paste of formatted code from email ("123 456" → strip space)
+- TOTP codes: paste-to-fill across all 6 inputs
+- Trust device toggle: GDPR/CCPA disclosure required
+
+---
+
+### 14.3 Address & contact info
+
+#### Standards
+- **ISO 3166-1** — country codes (alpha-2: US, GB; alpha-3: USA, GBR; numeric: 840)
+- **ISO 3166-2** — country subdivisions (US-CA, GB-ENG, CN-11)
+- **UPU S42** — international address format
+- **ITU E.164** — international phone format (+1234567890)
+- **ISO 13616** — IBAN structure
+- **ISO 9362** — BIC/SWIFT codes
+- **CLDR** — locale-specific address layouts
+
+#### Address form fields
+| Field | Detail |
+|---|---|
+| Country | ISO 3166-1; localized labels; flag icons (politically charged: TW/CN, IL/PS, Crimea, W. Sahara) · `autocomplete="country"` |
+| Subdivision | Cascading from country; localized labels; abbreviation vs full · `autocomplete="address-level1"` |
+| Postal code | Format per country (see below) · `autocomplete="postal-code"` |
+| City | Required vs autofilled from postcode (UK/NL/DE postcodes can derive city) · `autocomplete="address-level2"` |
+| Address line 1 | Street + number · `autocomplete="address-line1"` |
+| Address line 2 | Apartment / unit (optional) · `autocomplete="address-line2"` |
+| Recipient name | UTF-8 · CJK uses surname-first · `autocomplete="name"` |
+| Phone | E.164 storage, formatted display · `autocomplete="tel"` |
+
+#### Postal code formats (sample)
+| Country | Format |
+|---|---|
+| US | `12345` or `12345-6789` |
+| CA | `A1A 1A1` |
+| UK | alphanumeric (`SW1A 1AA`) |
+| JP | `123-4567` |
+| DE | `12345` |
+| NL | `1234 AB` |
+| BR | `12345-678` |
+| IN | `110001` |
+| AU | `1234` |
+| FR | `12345` |
+| RU | `123456` |
+| IE | `D02 X285` (Eircode — anywhere-format) |
+
+#### Address autocomplete services
+| Provider | Notes |
+|---|---|
+| Google Places | Most popular; Autocomplete API |
+| Mapbox Geocoding | Open alt |
+| Smarty Streets | US-focused, strict validation |
+| Loqate | Enterprise |
+| HERE Geocoding | Enterprise |
+| Algolia Places | Deprecated |
+| Postcoder | UK-strong |
+| Pelias / Nominatim | Self-host (OSM) |
+
+#### Phone input
+- **libphonenumber-js** (port of Google's libphonenumber) — gold standard for parse / validate / format / type detection
+- **Country code picker** — flag SVGs (politically charged); search by name + dial code
+- **Format-as-you-type** — `AsYouTypeFormatter`
+- **National vs international** — display vs storage (storage = E.164 string)
+- **Mobile vs landline** — derived from prefix; useful for SMS-OTP gating
+- **Emergency numbers** (911 / 112 / etc.) — usually skip / refuse
+
+#### Bank info
+| Field | Detail |
+|---|---|
+| IBAN | Country-specific length (DE 22, GB 22, NL 18, UA 29) + MOD-97 checksum · format in 4-char groups |
+| BIC / SWIFT | 8 or 11 chars: bank+country+location (+branch) |
+| US ABA routing | 9 digits + checksum |
+| UK sort code | 6 digits "12-34-56" |
+| AU BSB | 6 digits |
+| CA institution + transit + account | separate fields |
+| SEPA Direct Debit mandate | Reference + creditor ID |
+
+#### Tax IDs (privacy-sensitive — minimize, mask)
+- **VAT (EU)** — country-prefixed (`DE123456789`); validate via VIES API
+- **GST/GSTIN (AU/IN)** — different formats
+- **SSN (US)** — `XXX-XX-XXXX` — STRICT PRIVACY; never log; mask after entry
+- **NINO (UK)**, **CPF (BR)**, **CNPJ (BR)**, **NIF (PT/ES)**, **Codice Fiscale (IT)**
+
+#### Email
+- **RFC 5322** — full grammar (rarely needed)
+- **HTML5 `type="email"`** — browser regex; permissive
+- **Practical regex** — `\S+@\S+\.\S+` plus length cap
+- **Plus addressing** — `user+tag@domain` (legitimate; some validators wrongly reject)
+- **Internationalized email (EAI / IDN)** — `用户@例子.中国` (RFC 6532; rare but spec'd)
+
+---
+
+### 14.4 Date / time / calendar (deep)
+
+#### Standards
+- **ISO 8601** — date/time format
+- **RFC 5545 (iCalendar)** — events + recurrence rules (RRule)
+- **RFC 7986** — iCalendar extensions
+- **IANA Time Zone DB** — `tz` regions (`Europe/Berlin`, etc.)
+- **CLDR (Unicode)** — locale-specific formatting + week info
+- **Intl.DateTimeFormat / RelativeTimeFormat / DurationFormat** — see §4.2.2
+
+#### Component-specific
+| Component | Notes |
+|---|---|
+| **Date of birth** | Year-first picker (avoid endless month-paging) · age gate (COPPA: <13 in US blocks; GDPR-K: <13–16 default in EU per state) · store as `YYYY-MM-DD` not Date · `autocomplete="bday"` |
+| **Birthday (no year)** | `MM-DD` only — for reminders without revealing age |
+| **Recurrence editor** | RRule generator (FREQ + INTERVAL + BYDAY + BYMONTH + UNTIL/COUNT) — output RFC 5545 string |
+| **Timezone picker** | Search by city → IANA zone (`America/New_York`); map view alt |
+| **Date range presets** | Last N days / This week / Last week / This month / Last month / This quarter / Year-to-date / All time / Custom |
+| **Booking availability** | Multi-state cells (available / partial / unavailable / pending) · 2-step click (arrive → leave) |
+| **Office hours editor** | Per-day-of-week windows · copy-to-other-days |
+| **Holidays per region** | `date-holidays` / `holiday-api` libs |
+| **Lunar / solar conversion** | Hijri (Umm al-Qura), Buddhist, Hebrew, Chinese, Persian (Jalali) |
+
+#### Pitfalls
+- Server stores UTC; display in user's `Intl.DateTimeFormat` with their `timeZone`
+- DST transitions — 02:00 doesn't exist on spring-forward day; 02:30 happens twice in fall-back day
+- Calendar systems — Hijri month length varies per observation
+- Week start — Sun (US/CA/JP/IL), Mon (most), Sat (Arab)
+- Weekend days — Sat/Sun, Fri/Sat (KSA/IL), Fri only (IR), Sun (IN sometimes)
+- Don't `new Date('2024-03-15')` blindly — UTC parsing surprises; use Temporal API or libs
+- Recurrence: never expand to materialized list (memory); expand on-demand for visible window
+
+---
+
+### 14.5 Maps & geo
+
+#### Tile providers
+| Provider | Style | Notes |
+|---|---|---|
+| **Mapbox GL** | Vector | Custom styles, paid above tier |
+| **MapLibre GL** | Vector | Mapbox v1 fork, open-source |
+| **OpenStreetMap (OSM)** | Raster | Community tiles, attribution required |
+| **Google Maps** | Raster + vector | First-party SDK, license-bound |
+| **Esri ArcGIS** | Vector + raster | Enterprise |
+| **MapTiler** | Vector | Hosted MapLibre styles |
+| **Stadia / Stamen** | Raster | Themed (toner, watercolor) |
+| **Apple MapKit JS** | Vector | Apple-hosted |
+| **HERE** | Vector + raster | Enterprise |
+
+#### Map layer types
+- Street / satellite / hybrid / terrain
+- Custom vector style (colors, fonts, sprites)
+- 3D buildings (extrusions from OSM data)
+- 3D terrain (elevation tiles)
+- Indoor maps (custom layers per floor)
+- Heatmap (density)
+- Choropleth (per-region color)
+- GeoJSON overlays (polygons, lines, points)
+- Vector tiles (.pbf / Mapbox Vector Tile spec)
+
+#### Markers & clustering
+- Single marker (icon + popup)
+- **Marker clusters** — Supercluster algorithm (Mapbox), gridded clusters
+- **Custom DOM markers** — HTML/CSS, expensive at scale
+- **Animated markers** — live vehicle tracking (interpolation between updates)
+
+#### Geocoding
+| Direction | Use |
+|---|---|
+| Forward | address → coordinates |
+| Reverse | coordinates → address |
+| Place autocomplete | search-as-you-type with Place ID |
+
+Providers: Google Places, Mapbox Geocoding, Nominatim (OSM), Pelias, OpenCage, HERE.
+
+#### Routing / directions
+| Provider | Notes |
+|---|---|
+| Mapbox Directions | Turn-by-turn |
+| OSRM (Open Source Routing Machine) | Self-host |
+| GraphHopper | Java-based, self-host |
+| Google Directions | First-party |
+| Valhalla | Open-source dynamic |
+
+Modes: driving / cycling / walking / transit. Features: waypoints (drag-to-edit) · avoid tolls/highways/ferries · traffic-aware.
+
+#### Drawing tools
+- mapbox-gl-draw / Leaflet.draw / `terra-draw`
+- Modes: point / line / polygon / circle / rectangle / freehand
+- Edit existing geometry · snap-to / snap-to-grid · undo
+- Measure distance / area
+
+#### Standard controls
+- Zoom in/out
+- Compass / north reset
+- Scale bar (km/mi)
+- Fullscreen
+- Geolocate (HTML5 Geolocation API)
+- Mini-map / overview map
+- Layer toggle
+- Style switcher
+
+#### a11y / i18n / pitfalls
+- Maps are inherently visual — provide table fallback (list of markers) for screen readers
+- Keyboard nav — arrow-key pan, +/- zoom, Tab through markers (with announce on focus)
+- Coordinate display formats — DD (40.7128, -74.0060) · DMS (40°42'46"N) · UTM · MGRS
+- Locale labels — Mapbox/MapLibre support `text-field: ['get', 'name_{{locale}}']`
+- RTL labels — Arabic / Hebrew place names render correctly with proper font + bidi
+- Privacy — Geolocation requires permission prompt; not auto-granted
+- Tile caching — respect provider TOS
+- Attribution — OSM and Mapbox require visible credit
+
+---
+
+### 14.6 Editors (text / code / structured)
+
+#### Rich text editors
+| Lib | Notes |
+|---|---|
+| **TipTap** | ProseMirror wrapper, modular, popular |
+| **Lexical** (Meta) | Newer, performance-focused |
+| **Slate** | Operational-transform-based |
+| **ProseMirror** | Low-level, used by TipTap/Outline |
+| **Quill** | Older, Delta format |
+| **Editor.js** (CodeX) | Block-based, JSON output |
+| **Plate** | TipTap-based, headless React, shadcn-style |
+| **Remirror** | TipTap alternative |
+| **Trix (Basecamp)** | Simple, Hotwire-friendly |
+| **Outline editor** (Outline app) | TipTap-based collab editor |
+
+#### Code editors
+| Lib | Bundle | Notes |
+|---|---|---|
+| **Monaco** (VS Code) | ~3 MB | Full-featured; same as VS Code |
+| **CodeMirror 6** | ~200 KB | Modular, modern |
+| **Ace** | ~300 KB | Older, used by Cloud9 |
+| **Prism / Highlight.js / shiki** | small | Display-only (syntax highlight, no editing) |
+
+#### Markdown
+- **react-markdown** + remark/rehype plugin chain
+- **MDXEditor** — WYSIWYG MDX
+- **Milkdown** — pluggable WYSIWYG markdown
+- Live-preview pattern (dual pane); WYSIWYG single pane
+
+#### Math
+- **MathLive** — WYSIWYG LaTeX → MathML
+- **KaTeX / MathJax** — render only
+- **MathQuill** — older WYSIWYG
+
+#### Specialty editors
+| Type | Lib / approach |
+|---|---|
+| JSON | JSONEditor (jsoneditorjs), react-json-view |
+| YAML / TOML | Monaco language packs |
+| SQL | sql-formatter + Monaco SQL grammar + schema-aware autocomplete |
+| Regex | Live match preview against test strings |
+| Cron | Visual builder (every-day vs RRULE-style) |
+| Color | Gradient editor with per-stop edit |
+| Image annotation | react-easy-crop, fabric.js, konva |
+| Whiteboard | Excalidraw, tldraw |
+| Diff | diff-match-patch, monaco-diff-editor |
+| Mermaid / PlantUML | Diagram-as-code |
+| Formula (Excel) | Token-highlighting, autocomplete |
+| 3-way merge | Custom; semi-niche |
+
+#### a11y / pitfalls
+- **`contenteditable` is fraught** — IME composition events, browser-specific paste behavior, Safari quirks
+- Use **EditContext API** (modern Chromium) where available — more robust
+- Toolbar should be reachable via keyboard (Tab + `Cmd-Alt-T`-style or floating cmd menu)
+- Screen readers struggle with rich-text — provide plain-text fallback
+- **Paste sanitization** (strip formatting, scripts) — use HTML Sanitizer API or DOMPurify
+- Mobile keyboard — formatting toolbar should respect Visual Viewport for keyboard avoidance
+- Code editor mobile UX — most are unusable on touch (acceptable trade-off)
+
+---
+
+### 14.7 AI / LLM-specific UI
+
+#### Chat surface anatomy
+| Element | Detail |
+|---|---|
+| **Composer** | Multiline input + send (Cmd-Enter / Enter), placeholder hints, draft auto-save |
+| **Attachments** | Image / PDF / file uploader (drag-drop + paste) — multimodal upload |
+| **Slash commands** | `/imagine`, `/code`, etc. with autocomplete |
+| **Mentions** | `@model`, `@user`, `@tool` |
+| **Streaming text** | Token-by-token render; markdown safe-partial-parse (avoid breaking mid-codeblock) |
+| **Stop / regenerate** | Stop mid-stream; regenerate with same input; new variant |
+| **Per-message actions** | Copy / share / regenerate / branch / report |
+| **Model picker** | Dropdown w/ capabilities + pricing tooltip |
+| **Parameter panel** | temperature / top-p / max tokens / stop sequences / tools |
+| **System prompt editor** | Collapsible, persistent per-conversation |
+| **Tool call viewer** | Collapsed by default; expand to show fn name + args + result |
+| **Citations** | Superscript marker → preview popover w/ source URL |
+| **Token usage** | Input / output / total + cost estimate |
+| **Multimodal upload** | Image / audio / video / file (with per-type preview) |
+| **Artifact renderer** | Code block / HTML / React component / table / Mermaid / PDF / image |
+| **Agent trace viewer** | Step-by-step reasoning + decisions |
+| **Branch picker** | Conversation forks |
+| **Saved prompts library** | Templates with variables |
+| **Conversation list** | Recent + starred + search |
+| **Voice input** | Web Speech / push-to-talk |
+| **Reasoning preview** | "Thinking..." with optional reasoning surfaced |
+
+#### LLM-specific patterns
+- **Optimistic streaming** — show partial content before complete
+- **Cancellation** — abort streaming mid-response (AbortController)
+- **Re-roll** — generate new response with same input
+- **A/B compare** — side-by-side outputs from different models / params
+- **Token-aware UI** — show approaching limit, truncate input gracefully
+- **Markdown safety** — render markdown but strip `<script>`, sanitize URLs, lazy-load images
+- **Code execution** — sandboxed iframe / WASM runtime
+- **File preview** — within message (PDF, image, code)
+- **Tool result hand-off** — UI for human-in-the-loop approvals
+- **Memory banner** — indicate when AI is using long-term memory
+- **Disclaimer footer** — "AI may produce inaccurate information" mandatory in some jurisdictions
+
+#### a11y / pitfalls
+- Streaming text — pause `aria-live="polite"` updates to avoid screen-reader spam; final-only announce
+- Code block — copy button + language label
+- Long messages — virtualize / collapse
+- Citation popover — keyboard-navigable
+- Token cost — show before send (estimate) and after (actual)
+- Stop button reachable mid-stream
+- Preserve scroll position when streaming new message into long conversation
+- "Latency hiding" — show typing indicator before first token arrives
+
+---
+
+### 14.8 E-commerce specific
+
+#### Product page
+| Element | Notes |
+|---|---|
+| Image gallery | Main + thumbnails · zoom (hover/click) · fullscreen lightbox · 360° spin · video |
+| Variant selector | Per-attribute (size / color / etc.) · availability per variant · OOS state |
+| Quantity stepper | Min/max/step · large-step (Shift+arrow) |
+| Add-to-cart | Idle / loading / added (with mini-cart slide-out) |
+| Wishlist vs Save-for-later | Different intents |
+| Compare | Side-by-side specs |
+| Reviews | Overall rating + per-criteria + review composer + photo upload + helpful votes |
+| Q&A | Community questions + answers |
+| Related / recommended | Recently viewed / similar / customers also bought |
+| Stock indicator | In stock / Low (urgency) / OOS / Pre-order / Coming soon |
+| Sale countdown timer | Time-limited offer |
+| Bundle builder | Choose-N-of-X discount |
+
+#### Listing / category
+| Element | Notes |
+|---|---|
+| Product card | Image · title · price (with sale strike-through) · rating · badges (new / sale / bestseller) |
+| Filter sidebar | Facets (multi-select / range slider / color swatch / size grid) · "X selected" + clear · collapsible |
+| Sort dropdown | Featured / Price asc/desc / Newest / Rating / Best-selling |
+| View toggle | Grid vs list |
+| Pagination + page-size | "Showing X–Y of Z" |
+| Search-as-you-type | Suggestions + recent searches + visual |
+| Breadcrumb category nav | Truncate-with-ellipsis |
+| Quick view modal | Preview without leaving listing |
+
+#### Checkout
+| Step | Notes |
+|---|---|
+| Cart drawer / page | Quick edit · remove · promo code · shipping est · subtotal · CTA |
+| Mini-cart in nav | Count badge · flyout preview |
+| Stepper | Cart → Shipping → Payment → Review (or guest vs login choice first) |
+| Address book | Saved addresses |
+| Shipping options | Delivery date estimate · cost · carrier |
+| Payment methods | Saved cards · new card · wallet buttons |
+| Order summary | Sticky sidebar |
+| Promo / coupon | Input field · applied chip |
+| Gift options | Wrap · message · recipient |
+| Order tracking | Status timeline · carrier link |
+
+#### a11y / i18n / pitfalls
+- Currency display per locale
+- Tax-inclusive vs tax-exclusive display (EU vs US)
+- Stock count localization
+- Free shipping threshold display
+- Variant out-of-stock — show as disabled with reason
+- Quick-view modal must not trap focus permanently
+- Image alt text (often missing; product titles + key attributes)
+- Mobile sticky add-to-cart bar (respect safe-area-inset-bottom)
+
+---
+
+### 14.9 Banking / fintech
+
+#### Patterns
+| Pattern | Notes |
+|---|---|
+| Account selector | Masked number (••••1234) · balance preview |
+| Transaction list | Virtualized · date groups · categories with icons · search · date filter · attachment view · receipt download · dispute flow |
+| Transfer wizard | From / To / Amount / Date (now / scheduled / recurring) / Note |
+| Beneficiary picker | Recent + saved + add-new |
+| OTP / 2FA challenge | Push-to-mobile / SMS / TOTP |
+| Receipt | Generated PDF · share / save |
+| Statement download | Date range · format (PDF / CSV / OFX / QIF) |
+| Charts | Spending by category (donut) · balance trend (line) · per-month bar |
+| Budget tracker | Per-category targets + spent + remaining |
+| Currency converter | Live rate · locked rate for transfer |
+| Loan / mortgage calculator | Amortization table + chart |
+| Crypto wallet | Address w/ checksum (EIP-55) · ENS resolution · QR scan · send/receive · gas/fee picker · hardware wallet (Ledger/Trezor) flow |
+
+#### Security UX
+- Session timeout warning + activity check
+- **Confirm-before-execute** on transfers (always)
+- Limit display ("daily transfer limit: $X")
+- Suspicious activity nudge
+- Card freeze / unfreeze toggle
+- Replace card flow
+- Travel notice (geofence whitelist)
+
+#### a11y / i18n / pitfalls
+- Currency formatting — locale-aware
+- Negative amount display — color + sign + parens (accounting style); never color-only
+- Numbers — tabular (`font-variant-numeric: tabular-nums`) for column alignment
+- Don't auto-fill amount fields
+- Sensitive data (PAN, SSN, account#) — never log; mask after entry
+- Hardware wallet flows — long-running, require user attention on device
+- Crypto address — always validate checksum before send (EIP-55 for ETH)
+- Show fee + total in user's fiat (not just gas)
+
+---
+
+### 14.10 Communication & collaboration
+
+#### Chat
+| Element | Notes |
+|---|---|
+| Composer | Multiline input + emoji picker + attachment + mentions + reactions + send-key + draft auto-save |
+| Message list | Reverse-virtualization (anchor at bottom); jump-to-bottom button when scrolled up; unread divider; day separators; load-older on scroll-up |
+| Typing indicator | Debounced; per-user |
+| Read receipts | Per-user check marks |
+| Message status | Sending / sent / delivered / read / failed-retry |
+| Reactions | Emoji burst + count + hover-list-of-reactors |
+| Threads / replies | Collapsed thread + expanded view |
+| Quoted reply | Context preview |
+| Voice message | Record + waveform + transcribe |
+| Pinned messages | Section in nav |
+| Slash commands | `/giphy`, `/poll`, `/shrug` |
+| Search | Message + people + files |
+
+#### Live collab
+- **Live cursors** (multiplayer)
+- **Selection highlights** (per-user color)
+- **Presence** — online / away / dnd / offline
+- **Comments / annotations** on docs (Google Docs-style)
+- **Activity feed** — who-did-what
+- **Conflict resolution** — CRDT (Yjs / Automerge) or OT (ShareDB)
+
+#### Video conferencing
+| Element | Notes |
+|---|---|
+| Tile grid | 1-on-1 / gallery / speaker view; pin |
+| Participant list | Mute / kick / make-host |
+| Screen share | Picker (Screen Capture API), thumbnail |
+| Mute / camera | Hardware indicator + state |
+| Raise hand / reactions | Floating animation |
+| Layout switcher | Grid / spotlight / sidebar |
+| Background blur / virtual | MediaStream Track Insertable Streams API |
+| Captions | Live STT (Web Speech / cloud) |
+| Recording | Indicator + consent banner |
+| Breakout rooms | Host-driven splits |
+
+---
+
+### 14.11 Media playback
+
+#### Video / audio player anatomy
+| Control | Notes |
+|---|---|
+| Play / pause | Big center play on first frame |
+| Seek bar | Hover preview frame (poster from Media Source Extensions) |
+| Time | Current / total · MM:SS or HH:MM:SS |
+| Volume / mute | Slider; remember last |
+| Fullscreen | Fullscreen API |
+| PiP | Picture-in-Picture API |
+| Settings menu | Quality / speed / captions |
+| Captions / subtitles | WebVTT track selector; styling per WCAG (size / color / background) |
+| Quality selector | Auto + manual options (bitrate ladder) |
+| Speed selector | 0.5x / 1x / 1.25x / 1.5x / 2x |
+| Chapter markers | WebVTT chapters track |
+| Skip intro / outro | Auto-detect or metadata-driven |
+| Sponsor block | Community-driven (SponsorBlock-style) |
+| Cast / AirPlay | Presentation API + AirPlay JS |
+| Now playing widget | Locked screen / Bluetooth |
+| Media Session API | Title / artist / artwork / play/pause/next/prev integration |
+| Audio waveform | Pre-rendered SVG/canvas; click-to-seek |
+| Lyrics display | Synced via .lrc / TTML |
+| Sleep timer | Auto-pause after N min |
+| Playlist queue editor | Drag-reorder |
+
+#### Live streaming
+- **HLS / DASH** via Media Source Extensions
+- **Low-latency live** (LL-HLS / LL-DASH)
+- **Rewind buffer** display (DVR window)
+
+#### a11y
+- All controls keyboard-reachable
+- Captions on by default? (per-user pref; persist via localStorage)
+- Don't hide controls during keyboard nav
+- Don't auto-play with sound (browser blocks; UX hostile)
+- Caption styling controls separate from player chrome
+
+---
+
+### 14.12 Education / quiz
+
+#### Question types
+| Type | Notes |
+|---|---|
+| Multi-choice (single / multi) | Standard checkboxes / radios |
+| True/false | Boolean |
+| Drag-match | Column-A to column-B |
+| Drag-order | Rearrange sequence |
+| Fill-in-the-blank | Inline `<input>` in passage |
+| Numerical | With unit selector + tolerance |
+| Short answer | Text |
+| Long answer (essay) | LLM-graded or human-graded |
+| Code playground | In-browser editor + run + tests |
+| Math input | Numerical, expression, MathLive |
+| Audio answer | Record + STT or human-grade |
+| Speaking practice | Record + STT + compare via phonetic match |
+| Image hotspot | Click correct region |
+
+#### Interaction patterns
+- Per-question timer
+- Exam mode (no-back, lock browser, single-attempt)
+- Instant feedback vs deferred
+- Show correct answer + explanation
+- Skip / mark-for-review
+- Question palette (1-of-N navigator)
+- Progress %
+- Auto-save answers
+- Result breakdown (per topic, per type)
+- Recommendation engine (review weak areas)
+
+#### Spaced repetition (SRS)
+- Anki-style flashcards
+- Interval calculation (SM-2 algorithm; FSRS)
+- Due date queue
+- Mark-known buttons (Again / Hard / Good / Easy)
+
+---
+
+### 14.13 Onboarding & growth
+
+#### Patterns
+| Pattern | Notes |
+|---|---|
+| **Tour / coach mark / spotlight** | Dim background, highlight target, tooltip step |
+| **Empty state w/ CTA** | First-run experience |
+| **Welcome wizard** | Multi-step setup (org / team / sample data / done) |
+| **Feature checklist** | List of tasks + progress % |
+| **Whats-new banner** | Dismissable; per-user state |
+| **Beta opt-in toggle** | Per-feature flag |
+| **Referral / invite friends** | Link + email + reward display |
+| **Survey / NPS prompt** | 0-10 scale + optional comment |
+| **Re-engagement nudges** | Banner / toast / email integration |
+| **Trial countdown** | Banner with days remaining + upgrade CTA |
+| **Empty cart upsell** | Browse-categories CTA |
+
+#### Libs
+- driver.js — tour steps, lightweight
+- intro.js — older, paid for commercial
+- react-joyride — React tour (Material-flavored)
+- shepherd.js — Tippy-based
+- @reactour/tour — modern React
+
+---
+
+### 14.14 Privacy / consent / legal
+
+#### Standards / regulations
+| Reg | Scope |
+|---|---|
+| **GDPR (EU)** | Consent / right-to-access / right-to-erasure / data portability |
+| **CCPA / CPRA (California)** | Opt-out of sale / Do-Not-Sell |
+| **GPC (Global Privacy Control)** | Header-based opt-out signal (`Sec-GPC: 1`) |
+| **TCF (Transparency & Consent Framework)** | IAB EU standard; per-purpose / per-vendor |
+| **LGPD (Brazil)** | Similar to GDPR |
+| **PIPEDA (Canada)** | Federal privacy |
+| **PIPL (China)** | Strict; cross-border restrictions |
+| **COPPA (US, kids <13)** | Verifiable parental consent |
+| **GDPR-K (EU)** | Kids; varies by member state (13–16 default) |
+| **HIPAA (US health)** | PHI handling |
+| **POPIA (South Africa)** | Similar to GDPR |
+
+#### Component anatomy
+| Component | Notes |
+|---|---|
+| **Cookie banner** | Per-purpose toggles (Essential / Analytics / Marketing / Personalization) · Accept-all / Reject-all / Save · Reject-all MUST be as easy as Accept-all |
+| **CMP integration** | OneTrust / TrustArc / Cookiebot / Iubenda / Termly / Quantcast Choice |
+| **Privacy preferences panel** | Granular per-purpose + per-vendor (TCF) |
+| **Do-not-sell link** | CCPA mandate — footer link |
+| **GPC honor** | Auto-opt-out if browser sends header |
+| **Data export request** | DSAR (Data Subject Access Request) flow |
+| **Account delete confirmation** | "Type DELETE", multi-step, delay window |
+| **Age gate** | Jurisdiction-aware (COPPA / GDPR-K) |
+| **Terms-of-service accept** | Versioned · diff display since last accept |
+| **Privacy policy accept** | Same |
+
+#### a11y / pitfalls
+- Reject-all parity (GDPR requirement)
+- No "deceptive design" / dark patterns (regulators are looking)
+- Persistent dismissal — don't re-prompt unless policy changes
+- Honor `Sec-GPC: 1` header automatically
+- Track consent version + timestamp
+- Provide "manage preferences" link in footer always
+
+---
+
+### 14.15 DevOps / monitoring
+
+#### Patterns
+| Pattern | Notes |
+|---|---|
+| **Status board** | Per-service health (green / yellow / red) · SLA badge |
+| **Incident timeline** | Events · commit / deploy / alert markers |
+| **Log stream** | Live tail · level filter · search · structured field highlight · Lucene-like syntax |
+| **Stack trace viewer** | Frame list · expand to source preview · copy |
+| **Trace viewer** | Distributed tracing waterfall (per-span) · flame graph |
+| **Metric chart** | Time-series · percentiles (p50/p95/p99) · anomaly markers · threshold lines |
+| **Heatmap** | Per-host CPU/mem grid |
+| **Build log** | Collapsible steps · per-step duration |
+| **Pipeline visualization** | DAG of stages · status per stage |
+| **Cost explorer** | Per-service / per-period |
+| **Alert config UI** | Threshold builder · notification channels (Slack / PagerDuty / email) |
+| **On-call schedule** | Calendar view · swap requests |
+| **Run-book attachment** | Link to wiki |
+| **Feature flag dashboard** | Per-flag rollout %, target list |
+| **A/B test results** | Conversion + significance |
+
+#### Observability libs (consumer's choice)
+Grafana / Datadog / New Relic / Honeycomb / Lightstep / Tempo / Jaeger / Zipkin / Sentry / Bugsnag / Rollbar / Logtail.
 
 ---
 

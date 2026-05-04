@@ -33,3 +33,4 @@ export * from './tree';
 export * from './table';
 export * from './dataTable';
 export * from './carousel';
+export * from './swipeActions';

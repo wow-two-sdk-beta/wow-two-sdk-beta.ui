@@ -7,3 +7,5 @@ export * from './contextMenu';
 export * from './menubar';
 export * from './navigationMenu';
 export * from './commandPalette';
+export * from './scrollSpy';
+export * from './tableOfContents';

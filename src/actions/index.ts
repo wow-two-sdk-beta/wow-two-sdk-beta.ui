@@ -11,3 +11,4 @@ export * from './disclosureButton';
 export * from './overlayButton';
 export * from './toolbar';
 export * from './speedDial';
+export * from './backToTopButton';

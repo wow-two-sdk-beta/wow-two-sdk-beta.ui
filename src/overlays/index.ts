@@ -4,3 +4,5 @@ export * from './alertDialog';
 export * from './drawer';
 export * from './popover';
 export * from './hoverCard';
+export * from './actionSheet';
+export * from './bottomSheet';
