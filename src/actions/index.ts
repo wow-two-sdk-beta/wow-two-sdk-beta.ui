@@ -10,3 +10,4 @@ export * from './copyButton';
 export * from './disclosureButton';
 export * from './overlayButton';
 export * from './toolbar';
+export * from './speedDial';

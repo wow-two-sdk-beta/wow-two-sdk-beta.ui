@@ -15,3 +15,4 @@ export * from './collection';
 export * from './formControlContext';
 export * from './scrollLockProvider';
 export * from './overlayArrow';
+export * from './announce';

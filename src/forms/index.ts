@@ -51,3 +51,6 @@ export * from './colorWheel';
 export * from './colorSwatchPicker';
 export * from './colorPicker';
 export * from './stepper';
+export * from './tagsInput';
+export * from './fileUpload';
+export * from './editable';

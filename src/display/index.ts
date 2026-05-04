@@ -32,3 +32,4 @@ export * from './timeline';
 export * from './tree';
 export * from './table';
 export * from './dataTable';
+export * from './carousel';

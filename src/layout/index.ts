@@ -13,3 +13,4 @@ export * from './inline';
 export * from './cluster';
 export * from './frame';
 export * from './twoColumn';
+export * from './resizablePanels';

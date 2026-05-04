@@ -6,3 +6,4 @@ export * from './dropdownMenu';
 export * from './contextMenu';
 export * from './menubar';
 export * from './navigationMenu';
+export * from './commandPalette';
