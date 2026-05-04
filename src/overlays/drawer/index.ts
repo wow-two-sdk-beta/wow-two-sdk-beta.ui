@@ -11,7 +11,5 @@ export {
   type DrawerProps,
   type DrawerTriggerProps,
   type DrawerContentProps,
-  type DrawerHeaderProps,
-  type DrawerCloseProps,
   type DrawerSide,
 } from './Drawer';

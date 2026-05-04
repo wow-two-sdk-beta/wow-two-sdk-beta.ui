@@ -1,6 +1,7 @@
 import {
   createContext,
   forwardRef,
+  useCallback,
   useContext,
   useId,
   useMemo,
@@ -9,12 +10,21 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { X } from 'lucide-react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
 import { cn, composeRefs } from '../../utils';
 import { useControlled } from '../../hooks';
 import { DismissableLayer, Portal, ScrollLockProvider, Slot } from '../../primitives';
 import { Backdrop } from '../backdrop';
+import {
+  OverlayBody,
+  OverlayChromeProvider,
+  OverlayCloseButton,
+  OverlayDescription,
+  OverlayFooter,
+  OverlayHeader,
+  OverlayTitle,
+  type OverlayChromeContextValue,
+} from '../OverlayChrome';
 
 interface DialogContextValue {
   open: boolean;
@@ -95,7 +105,7 @@ export const DialogTrigger = forwardRef<HTMLButtonElement, DialogTriggerProps>(
       <Component
         ref={composeRefs(forwardedRef, ctx.triggerRef as React.MutableRefObject<HTMLButtonElement | null>) as never}
         type="button"
-        aria-haspopup={ctx.role === 'alertdialog' ? 'dialog' : 'dialog'}
+        aria-haspopup="dialog"
         aria-expanded={ctx.open}
         data-state={ctx.open ? 'open' : 'closed'}
         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -125,6 +135,17 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
     forwardedRef,
   ) {
     const ctx = useDialogContext();
+
+    const close = useCallback(() => {
+      ctx.setOpen(false);
+      requestAnimationFrame(() => ctx.triggerRef.current?.focus());
+    }, [ctx]);
+
+    const chromeCtx = useMemo<OverlayChromeContextValue>(
+      () => ({ titleId: ctx.titleId, descriptionId: ctx.descriptionId, close }),
+      [ctx.titleId, ctx.descriptionId, close],
+    );
+
     if (!ctx.open) return null;
     return (
       <Portal>
@@ -158,7 +179,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
                   )}
                   {...rest}
                 >
-                  {children}
+                  <OverlayChromeProvider value={chromeCtx}>{children}</OverlayChromeProvider>
                 </div>
               </DismissableLayer>
             </FocusScope>
@@ -169,119 +190,13 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
   },
 );
 
-export interface DialogHeaderProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-}
-
-export function DialogHeader({ className, children, ...rest }: DialogHeaderProps) {
-  return (
-    <div className={cn('mb-4 flex flex-col gap-1.5', className)} {...rest}>
-      {children}
-    </div>
-  );
-}
-
-export interface DialogTitleProps extends HTMLAttributes<HTMLHeadingElement> {
-  children: ReactNode;
-}
-
-export function DialogTitle({ className, children, ...rest }: DialogTitleProps) {
-  const ctx = useDialogContext();
-  return (
-    <h2
-      id={ctx.titleId}
-      className={cn('text-lg font-semibold leading-none text-foreground', className)}
-      {...rest}
-    >
-      {children}
-    </h2>
-  );
-}
-
-export interface DialogDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {
-  children: ReactNode;
-}
-
-export function DialogDescription({
-  className,
-  children,
-  ...rest
-}: DialogDescriptionProps) {
-  const ctx = useDialogContext();
-  return (
-    <p id={ctx.descriptionId} className={cn('text-sm text-muted-foreground', className)} {...rest}>
-      {children}
-    </p>
-  );
-}
-
-export interface DialogBodyProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-}
-
-export function DialogBody({ className, children, ...rest }: DialogBodyProps) {
-  return (
-    <div className={cn('text-sm text-foreground', className)} {...rest}>
-      {children}
-    </div>
-  );
-}
-
-export interface DialogFooterProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-}
-
-export function DialogFooter({ className, children, ...rest }: DialogFooterProps) {
-  return (
-    <div
-      className={cn(
-        'mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end',
-        className,
-      )}
-      {...rest}
-    >
-      {children}
-    </div>
-  );
-}
-
-export interface DialogCloseProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-  asChild?: boolean;
-  children?: ReactNode;
-}
-
-export const DialogClose = forwardRef<HTMLButtonElement, DialogCloseProps>(function DialogClose(
-  { asChild, onClick, className, children, ...rest },
-  forwardedRef,
-) {
-  const ctx = useDialogContext();
-  const Component = asChild ? Slot : 'button';
-  return (
-    <Component
-      ref={forwardedRef as never}
-      type="button"
-      aria-label={children ? undefined : 'Close'}
-      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-        onClick?.(e);
-        if (e.defaultPrevented) return;
-        ctx.setOpen(false);
-        requestAnimationFrame(() => ctx.triggerRef.current?.focus());
-      }}
-      className={
-        asChild
-          ? className
-          : cn(
-              'absolute right-4 top-4 grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              className,
-            )
-      }
-      {...rest}
-    >
-      {children ?? <X className="h-4 w-4" />}
-    </Component>
-  );
-});
+// Re-export shared chrome subcomponents under the Dialog namespace.
+export const DialogHeader = OverlayHeader;
+export const DialogTitle = OverlayTitle;
+export const DialogDescription = OverlayDescription;
+export const DialogBody = OverlayBody;
+export const DialogFooter = OverlayFooter;
+export const DialogClose = OverlayCloseButton;
 
 type DialogComponent = typeof Dialog & {
   Trigger: typeof DialogTrigger;

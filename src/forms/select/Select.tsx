@@ -5,16 +5,14 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ButtonHTMLAttributes,
   type ReactNode,
 } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn, composeRefs } from '../../utils';
+import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
-import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
+import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import {
   Listbox,
   ListboxItem,
@@ -30,7 +28,6 @@ interface SelectContextValue {
   setOpen: (open: boolean) => void;
   value: string;
   onSelect: (value: string) => void;
-  triggerRef: React.MutableRefObject<HTMLButtonElement | null>;
   labels: Record<string, ReactNode>;
   registerLabel: (value: string, label: ReactNode) => void;
   unregisterLabel: (value: string) => void;
@@ -56,11 +53,11 @@ export interface SelectProps {
   name?: string;
   /** Style trigger as invalid (red border, error ring). */
   invalid?: boolean;
-  /** Default open state (uncontrolled). */
   defaultOpen?: boolean;
-  /** Controlled open state. */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Floating placement of the dropdown. */
+  placement?: React.ComponentProps<typeof Popover>['placement'];
   children: ReactNode;
 }
 
@@ -74,6 +71,7 @@ export function Select({
   defaultOpen = false,
   open: openProp,
   onOpenChange,
+  placement = 'bottom',
   children,
 }: SelectProps) {
   const [openState, setOpenState] = useControlled({
@@ -86,7 +84,6 @@ export function Select({
     default: defaultValue ?? '',
     onChange: onValueChange,
   });
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [labels, setLabels] = useState<Record<string, ReactNode>>({});
 
   const registerLabel = useCallback((v: string, label: ReactNode) => {
@@ -105,8 +102,6 @@ export function Select({
     (next: string) => {
       setValueState(next);
       setOpenState(false);
-      // Return focus to trigger
-      requestAnimationFrame(() => triggerRef.current?.focus());
     },
     [setValueState, setOpenState],
   );
@@ -117,7 +112,6 @@ export function Select({
       setOpen: setOpenState,
       value: valueState,
       onSelect,
-      triggerRef,
       labels,
       registerLabel,
       unregisterLabel,
@@ -139,7 +133,18 @@ export function Select({
     ],
   );
 
-  return <SelectContext.Provider value={ctx}>{children}</SelectContext.Provider>;
+  return (
+    <SelectContext.Provider value={ctx}>
+      <Popover
+        open={openState}
+        onOpenChange={setOpenState}
+        placement={placement}
+        offset={6}
+      >
+        {children}
+      </Popover>
+    </SelectContext.Provider>
+  );
 }
 
 export interface SelectTriggerProps
@@ -149,33 +154,27 @@ export interface SelectTriggerProps
 }
 
 export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
-  function SelectTrigger({ size, state, className, onClick, children, ...rest }, forwardedRef) {
+  function SelectTrigger({ size, state, className, children, ...rest }, ref) {
     const ctx = useSelectContext();
     const triggerState = state ?? (ctx.invalid ? 'invalid' : 'default');
     return (
-      <button
-        ref={composeRefs(forwardedRef, ctx.triggerRef)}
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={ctx.open}
-        data-state={ctx.open ? 'open' : 'closed'}
-        disabled={ctx.disabled}
-        onClick={(e) => {
-          onClick?.(e);
-          if (e.defaultPrevented) return;
-          ctx.setOpen(!ctx.open);
-        }}
-        className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
-        {...rest}
-      >
-        {children ?? <SelectValue />}
-        <ChevronDown
-          className={cn(
-            'h-4 w-4 text-muted-foreground transition-transform',
-            ctx.open && 'rotate-180',
-          )}
-        />
-      </button>
+      <PopoverTrigger asChild>
+        <button
+          ref={ref}
+          type="button"
+          disabled={ctx.disabled}
+          className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
+          {...rest}
+        >
+          {children ?? <SelectValue />}
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 text-muted-foreground transition-transform',
+              ctx.open && 'rotate-180',
+            )}
+          />
+        </button>
+      </PopoverTrigger>
     );
   },
 );
@@ -200,49 +199,22 @@ export function SelectValue({ placeholder, children }: SelectValueProps) {
 
 export interface SelectContentProps {
   className?: string;
-  /** Placement of the panel relative to trigger. Default `bottom`. */
-  placement?: React.ComponentProps<typeof AnchoredPositioner>['placement'];
-  /** Distance from trigger. Default 6. */
-  offset?: number;
   children: ReactNode;
 }
 
-export function SelectContent({
-  className,
-  placement = 'bottom',
-  offset = 6,
-  children,
-}: SelectContentProps) {
+export function SelectContent({ className, children }: SelectContentProps) {
   const ctx = useSelectContext();
-  if (!ctx.open) return null;
   return (
-    <Portal>
-      <AnchoredPositioner anchor={ctx.triggerRef.current} placement={placement} offset={offset}>
-        <FocusScope asChild trapped loop>
-          <DismissableLayer
-            onEscape={() => ctx.setOpen(false)}
-            onOutsidePointerDown={(e) => {
-              if (ctx.triggerRef.current?.contains(e.target as Node)) return;
-              ctx.setOpen(false);
-            }}
-          >
-            <Listbox
-              value={ctx.value}
-              onValueChange={(v) => ctx.onSelect(v as string)}
-              className={cn('min-w-[var(--radix-anchor-width)]', className)}
-              style={
-                ctx.triggerRef.current
-                  ? { minWidth: ctx.triggerRef.current.offsetWidth }
-                  : undefined
-              }
-            >
-              {children}
-            </Listbox>
-          </DismissableLayer>
-        </FocusScope>
-      </AnchoredPositioner>
+    <PopoverContent bare>
+      <Listbox
+        value={ctx.value}
+        onValueChange={(v) => ctx.onSelect(v as string)}
+        className={cn('min-w-[var(--anchor-width)]', className)}
+      >
+        {children}
+      </Listbox>
       {ctx.name && <input type="hidden" name={ctx.name} value={ctx.value} />}
-    </Portal>
+    </PopoverContent>
   );
 }
 

@@ -11,10 +11,4 @@ export {
   type DialogProps,
   type DialogTriggerProps,
   type DialogContentProps,
-  type DialogHeaderProps,
-  type DialogTitleProps,
-  type DialogDescriptionProps,
-  type DialogBodyProps,
-  type DialogFooterProps,
-  type DialogCloseProps,
 } from './Dialog';

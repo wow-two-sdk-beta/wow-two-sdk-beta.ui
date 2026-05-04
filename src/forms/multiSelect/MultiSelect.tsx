@@ -5,16 +5,14 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ButtonHTMLAttributes,
   type ReactNode,
 } from 'react';
 import { ChevronDown, X } from 'lucide-react';
-import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn, composeRefs } from '../../utils';
+import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
-import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
+import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import {
   Listbox,
   ListboxItem,
@@ -30,7 +28,6 @@ interface MultiSelectContextValue {
   setOpen: (open: boolean) => void;
   values: string[];
   setValues: (values: string[]) => void;
-  triggerRef: React.MutableRefObject<HTMLButtonElement | null>;
   labels: Record<string, ReactNode>;
   registerLabel: (value: string, label: ReactNode) => void;
   unregisterLabel: (value: string) => void;
@@ -57,6 +54,7 @@ export interface MultiSelectProps {
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  placement?: React.ComponentProps<typeof Popover>['placement'];
   children: ReactNode;
 }
 
@@ -70,6 +68,7 @@ export function MultiSelect({
   defaultOpen = false,
   open: openProp,
   onOpenChange,
+  placement = 'bottom',
   children,
 }: MultiSelectProps) {
   const [openState, setOpenState] = useControlled({
@@ -82,7 +81,6 @@ export function MultiSelect({
     default: defaultValue ?? [],
     onChange: onValueChange,
   });
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [labels, setLabels] = useState<Record<string, ReactNode>>({});
 
   const registerLabel = useCallback((v: string, label: ReactNode) => {
@@ -103,7 +101,6 @@ export function MultiSelect({
       setOpen: setOpenState,
       values: valuesState,
       setValues: setValuesState,
-      triggerRef,
       labels,
       registerLabel,
       unregisterLabel,
@@ -125,7 +122,18 @@ export function MultiSelect({
     ],
   );
 
-  return <MultiSelectContext.Provider value={ctx}>{children}</MultiSelectContext.Provider>;
+  return (
+    <MultiSelectContext.Provider value={ctx}>
+      <Popover
+        open={openState}
+        onOpenChange={setOpenState}
+        placement={placement}
+        offset={6}
+      >
+        {children}
+      </Popover>
+    </MultiSelectContext.Provider>
+  );
 }
 
 export interface MultiSelectTriggerProps
@@ -136,46 +144,40 @@ export interface MultiSelectTriggerProps
 
 export const MultiSelectTrigger = forwardRef<HTMLButtonElement, MultiSelectTriggerProps>(
   function MultiSelectTrigger(
-    { size, state, className, onClick, onKeyDown, children, ...rest },
-    forwardedRef,
+    { size, state, className, onKeyDown, children, ...rest },
+    ref,
   ) {
     const ctx = useMultiSelectContext();
     const triggerState = state ?? (ctx.invalid ? 'invalid' : 'default');
     return (
-      <button
-        ref={composeRefs(forwardedRef, ctx.triggerRef)}
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={ctx.open}
-        data-state={ctx.open ? 'open' : 'closed'}
-        disabled={ctx.disabled}
-        onClick={(e) => {
-          onClick?.(e);
-          if (e.defaultPrevented) return;
-          ctx.setOpen(!ctx.open);
-        }}
-        onKeyDown={(e) => {
-          onKeyDown?.(e);
-          if (e.defaultPrevented) return;
-          if (e.key === 'Backspace' && ctx.values.length > 0) {
-            ctx.setValues(ctx.values.slice(0, -1));
-          }
-        }}
-        className={cn(
-          selectTriggerVariants({ size, state: triggerState }),
-          'h-auto min-h-10 flex-wrap py-1.5',
-          className,
-        )}
-        {...rest}
-      >
-        {children ?? <MultiSelectTags />}
-        <ChevronDown
+      <PopoverTrigger asChild>
+        <button
+          ref={ref}
+          type="button"
+          disabled={ctx.disabled}
+          onKeyDown={(e) => {
+            onKeyDown?.(e);
+            if (e.defaultPrevented) return;
+            if (e.key === 'Backspace' && ctx.values.length > 0) {
+              ctx.setValues(ctx.values.slice(0, -1));
+            }
+          }}
           className={cn(
-            'h-4 w-4 shrink-0 self-center text-muted-foreground transition-transform',
-            ctx.open && 'rotate-180',
+            selectTriggerVariants({ size, state: triggerState }),
+            'h-auto min-h-10 flex-wrap py-1.5',
+            className,
           )}
-        />
-      </button>
+          {...rest}
+        >
+          {children ?? <MultiSelectTags />}
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 shrink-0 self-center text-muted-foreground transition-transform',
+              ctx.open && 'rotate-180',
+            )}
+          />
+        </button>
+      </PopoverTrigger>
     );
   },
 );
@@ -221,52 +223,24 @@ export function MultiSelectTags({ placeholder }: MultiSelectTagsProps) {
 
 export interface MultiSelectContentProps {
   className?: string;
-  placement?: React.ComponentProps<typeof AnchoredPositioner>['placement'];
-  offset?: number;
   children: ReactNode;
 }
 
-export function MultiSelectContent({
-  className,
-  placement = 'bottom',
-  offset = 6,
-  children,
-}: MultiSelectContentProps) {
+export function MultiSelectContent({ className, children }: MultiSelectContentProps) {
   const ctx = useMultiSelectContext();
-  if (!ctx.open) return null;
   return (
-    <Portal>
-      <AnchoredPositioner anchor={ctx.triggerRef.current} placement={placement} offset={offset}>
-        <FocusScope asChild trapped loop>
-          <DismissableLayer
-            onEscape={() => {
-              ctx.setOpen(false);
-              requestAnimationFrame(() => ctx.triggerRef.current?.focus());
-            }}
-            onOutsidePointerDown={(e) => {
-              if (ctx.triggerRef.current?.contains(e.target as Node)) return;
-              ctx.setOpen(false);
-            }}
-          >
-            <Listbox
-              multiple
-              value={ctx.values}
-              onValueChange={(v) => ctx.setValues(v as string[])}
-              className={cn(className)}
-              style={
-                ctx.triggerRef.current
-                  ? { minWidth: ctx.triggerRef.current.offsetWidth }
-                  : undefined
-              }
-            >
-              {children}
-            </Listbox>
-          </DismissableLayer>
-        </FocusScope>
-      </AnchoredPositioner>
+    <PopoverContent bare>
+      <Listbox
+        multiple
+        value={ctx.values}
+        onValueChange={(v) => ctx.setValues(v as string[])}
+        className={cn('min-w-[var(--anchor-width)]', className)}
+      >
+        {children}
+      </Listbox>
       {ctx.name &&
         ctx.values.map((v) => <input key={v} type="hidden" name={ctx.name} value={v} />)}
-    </Portal>
+    </PopoverContent>
   );
 }
 

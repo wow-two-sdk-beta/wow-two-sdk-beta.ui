@@ -1,6 +1,7 @@
 import {
   createContext,
   forwardRef,
+  useCallback,
   useContext,
   useId,
   useMemo,
@@ -9,12 +10,21 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { X } from 'lucide-react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
 import { cn, composeRefs } from '../../utils';
 import { useControlled } from '../../hooks';
 import { DismissableLayer, Portal, ScrollLockProvider, Slot } from '../../primitives';
 import { Backdrop } from '../backdrop';
+import {
+  OverlayBody,
+  OverlayChromeProvider,
+  OverlayCloseButton,
+  OverlayDescription,
+  OverlayFooter,
+  OverlayHeader,
+  OverlayTitle,
+  type OverlayChromeContextValue,
+} from '../OverlayChrome';
 
 export type DrawerSide = 'top' | 'right' | 'bottom' | 'left';
 
@@ -132,6 +142,17 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
     forwardedRef,
   ) {
     const ctx = useDrawerContext();
+
+    const close = useCallback(() => {
+      ctx.setOpen(false);
+      requestAnimationFrame(() => ctx.triggerRef.current?.focus());
+    }, [ctx]);
+
+    const chromeCtx = useMemo<OverlayChromeContextValue>(
+      () => ({ titleId: ctx.titleId, descriptionId: ctx.descriptionId, close }),
+      [ctx.titleId, ctx.descriptionId, close],
+    );
+
     if (!ctx.open) return null;
     return (
       <Portal>
@@ -166,7 +187,7 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
                 )}
                 {...rest}
               >
-                {children}
+                <OverlayChromeProvider value={chromeCtx}>{children}</OverlayChromeProvider>
               </div>
             </DismissableLayer>
           </FocusScope>
@@ -176,112 +197,13 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
   },
 );
 
-export interface DrawerHeaderProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-}
-
-export function DrawerHeader({ className, children, ...rest }: DrawerHeaderProps) {
-  return (
-    <div className={cn('flex flex-col gap-1.5', className)} {...rest}>
-      {children}
-    </div>
-  );
-}
-
-export function DrawerTitle({
-  className,
-  children,
-  ...rest
-}: HTMLAttributes<HTMLHeadingElement> & { children: ReactNode }) {
-  const ctx = useDrawerContext();
-  return (
-    <h2
-      id={ctx.titleId}
-      className={cn('text-lg font-semibold leading-none text-foreground', className)}
-      {...rest}
-    >
-      {children}
-    </h2>
-  );
-}
-
-export function DrawerDescription({
-  className,
-  children,
-  ...rest
-}: HTMLAttributes<HTMLParagraphElement> & { children: ReactNode }) {
-  const ctx = useDrawerContext();
-  return (
-    <p id={ctx.descriptionId} className={cn('text-sm text-muted-foreground', className)} {...rest}>
-      {children}
-    </p>
-  );
-}
-
-export function DrawerBody({
-  className,
-  children,
-  ...rest
-}: HTMLAttributes<HTMLDivElement> & { children: ReactNode }) {
-  return (
-    <div className={cn('flex-1 overflow-y-auto text-sm text-foreground', className)} {...rest}>
-      {children}
-    </div>
-  );
-}
-
-export function DrawerFooter({
-  className,
-  children,
-  ...rest
-}: HTMLAttributes<HTMLDivElement> & { children: ReactNode }) {
-  return (
-    <div
-      className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}
-      {...rest}
-    >
-      {children}
-    </div>
-  );
-}
-
-export interface DrawerCloseProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-  asChild?: boolean;
-  children?: ReactNode;
-}
-
-export const DrawerClose = forwardRef<HTMLButtonElement, DrawerCloseProps>(function DrawerClose(
-  { asChild, onClick, className, children, ...rest },
-  forwardedRef,
-) {
-  const ctx = useDrawerContext();
-  const Component = asChild ? Slot : 'button';
-  return (
-    <Component
-      ref={forwardedRef as never}
-      type="button"
-      aria-label={children ? undefined : 'Close'}
-      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-        onClick?.(e);
-        if (e.defaultPrevented) return;
-        ctx.setOpen(false);
-        requestAnimationFrame(() => ctx.triggerRef.current?.focus());
-      }}
-      className={
-        asChild
-          ? className
-          : cn(
-              'absolute right-4 top-4 grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              className,
-            )
-      }
-      {...rest}
-    >
-      {children ?? <X className="h-4 w-4" />}
-    </Component>
-  );
-});
+// Re-export shared chrome subcomponents under the Drawer namespace.
+export const DrawerHeader = OverlayHeader;
+export const DrawerTitle = OverlayTitle;
+export const DrawerDescription = OverlayDescription;
+export const DrawerBody = OverlayBody;
+export const DrawerFooter = OverlayFooter;
+export const DrawerClose = OverlayCloseButton;
 
 type DrawerComponent = typeof Drawer & {
   Trigger: typeof DrawerTrigger;
