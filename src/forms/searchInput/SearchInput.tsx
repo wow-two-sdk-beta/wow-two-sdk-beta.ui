@@ -9,7 +9,7 @@ import { Search, X } from 'lucide-react';
 import { cn } from '../../utils';
 import { Icon } from '../../icons';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../_styles';
+import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
 
 export interface SearchInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,

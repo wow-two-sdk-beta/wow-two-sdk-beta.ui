@@ -45,10 +45,10 @@ export default tseslint.config(
           default: 'disallow',
           rules: [
             { from: ['foundation'], allow: ['foundation'] },
-            {
-              from: ['domain'],
-              allow: ['foundation', ['domain', { domain: '${from.domain}' }]],
-            },
+            // Domain → any domain. Cross-domain composition is allowed at all layers.
+            // Convention: L3 atoms / L4 molecules should stay in-domain when natural;
+            // L5+ organisms freely compose across domains. The lint rule is permissive.
+            { from: ['domain'], allow: ['foundation', 'domain'] },
             { from: ['root'], allow: ['foundation', 'domain'] },
           ],
         },

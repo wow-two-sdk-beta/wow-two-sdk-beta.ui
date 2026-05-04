@@ -10,4 +10,4 @@ Single-line `<input type="text">`. Auto-wires id / disabled / required / readOnl
 | `state` | `'default' \| 'invalid'` | from FormControl |
 
 ## Dependencies
-Foundation: `utils/cn`, `primitives/formControlContext`. Same-domain: `forms/_styles`.
+Foundation: `utils/cn`, `primitives/formControlContext`. Same-domain: `forms/InputStyles`.

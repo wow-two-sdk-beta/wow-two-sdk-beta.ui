@@ -40,7 +40,7 @@ Standalone month-grid date picker — header with prev/next month nav, a 7×6 da
 Self-contained. `DatePicker` (L5) embeds it inside a Popover. `RangeCalendar` (L5) reimplements the visual pattern with range state.
 
 ## Dependencies
-Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `_dateUtils`.
+Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `DateExtensions`.
 
 ## Known limitations
 - No multi-month view (deferred).

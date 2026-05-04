@@ -7,10 +7,10 @@ The single architectural rule of `@wow-two-beta/ui`: **layered imports**.
 | Layer | Folders | May import | May NOT import |
 |---|---|---|---|
 | **Foundation** | `tokens` `tailwind` `utils` `hooks` `icons` `primitives` | other foundation | anything else |
-| **Domain** | `actions` `display` `feedback` `forms` `layout` `nav` `overlays` | foundation, components in **same** domain | sibling domains, root barrel |
+| **Domain** | `actions` `display` `feedback` `forms` `layout` `nav` `overlays` | foundation, **any sibling domain** | root barrel |
 | **Root** | `src/index.ts` | foundation, all domains | nothing else |
 
-Foundation never reaches up. Domains never reach sideways. Root only assembles.
+Foundation never reaches up. Root only assembles. Domains can compose across siblings — see "Cross-domain rule" below.
 
 ## Foundation sub-layers
 
@@ -31,11 +31,20 @@ icons   ────────────────┘
 - **`icons`** — `<Icon>` registry. May use `utils`.
 - **`primitives`** — headless components (Slot, Portal, FocusScope, etc.). Behavior + a11y only, no visuals beyond layout. May use `utils` + `hooks`. **This is L2.**
 
-## Why this rule
+## Why the foundation rule
 
-When the package eventually splits — even if "beta-forever" stretches for years — every domain folder must lift cleanly into its own repo. Sibling-domain imports are the single most common reason that "let's split this monorepo" turns into a multi-week refactor.
+Foundation never depending on domains keeps `utils/`, `hooks/`, `icons/`, `primitives/` standalone. They can be lifted out to a `@wow-two-beta/core` package any time without touching component code.
 
-Enforcing the rule from day 1 costs nothing. Letting it rot for 6 months costs weeks.
+## Cross-domain rule (revised 2026-05-04)
+
+Originally, sibling-domain imports were forbidden — the goal was every domain lifting cleanly into its own repo. In practice this generated significant duplication: `Select` rebuilt popover internals; `DatePicker / TimePicker / DateRangePicker` each reconstructed `Portal + AnchoredPositioner + FocusScope + DismissableLayer` rather than importing `Popover` from `overlays/`.
+
+**Rule today**: domains may import any sibling domain. Convention (not lint-enforced):
+
+- **L3 atoms / L4 molecules** — should stay in-domain when natural. Reaching across is allowed but signals the component might belong in a shared layer or a different domain.
+- **L5+ organisms** — compose freely across domains. `forms/DatePicker` may import `overlays/Popover` directly.
+
+The lift-out story is preserved at the L3/L4 layer (atoms/molecules of any domain remain domain-local). When the day comes to split, L5+ wrappers rebuild against the standalone packages.
 
 ## Enforcement
 
@@ -48,7 +57,7 @@ Rules:
 
 ```
 foundation → foundation only
-domain     → foundation + same domain only
+domain     → foundation + any domain
 root       → foundation + any domain
 ```
 
@@ -59,26 +68,24 @@ Violations fail `pnpm lint`. CI runs lint on every push.
 A domain component lives in one of three tiers:
 
 - **L3 atom** — imports only foundation. May not import another component (atoms never compose atoms).
-- **L4 molecule** — composes L3 atoms or other L4s in the **same** domain. May import foundation freely.
-- **L5 organism / L6 pattern** — composes L4s + atoms in the same domain.
+- **L4 molecule** — composes L3 atoms or other L4s in the same domain. May import foundation freely. Cross-domain imports allowed but should be deliberate.
+- **L5 organism / L6 pattern** — composes any component from any domain.
 
-ESLint enforces *same domain* boundaries; the L3-doesn't-import-L3 rule is convention (not lint-enforced) — when you find yourself wanting to compose two atoms, that composition is L4.
+The L3-doesn't-import-L3 rule is convention (not lint-enforced) — when you find yourself wanting to compose two atoms, that composition is L4.
 
 L3 atoms can use **L1 Icon** (it's foundation) and **L2 primitives** (Slot, Portal, FocusScope, etc.). When atom-on-atom composition is wanted, the result is L4.
 
-## Anti-patterns this prevents
+## Domain-internal helpers
 
-- `actions/button/Button.tsx` importing from `forms/input` → caught
-- `tokens/colors.ts` importing from `actions/button` → caught
-- Two domains both reaching for a shared helper → forces it to be promoted to `utils/`, `hooks/`, or `primitives/`, which is the right answer
+Each domain may co-locate non-component utility files alongside its component folders. Naming convention:
 
-## When the rule needs to bend
+| Suffix | Use | Examples |
+|---|---|---|
+| `*Extensions.ts` | Helpers extending a built-in or external type | `DateExtensions.ts`, `ColorExtensions.ts` |
+| `*Styles.ts` | Shared `tailwind-variants` style configs | `InputStyles.ts` |
+| `*Helpers.ts` | Other domain-specific utilities | `FormHelpers.ts` |
 
-It doesn't. If you find yourself wanting to cross domains, the answer is one of:
-
-1. The thing belongs in `utils/`, `hooks/`, or `primitives/` — promote it
-2. You have a domain misnamed — rename
-3. You have two responsibilities glued together — split them
+These files are not exported from the domain barrel — they're consumed by the domain's components only. The "internal" signal is "absent from `index.ts`", not file naming.
 
 ## Casing
 

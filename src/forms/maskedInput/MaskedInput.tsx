@@ -2,7 +2,7 @@ import { forwardRef, type InputHTMLAttributes } from 'react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../_styles';
+import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
 
 export interface MaskedInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'value' | 'defaultValue' | 'onChange'>,

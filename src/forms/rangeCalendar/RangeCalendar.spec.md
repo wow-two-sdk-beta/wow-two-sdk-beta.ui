@@ -33,7 +33,7 @@ Date-range picker — same calendar grid as `Calendar` but selects a `{ start, e
 Self-contained. `DateRangePicker` (L5) wraps it inside a Popover with start/end inputs.
 
 ## Dependencies
-Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `_dateUtils`.
+Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `DateExtensions`.
 
 ## Known limitations
 - Single-month view (deferred — many real range pickers show two months side-by-side).

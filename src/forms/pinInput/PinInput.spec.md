@@ -16,4 +16,4 @@ One-time-code / PIN entry — N single-character cells. Auto-advance on type, ba
 | `isDisabled` | `boolean` | `false` |
 
 ## Dependencies
-Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `forms/_styles`.
+Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `forms/InputStyles`.

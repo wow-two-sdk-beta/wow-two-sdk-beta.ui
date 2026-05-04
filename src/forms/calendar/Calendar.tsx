@@ -20,7 +20,7 @@ import {
   isSameDay,
   isToday,
   startOfMonth,
-} from '../_dateUtils';
+} from '../DateExtensions';
 
 export interface CalendarProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {

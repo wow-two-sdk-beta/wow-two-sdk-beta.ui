@@ -19,7 +19,7 @@ Date input with a calendar popover — click the trigger to open a `Calendar` fo
 - ARIA: trigger has `aria-haspopup="dialog"`, `aria-expanded`. Popover wraps `Calendar`.
 
 ## Visual states
-Trigger: same as `forms/_styles` `inputBaseVariants` plus `data-state="open"`.
+Trigger: same as `forms/InputStyles` `inputBaseVariants` plus `data-state="open"`.
 
 ## Props
 | Name | Type | Default | Required | Why |

@@ -5,7 +5,7 @@ import { cn, composeRefs } from '../../utils';
 import { useControlled } from '../../hooks';
 import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
 import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
-import { formatISODate } from '../_dateUtils';
+import { formatISODate } from '../DateExtensions';
 import { RangeCalendar, type DateRange } from '../rangeCalendar';
 
 export interface DateRangePickerProps

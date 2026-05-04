@@ -10,4 +10,4 @@
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` |
 
 ## Dependencies
-Foundation: `utils/cn`, `icons/Icon`, `primitives/formControlContext`. Same-domain: `forms/_styles`.
+Foundation: `utils/cn`, `icons/Icon`, `primitives/formControlContext`. Same-domain: `forms/InputStyles`.

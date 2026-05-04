@@ -17,7 +17,7 @@ import { Check } from 'lucide-react';
 import { cn, composeRefs } from '../../utils';
 import { useControlled } from '../../hooks';
 import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
-import { inputBaseVariants, type InputBaseVariants } from '../_styles';
+import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
 import {
   listboxVariants,
   listboxItemVariants,

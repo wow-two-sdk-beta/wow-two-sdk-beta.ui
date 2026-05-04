@@ -11,7 +11,7 @@ Single styled `<input type="time">`.
 - 24-hour `HH:MM` string under the hood; component does object-conversion.
 
 ## Visual states
-Same as `forms/_styles` `inputBaseVariants`.
+Same as `forms/InputStyles` `inputBaseVariants`.
 
 ## Props
 | Name | Type | Default | Required | Why |
@@ -27,7 +27,7 @@ Same as `forms/_styles` `inputBaseVariants`.
 Single element. Works inside `FormField`.
 
 ## Dependencies
-Foundation: `utils/cn`. Same-domain: `_styles`, `_dateUtils`.
+Foundation: `utils/cn`. Same-domain: `InputStyles`, `DateExtensions`.
 
 ## Known limitations
 - Native picker UI varies across browsers.

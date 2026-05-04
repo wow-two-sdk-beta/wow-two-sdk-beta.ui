@@ -22,7 +22,7 @@ import {
   isToday,
   startOfDay,
   startOfMonth,
-} from '../_dateUtils';
+} from '../DateExtensions';
 
 export interface DateRange {
   start: Date | null;

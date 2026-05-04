@@ -2,8 +2,8 @@ import { forwardRef, type InputHTMLAttributes } from 'react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../_styles';
-import { formatISODate, parseISODate } from '../_dateUtils';
+import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { formatISODate, parseISODate } from '../DateExtensions';
 
 export interface DateFieldProps
   extends Omit<

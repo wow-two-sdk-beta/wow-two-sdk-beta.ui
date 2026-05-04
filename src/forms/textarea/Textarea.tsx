@@ -1,7 +1,7 @@
 import { forwardRef, type TextareaHTMLAttributes } from 'react';
 import { cn } from '../../utils';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../_styles';
+import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
 
 export interface TextareaProps
   extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,

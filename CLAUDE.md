@@ -12,6 +12,20 @@ The `@wow-two-beta/ui` package — beta-forever React UI library for the wow-two
 - Files: `PascalCase` (`Button.tsx`, `Button.spec.md`, `Button.stories.tsx`, `Button.variants.ts`)
 - Index files: lowercase (`index.ts`)
 
+### Shared/internal helper files (within a domain)
+
+Each domain may co-locate non-component utility files alongside its component folders. Use descriptive PascalCase + role-based suffix:
+
+| Suffix | Use | Examples |
+|---|---|---|
+| `*Extensions.ts` | Helpers that extend a built-in or external type | `DateExtensions.ts`, `ColorExtensions.ts`, `StringExtensions.ts` |
+| `*Styles.ts` | Shared `tailwind-variants` configurations | `InputStyles.ts`, `ButtonStyles.ts` |
+| `*Helpers.ts` | Domain-specific utility fns that don't fit `Extensions` | `FormHelpers.ts` |
+
+These files are not exported from the domain barrel — they're consumed by the domain's components only. The "internal" signal is "absent from `index.ts`", not file naming.
+
+The `*Extensions.ts` postfix is borrowed from .NET extension methods — files of this shape extend an existing type with utilities. Most JS libs use camelCase for utilities; we deliberately diverge for consistency with the broader wow-two ecosystem (which is .NET-heavy).
+
 ## Per-component pattern
 
 Every component lives in its own folder with this exact shape:
@@ -30,7 +44,7 @@ forms/numberInput/
 ## Layout
 
 - `src/tokens` `src/tailwind` `src/utils` `src/hooks` `src/icons` `src/primitives` — **foundation** (no upward deps; ESLint enforces). `src/primitives` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.).
-- `src/actions` `src/display` `src/feedback` `src/forms` `src/layout` `src/nav` `src/overlays` — **domains** (may import foundation; may NOT import sibling domains; ESLint enforces)
+- `src/actions` `src/display` `src/feedback` `src/forms` `src/layout` `src/nav` `src/overlays` — **domains** (may import foundation **and any sibling domain**; ESLint enforces only that domains may not reach upward into root)
 - `docs/component-standard.md` — meta-template every `*.spec.md` fills
 - `docs/architecture.md` — full layering rule + ESLint mechanics
 - `docs/decisions/` — cross-component ADRs
@@ -52,7 +66,8 @@ forms/numberInput/
 ## Working rules
 
 - **Spec before code.** No `Component.tsx` without its `Component.spec.md`.
-- **Foundation cannot import domains. Domains cannot import sibling domains.** ESLint blocks both.
+- **Foundation cannot import domains.** ESLint enforces.
+- **Domains can import any sibling domain.** Convention: L3 atoms / L4 molecules should stay in-domain when natural; L5+ organisms compose freely across domains. The lint rule is permissive — judgment calls go to the spec.
 - **Subpath exports per top-level src/ folder.** Consumers can pull just the slice they need.
 - **One component per folder.** Multiple files share the folder; never flatten.
 - **Default theme out-of-box.** Configure key tokens; rest defaults gracefully.

@@ -6,7 +6,7 @@ import {
 } from 'react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
-import { inputBaseVariants } from '../_styles';
+import { inputBaseVariants } from '../InputStyles';
 
 export interface PinInputProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'onChange'> {
   /** Number of digit cells. Default 6. */

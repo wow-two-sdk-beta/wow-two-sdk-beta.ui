@@ -12,7 +12,7 @@ Single styled `<input type="date">`.
 - `min` / `max` map to native input attributes.
 
 ## Visual states
-Same as `forms/_styles` `inputBaseVariants`: `default` · `hover` · `focus-visible` · `invalid` · `disabled`.
+Same as `forms/InputStyles` `inputBaseVariants`: `default` · `hover` · `focus-visible` · `invalid` · `disabled`.
 
 ## Props
 | Name | Type | Default | Required | Why |
@@ -28,7 +28,7 @@ Same as `forms/_styles` `inputBaseVariants`: `default` · `hover` · `focus-visi
 Single element. Works inside `FormField`.
 
 ## Dependencies
-Foundation: `utils/cn`. Same-domain: `_styles`, `_dateUtils`.
+Foundation: `utils/cn`. Same-domain: `InputStyles`, `DateExtensions`.
 
 ## Known limitations
 - Native picker UI varies across browsers.

@@ -2,8 +2,8 @@ import { forwardRef, type InputHTMLAttributes } from 'react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../_styles';
-import { formatISOTime, parseISOTime } from '../_dateUtils';
+import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { formatISOTime, parseISOTime } from '../DateExtensions';
 
 export interface TimeValue {
   hours: number;
