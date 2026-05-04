@@ -39,3 +39,7 @@ export * from './sparkline';
 export * from './heatmapCalendar';
 export * from './dataGrid';
 export * from './nodeEditor';
+export * from './audioWaveform';
+export * from './audioPlayer';
+export * from './videoPlayer';
+export * from './pdfViewer';
