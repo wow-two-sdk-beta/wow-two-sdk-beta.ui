@@ -24,3 +24,6 @@ export * from './infoRow';
 export * from './badgeOverlay';
 export * from './sectionHeader';
 export * from './highlight';
+export * from './collapsible';
+export * from './accordion';
+export * from './tabs';

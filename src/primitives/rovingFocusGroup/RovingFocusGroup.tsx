@@ -1,5 +1,6 @@
 import {
   createContext,
+  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -35,65 +36,65 @@ export interface RovingFocusGroupProps extends HTMLAttributes<HTMLDivElement> {
  * call `useRovingFocusItem()` to register and receive `tabIndex` / event
  * handlers. Used by Tabs, ToggleGroup, RadioGroup, Menu.
  */
-export function RovingFocusGroup({
-  orientation = 'horizontal',
-  loop = true,
-  children,
-  ...props
-}: RovingFocusGroupProps) {
-  const items = useRef<string[]>([]);
-  const [focusedId, setFocusedId] = useState<string | null>(null);
+export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps>(
+  function RovingFocusGroup(
+    { orientation = 'horizontal', loop = true, children, ...props },
+    ref,
+  ) {
+    const items = useRef<string[]>([]);
+    const [focusedId, setFocusedId] = useState<string | null>(null);
 
-  const register = useCallback((id: string) => {
-    if (!items.current.includes(id)) items.current.push(id);
-    setFocusedId((current) => current ?? id);
-  }, []);
+    const register = useCallback((id: string) => {
+      if (!items.current.includes(id)) items.current.push(id);
+      setFocusedId((current) => current ?? id);
+    }, []);
 
-  const unregister = useCallback((id: string) => {
-    items.current = items.current.filter((i) => i !== id);
-  }, []);
+    const unregister = useCallback((id: string) => {
+      items.current = items.current.filter((i) => i !== id);
+    }, []);
 
-  const onItemKeyDown = useCallback(
-    (event: KeyboardEvent, id: string) => {
-      const list = items.current;
-      const idx = list.indexOf(id);
-      if (idx === -1) return;
-      const isVert = orientation === 'vertical' || orientation === 'both';
-      const isHoriz = orientation === 'horizontal' || orientation === 'both';
-      let next = idx;
-      if ((event.key === 'ArrowRight' && isHoriz) || (event.key === 'ArrowDown' && isVert)) {
-        next = idx + 1;
-        if (next >= list.length) next = loop ? 0 : list.length - 1;
-      } else if ((event.key === 'ArrowLeft' && isHoriz) || (event.key === 'ArrowUp' && isVert)) {
-        next = idx - 1;
-        if (next < 0) next = loop ? list.length - 1 : 0;
-      } else if (event.key === 'Home') {
-        next = 0;
-      } else if (event.key === 'End') {
-        next = list.length - 1;
-      } else {
-        return;
-      }
-      event.preventDefault();
-      const id2 = list[next];
-      if (id2) setFocusedId(id2);
-    },
-    [orientation, loop],
-  );
+    const onItemKeyDown = useCallback(
+      (event: KeyboardEvent, id: string) => {
+        const list = items.current;
+        const idx = list.indexOf(id);
+        if (idx === -1) return;
+        const isVert = orientation === 'vertical' || orientation === 'both';
+        const isHoriz = orientation === 'horizontal' || orientation === 'both';
+        let next = idx;
+        if ((event.key === 'ArrowRight' && isHoriz) || (event.key === 'ArrowDown' && isVert)) {
+          next = idx + 1;
+          if (next >= list.length) next = loop ? 0 : list.length - 1;
+        } else if ((event.key === 'ArrowLeft' && isHoriz) || (event.key === 'ArrowUp' && isVert)) {
+          next = idx - 1;
+          if (next < 0) next = loop ? list.length - 1 : 0;
+        } else if (event.key === 'Home') {
+          next = 0;
+        } else if (event.key === 'End') {
+          next = list.length - 1;
+        } else {
+          return;
+        }
+        event.preventDefault();
+        const id2 = list[next];
+        if (id2) setFocusedId(id2);
+      },
+      [orientation, loop],
+    );
 
-  const value = useMemo(
-    () => ({ register, unregister, focusedId, setFocusedId, onItemKeyDown }),
-    [register, unregister, focusedId, onItemKeyDown],
-  );
+    const value = useMemo(
+      () => ({ register, unregister, focusedId, setFocusedId, onItemKeyDown }),
+      [register, unregister, focusedId, onItemKeyDown],
+    );
 
-  return (
-    <RovingFocusContext.Provider value={value}>
-      <div role="group" {...props}>
-        {children}
-      </div>
-    </RovingFocusContext.Provider>
-  );
-}
+    return (
+      <RovingFocusContext.Provider value={value}>
+        <div ref={ref} role="group" {...props}>
+          {children}
+        </div>
+      </RovingFocusContext.Provider>
+    );
+  },
+);
 
 export interface UseRovingFocusItemReturn {
   ref: (node: HTMLElement | null) => void;

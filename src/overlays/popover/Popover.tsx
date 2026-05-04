@@ -114,11 +114,18 @@ export const PopoverTrigger = forwardRef<HTMLButtonElement, PopoverTriggerProps>
 );
 
 export interface PopoverContentProps extends HTMLAttributes<HTMLDivElement> {
+  /**
+   * Strip the default chrome (bg / border / padding / shadow / fixed width).
+   * Use when the child provides its own container — e.g. wrapping a `Calendar`,
+   * `Listbox`, or any pre-styled card. Keeps only structural classes
+   * (z-index, animation, outline).
+   */
+  bare?: boolean;
   children: ReactNode;
 }
 
 export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
-  function PopoverContent({ className, children, ...rest }, forwardedRef) {
+  function PopoverContent({ bare, className, children, ...rest }, forwardedRef) {
     const ctx = usePopoverContext();
     if (!ctx.open) return null;
     return (
@@ -146,7 +153,9 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
                 role="dialog"
                 data-state="open"
                 className={cn(
-                  'z-50 w-72 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
+                  'z-50 outline-none animate-in fade-in-0 zoom-in-95',
+                  !bare &&
+                    'w-72 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md',
                   className,
                 )}
                 {...rest}

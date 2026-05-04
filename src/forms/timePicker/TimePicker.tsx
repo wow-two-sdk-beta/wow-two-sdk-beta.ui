@@ -1,9 +1,8 @@
 import { forwardRef, useEffect, useMemo, useRef, type ButtonHTMLAttributes } from 'react';
 import { Clock } from 'lucide-react';
-import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn, composeRefs } from '../../utils';
+import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
-import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
+import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
 import { type TimeValue } from '../timeField';
 
@@ -40,7 +39,6 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
     state,
     className,
     disabled,
-    onClick,
     ...rest
   },
   forwardedRef,
@@ -54,7 +52,6 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
     controlled: undefined,
     default: false,
   });
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const hoursRef = useRef<HTMLDivElement | null>(null);
   const minutesRef = useRef<HTMLDivElement | null>(null);
 
@@ -88,101 +85,78 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
   };
 
   return (
-    <>
-      <button
-        ref={composeRefs(forwardedRef, triggerRef)}
-        type="button"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        data-state={open ? 'open' : 'closed'}
-        disabled={disabled}
-        onClick={(e) => {
-          onClick?.(e);
-          if (e.defaultPrevented) return;
-          setOpen(!open);
-        }}
-        className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
-        {...rest}
-      >
-        <span className={cn('truncate', !time && 'text-subtle-foreground')}>
-          {time ? format(time) : placeholder}
-        </span>
-        <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
-      </button>
-      {open && (
-        <Portal>
-          <AnchoredPositioner anchor={triggerRef.current} placement="bottom-start" offset={6}>
-            <FocusScope asChild trapped loop>
-              <DismissableLayer
-                onEscape={() => {
-                  setOpen(false);
-                  requestAnimationFrame(() => triggerRef.current?.focus());
-                }}
-                onOutsidePointerDown={(e) => {
-                  if (triggerRef.current?.contains(e.target as Node)) return;
-                  setOpen(false);
-                }}
-              >
-                <div className="z-50 flex gap-1 rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95">
-                  <div
-                    ref={hoursRef}
-                    role="listbox"
-                    aria-label="Hours"
-                    className="flex max-h-56 flex-col gap-0.5 overflow-y-auto pr-1"
-                  >
-                    {HOURS.map((h) => {
-                      const selected = time?.hours === h;
-                      return (
-                        <button
-                          key={h}
-                          type="button"
-                          role="option"
-                          aria-selected={selected}
-                          data-selected={selected ? '' : undefined}
-                          onClick={() => update({ hours: h })}
-                          className={cn(
-                            'grid h-8 w-12 place-items-center rounded-sm text-sm transition-colors hover:bg-muted',
-                            selected && 'bg-primary text-primary-foreground hover:bg-primary',
-                          )}
-                        >
-                          {String(h).padStart(2, '0')}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="w-px self-stretch bg-border" />
-                  <div
-                    ref={minutesRef}
-                    role="listbox"
-                    aria-label="Minutes"
-                    className="flex max-h-56 flex-col gap-0.5 overflow-y-auto pl-1"
-                  >
-                    {minutes.map((m) => {
-                      const selected = time?.minutes === m;
-                      return (
-                        <button
-                          key={m}
-                          type="button"
-                          role="option"
-                          aria-selected={selected}
-                          data-selected={selected ? '' : undefined}
-                          onClick={() => update({ minutes: m })}
-                          className={cn(
-                            'grid h-8 w-12 place-items-center rounded-sm text-sm transition-colors hover:bg-muted',
-                            selected && 'bg-primary text-primary-foreground hover:bg-primary',
-                          )}
-                        >
-                          {String(m).padStart(2, '0')}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </DismissableLayer>
-            </FocusScope>
-          </AnchoredPositioner>
-        </Portal>
-      )}
+    <Popover open={open} onOpenChange={setOpen} placement="bottom-start" offset={6}>
+      <PopoverTrigger asChild>
+        <button
+          ref={forwardedRef}
+          type="button"
+          disabled={disabled}
+          className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
+          {...rest}
+        >
+          <span className={cn('truncate', !time && 'text-subtle-foreground')}>
+            {time ? format(time) : placeholder}
+          </span>
+          <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent bare>
+        <div className="flex gap-1 rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-md">
+          <div
+            ref={hoursRef}
+            role="listbox"
+            aria-label="Hours"
+            className="flex max-h-56 flex-col gap-0.5 overflow-y-auto pr-1"
+          >
+            {HOURS.map((h) => {
+              const selected = time?.hours === h;
+              return (
+                <button
+                  key={h}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  data-selected={selected ? '' : undefined}
+                  onClick={() => update({ hours: h })}
+                  className={cn(
+                    'grid h-8 w-12 place-items-center rounded-sm text-sm transition-colors hover:bg-muted',
+                    selected && 'bg-primary text-primary-foreground hover:bg-primary',
+                  )}
+                >
+                  {String(h).padStart(2, '0')}
+                </button>
+              );
+            })}
+          </div>
+          <div className="w-px self-stretch bg-border" />
+          <div
+            ref={minutesRef}
+            role="listbox"
+            aria-label="Minutes"
+            className="flex max-h-56 flex-col gap-0.5 overflow-y-auto pl-1"
+          >
+            {minutes.map((m) => {
+              const selected = time?.minutes === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  data-selected={selected ? '' : undefined}
+                  onClick={() => update({ minutes: m })}
+                  className={cn(
+                    'grid h-8 w-12 place-items-center rounded-sm text-sm transition-colors hover:bg-muted',
+                    selected && 'bg-primary text-primary-foreground hover:bg-primary',
+                  )}
+                >
+                  {String(m).padStart(2, '0')}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </PopoverContent>
       {name && time && (
         <input
           type="hidden"
@@ -190,6 +164,6 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
           value={`${String(time.hours).padStart(2, '0')}:${String(time.minutes).padStart(2, '0')}`}
         />
       )}
-    </>
+    </Popover>
   );
 });

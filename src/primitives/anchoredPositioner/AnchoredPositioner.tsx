@@ -3,6 +3,7 @@ import {
   flip,
   offset as offsetMiddleware,
   shift,
+  size as sizeMiddleware,
   useFloating,
   type Placement,
 } from '@floating-ui/react';
@@ -25,6 +26,14 @@ export interface AnchoredPositionerProps extends HTMLAttributes<HTMLDivElement> 
  * Position children relative to an anchor element using Floating UI.
  * Auto-flips and shifts to stay in viewport. Use as the positioning surface
  * for Tooltip, Popover, Menu, HoverCard.
+ *
+ * Exposes the anchor's measured size as CSS variables on the floating
+ * element, enabling consumers to size content relative to the trigger:
+ *
+ *     style="--anchor-width: 240px; --anchor-height: 36px;"
+ *
+ * Common pattern: `min-w-[var(--anchor-width)]` on a Select dropdown so
+ * the panel never narrows below the trigger.
  */
 export const AnchoredPositioner = forwardRef<HTMLDivElement, AnchoredPositionerProps>(
   (
@@ -34,7 +43,20 @@ export const AnchoredPositioner = forwardRef<HTMLDivElement, AnchoredPositionerP
     const { refs, floatingStyles } = useFloating({
       open,
       placement,
-      middleware: [offsetMiddleware(offset), flip(), shift({ padding: 8 })],
+      middleware: [
+        offsetMiddleware(offset),
+        flip(),
+        shift({ padding: 8 }),
+        sizeMiddleware({
+          apply({ rects, elements }) {
+            elements.floating.style.setProperty('--anchor-width', `${rects.reference.width}px`);
+            elements.floating.style.setProperty(
+              '--anchor-height',
+              `${rects.reference.height}px`,
+            );
+          },
+        }),
+      ],
       whileElementsMounted: autoUpdate,
       elements: { reference: anchor },
     });

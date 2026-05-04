@@ -9,3 +9,4 @@ export * from './fab';
 export * from './copyButton';
 export * from './disclosureButton';
 export * from './overlayButton';
+export * from './toolbar';

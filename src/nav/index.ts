@@ -5,3 +5,4 @@ export * from './menu';
 export * from './dropdownMenu';
 export * from './contextMenu';
 export * from './menubar';
+export * from './navigationMenu';
