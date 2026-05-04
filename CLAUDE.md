@@ -6,6 +6,15 @@ The `@wow-two-beta/ui` package — beta-forever React UI library for the wow-two
 
 > **Beta-forever rules**: no CHANGELOG, no PR gates, no required tests, push directly to main, fix-forward when broken. CI builds + auto-bumps `0.0.y` on each main push.
 
+## Tech catalog & roadmap
+
+Source-of-truth for every UI tech, pattern, and browser API we may consider. Two co-located docs in [`docs/analysis/ui-philosophy/`](./docs/analysis/ui-philosophy/):
+
+- **[`ideas.md`](./docs/analysis/ui-philosophy/ideas.md)** — every UI tech / pattern / framework / cross-cutting vector / component / delegate / browser API (full MDN encyclopedia) / React+client ecosystem (sketch) that exists in Web2. **No verdicts** — pure inventory. Source of ideas; read when considering scope expansion.
+- **[`targets.md`](./docs/analysis/ui-philosophy/targets.md)** — verdict per item: **DONE / NOW / NEXT / LATER / MAYBE / SKIP / LOCKED**. Mirrors `ideas.md`'s structure. Read when deciding what to ship next; cross-references the [roadmap](../../../../docs/ui-beta-roadmap.md) for phase placement.
+
+When scope expansion is considered, walk `targets.md` first. If the desired vector is missing or marked **MAYBE/LATER**, raise it for triage and update both files. Treat these two as a paired source-of-truth — when one changes, sync the other.
+
 ## Casing convention
 
 - Folders: `camelCase` (`numberInput/`, `actions/`, `inputPrimitives/`)
