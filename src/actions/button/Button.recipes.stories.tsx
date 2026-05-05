@@ -169,3 +169,34 @@ export const LinkInline: Story = {
     </p>
   ),
 };
+
+/** `minWidth` — reserves enough space so the button doesn't reflow when its
+ *  label morphs through a state sequence ("Save" → "Saving…" → "Saved"). */
+export const FixedWidthOnLabelChange: Story = {
+  render: function FixedWidthStory() {
+    const [state, setState] = useState<'idle' | 'saving' | 'saved'>('idle');
+    const label = state === 'idle' ? 'Save' : state === 'saving' ? 'Saving…' : 'Saved ✓';
+    return (
+      <div className="flex flex-col items-center gap-6">
+        <div className="flex gap-6 items-center">
+          <div className="flex flex-col items-center gap-1">
+            <Button onClick={() => {
+              setState('saving');
+              setTimeout(() => setState('saved'), 1200);
+              setTimeout(() => setState('idle'), 2400);
+            }}>{label}</Button>
+            <span className="text-[10px] text-muted-foreground">no minWidth (jiggles)</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <Button minWidth={100} onClick={() => {
+              setState('saving');
+              setTimeout(() => setState('saved'), 1200);
+              setTimeout(() => setState('idle'), 2400);
+            }}>{label}</Button>
+            <span className="text-[10px] text-muted-foreground">minWidth=100 (stable)</span>
+          </div>
+        </div>
+      </div>
+    );
+  },
+};

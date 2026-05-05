@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Heart, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { Heart, ChevronDown, Plus, Trash2, Loader2 } from 'lucide-react';
 import { Icon } from '../../icons';
 import { Button } from './Button';
 import { Grid, Row } from '../../../.storybook/grid';
@@ -19,7 +19,7 @@ const meta: Meta<typeof Button> = {
 export default meta;
 type Story = StoryObj;
 
-const VARIANTS = ['solid', 'soft', 'outline', 'ghost', 'link', 'glass'] as const;
+const VARIANTS = ['solid', 'soft', 'surface', 'outline', 'ghost', 'link', 'glass'] as const;
 const TONES = ['primary', 'neutral', 'danger', 'success', 'warning'] as const;
 const SIZES = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 const SHAPES = ['default', 'square', 'circle'] as const;
@@ -72,7 +72,7 @@ export const VariantsByToneOnImage: Story = {
   ),
 };
 
-/** Sizes with default text + with leading icon to show gap scaling. */
+/** Sizes with default text + with leading icon + in loading state. */
 export const Sizes: Story = {
   render: () => (
     <div className="p-8 space-y-8">
@@ -90,41 +90,66 @@ export const Sizes: Story = {
           </Button>
         )}
       />
+      <Row
+        label="size — loading (built-in spinner replaces leading)"
+        items={SIZES}
+        render={(size) => (
+          <Button size={size} loading loadingText="Saving…">
+            Save
+          </Button>
+        )}
+      />
+      <Row
+        label="size — leading icon = lucide Loader2 (consumer-supplied spinner)"
+        items={SIZES}
+        render={(size) => (
+          <Button size={size} leading={<Icon icon={Loader2} size={14} className="animate-spin" />}>
+            Loading
+          </Button>
+        )}
+      />
     </div>
   ),
 };
 
-/** Shapes — default rectangle, square (icon-only square), circle (FAB-style). */
+/** Shapes — default rectangle, square (icon-only square), circle (FAB-style).
+ *  Three distinct rows so each shape's size sweep is readable on its own. */
 export const Shapes: Story = {
   render: () => (
-    <div className="p-8 space-y-8">
-      <Row
-        label="shape — text"
-        items={SHAPES}
-        render={(shape) => (
-          <Button shape={shape} aria-label={shape === 'default' ? undefined : 'Add'}>
-            {shape === 'default' ? 'Default' : <Icon icon={Plus} size={16} />}
-          </Button>
-        )}
-      />
-      <Row
-        label="shape — icon-only across sizes (square)"
-        items={SIZES}
-        render={(size) => (
-          <Button size={size} shape="square" aria-label="Add">
-            <Icon icon={Plus} size={14} />
-          </Button>
-        )}
-      />
-      <Row
-        label="shape — icon-only across sizes (circle)"
-        items={SIZES}
-        render={(size) => (
-          <Button size={size} shape="circle" aria-label="Add">
-            <Icon icon={Plus} size={14} />
-          </Button>
-        )}
-      />
+    <div className="p-8 flex flex-col gap-10 items-start">
+      <div>
+        <Row
+          label="shape = default — text label"
+          items={SHAPES}
+          render={(shape) => (
+            <Button shape={shape} aria-label={shape === 'default' ? undefined : 'Add'}>
+              {shape === 'default' ? 'Default' : <Icon icon={Plus} size={16} />}
+            </Button>
+          )}
+        />
+      </div>
+      <div>
+        <Row
+          label="shape = square — icon-only, sizes xs → xl"
+          items={SIZES}
+          render={(size) => (
+            <Button size={size} shape="square" aria-label="Add">
+              <Icon icon={Plus} size={14} />
+            </Button>
+          )}
+        />
+      </div>
+      <div>
+        <Row
+          label="shape = circle — icon-only, sizes xs → xl"
+          items={SIZES}
+          render={(size) => (
+            <Button size={size} shape="circle" aria-label="Add">
+              <Icon icon={Plus} size={14} />
+            </Button>
+          )}
+        />
+      </div>
     </div>
   ),
 };

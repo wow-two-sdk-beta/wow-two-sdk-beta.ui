@@ -31,8 +31,9 @@ export const buttonVariants = tv({
     'motion-reduce:transition-none',
     // focus
     'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-    // disabled (native)
-    'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
+    // disabled (native attr handles click-blocking; pointer-events-none would
+    // suppress the cursor visual, so we don't add it here)
+    'disabled:opacity-50 disabled:cursor-not-allowed',
     // skeleton state — wins over everything
     'data-[state=skeleton]:!bg-muted data-[state=skeleton]:!text-transparent data-[state=skeleton]:!border-transparent data-[state=skeleton]:!cursor-default data-[state=skeleton]:!pointer-events-none data-[state=skeleton]:animate-pulse',
     'data-[state=skeleton]:[&>*]:!invisible',
@@ -41,6 +42,7 @@ export const buttonVariants = tv({
     variant: {
       solid: '',
       soft: '',
+      surface: '',
       outline: 'bg-transparent',
       ghost: 'bg-transparent',
       link: 'bg-transparent !h-auto !p-0 !rounded-none underline-offset-4 hover:underline focus-visible:ring-offset-0',
@@ -89,6 +91,13 @@ export const buttonVariants = tv({
     { variant: 'soft', tone: 'danger',    class: 'bg-destructive-soft text-destructive-soft-foreground hover:bg-destructive-soft/80 active:bg-destructive-soft/85' },
     { variant: 'soft', tone: 'success',   class: 'bg-success-soft text-success-soft-foreground hover:bg-success-soft/80 active:bg-success-soft/85' },
     { variant: 'soft', tone: 'warning',   class: 'bg-warning-soft text-warning-soft-foreground hover:bg-warning-soft/80 active:bg-warning-soft/85' },
+
+    // === SURFACE × tone (subtle tinted bg + visible tone-colored border) ===
+    { variant: 'surface', tone: 'primary',  class: 'bg-primary/5 border-primary/40 text-primary hover:bg-primary/10 active:bg-primary/15' },
+    { variant: 'surface', tone: 'neutral',  class: 'bg-muted/30 border-border-strong text-foreground hover:bg-muted/50 active:bg-muted/70' },
+    { variant: 'surface', tone: 'danger',   class: 'bg-destructive/5 border-destructive/40 text-destructive hover:bg-destructive/10 active:bg-destructive/15' },
+    { variant: 'surface', tone: 'success',  class: 'bg-success/5 border-success/40 text-success hover:bg-success/10 active:bg-success/15' },
+    { variant: 'surface', tone: 'warning',  class: 'bg-warning/10 border-warning/40 text-warning hover:bg-warning/15 active:bg-warning/20' },
 
     // === OUTLINE × tone ===
     { variant: 'outline', tone: 'primary',  class: 'border-primary/50 text-primary hover:bg-primary/10 active:bg-primary/15' },

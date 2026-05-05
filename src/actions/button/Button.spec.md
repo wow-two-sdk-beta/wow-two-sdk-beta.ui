@@ -23,7 +23,8 @@ Two independent axes — `variant × tone`. Pattern borrowed from Mantine and Ra
 | Value | Description |
 |---|---|
 | `solid` (default) | Filled background, contrasting text. Highest visual weight. |
-| `soft` | Lightly-tinted background, tone-colored text. Mid weight. |
+| `soft` | Lightly-tinted background, tone-colored text, NO border. Mid weight. |
+| `surface` | Very faintly tinted background AND visible tone-colored border. Sits between `soft` and `outline` — useful when you want both presence and structure. |
 | `outline` | Transparent background, visible border, tone-colored text. Mid weight. |
 | `ghost` | Transparent until hover, then tinted. Low weight. |
 | `link` | Looks like a link (text + underline on hover). No padding/border/bg. Lowest weight. |
@@ -39,7 +40,7 @@ Two independent axes — `variant × tone`. Pattern borrowed from Mantine and Ra
 | `success` | Confirm a positive action |
 | `warning` | Caution-flagged action |
 
-6 × 5 = 30 combos. All theme tokens already exist in [`src/index.css`](../../index.css) (light + dark). `glass` uses `--color-inverse` + `--color-inverse-foreground` for the surface; `tone` colors the text/icon/border on top.
+7 × 5 = 35 combos. All theme tokens already exist in [`src/index.css`](../../index.css) (light + dark). `glass` uses `--color-inverse` + `--color-inverse-foreground` for the surface; `tone` colors the text/icon/border on top.
 
 ## Sizing & spacing
 
@@ -100,6 +101,26 @@ type RadiusToken = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
 Note: rectangular icon-only buttons in dense layouts (e.g. card actions) keep `shape='default'` and rely on rectangular padding — no auto-detection.
 
 **`fullWidth`** — `boolean`, default `false`. When `true`, button stretches to fill its container.
+
+**Box-size overrides** (all `SizeValue` — `number` = px, `string` = any CSS unit, all undefined by default):
+
+| Prop | Use |
+|---|---|
+| `width` | Explicit fixed width. Overrides `fullWidth` if both set. |
+| `height` | Explicit fixed height. Overrides `size`'s built-in height. |
+| `minWidth` | Reserve min-width so content doesn't reflow when the label morphs (`"Save" → "Saving…" → "Saved"` sequence). |
+| `minHeight` | Reserve min-height — symmetric with `minWidth`. Useful when content height varies (multi-line wrap on/off). |
+
+Together with `padding` and `radius`, these cover all four sizing modes:
+
+| Mode | API |
+|---|---|
+| Standard size + auto padding | `<Button size="md">` |
+| Standard size + manual padding | `<Button size="md" padding={{x: 'lg'}}>` |
+| Manual size + manual padding | `<Button height={48} padding={{x: 'lg', y: 'sm'}}>` |
+| Standard size + fixed dimensions (anti-reflow) | `<Button size="md" minWidth={120}>` |
+
+Content stays centered via the base `justify-center` regardless of which mode is used.
 
 ## Content
 
@@ -224,11 +245,15 @@ No JS needed; browser handles the toggle. Falls through `...rest`.
 
 | Name | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `'solid' \| 'soft' \| 'outline' \| 'ghost' \| 'link' \| 'glass'` | `'solid'` | Visual treatment |
+| `variant` | `'solid' \| 'soft' \| 'surface' \| 'outline' \| 'ghost' \| 'link' \| 'glass'` | `'solid'` | Visual treatment |
 | `tone` | `'primary' \| 'neutral' \| 'danger' \| 'success' \| 'warning'` | `'primary'` | Semantic intent |
 | `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Preset bundle |
 | `padding` | `PaddingToken \| { x?: SizeValue, y?: SizeValue }` | from `size` | Independent override |
 | `radius` | `RadiusToken \| SizeValue` | from `size` | Independent override |
+| `width` | `SizeValue` | — | Explicit width override |
+| `height` | `SizeValue` | — | Explicit height override |
+| `minWidth` | `SizeValue` | — | Reserve min width so label changes don't reflow |
+| `minHeight` | `SizeValue` | — | Reserve min height (symmetric with `minWidth`) |
 | `shape` | `'default' \| 'square' \| 'circle'` | `'default'` | Aspect ratio |
 | `fullWidth` | `boolean` | `false` | Stretch to container |
 | `leading` | `ReactNode` | — | Slot before children (logical start) |
