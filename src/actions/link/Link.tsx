@@ -9,10 +9,7 @@ export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement>, Link
   asChild?: boolean;
 }
 
-/**
- * Anchor with consistent focus / hover styling. Pass `asChild` to render a
- * router `<Link>` while inheriting our visuals.
- */
+/** Anchor with consistent focus/hover styling — `asChild` swaps in router links. */
 export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'a';

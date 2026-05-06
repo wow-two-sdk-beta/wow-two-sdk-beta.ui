@@ -4,13 +4,7 @@ import { Icon } from '../../icons';
 import { Button } from './Button';
 import { Grid, Row } from '../../../.storybook/grid';
 
-/**
- * Button — Matrix.
- *
- * Programmatic grids covering every concrete axis of the spec at a glance.
- * Pair with the storybook-addon-pseudo-states toolbar to multiply by
- * interaction states (hover / focus-visible / active) without manual hover.
- */
+/** Button — visual matrices (variants × tones × sizes × shapes × states × density × RTL). */
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button/Matrix',
   component: Button,

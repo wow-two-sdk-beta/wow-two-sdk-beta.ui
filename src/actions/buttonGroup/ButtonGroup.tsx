@@ -8,11 +8,7 @@ export interface ButtonGroupProps extends ComponentPropsWithoutRef<'div'> {
   attached?: boolean;
 }
 
-/**
- * Visually groups Button / IconButton children. When `attached` (default),
- * collapses inner border-radii so children read as one connected control.
- * Pass `attached={false}` for a simple gap-spaced row.
- */
+/** Visually groups action-children — collapses inner radii when `attached`. */
 export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(
   ({ orientation = 'horizontal', attached = true, className, ...props }, ref) => (
     <div

@@ -1,22 +1,6 @@
 import { tv, type VariantProps } from '../../utils';
 
-/**
- * Button visual surface — see `Button.standard.md` (rules) + `Button.spec.md` (values).
- *
- * Two-axis style system: `variant` × `tone`. Glass is tone-neutral by design
- * (text/bg derived from `--color-inverse*` regardless of tone).
- *
- * Density: height + horizontal padding scale with `--ui-density-scale` CSS var
- * (default `1`) via `calc()`.
- *
- * Forced-colors: every variant carries `border border-transparent` so HCM
- * paints a visible boundary.
- *
- * Reduced motion: `motion-reduce:transition-none` on base.
- *
- * Skeleton state: `[data-state="skeleton"]` rule on base hides children +
- * applies shimmer. Owned by Button.tsx (sets `data-state`).
- */
+/** Button visual surface — see Button.standard.md + Button.spec.md. */
 export const buttonVariants = tv({
   base: [
     // layout

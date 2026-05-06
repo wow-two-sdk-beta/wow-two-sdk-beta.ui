@@ -8,17 +8,13 @@ export type {
   PolymorphicPropsWithoutRef,
   PolymorphicRef,
 } from './polymorphic';
-export {
-  PADDING_TOKEN_TO_CSS,
-  RADIUS_TOKEN_TO_CSS,
-  sizeValueToCss,
-  resolvePaddingStyle,
-  resolveRadiusStyle,
-  resolveBoxSizeStyle,
-  type PaddingToken,
-  type RadiusToken,
-  type SizeValue,
-  type PaddingProp,
-  type RadiusProp,
-  type BoxSizeOverrides,
+export { CssExtensions } from './CssExtensions';
+export type {
+  PaddingToken,
+  RadiusToken,
+  SizeValue,
+  PaddingProp,
+  RadiusProp,
+  BoxSizeOverrides,
 } from './CssExtensions';
+export { OptionalExtensions } from './OptionalExtensions';

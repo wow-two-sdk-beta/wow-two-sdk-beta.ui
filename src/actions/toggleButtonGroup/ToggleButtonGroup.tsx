@@ -35,11 +35,7 @@ interface ChildLike extends ToggleButtonProps {
   value?: string;
 }
 
-/**
- * Coordinates a row/column of `ToggleButton` children. `type="single"` (default)
- * tracks one active value; `type="multi"` tracks an array. Each child must
- * expose a `value` prop that the group uses as its identifier.
- */
+/** Coordinates a row/column of ToggleButton children — `type="single" | "multi"`. */
 export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupProps>(
   (props, ref) => {
     const { orientation = 'horizontal', attached = true, className, children, ...rest } = props;

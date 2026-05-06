@@ -35,11 +35,7 @@ const POSITION: Record<BackToTopPosition, string> = {
   'top-left': 'top-6 left-6',
 };
 
-/**
- * Floating button that appears after the user scrolls past `threshold`.
- * Click scrolls the target back to top with smooth-scroll (skipped under
- * `prefers-reduced-motion`).
- */
+/** Floating button revealed past `threshold` scroll — smooth-scrolls to top. */
 export const BackToTopButton = forwardRef<HTMLButtonElement, BackToTopButtonProps>(
   function BackToTopButton(
     {

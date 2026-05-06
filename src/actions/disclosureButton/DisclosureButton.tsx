@@ -18,11 +18,7 @@ export interface DisclosureButtonProps
   chevronSide?: 'left' | 'right';
 }
 
-/**
- * Button with a chevron that rotates on open. Used as the trigger for
- * collapsible sections, accordion items, sidebar groups. Sets `aria-expanded`
- * and `data-state="open" | "closed"` for downstream content sync.
- */
+/** Button with a rotating chevron — sets `aria-expanded` + `data-state="open|closed"`. */
 export const DisclosureButton = forwardRef<HTMLButtonElement, DisclosureButtonProps>(
   (
     {

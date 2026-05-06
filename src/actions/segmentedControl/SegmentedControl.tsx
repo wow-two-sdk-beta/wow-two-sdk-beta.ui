@@ -4,11 +4,7 @@ import { ToggleButtonGroup, type ToggleButtonGroupProps } from '../toggleButtonG
 
 export type SegmentedControlProps = ToggleButtonGroupProps;
 
-/**
- * Visual variant of `ToggleButtonGroup` styled as a connected pill row —
- * the iOS / shadcn segmented control pattern. Use for view switchers
- * (day/week/month) and small option pickers.
- */
+/** Visual variant of ToggleButtonGroup — iOS-style connected pill row. */
 export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps>(
   ({ className, ...props }, ref) => (
     <ToggleButtonGroup

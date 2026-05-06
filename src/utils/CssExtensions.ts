@@ -1,31 +1,28 @@
 import type { CSSProperties } from 'react';
 
-/**
- * CSS-value extensions — types, token maps, and resolvers for the design
- * system's spacing / radius / box-size abstractions.
- *
- * Components consume these instead of duplicating their own padding/radius
- * tokens (Button, IconButton, FAB, ToggleButton, etc.).
- */
+/** CSS-value extensions — types, token maps, resolvers. Call as `CssExtensions.x(...)`. */
 
 // =============================================================================
-// Tokens
+// Tokens (types — individually exported; types are erased, no shaking concern)
 // =============================================================================
 
-/** Padding preset — discrete spacing scale, decoupled from `size`. */
 export type PaddingToken = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-
-/** Border-radius preset — design-system radius scale + `none` / `full`. */
 export type RadiusToken = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
-
-/** Raw CSS value — number = px, string = any CSS unit (`"1rem"`, `"calc(...)"`). */
 export type SizeValue = string | number;
+export type PaddingProp = PaddingToken | { x?: SizeValue; y?: SizeValue };
+export type RadiusProp = RadiusToken | SizeValue;
+export interface BoxSizeOverrides {
+  width?: SizeValue;
+  height?: SizeValue;
+  minWidth?: SizeValue;
+  minHeight?: SizeValue;
+}
 
 // =============================================================================
 // Token → CSS maps
 // =============================================================================
 
-export const PADDING_TOKEN_TO_CSS: Record<Exclude<PaddingToken, 'none'>, string> = {
+const PADDING_TOKEN_TO_CSS: Record<Exclude<PaddingToken, 'none'>, string> = {
   xs: '0.5rem',
   sm: '0.75rem',
   md: '1rem',
@@ -33,7 +30,7 @@ export const PADDING_TOKEN_TO_CSS: Record<Exclude<PaddingToken, 'none'>, string>
   xl: '2rem',
 };
 
-export const RADIUS_TOKEN_TO_CSS: Record<Exclude<RadiusToken, 'none' | 'full'>, string> = {
+const RADIUS_TOKEN_TO_CSS: Record<Exclude<RadiusToken, 'none' | 'full'>, string> = {
   xs: '0.125rem',
   sm: '0.25rem',
   md: '0.5rem',
@@ -42,20 +39,14 @@ export const RADIUS_TOKEN_TO_CSS: Record<Exclude<RadiusToken, 'none' | 'full'>, 
 };
 
 // =============================================================================
-// Resolvers — turn SDK abstractions into CSSProperties
+// Internal resolvers
 // =============================================================================
 
-/** Coerce a `SizeValue` to a CSS string (number → `"Npx"`, string passthrough). */
-export function sizeValueToCss(v: SizeValue): string {
+function toCss(v: SizeValue): string {
   return typeof v === 'number' ? `${v}px` : v;
 }
 
-/** Padding override — token preset OR per-axis object. */
-export type PaddingProp = PaddingToken | { x?: SizeValue; y?: SizeValue };
-
-export function resolvePaddingStyle(
-  padding: PaddingProp | undefined,
-): CSSProperties | undefined {
+function resolvePadding(padding: PaddingProp | undefined): CSSProperties | undefined {
   if (!padding) return undefined;
   if (typeof padding === 'string') {
     if (padding === 'none') {
@@ -66,24 +57,19 @@ export function resolvePaddingStyle(
   }
   const style: CSSProperties = {};
   if (padding.x !== undefined) {
-    const v = sizeValueToCss(padding.x);
+    const v = toCss(padding.x);
     style.paddingLeft = v;
     style.paddingRight = v;
   }
   if (padding.y !== undefined) {
-    const v = sizeValueToCss(padding.y);
+    const v = toCss(padding.y);
     style.paddingTop = v;
     style.paddingBottom = v;
   }
   return style;
 }
 
-/** Radius override — token preset OR raw CSS value. */
-export type RadiusProp = RadiusToken | SizeValue;
-
-export function resolveRadiusStyle(
-  radius: RadiusProp | undefined,
-): CSSProperties | undefined {
+function resolveRadius(radius: RadiusProp | undefined): CSSProperties | undefined {
   if (radius === undefined || radius === null) return undefined;
   if (typeof radius === 'number') return { borderRadius: `${radius}px` };
   if (radius === 'none') return { borderRadius: 0 };
@@ -94,38 +80,40 @@ export function resolveRadiusStyle(
         RADIUS_TOKEN_TO_CSS[radius as Exclude<RadiusToken, 'none' | 'full'>],
     };
   }
-  // Raw CSS unit string (e.g. "20px", "1rem")
   return { borderRadius: radius };
 }
 
-/** Box-size overrides — `width / height / minWidth / minHeight`. */
-export interface BoxSizeOverrides {
-  width?: SizeValue;
-  height?: SizeValue;
-  minWidth?: SizeValue;
-  minHeight?: SizeValue;
-}
-
-export function resolveBoxSizeStyle(
-  overrides: BoxSizeOverrides,
-): CSSProperties | undefined {
+function resolveBoxSize(overrides: BoxSizeOverrides): CSSProperties | undefined {
   const style: CSSProperties = {};
   let hasAny = false;
   if (overrides.width !== undefined) {
-    style.width = sizeValueToCss(overrides.width);
+    style.width = toCss(overrides.width);
     hasAny = true;
   }
   if (overrides.height !== undefined) {
-    style.height = sizeValueToCss(overrides.height);
+    style.height = toCss(overrides.height);
     hasAny = true;
   }
   if (overrides.minWidth !== undefined) {
-    style.minWidth = sizeValueToCss(overrides.minWidth);
+    style.minWidth = toCss(overrides.minWidth);
     hasAny = true;
   }
   if (overrides.minHeight !== undefined) {
-    style.minHeight = sizeValueToCss(overrides.minHeight);
+    style.minHeight = toCss(overrides.minHeight);
     hasAny = true;
   }
   return hasAny ? style : undefined;
 }
+
+// =============================================================================
+// Grouped namespace export
+// =============================================================================
+
+export const CssExtensions = {
+  toCss,
+  resolvePadding,
+  resolveRadius,
+  resolveBoxSize,
+  PADDING_TOKEN_TO_CSS,
+  RADIUS_TOKEN_TO_CSS,
+} as const;

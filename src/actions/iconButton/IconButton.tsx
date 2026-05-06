@@ -10,10 +10,7 @@ export interface IconButtonProps
   children: ReactNode;
 }
 
-/**
- * Square / circular button containing only an icon. `aria-label` is
- * required by the type — there is no visible text fallback.
- */
+/** Square or circular icon-only button — `aria-label` is type-required. */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ className, variant, size, shape, type = 'button', ...props }, ref) => (
     <button

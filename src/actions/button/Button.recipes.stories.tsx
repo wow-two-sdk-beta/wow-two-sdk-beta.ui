@@ -4,12 +4,7 @@ import { Heart, Plus, Trash2, Pencil, ArrowRight, Save } from 'lucide-react';
 import { Icon } from '../../icons';
 import { Button } from './Button';
 
-/**
- * Button — Recipes.
- *
- * Curated real-world combinations. Each recipe is a "blessed pattern" — the
- * shape of Button consumers should reach for first when the use case matches.
- */
+/** Button — curated real-world recipes (CTA · Loading · Skeleton · GlassOverlay · …). */
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button/Recipes',
   component: Button,
@@ -168,6 +163,74 @@ export const LinkInline: Story = {
       <Button variant="link" tone="primary">Privacy Policy</Button>.
     </p>
   ),
+};
+
+/** Long-press — hold the button to fire `onLongPress` (default 500ms).
+ *  Long-press SUPPRESSES the regular click in the same gesture. */
+export const LongPress: Story = {
+  render: function LongPressStory() {
+    const [log, setLog] = useState<string[]>([]);
+    const append = (msg: string) =>
+      setLog((l) => [`${new Date().toLocaleTimeString()} — ${msg}`, ...l].slice(0, 5));
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <Button
+          tone="neutral"
+          variant="surface"
+          onClick={() => append('click')}
+          onLongPress={() => append('LONG PRESS (suppresses click)')}
+          longPressDelay={500}
+        >
+          Hold me 500ms
+        </Button>
+        <div className="text-xs text-muted-foreground font-mono w-72 h-32 overflow-hidden border border-border rounded p-2">
+          {log.length === 0 ? 'Tap (= click) or hold (= long-press) the button…' : log.map((l) => <div key={l}>{l}</div>)}
+        </div>
+      </div>
+    );
+  },
+};
+
+/** `debounceMs` — first click in window fires, subsequent within window
+ *  are swallowed. Useful for double-submit prevention. */
+export const DebouncedClick: Story = {
+  render: function DebouncedStory() {
+    const [count, setCount] = useState(0);
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <Button debounceMs={1000} onClick={() => setCount((c) => c + 1)}>
+          Increment (debounceMs=1000)
+        </Button>
+        <div className="text-sm text-muted-foreground">
+          Count: <span className="font-mono text-foreground">{count}</span> · spam-click — only one per second registers
+        </div>
+      </div>
+    );
+  },
+};
+
+/** `onPressStart` / `onPressEnd` — gesture lifecycle for analytics.
+ *  Fires on both pointer AND keyboard (Enter/Space) activation. */
+export const PressLifecycle: Story = {
+  render: function PressLifecycleStory() {
+    const [log, setLog] = useState<string[]>([]);
+    const append = (msg: string) =>
+      setLog((l) => [`${performance.now().toFixed(0)}ms — ${msg}`, ...l].slice(0, 8));
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <Button
+          onPressStart={() => append('pressStart')}
+          onPressEnd={() => append('pressEnd')}
+          onClick={() => append('click')}
+        >
+          Press me (mouse OR keyboard)
+        </Button>
+        <div className="text-xs text-muted-foreground font-mono w-72 h-40 overflow-hidden border border-border rounded p-2">
+          {log.length === 0 ? 'Press the button — pressStart / pressEnd fire on both pointer + Space/Enter.' : log.map((l, i) => <div key={`${l}-${i}`}>{l}</div>)}
+        </div>
+      </div>
+    );
+  },
 };
 
 /** `minWidth` — reserves enough space so the button doesn't reflow when its

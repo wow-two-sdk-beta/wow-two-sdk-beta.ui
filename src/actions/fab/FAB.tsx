@@ -8,10 +8,7 @@ export interface FABProps extends ButtonHTMLAttributes<HTMLButtonElement>, FABVa
   children: ReactNode;
 }
 
-/**
- * Floating Action Button — fixed-position circular button with shadow.
- * Pass an icon (or icon + short label) as children. `aria-label` required.
- */
+/** Floating Action Button — fixed-position circular button with shadow. */
 export const FAB = forwardRef<HTMLButtonElement, FABProps>(
   ({ className, variant, size, position, type = 'button', ...props }, ref) => (
     <button

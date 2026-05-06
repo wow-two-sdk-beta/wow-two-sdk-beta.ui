@@ -14,10 +14,7 @@ export interface ToggleButtonProps
   onPressedChange?: (pressed: boolean) => void;
 }
 
-/**
- * Two-state button (on / off). Sets `aria-pressed` and `data-state`. Use
- * inside `ToggleButtonGroup` for arrow-key navigation across siblings.
- */
+/** Two-state button (on/off) — sets `aria-pressed` + `data-state="on|off"`. */
 export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
   (
     {

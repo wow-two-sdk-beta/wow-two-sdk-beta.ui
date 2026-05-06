@@ -2,16 +2,7 @@ import { forwardRef } from 'react';
 import { cn } from '../../utils';
 import { Button, type ButtonProps } from '../button/Button';
 
-/**
- * OverlayButton — thin wrapper around Button, supplying the typical
- * "icon-button glassy circle anchored over a card/image" preset.
- *
- * Glass styling, sizing, loading/skeleton, asChild, etc. all flow from Button.
- * OverlayButton owns positioning + reveal-on-hover only.
- *
- * Pair with `appearOn="hover"` and a parent with `className="group"` to
- * reveal the button only when the parent is hovered.
- */
+/** Slim wrapper around Button — variant=glass + shape=circle + position/appearOn helpers. */
 
 export type OverlayPosition =
   | 'top-right'

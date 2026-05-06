@@ -15,10 +15,7 @@ export interface CopyButtonProps extends Omit<ButtonProps, 'onClick' | 'children
   'aria-label'?: string;
 }
 
-/**
- * Button that copies `text` to the clipboard. Swaps to a checkmark icon for
- * `resetAfter` ms after a successful copy.
- */
+/** Button that copies `text` to the clipboard with a checkmark swap on success. */
 export const CopyButton = forwardRef<HTMLButtonElement, CopyButtonProps>(
   (
     { text, resetAfter = 2000, children, variant = 'ghost', 'aria-label': ariaLabel, ...props },

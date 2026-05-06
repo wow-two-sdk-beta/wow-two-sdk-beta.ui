@@ -167,6 +167,47 @@ Mutually exclusive — if both are set, `skeleton` takes precedence + a dev-mode
 - **Form association** — native `form` attribute forwarded ([Standard rule 5](./Button.standard.md#behavior)).
 - **`prefers-reduced-motion`** — press transforms (scale/translate) disabled when the media query matches; color-shift retained ([Standard rule 20](./Button.standard.md#motion)).
 
+### Press detection
+
+Unified pointer + keyboard activation, à la React Aria. `onPressStart` / `onPressEnd` fire on the *first* event in a gesture (pointer-down OR Space/Enter keydown) and the matching end (pointer-up/cancel OR Space/Enter keyup). `e.repeat` keydown events are ignored.
+
+```ts
+onPressStart?: (event: React.PointerEvent | React.KeyboardEvent) => void
+onPressEnd?:   (event: React.PointerEvent | React.KeyboardEvent) => void
+```
+
+Both fire whether or not the press completed (pointer-up outside the button still ends the press). Useful for analytics (gesture timing) and custom press feedback. Blocked when `loading | skeleton | disabled`.
+
+### Long press
+
+```ts
+onLongPress?:    (event: React.PointerEvent) => void
+longPressDelay?: number   // ms; default 500; valid range 200–60000 (1 min)
+```
+
+Triggers after the pointer is held for `longPressDelay` ms (default 500). Cancels if the user releases or the pointer leaves the button bounds before the delay. **A long-press that fires SUPPRESSES the implicit click in the same gesture** — matches React Aria's contract and the typical context-menu UX (long-pressing to open a menu shouldn't also activate the button).
+
+`longPressDelay` is validated at runtime: values below 200ms (too easy to trigger accidentally — overlaps with normal click latency) or above 60000ms / 1 minute (clearly a developer error) emit a dev console warning and fall back to the 500ms default. The generous upper bound accommodates hold-to-confirm patterns — e.g. a destructive Delete button can use `longPressDelay={5000}` to require a deliberate 5-second hold.
+
+### Debounce (throttle)
+
+```ts
+debounceMs?: number   // ms; default undefined (off)
+```
+
+When set, the *first* click in a `debounceMs` window fires; subsequent clicks within the window are swallowed (functionally a *throttle* — name kept as `debounce*` for consumer familiarity). Different from `loading` (reactive — flipped after a click) — `debounceMs` is preventive at the gesture level. Skipped when `loading | skeleton` is active (they already block clicks).
+
+Implemented via the `useDebounceHandler` hook, exported from [`/hooks`](../../hooks/) so consumers can throttle arbitrary handlers (form submits, custom click-outside handlers, etc.) without rebuilding the timer logic:
+
+```tsx
+import { useDebounceHandler } from '@wow-two-beta/ui/hooks';
+
+const debouncedSubmit = useDebounceHandler(handleSubmit, 1000);
+<form onSubmit={debouncedSubmit}>…</form>
+```
+
+A long-press-suppressed click does NOT advance the throttle window (the gate happens before the wrapped handler fires).
+
 ## Accessibility
 
 - Renders native `<button>` (or any element via `asChild`) — keyboard, focus, role, ARIA inherited.
@@ -265,33 +306,12 @@ No JS needed; browser handles the toggle. Falls through `...rest`.
 | `disabled` | `boolean` | `false` | Native attr; emits `data-state="disabled"` |
 | `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | Native attr (defaults to `button`, not `submit`) |
 | `asChild` | `boolean` | `false` | Render as child via `Slot` |
-| `...rest` | `ButtonHTMLAttributes<HTMLButtonElement>` | — | All native button attrs forwarded — including form attrs (`name`, `value`, `formAction`, `formMethod`, `formNoValidate`, `formTarget`, `formEnctype`), [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) (`popoverTarget`, `popoverTargetAction`), [Invoker Commands API](https://open-ui.org/components/invokers.explainer/) (`commandFor`, `command`), focus (`autoFocus`, `tabIndex`, `accesskey`), all pointer/keyboard/mouse events, [`inert`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert), `title`, View Transitions (`view-transition-name` via `style`), and arbitrary `data-*` attributes (except `data-state`, which Button owns) |
-
-## Planned (post-v1)
-
-API surface documented now so it can't be retrofitted incompatibly later. Implementation deferred — props absent from `Button.tsx` until shipped.
-
-**Press detection** — unified pointer + keyboard activation events with consistent shape, à la React Aria. `onPressStart` / `onPressEnd` fire on both pointer-down/up AND Space/Enter keydown/keyup; useful for analytics (timing how long a user held the button) and custom press feedback.
-
-```ts
-onPressStart?: (event: React.PointerEvent | React.KeyboardEvent) => void
-onPressEnd?:   (event: React.PointerEvent | React.KeyboardEvent) => void
-```
-
-**Long-press** — triggers after the button has been held for `longPressDelay` ms. Common pattern: open a context menu on touch (right-click equivalent). Cancels if the user releases or moves outside the button bounds before the delay.
-
-```ts
-onLongPress?:    (event: React.PointerEvent) => void
-longPressDelay?: number   // ms, default 500
-```
-
-**Debounce** — collapses rapid-fire clicks into one. Different from `loading=true` (which is reactive — set after first click); `debounceMs` is preventive (swallows clicks within the window). Skipped when `loading` or `skeleton` is active (they already block).
-
-```ts
-debounceMs?: number   // ms, default undefined (no debounce)
-```
-
-When implemented, all five props will move into the main props summary; this section will be removed.
+| `onPressStart` | `(event) => void` | — | Fires on press begin (pointer-down OR Space/Enter keydown) |
+| `onPressEnd` | `(event) => void` | — | Fires on press end (pointer-up/cancel OR Space/Enter keyup) |
+| `onLongPress` | `(event) => void` | — | Fires after `longPressDelay` ms held; suppresses next click |
+| `longPressDelay` | `number` | `500` | Long-press duration (ms). Out-of-range values (< 200 or > 60000) trigger a dev warning + fall back to the default. |
+| `debounceMs` | `number` | — | Throttle clicks within window — first click wins. Internally wraps `onClick` with `useDebounceHandler` (re-exported from [`/hooks`](../../hooks/) for consumer use on arbitrary handlers). |
+| `...rest` | `ButtonHTMLAttributes<HTMLButtonElement>` | — | All native button attrs forwarded — form attrs, [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API), [Invoker Commands API](https://open-ui.org/components/invokers.explainer/), focus, mouse/touch events, [`inert`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert), `title`, View Transitions (`view-transition-name` via `style`), arbitrary `data-*` (except `data-state`, owned by Button) |
 
 ## Storybook coverage
 

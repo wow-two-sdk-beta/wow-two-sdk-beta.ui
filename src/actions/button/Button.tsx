@@ -1,23 +1,37 @@
 import {
   forwardRef,
+  useEffect,
+  useRef,
   type ButtonHTMLAttributes,
   type CSSProperties,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
   type ReactNode,
 } from 'react';
 import {
   cn,
-  resolvePaddingStyle,
-  resolveRadiusStyle,
-  resolveBoxSizeStyle,
+  composeEventHandlers,
+  CssExtensions,
+  OptionalExtensions,
   type PaddingProp,
   type RadiusProp,
   type SizeValue,
 } from '../../utils';
 import { Slot } from '../../primitives';
 import { Spinner } from '../../icons';
+import { useDebounceHandler } from '../../hooks';
 import { buttonVariants, type ButtonVariants } from './Button.variants';
 
 /** Foundational interactive element — see Button.standard.md + Button.spec.md. */
+
+const LONG_PRESS_DELAY_MIN = 200;
+const LONG_PRESS_DELAY_MAX = 60_000; // 1 min — accommodates hold-to-confirm patterns (e.g. 5s for destructive)
+const LONG_PRESS_DELAY_DEFAULT = 500;
+
+export type PressEvent =
+  | PointerEvent<HTMLButtonElement>
+  | KeyboardEvent<HTMLButtonElement>;
 
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
@@ -55,6 +69,20 @@ export interface ButtonProps
   minHeight?: SizeValue;
   /** Default `'button'` — NOT browser-default `'submit'`. */
   type?: 'button' | 'submit' | 'reset';
+  /** Fires on pointer-down OR Space/Enter keydown (first event in a gesture). */
+  onPressStart?: (event: PressEvent) => void;
+  /** Fires on pointer-up/cancel OR Space/Enter keyup. */
+  onPressEnd?: (event: PressEvent) => void;
+  /** Fires when the pointer is held for `longPressDelay` ms. Suppresses the next click. */
+  onLongPress?: (event: PointerEvent<HTMLButtonElement>) => void;
+  /** Long-press duration in ms. Default 500. */
+  longPressDelay?: number;
+  /**
+   * Throttle clicks within `debounceMs`: first click fires, subsequent within
+   * the window are swallowed (functionally a throttle — kept the `debounce*`
+   * naming for consumer familiarity). Skipped when `loading` or `skeleton`.
+   */
+  debounceMs?: number;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -84,6 +112,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       disabled,
       children,
       onClick,
+      onPressStart,
+      onPressEnd,
+      onLongPress,
+      longPressDelay = LONG_PRESS_DELAY_DEFAULT,
+      debounceMs,
+      onPointerDown,
+      onPointerUp,
+      onPointerCancel,
+      onPointerLeave,
+      onKeyDown,
+      onKeyUp,
       ...rest
     },
     ref,
@@ -93,8 +132,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         '[Button] `loading` and `skeleton` are mutually exclusive — `skeleton` takes precedence.',
       );
     }
+    const safeLongPressDelay =
+      longPressDelay < LONG_PRESS_DELAY_MIN || longPressDelay > LONG_PRESS_DELAY_MAX
+        ? (console.warn(
+            `[Button] longPressDelay=${longPressDelay}ms is outside reasonable range (${LONG_PRESS_DELAY_MIN}–${LONG_PRESS_DELAY_MAX}ms). Falling back to ${LONG_PRESS_DELAY_DEFAULT}ms.`,
+          ),
+          LONG_PRESS_DELAY_DEFAULT)
+        : longPressDelay;
+
     const isSkeleton = !!skeleton;
     const isLoading = !isSkeleton && !!loading;
+    const isInactive = isLoading || isSkeleton || !!disabled;
 
     const dataState: 'loading' | 'skeleton' | 'disabled' | undefined = isSkeleton
       ? 'skeleton'
@@ -107,14 +155,104 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : 'button';
 
     const overrideStyle: CSSProperties | undefined = (() => {
-      const padStyle = resolvePaddingStyle(padding);
-      const radStyle = resolveRadiusStyle(radius);
-      const boxStyle = resolveBoxSizeStyle({ width, height, minWidth, minHeight });
+      const padStyle = CssExtensions.resolvePadding(padding);
+      const radStyle = CssExtensions.resolveRadius(radius);
+      const boxStyle = CssExtensions.resolveBoxSize({ width, height, minWidth, minHeight });
       if (!padStyle && !radStyle && !boxStyle && !style) return undefined;
       return { ...padStyle, ...radStyle, ...boxStyle, ...style };
     })();
 
-    const handleClick = isLoading || isSkeleton ? undefined : onClick;
+    // Press / long-press / debounce state
+    const isPressingRef = useRef(false);
+    const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const longPressFiredRef = useRef(false);
+
+    useEffect(
+      () => () => {
+        if (longPressTimerRef.current !== undefined) {
+          clearTimeout(longPressTimerRef.current);
+        }
+      },
+      [],
+    );
+
+    const cancelLongPress = () => {
+      if (longPressTimerRef.current !== undefined) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = undefined;
+      }
+    };
+
+    const handlePointerDown = (e: PointerEvent<HTMLButtonElement>) => {
+      if (isInactive) return;
+      if (!isPressingRef.current) {
+        isPressingRef.current = true;
+        longPressFiredRef.current = false;
+        onPressStart?.(e);
+      }
+      if (onLongPress) {
+        longPressTimerRef.current = setTimeout(() => {
+          longPressFiredRef.current = true;
+          onLongPress(e);
+          longPressTimerRef.current = undefined;
+        }, safeLongPressDelay);
+      }
+    };
+
+    const handlePointerUp = (e: PointerEvent<HTMLButtonElement>) => {
+      cancelLongPress();
+      if (isPressingRef.current) {
+        isPressingRef.current = false;
+        onPressEnd?.(e);
+      }
+    };
+
+    const handlePointerCancel = (e: PointerEvent<HTMLButtonElement>) => {
+      cancelLongPress();
+      if (isPressingRef.current) {
+        isPressingRef.current = false;
+        onPressEnd?.(e);
+      }
+    };
+
+    const handlePointerLeave = () => {
+      // Pointer leaving the button cancels a pending long-press but does NOT end the
+      // press itself — pointer-up/cancel handlers do that. Matches React Aria.
+      cancelLongPress();
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+      if (isInactive) return;
+      if ((e.key === ' ' || e.key === 'Enter') && !e.repeat && !isPressingRef.current) {
+        isPressingRef.current = true;
+        longPressFiredRef.current = false;
+        onPressStart?.(e);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent<HTMLButtonElement>) => {
+      if ((e.key === ' ' || e.key === 'Enter') && isPressingRef.current) {
+        isPressingRef.current = false;
+        onPressEnd?.(e);
+      }
+    };
+
+    // Throttle the actual onClick via useDebounceHandler (extracted hook —
+    // also usable by consumers on arbitrary handlers via the hooks barrel).
+    // Wrapping just `onClick` (not the gate logic) means a long-press-suppressed
+    // click does NOT advance the throttle window.
+    const debouncedOnClick = useDebounceHandler(onClick, debounceMs);
+
+    const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+      if (isLoading || isSkeleton) return;
+      // Long-press already handled this gesture — suppress the implicit click.
+      if (longPressFiredRef.current) {
+        longPressFiredRef.current = false;
+        e.preventDefault();
+        return;
+      }
+      debouncedOnClick(e);
+    };
 
     const content = isLoading ? (
       <>
@@ -139,11 +277,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className,
         )}
         style={overrideStyle}
-        disabled={disabled || undefined}
-        aria-busy={isLoading || isSkeleton ? true : undefined}
-        tabIndex={isSkeleton ? -1 : undefined}
+        disabled={OptionalExtensions.from(disabled, true)}
+        aria-busy={OptionalExtensions.from(isLoading || isSkeleton, true)}
+        tabIndex={OptionalExtensions.from(isSkeleton, -1)}
         data-state={dataState}
         onClick={handleClick}
+        onPointerDown={composeEventHandlers(onPointerDown, handlePointerDown)}
+        onPointerUp={composeEventHandlers(onPointerUp, handlePointerUp)}
+        onPointerCancel={composeEventHandlers(onPointerCancel, handlePointerCancel)}
+        onPointerLeave={composeEventHandlers(onPointerLeave, handlePointerLeave)}
+        onKeyDown={composeEventHandlers(onKeyDown, handleKeyDown)}
+        onKeyUp={composeEventHandlers(onKeyUp, handleKeyUp)}
         {...rest}
       >
         {content}

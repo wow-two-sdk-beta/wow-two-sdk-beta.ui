@@ -1,13 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from './Button';
 
-/**
- * Button — Playground.
- *
- * Single controls-driven story exposing every prop. For at-a-glance visual
- * coverage across the variant×tone matrix, see `Actions/Button/Matrix`.
- * For curated real-world combinations, see `Actions/Button/Recipes`.
- */
+/** Button — controls-driven playground (every prop wired). */
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button/Playground',
   component: Button,
