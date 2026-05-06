@@ -4,7 +4,7 @@ import { Heart, Plus, Trash2, Pencil, ArrowRight, Save } from 'lucide-react';
 import { Icon } from '../../icons';
 import { Button } from './Button';
 
-/** Button — curated real-world recipes (CTA · Loading · Skeleton · GlassOverlay · …). */
+/* Button — curated real-world recipes (CTA · Loading · Skeleton · GlassOverlay · …). */
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button/Recipes',
   component: Button,
@@ -13,25 +13,25 @@ const meta: Meta<typeof Button> = {
 export default meta;
 type Story = StoryObj;
 
-/** Primary call-to-action at hero scale — leading icon, large size. */
+/* Primary call-to-action at hero scale — leading icon, large size. */
 export const PrimaryCTA: Story = {
   render: () => (
-    <Button size="lg" leading={<Icon icon={ArrowRight} size={18} />}>
+    <Button size="lg" leadingSlot={<Icon icon={ArrowRight} size={18} />}>
       Get started
     </Button>
   ),
 };
 
-/** Destructive action — danger tone, leading icon, intentional weight. */
+/* Destructive action — danger tone, leading icon, intentional weight. */
 export const DangerWithIcon: Story = {
   render: () => (
-    <Button tone="danger" leading={<Icon icon={Trash2} size={16} />}>
+    <Button tone="danger" leadingSlot={<Icon icon={Trash2} size={16} />}>
       Delete account
     </Button>
   ),
 };
 
-/** Toolbar of icon-only ghost buttons — square shape, sm size, aria-label each. */
+/* Toolbar of icon-only ghost buttons — square shape, sm size, aria-label each. */
 export const IconOnlyToolbar: Story = {
   render: () => (
     <div className="flex gap-1 p-1 rounded border border-border bg-card">
@@ -51,15 +51,15 @@ export const IconOnlyToolbar: Story = {
   ),
 };
 
-/** Action-loading — click, spinner replaces leading, aria-busy, blocked. */
+/* Action-loading — click, spinner replaces leading, aria-busy, blocked. */
 export const Loading: Story = {
   render: function LoadingStory() {
     const [busy, setBusy] = useState(false);
     return (
       <Button
-        loading={busy}
+        isLoading={busy}
         loadingText="Saving…"
-        leading={<Icon icon={Save} size={16} />}
+        leadingSlot={<Icon icon={Save} size={16} />}
         onClick={() => {
           setBusy(true);
           window.setTimeout(() => setBusy(false), 1500);
@@ -71,13 +71,13 @@ export const Loading: Story = {
   },
 };
 
-/** Content-loading (skeleton) — label depends on backend. Toggles every 1.5s. */
+/* Content-loading (skeleton) — label depends on backend. Toggles every 1.5s. */
 export const Skeleton: Story = {
   render: function SkeletonStory() {
     const [loaded, setLoaded] = useState(false);
     return (
       <div className="flex flex-col items-center gap-3">
-        <Button skeleton={!loaded}>Edit profile · Sultonbek</Button>
+        <Button isSkeleton={!loaded}>Edit profile · Sultonbek</Button>
         <Button variant="soft" tone="neutral" size="sm" onClick={() => setLoaded((l) => !l)}>
           Toggle data state
         </Button>
@@ -86,9 +86,29 @@ export const Skeleton: Story = {
   },
 };
 
-/** Glass overlay — `variant="glass" shape="circle"` over an image. The
- *  consumer adds positioning + reveal-on-hover via className (or uses the
- *  `OverlayButton` wrapper which bakes these in). */
+/* Custom loading slot — replaces built-in <Spinner/> with consumer-supplied indicator. */
+export const CustomLoadingSlot: Story = {
+  render: function CustomLoadingStory() {
+    const [busy, setBusy] = useState(false);
+    return (
+      <Button
+        isLoading={busy}
+        loadingText="Working…"
+        loadingSlot={<span className="font-mono">⏳</span>}
+        onClick={() => {
+          setBusy(true);
+          window.setTimeout(() => setBusy(false), 1500);
+        }}
+      >
+        Run task
+      </Button>
+    );
+  },
+};
+
+/* Glass overlay — `variant="glass" shape="circle"` over an image. The
+   consumer adds positioning + reveal-on-hover via className (or uses the
+   `OverlayButton` wrapper which bakes these in). */
 export const GlassOverlay: Story = {
   render: () => (
     <div
@@ -122,7 +142,7 @@ export const GlassOverlay: Story = {
   ),
 };
 
-/** asChild — render as `<a>` for semantically-correct navigation. */
+/* asChild — render as `<a>` for semantically-correct navigation. */
 export const AsChildLink: Story = {
   render: () => (
     <Button asChild variant="outline">
@@ -133,7 +153,7 @@ export const AsChildLink: Story = {
   ),
 };
 
-/** fullWidth in a form footer — submit + cancel pair. */
+/* isFullWidth in a form footer — submit + cancel pair. */
 export const FullWidthForm: Story = {
   render: () => (
     <form className="w-72 space-y-3 p-4 border border-border rounded-lg" onSubmit={(e) => e.preventDefault()}>
@@ -147,13 +167,13 @@ export const FullWidthForm: Story = {
         placeholder="Password"
         type="password"
       />
-      <Button type="submit" fullWidth>Sign in</Button>
-      <Button variant="ghost" tone="neutral" fullWidth>Cancel</Button>
+      <Button type="submit" isFullWidth>Sign in</Button>
+      <Button variant="ghost" tone="neutral" isFullWidth>Cancel</Button>
     </form>
   ),
 };
 
-/** Link variant — inline with text. */
+/* Link variant — inline with text. */
 export const LinkInline: Story = {
   render: () => (
     <p className="text-sm text-foreground max-w-md">
@@ -165,8 +185,8 @@ export const LinkInline: Story = {
   ),
 };
 
-/** Long-press — hold the button to fire `onLongPress` (default 500ms).
- *  Long-press SUPPRESSES the regular click in the same gesture. */
+/* Long-press — hold the button to fire `onLongPress` (default 500ms).
+   Long-press SUPPRESSES the regular click in the same gesture. */
 export const LongPress: Story = {
   render: function LongPressStory() {
     const [log, setLog] = useState<string[]>([]);
@@ -191,8 +211,8 @@ export const LongPress: Story = {
   },
 };
 
-/** `debounceMs` — first click in window fires, subsequent within window
- *  are swallowed. Useful for double-submit prevention. */
+/* `debounceMs` — first click in window fires, subsequent within window
+   are swallowed. Useful for double-submit prevention. */
 export const DebouncedClick: Story = {
   render: function DebouncedStory() {
     const [count, setCount] = useState(0);
@@ -209,8 +229,8 @@ export const DebouncedClick: Story = {
   },
 };
 
-/** `onPressStart` / `onPressEnd` — gesture lifecycle for analytics.
- *  Fires on both pointer AND keyboard (Enter/Space) activation. */
+/* `onPressStart` / `onPressEnd` — gesture lifecycle for analytics.
+   Fires on both pointer AND keyboard (Enter/Space) activation. */
 export const PressLifecycle: Story = {
   render: function PressLifecycleStory() {
     const [log, setLog] = useState<string[]>([]);
@@ -233,8 +253,8 @@ export const PressLifecycle: Story = {
   },
 };
 
-/** `minWidth` — reserves enough space so the button doesn't reflow when its
- *  label morphs through a state sequence ("Save" → "Saving…" → "Saved"). */
+/* `minWidth` — reserves enough space so the button doesn't reflow when its
+   label morphs through a state sequence ("Save" → "Saving…" → "Saved"). */
 export const FixedWidthOnLabelChange: Story = {
   render: function FixedWidthStory() {
     const [state, setState] = useState<'idle' | 'saving' | 'saved'>('idle');

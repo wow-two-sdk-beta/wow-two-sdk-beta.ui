@@ -18,3 +18,6 @@ export type {
   BoxSizeOverrides,
 } from './CssExtensions';
 export { OptionalExtensions } from './OptionalExtensions';
+export { PressExtensions, type PressEvent } from './PressExtensions';
+export { HtmlElement, ButtonType } from './HtmlExtensions';
+export { Key } from './KeyboardExtensions';

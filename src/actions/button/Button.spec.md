@@ -12,7 +12,7 @@
 </button>
 ```
 
-When `loading=true`: the spinner replaces the **leading** slot (or appears at the start if no `leading` is set). When `loadingText` is provided, it replaces `children`.
+When `loading=true`: the spinner replaces the **leading** slot (or appears at the start if no `leadingSlot` is set). When `loadingText` is provided, it replaces `children`.
 
 ## Style axes
 
@@ -100,13 +100,13 @@ type RadiusToken = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
 
 Note: rectangular icon-only buttons in dense layouts (e.g. card actions) keep `shape='default'` and rely on rectangular padding — no auto-detection.
 
-**`fullWidth`** — `boolean`, default `false`. When `true`, button stretches to fill its container.
+**`isFullWidth`** — `boolean`, default `false`. When `true`, button stretches to fill its container.
 
 **Box-size overrides** (all `SizeValue` — `number` = px, `string` = any CSS unit, all undefined by default):
 
 | Prop | Use |
 |---|---|
-| `width` | Explicit fixed width. Overrides `fullWidth` if both set. |
+| `width` | Explicit fixed width. Overrides `isFullWidth` if both set. |
 | `height` | Explicit fixed height. Overrides `size`'s built-in height. |
 | `minWidth` | Reserve min-width so content doesn't reflow when the label morphs (`"Save" → "Saving…" → "Saved"` sequence). |
 | `minHeight` | Reserve min-height — symmetric with `minWidth`. Useful when content height varies (multi-line wrap on/off). |
@@ -126,9 +126,9 @@ Content stays centered via the base `justify-center` regardless of which mode is
 
 **`children`** — arbitrary `ReactNode`. Per HTML spec, `<button>` may contain phrasing content but NOT interactive content — no nested `<a>`, `<button>`, `<input>`, `<select>`, `<textarea>`, `<details>`, `<label>`. Library does not enforce this; consumer's responsibility.
 
-**`leading` / `trailing`** — slot props (`ReactNode`) for the common "icon + text + caret" composition. When provided, layout arranges them with consistent gap from `size`. Positioned via logical CSS properties ([Standard rule 18](./Button.standard.md#internationalization)) — slot ORDER is start → end, not left → right.
+**`leadingSlot` / `trailingSlot`** — slot props (`ReactNode`) for the common "icon + text + caret" composition. When provided, layout arranges them with consistent gap from `size`. Positioned via logical CSS properties ([Standard rule 18](./Button.standard.md#internationalization)) — slot ORDER is start → end, not left → right.
 
-**`wrap`** — `boolean`, default `false`. Long-label behavior:
+**`isMultiline`** — `boolean`, default `false`. Long-label behavior:
 
 | Value | Behavior |
 |---|---|
@@ -146,24 +146,24 @@ Default is truncate because buttons appear in dense UIs (toolbars, cards, tables
 | `focus-visible` | 2px ring in `--ring` color | — | (absent) |
 | `active` | subtle press affordance (color-shift; transform disabled under `prefers-reduced-motion`) | — | (absent) |
 | `disabled` | opacity 0.5 + `cursor-not-allowed` | Removed from focus order, no click events | `disabled` |
-| `loading` | spinner replaces leading slot; `loadingText` may replace children; `forced-colors` border preserved | Click blocked, `aria-busy=true`, focus retained | `loading` |
-| `skeleton` | All children + slots `visibility: hidden` (preserves box dimensions); bg becomes `bg-muted` with shimmer animation overlay | Click blocked (`pointer-events-none`), `aria-busy=true`, removed from tab order (`tabindex=-1`) | `skeleton` |
+| `isLoading` | spinner replaces leading slot; `loadingText` may replace children; `forced-colors` border preserved | Click blocked, `aria-busy=true`, focus retained | `isLoading` |
+| `isSkeleton` | All children + slots `visibility: hidden` (preserves box dimensions); bg becomes `bg-muted` with shimmer animation overlay | Click blocked (`pointer-events-none`), `aria-busy=true`, removed from tab order (`tabindex=-1`) | `isSkeleton` |
 
 `data-state` is the observable-state attribute ([Standard rule 10](./Button.standard.md#states)) — analytics, integration tests, and CSS attribute selectors target it without prop drilling.
 
-**`loading` vs `skeleton`** — distinct semantics ([Standard rule 9](./Button.standard.md#states)):
-- `loading` = user's *action* is being processed; label remains meaningful (the action verb).
-- `skeleton` = button's *definition* is awaiting backend data; label not yet meaningful (often a fetched user-name, label-from-server, etc.).
-Mutually exclusive — if both are set, `skeleton` takes precedence + a dev-mode warning is emitted.
+**`isLoading` vs `isSkeleton`** — distinct semantics ([Standard rule 9](./Button.standard.md#states)):
+- `isLoading` = user's *action* is being processed; label remains meaningful (the action verb).
+- `isSkeleton` = button's *definition* is awaiting backend data; label not yet meaningful (often a fetched user-name, label-from-server, etc.).
+Mutually exclusive — if both are set, `isSkeleton` takes precedence + a dev-mode warning is emitted.
 
 ## Behavior
 
 - **`type`** — defaults to `'button'`, NOT browser-default `'submit'` ([Standard rule 2](./Button.standard.md#behavior)).
 - **Keyboard** — Enter and Space activate (native).
 - **`disabled`** — native attr. Removes from focus order, suppresses click events. Sets `data-state="disabled"`.
-- **`loading`** — non-native. Sets `aria-busy=true`, blocks `onClick`, replaces leading slot with inlined spinner SVG, sets `data-state="loading"`. **Does NOT set native `disabled`** ([Standard rule 4](./Button.standard.md#behavior)).
+- **`isLoading`** — non-native. Sets `aria-busy=true`, blocks `onClick`, replaces leading slot with inlined spinner SVG, sets `data-state="loading"`. **Does NOT set native `disabled`** ([Standard rule 4](./Button.standard.md#behavior)).
 - **`loadingText`** — optional. When present + `loading=true`, replaces `children` (e.g., `"Saving…"`). No default value — consumer always supplies (i18n discipline; [Standard rule 19](./Button.standard.md#internationalization)).
-- **`skeleton`** — non-native. Content-loading state — signals the button's *label* is awaiting backend data, distinct from `loading` (which signals the user's *action* is in flight). When `true`: children + leading + trailing all become `visibility: hidden` (preserves intrinsic box dimensions so the button doesn't shift layout when real content arrives), bg becomes `bg-muted` with shimmer overlay, sets `aria-busy=true`, blocks clicks via `pointer-events-none`, removes from tab order via `tabindex=-1`, sets `data-state="skeleton"`. Mutually exclusive with `loading` — if both, `skeleton` wins + dev-mode warns.
+- **`isSkeleton`** — non-native. Content-loading state — signals the button's *label* is awaiting backend data, distinct from `isLoading` (which signals the user's *action* is in flight). When `true`: children + leading + trailing all become `visibility: hidden` (preserves intrinsic box dimensions so the button doesn't shift layout when real content arrives), bg becomes `bg-muted` with shimmer overlay, sets `aria-busy=true`, blocks clicks via `pointer-events-none`, removes from tab order via `tabindex=-1`, sets `data-state="skeleton"`. Mutually exclusive with `isLoading` — if both, `isSkeleton` wins + dev-mode warns.
 - **Form association** — native `form` attribute forwarded ([Standard rule 5](./Button.standard.md#behavior)).
 - **`prefers-reduced-motion`** — press transforms (scale/translate) disabled when the media query matches; color-shift retained ([Standard rule 20](./Button.standard.md#motion)).
 
@@ -182,12 +182,12 @@ Both fire whether or not the press completed (pointer-up outside the button stil
 
 ```ts
 onLongPress?:    (event: React.PointerEvent) => void
-longPressDelay?: number   // ms; default 500; valid range 200–60000 (1 min)
+longPressDelay?: number   // ms; default 500; valid range 200–300000 (5 min)
 ```
 
 Triggers after the pointer is held for `longPressDelay` ms (default 500). Cancels if the user releases or the pointer leaves the button bounds before the delay. **A long-press that fires SUPPRESSES the implicit click in the same gesture** — matches React Aria's contract and the typical context-menu UX (long-pressing to open a menu shouldn't also activate the button).
 
-`longPressDelay` is validated at runtime: values below 200ms (too easy to trigger accidentally — overlaps with normal click latency) or above 60000ms / 1 minute (clearly a developer error) emit a dev console warning and fall back to the 500ms default. The generous upper bound accommodates hold-to-confirm patterns — e.g. a destructive Delete button can use `longPressDelay={5000}` to require a deliberate 5-second hold.
+`longPressDelay` is validated at runtime: values below 200ms (too easy to trigger accidentally — overlaps with normal click latency) or above 300000ms / 5 minutes (clearly a developer error) emit a dev console warning and fall back to the 500ms default. The generous upper bound accommodates any hold-to-confirm pattern — e.g. a destructive Delete button using `longPressDelay={5000}` for a deliberate 5-second hold, or multi-stage interaction patterns.
 
 ### Debounce (throttle)
 
@@ -195,7 +195,7 @@ Triggers after the pointer is held for `longPressDelay` ms (default 500). Cancel
 debounceMs?: number   // ms; default undefined (off)
 ```
 
-When set, the *first* click in a `debounceMs` window fires; subsequent clicks within the window are swallowed (functionally a *throttle* — name kept as `debounce*` for consumer familiarity). Different from `loading` (reactive — flipped after a click) — `debounceMs` is preventive at the gesture level. Skipped when `loading | skeleton` is active (they already block clicks).
+When set, the *first* click in a `debounceMs` window fires; subsequent clicks within the window are swallowed (functionally a *throttle* — name kept as `debounce*` for consumer familiarity). Different from `isLoading` (reactive — flipped after a click) — `debounceMs` is preventive at the gesture level. Skipped when `loading | skeleton` is active (they already block clicks).
 
 Implemented via the `useDebounceHandler` hook, exported from [`/hooks`](../../hooks/) so consumers can throttle arbitrary handlers (form submits, custom click-outside handlers, etc.) without rebuilding the timer logic:
 
@@ -234,7 +234,7 @@ A long-press-suppressed click does NOT advance the throttle window (the gate hap
 </Button>
 ```
 
-**Content-loading via `skeleton` prop** — built-in (see Behavior). Reason for built-in (not `<Skeleton>` wrapper): content-sized buttons have no fixed width for an external Skeleton to match; built-in skeleton uses the button's actual rendered dimensions (children remain in DOM but invisible).
+**Content-loading via `isSkeleton` prop** — built-in (see Behavior). Reason for built-in (not `<Skeleton>` wrapper): content-sized buttons have no fixed width for an external Skeleton to match; built-in skeleton uses the button's actual rendered dimensions (children remain in DOM but invisible).
 
 ```tsx
 <Button skeleton={!user.name}>Edit {user.name}</Button>
@@ -254,7 +254,7 @@ A long-press-suppressed click does NOT advance the throttle window (the gate hap
 
 (Future `<Overlay position="top-right" appearOn="hover">` layout helper may absorb the className boilerplate. `OverlayButton` is the slim wrapper that supplies these classnames + sets `variant="glass" shape="circle"`.)
 
-**React 19 form auto-pending** — wire `loading` to `useFormStatus()`:
+**React 19 form auto-pending** — wire `isLoading` to `useFormStatus()`:
 
 ```tsx
 import { useFormStatus } from 'react-dom';
@@ -296,20 +296,20 @@ No JS needed; browser handles the toggle. Falls through `...rest`.
 | `minWidth` | `SizeValue` | — | Reserve min width so label changes don't reflow |
 | `minHeight` | `SizeValue` | — | Reserve min height (symmetric with `minWidth`) |
 | `shape` | `'default' \| 'square' \| 'circle'` | `'default'` | Aspect ratio |
-| `fullWidth` | `boolean` | `false` | Stretch to container |
-| `leading` | `ReactNode` | — | Slot before children (logical start) |
-| `trailing` | `ReactNode` | — | Slot after children (logical end) |
-| `wrap` | `boolean` | `false` | Allow multi-line label |
-| `loading` | `boolean` | `false` | Action-loading: spinner in leading, `aria-busy`, blocks clicks, `data-state="loading"` |
+| `isFullWidth` | `boolean` | `false` | Stretch to container |
+| `leadingSlot` | `ReactNode` | — | Slot before children (logical start) |
+| `trailingSlot` | `ReactNode` | — | Slot after children (logical end) |
+| `isMultiline` | `boolean` | `false` | Allow multi-line label |
+| `isLoading` | `boolean` | `false` | Action-loading: spinner in leading, `aria-busy`, blocks clicks, `data-state="loading"` |
 | `loadingText` | `string` | — | Replaces `children` when loading. No default — consumer supplies |
-| `skeleton` | `boolean` | `false` | Content-loading: hides content, shimmer bg, `aria-busy`, `tabindex=-1`, `data-state="skeleton"`. Mutually exclusive with `loading` |
+| `isSkeleton` | `boolean` | `false` | Content-loading: hides content, shimmer bg, `aria-busy`, `tabindex=-1`, `data-state="skeleton"`. Mutually exclusive with `isLoading` |
 | `disabled` | `boolean` | `false` | Native attr; emits `data-state="disabled"` |
 | `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | Native attr (defaults to `button`, not `submit`) |
 | `asChild` | `boolean` | `false` | Render as child via `Slot` |
 | `onPressStart` | `(event) => void` | — | Fires on press begin (pointer-down OR Space/Enter keydown) |
 | `onPressEnd` | `(event) => void` | — | Fires on press end (pointer-up/cancel OR Space/Enter keyup) |
 | `onLongPress` | `(event) => void` | — | Fires after `longPressDelay` ms held; suppresses next click |
-| `longPressDelay` | `number` | `500` | Long-press duration (ms). Out-of-range values (< 200 or > 60000) trigger a dev warning + fall back to the default. |
+| `longPressDelay` | `number` | `500` | Long-press duration (ms). Out-of-range values (< 200 or > 300000) trigger a dev warning + fall back to the default. |
 | `debounceMs` | `number` | — | Throttle clicks within window — first click wins. Internally wraps `onClick` with `useDebounceHandler` (re-exported from [`/hooks`](../../hooks/) for consumer use on arbitrary handlers). |
 | `...rest` | `ButtonHTMLAttributes<HTMLButtonElement>` | — | All native button attrs forwarded — form attrs, [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API), [Invoker Commands API](https://open-ui.org/components/invokers.explainer/), focus, mouse/touch events, [`inert`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert), `title`, View Transitions (`view-transition-name` via `style`), arbitrary `data-*` (except `data-state`, owned by Button) |
 
@@ -331,11 +331,11 @@ No JS needed; browser handles the toggle. Falls through `...rest`.
 
 ## Inspirations
 
-- **Mantine Button** — `variant + color` two-axis approach; `radius` as token-or-custom; `loading` semantics.
+- **Mantine Button** — `variant + color` two-axis approach; `radius` as token-or-custom; `isLoading` semantics.
 - **Radix Themes Button** — variant taxonomy (`solid | soft | surface | outline | ghost`); `data-state` attribute pattern.
 - **shadcn/ui Button** — `asChild` via Slot primitive; default `type='button'` discipline.
-- **Chakra UI Button** — `loading` + `loadingText` shape.
-- **Material UI Button** — `startIcon`/`endIcon` slot pattern (we use `leading`/`trailing`).
+- **Chakra UI Button** — `isLoading` + `loadingText` shape.
+- **Material UI Button** — `startIcon`/`endIcon` slot pattern (we use `leadingSlot`/`trailingSlot`).
 - **React Aria Button** — `aria-busy` for loading; rejected `onPress` API in favor of native `onClick`.
 
 ---

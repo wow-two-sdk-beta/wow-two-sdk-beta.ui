@@ -4,7 +4,7 @@ import { Icon } from '../../icons';
 import { Button } from './Button';
 import { Grid, Row } from '../../../.storybook/grid';
 
-/** Button — visual matrices (variants × tones × sizes × shapes × states × density × RTL). */
+/* Button — visual matrices (variants × tones × sizes × shapes × states × density × RTL). */
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button/Matrix',
   component: Button,
@@ -18,8 +18,8 @@ const TONES = ['primary', 'neutral', 'danger', 'success', 'warning'] as const;
 const SIZES = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 const SHAPES = ['default', 'square', 'circle'] as const;
 
-/** 6 × 5 = 30 combos — the canonical visual matrix. Toggle the pseudo-states
- *  toolbar to render each cell in `:hover`, `:focus-visible`, `:active`. */
+/* 7 × 5 = 35 combos — the canonical visual matrix. Toggle the pseudo-states
+   toolbar to render each cell in `:hover`, `:focus-visible`, `:active`. */
 export const VariantsByTone: Story = {
   render: () => (
     <div className="p-8">
@@ -38,7 +38,7 @@ export const VariantsByTone: Story = {
   ),
 };
 
-/** Same matrix, glass on a photographic background to stress-test legibility. */
+/* Same matrix, glass on a photographic background to stress-test legibility. */
 export const VariantsByToneOnImage: Story = {
   render: () => (
     <div
@@ -66,7 +66,7 @@ export const VariantsByToneOnImage: Story = {
   ),
 };
 
-/** Sizes with default text + with leading icon + in loading state. */
+/* Sizes with default text + with leading slot + in loading state. */
 export const Sizes: Story = {
   render: () => (
     <div className="p-8 space-y-8">
@@ -79,25 +79,25 @@ export const Sizes: Story = {
         label="size — with leading icon"
         items={SIZES}
         render={(size) => (
-          <Button size={size} leading={<Icon icon={Plus} size={14} />}>
+          <Button size={size} leadingSlot={<Icon icon={Plus} size={14} />}>
             Add item
           </Button>
         )}
       />
       <Row
-        label="size — loading (built-in spinner replaces leading)"
+        label="size — isLoading (built-in spinner replaces leading)"
         items={SIZES}
         render={(size) => (
-          <Button size={size} loading loadingText="Saving…">
+          <Button size={size} isLoading loadingText="Saving…">
             Save
           </Button>
         )}
       />
       <Row
-        label="size — leading icon = lucide Loader2 (consumer-supplied spinner)"
+        label="size — leadingSlot = lucide Loader2 (consumer-supplied spinner)"
         items={SIZES}
         render={(size) => (
-          <Button size={size} leading={<Icon icon={Loader2} size={14} className="animate-spin" />}>
+          <Button size={size} leadingSlot={<Icon icon={Loader2} size={14} className="animate-spin" />}>
             Loading
           </Button>
         )}
@@ -106,8 +106,8 @@ export const Sizes: Story = {
   ),
 };
 
-/** Shapes — default rectangle, square (icon-only square), circle (FAB-style).
- *  Three distinct rows so each shape's size sweep is readable on its own. */
+/* Shapes — default rectangle, square (icon-only square), circle (FAB-style).
+   Three distinct rows so each shape's size sweep is readable on its own. */
 export const Shapes: Story = {
   render: () => (
     <div className="p-8 flex flex-col gap-10 items-start">
@@ -148,8 +148,8 @@ export const Shapes: Story = {
   ),
 };
 
-/** Each visible state, paired with `solid` and `outline` for contrast.
- *  Toggle the pseudo-states toolbar to see hover / focus / active variants. */
+/* Each visible state, paired with `solid` and `outline` for contrast.
+   Toggle the pseudo-states toolbar to see hover / focus / active variants. */
 export const States: Story = {
   render: () => (
     <div className="p-8">
@@ -161,9 +161,9 @@ export const States: Story = {
         render={(variant, state) => (
           <Button
             variant={variant}
-            disabled={state === 'disabled'}
-            loading={state === 'loading'}
-            skeleton={state === 'skeleton'}
+            isDisabled={state === 'disabled'}
+            isLoading={state === 'loading'}
+            isSkeleton={state === 'skeleton'}
             loadingText={state === 'loading' ? 'Saving…' : undefined}
           >
             Save
@@ -174,40 +174,40 @@ export const States: Story = {
   ),
 };
 
-/** Slot composition — leading / trailing / both / loading replaces leading. */
+/* Slot composition — leading / trailing / both / loadingSlot replaces leading when isLoading. */
 export const WithIcons: Story = {
   render: () => (
     <div className="p-8 flex flex-wrap gap-3 items-center">
-      <Button leading={<Icon icon={Plus} size={16} />}>Leading icon</Button>
-      <Button trailing={<Icon icon={ChevronDown} size={16} />}>Trailing caret</Button>
+      <Button leadingSlot={<Icon icon={Plus} size={16} />}>Leading icon</Button>
+      <Button trailingSlot={<Icon icon={ChevronDown} size={16} />}>Trailing caret</Button>
       <Button
-        leading={<Icon icon={Heart} size={16} />}
-        trailing={<Icon icon={ChevronDown} size={16} />}
+        leadingSlot={<Icon icon={Heart} size={16} />}
+        trailingSlot={<Icon icon={ChevronDown} size={16} />}
       >
         Both
       </Button>
       <Button shape="square" aria-label="Delete" tone="danger">
         <Icon icon={Trash2} size={16} />
       </Button>
-      <Button loading loadingText="Saving…">Save</Button>
+      <Button isLoading loadingText="Saving…">Save</Button>
     </div>
   ),
 };
 
-/** Long labels — truncate vs wrap, in a constrained container. */
+/* Long labels — truncate vs wrap, in a constrained container. */
 export const LongLabels: Story = {
   render: () => (
     <div className="p-8 space-y-6">
       <div className="space-y-2">
-        <div className="text-xs text-muted-foreground">wrap=false (default) — truncate</div>
+        <div className="text-xs text-muted-foreground">isMultiline=false (default) — truncate</div>
         <div className="w-48 border border-dashed border-border-strong p-2 rounded">
           <Button>This is a really really long label that overflows the parent</Button>
         </div>
       </div>
       <div className="space-y-2">
-        <div className="text-xs text-muted-foreground">wrap=true — multi-line</div>
+        <div className="text-xs text-muted-foreground">isMultiline=true — multi-line</div>
         <div className="w-48 border border-dashed border-border-strong p-2 rounded">
-          <Button wrap fullWidth>
+          <Button isMultiline isFullWidth>
             This is a really really long label that overflows the parent
           </Button>
         </div>
@@ -216,7 +216,7 @@ export const LongLabels: Story = {
   ),
 };
 
-/** RTL — same matrix in `dir="rtl"`. Logical CSS props flip slot order. */
+/* RTL — same matrix in `dir="rtl"`. Logical CSS props flip slot order. */
 export const RTL: Story = {
   render: () => (
     <div className="p-8" dir="rtl">
@@ -226,8 +226,8 @@ export const RTL: Story = {
         render={(size) => (
           <Button
             size={size}
-            leading={<Icon icon={Plus} size={14} />}
-            trailing={<Icon icon={ChevronDown} size={14} />}
+            leadingSlot={<Icon icon={Plus} size={14} />}
+            trailingSlot={<Icon icon={ChevronDown} size={14} />}
           >
             עברית
           </Button>
@@ -237,7 +237,7 @@ export const RTL: Story = {
   ),
 };
 
-/** Density preview — same buttons, different `--ui-density-scale` per row. */
+/* Density preview — same buttons, different `--ui-density-scale` per row. */
 export const Density: Story = {
   render: () => (
     <div className="p-8 space-y-6">

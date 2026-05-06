@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from './Button';
 
-/** Button — controls-driven playground (every prop wired). */
+/* Button — controls-driven playground (every prop wired). */
 const meta: Meta<typeof Button> = {
   title: 'Actions/Button/Playground',
   component: Button,
@@ -25,12 +25,12 @@ const meta: Meta<typeof Button> = {
       control: 'select',
       options: ['default', 'square', 'circle'],
     },
-    fullWidth: { control: 'boolean' },
-    wrap: { control: 'boolean', description: 'false = single-line truncate; true = multi-line wrap' },
-    loading: { control: 'boolean', description: 'Action-loading: spinner + aria-busy + click blocked' },
-    skeleton: { control: 'boolean', description: 'Content-loading: shimmer + dimensions preserved' },
+    isFullWidth: { control: 'boolean' },
+    isMultiline: { control: 'boolean', description: 'false = single-line truncate; true = multi-line wrap' },
+    isLoading: { control: 'boolean', description: 'Action-loading: spinner + aria-busy + click blocked' },
+    isSkeleton: { control: 'boolean', description: 'Content-loading: shimmer + dimensions preserved' },
     loadingText: { control: 'text', description: 'Replaces children when loading' },
-    disabled: { control: 'boolean' },
+    isDisabled: { control: 'boolean' },
     type: { control: 'select', options: ['button', 'submit', 'reset'] },
     asChild: { control: false, description: 'Render as child via Slot — playground does not render children swap' },
     children: { control: 'text' },
@@ -41,11 +41,11 @@ const meta: Meta<typeof Button> = {
     tone: 'primary',
     size: 'md',
     shape: 'default',
-    fullWidth: false,
-    wrap: false,
-    loading: false,
-    skeleton: false,
-    disabled: false,
+    isFullWidth: false,
+    isMultiline: false,
+    isLoading: false,
+    isSkeleton: false,
+    isDisabled: false,
   },
 };
 

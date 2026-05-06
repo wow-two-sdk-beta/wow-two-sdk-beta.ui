@@ -21,7 +21,7 @@ Items use RFC 2119 keywords (MUST · SHOULD · MAY). Each item is independently 
 
 3. **MUST activate on Enter and Space.** Inherited from native `<button>`; library does not override this behavior.
 
-4. **MUST set `aria-busy="true"` and block `onClick` when `loading=true`, AND MUST NOT set the native `disabled` attribute as a side effect of `loading`.** Native `disabled` removes the element from focus order and suppresses screen-reader state announcements.
+4. **MUST set `aria-busy="true"` and block `onClick` when `loading=true`, AND MUST NOT set the native `disabled` attribute as a side effect of `isLoading`.** Native `disabled` removes the element from focus order and suppresses screen-reader state announcements.
    - Reference: [WAI-ARIA `aria-busy`](https://www.w3.org/TR/wai-aria-1.2/#aria-busy)
 
 5. **MUST forward the `form` attribute** to support submit-from-outside-form patterns (e.g. modal forms with footer actions in a separate DOM subtree).
@@ -33,13 +33,13 @@ Items use RFC 2119 keywords (MUST · SHOULD · MAY). Each item is independently 
 
 7. **MUST expose `leading` and `trailing` slot props for icon composition; MUST NOT expose a compound API (`Button.Icon`, `Button.Label`).** Button has no nameable internal structure beyond decorations — slot props match the actual mental model with less ceremony.
 
-8. **MAY import sibling-domain components but SHOULD NOT.** Atom-rule convention: Button stays self-contained. The `loading` spinner is inlined as SVG rather than imported from `feedback/spinner`.
+8. **MAY import sibling-domain components but SHOULD NOT.** Atom-rule convention: Button stays self-contained. The `isLoading` spinner is inlined as SVG rather than imported from `feedback/spinner`.
 
 ### States
 
-9. **MUST distinguish `default`, `hover`, `focus-visible`, `active`, `disabled`, `loading`, `skeleton` with visually distinct presentations** at the default theme. `hover` and `focus-visible` MUST NOT be visually identical. `loading` (action-loading: user's action in flight, label is meaningful) and `skeleton` (content-loading: button definition awaiting backend data, label is not yet meaningful) MUST NOT be visually identical AND MUST be treated as mutually exclusive — if both `loading=true` and `skeleton=true`, `skeleton` MUST take precedence and a dev-mode warning MUST be emitted.
+9. **MUST distinguish `default`, `hover`, `focus-visible`, `active`, `disabled`, `isLoading`, `isSkeleton` with visually distinct presentations** at the default theme. `hover` and `focus-visible` MUST NOT be visually identical. `isLoading` (action-loading: user's action in flight, label is meaningful) and `isSkeleton` (content-loading: button definition awaiting backend data, label is not yet meaningful) MUST NOT be visually identical AND MUST be treated as mutually exclusive — if both `loading=true` and `skeleton=true`, `isSkeleton` MUST take precedence and a dev-mode warning MUST be emitted.
 
-10. **MUST emit a `data-state` attribute reflecting current observable state.** Values: `loading` (when `loading=true`), `skeleton` (when `skeleton=true`), `disabled` (when `disabled=true` and not loading/skeleton), absent otherwise. Lets analytics scrapers, integration tests, visual-regression suites, and custom CSS overlays target state without prop drilling. Convention borrowed from Radix UI.
+10. **MUST emit a `data-state` attribute reflecting current observable state.** Values: `isLoading` (when `loading=true`), `isSkeleton` (when `skeleton=true`), `disabled` (when `disabled=true` and not loading/skeleton), absent otherwise. Lets analytics scrapers, integration tests, visual-regression suites, and custom CSS overlays target state without prop drilling. Convention borrowed from Radix UI.
 
 11. **SHOULD use `:focus-visible` (NOT `:focus`) for the focus ring.** Focus ring on click is jarring; `:focus-visible` matches platform convention (ring on keyboard-induced focus only).
    - Reference: [MDN `:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible)
@@ -94,8 +94,8 @@ Items use RFC 2119 keywords (MUST · SHOULD · MAY). Each item is independently 
 - **Specification.6** — `Slot` composition over `as` because TypeScript inference fails for `<Button as={Link} to="..." />` — `to` is foreign to Button's prop type. `Slot` keeps the child's prop type intact.
 - **Specification.7** — Compound API (`Button.Icon`, `Button.Label`) reserved for components with real internal structure (Card, Dialog, Menu). For Button, slots are the simpler answer.
 - **Specification.8** — The atom rule's intent was bundle isolation. Tailwind makes this less critical (no per-component CSS to drag in), but the cleanliness benefit holds. Inlined SVG for spinner trades 15 lines of code for full atom-purity.
-- **Specification.9** — Identical hover / focus-visible visuals are a regression that creeps in when one is added without re-checking the other. Distinct visuals = a11y (focus locator works) + UX (state legibility). `loading` vs `skeleton` distinction earns its own clause because they answer different user questions ("is my action processing?" vs "has the button's content loaded yet?") — collapsing them into one prop forces consumers to encode the difference outside the component.
-- **Specification.10** — Observable state needs a non-ARIA address for analytics, integration tests, visual-regression diffing, and custom CSS overlays. `data-state` is the de facto ecosystem convention (Radix). Cannot be added later without modifying the component, hence ships in v1. `skeleton` joins the value set because content-loading is just as observable a state as action-loading.
+- **Specification.9** — Identical hover / focus-visible visuals are a regression that creeps in when one is added without re-checking the other. Distinct visuals = a11y (focus locator works) + UX (state legibility). `isLoading` vs `isSkeleton` distinction earns its own clause because they answer different user questions ("is my action processing?" vs "has the button's content loaded yet?") — collapsing them into one prop forces consumers to encode the difference outside the component.
+- **Specification.10** — Observable state needs a non-ARIA address for analytics, integration tests, visual-regression diffing, and custom CSS overlays. `data-state` is the de facto ecosystem convention (Radix). Cannot be added later without modifying the component, hence ships in v1. `isSkeleton` joins the value set because content-loading is just as observable a state as action-loading.
 - **Specification.11** — `:focus-visible` matches every modern browser's default; users who actually need always-visible focus ring set it via OS / browser preference, which `:focus-visible` honors.
 - **Specification.12** — Icon-only buttons are the most common a11y regression in any UI lib. Spec makes the obligation explicit; library does not auto-infer because icon names are arbitrary and frequently incorrect labels.
 - **Specification.13** — 24×24 is the WCAG 2.2 floor; `xs` is exactly at the limit. Below this, the button fails AA and must not exist as a size token.
