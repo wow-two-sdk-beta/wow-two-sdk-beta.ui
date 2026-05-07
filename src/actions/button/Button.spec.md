@@ -242,17 +242,20 @@ A long-press-suppressed click does NOT advance the throttle window (the gate hap
 {/* When user.name resolves: zero layout shift, label appears.                       */}
 ```
 
-**Image-overlay buttons** — use `variant="glass"` (built-in) plus className for positioning:
+**Image-overlay buttons** — compose with the [`<Overlay>`](../../layout/overlay/Overlay.spec.md) layout primitive instead of hand-writing positioning + opacity classes. `<Overlay>` handles preset corners / custom insets, hover/focus-within reveal, presence-based mount/unmount, and reduced-motion-safe transitions:
 
 ```tsx
-<Button variant="glass" tone="neutral" shape="circle" size="sm"
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
-        aria-label="Favorite">
-  <HeartIcon />
-</Button>
+<div className="group relative">
+  <img src={hero} alt="" />
+  <Overlay position="top-right" appearOn="hover" transition="fade-scale">
+    <Button variant="glass" shape="circle" size="sm" tone="neutral" aria-label="Favorite">
+      <HeartIcon />
+    </Button>
+  </Overlay>
+</div>
 ```
 
-(Future `<Overlay position="top-right" appearOn="hover">` layout helper may absorb the className boilerplate. `OverlayButton` is the slim wrapper that supplies these classnames + sets `variant="glass" shape="circle"`.)
+The previous `OverlayButton` wrapper was deleted in favor of this composition — `<Overlay>` extracts the positioning/visibility/transition concerns to a layout primitive that works with any child component (Button, Badge, IconButton, etc.).
 
 **React 19 form auto-pending** — wire `isLoading` to `useFormStatus()`:
 

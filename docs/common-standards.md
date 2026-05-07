@@ -85,6 +85,36 @@ Numbering runs continuously across groups so rules stay citable as
    - *Example — good:* `ButtonDataState` (`{Loading, Skeleton, Disabled}`)
      lives in `Button.tsx` because the values are Button-specific.
 
+## Component declaration comment
+
+10. **The single-line comment describing what a component IS belongs
+    immediately above the main exported component declaration** (the
+    `forwardRef` / `function` / `const ComponentName = ...` line), **NOT
+    at the top of the file.** A component file frequently opens with helper
+    types, internal hooks, constants, or sub-types before reaching the actual
+    component — anchoring the comment to the declaration ensures it documents
+    what a reader is *about* to read, not what they encountered N lines ago.
+    The top of the file is reserved for non-component context (helper types,
+    private hooks) when present; per Common.1 it MAY be omitted entirely.
+
+11. **The component-declaration comment SHOULD start with the verb "Renders"
+    AND describe the component's identity + typical use case — NOT its
+    features, props, variants, or API surface.** Feature lists, prop tables,
+    and variant matrices belong in the matching `*.spec.md` / `*.standard.md`
+    files (single source of truth — see Common.1). Listing features in the
+    component comment guarantees drift on every feature add.
+
+    Shape: `/* Renders {identity-noun-phrase} — {typical use case or content}. */`
+
+    - *Example — good:* `/* Renders an action button — for text and/or icon content. */`
+    - *Example — good:* `/* Renders a positioned overlay anchored to its nearest positioned ancestor — for image-corner controls, badges, hover-revealed actions, and conditionally mounted floating elements. */`
+    - *Example — good:* `/* Renders a spinning loader icon — for inline action-loading feedback or standalone progress indication. */`
+    - *Example — bad (feature list, decays on every prop add):*
+      `/* Renders a button supporting variant, tone, size, shape, isLoading, isSkeleton, asChild, debounce. */`
+    - *Example — bad (implementation detail — irrelevant to consumers):*
+      `/* Renders a button using Lucide icons + Tailwind variants. */`
+    - *Exception:* hooks (`use*`), utilities, and Slot-only re-exports use other shapes (typically: a verb describing what the function returns or does).
+
 ## Decision Record
 
 - **Common.1** — implementation files drift faster than docs; long file-level
@@ -118,3 +148,22 @@ Numbering runs continuously across groups so rules stay citable as
   default/comparison are the high-leverage extractions. Extracting one-off
   literals is over-engineering; extracting recurring ones eliminates "edit
   in N places" failure modes.
+- **Common.10** — the top of a component file is often crowded with
+  prerequisite declarations (helper types, internal hooks, sub-types,
+  constants) before the actual component appears. Putting the descriptive
+  comment at the file top forces the reader to scroll past N lines of
+  unrelated code before reaching what the comment describes; anchoring it
+  to the component declaration keeps the comment adjacent to its referent.
+  Top-of-file comments are still permitted (per Common.1) but should
+  describe the *file* (e.g. *"Helpers for X"*), not the component.
+- **Common.11** — "Renders" is a structural keyword that telegraphs the
+  file's category (component vs hook vs utility) at a glance. A reader
+  scanning a directory of `.ts` files can identify the components by
+  searching for `/* Renders` and find the canonical one-liners. Hooks
+  ("Returns…"), pure functions ("Computes…"), and constants ("Maps…") use
+  parallel verb-led shapes, but those conventions are looser — the strict
+  rule is component-only. The identity + use-case discipline (vs feature
+  enumeration) is what makes the comment drift-resistant: identity rarely
+  changes and use-cases are stable, while feature lists rot on every prop
+  added. Spec/standard files own the surface area; the comment is a shelf
+  label, not a user manual.

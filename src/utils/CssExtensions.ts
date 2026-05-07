@@ -18,6 +18,28 @@ export interface BoxSizeOverrides {
   minHeight?: SizeValue;
 }
 
+/* Absolute-positioning tokens — preset 9-anchor enum + raw inset overrides. */
+
+export type AbsolutePositionPreset =
+  | 'top-right'
+  | 'top-left'
+  | 'bottom-right'
+  | 'bottom-left'
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'center';
+
+export interface AbsoluteInsetOverrides {
+  top?: SizeValue;
+  right?: SizeValue;
+  bottom?: SizeValue;
+  left?: SizeValue;
+}
+
+export type AbsolutePosition = AbsolutePositionPreset | AbsoluteInsetOverrides;
+
 // =============================================================================
 // Token → CSS maps
 // =============================================================================

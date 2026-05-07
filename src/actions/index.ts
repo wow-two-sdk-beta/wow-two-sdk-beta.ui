@@ -8,7 +8,6 @@ export * from './segmentedControl';
 export * from './fab';
 export * from './copyButton';
 export * from './disclosureButton';
-export * from './overlayButton';
 export * from './toolbar';
 export * from './speedDial';
 export * from './backToTopButton';

@@ -197,7 +197,7 @@ Currently **EVERY** component is en-US-locked. The largest single gap. Plan:
 |---|---|
 | Enter/exit transitions | **DONE** — `Presence` primitive |
 | CSS keyframes/transitions | **DONE** — Tailwind animations |
-| Layout animations (FLIP) | **MAYBE** — case by case |
+| Layout animations (FLIP) | **NEXT** — concrete consumers: SortableList reflow · NotificationCenter / ToastStack item add+remove · TabIndicator slide · MasonryGrid auto-flow · DataGrid row reorder · KanbanBoard column shift. Approach: View Transitions API where supported + `useFlip` hook + `<AnimatedLayout>` primitive for older browsers. |
 | Gestures | **LATER** — couples with drag-drop |
 | Spring physics | **MAYBE** — only if Slider/Sheet need momentum |
 | Stagger | **MAYBE** |

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { Heart, Plus, Trash2, Pencil, ArrowRight, Save } from 'lucide-react';
 import { Icon } from '../../icons';
+import { Overlay } from '../../layout/overlay';
 import { Button } from './Button';
 
 /* Button — curated real-world recipes (CTA · Loading · Skeleton · GlassOverlay · …). */
@@ -106,9 +107,9 @@ export const CustomLoadingSlot: Story = {
   },
 };
 
-/* Glass overlay — `variant="glass" shape="circle"` over an image. The
-   consumer adds positioning + reveal-on-hover via className (or uses the
-   `OverlayButton` wrapper which bakes these in). */
+/* Glass overlay — `variant="glass" shape="circle"` over an image, composed
+   with `<Overlay>` for positioning + hover-reveal + reduced-motion-safe
+   transitions. */
 export const GlassOverlay: Story = {
   render: () => (
     <div
@@ -120,24 +121,16 @@ export const GlassOverlay: Story = {
         backgroundPosition: 'center',
       }}
     >
-      <Button
-        variant="glass"
-        shape="circle"
-        size="sm"
-        aria-label="Favorite"
-        className="absolute top-2 right-2"
-      >
-        <Icon icon={Heart} size={16} />
-      </Button>
-      <Button
-        variant="glass"
-        shape="circle"
-        size="sm"
-        aria-label="Edit"
-        className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        <Icon icon={Pencil} size={16} />
-      </Button>
+      <Overlay position="top-right">
+        <Button variant="glass" shape="circle" size="sm" aria-label="Favorite">
+          <Icon icon={Heart} size={16} />
+        </Button>
+      </Overlay>
+      <Overlay position="top-left" appearOn="hover" transition="fade-scale">
+        <Button variant="glass" shape="circle" size="sm" aria-label="Edit">
+          <Icon icon={Pencil} size={16} />
+        </Button>
+      </Overlay>
     </div>
   ),
 };

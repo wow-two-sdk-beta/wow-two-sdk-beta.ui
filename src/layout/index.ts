@@ -16,3 +16,4 @@ export * from './twoColumn';
 export * from './resizablePanels';
 export * from './pullToRefresh';
 export * from './appShell';
+export * from './overlay';

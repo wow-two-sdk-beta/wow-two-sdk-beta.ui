@@ -233,6 +233,7 @@ function useButtonInteractivity(opts: UseButtonInteractivityOptions) {
   };
 }
 
+/* Renders an action button — for text and/or icon content. */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {

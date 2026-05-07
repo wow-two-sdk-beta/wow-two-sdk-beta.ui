@@ -16,8 +16,16 @@ export type {
   PaddingProp,
   RadiusProp,
   BoxSizeOverrides,
+  AbsolutePositionPreset,
+  AbsoluteInsetOverrides,
+  AbsolutePosition,
 } from './CssExtensions';
 export { OptionalExtensions } from './OptionalExtensions';
 export { PressExtensions, type PressEvent } from './PressExtensions';
 export { HtmlElement, ButtonType } from './HtmlExtensions';
 export { Key } from './KeyboardExtensions';
+export { TransitionExtensions } from './TransitionExtensions';
+export type {
+  PresenceAnimationDurationProp,
+  PresenceAnimationDuration,
+} from './TransitionExtensions';

@@ -314,6 +314,23 @@ i18n leaks far beyond strings. See §7 for the full per-component leak inventory
 | Reduced motion | Disable transforms, keep opacity |
 | Motion tokens | Durations, easings (standard/emphasized/decelerated/accelerated) |
 
+**FLIP / animated layout shift — concrete consumers** (cross-ref `targets.md` 2.8 Motion):
+
+| Component | What FLIP unlocks |
+|---|---|
+| `SortableList` / `KanbanBoard` | Drag a card; siblings smoothly reflow into new positions |
+| `NotificationCenter` / `ToastStack` | Item add/remove → stack shifts smoothly instead of jumping |
+| `TabIndicator` | Active-tab underline slides between tabs instead of jump-cutting |
+| `MasonryGrid` | Items resize; neighbors reflow without flicker |
+| `DataGrid` row reorder | Sortable rows animate to new positions |
+| `Carousel` page swipes | Velocity-aware page-snap (where spring would also help — see Spring physics below) |
+
+Implementation directions: **View Transitions API** (`document.startViewTransition`) where browser-supported (Chrome 111+, Safari 18+, Firefox 129+), with a `useFlip` hook + `<AnimatedLayout>` primitive as the cross-browser fallback. Logged together because they share the measure-update-invert-play cycle.
+
+**Spring physics — when it earns the JS dependency:**
+
+Spring is a different motion *model*, not a different easing curve. CSS handles duration-based motion (`200ms ease-out`); springs handle physics-based motion (stiffness × damping × mass → emergent end time + interruption-aware velocity inheritance). The visible win shows up only in interruption-heavy interactions — drag-to-dismiss drawers, swipeable carousels, sortable lists with mid-flight target changes. For our `<Overlay>` opacity+scale fade, CSS `ease-out` approximates a spring's settle feel well enough that the upgrade isn't justified. Reconsider when shipping the first drag-driven primitive (Drawer dismiss is the obvious candidate) — at that point integrate Framer Motion or react-spring on a per-component basis rather than retrofitting the whole library.
+
 ### 4.9 Density / size
 
 | Sub-vector | Detail |
