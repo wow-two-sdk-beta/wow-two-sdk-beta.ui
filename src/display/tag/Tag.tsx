@@ -16,7 +16,8 @@ export interface TagProps
 
 /**
  * Pill with an optional close button. The close button is a raw `<button>`
- * (not `IconButton`) so this stays a strict atom.
+ * to keep the strict atom rule (Tag is L3, so importing Button would make
+ * this an atom-on-atom composition).
  */
 export const Tag = forwardRef<HTMLSpanElement, TagProps>(
   ({ children, onClose, closeLabel = 'Remove', variant, className, ...props }, ref) => (

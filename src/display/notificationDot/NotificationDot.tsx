@@ -34,7 +34,7 @@ const POS: Record<NonNullable<NotificationDotProps['position']>, string> = {
 
 /**
  * Tiny colored dot — unread/notification indicator. Pass `position` to
- * absolutely-place over a parent (e.g. on an Avatar or IconButton).
+ * absolutely-place over a parent (e.g. on an Avatar or `<Button shape="square"/circle">`).
  */
 export const NotificationDot = forwardRef<HTMLSpanElement, NotificationDotProps>(
   ({ tone = 'destructive', size = 'sm', pulse, position, className, ...props }, ref) => (

@@ -255,7 +255,7 @@ A long-press-suppressed click does NOT advance the throttle window (the gate hap
 </div>
 ```
 
-The previous `OverlayButton` wrapper was deleted in favor of this composition — `<Overlay>` extracts the positioning/visibility/transition concerns to a layout primitive that works with any child component (Button, Badge, IconButton, etc.).
+The previous `OverlayButton` wrapper was deleted in favor of this composition — `<Overlay>` extracts the positioning/visibility/transition concerns to a layout primitive that works with any child component (Button, Badge, Avatar, etc.).
 
 **React 19 form auto-pending** — wire `isLoading` to `useFormStatus()`:
 

@@ -22,7 +22,7 @@ const POS: Record<NonNullable<BadgeOverlayProps['position']>, string> = {
 /**
  * Decorator that overlays a badge / dot on top of any child. Use to
  * attach `CountBadge`, `NotificationDot`, or arbitrary `Badge` to an
- * `Avatar`, `IconButton`, or icon.
+ * `Avatar`, icon, or `<Button shape="square"/circle">`.
  */
 export const BadgeOverlay = forwardRef<HTMLDivElement, BadgeOverlayProps>(
   ({ children, badge, position = 'top-right', hidden, className, ...props }, ref) => (

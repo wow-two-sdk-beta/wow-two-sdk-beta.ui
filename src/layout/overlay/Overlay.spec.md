@@ -2,7 +2,7 @@
 
 > **Behavioral contract:** [`Overlay.standard.md`](./Overlay.standard.md)
 
-Layout primitive that absolutely-positions a child within its nearest positioned ancestor, with optional reveal-on-hover/focus and mount/unmount transitions. Intentionally presentational — applies to any component (Button, Badge, Icon, Image label, IconButton, anything).
+Layout primitive that absolutely-positions a child within its nearest positioned ancestor, with optional reveal-on-hover/focus and mount/unmount transitions. Intentionally presentational — applies to any component (Button, Badge, Avatar, Icon, Image label, anything).
 
 ## Anatomy
 

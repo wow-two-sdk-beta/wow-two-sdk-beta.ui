@@ -118,4 +118,4 @@ Inline citations above point at specific rule/section URLs. This section lists u
 - HTML Living Standard — https://html.spec.whatwg.org/multipage/form-elements.html
 - MDN HTMLButtonElement — https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement
 - i18n leak inventory — [`docs/analysis/ui-philosophy/ideas.md` §7](../../../docs/analysis/ui-philosophy/ideas.md)
-- Sibling: `ButtonGroup.standard.md` (TBD), `IconButton.standard.md` (TBD), `CopyButton.standard.md` (TBD), `ToggleButton.standard.md` (TBD)
+- Sibling: `ButtonGroup.standard.md` (TBD), `CopyButton.standard.md` (TBD), `ToggleButton.standard.md` (TBD). For icon-only buttons, use `<Button shape="square">` (or `<Button shape="circle">` for circular).

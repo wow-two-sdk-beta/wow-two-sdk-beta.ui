@@ -18,7 +18,8 @@ export interface NumberInputProps
 
 /**
  * Numeric input with stepper buttons. Steppers are raw `<button>` elements
- * (not `IconButton`) to keep the strict atom rule.
+ * to keep the strict atom rule (NumberInput is L3; importing Button would
+ * make this an atom-on-atom composition).
  */
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
   (

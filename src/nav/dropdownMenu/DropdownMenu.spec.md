@@ -29,7 +29,7 @@ Button-triggered menu — most common menu shape. Click the trigger to open; pic
 | `open`, `defaultOpen`, `onOpenChange` | — | — | no | Standard open-state shape. |
 | `placement` | Floating UI placement | `'bottom-start'` | no | Pass-through to `Menu`. |
 
-`DropdownMenu.Trigger`: `asChild` to use a custom button (e.g., `<Button>` or `<IconButton>`). Default renders a plain button.
+`DropdownMenu.Trigger`: `asChild` to use a custom button (e.g., `<Button>` text or `<Button shape="square">` icon-only). Default renders a plain button.
 `DropdownMenu.Item`: same shape as `Menu.Item`.
 
 ## Composition

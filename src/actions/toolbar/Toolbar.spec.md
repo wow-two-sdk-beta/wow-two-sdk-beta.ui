@@ -29,7 +29,7 @@ Same as `actions/button`'s focus/hover/disabled states.
 `Toolbar.Button` / `Toolbar.Link`: standard button/anchor props plus auto-roving-focus participation.
 
 ## Composition
-Compound. Same-domain reuse: caller can compose existing `actions/Button`, `IconButton`, `ToggleButton` inside `Toolbar.Button asChild`.
+Compound. Same-domain reuse: caller can compose existing `actions/Button` (text, `shape="square"`, or `shape="circle"`) and `ToggleButton` inside `Toolbar.Button asChild`.
 
 ## Accessibility
 - WAI-ARIA Toolbar pattern.

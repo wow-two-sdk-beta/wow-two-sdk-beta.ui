@@ -1,5 +1,4 @@
 export * from './button';
-export * from './iconButton';
 export * from './link';
 export * from './buttonGroup';
 export * from './toggleButton';

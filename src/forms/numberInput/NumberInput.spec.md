@@ -1,7 +1,7 @@
 # NumberInput
 
 ## Purpose
-`<input type="number">` with stepper buttons. Steppers are raw `<button>` to keep the strict atom rule (no `IconButton` import).
+`<input type="number">` with stepper buttons. Steppers are raw `<button>` to keep the strict atom rule (NumberInput is L3, so importing Button would make this an atom-on-atom composition).
 
 ## Props
 | Name | Type | Default |
