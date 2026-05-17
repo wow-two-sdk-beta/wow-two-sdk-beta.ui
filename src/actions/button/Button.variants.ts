@@ -31,6 +31,8 @@ export const buttonVariants = tv({
       ghost: 'bg-transparent',
       link: 'bg-transparent !h-auto !p-0 !rounded-none underline-offset-4 hover:underline focus-visible:ring-offset-0',
       glass:
+        'bg-black/70 text-white backdrop-blur-md hover:bg-black/85 active:bg-black/90',
+      'glass-surface':
         'bg-black/70 text-white backdrop-blur-md hover:bg-black/85 active:bg-black/90 border-white/10',
     },
     tone: {
@@ -104,7 +106,7 @@ export const buttonVariants = tv({
     { variant: 'link', tone: 'success',  class: 'text-success' },
     { variant: 'link', tone: 'warning',  class: 'text-warning' },
 
-    // glass intentionally omitted — tone-neutral by design.
+    // glass + glass-surface intentionally omitted — tone-neutral by design.
   ],
   defaultVariants: {
     variant: 'solid',
