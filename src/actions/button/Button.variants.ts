@@ -31,9 +31,9 @@ export const buttonVariants = tv({
       ghost: 'bg-transparent',
       link: 'bg-transparent !h-auto !p-0 !rounded-none underline-offset-4 hover:underline focus-visible:ring-offset-0',
       glass:
-        'bg-black/70 text-white backdrop-blur-md hover:bg-black/85 active:bg-black/90',
+        'bg-black/55 text-white backdrop-blur-md hover:bg-black/70 active:bg-black/80',
       'glass-surface':
-        'bg-black/70 text-white backdrop-blur-md hover:bg-black/85 active:bg-black/90 border-white/10',
+        'bg-black/55 text-white backdrop-blur-md hover:bg-black/70 active:bg-black/80 border-white/10',
     },
     tone: {
       primary: '',
