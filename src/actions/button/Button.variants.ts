@@ -106,7 +106,11 @@ export const buttonVariants = tv({
     { variant: 'link', tone: 'success',  class: 'text-success' },
     { variant: 'link', tone: 'warning',  class: 'text-warning' },
 
-    // glass + glass-surface intentionally omitted — tone-neutral by design.
+    // === GLASS / GLASS-SURFACE × tone ===
+    // Only `danger` is wired today (matches old image-overlay convention: red on hover).
+    // Other tones are inert — base dark glass renders identically across tones.
+    { variant: 'glass',         tone: 'danger', class: 'hover:bg-destructive/65 active:bg-destructive/75' },
+    { variant: 'glass-surface', tone: 'danger', class: 'hover:bg-destructive/65 active:bg-destructive/75' },
   ],
   defaultVariants: {
     variant: 'solid',

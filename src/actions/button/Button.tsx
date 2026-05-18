@@ -337,8 +337,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const content = loadingActive ? (
       <>
         {loadingSlot ?? <Spinner />}
-        {loadingText !== undefined ? <span>{loadingText}</span> : children}
-        {trailingSlot}
+        {loadingText !== undefined && <span>{loadingText}</span>}
       </>
     ) : (
       <>
@@ -347,6 +346,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {trailingSlot}
       </>
     );
+
+    /* asChild bypasses the fragment-wrapped content so Slot can merge className/style onto the user's element. leadingSlot/trailingSlot/isLoading rendering aren't supported in asChild mode — consumer owns the rendered children entirely. */
+    const renderedContent = asChild ? children : content;
 
     return (
       <Comp
@@ -371,7 +373,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...eventHandlers}
         {...rest}
       >
-        {content}
+        {renderedContent}
       </Comp>
     );
   },
