@@ -21,9 +21,12 @@ import {
   Key,
   OptionalExtensions,
   PressExtensions,
+  type BoxSizeOverrides,
   type PaddingProp,
   type PressEvent,
   type RadiusProp,
+  type SizePreset,
+  type SizeUnion,
   type SizeValue,
 } from '../../utils';
 import { Slot } from '../../primitives';
@@ -32,6 +35,21 @@ import { useDebounceHandler } from '../../hooks';
 import { buttonVariants, type ButtonVariants } from './Button.variants';
 
 const COMPONENT_NAME = 'Button';
+
+/* Named size presets — used for variant lookup. Any other string/number/object flows to box-overrides. Subset of the canonical `SizePreset` vocabulary. */
+type ButtonSizePreset = Extract<SizePreset, 'xs' | 'sm' | 'md' | 'lg' | 'xl'>;
+const BUTTON_SIZE_PRESETS: ReadonlySet<string> = new Set<ButtonSizePreset>(['xs', 'sm', 'md', 'lg', 'xl']);
+
+/**
+ * Union accepted by Button's `size` prop:
+ * - preset: `'xs' | 'sm' | 'md' | 'lg' | 'xl'` — applies the variant class (height + padding + font)
+ * - `number`: raw px, applied to both width and height (square shorthand)
+ * - `string` (non-preset): any CSS unit (`'2rem'`, `'24px'`), applied to both width and height
+ * - object: `{ width?, height?, minWidth?, minHeight?, boxSize? }` — explicit per-dim overrides
+ *
+ * Raw or object forms set inline dimensions only — no padding/font baseline. Combine with `padding` if text-bearing.
+ */
+export type ButtonSize = SizeUnion<ButtonSizePreset>;
 
 /* Observable state surfaced via the `data-state` DOM attribute. */
 const ButtonDataState = {
@@ -43,7 +61,10 @@ type ButtonDataState = (typeof ButtonDataState)[keyof typeof ButtonDataState];
 
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'disabled'>,
-    ButtonVariants {
+    Omit<ButtonVariants, 'size'> {
+  /* Preset name OR raw value OR explicit dim object — see `ButtonSize` for details. */
+  size?: ButtonSize;
+
   /* Slot before children (logical start). */
   leadingSlot?: ReactNode;
 
@@ -91,6 +112,9 @@ export interface ButtonProps
 
   /* Reserve a min height — symmetric with `minWidth`. */
   minHeight?: SizeValue;
+
+  /* Square shorthand — applied as fallback for both `width` and `height`. Explicit `width`/`height` win when both are set. Pairs with `shape="square"` / `shape="circle"` for icon buttons. */
+  boxSize?: SizeValue;
 
   /* Default `ButtonType.Button` — NOT browser-default `'submit'`. */
   type?: ButtonType;
@@ -251,6 +275,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       height,
       minWidth,
       minHeight,
+      boxSize,
       leadingSlot,
       trailingSlot,
       loadingSlot,
@@ -308,10 +333,25 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const Comp = asChild ? Slot : HtmlElement.Button;
 
+    /* Parse the union-typed `size` prop into preset (for variant lookup) + box overrides (for inline dims). */
+    const { preset: sizePreset, box: sizeBox } = CssExtensions.parseSizeUnion<ButtonSizePreset>(
+      size,
+      BUTTON_SIZE_PRESETS,
+    );
+
     const overrideStyle: CSSProperties | undefined = (() => {
       const padStyle = CssExtensions.resolvePadding(padding);
       const radStyle = CssExtensions.resolveRadius(radius);
-      const boxStyle = CssExtensions.resolveBoxSize({ width, height, minWidth, minHeight });
+      /* Box overrides — `size` (object form or raw value) is the base; flat width/height/minWidth/minHeight/boxSize props win when both are set. */
+      const composedBox: BoxSizeOverrides = {
+        ...(sizeBox ?? {}),
+        ...(width !== undefined ? { width } : {}),
+        ...(height !== undefined ? { height } : {}),
+        ...(minWidth !== undefined ? { minWidth } : {}),
+        ...(minHeight !== undefined ? { minHeight } : {}),
+        ...(boxSize !== undefined ? { boxSize } : {}),
+      };
+      const boxStyle = CssExtensions.resolveBoxSize(composedBox);
       if (!padStyle && !radStyle && !boxStyle && !style) return undefined;
       return { ...padStyle, ...radStyle, ...boxStyle, ...style };
     })();
@@ -358,7 +398,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           buttonVariants({
             variant,
             tone,
-            size,
+            size: sizePreset,
             shape,
             fullWidth: isFullWidth,
             wrap: isMultiline,

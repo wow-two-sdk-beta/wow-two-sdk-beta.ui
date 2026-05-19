@@ -4,10 +4,16 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from 'react';
-import { cn } from '../../utils';
+import { cn, CssExtensions, type SizePreset, type SizeUnion } from '../../utils';
 import { avatarVariants, type AvatarVariants } from './Avatar.variants';
 
 const COMPONENT_NAME = 'Avatar';
+
+/* Avatar supports the full canonical preset vocabulary. */
+type AvatarSizePreset = SizePreset;
+const AVATAR_SIZE_PRESETS: ReadonlySet<string> = new Set<AvatarSizePreset>([
+  'xs', 'sm', 'md', 'lg', 'xl', '2xl',
+]);
 
 /* Solid palette for autoColor — 17 distinct hues, dark-mode aware. Light: bg-100/text-800. Dark: bg-900/text-100. No opacity — keeps contrast deterministic across themes. */
 const AUTO_COLOR_PALETTE = [
@@ -52,7 +58,7 @@ function getInitials(name: string): string {
 
 export interface AvatarProps
   extends Omit<ComponentPropsWithoutRef<'span'>, 'children'>,
-    AvatarVariants {
+    Omit<AvatarVariants, 'size'> {
   /* Image source. Falls back to `name` initials or `fallback` on error. */
   src?: string;
 
@@ -67,6 +73,9 @@ export interface AvatarProps
 
   /* When true (and no explicit non-neutral `tone` / non-solid `bgStyle`), derive a deterministic soft-color tint from `name` hash → 17-color palette. */
   autoColor?: boolean;
+
+  /* Size: preset (`xs|sm|md|lg|xl|2xl`) → variant class · raw number/string → square inline · object → explicit dims. See `SizeUnion`. */
+  size?: SizeUnion<AvatarSizePreset>;
 }
 
 /* Image avatar with initials fallback. Supports semantic tones, deterministic auto-color from name hash, gradient bg, ring, and loading skeleton. Composable with `<BadgeOverlay>` for status dots / counts / icons. */
@@ -92,6 +101,13 @@ export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(
     const [errored, setErrored] = useState(false);
     const showImage = !!src && !errored && !isLoading;
 
+    /* Parse union-typed `size` — preset routes to variant class, raw/object routes to inline dims. */
+    const { preset: sizePreset, box: sizeBox } = CssExtensions.parseSizeUnion<AvatarSizePreset>(
+      size,
+      AVATAR_SIZE_PRESETS,
+    );
+    const boxStyle = sizeBox ? CssExtensions.resolveBoxSize(sizeBox) : undefined;
+
     /* autoColor only fires when (a) name is set, (b) no explicit non-neutral tone, (c) bgStyle isn't gradient. Explicit dials win. */
     const autoColorClass =
       autoColor &&
@@ -108,10 +124,11 @@ export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(
       <span
         ref={ref}
         className={cn(
-          avatarVariants({ size, shape, tone: effectiveTone, bgStyle, ring, isLoading }),
+          avatarVariants({ size: sizePreset, shape, tone: effectiveTone, bgStyle, ring, isLoading }),
           autoColorClass,
           className,
         )}
+        style={boxStyle}
         data-loading={isLoading ? 'true' : undefined}
         aria-busy={isLoading ? true : undefined}
         {...props}

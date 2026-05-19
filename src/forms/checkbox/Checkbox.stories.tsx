@@ -12,7 +12,7 @@ type Story = StoryObj<typeof Checkbox>;
 
 const VARIANTS = ['solid', 'soft', 'outline', 'ghost', 'glass', 'glass-surface'] as const;
 const TONES = ['primary', 'neutral', 'danger', 'success', 'warning'] as const;
-const SIZES = ['sm', 'md', 'lg'] as const;
+const SIZES = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 
 function DefaultStory() {
   const [checked, setChecked] = useState(false);
@@ -104,6 +104,30 @@ export const Disabled: Story = {
       <Checkbox disabled />
       <Checkbox disabled defaultChecked />
       <Checkbox disabled indeterminate />
+    </div>
+  ),
+};
+
+/* Size union — same prop accepts preset, raw px, CSS string, or dim object. */
+export const SizeUnionForms: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">preset (lg)</span>
+        <Checkbox size="lg" defaultChecked />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">raw px (32)</span>
+        <Checkbox size={32} defaultChecked />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">CSS unit (1.5rem)</span>
+        <Checkbox size="1.5rem" defaultChecked />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">explicit dims</span>
+        <Checkbox size={{ width: 24, height: 24 }} defaultChecked />
+      </div>
     </div>
   ),
 };

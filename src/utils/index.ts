@@ -16,6 +16,8 @@ export type {
   PaddingProp,
   RadiusProp,
   BoxSizeOverrides,
+  SizeUnion,
+  SizePreset,
   AbsolutePositionPreset,
   AbsoluteInsetOverrides,
   AbsolutePosition,

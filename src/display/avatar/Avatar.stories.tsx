@@ -106,3 +106,31 @@ export const Combined: Story = {
     </div>
   ),
 };
+
+/* Size union — same prop accepts preset, raw px, CSS string, or dim object. */
+export const SizeUnionForms: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">preset (xl)</span>
+        <Avatar name="Sam Person" size="xl" />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">raw px (56)</span>
+        <Avatar name="Sam Person" size={56} />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">CSS unit (3.5rem)</span>
+        <Avatar name="Sam Person" size="3.5rem" />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">explicit dims</span>
+        <Avatar name="Sam Person" size={{ width: 80, height: 48 }} shape="square" />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-32">aspect-ratio</span>
+        <Avatar name="Sam Person" size={{ width: 80, aspectRatio: '16/9' }} shape="square" />
+      </div>
+    </div>
+  ),
+};

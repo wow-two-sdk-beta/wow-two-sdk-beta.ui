@@ -16,7 +16,16 @@ export interface BoxSizeOverrides {
   height?: SizeValue;
   minWidth?: SizeValue;
   minHeight?: SizeValue;
+  maxWidth?: SizeValue;
+  maxHeight?: SizeValue;
+  /** Shorthand for square boxes — applied as fallback for both `width` and `height`. Explicit `width`/`height` win when both are set. */
+  boxSize?: SizeValue;
+  /** CSS `aspect-ratio`. String like `'16/9'` or number like `1.5`. Pairs naturally with a single width/height. */
+  aspectRatio?: string | number;
 }
+
+/** Canonical size preset vocabulary — shared across components. Each component picks the subset it supports via `Extract<SizePreset, ...>` and owns its internal dimension mapping. */
+export type SizePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 /* Absolute-positioning tokens — preset 9-anchor enum + raw inset overrides. */
 
@@ -108,12 +117,15 @@ function resolveRadius(radius: RadiusProp | undefined): CSSProperties | undefine
 function resolveBoxSize(overrides: BoxSizeOverrides): CSSProperties | undefined {
   const style: CSSProperties = {};
   let hasAny = false;
-  if (overrides.width !== undefined) {
-    style.width = toCss(overrides.width);
+  // boxSize is the fallback for width AND height — explicit dims win.
+  const effectiveWidth = overrides.width ?? overrides.boxSize;
+  const effectiveHeight = overrides.height ?? overrides.boxSize;
+  if (effectiveWidth !== undefined) {
+    style.width = toCss(effectiveWidth);
     hasAny = true;
   }
-  if (overrides.height !== undefined) {
-    style.height = toCss(overrides.height);
+  if (effectiveHeight !== undefined) {
+    style.height = toCss(effectiveHeight);
     hasAny = true;
   }
   if (overrides.minWidth !== undefined) {
@@ -124,7 +136,49 @@ function resolveBoxSize(overrides: BoxSizeOverrides): CSSProperties | undefined 
     style.minHeight = toCss(overrides.minHeight);
     hasAny = true;
   }
+  if (overrides.maxWidth !== undefined) {
+    style.maxWidth = toCss(overrides.maxWidth);
+    hasAny = true;
+  }
+  if (overrides.maxHeight !== undefined) {
+    style.maxHeight = toCss(overrides.maxHeight);
+    hasAny = true;
+  }
+  if (overrides.aspectRatio !== undefined) {
+    style.aspectRatio = String(overrides.aspectRatio);
+    hasAny = true;
+  }
   return hasAny ? style : undefined;
+}
+
+/** Union type for size props that accept either a named preset, a raw value (applied as `boxSize`), or an explicit dim object. */
+export type SizeUnion<P extends string> =
+  | P
+  | (string & {}) // keeps preset literals in autocomplete while accepting any CSS unit string
+  | number
+  | BoxSizeOverrides;
+
+/**
+ * Parse a union-style size prop into (a) a preset name (if matched), or (b) a `BoxSizeOverrides` payload.
+ *
+ * Resolution order:
+ * - `undefined`         → `{}`
+ * - object              → `{ box: input }`
+ * - preset string       → `{ preset: input }`
+ * - any other string    → `{ box: { boxSize: input } }`
+ * - number              → `{ box: { boxSize: input } }`
+ */
+function parseSizeUnion<P extends string>(
+  input: SizeUnion<P> | undefined,
+  presets: ReadonlySet<string>,
+): { preset?: P; box?: BoxSizeOverrides } {
+  if (input === undefined) return {};
+  if (typeof input === 'object' && input !== null) return { box: input };
+  if (typeof input === 'string' && presets.has(input)) return { preset: input as P };
+  if (typeof input === 'number' || typeof input === 'string') {
+    return { box: { boxSize: input } };
+  }
+  return {};
 }
 
 // =============================================================================
@@ -136,6 +190,7 @@ export const CssExtensions = {
   resolvePadding,
   resolveRadius,
   resolveBoxSize,
+  parseSizeUnion,
   PADDING_TOKEN_TO_CSS,
   RADIUS_TOKEN_TO_CSS,
 } as const;

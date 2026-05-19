@@ -1,26 +1,47 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
 import { Check, Minus } from 'lucide-react';
-import { cn } from '../../utils';
+import { cn, CssExtensions, type SizePreset, type SizeUnion } from '../../utils';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
 import { checkboxVariants, type CheckboxVariants } from './Checkbox.variants';
 
 const COMPONENT_NAME = 'Checkbox';
 
+/* Checkbox supports the 5-preset core (skips `2xl` — outsized for a form control). */
+type CheckboxSizePreset = Extract<SizePreset, 'xs' | 'sm' | 'md' | 'lg' | 'xl'>;
+const CHECKBOX_SIZE_PRESETS: ReadonlySet<string> = new Set<CheckboxSizePreset>([
+  'xs', 'sm', 'md', 'lg', 'xl',
+]);
+
+/* Outer wrapper box dim per preset. */
+const BOX_SIZE_CLASS: Record<CheckboxSizePreset, string> = {
+  xs: 'h-3.5 w-3.5',  // 14px — dense / mobile-tight (consumer must ensure ≥24px hit target via wrapping label)
+  sm: 'h-4 w-4',      // 16px
+  md: 'h-5 w-5',      // 20px (default)
+  lg: 'h-6 w-6',      // 24px (WCAG-compliant standalone)
+  xl: 'h-7 w-7',      // 28px (emphasis / a11y-first)
+};
+
+/* Inner icon dim per preset — scales proportionally to box. */
+const ICON_SIZE_CLASS: Record<CheckboxSizePreset, string> = {
+  xs: 'h-2.5 w-2.5',
+  sm: 'h-3 w-3',
+  md: 'h-3.5 w-3.5',
+  lg: 'h-4 w-4',
+  xl: 'h-5 w-5',
+};
+
+/* Fallback icon dim when raw/object size used — middle of scale. */
+const DEFAULT_ICON_CLASS = 'h-3 w-3';
+
 export interface CheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'>,
     CheckboxVariants {
-  /* Box size — sm 16px · md 20px · lg 24px. */
-  size?: 'sm' | 'md' | 'lg';
+  /* Size: preset (`xs|sm|md|lg|xl`) → box + icon scale · raw number/string → square inline · object → explicit dims. See `SizeUnion`. */
+  size?: SizeUnion<CheckboxSizePreset>;
 
   /* Tristate visual — input stays `checked={false}` but renders as a dash with the same checked-state styling. */
   indeterminate?: boolean;
 }
-
-const SIZE_CLASS: Record<NonNullable<CheckboxProps['size']>, string> = {
-  sm: 'h-4 w-4',
-  md: 'h-5 w-5',
-  lg: 'h-6 w-6',
-};
 
 /* When indeterminate=true, apply the compound's checked classes regardless of peer-checked state. */
 const INDETERMINATE_CHECKED_CLASS: Record<
@@ -90,8 +111,21 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   ) => {
     const ctx = useFormControl();
     const isDisabled = disabled ?? ctx?.isDisabled;
+
+    /* Parse union-typed `size` — preset routes to box+icon class lookup, raw/object routes to inline dims. */
+    const { preset: sizePreset, box: sizeBox } = CssExtensions.parseSizeUnion<CheckboxSizePreset>(
+      size,
+      CHECKBOX_SIZE_PRESETS,
+    );
+    const boxClass = sizePreset ? BOX_SIZE_CLASS[sizePreset] : undefined;
+    const iconClass = sizePreset ? ICON_SIZE_CLASS[sizePreset] : DEFAULT_ICON_CLASS;
+    const boxStyle = sizeBox ? CssExtensions.resolveBoxSize(sizeBox) : undefined;
+
     return (
-      <span className={cn('relative inline-flex shrink-0', SIZE_CLASS[size], className)}>
+      <span
+        className={cn('relative inline-flex shrink-0', boxClass, className)}
+        style={boxStyle}
+      >
         <input
           ref={ref}
           type="checkbox"
@@ -112,9 +146,9 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           )}
         >
           {indeterminate ? (
-            <Minus className="h-3 w-3" />
+            <Minus className={iconClass} />
           ) : (
-            <Check className="h-3 w-3 opacity-0 peer-checked:opacity-100" />
+            <Check className={cn(iconClass, 'opacity-0 peer-checked:opacity-100')} />
           )}
         </span>
       </span>
