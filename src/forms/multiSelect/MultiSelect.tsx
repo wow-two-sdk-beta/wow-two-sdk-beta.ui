@@ -253,10 +253,12 @@ export interface MultiSelectItemProps {
 export const MultiSelectItem = forwardRef<HTMLDivElement, MultiSelectItemProps>(
   function MultiSelectItem(props, ref) {
     const ctx = useMultiSelectContext();
+    /* Stable refs out of ctx — same rationale as SelectItem (see comment there). */
+    const { registerLabel, unregisterLabel } = ctx;
     useEffect(() => {
-      ctx.registerLabel(props.value, props.children);
-      return () => ctx.unregisterLabel(props.value);
-    }, [ctx, props.value, props.children]);
+      registerLabel(props.value, props.children);
+      return () => unregisterLabel(props.value);
+    }, [registerLabel, unregisterLabel, props.value, props.children]);
     return <ListboxItem ref={ref} {...props} />;
   },
 );

@@ -418,18 +418,22 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function S
   ref,
 ) {
   const ctx = useSelectContext();
+  /* Destructure the stable useCallback refs from ctx so the effect deps don't churn
+     when ctx is rebuilt by items-state updates. Without this we re-enter the
+     effect every items change → unregister+register → new items → infinite loop. */
+  const { registerItem, unregisterItem, query } = ctx;
   const itemText = useMemo(
     () => text ?? extractText(children),
     [text, children],
   );
 
   useEffect(() => {
-    ctx.registerItem({ value, label: children, text: itemText });
-    return () => ctx.unregisterItem(value);
-  }, [ctx, value, children, itemText]);
+    registerItem({ value, label: children, text: itemText });
+    return () => unregisterItem(value);
+  }, [registerItem, unregisterItem, value, children, itemText]);
 
   const matchesQuery =
-    !ctx.query || itemText.toLowerCase().includes(ctx.query.toLowerCase());
+    !query || itemText.toLowerCase().includes(query.toLowerCase());
   if (!matchesQuery) return null;
 
   return (
