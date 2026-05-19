@@ -600,7 +600,7 @@ Per category, the hidden complexity *beyond* "render pixels".
 
 | Component | Vectors |
 |---|---|
-| Avatar | Initials fallback · color-from-name hash · status badge · size · group (overlap, "+N") |
+| Avatar | Initials fallback · color-from-name hash · semantic tone · gradient bg · ring · loading skeleton · status/count/icon badge (via BadgeOverlay) · group (overlap, "+N" via AvatarGroup) · deferred: identicon/jdenticon patterns · multi-source cascade (gravatar → custom → initials) · crossfade on src change · blur-up low-res placeholder · long-press preview · bot/AI marker · emoji avatar · verified frame · activity pulse (speaking/typing ring) · locale-aware initials (CJK single-char) · custom initials resolver fn · forced-colors a11y stroke |
 | Image | Lazy · blur-up · fallback · aspect-ratio · object-fit · srcset · loading priority |
 | Video / Audio | Custom controls · captions/subtitles (VTT) · poster · keyboard scrub · PiP · fullscreen |
 | Progress | Linear/circular/segmented · indeterminate · `aria-valuetext` · color by threshold |
