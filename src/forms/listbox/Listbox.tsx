@@ -8,9 +8,12 @@ import {
   useMemo,
   useRef,
   useState,
+  type ForwardedRef,
   type HTMLAttributes,
   type KeyboardEvent,
+  type ReactElement,
   type ReactNode,
+  type Ref,
 } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '../../utils';
@@ -23,18 +26,24 @@ import {
   listboxVariants,
 } from './Listbox.variants';
 
+/** Equality comparer — used to match items against the current selection. */
+export type EqualityFn<T> = (a: T, b: T) => boolean;
+
+/* Default equality: Object.is. Correct for primitives + NaN; reference-equality for objects. */
+const defaultEquals: EqualityFn<unknown> = (a, b) => Object.is(a, b);
+
 interface ItemEntry {
   id: string;
-  value: string;
+  value: unknown;
   disabled: boolean;
-  ref: HTMLDivElement | null;
 }
 
 interface ListboxContextValue {
   multiple: boolean;
-  values: string[];
+  values: unknown[];
+  isEqual: EqualityFn<unknown>;
   activeId: string | null;
-  onItemSelect: (value: string) => void;
+  onItemSelect: (value: unknown) => void;
   registerItem: (entry: ItemEntry) => void;
   unregisterItem: (id: string) => void;
   setActiveId: (id: string | null) => void;
@@ -48,97 +57,107 @@ function useListboxContext() {
   return ctx;
 }
 
-type SingleProps = {
+type SingleProps<T> = {
   multiple?: false;
-  value?: string;
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
+  value?: T;
+  defaultValue?: T;
+  onValueChange?: (value: T | undefined) => void;
 };
-type MultiProps = {
+
+type MultiProps<T> = {
   multiple: true;
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (value: string[]) => void;
+  value?: T[];
+  defaultValue?: T[];
+  onValueChange?: (value: T[]) => void;
 };
 
-export type ListboxProps = HTMLAttributes<HTMLDivElement> &
-  (SingleProps | MultiProps) & {
-    /** Disable all items. */
-    disabled?: boolean;
-    /** Optional class to override container styles. */
-    className?: string;
-    children: ReactNode;
-  };
+type CommonProps<T> = {
+  /** Disable all items. */
+  disabled?: boolean;
+  /** Custom equality. Defaults to `Object.is`. */
+  isEqual?: EqualityFn<T>;
+  className?: string;
+  children: ReactNode;
+};
 
-export const Listbox = forwardRef<HTMLDivElement, ListboxProps>(function Listbox(
-  props,
-  ref,
-) {
+export type ListboxProps<T = string> = Omit<
+  HTMLAttributes<HTMLDivElement>,
+  'defaultValue' | 'onChange'
+> &
+  (SingleProps<T> | MultiProps<T>) &
+  CommonProps<T>;
+
+function ListboxImpl<T>(
+  props: ListboxProps<T>,
+  ref: ForwardedRef<HTMLDivElement>,
+): ReactElement {
   const {
     multiple = false,
     value,
     defaultValue,
     onValueChange,
+    isEqual,
     disabled,
     className,
     children,
     onKeyDown,
     ...rest
-  } = props as ListboxProps & {
+  } = props as ListboxProps<T> & {
     multiple?: boolean;
-    value?: string | string[];
-    defaultValue?: string | string[];
-    onValueChange?: ((v: string) => void) | ((v: string[]) => void);
+    value?: T | T[];
+    defaultValue?: T | T[];
+    onValueChange?: ((v: T | undefined) => void) | ((v: T[]) => void);
   };
 
-  const initial: string | string[] =
-    defaultValue ?? (multiple ? [] : '');
-  const [current, setCurrent] = useControlled<string | string[]>({
+  const equals = (isEqual as EqualityFn<unknown> | undefined) ?? defaultEquals;
+
+  const initial: T | T[] | undefined = defaultValue ?? (multiple ? ([] as T[]) : undefined);
+  const [current, setCurrent] = useControlled<T | T[] | undefined>({
     controlled: value,
     default: initial,
-    onChange: onValueChange as (v: string | string[]) => void,
+    onChange: onValueChange as (v: T | T[] | undefined) => void,
   });
-  const values = useMemo(
-    () => (Array.isArray(current) ? current : current ? [current] : []),
-    [current],
-  );
+
+  const values: unknown[] = useMemo(() => {
+    if (Array.isArray(current)) return current as unknown[];
+    return current === undefined ? [] : [current];
+  }, [current]);
 
   const items = useRef<ItemEntry[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const registerItem = useCallback((entry: ItemEntry) => {
-    if (!items.current.some((i) => i.id === entry.id)) items.current.push(entry);
-  }, []);
-  const updateItem = useCallback((entry: ItemEntry) => {
     const idx = items.current.findIndex((i) => i.id === entry.id);
     if (idx >= 0) items.current[idx] = entry;
+    else items.current.push(entry);
   }, []);
+
   const unregisterItem = useCallback((id: string) => {
     items.current = items.current.filter((i) => i.id !== id);
   }, []);
 
   const onItemSelect = useCallback(
-    (next: string) => {
+    (next: unknown) => {
       if (multiple) {
-        const cur = Array.isArray(current) ? current : [];
-        const has = cur.includes(next);
-        setCurrent(has ? cur.filter((v) => v !== next) : [...cur, next]);
+        const cur = (Array.isArray(current) ? current : []) as unknown[];
+        const has = cur.some((v) => equals(v, next));
+        const out = has ? cur.filter((v) => !equals(v, next)) : [...cur, next];
+        (setCurrent as (v: unknown[]) => void)(out);
       } else {
-        setCurrent(next);
+        (setCurrent as (v: unknown) => void)(next);
       }
     },
-    [multiple, current, setCurrent],
+    [multiple, current, setCurrent, equals],
   );
 
   // Initialise active descendant — first selected, else first enabled.
   useEffect(() => {
     if (activeId) return;
     const firstSelected = items.current.find(
-      (i) => !i.disabled && values.includes(i.value),
+      (i) => !i.disabled && values.some((v) => equals(v, i.value)),
     );
     const firstEnabled = items.current.find((i) => !i.disabled);
     setActiveId((firstSelected ?? firstEnabled)?.id ?? null);
-    // run once after mount when items have registered
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -204,17 +223,14 @@ export const Listbox = forwardRef<HTMLDivElement, ListboxProps>(function Listbox
     () => ({
       multiple,
       values,
+      isEqual: equals,
       activeId,
       onItemSelect,
-      registerItem: (e) => {
-        const existing = items.current.find((i) => i.id === e.id);
-        if (existing) updateItem(e);
-        else registerItem(e);
-      },
+      registerItem,
       unregisterItem,
       setActiveId,
     }),
-    [multiple, values, activeId, onItemSelect, registerItem, unregisterItem, updateItem],
+    [multiple, values, equals, activeId, onItemSelect, registerItem, unregisterItem],
   );
 
   return (
@@ -234,10 +250,15 @@ export const Listbox = forwardRef<HTMLDivElement, ListboxProps>(function Listbox
       </div>
     </ListboxContext.Provider>
   );
-});
+}
 
-export interface ListboxItemProps extends HTMLAttributes<HTMLDivElement> {
-  value: string;
+const ListboxForwardRef = forwardRef(ListboxImpl) as <T = string>(
+  props: ListboxProps<T> & { ref?: Ref<HTMLDivElement> },
+) => ReactElement;
+
+export interface ListboxItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+  /** Item value. Typed as `unknown` at call site; compared via parent Listbox's `isEqual`. */
+  value: unknown;
   disabled?: boolean;
   children: ReactNode;
 }
@@ -251,11 +272,11 @@ export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    ctx.registerItem({ id, value, disabled, ref: ref.current });
+    ctx.registerItem({ id, value, disabled });
     return () => ctx.unregisterItem(id);
   }, [ctx, id, value, disabled]);
 
-  const isSelected = ctx.values.includes(value);
+  const isSelected = ctx.values.some((v) => ctx.isEqual(v, value));
   const isActive = ctx.activeId === id;
   const state = disabled
     ? 'disabled'
@@ -332,16 +353,20 @@ export function ListboxEmpty({ children, className, ...rest }: HTMLAttributes<HT
   );
 }
 
-type ListboxComponent = typeof Listbox & {
+type ListboxComponent = (<T = string>(
+  props: ListboxProps<T> & { ref?: Ref<HTMLDivElement> },
+) => ReactElement) & {
   Item: typeof ListboxItem;
   Group: typeof ListboxGroup;
   Separator: typeof ListboxSeparator;
   Empty: typeof ListboxEmpty;
 };
 
-(Listbox as ListboxComponent).Item = ListboxItem;
-(Listbox as ListboxComponent).Group = ListboxGroup;
-(Listbox as ListboxComponent).Separator = ListboxSeparator;
-(Listbox as ListboxComponent).Empty = ListboxEmpty;
+const Listbox = ListboxForwardRef as ListboxComponent;
+Listbox.Item = ListboxItem;
+Listbox.Group = ListboxGroup;
+Listbox.Separator = ListboxSeparator;
+Listbox.Empty = ListboxEmpty;
 
-export default Listbox as ListboxComponent;
+export { Listbox };
+export default Listbox;

@@ -11,7 +11,7 @@ export default meta;
 type Story = StoryObj<typeof Listbox>;
 
 function SingleDemo() {
-  const [value, setValue] = useState('apple');
+  const [value, setValue] = useState<string | undefined>('apple');
   return (
     <div className="w-64">
       <Listbox value={value} onValueChange={setValue} aria-label="Choose fruit">
@@ -40,8 +40,39 @@ function MultiDemo() {
   );
 }
 
+interface Item {
+  id: number;
+  label: string;
+}
+
+function GenericDemo() {
+  const items: Item[] = [
+    { id: 1, label: 'One' },
+    { id: 2, label: 'Two' },
+    { id: 3, label: 'Three' },
+  ];
+  const [picked, setPicked] = useState<Item | undefined>(items[0]);
+  return (
+    <div className="w-64">
+      <Listbox<Item>
+        value={picked}
+        onValueChange={setPicked}
+        isEqual={(a, b) => a.id === b.id}
+        aria-label="Pick an object"
+      >
+        {items.map((it) => (
+          <Listbox.Item key={it.id} value={it}>
+            {it.label}
+          </Listbox.Item>
+        ))}
+      </Listbox>
+    </div>
+  );
+}
+
 export const Default: Story = { render: () => <SingleDemo /> };
 export const Multiple: Story = { render: () => <MultiDemo /> };
+export const GenericObject: Story = { render: () => <GenericDemo /> };
 
 export const Grouped: Story = {
   render: () => (

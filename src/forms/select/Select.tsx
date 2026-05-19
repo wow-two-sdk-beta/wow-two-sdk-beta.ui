@@ -1,15 +1,18 @@
 import {
   createContext,
   forwardRef,
+  isValidElement,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ButtonHTMLAttributes,
+  type ReactElement,
   type ReactNode,
 } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, X, Loader2 } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
@@ -19,19 +22,37 @@ import {
   ListboxGroup,
   ListboxSeparator,
   ListboxEmpty,
-  type ListboxItemProps,
+  type EqualityFn,
 } from '../listbox';
+import { SearchInput } from '../searchInput';
 import { selectTriggerVariants, type SelectTriggerVariants } from './Select.variants';
+
+/* Default equality: Object.is. */
+const defaultEquals: EqualityFn<unknown> = (a, b) => Object.is(a, b);
+
+interface ItemRegistryEntry {
+  value: unknown;
+  label: ReactNode;
+  text: string;
+}
 
 interface SelectContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
-  value: string;
-  onSelect: (value: string) => void;
-  labels: Record<string, ReactNode>;
-  registerLabel: (value: string, label: ReactNode) => void;
-  unregisterLabel: (value: string) => void;
+  value: unknown;
+  hasValue: boolean;
+  onSelect: (value: unknown) => void;
+  onClear: () => void;
+  isEqual: EqualityFn<unknown>;
+  items: ItemRegistryEntry[];
+  registerItem: (entry: ItemRegistryEntry) => void;
+  unregisterItem: (value: unknown) => void;
+  query: string;
+  setQuery: (q: string) => void;
   disabled: boolean;
+  isLoading: boolean;
+  clearable: boolean;
+  serialize: (value: unknown) => string;
   name?: string;
   invalid?: boolean;
 }
@@ -44,13 +65,22 @@ function useSelectContext() {
   return ctx;
 }
 
-export interface SelectProps {
-  value?: string;
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
+export interface SelectProps<T = string> {
+  /** `T` = selected value · `null` = explicitly cleared · `undefined` = uncontrolled. */
+  value?: T | null;
+  defaultValue?: T | null;
+  onValueChange?: (value: T | null) => void;
+  /** Custom equality. Default: `Object.is`. */
+  isEqual?: EqualityFn<T>;
   disabled?: boolean;
-  /** Hidden form-input name. If set, value ships with native form submission. */
+  /** Show a small spinner in the trigger and block interaction. */
+  isLoading?: boolean;
+  /** Render a clear (×) button in the trigger when a value is set. */
+  clearable?: boolean;
+  /** Hidden form-input name. Value is stringified via `serialize`. */
   name?: string;
+  /** Stringify value for the hidden form input. Default: `String(value)`. */
+  serialize?: (value: T) => string;
   /** Style trigger as invalid (red border, error ring). */
   invalid?: boolean;
   defaultOpen?: boolean;
@@ -61,61 +91,110 @@ export interface SelectProps {
   children: ReactNode;
 }
 
-export function Select({
+function SelectImpl<T = string>({
   value,
   defaultValue,
   onValueChange,
+  isEqual,
   disabled = false,
+  isLoading = false,
+  clearable = false,
   name,
+  serialize,
   invalid,
   defaultOpen = false,
   open: openProp,
   onOpenChange,
   placement = 'bottom',
   children,
-}: SelectProps) {
+}: SelectProps<T>): ReactElement {
   const [openState, setOpenState] = useControlled({
     controlled: openProp,
     default: defaultOpen,
     onChange: onOpenChange,
   });
-  const [valueState, setValueState] = useControlled({
+  const [valueState, setValueState] = useControlled<T | null>({
     controlled: value,
-    default: defaultValue ?? '',
+    default: defaultValue ?? null,
     onChange: onValueChange,
   });
-  const [labels, setLabels] = useState<Record<string, ReactNode>>({});
+  const [items, setItems] = useState<ItemRegistryEntry[]>([]);
+  const [query, setQuery] = useState('');
 
-  const registerLabel = useCallback((v: string, label: ReactNode) => {
-    setLabels((prev) => (prev[v] === label ? prev : { ...prev, [v]: label }));
+  /* Ref-stabilise consumer fns so they don't churn `useMemo` deps when passed inline. */
+  const isEqualRef = useRef(isEqual);
+  isEqualRef.current = isEqual;
+  const serializeRef = useRef(serialize);
+  serializeRef.current = serialize;
+
+  const equals = useCallback<EqualityFn<unknown>>((a, b) => {
+    const fn = isEqualRef.current as EqualityFn<unknown> | undefined;
+    return (fn ?? defaultEquals)(a, b);
   }, []);
-  const unregisterLabel = useCallback((v: string) => {
-    setLabels((prev) => {
-      if (!(v in prev)) return prev;
-      const next = { ...prev };
-      delete next[v];
+  const serializer = useCallback((v: unknown) => {
+    const fn = serializeRef.current as ((v: unknown) => string) | undefined;
+    return (fn ?? ((x) => String(x)))(v);
+  }, []);
+
+  const registerItem = useCallback((entry: ItemRegistryEntry) => {
+    setItems((prev) => {
+      const idx = prev.findIndex((p) => Object.is(p.value, entry.value));
+      if (idx >= 0) {
+        const existing = prev[idx];
+        if (existing && existing.label === entry.label && existing.text === entry.text) {
+          return prev;
+        }
+        const next = prev.slice();
+        next[idx] = entry;
+        return next;
+      }
+      return [...prev, entry];
+    });
+  }, []);
+
+  const unregisterItem = useCallback((v: unknown) => {
+    setItems((prev) => {
+      const idx = prev.findIndex((p) => Object.is(p.value, v));
+      if (idx === -1) return prev;
+      const next = prev.slice();
+      next.splice(idx, 1);
       return next;
     });
   }, []);
 
   const onSelect = useCallback(
-    (next: string) => {
-      setValueState(next);
+    (next: unknown) => {
+      (setValueState as (v: unknown) => void)(next);
       setOpenState(false);
+      setQuery('');
     },
     [setValueState, setOpenState],
   );
+
+  const onClear = useCallback(() => {
+    (setValueState as (v: unknown) => void)(null);
+  }, [setValueState]);
+
+  const hasValue = valueState !== null && valueState !== undefined;
 
   const ctx = useMemo<SelectContextValue>(
     () => ({
       open: openState,
       setOpen: setOpenState,
       value: valueState,
+      hasValue,
       onSelect,
-      labels,
-      registerLabel,
-      unregisterLabel,
+      onClear,
+      isEqual: equals,
+      items,
+      registerItem,
+      unregisterItem,
+      query,
+      setQuery,
       disabled,
+      isLoading,
+      clearable,
+      serialize: serializer,
       name,
       invalid,
     }),
@@ -123,11 +202,18 @@ export function Select({
       openState,
       setOpenState,
       valueState,
+      hasValue,
       onSelect,
-      labels,
-      registerLabel,
-      unregisterLabel,
+      onClear,
+      equals,
+      items,
+      registerItem,
+      unregisterItem,
+      query,
       disabled,
+      isLoading,
+      clearable,
+      serializer,
       name,
       invalid,
     ],
@@ -137,7 +223,10 @@ export function Select({
     <SelectContext.Provider value={ctx}>
       <Popover
         open={openState}
-        onOpenChange={setOpenState}
+        onOpenChange={(o) => {
+          setOpenState(o);
+          if (!o) setQuery('');
+        }}
         placement={placement}
         offset={6}
       >
@@ -146,6 +235,16 @@ export function Select({
     </SelectContext.Provider>
   );
 }
+
+const Select = SelectImpl as (<T = string>(props: SelectProps<T>) => ReactElement) & {
+  Trigger: typeof SelectTrigger;
+  Value: typeof SelectValue;
+  Content: typeof SelectContent;
+  Item: typeof SelectItem;
+  Group: typeof ListboxGroup;
+  Separator: typeof ListboxSeparator;
+  Empty: typeof ListboxEmpty;
+};
 
 export interface SelectTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
@@ -157,22 +256,52 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
   function SelectTrigger({ size, state, className, children, ...rest }, ref) {
     const ctx = useSelectContext();
     const triggerState = state ?? (ctx.invalid ? 'invalid' : 'default');
+    const showClear = ctx.clearable && ctx.hasValue && !ctx.isLoading && !ctx.disabled;
     return (
       <PopoverTrigger asChild>
         <button
           ref={ref}
           type="button"
-          disabled={ctx.disabled}
+          disabled={ctx.disabled || ctx.isLoading}
+          aria-busy={ctx.isLoading || undefined}
           className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
           {...rest}
         >
           {children ?? <SelectValue />}
-          <ChevronDown
-            className={cn(
-              'h-4 w-4 text-muted-foreground transition-transform',
-              ctx.open && 'rotate-180',
+          <span className="ml-auto flex items-center gap-1">
+            {showClear && (
+              <span
+                role="button"
+                tabIndex={0}
+                aria-label="Clear selection"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  ctx.onClear();
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    ctx.onClear();
+                  }
+                }}
+                className="grid h-4 w-4 place-items-center rounded-sm text-subtle-foreground hover:bg-muted hover:text-foreground"
+              >
+                <X className="h-3 w-3" />
+              </span>
             )}
-          />
+            {ctx.isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-subtle-foreground" />
+            ) : (
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 text-muted-foreground transition-transform',
+                  ctx.open && 'rotate-180',
+                )}
+              />
+            )}
+          </span>
         </button>
       </PopoverTrigger>
     );
@@ -182,16 +311,19 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
 export interface SelectValueProps {
   /** Shown when nothing is selected. */
   placeholder?: ReactNode;
-  /** Optional explicit override (e.g., custom rendering). */
+  /** Optional explicit override. */
   children?: ReactNode;
 }
 
 export function SelectValue({ placeholder, children }: SelectValueProps) {
   const ctx = useSelectContext();
   if (children) return <span className="truncate">{children}</span>;
-  const label = ctx.value ? (ctx.labels[ctx.value] ?? ctx.value) : null;
+  const match = ctx.hasValue
+    ? ctx.items.find((i) => ctx.isEqual(i.value, ctx.value))
+    : undefined;
+  const label = match?.label ?? (ctx.hasValue ? ctx.serialize(ctx.value) : null);
   return (
-    <span className={cn('truncate', !label && 'text-subtle-foreground')}>
+    <span className={cn('truncate text-left', !label && 'text-subtle-foreground')}>
       {label ?? placeholder}
     </span>
   );
@@ -199,55 +331,121 @@ export function SelectValue({ placeholder, children }: SelectValueProps) {
 
 export interface SelectContentProps {
   className?: string;
+  /** Render a search input above the items; filters by item label text. */
+  searchable?: boolean;
+  /** Placeholder for the search input. Default: "Search…". */
+  searchPlaceholder?: string;
+  /** Text shown when search yields no matches. Default: "No results". */
+  noResultsLabel?: ReactNode;
   children: ReactNode;
 }
 
-export function SelectContent({ className, children }: SelectContentProps) {
+export function SelectContent({
+  className,
+  searchable = false,
+  searchPlaceholder = 'Search…',
+  noResultsLabel = 'No results',
+  children,
+}: SelectContentProps) {
   const ctx = useSelectContext();
+  const hasItems = ctx.items.length > 0;
+  const visibleCount = ctx.query
+    ? ctx.items.filter((i) => i.text.toLowerCase().includes(ctx.query.toLowerCase())).length
+    : ctx.items.length;
+  const showEmpty = hasItems && visibleCount === 0;
+
   return (
     <PopoverContent bare>
-      <Listbox
-        value={ctx.value}
-        onValueChange={(v) => ctx.onSelect(v as string)}
-        className={cn('min-w-[var(--anchor-width)]', className)}
+      <div
+        className={cn('min-w-[var(--anchor-width)] overflow-hidden rounded-md', className)}
       >
-        {children}
-      </Listbox>
-      {ctx.name && <input type="hidden" name={ctx.name} value={ctx.value} />}
+        {searchable && (
+          <div className="border-b border-border bg-popover p-1">
+            <SearchInput
+              size="sm"
+              autoFocus
+              value={ctx.query}
+              onChange={(e) => ctx.setQuery(e.target.value)}
+              placeholder={searchPlaceholder}
+              clearable
+              onClear={() => ctx.setQuery('')}
+              className="rounded-sm"
+            />
+          </div>
+        )}
+        <Listbox<unknown>
+          value={ctx.value ?? undefined}
+          onValueChange={(v) => {
+            if (v !== null && v !== undefined) ctx.onSelect(v);
+          }}
+          isEqual={ctx.isEqual}
+          className="border-0 shadow-none rounded-none"
+        >
+          {children}
+          {showEmpty && <ListboxEmpty>{noResultsLabel}</ListboxEmpty>}
+        </Listbox>
+        {ctx.name && ctx.hasValue && (
+          <input type="hidden" name={ctx.name} value={ctx.serialize(ctx.value)} />
+        )}
+      </div>
     </PopoverContent>
   );
 }
 
-export type SelectItemProps = ListboxItemProps;
+/* Recursively pull a string out of a ReactNode for search-filter matching. */
+function extractText(node: ReactNode): string {
+  if (node == null || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(extractText).join(' ');
+  if (isValidElement(node)) {
+    const props = node.props as { children?: ReactNode };
+    return extractText(props.children);
+  }
+  return '';
+}
+
+export interface SelectItemProps {
+  value: unknown;
+  disabled?: boolean;
+  /** Override the searchable text (defaults to extracting from children). */
+  text?: string;
+  className?: string;
+  children: ReactNode;
+}
 
 export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function SelectItem(
-  props,
+  { value, disabled, text, className, children },
   ref,
 ) {
   const ctx = useSelectContext();
+  const itemText = useMemo(
+    () => text ?? extractText(children),
+    [text, children],
+  );
+
   useEffect(() => {
-    ctx.registerLabel(props.value, props.children);
-    return () => ctx.unregisterLabel(props.value);
-  }, [ctx, props.value, props.children]);
-  return <ListboxItem ref={ref} {...props} />;
+    ctx.registerItem({ value, label: children, text: itemText });
+    return () => ctx.unregisterItem(value);
+  }, [ctx, value, children, itemText]);
+
+  const matchesQuery =
+    !ctx.query || itemText.toLowerCase().includes(ctx.query.toLowerCase());
+  if (!matchesQuery) return null;
+
+  return (
+    <ListboxItem ref={ref} value={value} disabled={disabled} className={className}>
+      {children}
+    </ListboxItem>
+  );
 });
 
-type SelectComponent = typeof Select & {
-  Trigger: typeof SelectTrigger;
-  Value: typeof SelectValue;
-  Content: typeof SelectContent;
-  Item: typeof SelectItem;
-  Group: typeof ListboxGroup;
-  Separator: typeof ListboxSeparator;
-  Empty: typeof ListboxEmpty;
-};
+Select.Trigger = SelectTrigger;
+Select.Value = SelectValue;
+Select.Content = SelectContent;
+Select.Item = SelectItem;
+Select.Group = ListboxGroup;
+Select.Separator = ListboxSeparator;
+Select.Empty = ListboxEmpty;
 
-(Select as SelectComponent).Trigger = SelectTrigger;
-(Select as SelectComponent).Value = SelectValue;
-(Select as SelectComponent).Content = SelectContent;
-(Select as SelectComponent).Item = SelectItem;
-(Select as SelectComponent).Group = ListboxGroup;
-(Select as SelectComponent).Separator = ListboxSeparator;
-(Select as SelectComponent).Empty = ListboxEmpty;
-
-export default Select as SelectComponent;
+export { Select };
+export default Select;

@@ -19,7 +19,6 @@ import {
   ListboxGroup,
   ListboxSeparator,
   ListboxEmpty,
-  type ListboxItemProps,
 } from '../listbox';
 import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
 
@@ -230,10 +229,10 @@ export function MultiSelectContent({ className, children }: MultiSelectContentPr
   const ctx = useMultiSelectContext();
   return (
     <PopoverContent bare>
-      <Listbox
+      <Listbox<string>
         multiple
         value={ctx.values}
-        onValueChange={(v) => ctx.setValues(v as string[])}
+        onValueChange={(v) => ctx.setValues(v)}
         className={cn('min-w-[var(--anchor-width)]', className)}
       >
         {children}
@@ -244,7 +243,12 @@ export function MultiSelectContent({ className, children }: MultiSelectContentPr
   );
 }
 
-export type MultiSelectItemProps = ListboxItemProps;
+export interface MultiSelectItemProps {
+  value: string;
+  disabled?: boolean;
+  className?: string;
+  children: ReactNode;
+}
 
 export const MultiSelectItem = forwardRef<HTMLDivElement, MultiSelectItemProps>(
   function MultiSelectItem(props, ref) {

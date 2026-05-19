@@ -2,11 +2,17 @@ import { forwardRef, type InputHTMLAttributes } from 'react';
 import { Check, Minus } from 'lucide-react';
 import { cn } from '../../utils';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
+import { checkboxVariants, type CheckboxVariants } from './Checkbox.variants';
+
+const COMPONENT_NAME = 'Checkbox';
 
 export interface CheckboxProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'>,
+    CheckboxVariants {
+  /* Box size — sm 16px · md 20px · lg 24px. */
   size?: 'sm' | 'md' | 'lg';
-  /** Tristate visual — input is `checked={false}` but rendered as a dash. */
+
+  /* Tristate visual — input stays `checked={false}` but renders as a dash with the same checked-state styling. */
   indeterminate?: boolean;
 }
 
@@ -16,13 +22,70 @@ const SIZE_CLASS: Record<NonNullable<CheckboxProps['size']>, string> = {
   lg: 'h-6 w-6',
 };
 
-/**
- * Native checkbox with custom visual. Renders the input visually hidden but
- * accessible — wrap in a `<label>` (or pair with `Label` via `FormControl`).
- */
+/* When indeterminate=true, apply the compound's checked classes regardless of peer-checked state. */
+const INDETERMINATE_CHECKED_CLASS: Record<
+  NonNullable<CheckboxVariants['variant']>,
+  Record<NonNullable<CheckboxVariants['tone']>, string>
+> = {
+  solid: {
+    primary: 'bg-primary border-primary text-primary-foreground',
+    neutral: 'bg-foreground border-foreground text-background',
+    danger:  'bg-destructive border-destructive text-destructive-foreground',
+    success: 'bg-success border-success text-success-foreground',
+    warning: 'bg-warning border-warning text-warning-foreground',
+  },
+  soft: {
+    primary: 'bg-primary text-primary-foreground',
+    neutral: 'bg-foreground text-background',
+    danger:  'bg-destructive text-destructive-foreground',
+    success: 'bg-success text-success-foreground',
+    warning: 'bg-warning text-warning-foreground',
+  },
+  outline: {
+    primary: 'bg-primary text-primary-foreground',
+    neutral: 'bg-foreground text-background',
+    danger:  'bg-destructive text-destructive-foreground',
+    success: 'bg-success text-success-foreground',
+    warning: 'bg-warning text-warning-foreground',
+  },
+  ghost: {
+    primary: 'bg-primary/10 text-primary',
+    neutral: 'bg-muted text-foreground',
+    danger:  'bg-destructive/10 text-destructive',
+    success: 'bg-success/10 text-success',
+    warning: 'bg-warning/10 text-warning',
+  },
+  glass: {
+    primary: 'bg-primary border-primary text-white',
+    neutral: 'bg-foreground border-foreground text-background',
+    danger:  'bg-destructive border-destructive text-white',
+    success: 'bg-success border-success text-white',
+    warning: 'bg-warning border-warning text-white',
+  },
+  'glass-surface': {
+    primary: 'bg-primary border-white/60 text-white',
+    neutral: 'bg-foreground border-white/60 text-background',
+    danger:  'bg-destructive border-white/60 text-white',
+    success: 'bg-success border-white/60 text-white',
+    warning: 'bg-warning border-white/60 text-white',
+  },
+};
+
+/* Native checkbox with custom visual. Renders the input visually hidden but accessible — wrap in a `<label>` (or pair with `Label` via `FormControl`). Supports 6 variants × 5 tones matrix + indeterminate. */
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   (
-    { className, size = 'md', indeterminate, id, disabled, required, checked, ...props },
+    {
+      className,
+      size = 'md',
+      indeterminate,
+      variant = 'solid',
+      tone = 'primary',
+      id,
+      disabled,
+      required,
+      checked,
+      ...props
+    },
     ref,
   ) => {
     const ctx = useFormControl();
@@ -44,15 +107,12 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         <span
           aria-hidden="true"
           className={cn(
-            'pointer-events-none grid h-full w-full place-items-center rounded-sm border border-input bg-background text-primary-foreground transition-colors',
-            'peer-checked:border-primary peer-checked:bg-primary',
-            'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1',
-            'peer-disabled:opacity-50',
-            indeterminate && 'border-primary bg-primary',
+            checkboxVariants({ variant, tone }),
+            indeterminate && INDETERMINATE_CHECKED_CLASS[variant][tone],
           )}
         >
           {indeterminate ? (
-            <Minus size={Math.round(SIZE_CLASS[size].length * 1.4)} className="h-3 w-3" />
+            <Minus className="h-3 w-3" />
           ) : (
             <Check className="h-3 w-3 opacity-0 peer-checked:opacity-100" />
           )}
@@ -61,4 +121,5 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     );
   },
 );
-Checkbox.displayName = 'Checkbox';
+
+Checkbox.displayName = COMPONENT_NAME;

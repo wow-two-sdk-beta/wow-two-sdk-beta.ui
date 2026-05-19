@@ -7,4 +7,5 @@ export {
   type ListboxProps,
   type ListboxItemProps,
   type ListboxGroupProps,
+  type EqualityFn,
 } from './Listbox';
