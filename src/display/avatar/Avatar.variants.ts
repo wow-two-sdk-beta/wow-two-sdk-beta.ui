@@ -16,6 +16,8 @@ export const avatarVariants = tv({
       square: 'rounded-md',
     },
     tone: {
+      // 'none' is used when autoColor takes over — prevents theme tokens from competing in the cascade.
+      none: '',
       neutral: 'bg-muted text-muted-foreground',
       primary: 'bg-primary-soft text-primary-soft-foreground',
       danger: 'bg-destructive-soft text-destructive-soft-foreground',
