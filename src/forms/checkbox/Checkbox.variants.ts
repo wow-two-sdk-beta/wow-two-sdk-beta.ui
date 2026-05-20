@@ -48,19 +48,19 @@ export const checkboxVariants = tv({
     { variant: 'ghost', tone: 'success', class: 'text-success peer-checked:bg-success/10' },
     { variant: 'ghost', tone: 'warning', class: 'text-warning peer-checked:bg-warning/10' },
 
-    // === GLASS × tone — dark glass unchecked → tone fill checked, white check throughout ===
-    { variant: 'glass', tone: 'primary', class: 'text-white peer-checked:bg-primary peer-checked:border-primary' },
-    { variant: 'glass', tone: 'neutral', class: 'text-white peer-checked:bg-foreground peer-checked:border-foreground peer-checked:text-background' },
-    { variant: 'glass', tone: 'danger',  class: 'text-white peer-checked:bg-destructive peer-checked:border-destructive' },
-    { variant: 'glass', tone: 'success', class: 'text-white peer-checked:bg-success peer-checked:border-success' },
-    { variant: 'glass', tone: 'warning', class: 'text-white peer-checked:bg-warning peer-checked:border-warning' },
+    // === GLASS × tone — dark glass stays on check; only the white check icon appears (peer-checked:opacity-100 on Check). Tone is preserved as text-white throughout — bg doesn't swap, matching the photo-overlay aesthetic. ===
+    { variant: 'glass', tone: 'primary', class: 'text-white' },
+    { variant: 'glass', tone: 'neutral', class: 'text-white' },
+    { variant: 'glass', tone: 'danger',  class: 'text-white' },
+    { variant: 'glass', tone: 'success', class: 'text-white' },
+    { variant: 'glass', tone: 'warning', class: 'text-white' },
 
-    // === GLASS-SURFACE × tone — same as glass but border stays light when checked ===
-    { variant: 'glass-surface', tone: 'primary', class: 'text-white peer-checked:bg-primary peer-checked:border-white/60' },
-    { variant: 'glass-surface', tone: 'neutral', class: 'text-white peer-checked:bg-foreground peer-checked:border-white/60 peer-checked:text-background' },
-    { variant: 'glass-surface', tone: 'danger',  class: 'text-white peer-checked:bg-destructive peer-checked:border-white/60' },
-    { variant: 'glass-surface', tone: 'success', class: 'text-white peer-checked:bg-success peer-checked:border-white/60' },
-    { variant: 'glass-surface', tone: 'warning', class: 'text-white peer-checked:bg-warning peer-checked:border-white/60' },
+    // === GLASS-SURFACE × tone — same: dark glass + white check on check. Border emphasis (white/80) optional on check for stronger affordance. ===
+    { variant: 'glass-surface', tone: 'primary', class: 'text-white peer-checked:border-white/80' },
+    { variant: 'glass-surface', tone: 'neutral', class: 'text-white peer-checked:border-white/80' },
+    { variant: 'glass-surface', tone: 'danger',  class: 'text-white peer-checked:border-white/80' },
+    { variant: 'glass-surface', tone: 'success', class: 'text-white peer-checked:border-white/80' },
+    { variant: 'glass-surface', tone: 'warning', class: 'text-white peer-checked:border-white/80' },
   ],
   defaultVariants: {
     variant: 'solid',

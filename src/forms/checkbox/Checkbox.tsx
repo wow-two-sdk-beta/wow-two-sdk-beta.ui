@@ -76,19 +76,20 @@ const INDETERMINATE_CHECKED_CLASS: Record<
     success: 'bg-success/10 text-success',
     warning: 'bg-warning/10 text-warning',
   },
+  /* Glass family keeps dark glass bg in indeterminate state (matches checked behavior). The Minus icon renders unconditionally; text-white from variant base makes it visible. */
   glass: {
-    primary: 'bg-primary border-primary text-white',
-    neutral: 'bg-foreground border-foreground text-background',
-    danger:  'bg-destructive border-destructive text-white',
-    success: 'bg-success border-success text-white',
-    warning: 'bg-warning border-warning text-white',
+    primary: 'text-white',
+    neutral: 'text-white',
+    danger:  'text-white',
+    success: 'text-white',
+    warning: 'text-white',
   },
   'glass-surface': {
-    primary: 'bg-primary border-white/60 text-white',
-    neutral: 'bg-foreground border-white/60 text-background',
-    danger:  'bg-destructive border-white/60 text-white',
-    success: 'bg-success border-white/60 text-white',
-    warning: 'bg-warning border-white/60 text-white',
+    primary: 'text-white border-white/80',
+    neutral: 'text-white border-white/80',
+    danger:  'text-white border-white/80',
+    success: 'text-white border-white/80',
+    warning: 'text-white border-white/80',
   },
 };
 
