@@ -143,13 +143,16 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           aria-hidden="true"
           className={cn(
             checkboxVariants({ variant, tone }),
-            indeterminate && INDETERMINATE_CHECKED_CLASS[variant][tone],
+            indeterminate
+              ? INDETERMINATE_CHECKED_CLASS[variant][tone]
+              /* Opacity gate lives on this span (a peer sibling of the input) — child-selector targets the SVG. peer-checked: cannot reach descendants directly. */
+              : '[&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100',
           )}
         >
           {indeterminate ? (
             <Minus className={iconClass} />
           ) : (
-            <Check className={cn(iconClass, 'opacity-0 peer-checked:opacity-100')} />
+            <Check className={iconClass} />
           )}
         </span>
       </span>
