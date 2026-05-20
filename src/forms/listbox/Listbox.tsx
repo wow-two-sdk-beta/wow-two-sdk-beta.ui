@@ -16,7 +16,7 @@ import {
   type Ref,
 } from 'react';
 import { Check } from 'lucide-react';
-import { cn } from '../../utils';
+import { cn, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import {
   listboxEmptyVariants,
@@ -31,6 +31,9 @@ export type EqualityFn<T> = (a: T, b: T) => boolean;
 
 /* Default equality: Object.is. Correct for primitives + NaN; reference-equality for objects. */
 const defaultEquals: EqualityFn<unknown> = (a, b) => Object.is(a, b);
+
+/** Selection indicator style — applied to every item under this listbox. */
+export type ListboxIndicator = 'check' | 'checkbox' | 'radio' | 'dot' | 'none';
 
 interface ItemEntry {
   id: string;
@@ -47,6 +50,7 @@ interface ListboxContextValue {
   registerItem: (entry: ItemEntry) => void;
   unregisterItem: (id: string) => void;
   setActiveId: (id: string | null) => void;
+  indicator: ListboxIndicator;
 }
 
 const ListboxContext = createContext<ListboxContextValue | null>(null);
@@ -71,11 +75,13 @@ type MultiProps<T> = {
   onValueChange?: (value: T[]) => void;
 };
 
-type CommonProps<T> = {
+type CommonProps<T> = SurfaceVariants & {
   /** Disable all items. */
   disabled?: boolean;
   /** Custom equality. Defaults to `Object.is`. */
   isEqual?: EqualityFn<T>;
+  /** Selection indicator style. Default `check` for single, `checkbox` for multi. */
+  indicator?: ListboxIndicator;
   className?: string;
   children: ReactNode;
 };
@@ -97,6 +103,12 @@ function ListboxImpl<T>(
     defaultValue,
     onValueChange,
     isEqual,
+    indicator,
+    variant,
+    tone,
+    radius,
+    padding,
+    elevation,
     disabled,
     className,
     children,
@@ -110,6 +122,7 @@ function ListboxImpl<T>(
   };
 
   const equals = (isEqual as EqualityFn<unknown> | undefined) ?? defaultEquals;
+  const resolvedIndicator: ListboxIndicator = indicator ?? (multiple ? 'checkbox' : 'check');
 
   const initial: T | T[] | undefined = defaultValue ?? (multiple ? ([] as T[]) : undefined);
   const [current, setCurrent] = useControlled<T | T[] | undefined>({
@@ -150,7 +163,6 @@ function ListboxImpl<T>(
     [multiple, current, setCurrent, equals],
   );
 
-  // Initialise active descendant — first selected, else first enabled.
   useEffect(() => {
     if (activeId) return;
     const firstSelected = items.current.find(
@@ -229,9 +241,22 @@ function ListboxImpl<T>(
       registerItem,
       unregisterItem,
       setActiveId,
+      indicator: resolvedIndicator,
     }),
-    [multiple, values, equals, activeId, onItemSelect, registerItem, unregisterItem],
+    [
+      multiple,
+      values,
+      equals,
+      activeId,
+      onItemSelect,
+      registerItem,
+      unregisterItem,
+      resolvedIndicator,
+    ],
   );
+
+  /* Default padding is `xs` (p-1) for items breathing room — overridable. */
+  const resolvedPadding = padding ?? 'xs';
 
   return (
     <ListboxContext.Provider value={ctx}>
@@ -243,7 +268,11 @@ function ListboxImpl<T>(
         aria-activedescendant={activeId ?? undefined}
         aria-disabled={disabled || undefined}
         onKeyDown={handleKeyDown}
-        className={cn(listboxVariants(), className)}
+        className={cn(
+          surfaceVariants({ variant, tone, radius, padding: resolvedPadding, elevation }),
+          listboxVariants(),
+          className,
+        )}
         {...rest}
       >
         {children}
@@ -256,20 +285,91 @@ const ListboxForwardRef = forwardRef(ListboxImpl) as <T = string>(
   props: ListboxProps<T> & { ref?: Ref<HTMLDivElement> },
 ) => ReactElement;
 
+/* ---------- Indicator visuals ---------- */
+
+function LeadingIndicator({
+  indicator,
+  isSelected,
+}: {
+  indicator: ListboxIndicator;
+  isSelected: boolean;
+}) {
+  if (indicator === 'checkbox') {
+    return (
+      <span
+        aria-hidden
+        className={cn(
+          'flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border',
+          isSelected
+            ? 'border-primary bg-primary text-primary-foreground'
+            : 'border-border',
+        )}
+      >
+        {isSelected && <Check className="h-3 w-3" />}
+      </span>
+    );
+  }
+  if (indicator === 'radio') {
+    return (
+      <span
+        aria-hidden
+        className={cn(
+          'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+          isSelected ? 'border-primary' : 'border-border',
+        )}
+      >
+        {isSelected && <span className="h-2 w-2 rounded-full bg-primary" />}
+      </span>
+    );
+  }
+  if (indicator === 'dot') {
+    return (
+      <span
+        aria-hidden
+        className={cn(
+          'h-1.5 w-1.5 shrink-0 rounded-full',
+          isSelected ? 'bg-primary' : 'bg-transparent',
+        )}
+      />
+    );
+  }
+  return null;
+}
+
+function TrailingIndicator({
+  indicator,
+  isSelected,
+  multiple,
+}: {
+  indicator: ListboxIndicator;
+  isSelected: boolean;
+  multiple: boolean;
+}) {
+  if (indicator === 'check' && isSelected) {
+    return <Check className={cn('h-4 w-4 shrink-0', !multiple && 'opacity-80')} />;
+  }
+  return null;
+}
+
+/* ---------- Item ---------- */
+
 export interface ListboxItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   /** Item value. Typed as `unknown` at call site; compared via parent Listbox's `isEqual`. */
   value: unknown;
   disabled?: boolean;
+  /** Override the listbox-level indicator for this item only. */
+  indicator?: ListboxIndicator;
   children: ReactNode;
 }
 
 export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function ListboxItem(
-  { value, disabled = false, className, children, onClick, onPointerEnter, ...rest },
+  { value, disabled = false, indicator: itemIndicator, className, children, onClick, onPointerEnter, ...rest },
   forwardedRef,
 ) {
   const ctx = useListboxContext();
   const id = useId();
   const ref = useRef<HTMLDivElement | null>(null);
+  const indicator = itemIndicator ?? ctx.indicator;
 
   useEffect(() => {
     ctx.registerItem({ id, value, disabled });
@@ -314,9 +414,9 @@ export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function
       className={cn(listboxItemVariants({ state }), className)}
       {...rest}
     >
-      <span className="flex-1">{children}</span>
-      {ctx.multiple && isSelected && <Check className="h-4 w-4" />}
-      {!ctx.multiple && isSelected && <Check className="h-4 w-4 opacity-80" />}
+      <LeadingIndicator indicator={indicator} isSelected={isSelected} />
+      <span className="flex min-w-0 flex-1 items-center gap-2">{children}</span>
+      <TrailingIndicator indicator={indicator} isSelected={isSelected} multiple={ctx.multiple} />
     </div>
   );
 });

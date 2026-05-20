@@ -14,7 +14,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Check } from 'lucide-react';
-import { cn, composeRefs } from '../../utils';
+import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
 import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
@@ -287,7 +287,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
   },
 );
 
-export interface ComboboxContentProps {
+export interface ComboboxContentProps extends SurfaceVariants {
   className?: string;
   placement?: React.ComponentProps<typeof AnchoredPositioner>['placement'];
   offset?: number;
@@ -298,10 +298,17 @@ export function ComboboxContent({
   className,
   placement = 'bottom',
   offset = 6,
+  variant,
+  tone,
+  radius,
+  padding,
+  elevation,
   children,
 }: ComboboxContentProps) {
   const ctx = useComboboxContext();
   if (!ctx.open) return null;
+  /* Default to `xs` (p-1) so items breathe — same as Listbox. */
+  const resolvedPadding = padding ?? 'xs';
   return (
     <Portal>
       <AnchoredPositioner anchor={ctx.inputRef.current} placement={placement} offset={offset}>
@@ -315,7 +322,17 @@ export function ComboboxContent({
           <div
             id={ctx.listboxId}
             role="listbox"
-            className={cn(listboxVariants(), className)}
+            className={cn(
+              surfaceVariants({
+                variant,
+                tone,
+                radius,
+                padding: resolvedPadding,
+                elevation,
+              }),
+              listboxVariants(),
+              className,
+            )}
             style={
               ctx.inputRef.current
                 ? { minWidth: ctx.inputRef.current.offsetWidth }

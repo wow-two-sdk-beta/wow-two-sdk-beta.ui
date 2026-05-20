@@ -13,7 +13,7 @@ import {
   type ReactNode,
 } from 'react';
 import { ChevronDown, X, Loader2 } from 'lucide-react';
-import { cn } from '../../utils';
+import { cn, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import {
@@ -329,7 +329,7 @@ export function SelectValue({ placeholder, children }: SelectValueProps) {
   );
 }
 
-export interface SelectContentProps {
+export interface SelectContentProps extends SurfaceVariants {
   className?: string;
   /** Render a search input above the items; filters by item label text. */
   searchable?: boolean;
@@ -345,6 +345,11 @@ export function SelectContent({
   searchable = false,
   searchPlaceholder = 'Search…',
   noResultsLabel = 'No results',
+  variant,
+  tone,
+  radius,
+  padding,
+  elevation,
   children,
 }: SelectContentProps) {
   const ctx = useSelectContext();
@@ -355,39 +360,48 @@ export function SelectContent({
   const showEmpty = hasItems && visibleCount === 0;
 
   return (
-    <PopoverContent bare>
-      <div
-        className={cn('min-w-[var(--anchor-width)] overflow-hidden rounded-md', className)}
+    <PopoverContent
+      variant={variant}
+      tone={tone}
+      radius={radius}
+      /* No outer padding — items provide their own breathing room. */
+      padding={padding ?? 'none'}
+      elevation={elevation}
+      className={cn(
+        'w-auto min-w-[var(--anchor-width)] overflow-hidden',
+        className,
+      )}
+    >
+      {searchable && (
+        <div className="border-b border-border p-1">
+          <SearchInput
+            size="sm"
+            autoFocus
+            value={ctx.query}
+            onChange={(e) => ctx.setQuery(e.target.value)}
+            placeholder={searchPlaceholder}
+            clearable
+            onClear={() => ctx.setQuery('')}
+            className="rounded-sm"
+          />
+        </div>
+      )}
+      <Listbox<unknown>
+        value={ctx.value ?? undefined}
+        onValueChange={(v) => {
+          if (v !== null && v !== undefined) ctx.onSelect(v);
+        }}
+        isEqual={ctx.isEqual}
+        /* PopoverContent already provides chrome — Listbox stays flat + square. */
+        variant="flat"
+        radius="none"
       >
-        {searchable && (
-          <div className="border-b border-border bg-popover p-1">
-            <SearchInput
-              size="sm"
-              autoFocus
-              value={ctx.query}
-              onChange={(e) => ctx.setQuery(e.target.value)}
-              placeholder={searchPlaceholder}
-              clearable
-              onClear={() => ctx.setQuery('')}
-              className="rounded-sm"
-            />
-          </div>
-        )}
-        <Listbox<unknown>
-          value={ctx.value ?? undefined}
-          onValueChange={(v) => {
-            if (v !== null && v !== undefined) ctx.onSelect(v);
-          }}
-          isEqual={ctx.isEqual}
-          className="border-0 shadow-none rounded-none"
-        >
-          {children}
-          {showEmpty && <ListboxEmpty>{noResultsLabel}</ListboxEmpty>}
-        </Listbox>
-        {ctx.name && ctx.hasValue && (
-          <input type="hidden" name={ctx.name} value={ctx.serialize(ctx.value)} />
-        )}
-      </div>
+        {children}
+        {showEmpty && <ListboxEmpty>{noResultsLabel}</ListboxEmpty>}
+      </Listbox>
+      {ctx.name && ctx.hasValue && (
+        <input type="hidden" name={ctx.name} value={ctx.serialize(ctx.value)} />
+      )}
     </PopoverContent>
   );
 }

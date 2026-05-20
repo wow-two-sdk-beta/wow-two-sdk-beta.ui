@@ -17,3 +17,4 @@ export * from './resizablePanels';
 export * from './pullToRefresh';
 export * from './appShell';
 export * from './overlay';
+export * from './surface';

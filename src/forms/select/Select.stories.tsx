@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { Select } from './Select';
+import { Listbox } from '../listbox';
 
 const meta: Meta<typeof Select> = {
   title: 'Forms/Select',
@@ -167,12 +168,62 @@ function GenericObjectDemo() {
   );
 }
 
+function SurfaceVariantsDemo() {
+  const [value, setValue] = useState<string | null>(null);
+  const variants = ['surface', 'solid', 'soft', 'outline', 'glass', 'elevated', 'flat'] as const;
+  return (
+    <div
+      className="grid gap-4 p-8"
+      style={{
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        backgroundImage: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)',
+      }}
+    >
+      {variants.map((v) => (
+        <div key={v} className="space-y-1">
+          <div className="text-xs font-semibold uppercase tracking-wide text-white/90">{v}</div>
+          <Select value={value} onValueChange={setValue}>
+            <Select.Trigger>
+              <Select.Value placeholder={`${v} panel`} />
+            </Select.Trigger>
+            <Select.Content variant={v}>
+              <Select.Item value="apple">Apple</Select.Item>
+              <Select.Item value="banana">Banana</Select.Item>
+              <Select.Item value="cherry">Cherry</Select.Item>
+            </Select.Content>
+          </Select>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function IndicatorRadioDemo() {
+  const [value, setValue] = useState<string | null>('apple');
+  return (
+    <div className="w-72">
+      <Select value={value} onValueChange={setValue}>
+        <Select.Trigger>
+          <Select.Value placeholder="Pick one" />
+        </Select.Trigger>
+        <Select.Content>
+          <Listbox.Item value="apple" indicator="radio">Apple</Listbox.Item>
+          <Listbox.Item value="banana" indicator="radio">Banana</Listbox.Item>
+          <Listbox.Item value="cherry" indicator="radio">Cherry</Listbox.Item>
+        </Select.Content>
+      </Select>
+    </div>
+  );
+}
+
 export const Default: Story = { render: () => <DefaultDemo /> };
 export const Grouped: Story = { render: () => <GroupedDemo /> };
 export const Searchable: Story = { render: () => <SearchableDemo /> };
 export const Clearable: Story = { render: () => <ClearableDemo /> };
 export const Loading: Story = { render: () => <LoadingDemo /> };
 export const GenericObject: Story = { render: () => <GenericObjectDemo /> };
+export const SurfaceVariants: Story = { render: () => <SurfaceVariantsDemo /> };
+export const RadioIndicator: Story = { render: () => <IndicatorRadioDemo /> };
 
 export const Invalid: Story = {
   render: () => (

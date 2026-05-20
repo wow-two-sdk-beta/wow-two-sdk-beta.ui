@@ -13,6 +13,7 @@ import { ChevronDown, X } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
+import type { SurfaceVariants } from '../../utils';
 import {
   Listbox,
   ListboxItem,
@@ -220,20 +221,36 @@ export function MultiSelectTags({ placeholder }: MultiSelectTagsProps) {
   );
 }
 
-export interface MultiSelectContentProps {
+export interface MultiSelectContentProps extends SurfaceVariants {
   className?: string;
   children: ReactNode;
 }
 
-export function MultiSelectContent({ className, children }: MultiSelectContentProps) {
+export function MultiSelectContent({
+  className,
+  variant,
+  tone,
+  radius,
+  padding,
+  elevation,
+  children,
+}: MultiSelectContentProps) {
   const ctx = useMultiSelectContext();
   return (
-    <PopoverContent bare>
+    <PopoverContent
+      variant={variant}
+      tone={tone}
+      radius={radius}
+      padding={padding ?? 'none'}
+      elevation={elevation}
+      className={cn('w-auto min-w-[var(--anchor-width)] overflow-hidden', className)}
+    >
       <Listbox<string>
         multiple
         value={ctx.values}
         onValueChange={(v) => ctx.setValues(v)}
-        className={cn('min-w-[var(--anchor-width)]', className)}
+        variant="flat"
+        radius="none"
       >
         {children}
       </Listbox>

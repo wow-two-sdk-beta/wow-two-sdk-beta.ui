@@ -1,7 +1,9 @@
 import { tv, type VariantProps } from '../../utils';
 
+/* Listbox container — STRUCTURAL only. Surface chrome (bg, border, shadow,
+   rounded, padding) is composed from `surfaceVariants` in `Listbox.tsx`. */
 export const listboxVariants = tv({
-  base: 'flex max-h-72 flex-col gap-0.5 overflow-y-auto rounded-md border border-border bg-popover p-1 text-sm text-popover-foreground shadow-md outline-none',
+  base: 'flex max-h-72 flex-col gap-0.5 overflow-y-auto text-sm outline-none',
 });
 
 export const listboxItemVariants = tv({

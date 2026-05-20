@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn, composeRefs } from '../../utils';
+import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import {
   AnchoredPositioner,
@@ -113,21 +113,33 @@ export const PopoverTrigger = forwardRef<HTMLButtonElement, PopoverTriggerProps>
   },
 );
 
-export interface PopoverContentProps extends HTMLAttributes<HTMLDivElement> {
+export interface PopoverContentProps
+  extends HTMLAttributes<HTMLDivElement>,
+    SurfaceVariants {
   /**
-   * Strip the default chrome (bg / border / padding / shadow / fixed width).
-   * Use when the child provides its own container — e.g. wrapping a `Calendar`,
-   * `Listbox`, or any pre-styled card. Keeps only structural classes
-   * (z-index, animation, outline).
+   * Skip the surface chrome entirely. Use when the child provides its own
+   * container (Listbox, Calendar, pre-styled card). Keeps only structural
+   * classes (z-index, animation, outline).
+   *
+   * `bare={true}` is equivalent to omitting variant/tone — except it ALSO
+   * skips the default `variant="surface"` (no bg/border/shadow at all).
    */
   bare?: boolean;
   children: ReactNode;
 }
 
+/* Default width when chrome is applied — preserves the historical look. */
+const DEFAULT_WIDTH = 'w-72';
+
 export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
-  function PopoverContent({ bare, className, children, ...rest }, forwardedRef) {
+  function PopoverContent(
+    { bare, variant, tone, radius, padding, elevation, className, children, ...rest },
+    forwardedRef,
+  ) {
     const ctx = usePopoverContext();
     if (!ctx.open) return null;
+    /* Pad-by-default when chrome is on (matches old `p-4`); consumer can override. */
+    const resolvedPadding = padding ?? (bare ? 'none' : 'lg');
     return (
       <Portal>
         <AnchoredPositioner
@@ -155,7 +167,16 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
                 className={cn(
                   'z-50 outline-none animate-in fade-in-0 zoom-in-95',
                   !bare &&
-                    'w-72 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md',
+                    cn(
+                      DEFAULT_WIDTH,
+                      surfaceVariants({
+                        variant,
+                        tone,
+                        radius,
+                        padding: resolvedPadding,
+                        elevation,
+                      }),
+                    ),
                   className,
                 )}
                 {...rest}

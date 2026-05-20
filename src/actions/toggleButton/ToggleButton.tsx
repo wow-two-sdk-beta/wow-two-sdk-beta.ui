@@ -1,57 +1,76 @@
-import { forwardRef, type ButtonHTMLAttributes } from 'react';
-import { cn, dataAttr } from '../../utils';
+import { forwardRef, type ReactNode } from 'react';
+import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
+import { Button, type ButtonProps } from '../button/Button';
 import { toggleButtonVariants, type ToggleButtonVariants } from './ToggleButton.variants';
 
+const COMPONENT_NAME = 'ToggleButton';
+
+/* Children may be static OR a render-prop receiving `{ pressed }` — render-prop enables icon-swap patterns (e.g., Eye ↔ EyeOff) for both controlled and uncontrolled toggles. */
+type ToggleButtonChildren =
+  | ReactNode
+  | ((args: { pressed: boolean }) => ReactNode);
+
 export interface ToggleButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'value'>,
+  extends Omit<ButtonProps, 'variant' | 'tone' | 'children'>,
     ToggleButtonVariants {
-  /** Controlled pressed state. */
+  /* Controlled pressed state. */
   pressed?: boolean;
-  /** Uncontrolled initial state. */
+
+  /* Uncontrolled initial state. Ignored if `pressed` is set. */
   defaultPressed?: boolean;
-  /** Fires whenever pressed state changes. */
+
+  /* Fires whenever pressed state changes. */
   onPressedChange?: (pressed: boolean) => void;
+
+  /* Static content OR render-prop receiving `{ pressed }` for state-driven swap. */
+  children?: ToggleButtonChildren;
 }
 
-/** Two-state button (on/off) — sets `aria-pressed` + `data-state="on|off"`. */
+/* Two-state action button (on/off) — sets `aria-pressed` + `data-pressed="true|false"`. Wraps Button to inherit size union, shape, asChild, loading, padding/radius. Press appearance lives in `toggleButtonVariants` (variant × tone matrix); ToggleButton's own appearance overrides Button's neutral-ghost baseline via class order. */
 export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
   (
     {
       pressed,
-      defaultPressed = false,
+      defaultPressed,
       onPressedChange,
       onClick,
+      variant = 'ghost',
+      tone = 'primary',
       className,
-      variant,
-      size,
-      disabled,
-      type = 'button',
-      ...props
+      children,
+      ...buttonProps
     },
     ref,
   ) => {
     const [value, setValue] = useControlled({
       controlled: pressed,
-      default: defaultPressed,
+      default: defaultPressed ?? false,
       onChange: onPressedChange,
     });
+
+    const renderedChildren =
+      typeof children === 'function' ? children({ pressed: value }) : children;
+
     return (
-      <button
+      <Button
         ref={ref}
-        type={type}
+        /* Neutral baseline — ToggleButton's compound classes paint over Button's defaults via class order. */
+        variant="ghost"
+        tone="neutral"
         aria-pressed={value}
-        data-state={value ? 'on' : 'off'}
-        data-disabled={dataAttr(disabled)}
-        disabled={disabled}
+        data-pressed={value ? 'true' : 'false'}
         onClick={(e) => {
           onClick?.(e);
           if (!e.defaultPrevented) setValue(!value);
         }}
-        className={cn(toggleButtonVariants({ variant, size }), className)}
-        {...props}
-      />
+        className={cn(toggleButtonVariants({ variant, tone }), className)}
+        {...buttonProps}
+      >
+        {renderedChildren}
+      </Button>
     );
   },
 );
-ToggleButton.displayName = 'ToggleButton';
+
+ToggleButton.displayName = COMPONENT_NAME;

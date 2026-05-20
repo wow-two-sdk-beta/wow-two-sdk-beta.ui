@@ -8,4 +8,5 @@ export {
   type ListboxItemProps,
   type ListboxGroupProps,
   type EqualityFn,
+  type ListboxIndicator,
 } from './Listbox';

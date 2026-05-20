@@ -31,3 +31,12 @@ export type {
   PresenceAnimationDurationProp,
   PresenceAnimationDuration,
 } from './TransitionExtensions';
+export { surfaceVariants } from './SurfaceStyles';
+export type {
+  SurfaceVariants,
+  SurfaceVariant,
+  SurfaceTone,
+  SurfaceRadius,
+  SurfacePadding,
+  SurfaceElevation,
+} from './SurfaceStyles';
