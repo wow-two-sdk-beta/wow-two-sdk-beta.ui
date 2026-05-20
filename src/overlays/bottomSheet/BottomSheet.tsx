@@ -192,7 +192,7 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
                   transition: dragHeight == null ? 'height 220ms ease-out' : 'none',
                 }}
                 className={cn(
-                  'fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-xl border-t border-border bg-card text-card-foreground shadow-2xl outline-none',
+                  'fixed inset-x-0 bottom-0 z-modal flex flex-col rounded-t-xl border-t border-border bg-card text-card-foreground shadow-2xl outline-none',
                   className,
                 )}
                 {...rest}

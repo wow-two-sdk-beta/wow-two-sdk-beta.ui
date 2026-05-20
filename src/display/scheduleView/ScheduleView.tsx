@@ -83,7 +83,7 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
       {...rest}
     >
       {/* Hour header */}
-      <div className="sticky top-0 z-10 flex border-b border-border bg-muted/40">
+      <div className="sticky top-0 z-raised flex border-b border-border bg-muted/40">
         <div className="w-32 shrink-0 border-r border-border px-3 py-2 text-xs font-medium text-muted-foreground">
           {date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
         </div>

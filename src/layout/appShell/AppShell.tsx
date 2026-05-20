@@ -103,7 +103,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
       >
         <a
           href="#app-shell-main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:shadow"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-modal focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:shadow"
         >
           Skip to content
         </a>
@@ -122,7 +122,7 @@ export const AppShellHeader = forwardRef<HTMLElement, AppShellHeaderProps>(
         ref={ref}
         role="banner"
         className={cn(
-          'sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card px-4 [grid-area:header]',
+          'sticky top-0 z-sticky flex h-14 items-center gap-3 border-b border-border bg-card px-4 [grid-area:header]',
           className,
         )}
         {...rest}

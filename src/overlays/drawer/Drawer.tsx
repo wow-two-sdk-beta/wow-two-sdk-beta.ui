@@ -181,7 +181,7 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
                 data-state="open"
                 data-side={ctx.side}
                 className={cn(
-                  'fixed z-50 flex flex-col gap-4 border-border bg-background p-6 shadow-lg outline-none',
+                  'fixed z-modal flex flex-col gap-4 border-border bg-background p-6 shadow-lg outline-none',
                   SIDE_CLASSES[ctx.side],
                   className,
                 )}

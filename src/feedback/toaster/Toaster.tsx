@@ -212,7 +212,7 @@ export function Toaster({
         onBlur={handleResume}
         style={{ gap }}
         className={cn(
-          'pointer-events-none fixed z-50 flex flex-col',
+          'pointer-events-none fixed z-toast flex flex-col',
           POSITION_CLASSES[position],
           className,
         )}

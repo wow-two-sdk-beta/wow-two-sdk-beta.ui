@@ -28,7 +28,7 @@ export const Backdrop = forwardRef<HTMLDivElement, BackdropProps>(function Backd
       data-state={open ? 'open' : 'closed'}
       style={{ pointerEvents, ...style }}
       className={cn(
-        'fixed inset-0 z-50 bg-black/50 animate-in fade-in-0',
+        'fixed inset-0 z-overlay bg-black/50 animate-in fade-in-0',
         blur && 'backdrop-blur-sm',
         className,
       )}

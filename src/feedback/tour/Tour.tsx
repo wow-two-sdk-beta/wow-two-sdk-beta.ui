@@ -158,7 +158,7 @@ export function Tour({
       {/* SVG mask backdrop with cutout around target */}
       <svg
         aria-hidden="true"
-        className="pointer-events-auto fixed inset-0 z-50 h-full w-full"
+        className="pointer-events-auto fixed inset-0 z-modal h-full w-full"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>

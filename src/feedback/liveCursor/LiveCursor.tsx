@@ -56,7 +56,7 @@ export const LiveCursor = forwardRef<HTMLDivElement, LiveCursorProps>(
         ref={ref}
         aria-hidden="true"
         className={cn(
-          'pointer-events-none absolute left-0 top-0 z-50 select-none',
+          'pointer-events-none absolute left-0 top-0 z-tooltip select-none',
           className,
         )}
         style={wrapperStyle}

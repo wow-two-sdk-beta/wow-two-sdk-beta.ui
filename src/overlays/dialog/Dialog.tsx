@@ -159,7 +159,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
               }}
             />
           )}
-          <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto p-4">
+          <div className="fixed inset-0 z-modal grid place-items-center overflow-y-auto p-4">
             <FocusScope asChild trapped loop>
               <DismissableLayer
                 disableEscape={!ctx.dismissOnEscape}

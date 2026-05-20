@@ -165,7 +165,7 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
                 role="dialog"
                 data-state="open"
                 className={cn(
-                  'z-50 outline-none animate-in fade-in-0 zoom-in-95',
+                  'z-dropdown outline-none animate-in fade-in-0 zoom-in-95',
                   !bare &&
                     cn(
                       DEFAULT_WIDTH,

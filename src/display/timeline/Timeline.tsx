@@ -92,7 +92,7 @@ export const TimelineItem = forwardRef<HTMLLIElement, TimelineItemProps>(functio
         <span
           aria-hidden="true"
           className={cn(
-            'relative z-10 grid h-7 w-7 place-items-center rounded-full border-2',
+            'relative z-raised grid h-7 w-7 place-items-center rounded-full border-2',
             STATUS_BG[status],
           )}
         >

@@ -88,7 +88,7 @@ export const BackToTopButton = forwardRef<HTMLButtonElement, BackToTopButtonProp
           }
         }}
         className={cn(
-          'fixed z-40 inline-flex items-center justify-center gap-2 rounded-full bg-card text-card-foreground shadow-lg ring-1 ring-border transition-all hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'fixed z-banner inline-flex items-center justify-center gap-2 rounded-full bg-card text-card-foreground shadow-lg ring-1 ring-border transition-all hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           label ? 'h-11 px-4 text-sm font-medium' : 'h-11 w-11',
           POSITION[position],
           className,

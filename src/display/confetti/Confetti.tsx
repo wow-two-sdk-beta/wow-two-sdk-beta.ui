@@ -156,7 +156,7 @@ export const Confetti = forwardRef<ConfettiHandle, ConfettiProps>(function Confe
     <Portal>
       <svg
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-50"
+        className="pointer-events-none fixed inset-0 z-toast"
         style={{ width: '100vw', height: '100vh' }}
       >
         {particles.map((p) =>

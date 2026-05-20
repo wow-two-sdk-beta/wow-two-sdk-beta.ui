@@ -99,7 +99,7 @@ export function UndoBar({
         onFocus={() => pauseOnHover && setPaused(true)}
         onBlur={() => pauseOnHover && setPaused(false)}
         className={cn(
-          'fixed z-50 flex items-center gap-3 overflow-hidden rounded-md border border-border bg-popover px-4 py-2.5 text-sm text-popover-foreground shadow-lg animate-in fade-in-0 slide-in-from-bottom-2',
+          'fixed z-toast flex items-center gap-3 overflow-hidden rounded-md border border-border bg-popover px-4 py-2.5 text-sm text-popover-foreground shadow-lg animate-in fade-in-0 slide-in-from-bottom-2',
           POSITION[position],
           className,
         )}

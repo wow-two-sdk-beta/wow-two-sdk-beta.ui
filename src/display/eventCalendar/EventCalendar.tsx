@@ -431,7 +431,7 @@ function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotC
                   return (
                     <div
                       aria-hidden="true"
-                      className="absolute inset-x-0 z-10 border-t border-primary"
+                      className="absolute inset-x-0 z-raised border-t border-primary"
                       style={{ top }}
                     />
                   );

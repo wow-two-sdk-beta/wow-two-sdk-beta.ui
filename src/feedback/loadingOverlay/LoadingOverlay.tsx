@@ -44,7 +44,7 @@ export const LoadingOverlay = forwardRef<HTMLDivElement, LoadingOverlayProps>(
           role="alert"
           aria-busy="true"
           className={cn(
-            'absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 bg-background/70',
+            'absolute inset-0 z-banner flex flex-col items-center justify-center gap-3 bg-background/70',
             blur && 'backdrop-blur-sm',
             className,
           )}
@@ -65,7 +65,7 @@ export const LoadingOverlay = forwardRef<HTMLDivElement, LoadingOverlayProps>(
           role="alert"
           aria-busy="true"
           className={cn(
-            'fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 pointer-events-none',
+            'fixed inset-0 z-modal flex flex-col items-center justify-center gap-3 pointer-events-none',
             className,
           )}
           {...rest}

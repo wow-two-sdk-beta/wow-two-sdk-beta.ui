@@ -89,7 +89,7 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-center"
+          className="pointer-events-none absolute inset-x-0 top-0 z-raised flex items-center justify-center"
           style={{
             height: pull,
             transition: startYRef.current == null ? 'height 200ms ease-out' : 'none',

@@ -284,7 +284,7 @@ export const NavigationMenuContent = forwardRef<HTMLDivElement, NavigationMenuCo
               aria-labelledby={item.triggerId}
               data-state="open"
               className={cn(
-                'z-50 min-w-[12rem] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
+                'z-dropdown min-w-[12rem] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
                 className,
               )}
               {...rest}

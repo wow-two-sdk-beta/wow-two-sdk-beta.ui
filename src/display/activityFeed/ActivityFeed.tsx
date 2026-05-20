@@ -53,7 +53,7 @@ export const ActivityItem = forwardRef<HTMLLIElement, ActivityItemProps>(
       {...props}
     >
       <div className="relative flex flex-col items-center">
-        <div className="z-10 shrink-0">{avatar}</div>
+        <div className="z-raised shrink-0">{avatar}</div>
         {!last && (
           <span
             aria-hidden="true"

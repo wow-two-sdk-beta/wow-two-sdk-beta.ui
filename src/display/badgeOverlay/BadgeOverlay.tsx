@@ -29,7 +29,7 @@ export const BadgeOverlay = forwardRef<HTMLDivElement, BadgeOverlayProps>(
     <div ref={ref} className={cn('relative inline-flex', className)} {...props}>
       {children}
       {!hidden && (
-        <span className={cn('absolute z-10', POS[position])}>{badge}</span>
+        <span className={cn('absolute z-raised', POS[position])}>{badge}</span>
       )}
     </div>
   ),

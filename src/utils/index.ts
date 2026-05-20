@@ -40,3 +40,4 @@ export type {
   SurfacePadding,
   SurfaceElevation,
 } from './SurfaceStyles';
+export { Layer, layerStyle, type LayerName } from './Layers';
