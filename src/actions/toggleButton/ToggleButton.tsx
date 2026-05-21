@@ -6,13 +6,15 @@ import { toggleButtonVariants, type ToggleButtonVariants } from './ToggleButton.
 
 const COMPONENT_NAME = 'ToggleButton';
 
+/* Render-prop signature for state-aware content/labels. */
+type PressedFn<T> = (args: { pressed: boolean }) => T;
+type StateAware<T> = T | PressedFn<T>;
+
 /* Children may be static OR a render-prop receiving `{ pressed }` — render-prop enables icon-swap patterns (e.g., Eye ↔ EyeOff) for both controlled and uncontrolled toggles. */
-type ToggleButtonChildren =
-  | ReactNode
-  | ((args: { pressed: boolean }) => ReactNode);
+type ToggleButtonChildren = StateAware<ReactNode>;
 
 export interface ToggleButtonProps
-  extends Omit<ButtonProps, 'variant' | 'tone' | 'children'>,
+  extends Omit<ButtonProps, 'variant' | 'tone' | 'children' | 'title' | 'aria-label'>,
     ToggleButtonVariants {
   /* Controlled pressed state. */
   pressed?: boolean;
@@ -25,6 +27,12 @@ export interface ToggleButtonProps
 
   /* Static content OR render-prop receiving `{ pressed }` for state-driven swap. */
   children?: ToggleButtonChildren;
+
+  /* Tooltip text — string OR fn receiving `{ pressed }`. State-aware form keeps consumer-supplied strings (i18n discipline). */
+  title?: StateAware<string>;
+
+  /* Accessible label — string OR fn. Use when icon-only or when `aria-pressed` alone is insufficient context for screen readers. */
+  'aria-label'?: StateAware<string>;
 }
 
 /* Two-state action button (on/off) — sets `aria-pressed` + `data-pressed="true|false"`. Wraps Button to inherit size union, shape, asChild, loading, padding/radius. Press appearance lives in `toggleButtonVariants` (variant × tone matrix); ToggleButton's own appearance overrides Button's neutral-ghost baseline via class order. */
@@ -39,6 +47,8 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
       tone = 'primary',
       className,
       children,
+      title,
+      'aria-label': ariaLabel,
       ...buttonProps
     },
     ref,
@@ -52,6 +62,12 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
     const renderedChildren =
       typeof children === 'function' ? children({ pressed: value }) : children;
 
+    /* Resolve state-aware string props to plain strings for the underlying Button. */
+    const resolvedTitle =
+      typeof title === 'function' ? title({ pressed: value }) : title;
+    const resolvedAriaLabel =
+      typeof ariaLabel === 'function' ? ariaLabel({ pressed: value }) : ariaLabel;
+
     return (
       <Button
         ref={ref}
@@ -59,7 +75,9 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
         variant="ghost"
         tone="neutral"
         aria-pressed={value}
+        aria-label={resolvedAriaLabel}
         data-pressed={value ? 'true' : 'false'}
+        title={resolvedTitle}
         onClick={(e) => {
           onClick?.(e);
           if (!e.defaultPrevented) setValue(!value);

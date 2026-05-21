@@ -252,11 +252,28 @@ export interface SelectTriggerProps
   children?: ReactNode;
 }
 
+/* Icon dimensions scale with trigger size — keeps visual weight balanced. */
+const TRIGGER_ICON_CLASSES = {
+  xs: 'h-3 w-3',
+  sm: 'h-3.5 w-3.5',
+  md: 'h-4 w-4',
+  lg: 'h-5 w-5',
+} as const;
+
+const TRIGGER_CLEAR_BOX_CLASSES = {
+  xs: 'h-3.5 w-3.5',
+  sm: 'h-4 w-4',
+  md: 'h-4 w-4',
+  lg: 'h-5 w-5',
+} as const;
+
 export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
   function SelectTrigger({ size, state, className, children, ...rest }, ref) {
     const ctx = useSelectContext();
     const triggerState = state ?? (ctx.invalid ? 'invalid' : 'default');
     const showClear = ctx.clearable && ctx.hasValue && !ctx.isLoading && !ctx.disabled;
+    const iconClass = TRIGGER_ICON_CLASSES[size ?? 'md'];
+    const clearBoxClass = TRIGGER_CLEAR_BOX_CLASSES[size ?? 'md'];
     return (
       <PopoverTrigger asChild>
         <button
@@ -286,17 +303,21 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
                     ctx.onClear();
                   }
                 }}
-                className="grid h-4 w-4 place-items-center rounded-sm text-subtle-foreground hover:bg-muted hover:text-foreground"
+                className={cn(
+                  'grid place-items-center rounded-sm text-subtle-foreground hover:bg-muted hover:text-foreground',
+                  clearBoxClass,
+                )}
               >
-                <X className="h-3 w-3" />
+                <X className={iconClass} />
               </span>
             )}
             {ctx.isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-subtle-foreground" />
+              <Loader2 className={cn(iconClass, 'animate-spin text-subtle-foreground')} />
             ) : (
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 text-muted-foreground transition-transform',
+                  iconClass,
+                  'text-muted-foreground transition-transform',
                   ctx.open && 'rotate-180',
                 )}
               />

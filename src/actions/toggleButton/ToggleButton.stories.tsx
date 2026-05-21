@@ -35,6 +35,26 @@ export const IconSwap: Story = {
   ),
 };
 
+/* State-aware label + title + icon — filter-chip pattern. Visible "Deleted" identifies the filter, icon + title convey current state. */
+export const FilterChip: Story = {
+  render: () => (
+    <ToggleButton
+      variant="soft"
+      tone="neutral"
+      size="sm"
+      title={({ pressed }) => (pressed ? 'Hide deleted' : 'Show deleted')}
+      aria-label={({ pressed }) => (pressed ? 'Hide deleted listings' : 'Show deleted listings')}
+    >
+      {({ pressed }) => (
+        <>
+          <Icon icon={pressed ? Eye : EyeOff} size={14} />
+          <span className="ml-1">Deleted</span>
+        </>
+      )}
+    </ToggleButton>
+  ),
+};
+
 /* Full matrix: 6 variants × 5 tones, unpressed + pressed side by side. */
 export const Matrix: Story = {
   render: () => (
