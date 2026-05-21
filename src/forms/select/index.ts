@@ -9,4 +9,5 @@ export {
   type SelectValueProps,
   type SelectContentProps,
   type SelectItemProps,
+  type SelectOption,
 } from './Select';

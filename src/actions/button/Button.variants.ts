@@ -94,7 +94,7 @@ export const buttonVariants = tv({
 
     // === GHOST × tone ===
     { variant: 'ghost', tone: 'primary',  class: 'text-primary hover:bg-primary/10 active:bg-primary/15' },
-    { variant: 'ghost', tone: 'neutral',  class: 'text-foreground hover:bg-muted active:bg-muted/80' },
+    { variant: 'ghost', tone: 'neutral',  class: 'text-foreground hover:bg-foreground/10 active:bg-foreground/15' },
     { variant: 'ghost', tone: 'danger',   class: 'text-destructive hover:bg-destructive/10 active:bg-destructive/15' },
     { variant: 'ghost', tone: 'success',  class: 'text-success hover:bg-success/10 active:bg-success/15' },
     { variant: 'ghost', tone: 'warning',  class: 'text-warning hover:bg-warning/10 active:bg-warning/15' },

@@ -41,3 +41,4 @@ export type {
   SurfaceElevation,
 } from './SurfaceStyles';
 export { Layer, layerStyle, type LayerName } from './Layers';
+export { Equality, type EqualityComparer } from './Equality';
