@@ -1,6 +1,6 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
 import { Check, Minus } from 'lucide-react';
-import { cn, CssExtensions, type SizePreset, type SizeUnion } from '../../utils';
+import { cn, ColorExtensions, CssExtensions, type ColorProp, type ColorTone, type SizePreset, type SizeUnion } from '../../utils';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
 import { checkboxVariants, type CheckboxVariants } from './Checkbox.variants';
 
@@ -34,13 +34,16 @@ const ICON_SIZE_CLASS: Record<CheckboxSizePreset, string> = {
 const DEFAULT_ICON_CLASS = 'h-3 w-3';
 
 export interface CheckboxProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'>,
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size' | 'color'>,
     CheckboxVariants {
   /* Size: preset (`xs|sm|md|lg|xl`) → box + icon scale · raw number/string → square inline · object → explicit dims. See `SizeUnion`. */
   size?: SizeUnion<CheckboxSizePreset>;
 
   /* Tristate visual — input stays `checked={false}` but renders as a dash with the same checked-state styling. */
   indeterminate?: boolean;
+
+  /* Per-instance color override (string seed or slot object). Overrides the active `tone`'s theme tokens locally. */
+  color?: ColorProp;
 }
 
 /* When indeterminate=true, apply the compound's checked classes regardless of peer-checked state. */
@@ -102,6 +105,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       indeterminate,
       variant = 'solid',
       tone = 'primary',
+      color,
       id,
       disabled,
       required,
@@ -121,11 +125,15 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     const boxClass = sizePreset ? BOX_SIZE_CLASS[sizePreset] : undefined;
     const iconClass = sizePreset ? ICON_SIZE_CLASS[sizePreset] : DEFAULT_ICON_CLASS;
     const boxStyle = sizeBox ? CssExtensions.resolveBoxSize(sizeBox) : undefined;
+    /* Per-instance color override → sets CSS vars on wrapper; the visual span inherits via cascade. */
+    const colorStyle = ColorExtensions.toneColorOverride(color, tone as ColorTone | undefined);
+    const composedStyle =
+      colorStyle || boxStyle ? { ...colorStyle, ...boxStyle } : undefined;
 
     return (
       <span
         className={cn('relative inline-flex shrink-0', boxClass, className)}
-        style={boxStyle}
+        style={composedStyle}
       >
         <input
           ref={ref}

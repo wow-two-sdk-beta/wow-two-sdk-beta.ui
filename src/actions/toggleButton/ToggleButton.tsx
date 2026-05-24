@@ -1,5 +1,5 @@
 import { forwardRef, type ReactNode } from 'react';
-import { cn } from '../../utils';
+import { cn, type ColorProp } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Button, type ButtonProps } from '../button/Button';
 import { toggleButtonVariants, type ToggleButtonVariants } from './ToggleButton.variants';
@@ -14,7 +14,7 @@ type StateAware<T> = T | PressedFn<T>;
 type ToggleButtonChildren = StateAware<ReactNode>;
 
 export interface ToggleButtonProps
-  extends Omit<ButtonProps, 'variant' | 'tone' | 'children' | 'title' | 'aria-label'>,
+  extends Omit<ButtonProps, 'variant' | 'tone' | 'children' | 'title' | 'aria-label' | 'color'>,
     ToggleButtonVariants {
   /* Controlled pressed state. */
   pressed?: boolean;
@@ -33,6 +33,9 @@ export interface ToggleButtonProps
 
   /* Accessible label — string OR fn. Use when icon-only or when `aria-pressed` alone is insufficient context for screen readers. */
   'aria-label'?: StateAware<string>;
+
+  /* Per-instance color override — applies to the active `tone`'s theme tokens. See `ColorProp`. */
+  color?: ColorProp;
 }
 
 /* Two-state action button (on/off) — sets `aria-pressed` + `data-pressed="true|false"`. Wraps Button to inherit size union, shape, asChild, loading, padding/radius. Press appearance lives in `toggleButtonVariants` (variant × tone matrix); ToggleButton's own appearance overrides Button's neutral-ghost baseline via class order. */
@@ -45,6 +48,7 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
       onClick,
       variant = 'ghost',
       tone = 'primary',
+      color,
       className,
       children,
       title,
@@ -71,9 +75,10 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
     return (
       <Button
         ref={ref}
-        /* Neutral baseline — ToggleButton's compound classes paint over Button's defaults via class order. */
+        /* Ghost baseline — ToggleButton's compound classes paint over Button's defaults via class order. tone is forwarded so per-instance `color` overrides hit the right `--color-{tone}` slot. */
         variant="ghost"
-        tone="neutral"
+        tone={tone ?? undefined}
+        color={color}
         aria-pressed={value}
         aria-label={resolvedAriaLabel}
         data-pressed={value ? 'true' : 'false'}

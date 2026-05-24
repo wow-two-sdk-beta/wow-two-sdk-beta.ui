@@ -156,6 +156,7 @@ export const HoverCardContent = forwardRef<HTMLDivElement, HoverCardContentProps
           anchor={ctx.triggerRef.current}
           placement={ctx.placement}
           offset={ctx.offset}
+          className="z-dropdown"
         >
           <div
             ref={forwardedRef}
@@ -169,7 +170,7 @@ export const HoverCardContent = forwardRef<HTMLDivElement, HoverCardContentProps
               ctx.hide();
             }}
             className={cn(
-              'z-dropdown w-64 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
+              'w-64 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
               className,
             )}
             {...rest}

@@ -311,7 +311,12 @@ export function ComboboxContent({
   const resolvedPadding = padding ?? 'xs';
   return (
     <Portal>
-      <AnchoredPositioner anchor={ctx.inputRef.current} placement={placement} offset={offset}>
+      <AnchoredPositioner
+        anchor={ctx.inputRef.current}
+        placement={placement}
+        offset={offset}
+        className="z-dropdown"
+      >
         <DismissableLayer
           onEscape={() => ctx.setOpen(false)}
           onOutsidePointerDown={(e) => {

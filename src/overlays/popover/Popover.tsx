@@ -142,10 +142,14 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
     const resolvedPadding = padding ?? (bare ? 'none' : 'lg');
     return (
       <Portal>
+        {/* z-index lives HERE — on the SC root (transform creates the context).
+            Putting z-* on a descendant of a transformed element only orders
+            within the local context, not at document.body level. */}
         <AnchoredPositioner
           anchor={ctx.triggerRef.current}
           placement={ctx.placement}
           offset={ctx.offset}
+          className="z-dropdown"
         >
           <FocusScope asChild trapped loop>
             <DismissableLayer
@@ -165,7 +169,7 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
                 role="dialog"
                 data-state="open"
                 className={cn(
-                  'z-dropdown outline-none animate-in fade-in-0 zoom-in-95',
+                  'outline-none animate-in fade-in-0 zoom-in-95',
                   !bare &&
                     cn(
                       DEFAULT_WIDTH,

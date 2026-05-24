@@ -14,6 +14,7 @@ import {
 } from 'react';
 import {
   cn,
+  ColorExtensions,
   composeEventHandlers,
   ButtonType,
   CssExtensions,
@@ -22,6 +23,8 @@ import {
   OptionalExtensions,
   PressExtensions,
   type BoxSizeOverrides,
+  type ColorProp,
+  type ColorTone,
   type PaddingProp,
   type PressEvent,
   type RadiusProp,
@@ -60,10 +63,13 @@ const ButtonDataState = {
 type ButtonDataState = (typeof ButtonDataState)[keyof typeof ButtonDataState];
 
 export interface ButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'disabled'>,
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'disabled' | 'color'>,
     Omit<ButtonVariants, 'size'> {
   /* Preset name OR raw value OR explicit dim object — see `ButtonSize` for details. */
   size?: ButtonSize;
+
+  /* Per-instance color override. Single string (`'#3b82f6'`, `'oklch(...)'`, etc.) → lib derives all slots. Object → override individual slots (bg/text/soft/softText/ring). Overrides apply to the active `tone`'s theme tokens locally — every Tailwind utility (`bg-{tone}`, `hover:bg-{tone}/X`, etc.) picks them up automatically. */
+  color?: ColorProp;
 
   /* Slot before children (logical start). */
   leadingSlot?: ReactNode;
@@ -284,6 +290,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       isSkeleton,
       isDisabled,
       asChild,
+      color,
       type = ButtonType.Button,
       children,
       onClick,
@@ -352,8 +359,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ...(boxSize !== undefined ? { boxSize } : {}),
       };
       const boxStyle = CssExtensions.resolveBoxSize(composedBox);
-      if (!padStyle && !radStyle && !boxStyle && !style) return undefined;
-      return { ...padStyle, ...radStyle, ...boxStyle, ...style };
+      /* Per-instance color override → sets CSS vars on element, scoped locally. */
+      const colorStyle = ColorExtensions.toneColorOverride(color, tone as ColorTone | undefined);
+      if (!padStyle && !radStyle && !boxStyle && !colorStyle && !style) return undefined;
+      return { ...colorStyle, ...padStyle, ...radStyle, ...boxStyle, ...style };
     })();
 
     const eventHandlers = useButtonInteractivity({

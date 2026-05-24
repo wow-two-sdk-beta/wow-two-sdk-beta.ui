@@ -22,6 +22,8 @@ export type {
   AbsoluteInsetOverrides,
   AbsolutePosition,
 } from './CssExtensions';
+export { ColorExtensions } from './ColorExtensions';
+export type { ColorTone, ColorOverride, ColorProp } from './ColorExtensions';
 export { OptionalExtensions } from './OptionalExtensions';
 export { PressExtensions, type PressEvent } from './PressExtensions';
 export { HtmlElement, ButtonType } from './HtmlExtensions';

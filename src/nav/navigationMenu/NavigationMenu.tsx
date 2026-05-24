@@ -270,7 +270,12 @@ export const NavigationMenuContent = forwardRef<HTMLDivElement, NavigationMenuCo
     if (!item.open) return null;
     return (
       <Portal>
-        <AnchoredPositioner anchor={item.triggerRef.current} placement="bottom-start" offset={6}>
+        <AnchoredPositioner
+          anchor={item.triggerRef.current}
+          placement="bottom-start"
+          offset={6}
+          className="z-dropdown"
+        >
           <DismissableLayer
             onEscape={handleClose}
             onOutsidePointerDown={(e) => {
@@ -284,7 +289,7 @@ export const NavigationMenuContent = forwardRef<HTMLDivElement, NavigationMenuCo
               aria-labelledby={item.triggerId}
               data-state="open"
               className={cn(
-                'z-dropdown min-w-[12rem] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
+                'min-w-[12rem] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
                 className,
               )}
               {...rest}

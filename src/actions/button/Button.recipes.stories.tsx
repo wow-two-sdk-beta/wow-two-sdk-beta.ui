@@ -276,3 +276,37 @@ export const FixedWidthOnLabelChange: Story = {
     );
   },
 };
+
+/* Per-instance color override — single seed (lib derives slots) and slot-by-slot. Each Button sets `--color-{tone}` CSS vars locally; every variant utility picks them up automatically. */
+export const CustomColors: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-40">single seed</span>
+        <Button color="#3b82f6">Blue</Button>
+        <Button color="#ec4899">Pink</Button>
+        <Button color="#10b981">Emerald</Button>
+        <Button color="oklch(0.7 0.18 145)">OKLCH</Button>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-40">soft + tone</span>
+        <Button variant="soft" color="#3b82f6">Soft blue</Button>
+        <Button variant="soft" color="#ec4899">Soft pink</Button>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-40">outline + tone</span>
+        <Button variant="outline" color="#3b82f6">Outline blue</Button>
+        <Button variant="outline" color="#ec4899">Outline pink</Button>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-40">slot override</span>
+        <Button color={{ bg: '#1e293b', text: '#fbbf24' }}>Dark + amber text</Button>
+        <Button variant="outline" color={{ bg: '#7c3aed', text: '#fff', ring: '#a78bfa' }}>Custom ring</Button>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground w-40">danger tone + color</span>
+        <Button tone="danger" color="#f97316">Orange danger</Button>
+      </div>
+    </div>
+  ),
+};
