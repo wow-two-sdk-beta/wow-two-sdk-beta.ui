@@ -374,8 +374,8 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
                 >
                   <X className={iconClass} />
                 </span>
-                {/* Separates the clear button from the chevron. */}
-                <span aria-hidden className={cn('w-px bg-border', dividerClass)} />
+                {/* Separates the clear button from the chevron — `foreground/20` always contrasts. */}
+                <span aria-hidden className={cn('w-px bg-foreground/20', dividerClass)} />
               </>
             )}
             {ctx.isLoading ? (
@@ -469,8 +469,8 @@ export function SelectContent({
       className={cn(
         'overflow-hidden',
         matchWidth
-          ? 'w-[var(--anchor-width)] [&_[role=option]>span.flex-1>:first-child]:truncate'
-          : 'w-auto min-w-[var(--anchor-width)]',
+          ? 'w-(--anchor-width) [&_[role=option]>span.flex-1>:first-child]:truncate'
+          : 'w-auto min-w-(--anchor-width)',
         className,
       )}
     >
@@ -545,17 +545,17 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function S
   ref,
 ) {
   const ctx = useSelectContext();
-  const { registerItem, unregisterItem, query } = ctx;
+  const { registerItem, query } = ctx;
   const resolvedValue = (value === undefined ? itemKey : value) as unknown;
   const itemText = useMemo(
     () => text ?? extractText(label) ?? extractText(children),
     [text, label, children],
   );
 
+  /* Registers only — never unregisters; items unmount on popover close and the trigger still needs the label. */
   useEffect(() => {
     registerItem({ itemKey, value: resolvedValue, label, text: itemText });
-    return () => unregisterItem(itemKey);
-  }, [registerItem, unregisterItem, itemKey, resolvedValue, label, itemText]);
+  }, [registerItem, itemKey, resolvedValue, label, itemText]);
 
   const matchesQuery =
     !query || itemText.toLowerCase().includes(query.toLowerCase());
