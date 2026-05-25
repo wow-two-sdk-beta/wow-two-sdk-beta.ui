@@ -26,21 +26,23 @@ import {
   listboxVariants,
 } from './Listbox.variants';
 
-/** Equality comparer — used to match items against the current selection. */
+/** Represents a function that matches items against the current selection. */
 export type EqualityFn<T> = (a: T, b: T) => boolean;
 
-/* Default equality: Object.is. Correct for primitives + NaN; reference-equality for objects. */
+/** Provides the default equality (Object.is) — primitives + reference equality. */
 const defaultEquals: EqualityFn<unknown> = (a, b) => Object.is(a, b);
 
-/** Selection indicator style — applied to every item under this listbox. */
+/** Represents the selection-indicator style applied to every item under this listbox. */
 export type ListboxIndicator = 'check' | 'checkbox' | 'radio' | 'dot' | 'none';
 
+/** Represents the per-item registry entry maintained by the listbox. */
 interface ItemEntry {
   id: string;
   value: unknown;
   disabled: boolean;
 }
 
+/** Represents the shape of the listbox context shared with descendants. */
 interface ListboxContextValue {
   multiple: boolean;
   values: unknown[];
@@ -75,12 +77,13 @@ type MultiProps<T> = {
   onValueChange?: (value: T[]) => void;
 };
 
+/** Represents the props shared between single-select and multi-select modes. */
 type CommonProps<T> = SurfaceVariants & {
-  /** Disable all items. */
+  /** Disables all items when true. */
   disabled?: boolean;
-  /** Custom equality. Defaults to `Object.is`. */
+  /** Compares item values for equality; defaults to `Object.is`. */
   isEqual?: EqualityFn<T>;
-  /** Selection indicator style. Default `check` for single, `checkbox` for multi. */
+  /** Sets the selection-indicator style; default `check` (single) or `checkbox` (multi). */
   indicator?: ListboxIndicator;
   className?: string;
   children: ReactNode;
@@ -287,6 +290,7 @@ const ListboxForwardRef = forwardRef(ListboxImpl) as <T = string>(
 
 /* ---------- Indicator visuals ---------- */
 
+/** Provides the leading selection indicator (checkbox · radio · dot). */
 function LeadingIndicator({
   indicator,
   isSelected,
@@ -336,6 +340,7 @@ function LeadingIndicator({
   return null;
 }
 
+/** Provides the trailing selection indicator (check icon). */
 function TrailingIndicator({
   indicator,
   isSelected,
@@ -353,11 +358,13 @@ function TrailingIndicator({
 
 /* ---------- Item ---------- */
 
+/** Represents the prop surface of `Listbox.Item`. */
 export interface ListboxItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
-  /** Item value. Typed as `unknown` at call site; compared via parent Listbox's `isEqual`. */
+  /** Holds the item value; compared via the parent listbox's `isEqual`. */
   value: unknown;
+  /** Disables this item when true. */
   disabled?: boolean;
-  /** Override the listbox-level indicator for this item only. */
+  /** Overrides the listbox-level indicator for this single item. */
   indicator?: ListboxIndicator;
   children: ReactNode;
 }
@@ -421,12 +428,14 @@ export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function
   );
 });
 
+/** Represents the prop surface of `Listbox.Group`. */
 export interface ListboxGroupProps extends HTMLAttributes<HTMLDivElement> {
-  /** Optional group heading. */
+  /** Renders an optional group heading above the contained items. */
   label?: ReactNode;
   children: ReactNode;
 }
 
+/** Provides a labelled group wrapping a subset of items. */
 export function ListboxGroup({ label, children, className, ...rest }: ListboxGroupProps) {
   const labelId = useId();
   return (
@@ -441,10 +450,12 @@ export function ListboxGroup({ label, children, className, ...rest }: ListboxGro
   );
 }
 
+/** Provides a thin horizontal rule between groups of items. */
 export function ListboxSeparator(props: HTMLAttributes<HTMLDivElement>) {
   return <div role="separator" className={listboxSeparatorVariants()} {...props} />;
 }
 
+/** Provides the message shown when no items match (e.g., after search filter). */
 export function ListboxEmpty({ children, className, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div role="presentation" className={cn(listboxEmptyVariants(), className)} {...rest}>

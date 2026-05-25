@@ -9,24 +9,18 @@ import { cn, surfaceVariants, type SurfaceVariants } from '../../utils';
 
 const COMPONENT_NAME = 'Surface';
 
+/** Represents the prop surface of the `Surface` atom. */
 export interface SurfaceProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'children'>,
     SurfaceVariants {
-  /** HTML element to render. Default `div`. */
+  /** Names the HTML element to render; defaults to `div`. */
   as?: ElementType;
-  /** Merge styles onto the immediate child instead of rendering a wrapper. */
+  /** Merges styles onto the immediate child instead of rendering a wrapper. */
   asChild?: boolean;
   children?: React.ReactNode;
 }
 
-/**
- * Visual surface primitive. Renders a styled block using the project-wide
- * `surfaceVariants` matrix (variant × tone × radius × padding × elevation).
- *
- * Composed internally by popovers, menus, dialogs, drawers, cards, toasts,
- * and any other "block of content with a visual treatment" in the lib.
- * Consumers can also use it directly for ad-hoc panels.
- */
+/** Provides a styled visual surface composed from the `surfaceVariants` matrix. */
 export const Surface = forwardRef<HTMLElement, SurfaceProps>(function Surface(
   {
     as: Component = 'div',

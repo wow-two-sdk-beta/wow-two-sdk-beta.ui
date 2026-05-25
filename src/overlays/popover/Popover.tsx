@@ -113,22 +113,16 @@ export const PopoverTrigger = forwardRef<HTMLButtonElement, PopoverTriggerProps>
   },
 );
 
+/** Represents the prop surface of the `Popover.Content`. */
 export interface PopoverContentProps
   extends HTMLAttributes<HTMLDivElement>,
     SurfaceVariants {
-  /**
-   * Skip the surface chrome entirely. Use when the child provides its own
-   * container (Listbox, Calendar, pre-styled card). Keeps only structural
-   * classes (z-index, animation, outline).
-   *
-   * `bare={true}` is equivalent to omitting variant/tone — except it ALSO
-   * skips the default `variant="surface"` (no bg/border/shadow at all).
-   */
+  /** Skips the surface chrome (bg/border/shadow); keeps only z-index + animation. */
   bare?: boolean;
   children: ReactNode;
 }
 
-/* Default width when chrome is applied — preserves the historical look. */
+/** Contains the default chrome width that preserves the historical look. */
 const DEFAULT_WIDTH = 'w-72';
 
 export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
@@ -138,13 +132,11 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
   ) {
     const ctx = usePopoverContext();
     if (!ctx.open) return null;
-    /* Pad-by-default when chrome is on (matches old `p-4`); consumer can override. */
+    /* Default to lg padding when chrome is on (matches old `p-4`); consumer can override. */
     const resolvedPadding = padding ?? (bare ? 'none' : 'lg');
     return (
       <Portal>
-        {/* z-index lives HERE — on the SC root (transform creates the context).
-            Putting z-* on a descendant of a transformed element only orders
-            within the local context, not at document.body level. */}
+        {/* z-index sits on the SC root — transform creates the stacking context. */}
         <AnchoredPositioner
           anchor={ctx.triggerRef.current}
           placement={ctx.placement}

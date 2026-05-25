@@ -32,14 +32,7 @@ import { selectTriggerVariants, type SelectTriggerVariants } from './Select.vari
 
 /* ────────── Option model ────────── */
 
-/**
- * The three coordinates of a single dropdown option:
- *   - `itemKey` — uniquely identifies the option (used for equality + indexing).
- *   - `value`   — the rich payload returned to the consumer on selection.
- *   - `label`   — what's shown in the trigger when this option is selected.
- *
- * Defaults: `V = K` (key === value when no rich payload needed).
- */
+/** Represents a single dropdown option as `{ itemKey, value, label }` — V defaults to K. */
 export interface SelectOption<K, V = K> {
   itemKey: K;
   value: V;
@@ -47,12 +40,11 @@ export interface SelectOption<K, V = K> {
   disabled?: boolean;
 }
 
-/* Internal item-registry entry — same shape but tracks searchable text too. */
+/** Represents an internal item-registry entry — option + plain-text for substring search. */
 interface ItemRegistryEntry<K, V> {
   itemKey: K;
   value: V;
   label: ReactNode;
-  /** Plain-text representation for substring search filtering. */
   text: string;
 }
 
@@ -89,29 +81,35 @@ function useSelectContext() {
 
 /* ────────── Root ────────── */
 
+/** Represents the prop surface of the `Select` root. */
 export interface SelectProps<K, V = K> {
-  /** Selected key. `null` = explicit clear. `undefined` = uncontrolled. */
+  /** Holds the selected key; `null` = explicit clear, `undefined` = uncontrolled. */
   selected?: K | null;
+  /** Holds the initial selected key for uncontrolled use. */
   defaultSelected?: K | null;
-  /** Fires when an item is picked or cleared. `null` for the cleared case. */
+  /** Fires when an item is picked or cleared (`null` on clear). */
   onChange?: (selected: SelectOption<K, V> | null) => void;
-  /** Key equality. Default: `Equality.strict` (Object.is — fine for string/number/boolean). */
+  /** Compares keys for equality; defaults to `Equality.strictEquals`. */
   keyEquals?: EqualityComparer<K>;
+  /** Disables interaction when true. */
   disabled?: boolean;
-  /** Spinner in trigger + interactions blocked. */
+  /** Shows a spinner in the trigger and blocks interaction. */
   isLoading?: boolean;
   /** Renders a clear (×) button in the trigger when a value is set. */
   clearable?: boolean;
-  /** Hidden form-input name. Value is the serialized selected key. */
+  /** Names the hidden form input that ships the serialized key. */
   name?: string;
-  /** Stringify the key for hidden form input. Default: `String(key)`. */
+  /** Serializes the key for the hidden form input; defaults to `String(key)`. */
   serializeKey?: (key: K) => string;
-  /** Style trigger as invalid (red border, error ring). */
+  /** Styles the trigger as invalid (red border, error ring). */
   invalid?: boolean;
+  /** Opens the dropdown initially when uncontrolled. */
   defaultOpen?: boolean;
+  /** Controls the dropdown open state. */
   open?: boolean;
+  /** Fires when the open state changes. */
   onOpenChange?: (open: boolean) => void;
-  /** Floating placement. */
+  /** Sets the floating placement of the dropdown. */
   placement?: React.ComponentProps<typeof Popover>['placement'];
   children: ReactNode;
 }
@@ -141,12 +139,13 @@ function SelectImpl<K, V = K>({
   const [keyState, setKeyState] = useControlled<K | null>({
     controlled: selected,
     default: defaultSelected ?? null,
-    onChange: undefined, // we emit via onChange below — needs both key + value
+    /* Emits via `emitChange` below — needs both key + value, not just key. */
+    onChange: undefined,
   });
   const [items, setItems] = useState<Array<ItemRegistryEntry<unknown, unknown>>>([]);
   const [query, setQuery] = useState('');
 
-  /* Ref-stabilise consumer fns so they don't churn `useMemo` deps. */
+  /* Ref-stabilises consumer fns so they don't churn `useMemo` deps. */
   const keyEqualsRef = useRef(keyEquals);
   keyEqualsRef.current = keyEquals;
   const serializeKeyRef = useRef(serializeKey);
@@ -156,7 +155,7 @@ function SelectImpl<K, V = K>({
 
   const keyEqualsFn = useCallback<EqualityComparer<unknown>>((a, b) => {
     const fn = keyEqualsRef.current as EqualityComparer<unknown> | undefined;
-    return (fn ?? Equality.strict)(a, b);
+    return (fn ?? Equality.strictEquals)(a, b);
   }, []);
 
   const serializeKeyFn = useCallback((k: unknown) => {
@@ -297,7 +296,7 @@ const Select = SelectImpl as (<K, V = K>(props: SelectProps<K, V>) => ReactEleme
 
 /* ────────── Trigger ────────── */
 
-/* Icon dimensions scale with trigger size. */
+/** Contains the icon Tailwind classes per trigger size. */
 const TRIGGER_ICON_CLASSES = {
   xs: 'h-3 w-3',
   sm: 'h-3.5 w-3.5',
@@ -305,7 +304,7 @@ const TRIGGER_ICON_CLASSES = {
   lg: 'h-5 w-5',
 } as const;
 
-/* Clear-button hit-box dimensions per size. Slightly bigger than the icon. */
+/** Contains the clear-button hit-box Tailwind classes per trigger size. */
 const TRIGGER_CLEAR_BOX_CLASSES = {
   xs: 'h-4 w-4',
   sm: 'h-5 w-5',
@@ -313,7 +312,7 @@ const TRIGGER_CLEAR_BOX_CLASSES = {
   lg: 'h-6 w-6',
 } as const;
 
-/* Vertical divider height between clear and chevron, per size. */
+/** Contains the vertical-divider height Tailwind classes per trigger size. */
 const TRIGGER_DIVIDER_CLASSES = {
   xs: 'h-3',
   sm: 'h-3.5',
@@ -321,6 +320,7 @@ const TRIGGER_DIVIDER_CLASSES = {
   lg: 'h-5',
 } as const;
 
+/** Represents the prop surface of the `Select.Trigger`. */
 export interface SelectTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
     SelectTriggerVariants {
@@ -374,7 +374,7 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
                 >
                   <X className={iconClass} />
                 </span>
-                {/* Vertical divider separating clear from the chevron */}
+                {/* Separates the clear button from the chevron. */}
                 <span aria-hidden className={cn('w-px bg-border', dividerClass)} />
               </>
             )}
@@ -398,12 +398,15 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
 
 /* ────────── Value (label inside trigger) ────────── */
 
+/** Represents the prop surface of the `Select.Value`. */
 export interface SelectValueProps {
+  /** Shows when no item is selected. */
   placeholder?: ReactNode;
-  /** Explicit override (rendered as-is, no lookup). */
+  /** Overrides the auto-resolved label (rendered as-is, no item lookup). */
   children?: ReactNode;
 }
 
+/** Provides the label shown inside the trigger for the currently selected item. */
 export function SelectValue({ placeholder, children }: SelectValueProps) {
   const ctx = useSelectContext();
   if (children) return <span className="truncate">{children}</span>;
@@ -421,19 +424,21 @@ export function SelectValue({ placeholder, children }: SelectValueProps) {
 
 /* ────────── Content ────────── */
 
+/** Represents the prop surface of the `Select.Content`. */
 export interface SelectContentProps extends SurfaceVariants {
   className?: string;
+  /** Renders a search input above the items and filters by label substring. */
   searchable?: boolean;
+  /** Sets the placeholder of the search input. */
   searchPlaceholder?: string;
+  /** Renders this label when the search yields no matches. */
   noResultsLabel?: ReactNode;
-  /**
-   * Lock surface width to the trigger's width. Long items truncate with `…`.
-   * Default `false` — surface grows to fit the longest item.
-   */
+  /** Locks the surface width to the trigger's width and truncates long items. */
   matchWidth?: boolean;
   children: ReactNode;
 }
 
+/** Provides the floating panel that hosts the items below the trigger. */
 export function SelectContent({
   className,
   searchable = false,
@@ -506,7 +511,7 @@ export function SelectContent({
 
 /* ────────── Item ────────── */
 
-/* Recursively extract a plain-text representation of a ReactNode for search. */
+/** Provides a plain-text representation of a ReactNode for substring search. */
 function extractText(node: ReactNode): string {
   if (node == null || typeof node === 'boolean') return '';
   if (typeof node === 'string' || typeof node === 'number') return String(node);
@@ -518,17 +523,19 @@ function extractText(node: ReactNode): string {
   return '';
 }
 
+/** Represents the prop surface of the `Select.Item`. */
 export interface SelectItemProps<K = unknown, V = K> {
-  /** Unique key — drives equality, ARIA, search. */
+  /** Identifies the item; drives equality, ARIA, and search. */
   itemKey: K;
-  /** Rich payload returned via `onChange`. Defaults to `itemKey` if omitted. */
+  /** Holds the rich payload returned via `onChange`; defaults to `itemKey`. */
   value?: V;
-  /** Label shown in the trigger when this item is selected. */
+  /** Shows in the trigger when this item is selected. */
   label: ReactNode;
-  /** Optional in-list rendering. Falls back to `label` if not provided. */
+  /** Overrides in-list rendering; falls back to `label` when omitted. */
   children?: ReactNode;
-  /** Override the searchable text (defaults to the text content of `label`). */
+  /** Overrides the searchable text; defaults to the text content of `label`. */
   text?: string;
+  /** Disables this item when true. */
   disabled?: boolean;
   className?: string;
 }
@@ -554,9 +561,7 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function S
     !query || itemText.toLowerCase().includes(query.toLowerCase());
   if (!matchesQuery) return null;
 
-  /* `<Listbox.Item value={itemKey}>` — Listbox compares by ctx.keyEquals which
-     is wired to Select's keyEquals. So Listbox's internal equality math is the
-     same as Select's key equality. */
+  /* Listbox compares via the wired keyEquals — same equality math as Select. */
   return (
     <ListboxItem ref={ref} value={itemKey} disabled={disabled} className={className}>
       {children ?? label}

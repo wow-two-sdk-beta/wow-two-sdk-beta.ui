@@ -142,7 +142,7 @@ function KvSplitDemo() {
       <Select<number, User>
         selected={pick?.itemKey ?? null}
         onChange={setPick}
-        keyEquals={Equality.strict}
+        keyEquals={Equality.strictEquals}
         clearable
       >
         <Select.Trigger>

@@ -1,26 +1,8 @@
-/*
- * Cross-domain surface style engine.
- *
- * Every "block of content with a visual treatment" in the lib composes these
- * variants: floating panels (Popover, Tooltip, HoverCard), menus (DropdownMenu,
- * ContextMenu, CommandPalette), dialogs/drawers, cards (Card, ChatBubble,
- * AlertCard), notifications (Toast, NotificationItem), and listbox surfaces.
- *
- * Lives in `src/utils/` because the boundaries lint forbids domain folders from
- * being import roots of other domains. Mirrors `forms/InputStyles.ts` for inputs
- * and `actions/button/Button.variants.ts` for buttons.
- *
- * Axes:
- *   - variant   — the visual recipe (bg + border + shadow structure)
- *   - tone      — semantic colorisation (neutral/primary/danger/success/warning/info)
- *   - radius    — corner roundness (independent)
- *   - padding   — interior breathing room (independent; default: none — most
- *                 surfaces contain children that pad themselves)
- *   - elevation — optional shadow override (0–5). When omitted, variant decides.
- */
+/* Provides the cross-domain surface style engine — variant × tone × radius × padding × elevation. */
 
 import { tv, type VariantProps } from './tv';
 
+/** Provides the tailwind-variants config for every "block with a visual treatment" surface. */
 export const surfaceVariants = tv({
   base: 'outline-none transition-colors',
   variants: {
@@ -241,11 +223,20 @@ export const surfaceVariants = tv({
   },
 });
 
+/** Represents the union of every surface variant prop. */
 export type SurfaceVariants = VariantProps<typeof surfaceVariants>;
 
-/* Convenience type aliases for component props that want to expose the subset. */
+/** Represents the visual-recipe axis (solid · soft · surface · outline · glass · etc.). */
 export type SurfaceVariant = NonNullable<SurfaceVariants['variant']>;
+
+/** Represents the semantic colour axis (neutral · primary · danger · success · warning · info). */
 export type SurfaceTone = NonNullable<SurfaceVariants['tone']>;
+
+/** Represents the corner-roundness axis (none · sm · md · lg · xl · 2xl · full). */
 export type SurfaceRadius = NonNullable<SurfaceVariants['radius']>;
+
+/** Represents the interior-padding axis (none · xs · sm · md · lg · xl · 2xl). */
 export type SurfacePadding = NonNullable<SurfaceVariants['padding']>;
+
+/** Represents the shadow-depth override (0–5); when omitted the variant decides. */
 export type SurfaceElevation = NonNullable<SurfaceVariants['elevation']>;

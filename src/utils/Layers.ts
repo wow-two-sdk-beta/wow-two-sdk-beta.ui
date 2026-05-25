@@ -1,54 +1,39 @@
-/*
- * Layer (z-index) constants — the single source of truth for stacking order.
- *
- * Each layer is a semantic name with a fixed z-index value. Components never
- * pick arbitrary numbers; they pick a named layer that matches their role.
- *
- * Gaps of 10 between layers leave room to insert a future intermediate tier
- * without renumbering. `Debug` lives far above the rest (9999) so DevTools /
- * inspector overlays always win.
- *
- * Tailwind utility classes (`z-base`, `z-dropdown`, etc.) are auto-generated
- * from matching `--z-index-*` entries in `src/index.css` (Tailwind v4 @theme).
- * Use either form:
- *
- *   className="z-dropdown"            // utility class
- *   style={layerStyle('Modal')}       // inline programmatic
- *   style={{ zIndex: Layer.Modal }}   // raw const
- */
+/* Provides semantic z-index tiers — the single source of truth for stacking order. */
 
+/** Contains the semantic z-index tiers; matching `z-{name}` utilities ship via @theme. */
 export const Layer = {
-  /** Visually hidden — slip under base layer. */
+  /** Slips under the base layer; visually hidden. */
   Hide: -1,
-  /** Default DOM flow — no z-index applied. */
+  /** Sits in the default DOM flow with no z-index applied. */
   Base: 0,
-  /** Slightly elevated — sticky list items, hover-cards inside a grid. */
+  /** Slightly elevates over siblings — badges, sticky list items, in-grid overlays. */
   Raised: 10,
-  /** Pinned widgets inside a section (panel, inline overlay). */
+  /** Pins widgets inside a section — panels, inline overlays. */
   Docked: 20,
-  /** Page-level sticky header / footer. */
+  /** Anchors a page-level sticky header or footer. */
   Sticky: 30,
-  /** System banners — cookie notice, status banner, alert strip. */
+  /** Hosts system banners — cookie notice, status banner, persistent FAB. */
   Banner: 40,
-  /** Dropdowns, popovers, comboboxes, menus, hover-cards anchored to a trigger. */
+  /** Hosts dropdowns, popovers, comboboxes, menus, hover-cards anchored to a trigger. */
   Dropdown: 50,
-  /** Modal backdrop / drawer scrim — the dim layer behind a modal. */
+  /** Dims the page behind a modal — backdrop / scrim layer. */
   Overlay: 60,
-  /** Modal / dialog / drawer / sheet content sitting above its backdrop. */
+  /** Hosts modal / dialog / drawer / sheet content above its backdrop. */
   Modal: 70,
-  /** Popovers / menus opened FROM inside a modal — must beat Modal. */
+  /** Hosts popovers / menus opened FROM inside a modal — must beat Modal. */
   Popover: 80,
-  /** Toasts / snackbars / undo bars — survive above modals. */
+  /** Hosts toasts, snackbars, undo bars — survives above modals. */
   Toast: 90,
-  /** Tooltips — highest functional layer. */
+  /** Hosts tooltips and live-cursors — highest functional layer. */
   Tooltip: 100,
-  /** DevTools / design-system inspector overlays. Always wins. */
+  /** Hosts DevTools / design-system inspector overlays — always wins. */
   Debug: 9999,
 } as const;
 
+/** Represents the name of a semantic z-index tier. */
 export type LayerName = keyof typeof Layer;
 
-/** Inline style helper for programmatic use. */
+/** Provides an inline `style` object for programmatic z-index assignment. */
 export function layerStyle(layer: LayerName): { zIndex: number } {
   return { zIndex: Layer[layer] };
 }
