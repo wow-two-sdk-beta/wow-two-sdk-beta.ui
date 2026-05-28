@@ -1,38 +1,32 @@
 /* Provides the cross-domain surface style engine — variant × tone × radius × padding × elevation. */
 
 import { tv, type VariantProps } from './tv';
+import { Tones } from './Tones';
 
 /** Provides the tailwind-variants config for every "block with a visual treatment" surface. */
 export const surfaceVariants = tv({
   base: 'outline-none transition-colors',
   variants: {
     variant: {
-      /* Opaque fill, no border, light shadow. Tooltips, chips, inline pills. */
+      /* Opaque fill, no border, light shadow — tooltips, chips, inline pills. */
       solid: 'shadow-sm',
-      /* Muted/tinted fill, no border, light shadow. Chat bubbles, inline groups. */
+      /* Muted/tinted fill, no border, light shadow — chat bubbles, inline groups. */
       soft: 'shadow-sm',
-      /* Opaque fill + visible border + medium shadow. Default for popovers/menus. */
+      /* Opaque fill + visible border + medium shadow — default for popovers/menus. */
       surface: 'border shadow-md',
-      /* Transparent fill + visible border. Static cards, embedded info blocks. */
+      /* Transparent fill + visible border — static cards, embedded info blocks. */
       outline: 'border bg-transparent',
-      /* Translucent + blur, no border, medium shadow. Image overlays. */
+      /* Translucent + blur, no border, medium shadow — image overlays. */
       glass: 'backdrop-blur-md shadow-md',
-      /* Translucent + blur + subtle border. Premium / hero overlays. */
+      /* Translucent + blur + subtle border — premium / hero overlays. */
       'glass-outline': 'border backdrop-blur-md shadow-md',
-      /* Opaque fill, no border, heavy shadow. Modals, drawers, command palette. */
+      /* Opaque fill, no border, heavy shadow — modals, drawers, command palette. */
       elevated: 'shadow-xl',
-      /* Opaque fill, no border, no shadow. Embedded sub-panels inside another surface. */
+      /* Opaque fill, no border, no shadow — embedded sub-panels inside another surface. */
       flat: '',
     },
 
-    tone: {
-      neutral: '',
-      primary: '',
-      danger: '',
-      success: '',
-      warning: '',
-      info: '',
-    },
+    tone: { neutral: '', primary: '', danger: '', success: '', warning: '', info: '' },
 
     radius: {
       none: 'rounded-none',
@@ -54,8 +48,7 @@ export const surfaceVariants = tv({
       '2xl': 'p-8',
     },
 
-    /* Optional shadow override — when set, beats variant's default shadow via
-       tailwind-merge precedence. Leave undefined to inherit from variant. */
+    /* Optional shadow override — beats variant's default shadow via tailwind-merge precedence. */
     elevation: {
       0: 'shadow-none',
       1: 'shadow-sm',
@@ -67,152 +60,53 @@ export const surfaceVariants = tv({
   },
 
   compoundVariants: [
-    /* SOLID + ELEVATED + FLAT — opaque, tone bg, tone foreground. Same color matrix
-       across these three variants — shadow is the only diff (handled by variant base). */
-    {
-      variant: ['solid', 'elevated', 'flat'],
-      tone: 'neutral',
-      class: 'bg-popover text-popover-foreground',
-    },
-    {
-      variant: ['solid', 'elevated', 'flat'],
-      tone: 'primary',
-      class: 'bg-primary text-primary-foreground',
-    },
-    {
-      variant: ['solid', 'elevated', 'flat'],
-      tone: 'danger',
-      class: 'bg-destructive text-destructive-foreground',
-    },
-    {
-      variant: ['solid', 'elevated', 'flat'],
-      tone: 'success',
-      class: 'bg-success text-success-foreground',
-    },
-    {
-      variant: ['solid', 'elevated', 'flat'],
-      tone: 'warning',
-      class: 'bg-warning text-warning-foreground',
-    },
-    {
-      variant: ['solid', 'elevated', 'flat'],
-      tone: 'info',
-      class: 'bg-info text-info-foreground',
-    },
+    /* solid / elevated / flat share the same palette — opaque tone bg + tone foreground. */
+    { variant: ['solid', 'elevated', 'flat'], tone: 'neutral', class: Tones.solid.neutral },
+    { variant: ['solid', 'elevated', 'flat'], tone: 'primary', class: Tones.solid.primary },
+    { variant: ['solid', 'elevated', 'flat'], tone: 'danger', class: Tones.solid.danger },
+    { variant: ['solid', 'elevated', 'flat'], tone: 'success', class: Tones.solid.success },
+    { variant: ['solid', 'elevated', 'flat'], tone: 'warning', class: Tones.solid.warning },
+    { variant: ['solid', 'elevated', 'flat'], tone: 'info', class: Tones.solid.info },
 
-    /* SOFT — muted/tinted bg, tone-readable text. */
-    { variant: 'soft', tone: 'neutral', class: 'bg-muted text-foreground' },
-    { variant: 'soft', tone: 'primary', class: 'bg-primary-soft text-primary' },
-    { variant: 'soft', tone: 'danger', class: 'bg-destructive-soft text-destructive' },
-    { variant: 'soft', tone: 'success', class: 'bg-success-soft text-success' },
-    { variant: 'soft', tone: 'warning', class: 'bg-warning-soft text-warning' },
-    { variant: 'soft', tone: 'info', class: 'bg-info-soft text-info' },
+    /* soft — muted/tinted bg, tone-readable text. */
+    { variant: 'soft', tone: 'neutral', class: Tones.soft.neutral },
+    { variant: 'soft', tone: 'primary', class: Tones.soft.primary },
+    { variant: 'soft', tone: 'danger', class: Tones.soft.danger },
+    { variant: 'soft', tone: 'success', class: Tones.soft.success },
+    { variant: 'soft', tone: 'warning', class: Tones.soft.warning },
+    { variant: 'soft', tone: 'info', class: Tones.soft.info },
 
-    /* SURFACE — popover bg + tone-accent border. Border colours subtly to keep
-       the panel reading as "neutral surface with [tone] context". */
-    {
-      variant: 'surface',
-      tone: 'neutral',
-      class: 'border-border bg-popover text-popover-foreground',
-    },
-    {
-      variant: 'surface',
-      tone: 'primary',
-      class: 'border-primary/40 bg-popover text-popover-foreground',
-    },
-    {
-      variant: 'surface',
-      tone: 'danger',
-      class: 'border-destructive/40 bg-popover text-popover-foreground',
-    },
-    {
-      variant: 'surface',
-      tone: 'success',
-      class: 'border-success/40 bg-popover text-popover-foreground',
-    },
-    {
-      variant: 'surface',
-      tone: 'warning',
-      class: 'border-warning/40 bg-popover text-popover-foreground',
-    },
-    {
-      variant: 'surface',
-      tone: 'info',
-      class: 'border-info/40 bg-popover text-popover-foreground',
-    },
+    /* surface — popover bg + tone-accent border. */
+    { variant: 'surface', tone: 'neutral', class: Tones.surface.neutral },
+    { variant: 'surface', tone: 'primary', class: Tones.surface.primary },
+    { variant: 'surface', tone: 'danger', class: Tones.surface.danger },
+    { variant: 'surface', tone: 'success', class: Tones.surface.success },
+    { variant: 'surface', tone: 'warning', class: Tones.surface.warning },
+    { variant: 'surface', tone: 'info', class: Tones.surface.info },
 
-    /* OUTLINE — fully transparent fill, tone border + tone-readable text. */
-    { variant: 'outline', tone: 'neutral', class: 'border-border text-foreground' },
-    { variant: 'outline', tone: 'primary', class: 'border-primary text-primary' },
-    { variant: 'outline', tone: 'danger', class: 'border-destructive text-destructive' },
-    { variant: 'outline', tone: 'success', class: 'border-success text-success' },
-    { variant: 'outline', tone: 'warning', class: 'border-warning text-warning' },
-    { variant: 'outline', tone: 'info', class: 'border-info text-info' },
+    /* outline — transparent fill, tone border + tone text. */
+    { variant: 'outline', tone: 'neutral', class: Tones.outline.neutral },
+    { variant: 'outline', tone: 'primary', class: Tones.outline.primary },
+    { variant: 'outline', tone: 'danger', class: Tones.outline.danger },
+    { variant: 'outline', tone: 'success', class: Tones.outline.success },
+    { variant: 'outline', tone: 'warning', class: Tones.outline.warning },
+    { variant: 'outline', tone: 'info', class: Tones.outline.info },
 
-    /* GLASS — translucent tinted fill + blur. Tone fills with alpha; foreground
-       must read clearly across the blurred background underneath. */
-    {
-      variant: 'glass',
-      tone: 'neutral',
-      class: 'bg-popover/70 text-popover-foreground',
-    },
-    {
-      variant: 'glass',
-      tone: 'primary',
-      class: 'bg-primary/30 text-primary-foreground',
-    },
-    {
-      variant: 'glass',
-      tone: 'danger',
-      class: 'bg-destructive/30 text-destructive-foreground',
-    },
-    {
-      variant: 'glass',
-      tone: 'success',
-      class: 'bg-success/30 text-success-foreground',
-    },
-    {
-      variant: 'glass',
-      tone: 'warning',
-      class: 'bg-warning/30 text-warning-foreground',
-    },
-    {
-      variant: 'glass',
-      tone: 'info',
-      class: 'bg-info/30 text-info-foreground',
-    },
+    /* glass — translucent tinted fill + blur. */
+    { variant: 'glass', tone: 'neutral', class: Tones.glass.neutral },
+    { variant: 'glass', tone: 'primary', class: Tones.glass.primary },
+    { variant: 'glass', tone: 'danger', class: Tones.glass.danger },
+    { variant: 'glass', tone: 'success', class: Tones.glass.success },
+    { variant: 'glass', tone: 'warning', class: Tones.glass.warning },
+    { variant: 'glass', tone: 'info', class: Tones.glass.info },
 
-    /* GLASS-OUTLINE — glass + tone-accent border at 50% alpha. */
-    {
-      variant: 'glass-outline',
-      tone: 'neutral',
-      class: 'border-border/50 bg-popover/70 text-popover-foreground',
-    },
-    {
-      variant: 'glass-outline',
-      tone: 'primary',
-      class: 'border-primary/50 bg-primary/30 text-primary-foreground',
-    },
-    {
-      variant: 'glass-outline',
-      tone: 'danger',
-      class: 'border-destructive/50 bg-destructive/30 text-destructive-foreground',
-    },
-    {
-      variant: 'glass-outline',
-      tone: 'success',
-      class: 'border-success/50 bg-success/30 text-success-foreground',
-    },
-    {
-      variant: 'glass-outline',
-      tone: 'warning',
-      class: 'border-warning/50 bg-warning/30 text-warning-foreground',
-    },
-    {
-      variant: 'glass-outline',
-      tone: 'info',
-      class: 'border-info/50 bg-info/30 text-info-foreground',
-    },
+    /* glass-outline — glass + tone border at 50% alpha. */
+    { variant: 'glass-outline', tone: 'neutral', class: Tones.glassOutline.neutral },
+    { variant: 'glass-outline', tone: 'primary', class: Tones.glassOutline.primary },
+    { variant: 'glass-outline', tone: 'danger', class: Tones.glassOutline.danger },
+    { variant: 'glass-outline', tone: 'success', class: Tones.glassOutline.success },
+    { variant: 'glass-outline', tone: 'warning', class: Tones.glassOutline.warning },
+    { variant: 'glass-outline', tone: 'info', class: Tones.glassOutline.info },
   ],
 
   defaultVariants: {
@@ -238,5 +132,5 @@ export type SurfaceRadius = NonNullable<SurfaceVariants['radius']>;
 /** Represents the interior-padding axis (none · xs · sm · md · lg · xl · 2xl). */
 export type SurfacePadding = NonNullable<SurfaceVariants['padding']>;
 
-/** Represents the shadow-depth override (0–5); when omitted the variant decides. */
+/** Represents the shadow-depth override (0–5); omitted means the variant decides. */
 export type SurfaceElevation = NonNullable<SurfaceVariants['elevation']>;

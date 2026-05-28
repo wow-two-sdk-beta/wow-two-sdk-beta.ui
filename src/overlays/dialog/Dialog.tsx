@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from 'react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn, composeRefs } from '../../utils';
+import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import { DismissableLayer, Portal, ScrollLockProvider, Slot } from '../../primitives';
 import { Backdrop } from '../backdrop';
@@ -121,17 +121,29 @@ export const DialogTrigger = forwardRef<HTMLButtonElement, DialogTriggerProps>(
   },
 );
 
-export interface DialogContentProps extends HTMLAttributes<HTMLDivElement> {
-  /** Disable the default backdrop. */
+/** Represents the prop surface of `Dialog.Content`. */
+export interface DialogContentProps extends HTMLAttributes<HTMLDivElement>, SurfaceVariants {
+  /** Disables the default backdrop when true. */
   hideBackdrop?: boolean;
-  /** Apply backdrop blur. */
+  /** Applies a backdrop blur. */
   blur?: boolean;
   children: ReactNode;
 }
 
 export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
   function DialogContent(
-    { hideBackdrop, blur, className, children, ...rest },
+    {
+      hideBackdrop,
+      blur,
+      variant,
+      tone,
+      radius,
+      padding,
+      elevation,
+      className,
+      children,
+      ...rest
+    },
     forwardedRef,
   ) {
     const ctx = useDialogContext();
@@ -174,7 +186,14 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
                   aria-describedby={ctx.descriptionId}
                   data-state="open"
                   className={cn(
-                    'relative w-full max-w-lg rounded-lg border border-border bg-background p-6 shadow-lg outline-none animate-in fade-in-0 zoom-in-95',
+                    'relative w-full max-w-lg animate-in fade-in-0 zoom-in-95',
+                    surfaceVariants({
+                      variant: variant ?? 'elevated',
+                      tone,
+                      radius: radius ?? 'lg',
+                      padding: padding ?? 'xl',
+                      elevation,
+                    }),
                     className,
                   )}
                   {...rest}

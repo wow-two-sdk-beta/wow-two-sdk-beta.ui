@@ -13,7 +13,7 @@ import {
   type ReactNode,
 } from 'react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn, composeRefs } from '../../utils';
+import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
 import {
   menuItemVariants,
@@ -44,13 +44,14 @@ function useMenuContext() {
   return ctx;
 }
 
-export interface MenuProps {
+/** Represents the prop surface of `Menu`. */
+export interface MenuProps extends SurfaceVariants {
   open: boolean;
   anchor: HTMLElement | null;
   onClose: () => void;
   placement?: React.ComponentProps<typeof AnchoredPositioner>['placement'];
   offset?: number;
-  /** A11y label for screen readers. */
+  /** Labels the menu for screen readers. */
   'aria-label'?: string;
   className?: string;
   children: ReactNode;
@@ -63,6 +64,11 @@ export function Menu({
   placement = 'bottom-start',
   offset = 6,
   'aria-label': ariaLabel,
+  variant,
+  tone,
+  radius,
+  padding,
+  elevation,
   className,
   children,
 }: MenuProps) {
@@ -86,7 +92,12 @@ export function Menu({
   return (
     <MenuContext.Provider value={ctx}>
       <Portal>
-        <AnchoredPositioner anchor={anchor} placement={placement} offset={offset}>
+        <AnchoredPositioner
+          anchor={anchor}
+          placement={placement}
+          offset={offset}
+          className="z-dropdown"
+        >
           <FocusScope asChild trapped loop>
             <DismissableLayer
               onEscape={onClose}
@@ -98,7 +109,17 @@ export function Menu({
               <div
                 role="menu"
                 aria-label={ariaLabel}
-                className={cn(menuVariants(), className)}
+                className={cn(
+                  surfaceVariants({
+                    variant: variant ?? 'surface',
+                    tone,
+                    radius: radius ?? 'md',
+                    padding: padding ?? 'xs',
+                    elevation,
+                  }),
+                  menuVariants(),
+                  className,
+                )}
                 onKeyDown={(e) => {
                   if (e.key === 'Tab') {
                     e.preventDefault();

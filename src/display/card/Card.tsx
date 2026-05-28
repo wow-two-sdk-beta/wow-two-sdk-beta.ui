@@ -1,26 +1,23 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../utils';
+import { cn, surfaceVariants, type SurfaceVariants } from '../../utils';
 
 type DivProps = ComponentPropsWithoutRef<'div'>;
 
-export interface CardProps extends DivProps {
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-}
-
-const PADDING: Record<NonNullable<CardProps['padding']>, string> = {
-  none: '',
-  sm: 'p-3',
-  md: 'p-4',
-  lg: 'p-6',
-};
+/** Represents the prop surface of `Card`. */
+export interface CardProps extends DivProps, SurfaceVariants {}
 
 const CardRoot = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, padding = 'none', ...props }, ref) => (
+  ({ className, variant, tone, radius, padding, elevation, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        'rounded-lg border border-border bg-card text-card-foreground shadow-xs',
-        PADDING[padding],
+        surfaceVariants({
+          variant: variant ?? 'surface',
+          tone,
+          radius: radius ?? 'lg',
+          padding: padding ?? 'none',
+          elevation: elevation ?? 1,
+        }),
         className,
       )}
       {...props}
@@ -58,12 +55,7 @@ const CardFooter = forwardRef<HTMLDivElement, DivProps>(({ className, ...props }
 ));
 CardFooter.displayName = 'Card.Footer';
 
-/**
- * Compound `Card` — raised surface for grouped content. Use sub-components
- * for structure: `<Card.Header>` (with optional `<Card.Title>` /
- * `<Card.Description>`), `<Card.Body>`, `<Card.Footer>`. Or pass
- * `padding="md"` and free-form children for the simplest case.
- */
+/** Provides a compound `Card` — raised surface for grouped content with optional sub-components. */
 export const Card = Object.assign(CardRoot, {
   Header: CardHeader,
   Title: CardTitle,

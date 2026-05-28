@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from 'react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn, composeRefs } from '../../utils';
+import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import { DismissableLayer, Portal, ScrollLockProvider, Slot } from '../../primitives';
 import { Backdrop } from '../backdrop';
@@ -130,7 +130,8 @@ const SIDE_CLASSES: Record<DrawerSide, string> = {
   bottom: 'inset-x-0 bottom-0 w-full max-h-[85vh] border-t animate-in slide-in-from-bottom',
 };
 
-export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement> {
+/** Represents the prop surface of `Drawer.Content`. */
+export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement>, SurfaceVariants {
   hideBackdrop?: boolean;
   blur?: boolean;
   children: ReactNode;
@@ -138,7 +139,18 @@ export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement> {
 
 export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
   function DrawerContent(
-    { hideBackdrop, blur, className, children, ...rest },
+    {
+      hideBackdrop,
+      blur,
+      variant,
+      tone,
+      radius,
+      padding,
+      elevation,
+      className,
+      children,
+      ...rest
+    },
     forwardedRef,
   ) {
     const ctx = useDrawerContext();
@@ -181,7 +193,14 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
                 data-state="open"
                 data-side={ctx.side}
                 className={cn(
-                  'fixed z-modal flex flex-col gap-4 border-border bg-background p-6 shadow-lg outline-none',
+                  'fixed z-modal flex flex-col gap-4 outline-none',
+                  surfaceVariants({
+                    variant: variant ?? 'elevated',
+                    tone,
+                    radius: radius ?? 'none',
+                    padding: padding ?? 'xl',
+                    elevation: elevation ?? 3,
+                  }),
                   SIDE_CLASSES[ctx.side],
                   className,
                 )}

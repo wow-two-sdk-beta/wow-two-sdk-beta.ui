@@ -12,7 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn } from '../../utils';
+import { cn, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import { DismissableLayer, Portal, ScrollLockProvider } from '../../primitives';
 import { Backdrop } from '../backdrop';
@@ -46,7 +46,8 @@ function resolveSnapPx(point: SnapPoint, viewport: number): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-export interface BottomSheetProps extends HTMLAttributes<HTMLDivElement> {
+/** Represents the prop surface of `BottomSheet`. */
+export interface BottomSheetProps extends HTMLAttributes<HTMLDivElement>, SurfaceVariants {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -73,6 +74,11 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
     dismissOnOutsideClick = true,
     dismissOnEscape = true,
     dragToDismiss = true,
+    variant,
+    tone,
+    radius,
+    padding,
+    elevation,
     className,
     children,
     ...rest
@@ -192,7 +198,14 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
                   transition: dragHeight == null ? 'height 220ms ease-out' : 'none',
                 }}
                 className={cn(
-                  'fixed inset-x-0 bottom-0 z-modal flex flex-col rounded-t-xl border-t border-border bg-card text-card-foreground shadow-2xl outline-none',
+                  'fixed inset-x-0 bottom-0 z-modal flex flex-col rounded-t-xl border-t outline-none',
+                  surfaceVariants({
+                    variant: variant ?? 'elevated',
+                    tone,
+                    radius: radius ?? 'none',
+                    padding: padding ?? 'none',
+                    elevation: elevation ?? 5,
+                  }),
                   className,
                 )}
                 {...rest}
