@@ -24,6 +24,7 @@ export const textVariants = tv({
       success: 'text-success',
       warning: 'text-warning',
       danger: 'text-destructive',
+      info: 'text-info',
     },
     align: {
       left: 'text-left',
@@ -33,6 +34,9 @@ export const textVariants = tv({
     },
     truncate: {
       true: 'truncate',
+    },
+    tabular: {
+      true: 'tabular-nums',
     },
   },
   defaultVariants: {

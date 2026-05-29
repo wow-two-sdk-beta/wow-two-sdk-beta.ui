@@ -18,10 +18,10 @@ export interface TextProps
  * to keep semantics consistent with the surrounding markup.
  */
 export const Text = forwardRef<HTMLElement, TextProps>(
-  ({ as: Component = 'p', className, size, weight, color, align, truncate, ...props }, ref) => (
+  ({ as: Component = 'p', className, size, weight, color, align, truncate, tabular, ...props }, ref) => (
     <Component
       ref={ref as Ref<HTMLElement>}
-      className={cn(textVariants({ size, weight, color, align, truncate }), className)}
+      className={cn(textVariants({ size, weight, color, align, truncate, tabular }), className)}
       {...props}
     />
   ),

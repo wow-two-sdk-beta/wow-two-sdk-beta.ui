@@ -122,18 +122,37 @@ export const DrawerTrigger = forwardRef<HTMLButtonElement, DrawerTriggerProps>(
   },
 );
 
-const SIDE_CLASSES: Record<DrawerSide, string> = {
-  right:
-    'inset-y-0 right-0 h-full w-full sm:max-w-sm border-l animate-in slide-in-from-right',
-  left: 'inset-y-0 left-0 h-full w-full sm:max-w-sm border-r animate-in slide-in-from-left',
-  top: 'inset-x-0 top-0 w-full max-h-[85vh] border-b animate-in slide-in-from-top',
-  bottom: 'inset-x-0 bottom-0 w-full max-h-[85vh] border-t animate-in slide-in-from-bottom',
+export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
+const SIDE_BASE: Record<DrawerSide, string> = {
+  right: 'inset-y-0 right-0 h-full w-full border-l animate-in slide-in-from-right',
+  left: 'inset-y-0 left-0 h-full w-full border-r animate-in slide-in-from-left',
+  top: 'inset-x-0 top-0 w-full border-b animate-in slide-in-from-top',
+  bottom: 'inset-x-0 bottom-0 w-full border-t animate-in slide-in-from-bottom',
+};
+
+const HORIZONTAL_SIZE: Record<DrawerSize, string> = {
+  sm: 'sm:max-w-sm',
+  md: 'sm:max-w-md',
+  lg: 'sm:max-w-lg',
+  xl: 'sm:max-w-2xl',
+  full: '',
+};
+
+const VERTICAL_SIZE: Record<DrawerSize, string> = {
+  sm: 'max-h-[40vh]',
+  md: 'max-h-[60vh]',
+  lg: 'max-h-[75vh]',
+  xl: 'max-h-[85vh]',
+  full: 'max-h-screen',
 };
 
 /** Represents the prop surface of `Drawer.Content`. */
 export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement>, SurfaceVariants {
   hideBackdrop?: boolean;
   blur?: boolean;
+  /** Per-side max-size token. Default `md` (preserves prior behavior for right/left at `sm`-ish width via `sm:max-w-md`). */
+  size?: DrawerSize;
   children: ReactNode;
 }
 
@@ -147,6 +166,7 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
       radius,
       padding,
       elevation,
+      size = 'md',
       className,
       children,
       ...rest
@@ -154,6 +174,8 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
     forwardedRef,
   ) {
     const ctx = useDrawerContext();
+    const isHorizontal = ctx.side === 'right' || ctx.side === 'left';
+    const sizeClass = isHorizontal ? HORIZONTAL_SIZE[size] : VERTICAL_SIZE[size];
 
     const close = useCallback(() => {
       ctx.setOpen(false);
@@ -201,7 +223,8 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
                     padding: padding ?? 'xl',
                     elevation: elevation ?? 3,
                   }),
-                  SIDE_CLASSES[ctx.side],
+                  SIDE_BASE[ctx.side],
+                  sizeClass,
                   className,
                 )}
                 {...rest}

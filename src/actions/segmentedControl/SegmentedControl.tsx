@@ -12,8 +12,8 @@ export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps
       attached
       className={cn(
         'rounded-md bg-muted p-1',
-        '[&>*]:!rounded-md [&>*]:!ml-0 [&>*]:border-transparent [&>*]:bg-transparent',
-        '[&>*[data-state=on]]:!bg-background [&>*[data-state=on]]:!text-foreground [&>*[data-state=on]]:shadow-sm',
+        '[&>*]:!rounded-md [&>*]:!ml-0 [&>*]:!border-transparent [&>*]:!bg-transparent',
+        '[&>*[data-pressed=true]]:!bg-background [&>*[data-pressed=true]]:!text-foreground [&>*[data-pressed=true]]:shadow-sm',
         className,
       )}
       {...(props as ToggleButtonGroupProps)}
