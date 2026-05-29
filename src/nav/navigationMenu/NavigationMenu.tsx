@@ -13,7 +13,7 @@ import {
   type ReactNode,
 } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '../../utils';
+import { cn, surfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import {
   AnchoredPositioner,
@@ -289,7 +289,8 @@ export const NavigationMenuContent = forwardRef<HTMLDivElement, NavigationMenuCo
               aria-labelledby={item.triggerId}
               data-state="open"
               className={cn(
-                'min-w-[12rem] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
+                'min-w-[12rem] outline-none animate-in fade-in-0 zoom-in-95',
+                surfaceVariants({ variant: 'surface', radius: 'md', padding: 'md' }),
                 className,
               )}
               {...rest}

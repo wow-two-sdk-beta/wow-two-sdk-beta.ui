@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Bell, X } from 'lucide-react';
-import { cn } from '../../utils';
+import { cn, surfaceVariants } from '../../utils';
 
 export interface NotificationCenterProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   /** Header title. Default `"Notifications"`. */
@@ -159,7 +159,8 @@ const NotificationCenterInner = forwardRef<HTMLDivElement, NotificationCenterPro
         role="region"
         aria-label="Notifications"
         className={cn(
-          'flex w-80 flex-col rounded-md border border-border bg-popover text-popover-foreground shadow-md',
+          'flex w-80 flex-col',
+          surfaceVariants({ variant: 'surface', radius: 'md' }),
           className,
         )}
         {...props}

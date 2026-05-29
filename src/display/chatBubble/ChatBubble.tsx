@@ -4,7 +4,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Check, CheckCheck, Clock, AlertTriangle } from 'lucide-react';
-import { cn } from '../../utils';
+import { cn, Tones } from '../../utils';
 
 export type ChatSide = 'start' | 'end';
 export type ChatStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
@@ -33,11 +33,12 @@ export interface ChatBubbleProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
+/** Maps each chat tone to the shared `Tones` palette (system stays custom — transparent + italic). */
 const TONE_BASE: Record<ChatTone, string> = {
-  default: 'bg-muted text-foreground',
-  primary: 'bg-primary text-primary-foreground',
+  default: Tones.soft.neutral,
+  primary: Tones.solid.primary,
   system: 'bg-transparent text-muted-foreground italic',
-  subtle: 'bg-card text-card-foreground border border-border',
+  subtle: `border ${Tones.surface.neutral}`,
 };
 
 const STATUS_ICON: Record<ChatStatus, ReactNode> = {

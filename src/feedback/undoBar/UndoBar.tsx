@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { cn } from '../../utils';
+import { cn, surfaceVariants } from '../../utils';
 import { Portal } from '../../primitives';
 
 export type UndoBarPosition =
@@ -99,7 +99,9 @@ export function UndoBar({
         onFocus={() => pauseOnHover && setPaused(true)}
         onBlur={() => pauseOnHover && setPaused(false)}
         className={cn(
-          'fixed z-toast flex items-center gap-3 overflow-hidden rounded-md border border-border bg-popover px-4 py-2.5 text-sm text-popover-foreground shadow-lg animate-in fade-in-0 slide-in-from-bottom-2',
+          'fixed z-toast flex items-center gap-3 overflow-hidden text-sm animate-in fade-in-0 slide-in-from-bottom-2',
+          surfaceVariants({ variant: 'surface', radius: 'md', padding: 'sm', elevation: 3 }),
+          'px-4 py-2.5',
           POSITION[position],
           className,
         )}
