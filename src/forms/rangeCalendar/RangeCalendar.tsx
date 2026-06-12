@@ -20,7 +20,7 @@ export interface RangeCalendarProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
   value?: DateRange | null;
   defaultValue?: DateRange | null;
-  onChange?: (range: DateRange) => void;
+  onValueChange?: (range: DateRange) => void;
   defaultMonth?: Date;
   min?: Date | null;
   max?: Date | null;
@@ -33,7 +33,7 @@ export const RangeCalendar = forwardRef<HTMLDivElement, RangeCalendarProps>(
     {
       value,
       defaultValue,
-      onChange,
+      onValueChange,
       defaultMonth,
       min,
       max,
@@ -47,7 +47,7 @@ export const RangeCalendar = forwardRef<HTMLDivElement, RangeCalendarProps>(
     const [range, setRange] = useControlled<DateRange | null>({
       controlled: value,
       default: defaultValue ?? null,
-      onChange: onChange as ((v: DateRange | null) => void) | undefined,
+      onChange: onValueChange as ((v: DateRange | null) => void) | undefined,
     });
     const [viewMonth, setViewMonth] = useState<Date>(
       () => startOfMonth(defaultMonth ?? range?.start ?? new Date()),

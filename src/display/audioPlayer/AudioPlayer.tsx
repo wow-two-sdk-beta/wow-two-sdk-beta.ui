@@ -104,6 +104,9 @@ export const AudioPlayer = forwardRef<HTMLAudioElement, AudioPlayerProps>(
     );
 
     const handleKey = (e: KeyboardEvent<HTMLDivElement>) => {
+      // Only handle shortcuts aimed at the container itself — never hijack
+      // keys from interactive children (seek slider, speed select, buttons).
+      if (e.target !== e.currentTarget) return;
       switch (e.key) {
         case ' ':
         case 'Spacebar':

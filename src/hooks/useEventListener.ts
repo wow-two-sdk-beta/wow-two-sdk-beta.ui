@@ -13,14 +13,18 @@ export function useEventListener<K extends string>(
   options?: boolean | AddEventListenerOptions,
 ): void {
   const handlerRef = useRef(handler);
+  const optionsRef = useRef(options);
   useLayoutEffect(() => {
     handlerRef.current = handler;
-  }, [handler]);
+    optionsRef.current = options;
+  }, [handler, options]);
 
   useEffect(() => {
     if (!target) return;
+    // Capture options at attach time — remove must use the same capture flag.
+    const listenerOptions = optionsRef.current;
     const listener = (e: Event) => handlerRef.current(e);
-    target.addEventListener(event, listener, options);
-    return () => target.removeEventListener(event, listener, options);
-  }, [event, target, options]);
+    target.addEventListener(event, listener, listenerOptions);
+    return () => target.removeEventListener(event, listener, listenerOptions);
+  }, [event, target]);
 }

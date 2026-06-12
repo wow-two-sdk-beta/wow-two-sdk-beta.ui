@@ -9,7 +9,7 @@ export interface ColorSwatchPickerProps
   colors: string[];
   value?: string | null;
   defaultValue?: string | null;
-  onChange?: (color: string) => void;
+  onValueChange?: (color: string) => void;
   swatchSize?: ColorSwatchVariants['size'];
   swatchShape?: ColorSwatchVariants['shape'];
   disabled?: boolean;
@@ -55,7 +55,7 @@ export function ColorSwatchPicker({
   colors,
   value,
   defaultValue,
-  onChange,
+  onValueChange,
   swatchSize = 'md',
   swatchShape = 'square',
   disabled = false,
@@ -65,7 +65,7 @@ export function ColorSwatchPicker({
   const [selected, setSelected] = useControlled<string | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange: onChange as ((v: string | null) => void) | undefined,
+    onChange: onValueChange as ((v: string | null) => void) | undefined,
   });
 
   return (

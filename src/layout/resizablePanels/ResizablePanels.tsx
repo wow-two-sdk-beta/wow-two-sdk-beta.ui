@@ -67,7 +67,11 @@ export const ResizablePanels = forwardRef<HTMLDivElement, ResizablePanelsProps>(
   ) {
     const panels = useRef<PanelInfo[]>([]);
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const dragCleanupRef = useRef<(() => void) | null>(null);
     const panelCount = countPanels(children);
+
+    // Unmounting mid-drag must release the window listeners + body style overrides.
+    useEffect(() => () => dragCleanupRef.current?.(), []);
 
     const initialSizes =
       defaultSizes && defaultSizes.length === panelCount
@@ -176,12 +180,14 @@ export const ResizablePanels = forwardRef<HTMLDivElement, ResizablePanelsProps>(
           window.removeEventListener('mouseup', onUp);
           document.body.style.cursor = '';
           document.body.style.userSelect = '';
+          dragCleanupRef.current = null;
         };
 
         document.body.style.cursor = orientation === 'horizontal' ? 'col-resize' : 'row-resize';
         document.body.style.userSelect = 'none';
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup', onUp);
+        dragCleanupRef.current = onUp;
       },
       [orientation, sizes, setSizes],
     );
@@ -380,16 +386,18 @@ function ResizableSeparatorInner({
     }
   };
 
-  const ariaValueNow = ctx.sizes[index + 1] ?? 50;
-  const nextPanel = ctx.panels.current[index + 1];
+  // Announce the panel BEFORE the separator — ArrowRight/ArrowDown grow that one,
+  // so its size moves in the same direction as the key.
+  const ariaValueNow = ctx.sizes[index] ?? 50;
+  const panelBefore = ctx.panels.current[index];
 
   return (
     <div
       role="separator"
       aria-orientation={ctx.orientation === 'horizontal' ? 'vertical' : 'horizontal'}
       aria-valuenow={Math.round(ariaValueNow)}
-      aria-valuemin={nextPanel?.minSize ?? 0}
-      aria-valuemax={nextPanel?.maxSize ?? 100}
+      aria-valuemin={panelBefore?.minSize ?? 0}
+      aria-valuemax={panelBefore?.maxSize ?? 100}
       aria-disabled={disabled || undefined}
       tabIndex={disabled ? -1 : 0}
       data-dragging={dragging || undefined}

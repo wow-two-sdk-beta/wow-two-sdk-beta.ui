@@ -12,7 +12,7 @@ interface RadioGroupProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, 'onC
   value?: string | null;
   defaultValue?: string | null;
   onValueChange?: (next: string | null) => void;
-  isDisabled?: boolean;
+  disabled?: boolean;
   orientation?: 'horizontal' | 'vertical';
   children: ReactNode;
 }
@@ -33,7 +33,7 @@ export const RadioGroup = forwardRef<HTMLFieldSetElement, RadioGroupProps>(
       value,
       defaultValue,
       onValueChange,
-      isDisabled,
+      disabled,
       orientation = 'vertical',
       className,
       children,
@@ -50,7 +50,7 @@ export const RadioGroup = forwardRef<HTMLFieldSetElement, RadioGroupProps>(
     });
 
     return (
-      <Fieldset ref={ref} disabled={isDisabled} className={cn(className)} {...props}>
+      <Fieldset ref={ref} disabled={disabled} className={cn(className)} {...props}>
         {legend && <Legend>{legend}</Legend>}
         <div className={cn('flex gap-3', orientation === 'vertical' ? 'flex-col' : 'flex-row flex-wrap')}>
           {Children.map(children, (child) => {

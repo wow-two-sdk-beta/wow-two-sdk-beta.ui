@@ -38,18 +38,30 @@ interface ChildLike extends ToggleButtonProps {
 /** Coordinates a row/column of ToggleButton children — `type="single" | "multi"`. */
 export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupProps>(
   (props, ref) => {
-    const { orientation = 'horizontal', attached = true, className, children, ...rest } = props;
-    const mode: Mode = props.type === 'multi' ? 'multi' : 'single';
+    const {
+      orientation = 'horizontal',
+      attached = true,
+      className,
+      children,
+      type,
+      value,
+      defaultValue,
+      onValueChange,
+      ...rest
+    } = props;
+    const mode: Mode = type === 'multi' ? 'multi' : 'single';
 
     const [singleValue, setSingleValue] = useControlled<string | null>({
-      controlled: mode === 'single' ? (rest as SingleProps).value : undefined,
-      default: mode === 'single' ? (rest as SingleProps).defaultValue ?? null : null,
-      onChange: mode === 'single' ? (rest as SingleProps).onValueChange : undefined,
+      controlled: mode === 'single' ? (value as string | null | undefined) : undefined,
+      default: mode === 'single' ? (defaultValue as string | null | undefined) ?? null : null,
+      onChange:
+        mode === 'single' ? (onValueChange as ((value: string | null) => void) | undefined) : undefined,
     });
     const [multiValue, setMultiValue] = useControlled<string[]>({
-      controlled: mode === 'multi' ? (rest as MultiProps).value : undefined,
-      default: mode === 'multi' ? (rest as MultiProps).defaultValue ?? [] : [],
-      onChange: mode === 'multi' ? (rest as MultiProps).onValueChange : undefined,
+      controlled: mode === 'multi' ? (value as string[] | undefined) : undefined,
+      default: mode === 'multi' ? (defaultValue as string[] | undefined) ?? [] : [],
+      onChange:
+        mode === 'multi' ? (onValueChange as ((value: string[]) => void) | undefined) : undefined,
     });
 
     const isPressed = (childValue: string | undefined): boolean => {
@@ -72,7 +84,7 @@ export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupPro
     return (
       <div
         ref={ref}
-        role={mode === 'single' ? 'radiogroup' : 'group'}
+        role="group"
         data-orientation={orientation}
         className={cn(
           'inline-flex',
@@ -84,14 +96,20 @@ export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupPro
             : 'gap-2',
           className,
         )}
+        {...rest}
       >
         {Children.map(children, (child) => {
           if (!isValidElement(child)) return child;
           const c = child as ReactElement<ChildLike>;
           const childValue = c.props.value;
+          // Compose with the child's own props — an explicit `pressed` wins, and
+          // the child's own `onPressedChange` still fires before the group toggle.
           return cloneElement(c, {
-            pressed: isPressed(childValue),
-            onPressedChange: () => togglePressed(childValue),
+            pressed: c.props.pressed ?? isPressed(childValue),
+            onPressedChange: (pressed: boolean) => {
+              c.props.onPressedChange?.(pressed);
+              togglePressed(childValue);
+            },
           } as Partial<ChildLike>);
         })}
       </div>

@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { cn } from '../../utils';
+import { useControlled } from '../../hooks';
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '../drawer';
 
 interface ActionSheetContextValue {
@@ -45,18 +46,19 @@ export function ActionSheet({
   children,
 }: ActionSheetProps) {
   // We can't intercept `setOpen` from Drawer's context directly, so the
-  // ActionSheet wraps Drawer with our own controlled bridge.
-  const handleOpenChange = (next: boolean) => onOpenChange?.(next);
+  // ActionSheet owns the open state and drives Drawer fully controlled —
+  // that way `ctx.setOpen` works in both controlled and uncontrolled modes.
+  const [resolvedOpen, setOpen] = useControlled({
+    controlled: open,
+    default: defaultOpen ?? false,
+    onChange: onOpenChange,
+  });
 
-  const ctx = useMemo<ActionSheetContextValue>(
-    () => ({ setOpen: handleOpenChange }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onOpenChange],
-  );
+  const ctx = useMemo<ActionSheetContextValue>(() => ({ setOpen }), [setOpen]);
 
   return (
     <ActionSheetContext.Provider value={ctx}>
-      <Drawer open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} side="bottom">
+      <Drawer open={resolvedOpen} onOpenChange={setOpen} side="bottom">
         <DrawerContent
           className={cn(
             'mx-auto max-w-md rounded-t-xl bg-card p-2 text-card-foreground',

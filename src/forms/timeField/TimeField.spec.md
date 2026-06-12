@@ -18,7 +18,7 @@ Same as `forms/InputStyles` `inputBaseVariants`.
 |---|---|---|---|---|
 | `value` | `{ hours, minutes } \| null` | — | no | Controlled. |
 | `defaultValue` | same | `null` | no | Uncontrolled. |
-| `onChange` | `(t) => void` | — | no | Selection callback. |
+| `onValueChange` | `(t) => void` | — | no | Selection callback. |
 | `step` | `number` (seconds) | — | no | Native step attr (e.g. `60` = 1 min, `300` = 5 min). |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | no | From `inputBaseVariants`. |
 | `state` | `'default' \| 'invalid'` | `'default'` | no | From `inputBaseVariants`. |

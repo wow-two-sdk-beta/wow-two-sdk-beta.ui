@@ -35,8 +35,8 @@ Blocks interaction with a region (or the whole viewport) while a long-running ta
 Single component. Cross-domain composes `overlays/Backdrop` for the scrim. Spinner is same-domain.
 
 ## Accessibility
-- Wrapper has `role="alert"` + `aria-busy="true"` so screen readers announce the busy state.
-- Label is visible AND part of the alert region (so it gets read).
+- Wrapper has `role="status"` (polite live region) so screen readers announce the busy state without an `aria-busy` suppression.
+- Label is visible AND part of the status region (so it gets read).
 
 ## Dependencies
 Foundation: `utils`. Same domain: `feedback/Spinner`. Cross-domain: `overlays/Backdrop`.

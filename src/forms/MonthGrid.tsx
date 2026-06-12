@@ -59,6 +59,10 @@ export interface MonthGridProps {
   className?: string;
 }
 
+// Upper bound when scanning past disabled days — covers a Shift+PageUp/PageDown
+// year jump (≤366 days) with margin.
+const MAX_DISABLED_SKIP = 400;
+
 export function MonthGrid({
   viewMonth,
   onViewMonthChange,
@@ -70,27 +74,63 @@ export function MonthGrid({
   'aria-label': ariaLabel = 'Calendar',
   className,
 }: MonthGridProps) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
+  // Tracks keyboard/click interaction so the focus effect below never steals
+  // page focus when a standalone Calendar mounts.
+  const interactedRef = useRef(false);
 
   // Re-focus the active day cell when focusedDate changes (keyboard nav).
   useEffect(() => {
+    if (!interactedRef.current) return;
     const cell = gridRef.current?.querySelector<HTMLButtonElement>(
       `[data-date="${focusedDate.toDateString()}"]`,
     );
     cell?.focus();
   }, [focusedDate]);
 
+  // When the grid mounts inside an open popover (DatePicker), the focus trap
+  // lands on the first tabbable (prev-month button); adopt it onto the active
+  // day cell. Standalone mounts (activeElement outside the root) are left alone.
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      if (!rootRef.current?.contains(document.activeElement)) return;
+      gridRef.current?.querySelector<HTMLButtonElement>('button[tabindex="0"]')?.focus();
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   const moveFocus = useCallback(
-    (next: Date) => {
-      if (
-        next.getMonth() !== viewMonth.getMonth() ||
-        next.getFullYear() !== viewMonth.getFullYear()
-      ) {
-        onViewMonthChange(startOfMonth(next));
+    (next: Date, dir: 1 | -1) => {
+      let target = next;
+      if (isDayDisabled) {
+        // Skip disabled days in the movement direction…
+        let steps = 0;
+        while (isDayDisabled(target) && steps < MAX_DISABLED_SKIP) {
+          target = addDays(target, dir);
+          steps += 1;
+        }
+        // …and clamp back toward the origin when none exist (min/max edges).
+        if (isDayDisabled(target)) {
+          target = next;
+          steps = 0;
+          while (isDayDisabled(target) && steps < MAX_DISABLED_SKIP) {
+            target = addDays(target, -dir);
+            steps += 1;
+          }
+        }
+        if (isDayDisabled(target)) return; // nothing focusable in reach — stay put
       }
-      onFocusedDateChange(next);
+      interactedRef.current = true;
+      if (
+        target.getMonth() !== viewMonth.getMonth() ||
+        target.getFullYear() !== viewMonth.getFullYear()
+      ) {
+        onViewMonthChange(startOfMonth(target));
+      }
+      onFocusedDateChange(target);
     },
-    [viewMonth, onViewMonthChange, onFocusedDateChange],
+    [isDayDisabled, viewMonth, onViewMonthChange, onFocusedDateChange],
   );
 
   const onCellKeyDown = useCallback(
@@ -98,35 +138,37 @@ export function MonthGrid({
       switch (e.key) {
         case 'ArrowRight':
           e.preventDefault();
-          moveFocus(addDays(date, 1));
+          moveFocus(addDays(date, 1), 1);
           break;
         case 'ArrowLeft':
           e.preventDefault();
-          moveFocus(addDays(date, -1));
+          moveFocus(addDays(date, -1), -1);
           break;
         case 'ArrowDown':
           e.preventDefault();
-          moveFocus(addDays(date, 7));
+          moveFocus(addDays(date, 7), 1);
           break;
         case 'ArrowUp':
           e.preventDefault();
-          moveFocus(addDays(date, -7));
+          moveFocus(addDays(date, -7), -1);
           break;
         case 'Home':
+          // Scan toward the origin so a disabled week start clamps to the
+          // first enabled day of the week instead of leaving it.
           e.preventDefault();
-          moveFocus(addDays(date, -date.getDay()));
+          moveFocus(addDays(date, -date.getDay()), 1);
           break;
         case 'End':
           e.preventDefault();
-          moveFocus(addDays(date, 6 - date.getDay()));
+          moveFocus(addDays(date, 6 - date.getDay()), -1);
           break;
         case 'PageDown':
           e.preventDefault();
-          moveFocus(addMonths(date, e.shiftKey ? 12 : 1));
+          moveFocus(addMonths(date, e.shiftKey ? 12 : 1), 1);
           break;
         case 'PageUp':
           e.preventDefault();
-          moveFocus(addMonths(date, e.shiftKey ? -12 : -1));
+          moveFocus(addMonths(date, e.shiftKey ? -12 : -1), -1);
           break;
         case 'Enter':
         case ' ':
@@ -138,12 +180,23 @@ export function MonthGrid({
     [moveFocus, onDayActivate, isDayDisabled],
   );
 
+  const dayDisabled = (date: Date) => isDayDisabled?.(date) ?? false;
   const cells = buildMonthGrid(viewMonth.getFullYear(), viewMonth.getMonth());
+  const weeks = Array.from({ length: 6 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
+
+  // Roving tab stop — the focused date unless it's disabled (e.g. today before
+  // `min`); then the first enabled cell so the grid stays Tab-reachable.
+  let tabStopDate = focusedDate;
+  if (dayDisabled(focusedDate)) {
+    const fallback =
+      cells.find((c) => !c.outOfMonth && !dayDisabled(c.date)) ??
+      cells.find((c) => !dayDisabled(c.date));
+    if (fallback) tabStopDate = fallback.date;
+  }
 
   return (
     <div
-      role="application"
-      aria-label={ariaLabel}
+      ref={rootRef}
       className={cn(
         'inline-flex flex-col gap-2 rounded-md border border-border bg-popover p-3 text-popover-foreground',
         className,
@@ -185,49 +238,53 @@ export function MonthGrid({
       </div>
 
       {/* Day grid */}
-      <div ref={gridRef} className="grid grid-cols-7 gap-0 px-1" role="grid">
-        {cells.map(({ date, outOfMonth }) => {
-          const disabled = isDayDisabled?.(date) ?? false;
-          const isFocusedCell = isSameDay(focusedDate, date);
-          const consumerProps = dayProps?.(date, { outOfMonth }) ?? {};
-          const { className: cellClassName, ...consumerRest } = consumerProps as Record<
-            string,
-            unknown
-          > & { className?: string };
+      <div ref={gridRef} role="grid" aria-label={ariaLabel} className="px-1">
+        {weeks.map((week, weekIndex) => (
+          <div key={weekIndex} role="row" className="grid grid-cols-7 gap-0">
+            {week.map(({ date, outOfMonth }) => {
+              const disabled = dayDisabled(date);
+              const isTabStop = isSameDay(tabStopDate, date);
+              const consumerProps = dayProps?.(date, { outOfMonth }) ?? {};
+              const { className: cellClassName, ...consumerRest } = consumerProps as Record<
+                string,
+                unknown
+              > & { className?: string };
 
-          return (
-            <button
-              key={date.toDateString()}
-              type="button"
-              role="gridcell"
-              data-date={date.toDateString()}
-              aria-disabled={disabled || undefined}
-              data-today={isToday(date) ? '' : undefined}
-              data-out-of-month={outOfMonth ? '' : undefined}
-              data-disabled={disabled ? '' : undefined}
-              tabIndex={isFocusedCell ? 0 : -1}
-              disabled={disabled}
-              onClick={() => {
-                if (disabled) return;
-                onDayActivate?.(date, { outOfMonth });
-                onFocusedDateChange(date);
-                if (outOfMonth) onViewMonthChange(startOfMonth(date));
-              }}
-              onKeyDown={(e) => onCellKeyDown(e, date, outOfMonth)}
-              {...(consumerRest as ButtonHTMLAttributes<HTMLButtonElement>)}
-              className={cn(
-                'grid h-9 w-9 place-items-center text-sm transition-colors',
-                'hover:bg-muted hover:text-foreground',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                outOfMonth && 'text-muted-foreground/60',
-                disabled && 'pointer-events-none opacity-40',
-                cellClassName,
-              )}
-            >
-              {date.getDate()}
-            </button>
-          );
-        })}
+              return (
+                <button
+                  key={date.toDateString()}
+                  type="button"
+                  role="gridcell"
+                  data-date={date.toDateString()}
+                  aria-disabled={disabled || undefined}
+                  data-today={isToday(date) ? '' : undefined}
+                  data-out-of-month={outOfMonth ? '' : undefined}
+                  data-disabled={disabled ? '' : undefined}
+                  tabIndex={isTabStop ? 0 : -1}
+                  onClick={() => {
+                    if (disabled) return;
+                    interactedRef.current = true;
+                    onDayActivate?.(date, { outOfMonth });
+                    onFocusedDateChange(date);
+                    if (outOfMonth) onViewMonthChange(startOfMonth(date));
+                  }}
+                  onKeyDown={(e) => onCellKeyDown(e, date, outOfMonth)}
+                  {...(consumerRest as ButtonHTMLAttributes<HTMLButtonElement>)}
+                  className={cn(
+                    'grid h-9 w-9 place-items-center text-sm transition-colors',
+                    'hover:bg-muted hover:text-foreground',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    outOfMonth && 'text-muted-foreground/60',
+                    disabled && 'pointer-events-none opacity-40',
+                    cellClassName,
+                  )}
+                >
+                  {date.getDate()}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );

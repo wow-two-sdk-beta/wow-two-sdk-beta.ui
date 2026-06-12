@@ -33,54 +33,67 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
     },
     "./utils": {
+      "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.js",
-      "types": "./dist/utils/index.d.ts"
+      "default": "./dist/utils/index.js"
     },
     "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
       "import": "./dist/hooks/index.js",
-      "types": "./dist/hooks/index.d.ts"
+      "default": "./dist/hooks/index.js"
     },
     "./icons": {
+      "types": "./dist/icons/index.d.ts",
       "import": "./dist/icons/index.js",
-      "types": "./dist/icons/index.d.ts"
+      "default": "./dist/icons/index.js"
     },
     "./primitives": {
+      "types": "./dist/primitives/index.d.ts",
       "import": "./dist/primitives/index.js",
-      "types": "./dist/primitives/index.d.ts"
+      "default": "./dist/primitives/index.js"
     },
     "./actions": {
+      "types": "./dist/actions/index.d.ts",
       "import": "./dist/actions/index.js",
-      "types": "./dist/actions/index.d.ts"
+      "default": "./dist/actions/index.js"
     },
     "./display": {
+      "types": "./dist/display/index.d.ts",
       "import": "./dist/display/index.js",
-      "types": "./dist/display/index.d.ts"
+      "default": "./dist/display/index.js"
     },
     "./feedback": {
+      "types": "./dist/feedback/index.d.ts",
       "import": "./dist/feedback/index.js",
-      "types": "./dist/feedback/index.d.ts"
+      "default": "./dist/feedback/index.js"
     },
     "./forms": {
+      "types": "./dist/forms/index.d.ts",
       "import": "./dist/forms/index.js",
-      "types": "./dist/forms/index.d.ts"
+      "default": "./dist/forms/index.js"
     },
     "./layout": {
+      "types": "./dist/layout/index.d.ts",
       "import": "./dist/layout/index.js",
-      "types": "./dist/layout/index.d.ts"
+      "default": "./dist/layout/index.js"
     },
     "./nav": {
+      "types": "./dist/nav/index.d.ts",
       "import": "./dist/nav/index.js",
-      "types": "./dist/nav/index.d.ts"
+      "default": "./dist/nav/index.js"
     },
     "./overlays": {
+      "types": "./dist/overlays/index.d.ts",
       "import": "./dist/overlays/index.js",
-      "types": "./dist/overlays/index.d.ts"
+      "default": "./dist/overlays/index.js"
     },
-    "./styles.css": "./dist/index.css"
+    "./styles.css": "./dist/index.css",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly --outDir dist && cp src/index.css dist/index.css",

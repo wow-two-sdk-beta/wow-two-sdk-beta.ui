@@ -5,6 +5,7 @@ import {
   isValidElement,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   type HTMLAttributes,
@@ -13,7 +14,7 @@ import {
   type Ref,
 } from 'react';
 import { cn, composeRefs } from '../../utils';
-import { useControlled } from '../../hooks';
+import { useControlled, useEscape } from '../../hooks';
 import {
   AnchoredPositioner,
   OverlayArrow,
@@ -94,6 +95,15 @@ export function HoverCard({
       closeTimer.current = null;
     }
   }, []);
+
+  // Clear pending timers on unmount — avoids setState-after-unmount.
+  useEffect(() => clear, [clear]);
+
+  // WCAG 1.4.13 — hover content must be dismissible without moving the pointer.
+  useEscape(() => {
+    clear();
+    setOpen(false);
+  }, open);
 
   const ctx = useMemo<HoverCardContextValue>(
     () => ({ open, setOpen, triggerRef, show, hide, cancelHide, placement, offset }),

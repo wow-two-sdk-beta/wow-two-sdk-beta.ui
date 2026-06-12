@@ -12,7 +12,7 @@ export interface DatePickerProps
     SelectTriggerVariants {
   value?: Date | null;
   defaultValue?: Date | null;
-  onChange?: (date: Date | null) => void;
+  onValueChange?: (date: Date | null) => void;
   placeholder?: string;
   format?: (date: Date) => string;
   min?: Date | null;
@@ -30,7 +30,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
   {
     value,
     defaultValue,
-    onChange,
+    onValueChange,
     placeholder = 'Pick a date',
     format = defaultFormat,
     min,
@@ -49,7 +49,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
   const [date, setDate] = useControlled<Date | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange,
+    onChange: onValueChange,
   });
   const [open, setOpen] = useControlled<boolean>({
     controlled: undefined,
@@ -77,7 +77,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
       <PopoverContent bare>
         <Calendar
           value={date}
-          onChange={(d) => {
+          onValueChange={(d) => {
             setDate(d);
             setOpen(false);
           }}

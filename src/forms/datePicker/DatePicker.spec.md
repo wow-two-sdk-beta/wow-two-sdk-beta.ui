@@ -26,7 +26,7 @@ Trigger: same as `forms/InputStyles` `inputBaseVariants` plus `data-state="open"
 |---|---|---|---|---|
 | `value` | `Date \| null` | — | no | Controlled. |
 | `defaultValue` | `Date \| null` | `null` | no | Uncontrolled. |
-| `onChange` | `(d) => void` | — | no | Selection callback. |
+| `onValueChange` | `(d) => void` | — | no | Selection callback. |
 | `placeholder` | `string` | `'Pick a date'` | no | Trigger text when no value. |
 | `format` | `(d) => string` | `Date.toLocaleDateString()` | no | Custom display formatter. |
 | `min` / `max` | `Date \| null` | — | no | Forwarded to Calendar. |

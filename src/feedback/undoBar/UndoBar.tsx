@@ -69,6 +69,17 @@ export function UndoBar({
     if (paused) return;
 
     startRef.current = performance.now();
+    if (!showCountdown) {
+      // No visible countdown — a single timeout, no per-frame re-renders.
+      const handle = window.setTimeout(() => {
+        onOpenChange?.(false);
+      }, remainingRef.current);
+      return () => {
+        window.clearTimeout(handle);
+        const elapsed = performance.now() - startRef.current;
+        remainingRef.current = Math.max(0, remainingRef.current - elapsed);
+      };
+    }
     const tick = (now: number) => {
       const elapsed = now - startRef.current;
       const remaining = Math.max(0, remainingRef.current - elapsed);
@@ -85,7 +96,7 @@ export function UndoBar({
       const elapsed = performance.now() - startRef.current;
       remainingRef.current = Math.max(0, remainingRef.current - elapsed);
     };
-  }, [open, duration, paused, onOpenChange]);
+  }, [open, duration, paused, showCountdown, onOpenChange]);
 
   if (!open) return null;
 

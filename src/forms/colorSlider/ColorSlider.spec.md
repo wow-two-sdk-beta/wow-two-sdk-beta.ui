@@ -27,7 +27,7 @@ Use as the building block of `ColorPicker`, or standalone for hue-only inputs.
 | `channel` | `'hue' \| 'saturation' \| 'value' \| 'alpha'` | `'hue'` | no | Which channel this slider edits. |
 | `value` | `number` | — | no | Channel value. Range depends on channel: hue 0–360; others 0–1. |
 | `defaultValue` | `number` | `0` | no | Uncontrolled. |
-| `onChange` | `(v) => void` | — | no | Drag/keystroke callback. |
+| `onValueChange` | `(v) => void` | — | no | Drag/keystroke callback. |
 | `color` | `HSV` | — | no | Context color used to render the saturation/value/alpha gradient. Ignored for hue. |
 | `step` | `number` | `1` (hue) / `0.01` (others) | no | Keyboard step. |
 | `disabled` | `boolean` | `false` | no | Block interaction. |

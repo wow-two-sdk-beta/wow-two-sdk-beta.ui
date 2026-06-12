@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Aurora poster">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1026"/>
+      <stop offset="1" stop-color="#1c2541"/>
+    </linearGradient>
+    <linearGradient id="rib1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34d399" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="rib2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a78bfa" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#34d399" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#sky)"/>
+  <path d="M-40 320 C 160 120, 320 260, 520 90 S 820 180, 860 60 L 860 -20 L -40 -20 Z" fill="url(#rib1)" opacity="0.55"/>
+  <path d="M-40 380 C 200 220, 420 320, 620 160 S 840 240, 880 140 L 880 -20 L -40 -20 Z" fill="url(#rib2)" opacity="0.4"/>
+  <g fill="#e2e8f0">
+    <circle cx="120" cy="70" r="2"/><circle cx="240" cy="40" r="1.5"/><circle cx="370" cy="90" r="2"/>
+    <circle cx="520" cy="50" r="1.5"/><circle cx="640" cy="110" r="2"/><circle cx="730" cy="60" r="1.5"/>
+    <circle cx="80" cy="160" r="1.5"/><circle cx="690" cy="180" r="1.5"/>
+  </g>
+  <path d="M0 450 L 0 360 L 140 280 L 260 350 L 380 270 L 540 360 L 680 300 L 800 370 L 800 450 Z" fill="#0a0f1f"/>
+  <text x="40" y="416" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" font-weight="700" fill="#e2e8f0">Aurora over the ridge</text>
+</svg>

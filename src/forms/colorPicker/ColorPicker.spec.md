@@ -26,7 +26,7 @@ Full color picker — a trigger swatch that opens a popover containing a saturat
 |---|---|---|---|---|
 | `value` | `string \| null` | — | no | Controlled hex. |
 | `defaultValue` | `string \| null` | `'#3b82f6'` | no | Uncontrolled. |
-| `onChange` | `(hex) => void` | — | no | Fires on every adjustment. |
+| `onValueChange` | `(hex) => void` | — | no | Fires on every adjustment. |
 | `withAlpha` | `boolean` | `false` | no | Show alpha slider; emits 8-digit hex. |
 | `presets` | `string[]` | — | no | If provided, renders a `ColorSwatchPicker` row. |
 | `triggerSize` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | no | Trigger swatch size. |

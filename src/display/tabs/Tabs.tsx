@@ -118,8 +118,10 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
   ref,
 ) {
   const ctx = useTabsContext();
-  const roving = useRovingFocusItem();
   const selected = ctx.value === value;
+  // Selected tab is the Tab stop (per APG) — seeds/syncs the roving
+  // focusedId whenever focus is outside the tablist.
+  const roving = useRovingFocusItem({ active: selected });
   const tabId = `${ctx.baseId}-tab-${value}`;
   const panelId = `${ctx.baseId}-panel-${value}`;
 

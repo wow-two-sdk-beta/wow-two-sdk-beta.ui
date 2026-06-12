@@ -41,8 +41,7 @@ export const LoadingOverlay = forwardRef<HTMLDivElement, LoadingOverlayProps>(
       return (
         <div
           ref={ref}
-          role="alert"
-          aria-busy="true"
+          role="status"
           className={cn(
             'absolute inset-0 z-banner flex flex-col items-center justify-center gap-3 bg-background/70',
             blur && 'backdrop-blur-sm',
@@ -62,8 +61,7 @@ export const LoadingOverlay = forwardRef<HTMLDivElement, LoadingOverlayProps>(
         <Backdrop open blur={blur} className="bg-background/70" />
         <div
           ref={ref}
-          role="alert"
-          aria-busy="true"
+          role="status"
           className={cn(
             'fixed inset-0 z-modal flex flex-col items-center justify-center gap-3 pointer-events-none',
             className,

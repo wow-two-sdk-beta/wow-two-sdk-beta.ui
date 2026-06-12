@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { BottomSheet } from './BottomSheet';
+import { BottomSheet, BottomSheetDescription, BottomSheetTitle } from './BottomSheet';
 
 const meta: Meta<typeof BottomSheet> = {
   title: 'Overlays/BottomSheet',
@@ -24,11 +24,11 @@ export const Default: Story = {
             Open bottom sheet
           </button>
           <BottomSheet open={open} onOpenChange={setOpen} snapPoints={['30vh', '60vh', '90vh']} initialSnap={1}>
-            <h2 className="mb-2 text-lg font-semibold">Sheet content</h2>
-            <p className="text-sm text-muted-foreground">
+            <BottomSheetTitle className="mb-2">Sheet content</BottomSheetTitle>
+            <BottomSheetDescription>
               Drag the handle up/down to resize. Drag below the smallest snap to dismiss. Use ↑/↓ on
               the focused handle for keyboard control.
-            </p>
+            </BottomSheetDescription>
             <div className="mt-4 space-y-2">
               {Array.from({ length: 20 }, (_, i) => (
                 <div key={i} className="rounded-md border border-border p-3 text-sm">

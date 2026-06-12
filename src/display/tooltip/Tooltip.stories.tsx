@@ -26,3 +26,11 @@ export const Bottom: Story = {
     </Tooltip>
   ),
 };
+
+export const DefaultOpen: Story = {
+  render: () => (
+    <Tooltip content="Visible on mount — Escape dismisses" defaultOpen>
+      <button className="rounded-md border border-border px-3 py-1.5 text-sm">Hover me</button>
+    </Tooltip>
+  ),
+};

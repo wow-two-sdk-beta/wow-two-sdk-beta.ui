@@ -51,6 +51,8 @@ export interface MenuProps extends SurfaceVariants {
   onClose: () => void;
   placement?: React.ComponentProps<typeof AnchoredPositioner>['placement'];
   offset?: number;
+  /** Keydown observed on the menu container — lets wrappers (e.g. Menubar) add navigation. */
+  onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
   /** Labels the menu for screen readers. */
   'aria-label'?: string;
   className?: string;
@@ -63,6 +65,7 @@ export function Menu({
   onClose,
   placement = 'bottom-start',
   offset = 6,
+  onKeyDown,
   'aria-label': ariaLabel,
   variant,
   tone,
@@ -121,6 +124,8 @@ export function Menu({
                   className,
                 )}
                 onKeyDown={(e) => {
+                  onKeyDown?.(e);
+                  if (e.defaultPrevented) return;
                   if (e.key === 'Tab') {
                     e.preventDefault();
                     onClose();
@@ -160,12 +165,16 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
   }, [ctx, id, disabled]);
 
   const moveFocus = useCallback(
-    (direction: 1 | -1, jump = 1) => {
+    (target: 1 | -1 | 'first' | 'last') => {
       const list = ctx.itemsRef.current.filter((i) => !i.disabled);
       if (list.length === 0) return;
+      if (target === 'first' || target === 'last') {
+        list[target === 'first' ? 0 : list.length - 1]?.ref?.focus();
+        return;
+      }
       const idx = list.findIndex((i) => i.id === id);
-      let nextIdx = idx + direction * jump;
-      if (idx === -1) nextIdx = direction === 1 ? 0 : list.length - 1;
+      let nextIdx = idx + target;
+      if (idx === -1) nextIdx = target === 1 ? 0 : list.length - 1;
       if (nextIdx < 0) nextIdx = list.length - 1;
       if (nextIdx >= list.length) nextIdx = 0;
       list[nextIdx]?.ref?.focus();
@@ -187,11 +196,11 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
         break;
       case 'Home':
         e.preventDefault();
-        moveFocus(-1, ctx.itemsRef.current.length);
+        moveFocus('first');
         break;
       case 'End':
         e.preventDefault();
-        moveFocus(1, ctx.itemsRef.current.length);
+        moveFocus('last');
         break;
       case 'Enter':
       case ' ':

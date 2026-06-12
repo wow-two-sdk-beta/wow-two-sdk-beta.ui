@@ -25,7 +25,7 @@ export interface PinInputProps extends Omit<ComponentPropsWithoutRef<'div'>, 'ch
   size?: 'sm' | 'md' | 'lg';
   /** Render each cell as `*` (good for verification codes). */
   mask?: boolean;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 const SIZE: Record<NonNullable<PinInputProps['size']>, string> = {
@@ -49,18 +49,19 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
       type = 'numeric',
       size = 'md',
       mask,
-      isDisabled,
+      disabled,
       className,
       ...props
     },
     ref,
   ) => {
-    const [val, setVal] = useControlled({
-      controlled: value,
-      default: defaultValue ?? '',
-      onChange: onValueChange,
+    /* Per-cell array state — a joined string compacts empties, remapping cell i to char 0. */
+    const toCells = (s: string) => Array.from({ length }, (_, i) => s[i] ?? '');
+    const [cells, setCells] = useControlled<string[]>({
+      controlled: value === undefined ? undefined : toCells(value),
+      default: toCells(defaultValue ?? ''),
+      onChange: (next) => onValueChange?.(next.join('')),
     });
-    const cells = Array.from({ length }, (_, i) => val[i] ?? '');
     const inputs = useRef<(HTMLInputElement | null)[]>([]);
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     useImperativeHandle(ref, () => wrapperRef.current as HTMLDivElement);
@@ -68,10 +69,9 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
     const isAllowed = (ch: string) =>
       type === 'numeric' ? /^[0-9]$/.test(ch) : /^[A-Za-z0-9]$/.test(ch);
 
-    const update = (next: string) => {
-      const trimmed = next.slice(0, length);
-      setVal(trimmed);
-      if (trimmed.length === length) onComplete?.(trimmed);
+    const update = (next: string[]) => {
+      setCells(next);
+      if (next.every(Boolean)) onComplete?.(next.join(''));
     };
 
     const handleChange = (i: number, raw: string) => {
@@ -79,8 +79,7 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
       if (ch && !isAllowed(ch)) return;
       const arr = cells.slice();
       arr[i] = ch;
-      const next = arr.join('').slice(0, length);
-      update(next);
+      update(arr);
       if (ch && i < length - 1) inputs.current[i + 1]?.focus();
     };
 
@@ -101,7 +100,7 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
       const filtered = pasted.split('').filter(isAllowed).join('');
       if (filtered) {
         e.preventDefault();
-        update(filtered);
+        update(toCells(filtered));
         const focusIdx = Math.min(filtered.length, length - 1);
         inputs.current[focusIdx]?.focus();
       }
@@ -119,7 +118,7 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
             inputMode={type === 'numeric' ? 'numeric' : 'text'}
             autoComplete="one-time-code"
             maxLength={1}
-            disabled={isDisabled}
+            disabled={disabled}
             value={ch}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}

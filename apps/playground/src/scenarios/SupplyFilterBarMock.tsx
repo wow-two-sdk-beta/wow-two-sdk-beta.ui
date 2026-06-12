@@ -39,8 +39,8 @@ export function SupplyFilterBarMock() {
       <div className="grid grid-cols-4 gap-4">
         <FilterField label="Contact">
           <Select<Contact>
-            selected={contact}
-            onChange={(opt) => setContact(opt?.itemKey ?? null)}
+            value={contact}
+            onValueChange={(opt) => setContact(opt?.itemKey ?? null)}
             clearable
           >
             <Select.Trigger size="xs" className="w-40">
@@ -64,8 +64,8 @@ export function SupplyFilterBarMock() {
 
         <FilterField label="Type">
           <Select<ListingType>
-            selected={listingType}
-            onChange={(opt) => setListingType(opt?.itemKey ?? null)}
+            value={listingType}
+            onValueChange={(opt) => setListingType(opt?.itemKey ?? null)}
             clearable
           >
             <Select.Trigger size="xs" className="w-40">
@@ -88,8 +88,8 @@ export function SupplyFilterBarMock() {
 
         <FilterField label="Rooms">
           <Select<number>
-            selected={rooms}
-            onChange={(opt) => setRooms(opt?.itemKey ?? null)}
+            value={rooms}
+            onValueChange={(opt) => setRooms(opt?.itemKey ?? null)}
             clearable
           >
             <Select.Trigger size="xs" className="w-40">

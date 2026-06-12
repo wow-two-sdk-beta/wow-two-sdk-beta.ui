@@ -27,7 +27,7 @@
 | `value` | `number` (0–1) | — | no | Controlled. |
 | `defaultSaturation` | `number` | `1` | no | Uncontrolled. |
 | `defaultValue` | `number` | `1` | no | Uncontrolled. |
-| `onChange` | `({ saturation, value }) => void` | — | no | Drag/key callback. |
+| `onValueChange` | `({ saturation, value }) => void` | — | no | Drag/key callback. |
 | `step` | `number` | `0.01` | no | Keyboard step. |
 | `disabled` | `boolean` | `false` | no | Block interaction. |
 

@@ -22,7 +22,7 @@ Date-range input with a `RangeCalendar` popover. Shows "May 1 → May 7" in the 
 |---|---|---|---|---|
 | `value` | `{ start, end } \| null` | — | no | Controlled. |
 | `defaultValue` | same | `null` | no | Uncontrolled. |
-| `onChange` | `(range) => void` | — | no | Selection callback. |
+| `onValueChange` | `(range) => void` | — | no | Selection callback. |
 | `placeholder` | `string` | `'Pick a range'` | no | Trigger text. |
 | `format` | `(d) => string` | locale short date | no | Per-end formatter. |
 | `min` / `max` | `Date \| null` | — | no | Forwarded to RangeCalendar. |

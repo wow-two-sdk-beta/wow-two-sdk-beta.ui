@@ -21,6 +21,9 @@ export interface SwipeActionsProps extends HTMLAttributes<HTMLDivElement> {
 
 type Side = 'left' | 'right' | null;
 
+/** px of pointer travel beyond which the gesture counts as a drag, not a tap. */
+const CLICK_SUPPRESS_SLOP = 6;
+
 /**
  * Drag a row left/right to reveal action slots. Pointer-event based — works
  * with touch and mouse. Tap the row body while open to close.
@@ -41,6 +44,7 @@ export const SwipeActions = forwardRef<HTMLDivElement, SwipeActionsProps>(
   ) {
     const startXRef = useRef<number | null>(null);
     const startOffsetRef = useRef(0);
+    const suppressClickRef = useRef(false);
     const [offset, setOffset] = useState(0);
     const [openSide, setOpenSide] = useState<Side>(null);
 
@@ -53,11 +57,15 @@ export const SwipeActions = forwardRef<HTMLDivElement, SwipeActionsProps>(
       if (disabled) return;
       startXRef.current = e.clientX;
       startOffsetRef.current = offset;
+      suppressClickRef.current = false;
       (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
     };
 
     const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
       if (disabled || startXRef.current == null) return;
+      if (Math.abs(e.clientX - startXRef.current) > CLICK_SUPPRESS_SLOP) {
+        suppressClickRef.current = true;
+      }
       const dx = e.clientX - startXRef.current + startOffsetRef.current;
       const clamped = Math.max(-rightMax, Math.min(leftMax, dx));
       setOffset(clamped);
@@ -83,6 +91,16 @@ export const SwipeActions = forwardRef<HTMLDivElement, SwipeActionsProps>(
     const close = () => {
       setOffset(0);
       setOpenSide(null);
+    };
+
+    const onClick = () => {
+      // Mouse drags always emit a click after pointerup — swallow it so a
+      // drag-to-open doesn't instantly close. Plain taps still close.
+      if (suppressClickRef.current) {
+        suppressClickRef.current = false;
+        return;
+      }
+      if (openSide) close();
     };
 
     return (
@@ -117,7 +135,7 @@ export const SwipeActions = forwardRef<HTMLDivElement, SwipeActionsProps>(
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          onClick={openSide ? close : undefined}
+          onClick={onClick}
           style={{
             transform: `translateX(${offset}px)`,
             transition: startXRef.current == null ? 'transform 200ms ease-out' : 'none',

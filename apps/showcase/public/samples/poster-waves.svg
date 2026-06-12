@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Waves poster">
+  <defs>
+    <linearGradient id="wbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cffafe"/>
+      <stop offset="1" stop-color="#0e7490"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#wbg)"/>
+  <path d="M0 180 C 130 140, 270 220, 400 180 S 670 140, 800 180 L 800 450 L 0 450 Z" fill="#22d3ee" opacity="0.55"/>
+  <path d="M0 250 C 130 210, 270 290, 400 250 S 670 210, 800 250 L 800 450 L 0 450 Z" fill="#0891b2" opacity="0.7"/>
+  <path d="M0 320 C 130 280, 270 360, 400 320 S 670 280, 800 320 L 800 450 L 0 450 Z" fill="#155e75" opacity="0.85"/>
+  <circle cx="650" cy="95" r="40" fill="#ecfeff" opacity="0.9"/>
+  <text x="40" y="416" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" font-weight="700" fill="#ecfeff">Tidal layers</text>
+</svg>

@@ -44,6 +44,8 @@ interface CommandPaletteContextValue {
   itemsRef: React.MutableRefObject<CommandItemEntry[]>;
   registerItem: (entry: CommandItemEntry) => void;
   unregisterItem: (id: string) => void;
+  /** Bumped on every register/unregister — lets consumers observe the mutable registry. */
+  registryVersion: number;
   filter: (searchText: string, search: string) => boolean;
   inputId: string;
   listboxId: string;
@@ -98,6 +100,9 @@ export function CommandPalette({
   const itemsRef = useRef<CommandItemEntry[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Items register via effects after render — bump a version so renders/effects
+  // that read the mutable registry recompute once items exist (fresh-open flow).
+  const [registryVersion, setRegistryVersion] = useState(0);
   const inputId = useId();
   const listboxId = useId();
 
@@ -105,10 +110,12 @@ export function CommandPalette({
     const idx = itemsRef.current.findIndex((i) => i.id === entry.id);
     if (idx >= 0) itemsRef.current[idx] = entry;
     else itemsRef.current.push(entry);
+    setRegistryVersion((v) => v + 1);
   }, []);
 
   const unregisterItem = useCallback((id: string) => {
     itemsRef.current = itemsRef.current.filter((i) => i.id !== id);
+    setRegistryVersion((v) => v + 1);
   }, []);
 
   // Global keybinding (cmd-/ctrl-K).
@@ -146,6 +153,7 @@ export function CommandPalette({
       itemsRef,
       registerItem,
       unregisterItem,
+      registryVersion,
       filter,
       inputId,
       listboxId,
@@ -159,6 +167,7 @@ export function CommandPalette({
       activeId,
       registerItem,
       unregisterItem,
+      registryVersion,
       filter,
       inputId,
       listboxId,
@@ -213,7 +222,7 @@ export const CommandPaletteInput = forwardRef<HTMLInputElement, CommandPaletteIn
       );
     }, [ctx]);
 
-    // Auto-set first match when filter changes.
+    // Auto-set first match when the filter or the item registry changes.
     useEffect(() => {
       const list = visibleItems();
       if (list.length > 0 && !list.some((i) => i.id === ctx.activeId)) {
@@ -222,7 +231,7 @@ export const CommandPaletteInput = forwardRef<HTMLInputElement, CommandPaletteIn
         ctx.setActiveId(null);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ctx.inputValue, ctx.itemsRef.current.length]);
+    }, [ctx.inputValue, ctx.registryVersion]);
 
     const moveActive = (direction: 1 | -1) => {
       const list = visibleItems();
@@ -389,8 +398,11 @@ export const CommandPaletteItem = forwardRef<HTMLDivElement, CommandPaletteItemP
       searchText ??
       (typeof children === 'string' ? children : Array.isArray(children) ? children.filter((c) => typeof c === 'string').join(' ') : value);
 
+    // Depend on the stable callbacks, not `ctx` — registering bumps the registry
+    // version (new ctx identity), which would otherwise re-run this effect forever.
+    const { registerItem, unregisterItem } = ctx;
     useEffect(() => {
-      ctx.registerItem({
+      registerItem({
         id,
         value,
         searchText: resolvedSearch,
@@ -398,8 +410,8 @@ export const CommandPaletteItem = forwardRef<HTMLDivElement, CommandPaletteItemP
         onSelect: () => onSelect?.(),
         closeOnSelect,
       });
-      return () => ctx.unregisterItem(id);
-    }, [ctx, id, value, resolvedSearch, disabled, onSelect, closeOnSelect]);
+      return () => unregisterItem(id);
+    }, [registerItem, unregisterItem, id, value, resolvedSearch, disabled, onSelect, closeOnSelect]);
 
     // Hide if filtered out.
     const matches = ctx.inputValue === '' || ctx.filter(resolvedSearch, ctx.inputValue);

@@ -20,7 +20,7 @@ function Demo() {
         hue={hue}
         saturation={s}
         value={v}
-        onChange={({ saturation, value }) => setSV({ s: saturation, v: value })}
+        onValueChange={({ saturation, value }) => setSV({ s: saturation, v: value })}
       />
       <p className="text-sm text-muted-foreground">
         Saturation: {(s * 100).toFixed(0)}% · Value: {(v * 100).toFixed(0)}%

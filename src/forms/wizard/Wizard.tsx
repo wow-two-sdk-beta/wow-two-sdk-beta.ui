@@ -5,6 +5,7 @@ import {
   isValidElement,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type HTMLAttributes,
@@ -275,20 +276,19 @@ export const WizardStep = forwardRef<HTMLDivElement, WizardStepProps>(function W
 ) {
   const ctx = useWizard();
   const isCurrent = ctx.currentStep?.id === id;
+  const { registerStep, unregisterStep, registerValidator, unregisterValidator } = ctx;
 
   // Register/refresh step metadata.
-  useMemo(() => {
-    ctx.registerStep({ id, label, optional, final });
-    return id;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, label, optional, final]);
+  useEffect(() => {
+    registerStep({ id, label, optional, final });
+    return () => unregisterStep(id);
+  }, [registerStep, unregisterStep, id, label, optional, final]);
 
-  useMemo(() => {
-    if (validate) ctx.registerValidator(id, validate);
-    else ctx.unregisterValidator(id);
-    return validate;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, validate]);
+  useEffect(() => {
+    if (validate) registerValidator(id, validate);
+    else unregisterValidator(id);
+    return () => unregisterValidator(id);
+  }, [registerValidator, unregisterValidator, id, validate]);
 
   if (!isCurrent) return null;
   return (

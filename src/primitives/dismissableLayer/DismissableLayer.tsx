@@ -4,7 +4,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from 'react';
-import { composeRefs } from '../../utils/composeRefs';
+import { useComposedRefs } from '../../utils/composeRefs';
 
 interface LayerEntry {
   node: HTMLElement;
@@ -37,16 +37,30 @@ export const DismissableLayer = forwardRef<HTMLDivElement, DismissableLayerProps
   ) => {
     const ref = useRef<HTMLDivElement | null>(null);
 
+    // Keep callbacks in refs so the registration effect runs exactly once on
+    // mount — re-registering on callback identity changes would splice the
+    // layer to the end of the stack and corrupt dismissal ordering.
+    const onEscapeRef = useRef(onEscape);
+    const onOutsidePointerDownRef = useRef(onOutsidePointerDown);
+    useEffect(() => {
+      onEscapeRef.current = onEscape;
+      onOutsidePointerDownRef.current = onOutsidePointerDown;
+    });
+
     useEffect(() => {
       const node = ref.current;
       if (!node) return;
-      const entry: LayerEntry = { node, onEscape, onOutsidePointerDown };
+      const entry: LayerEntry = {
+        node,
+        onEscape: (event) => onEscapeRef.current?.(event),
+        onOutsidePointerDown: (event) => onOutsidePointerDownRef.current?.(event),
+      };
       layerStack.push(entry);
       return () => {
         const idx = layerStack.indexOf(entry);
         if (idx >= 0) layerStack.splice(idx, 1);
       };
-    }, [onEscape, onOutsidePointerDown]);
+    }, []);
 
     useEffect(() => {
       if (disableEscape) return;
@@ -72,7 +86,8 @@ export const DismissableLayer = forwardRef<HTMLDivElement, DismissableLayerProps
       return () => document.removeEventListener('pointerdown', onPointer, true);
     }, [disableOutsideClick]);
 
-    return <div ref={composeRefs(forwardedRef, ref)} {...props} />;
+    const composedRef = useComposedRefs(forwardedRef, ref);
+    return <div ref={composedRef} {...props} />;
   },
 );
 DismissableLayer.displayName = 'DismissableLayer';

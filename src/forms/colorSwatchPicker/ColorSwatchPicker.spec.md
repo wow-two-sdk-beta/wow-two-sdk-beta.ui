@@ -20,7 +20,7 @@ Grid of clickable color swatches — pick one preset color from a curated palett
 | `colors` | `string[]` | — | yes | Palette to display. |
 | `value` | `string \| null` | — | no | Controlled selection. |
 | `defaultValue` | `string \| null` | `null` | no | Uncontrolled. |
-| `onChange` | `(color) => void` | — | no | Selection callback. |
+| `onValueChange` | `(color) => void` | — | no | Selection callback. |
 | `swatchSize` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | no | Forwarded to ColorSwatch. |
 | `swatchShape` | `'square' \| 'circle'` | `'square'` | no | Forwarded. |
 | `disabled` | `boolean` | `false` | no | Block all swatches. |

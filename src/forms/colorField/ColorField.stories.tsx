@@ -14,7 +14,7 @@ function Demo() {
   const [color, setColor] = useState<string | null>('#3b82f6');
   return (
     <div className="flex flex-col gap-3 w-72">
-      <ColorField value={color} onChange={setColor} />
+      <ColorField value={color} onValueChange={setColor} />
       <p className="text-sm text-muted-foreground">Value: {color ?? 'none'}</p>
     </div>
   );
@@ -24,7 +24,7 @@ function AlphaDemo() {
   const [color, setColor] = useState<string | null>('#3b82f680');
   return (
     <div className="flex flex-col gap-3 w-72">
-      <ColorField value={color} onChange={setColor} withAlpha />
+      <ColorField value={color} onValueChange={setColor} withAlpha />
       <p className="text-sm text-muted-foreground">Value: {color ?? 'none'}</p>
     </div>
   );

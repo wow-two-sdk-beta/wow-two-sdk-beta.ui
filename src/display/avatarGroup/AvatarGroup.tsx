@@ -39,7 +39,7 @@ export const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(
         {overflow > 0 && (
           <Avatar
             size={size}
-            name={`+${overflow}`}
+            fallback={`+${overflow}`}
             className={cn(overlap, 'ring-2 ring-background')}
           />
         )}

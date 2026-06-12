@@ -9,7 +9,7 @@ Multi-select group of `CheckboxField` children inside a `Fieldset` + optional `L
 | `legend` | `ReactNode` | — |
 | `value` / `defaultValue` | `string[]` | — / `[]` |
 | `onValueChange` | `(next: string[]) => void` | — |
-| `isDisabled` | `boolean` | `false` |
+| `disabled` | `boolean` | `false` |
 | `orientation` | `'horizontal' \| 'vertical'` | `'vertical'` |
 | `children` | `<CheckboxField value="…">` × N | — |
 

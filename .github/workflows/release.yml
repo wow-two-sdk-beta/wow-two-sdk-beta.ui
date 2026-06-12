@@ -74,6 +74,12 @@ jobs:
       - name: Build Storybook
         run: pnpm build:storybook
 
+      - name: Build showcase
+        run: pnpm --filter showcase build
+
+      - name: Merge showcase into Pages artifact
+        run: cp -r apps/showcase/dist storybook-static/showcase
+
       - name: Upload Storybook artifact
         uses: actions/upload-pages-artifact@v3
         with:

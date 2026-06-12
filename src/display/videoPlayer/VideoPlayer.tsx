@@ -19,7 +19,7 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
-import { cn } from '../../utils';
+import { cn, composeEventHandlers } from '../../utils';
 import { Icon } from '../../icons';
 
 export interface VideoTrack {
@@ -68,6 +68,11 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(
       muted: mutedProp,
       defaultVolume = 1,
       defaultPlaybackRate = 1,
+      onPlay,
+      onPause,
+      onTimeUpdate,
+      onLoadedMetadata,
+      onClick,
       className,
       ...rest
     },
@@ -162,6 +167,9 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(
     }, [playing, bumpControls]);
 
     const handleKey = (e: KeyboardEvent<HTMLDivElement>) => {
+      // Only handle shortcuts aimed at the container itself — never hijack
+      // keys from interactive children (seek slider, speed select, buttons).
+      if (e.target !== e.currentTarget) return;
       switch (e.key) {
         case ' ':
         case 'Spacebar':
@@ -226,20 +234,20 @@ export const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(
           autoPlay={autoPlay}
           loop={loop}
           muted={muted}
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onTimeUpdate={() => {
+          {...rest}
+          onPlay={composeEventHandlers(onPlay, () => setPlaying(true))}
+          onPause={composeEventHandlers(onPause, () => setPlaying(false))}
+          onTimeUpdate={composeEventHandlers(onTimeUpdate, () => {
             const v = videoRef.current;
             if (!v) return;
             setCurrentTime(v.currentTime);
-          }}
-          onLoadedMetadata={() => {
+          })}
+          onLoadedMetadata={composeEventHandlers(onLoadedMetadata, () => {
             const v = videoRef.current;
             if (v) setDuration(v.duration || 0);
-          }}
-          onClick={togglePlay}
+          })}
+          onClick={composeEventHandlers(onClick, togglePlay)}
           className="h-full w-full bg-black"
-          {...rest}
         >
           {tracks?.map((t, i) => (
             <track

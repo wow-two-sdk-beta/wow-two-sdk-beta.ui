@@ -1,0 +1,21 @@
+/* Provides the haven slate-dark token set so playground visuals match haven. */
+
+.theme-haven {
+  --color-background: #020617;       /* slate-950 */
+  --color-foreground: #f8fafc;       /* slate-50 */
+  --color-muted: #0f172a;            /* slate-900 */
+  --color-muted-foreground: #94a3b8; /* slate-400 */
+  --color-subtle-foreground: #64748b;/* slate-500 */
+  --color-border: #1e293b;           /* slate-800 */
+  --color-border-strong: #334155;    /* slate-700 */
+  --color-input: #1e293b;            /* slate-800 */
+  --color-ring: #cbd5e1;             /* slate-300 */
+  --color-primary: #3b82f6;          /* blue-500 */
+  --color-primary-foreground: #f8fafc;
+  --color-card: #0f172a;             /* slate-900 */
+  --color-card-foreground: #f8fafc;
+  --color-popover: #1e293b;          /* slate-800 — lighter for input/dropdown contrast */
+  --color-popover-foreground: #f8fafc;
+  --color-inverse: #f8fafc;
+  --color-inverse-foreground: #020617;
+}

@@ -14,7 +14,7 @@ function Demo() {
   const [date, setDate] = useState<Date | null>(new Date());
   return (
     <div className="flex flex-col gap-3">
-      <Calendar value={date} onChange={setDate} />
+      <Calendar value={date} onValueChange={setDate} />
       <p className="text-sm text-muted-foreground">
         Selected: {date ? date.toDateString() : 'none'}
       </p>

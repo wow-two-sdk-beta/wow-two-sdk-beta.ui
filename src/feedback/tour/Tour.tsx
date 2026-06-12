@@ -92,6 +92,7 @@ export function Tour({
   const [rect, setRect] = useState<Rect | null>(null);
   const titleId = useId();
   const descId = useId();
+  const maskId = useId();
 
   const step = steps[currentStep];
 
@@ -155,16 +156,17 @@ export function Tour({
 
   return (
     <Portal>
-      {/* SVG mask backdrop with cutout around target */}
-      <svg
-        aria-hidden="true"
-        className="pointer-events-auto fixed inset-0 z-modal h-full w-full"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <mask id="tour-mask">
-            <rect width="100%" height="100%" fill="white" />
-            {rect && (
+      {/* SVG mask backdrop with cutout around target. Skipped while the
+          target is unresolvable so a bare scrim never blocks the page. */}
+      {rect && (
+        <svg
+          aria-hidden="true"
+          className="pointer-events-auto fixed inset-0 z-modal h-full w-full"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <mask id={maskId}>
+              <rect width="100%" height="100%" fill="white" />
               <rect
                 x={rect.left - cutoutPadding}
                 y={rect.top - cutoutPadding}
@@ -173,16 +175,16 @@ export function Tour({
                 rx={6}
                 fill="black"
               />
-            )}
-          </mask>
-        </defs>
-        <rect
-          width="100%"
-          height="100%"
-          fill="rgba(0,0,0,0.55)"
-          mask="url(#tour-mask)"
-        />
-      </svg>
+            </mask>
+          </defs>
+          <rect
+            width="100%"
+            height="100%"
+            fill="rgba(0,0,0,0.55)"
+            mask={`url(#${maskId})`}
+          />
+        </svg>
+      )}
 
       {/* Tooltip */}
       {tooltipCoords && (
@@ -196,10 +198,9 @@ export function Tour({
             top: tooltipCoords.top,
             left: tooltipCoords.left,
             transform: tooltipCoords.transform,
-            zIndex: 60,
           }}
           className={cn(
-            'w-72 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-lg outline-none animate-in fade-in-0 zoom-in-95',
+            'z-popover w-72 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-lg outline-none animate-in fade-in-0 zoom-in-95',
           )}
         >
           {step.title && (

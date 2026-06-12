@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Circuit poster">
+  <defs>
+    <linearGradient id="cbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#cbg)"/>
+  <g stroke="#334155" stroke-width="1">
+    <path d="M0 90 H800 M0 180 H800 M0 270 H800 M0 360 H800"/>
+    <path d="M100 0 V450 M200 0 V450 M300 0 V450 M400 0 V450 M500 0 V450 M600 0 V450 M700 0 V450"/>
+  </g>
+  <g stroke="#38bdf8" stroke-width="2.5" fill="none">
+    <path d="M100 360 H260 V270 H400 V180 H560"/>
+    <path d="M200 90 H340 V180 M560 180 H660 V90"/>
+    <path d="M300 360 V270 H500 V360 H640"/>
+  </g>
+  <g fill="#38bdf8">
+    <circle cx="100" cy="360" r="6"/><circle cx="560" cy="180" r="6"/><circle cx="660" cy="90" r="6"/>
+    <circle cx="200" cy="90" r="6"/><circle cx="640" cy="360" r="6"/>
+  </g>
+  <g fill="#22d3ee" opacity="0.85">
+    <rect x="380" y="160" width="40" height="40" rx="6"/>
+    <rect x="240" y="250" width="40" height="40" rx="6"/>
+  </g>
+  <text x="40" y="416" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" font-weight="700" fill="#bae6fd">Edge node topology</text>
+</svg>

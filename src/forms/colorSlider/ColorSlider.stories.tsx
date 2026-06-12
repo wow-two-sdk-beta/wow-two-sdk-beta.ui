@@ -14,7 +14,7 @@ function HueDemo() {
   const [hue, setHue] = useState(180);
   return (
     <div className="flex flex-col gap-3 w-80">
-      <ColorSlider channel="hue" value={hue} onChange={setHue} aria-label="Hue" />
+      <ColorSlider channel="hue" value={hue} onValueChange={setHue} aria-label="Hue" />
       <p className="text-sm text-muted-foreground">Hue: {Math.round(hue)}°</p>
     </div>
   );
@@ -27,7 +27,7 @@ function SaturationDemo() {
       <ColorSlider
         channel="saturation"
         value={s}
-        onChange={setS}
+        onValueChange={setS}
         color={{ h: 200, s: 1, v: 1 }}
         aria-label="Saturation"
       />
@@ -43,7 +43,7 @@ function AlphaDemo() {
       <ColorSlider
         channel="alpha"
         value={a}
-        onChange={setA}
+        onValueChange={setA}
         color={{ h: 0, s: 0.9, v: 0.9 }}
         aria-label="Alpha"
       />

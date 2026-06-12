@@ -1,5 +1,6 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../../utils';
+import { useReducedMotion } from '../../hooks';
 
 export type MarqueeDirection = 'left' | 'right' | 'up' | 'down';
 
@@ -23,6 +24,7 @@ export const Marquee = forwardRef<HTMLDivElement, MarqueeProps>(function Marquee
   const horizontal = direction === 'left' || direction === 'right';
   const reverse = direction === 'right' || direction === 'down';
   const animationName = horizontal ? 'marquee-x' : 'marquee-y';
+  const reducedMotion = useReducedMotion();
 
   return (
     <div
@@ -37,25 +39,38 @@ export const Marquee = forwardRef<HTMLDivElement, MarqueeProps>(function Marquee
       style={{ '--marquee-gap': `${gap}px` } as React.CSSProperties}
       {...rest}
     >
-      {[0, 1].map((i) => (
-        <div
-          key={i}
-          aria-hidden={i === 1}
-          className={cn(
-            'shrink-0 motion-safe:animate-(--marquee-anim) motion-reduce:animation-none',
-            horizontal ? 'flex shrink-0 items-center' : 'flex flex-col items-center',
-            pauseOnHover && 'group-hover/marquee:[animation-play-state:paused]',
-          )}
-          style={{
-            gap,
-            paddingInline: horizontal ? gap / 2 : 0,
-            paddingBlock: horizontal ? 0 : gap / 2,
-            animation: `${animationName} ${speed}s linear infinite ${reverse ? 'reverse' : 'normal'}`,
-          }}
-        >
-          {children}
-        </div>
-      ))}
+      {/* Single animated track holding both copies — each copy is exactly
+          50% of the track, so the -50% keyframes loop seamlessly. */}
+      <div
+        className={cn(
+          'flex shrink-0',
+          horizontal ? 'items-center' : 'flex-col items-center',
+          pauseOnHover && 'group-hover/marquee:[animation-play-state:paused]',
+        )}
+        style={{
+          animation: reducedMotion
+            ? undefined
+            : `${animationName} ${speed}s linear infinite ${reverse ? 'reverse' : 'normal'}`,
+        }}
+      >
+        {[0, 1].map((i) => (
+          <div
+            key={i}
+            aria-hidden={i === 1}
+            className={cn(
+              'shrink-0',
+              horizontal ? 'flex items-center' : 'flex flex-col items-center',
+            )}
+            style={{
+              gap,
+              paddingInline: horizontal ? gap / 2 : 0,
+              paddingBlock: horizontal ? 0 : gap / 2,
+            }}
+          >
+            {children}
+          </div>
+        ))}
+      </div>
     </div>
   );
 });

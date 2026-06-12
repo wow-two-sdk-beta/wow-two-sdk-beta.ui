@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react';
 
 /**
  * Run `callback` whenever the referenced element's size changes. Returns
@@ -10,7 +10,9 @@ export function useResizeObserver<T extends HTMLElement>(
   enabled = true,
 ): void {
   const callbackRef = useRef(callback);
-  callbackRef.current = callback;
+  useLayoutEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   useEffect(() => {
     if (!enabled || !ref.current || typeof ResizeObserver === 'undefined') return;

@@ -19,6 +19,16 @@ const TONE: Record<NonNullable<NotificationDotProps['tone']>, string> = {
   neutral: 'bg-muted-foreground',
 };
 
+/* Static literal map — Tailwind must see the complete `after:bg-*` class names. */
+const PULSE_TONE: Record<NonNullable<NotificationDotProps['tone']>, string> = {
+  destructive: 'after:bg-destructive',
+  success: 'after:bg-success',
+  warning: 'after:bg-warning',
+  info: 'after:bg-info',
+  primary: 'after:bg-primary',
+  neutral: 'after:bg-muted-foreground',
+};
+
 const SIZE: Record<NonNullable<NotificationDotProps['size']>, string> = {
   xs: 'h-1.5 w-1.5',
   sm: 'h-2 w-2',
@@ -45,8 +55,10 @@ export const NotificationDot = forwardRef<HTMLSpanElement, NotificationDotProps>
         'inline-flex rounded-full ring-2 ring-background',
         TONE[tone],
         SIZE[size],
+        /* `relative` anchors the ::after ring; POS comes later so its `absolute` wins when positioned. */
+        pulse &&
+          `relative after:absolute after:inset-0 after:animate-ping after:rounded-full after:opacity-75 after:content-[""] ${PULSE_TONE[tone]}`,
         position && POS[position],
-        pulse && 'after:absolute after:inset-0 after:animate-ping after:rounded-full after:opacity-75 after:content-[""] ' + TONE[tone],
         className,
       )}
       {...props}

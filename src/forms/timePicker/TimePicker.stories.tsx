@@ -15,7 +15,7 @@ function Demo() {
   const [time, setTime] = useState<TimeValue | null>(null);
   return (
     <div className="w-72">
-      <TimePicker value={time} onChange={setTime} />
+      <TimePicker value={time} onValueChange={setTime} />
     </div>
   );
 }

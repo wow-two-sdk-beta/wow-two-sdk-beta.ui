@@ -10,9 +10,16 @@ const FOCUSABLE_SELECTOR = [
   '[contenteditable="true"]',
 ].join(',');
 
+function isVisible(el: HTMLElement): boolean {
+  // checkVisibility covers display/visibility/content-visibility; the
+  // getClientRects fallback (older engines) still includes position:fixed
+  // elements, which `offsetParent !== null` would wrongly exclude.
+  return el.checkVisibility?.() ?? el.getClientRects().length > 0;
+}
+
 function getFocusable(container: HTMLElement): HTMLElement[] {
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (el) => !el.hasAttribute('aria-hidden') && el.offsetParent !== null,
+    (el) => el.getAttribute('aria-hidden') !== 'true' && isVisible(el),
   );
 }
 
@@ -30,11 +37,15 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, enabled = true)
     const container = ref.current;
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
+    const previousTabIndex = container.getAttribute('tabindex');
+    let tabIndexMutated = false;
+
     const focusables = getFocusable(container);
     if (focusables.length > 0 && !container.contains(document.activeElement)) {
       focusables[0]?.focus();
     } else if (focusables.length === 0) {
       container.tabIndex = -1;
+      tabIndexMutated = true;
       container.focus();
     }
 
@@ -61,6 +72,10 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, enabled = true)
     container.addEventListener('keydown', onKeyDown);
     return () => {
       container.removeEventListener('keydown', onKeyDown);
+      if (tabIndexMutated) {
+        if (previousTabIndex === null) container.removeAttribute('tabindex');
+        else container.setAttribute('tabindex', previousTabIndex);
+      }
       previouslyFocused?.focus?.();
     };
   }, [ref, enabled]);

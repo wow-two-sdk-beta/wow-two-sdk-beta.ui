@@ -34,8 +34,9 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
     const adjust = (direction: 1 | -1) => {
       const el = inputRef.current;
       if (!el || typeof el.stepUp !== 'function') return;
-      if (direction === 1) el.stepUp(step);
-      else el.stepDown(step);
+      /* No argument — stepUp(n) steps n × the `step` attribute (already set on the input), not by n. */
+      if (direction === 1) el.stepUp();
+      else el.stepDown();
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
     };

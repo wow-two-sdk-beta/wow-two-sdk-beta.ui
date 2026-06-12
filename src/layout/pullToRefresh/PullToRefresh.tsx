@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useEffect,
   useRef,
   useState,
   type HTMLAttributes,
@@ -42,6 +43,12 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
 
     const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
       if (startYRef.current == null) return;
+      // Pointer was released outside the container — abandon the gesture.
+      if (e.buttons === 0) {
+        startYRef.current = null;
+        setPull(0);
+        return;
+      }
       const dy = e.clientY - startYRef.current;
       if (dy < 0) {
         setPull(0);
@@ -70,6 +77,38 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
       }
     };
 
+    // Touch: the browser's native vertical pan would fire pointercancel and kill
+    // the gesture. preventDefault the touchmove only when a pull is in progress
+    // (started at scrollTop 0, moving down) — normal scrolling stays native.
+    useEffect(() => {
+      const el = containerRef.current;
+      if (!el) return;
+      const onTouchMove = (e: TouchEvent) => {
+        if (startYRef.current == null || !e.cancelable) return;
+        if (el.scrollTop > 0) return;
+        const touch = e.touches[0];
+        if (!touch) return;
+        if (touch.clientY - startYRef.current > 0) e.preventDefault();
+      };
+      el.addEventListener('touchmove', onTouchMove, { passive: false });
+      return () => el.removeEventListener('touchmove', onTouchMove);
+    }, []);
+
+    // Releasing the pointer outside the container must still finish the gesture.
+    useEffect(() => {
+      if (pull === 0) return;
+      const finish = () => {
+        void onPointerUp();
+      };
+      window.addEventListener('pointerup', finish);
+      window.addEventListener('pointercancel', finish);
+      return () => {
+        window.removeEventListener('pointerup', finish);
+        window.removeEventListener('pointercancel', finish);
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pull]);
+
     const reached = pull >= threshold;
 
     return (
@@ -84,7 +123,6 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         className={cn('relative h-full overflow-y-auto', className)}
-        style={{ touchAction: 'pan-y' }}
         {...rest}
       >
         <div

@@ -11,7 +11,7 @@ export interface CalendarProps
   /** Uncontrolled initial selection. */
   defaultValue?: Date | null;
   /** Selection callback. */
-  onChange?: (date: Date) => void;
+  onValueChange?: (date: Date) => void;
   /** Initial visible month (uncontrolled). */
   defaultMonth?: Date;
   /** Minimum selectable date. */
@@ -28,7 +28,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
   {
     value,
     defaultValue,
-    onChange,
+    onValueChange,
     defaultMonth,
     min,
     max,
@@ -42,7 +42,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
   const [selected, setSelected] = useControlled<Date | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange: onChange as ((v: Date | null) => void) | undefined,
+    onChange: onValueChange as ((v: Date | null) => void) | undefined,
   });
   const [viewMonth, setViewMonth] = useState<Date>(
     () => startOfMonth(defaultMonth ?? selected ?? new Date()),

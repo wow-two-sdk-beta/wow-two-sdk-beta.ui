@@ -18,7 +18,7 @@ export interface ColorSliderProps
   channel?: ColorChannel;
   value?: number;
   defaultValue?: number;
-  onChange?: (value: number) => void;
+  onValueChange?: (value: number) => void;
   color?: HSV;
   step?: number;
   disabled?: boolean;
@@ -64,7 +64,7 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
     channel = 'hue',
     value,
     defaultValue,
-    onChange,
+    onValueChange,
     color,
     step,
     disabled = false,
@@ -79,7 +79,7 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
   const [val, setVal] = useControlled<number>({
     controlled: value,
     default: defaultValue ?? 0,
-    onChange,
+    onChange: onValueChange,
   });
 
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -91,7 +91,8 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
       const rect = track.getBoundingClientRect();
       const ratio = clamp01((clientX - rect.left) / rect.width);
       const next = ratio * max;
-      setVal(channel === 'hue' ? clampHue(next) : clamp01(next));
+      /* next is already within [0, max] — clampHue would wrap a full-right drag (360) back to 0. */
+      setVal(channel === 'hue' ? next : clamp01(next));
     },
     [channel, max, setVal],
   );
@@ -135,11 +136,11 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
           next = val - stepValue * 10;
           break;
         case 'Home':
-          next = 0;
-          break;
         case 'End':
-          next = max;
-          break;
+          /* Commit the extreme directly — clampHue(360) wraps to 0, which would make End act like Home. */
+          e.preventDefault();
+          setVal(e.key === 'Home' ? 0 : max);
+          return;
         default:
           return;
       }
@@ -149,7 +150,8 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
     [channel, disabled, max, setVal, stepValue, val],
   );
 
-  const ratio = channel === 'hue' ? clampHue(val) / 360 : clamp01(val);
+  /* val >= 360 pins the thumb to the right edge — clampHue would wrap the committed max back to 0. */
+  const ratio = channel === 'hue' ? (val >= 360 ? 1 : clampHue(val) / 360) : clamp01(val);
   const gradient = buildGradient(channel, color);
   const trackStyle: CSSProperties = {
     backgroundImage: gradient,

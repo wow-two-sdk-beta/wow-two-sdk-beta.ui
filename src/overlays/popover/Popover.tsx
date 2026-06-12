@@ -4,6 +4,7 @@ import {
   useContext,
   useMemo,
   useRef,
+  useState,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
   type ReactNode,
@@ -25,6 +26,9 @@ interface PopoverContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
   triggerRef: React.MutableRefObject<HTMLElement | null>;
+  /** Trigger node held in state so an initially-open popover re-renders anchored. */
+  triggerNode: HTMLElement | null;
+  onTriggerChange: (node: HTMLElement | null) => void;
   placement: AnchoredPositionerProps['placement'];
   offset: number;
   dismissOnOutsideClick: boolean;
@@ -66,18 +70,21 @@ export function Popover({
     onChange: onOpenChange,
   });
   const triggerRef = useRef<HTMLElement | null>(null);
+  const [triggerNode, setTriggerNode] = useState<HTMLElement | null>(null);
 
   const ctx = useMemo<PopoverContextValue>(
     () => ({
       open,
       setOpen,
       triggerRef,
+      triggerNode,
+      onTriggerChange: setTriggerNode,
       placement,
       offset,
       dismissOnOutsideClick,
       dismissOnEscape,
     }),
-    [open, setOpen, placement, offset, dismissOnOutsideClick, dismissOnEscape],
+    [open, setOpen, triggerNode, placement, offset, dismissOnOutsideClick, dismissOnEscape],
   );
 
   return <PopoverContext.Provider value={ctx}>{children}</PopoverContext.Provider>;
@@ -92,10 +99,21 @@ export interface PopoverTriggerProps
 export const PopoverTrigger = forwardRef<HTMLButtonElement, PopoverTriggerProps>(
   function PopoverTrigger({ asChild, onClick, children, ...rest }, forwardedRef) {
     const ctx = usePopoverContext();
+    const { triggerRef, onTriggerChange } = ctx;
     const Component = asChild ? Slot : 'button';
+    // Memoized so the callback ref isn't re-invoked (null → node) every render.
+    const composedRef = useMemo(
+      () =>
+        composeRefs<HTMLButtonElement>(
+          forwardedRef,
+          triggerRef as React.MutableRefObject<HTMLButtonElement | null>,
+          onTriggerChange,
+        ),
+      [forwardedRef, triggerRef, onTriggerChange],
+    );
     return (
       <Component
-        ref={composeRefs(forwardedRef, ctx.triggerRef as React.MutableRefObject<HTMLButtonElement | null>) as never}
+        ref={composedRef as never}
         type="button"
         aria-haspopup="dialog"
         aria-expanded={ctx.open}
@@ -136,12 +154,14 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
     const resolvedPadding = padding ?? (bare ? 'none' : 'lg');
     return (
       <Portal>
-        {/* z-index sits on the SC root — transform creates the stacking context. */}
+        {/* z-index sits on the SC root — transform creates the stacking context.
+            z-popover (80) so a popover opened from a Dialog (z-modal, 70) paints
+            above it — both portal to body, so equal z would resolve by DOM order. */}
         <AnchoredPositioner
-          anchor={ctx.triggerRef.current}
+          anchor={ctx.triggerNode}
           placement={ctx.placement}
           offset={ctx.offset}
-          className="z-dropdown"
+          className="z-popover"
         >
           <FocusScope asChild trapped loop>
             <DismissableLayer

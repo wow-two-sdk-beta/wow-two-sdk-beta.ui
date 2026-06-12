@@ -14,7 +14,7 @@ function Demo() {
   const [date, setDate] = useState<Date | null>(null);
   return (
     <div className="flex flex-col gap-3 w-72">
-      <DateField value={date} onChange={setDate} />
+      <DateField value={date} onValueChange={setDate} />
       <p className="text-sm text-muted-foreground">
         Value: {date ? date.toDateString() : 'none'}
       </p>

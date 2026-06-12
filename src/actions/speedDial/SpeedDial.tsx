@@ -1,10 +1,13 @@
 import {
+  Children,
   createContext,
   forwardRef,
+  isValidElement,
   useContext,
   useMemo,
   useRef,
   type ButtonHTMLAttributes,
+  type KeyboardEvent,
   type ReactNode,
 } from 'react';
 import { Plus, X } from 'lucide-react';
@@ -113,11 +116,39 @@ export function SpeedDial({
     [open, setOpen, resolvedDirection, position],
   );
 
+  // The trigger renders always (a closed dial must still be openable); only the
+  // action items are gated behind `open`.
+  const childArray = Children.toArray(children);
+  const triggerChildren = childArray.filter(
+    (child) => isValidElement(child) && child.type === SpeedDialTrigger,
+  );
+  const actionChildren = childArray.filter(
+    (child) => !(isValidElement(child) && child.type === SpeedDialTrigger),
+  );
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (!open || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp')) return;
+    const root = rootRef.current;
+    if (!root) return;
+    const items = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+    if (items.length === 0) return;
+    e.preventDefault();
+    const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+    const nextIndex =
+      currentIndex === -1
+        ? e.key === 'ArrowDown'
+          ? 0
+          : items.length - 1
+        : (currentIndex + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    items[nextIndex]?.focus();
+  };
+
   return (
     <SpeedDialContext.Provider value={ctx}>
       <div
         ref={rootRef}
         data-state={open ? 'open' : 'closed'}
+        onKeyDown={handleKeyDown}
         className={cn('fixed', POSITION_OFFSETS[position], className)}
       >
         {open && (
@@ -130,9 +161,10 @@ export function SpeedDial({
               DIRECTION_TO_STACK[resolvedDirection],
             )}
           >
-            {children}
+            {actionChildren}
           </ul>
         )}
+        {triggerChildren}
       </div>
     </SpeedDialContext.Provider>
   );
@@ -202,7 +234,7 @@ export const SpeedDialAction = forwardRef<HTMLButtonElement, SpeedDialActionProp
     const ctx = useSpeedDialContext();
     const labelSide = DIRECTION_LABEL_SIDE[ctx.direction];
     return (
-      <li className="flex items-center gap-2" data-side={labelSide}>
+      <li role="none" className="flex items-center gap-2" data-side={labelSide}>
         {tooltip && labelSide === 'left' && (
           <span className="rounded-md bg-popover px-2 py-1 text-xs text-popover-foreground shadow">
             {tooltip}

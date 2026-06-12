@@ -21,7 +21,7 @@ export interface ColorFieldProps
     InputBaseVariants {
   value?: string | null;
   defaultValue?: string | null;
-  onChange?: (hex: string | null) => void;
+  onValueChange?: (hex: string | null) => void;
   swatchShape?: 'square' | 'circle';
   withAlpha?: boolean;
 }
@@ -37,7 +37,7 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function
   {
     value,
     defaultValue,
-    onChange,
+    onValueChange,
     swatchShape = 'square',
     withAlpha = false,
     size,
@@ -56,7 +56,7 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function
   const [committed, setCommitted] = useControlled<string | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange,
+    onChange: onValueChange,
   });
   const [draft, setDraft] = useState<string>(committed ?? '');
 

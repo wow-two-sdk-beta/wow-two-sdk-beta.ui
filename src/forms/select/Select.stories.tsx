@@ -15,7 +15,7 @@ function DefaultDemo() {
   const [k, setK] = useState<string | null>(null);
   return (
     <div className="w-72">
-      <Select<string> selected={k} onChange={(opt) => setK(opt?.itemKey ?? null)}>
+      <Select<string> value={k} onValueChange={(opt) => setK(opt?.itemKey ?? null)}>
         <Select.Trigger>
           <Select.Value placeholder="Choose a fruit..." />
         </Select.Trigger>
@@ -34,7 +34,7 @@ function GroupedDemo() {
   const [k, setK] = useState<string | null>('apple');
   return (
     <div className="w-72">
-      <Select<string> selected={k} onChange={(opt) => setK(opt?.itemKey ?? null)}>
+      <Select<string> value={k} onValueChange={(opt) => setK(opt?.itemKey ?? null)}>
         <Select.Trigger>
           <Select.Value placeholder="Pick food..." />
         </Select.Trigger>
@@ -58,7 +58,7 @@ function ClearableDemo() {
   const [k, setK] = useState<string | null>('apple');
   return (
     <div className="w-72">
-      <Select<string> selected={k} onChange={(opt) => setK(opt?.itemKey ?? null)} clearable>
+      <Select<string> value={k} onValueChange={(opt) => setK(opt?.itemKey ?? null)} clearable>
         <Select.Trigger size="sm">
           <Select.Value placeholder="Pick one..." />
         </Select.Trigger>
@@ -83,7 +83,7 @@ function MetaInItemDemo() {
   const [k, setK] = useState<string | null>(null);
   return (
     <div className="w-72">
-      <Select<string> selected={k} onChange={(opt) => setK(opt?.itemKey ?? null)} clearable>
+      <Select<string> value={k} onValueChange={(opt) => setK(opt?.itemKey ?? null)} clearable>
         <Select.Trigger size="xs" className="w-40">
           <Select.Value placeholder="All" />
         </Select.Trigger>
@@ -109,7 +109,7 @@ function SearchableDemo() {
   ];
   return (
     <div className="w-72">
-      <Select<string> selected={k} onChange={(opt) => setK(opt?.itemKey ?? null)} clearable>
+      <Select<string> value={k} onValueChange={(opt) => setK(opt?.itemKey ?? null)} clearable>
         <Select.Trigger>
           <Select.Value placeholder="Search a fruit..." />
         </Select.Trigger>
@@ -140,8 +140,8 @@ function KvSplitDemo() {
   return (
     <div className="w-80">
       <Select<number, User>
-        selected={pick?.itemKey ?? null}
-        onChange={setPick}
+        value={pick?.itemKey ?? null}
+        onValueChange={setPick}
         keyEquals={Equality.strictEquals}
         clearable
       >
@@ -225,7 +225,7 @@ export const Invalid: Story = {
 export const Disabled: Story = {
   render: () => (
     <div className="w-72">
-      <Select<string> disabled defaultSelected="apple">
+      <Select<string> disabled defaultValue="apple">
         <Select.Trigger>
           <Select.Value />
         </Select.Trigger>

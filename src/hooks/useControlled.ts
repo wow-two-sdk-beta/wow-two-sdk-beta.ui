@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 interface UseControlledOptions<T> {
   controlled: T | undefined;
@@ -21,7 +21,9 @@ export function useControlled<T>({
 }: UseControlledOptions<T>): [T, (value: T) => void] {
   const [uncontrolled, setUncontrolled] = useState<T>(defaultValue);
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  useLayoutEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const isControlled = controlled !== undefined;
   const value = isControlled ? controlled : uncontrolled;

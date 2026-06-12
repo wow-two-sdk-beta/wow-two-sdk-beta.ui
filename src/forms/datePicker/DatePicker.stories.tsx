@@ -14,7 +14,7 @@ function Demo() {
   const [date, setDate] = useState<Date | null>(null);
   return (
     <div className="w-72">
-      <DatePicker value={date} onChange={setDate} />
+      <DatePicker value={date} onValueChange={setDate} />
     </div>
   );
 }

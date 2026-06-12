@@ -13,7 +13,7 @@ One-time-code / PIN entry — N single-character cells. Auto-advance on type, ba
 | `type` | `'numeric' \| 'alphanumeric'` | `'numeric'` |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` |
 | `mask` | `boolean` | `false` |
-| `isDisabled` | `boolean` | `false` |
+| `disabled` | `boolean` | `false` |
 
 ## Dependencies
 Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `forms/InputStyles`.

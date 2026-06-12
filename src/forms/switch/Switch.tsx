@@ -13,9 +13,15 @@ const TRACK_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
   lg: 'h-6 w-11',
 };
 const THUMB_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
-  sm: 'h-3 w-3 peer-checked:translate-x-3',
-  md: 'h-4 w-4 peer-checked:translate-x-4',
-  lg: 'h-5 w-5 peer-checked:translate-x-5',
+  sm: 'h-3 w-3',
+  md: 'h-4 w-4',
+  lg: 'h-5 w-5',
+};
+/* Thumb slide lives on the track (a peer sibling of the input) — child-selector targets the thumb. peer-checked: cannot reach descendants directly. */
+const TRACK_CHECKED_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
+  sm: 'peer-checked:[&>span]:translate-x-3',
+  md: 'peer-checked:[&>span]:translate-x-4',
+  lg: 'peer-checked:[&>span]:translate-x-5',
 };
 
 /**
@@ -43,6 +49,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
           className={cn(
             'pointer-events-none flex h-full w-full items-center rounded-full bg-input px-0.5 transition-colors',
             'peer-checked:bg-primary',
+            TRACK_CHECKED_CLASS[size],
             'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1',
             'peer-disabled:opacity-50',
           )}

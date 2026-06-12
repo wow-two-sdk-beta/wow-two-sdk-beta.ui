@@ -3,6 +3,7 @@ import {
   forwardRef,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -16,6 +17,12 @@ import { cn, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
 import { DismissableLayer, Portal, ScrollLockProvider } from '../../primitives';
 import { Backdrop } from '../backdrop';
+import {
+  OverlayChromeProvider,
+  OverlayDescription,
+  OverlayTitle,
+  type OverlayChromeContextValue,
+} from '../OverlayChrome';
 
 type SnapPoint = number | string;
 
@@ -97,6 +104,8 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
   const startYRef = useRef<number | null>(null);
   const startHeightRef = useRef(0);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
+  const titleId = useId();
+  const descriptionId = useId();
 
   // Reset to initialSnap each time we re-open.
   useEffect(() => {
@@ -106,6 +115,11 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
   const ctx = useMemo<BottomSheetContextValue>(
     () => ({ open, setOpen, currentSnap, setCurrentSnap, snapPoints }),
     [open, setOpen, currentSnap, snapPoints],
+  );
+
+  const chromeCtx = useMemo<OverlayChromeContextValue>(
+    () => ({ titleId, descriptionId, close: () => setOpen(false) }),
+    [titleId, descriptionId, setOpen],
   );
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -193,6 +207,8 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
                 }}
                 role="dialog"
                 aria-modal="true"
+                aria-labelledby={titleId}
+                aria-describedby={descriptionId}
                 style={{
                   height: heightStyle,
                   transition: dragHeight == null ? 'height 220ms ease-out' : 'none',
@@ -226,7 +242,9 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
                 >
                   <span className="h-1 w-10 rounded-full bg-border-strong" aria-hidden="true" />
                 </div>
-                <div className="flex-1 overflow-y-auto px-4 pb-4">{children}</div>
+                <div className="flex-1 overflow-y-auto px-4 pb-4">
+                  <OverlayChromeProvider value={chromeCtx}>{children}</OverlayChromeProvider>
+                </div>
               </div>
             </DismissableLayer>
           </FocusScope>
@@ -235,3 +253,19 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
     </BottomSheetContext.Provider>
   );
 });
+
+// Re-export shared chrome subcomponents under the BottomSheet namespace — they
+// wire `id={titleId}` / `id={descriptionId}` so the sheet's `aria-labelledby` /
+// `aria-describedby` resolve to an accessible name.
+export const BottomSheetTitle = OverlayTitle;
+export const BottomSheetDescription = OverlayDescription;
+
+type BottomSheetComponent = typeof BottomSheet & {
+  Title: typeof BottomSheetTitle;
+  Description: typeof BottomSheetDescription;
+};
+
+(BottomSheet as BottomSheetComponent).Title = BottomSheetTitle;
+(BottomSheet as BottomSheetComponent).Description = BottomSheetDescription;
+
+export default BottomSheet as BottomSheetComponent;

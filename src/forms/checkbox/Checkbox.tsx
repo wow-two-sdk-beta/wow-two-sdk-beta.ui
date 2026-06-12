@@ -1,6 +1,6 @@
-import { forwardRef, type InputHTMLAttributes } from 'react';
+import { forwardRef, useEffect, useRef, type InputHTMLAttributes } from 'react';
 import { Check, Minus } from 'lucide-react';
-import { cn, ColorExtensions, CssExtensions, type ColorProp, type ColorTone, type SizePreset, type SizeUnion } from '../../utils';
+import { cn, composeRefs, ColorExtensions, CssExtensions, type ColorProp, type ColorTone, type SizePreset, type SizeUnion } from '../../utils';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
 import { checkboxVariants, type CheckboxVariants } from './Checkbox.variants';
 
@@ -117,6 +117,12 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     const ctx = useFormControl();
     const isDisabled = disabled ?? ctx?.isDisabled;
 
+    /* Sync the native indeterminate property — it has no attribute, so it's only reachable imperatively. */
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    useEffect(() => {
+      if (inputRef.current) inputRef.current.indeterminate = Boolean(indeterminate);
+    }, [indeterminate]);
+
     /* Parse union-typed `size` — preset routes to box+icon class lookup, raw/object routes to inline dims. */
     const { preset: sizePreset, box: sizeBox } = CssExtensions.parseSizeUnion<CheckboxSizePreset>(
       size,
@@ -136,12 +142,13 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         style={composedStyle}
       >
         <input
-          ref={ref}
+          ref={composeRefs(inputRef, ref)}
           type="checkbox"
           id={id ?? ctx?.id}
           disabled={isDisabled}
           required={required ?? ctx?.isRequired}
           checked={checked}
+          aria-checked={indeterminate ? 'mixed' : undefined}
           aria-invalid={ctx?.isInvalid || undefined}
           aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
           className="peer absolute inset-0 m-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"

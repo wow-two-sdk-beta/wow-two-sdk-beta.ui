@@ -20,9 +20,19 @@ const BREAKPOINT_PX: Record<Breakpoint, number> = {
   '2xl': 1536,
 };
 
+// Complete class strings per breakpoint — Tailwind can't see interpolated names.
+const SIDEBAR_STATIC_CLASSES: Record<Breakpoint, string> = {
+  sm: 'hidden sm:flex',
+  md: 'hidden md:flex',
+  lg: 'hidden lg:flex',
+  xl: 'hidden xl:flex',
+  '2xl': 'hidden 2xl:flex',
+};
+
 interface AppShellContextValue {
   sidebarWidth: string;
   asideWidth: string;
+  sidebarBreakpoint: Breakpoint;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   isSidebarCollapsed: boolean;
@@ -81,12 +91,13 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
     () => ({
       sidebarWidth,
       asideWidth,
+      sidebarBreakpoint,
       sidebarOpen,
       setSidebarOpen,
       isSidebarCollapsed,
       isAsideHidden,
     }),
-    [sidebarWidth, asideWidth, sidebarOpen, setSidebarOpen, isSidebarCollapsed, isAsideHidden],
+    [sidebarWidth, asideWidth, sidebarBreakpoint, sidebarOpen, setSidebarOpen, isSidebarCollapsed, isAsideHidden],
   );
 
   const gridTemplate = isSidebarCollapsed
@@ -150,7 +161,8 @@ export const AppShellSidebar = forwardRef<HTMLElement, AppShellSidebarProps>(
       <aside
         ref={ref}
         className={cn(
-          'sticky top-14 hidden h-[calc(100svh-3.5rem)] overflow-y-auto border-r border-border bg-card [grid-area:sidebar] lg:flex',
+          'sticky top-14 h-[calc(100svh-3.5rem)] overflow-y-auto border-r border-border bg-card [grid-area:sidebar]',
+          SIDEBAR_STATIC_CLASSES[ctx.sidebarBreakpoint],
           className,
         )}
         {...rest}

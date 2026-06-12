@@ -26,7 +26,7 @@ Circular hue picker — a ring with the hue spectrum painted as a conic gradient
 |---|---|---|---|---|
 | `value` | `number` (0–360) | — | no | Controlled hue. |
 | `defaultValue` | `number` | `0` | no | Uncontrolled. |
-| `onChange` | `(hue) => void` | — | no | Callback. |
+| `onValueChange` | `(hue) => void` | — | no | Callback. |
 | `size` | `number` (px) | `200` | no | Outer diameter. |
 | `thickness` | `number` (px) | `30` | no | Ring thickness. |
 | `step` | `number` | `1` | no | Keyboard step. |

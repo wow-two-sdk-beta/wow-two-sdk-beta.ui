@@ -14,7 +14,7 @@ function Demo() {
   const [color, setColor] = useState<string | null>('#3b82f6');
   return (
     <div className="flex flex-col gap-3 p-4">
-      <ColorPicker value={color} onChange={setColor} />
+      <ColorPicker value={color} onValueChange={setColor} />
       <p className="text-sm text-muted-foreground">Value: {color}</p>
     </div>
   );

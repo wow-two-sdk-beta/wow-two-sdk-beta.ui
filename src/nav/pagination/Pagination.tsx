@@ -1,5 +1,5 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { cn } from '../../utils';
 import { Icon } from '../../icons';
 
@@ -38,7 +38,7 @@ function buildPages(total: number, page: number, siblings: number): (number | 'e
  */
 export const Pagination = forwardRef<HTMLElement, PaginationProps>(
   (
-    { total, page, onPageChange, siblings = 1, className, ...props },
+    { total, page, onPageChange, siblings = 1, hideFirstLast = false, className, ...props },
     ref,
   ) => {
     const pages = buildPages(total, page, siblings);
@@ -49,6 +49,17 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(
 
     return (
       <nav ref={ref} aria-label="Pagination" className={cn('inline-flex items-center gap-1', className)} {...props}>
+        {!hideFirstLast && (
+          <button
+            type="button"
+            aria-label="First page"
+            disabled={page <= 1}
+            onClick={() => go(1)}
+            className={cn(baseBtn, 'hover:bg-muted')}
+          >
+            <Icon icon={ChevronsLeft} size={16} />
+          </button>
+        )}
         <button
           type="button"
           aria-label="Previous page"
@@ -85,6 +96,17 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(
         >
           <Icon icon={ChevronRight} size={16} />
         </button>
+        {!hideFirstLast && (
+          <button
+            type="button"
+            aria-label="Last page"
+            disabled={page >= total}
+            onClick={() => go(total)}
+            className={cn(baseBtn, 'hover:bg-muted')}
+          >
+            <Icon icon={ChevronsRight} size={16} />
+          </button>
+        )}
       </nav>
     );
   },

@@ -11,7 +11,7 @@ export interface TimePickerProps
     SelectTriggerVariants {
   value?: TimeValue | null;
   defaultValue?: TimeValue | null;
-  onChange?: (time: TimeValue | null) => void;
+  onValueChange?: (time: TimeValue | null) => void;
   /** Minute interval. Default 5. */
   minuteStep?: number;
   placeholder?: string;
@@ -29,7 +29,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
   {
     value,
     defaultValue,
-    onChange,
+    onValueChange,
     minuteStep = 5,
     placeholder = 'Pick a time',
     format = defaultFormat,
@@ -46,7 +46,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
   const [time, setTime] = useControlled<TimeValue | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange,
+    onChange: onValueChange,
   });
   const [open, setOpen] = useControlled<boolean>({
     controlled: undefined,

@@ -74,6 +74,10 @@ const MessageListInner = forwardRef<MessageListHandle, MessageListProps>(
   ) => {
     void _reverse;
     const scrollerRef = useRef<HTMLDivElement | null>(null);
+    // Near-bottom state recorded *before* a new message commits (in onScroll).
+    // Measuring inside the layout effect would see the just-committed message,
+    // so anything taller than bottomThreshold would defeat stickiness.
+    const nearBottomRef = useRef(true);
     const [atBottom, setAtBottom] = useState(true);
 
     const isNearBottom = useCallback(() => {
@@ -95,13 +99,16 @@ const MessageListInner = forwardRef<MessageListHandle, MessageListProps>(
     );
 
     useLayoutEffect(() => {
-      if (stickToBottom && isNearBottom()) scrollToBottom('auto');
-    }, [children, stickToBottom, isNearBottom, scrollToBottom]);
+      if (stickToBottom && nearBottomRef.current) scrollToBottom('auto');
+    }, [children, stickToBottom, scrollToBottom]);
 
     useEffect(() => {
       const el = scrollerRef.current;
       if (!el) return;
-      const onScroll = () => setAtBottom(isNearBottom());
+      const onScroll = () => {
+        nearBottomRef.current = isNearBottom();
+        setAtBottom(nearBottomRef.current);
+      };
       el.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
       return () => el.removeEventListener('scroll', onScroll);

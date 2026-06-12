@@ -1,6 +1,7 @@
 import {
   forwardRef,
   useCallback,
+  useEffect,
   useRef,
   type HTMLAttributes,
   type KeyboardEvent,
@@ -107,12 +108,19 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
     (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
   };
 
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (disabled) return;
-    e.preventDefault();
-    const delta = e.deltaY < 0 ? step : -step;
-    setClamped(value + delta);
-  };
+  /* Wheel via non-passive native listener — React's root wheel listener is passive, so preventDefault inside onWheel can't stop the page scroll. */
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handleWheel = (e: WheelEvent) => {
+      if (disabled) return;
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? step : -step;
+      setClamped(value + delta);
+    };
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [disabled, step, value, setClamped]);
 
   const handleKey = (e: KeyboardEvent<HTMLDivElement>) => {
     if (disabled) return;
@@ -177,7 +185,6 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      onWheel={handleWheel}
       onKeyDown={handleKey}
       style={{ width: size, height: size, touchAction: 'none' }}
       className={cn(

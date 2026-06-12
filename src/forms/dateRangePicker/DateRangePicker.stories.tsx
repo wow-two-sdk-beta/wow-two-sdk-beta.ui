@@ -15,7 +15,7 @@ function Demo() {
   const [range, setRange] = useState<DateRange | null>(null);
   return (
     <div className="w-96">
-      <DateRangePicker value={range} onChange={setRange} />
+      <DateRangePicker value={range} onValueChange={setRange} />
     </div>
   );
 }

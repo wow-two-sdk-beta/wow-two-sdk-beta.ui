@@ -243,7 +243,11 @@ function useButtonInteractivity(opts: UseButtonInteractivityOptions) {
   const debouncedOnClick = useDebounceHandler(opts.onClick, opts.debounceMs);
 
   const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-    if (opts.isLoading || opts.isSkeleton) return;
+    if (opts.isLoading || opts.isSkeleton) {
+      // Block native activation too — e.g. `type="submit"` must not submit while loading.
+      e.preventDefault();
+      return;
+    }
     if (longPressFiredRef.current) {
       longPressFiredRef.current = false;
       e.preventDefault();

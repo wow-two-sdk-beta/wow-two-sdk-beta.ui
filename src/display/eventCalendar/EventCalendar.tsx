@@ -6,7 +6,6 @@ import { Icon } from '../../icons';
 import {
   addDays,
   addMonths,
-  buildMonthGrid,
   isSameDay,
   isToday,
   MONTHS_LONG,
@@ -243,15 +242,18 @@ interface MonthViewProps {
 }
 
 function MonthView({ date, events, weekStart, onEventClick, onSlotClick }: MonthViewProps) {
-  const grid = buildMonthGrid(date.getFullYear(), date.getMonth());
   // Reorder weekdays per weekStart.
   const weekdayHeaders = Array.from({ length: 7 }, (_, i) => WEEKDAYS_SHORT[(i + weekStart) % 7]!);
-  // The grid from buildMonthGrid is Sunday-first; rotate if weekStart=1.
-  const cells = weekStart === 0 ? grid : (() => {
-    // Rotate each row by -1 from Sunday-first to Monday-first.
-    const out = grid.slice();
-    return out;
-  })();
+  // buildMonthGrid is Sunday-anchored; build the grid here so the first
+  // column matches weekStart and dates land under the right headers.
+  const month = date.getMonth();
+  const first = new Date(date.getFullYear(), month, 1);
+  const lead = (first.getDay() - weekStart + 7) % 7;
+  const gridStart = addDays(first, -lead);
+  const cells = Array.from({ length: 42 }, (_, i) => {
+    const d = addDays(gridStart, i);
+    return { date: d, outOfMonth: d.getMonth() !== month };
+  });
 
   const eventsForDay = (d: Date) =>
     events.filter((e) => isInRange(d, e.start, e.end));

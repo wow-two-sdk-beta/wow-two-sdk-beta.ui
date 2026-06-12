@@ -131,6 +131,11 @@ export function MultiSelect({
         offset={6}
       >
         {children}
+        {/* Always-rendered — inside PopoverContent they would vanish from form submission when closed. */}
+        {name &&
+          valuesState.map((v) => (
+            <input key={v} type="hidden" name={name} value={v} />
+          ))}
       </Popover>
     </MultiSelectContext.Provider>
   );
@@ -254,8 +259,6 @@ export function MultiSelectContent({
       >
         {children}
       </Listbox>
-      {ctx.name &&
-        ctx.values.map((v) => <input key={v} type="hidden" name={ctx.name} value={v} />)}
     </PopoverContent>
   );
 }
@@ -271,11 +274,11 @@ export const MultiSelectItem = forwardRef<HTMLDivElement, MultiSelectItemProps>(
   function MultiSelectItem(props, ref) {
     const ctx = useMultiSelectContext();
     /* Stable refs out of ctx — same rationale as SelectItem (see comment there). */
-    const { registerLabel, unregisterLabel } = ctx;
+    const { registerLabel } = ctx;
+    /* Registers only — never unregisters; items unmount on popover close and the tags still need the labels. */
     useEffect(() => {
       registerLabel(props.value, props.children);
-      return () => unregisterLabel(props.value);
-    }, [registerLabel, unregisterLabel, props.value, props.children]);
+    }, [registerLabel, props.value, props.children]);
     return <ListboxItem ref={ref} {...props} />;
   },
 );

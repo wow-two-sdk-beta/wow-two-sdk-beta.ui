@@ -1,4 +1,4 @@
-import { forwardRef, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { forwardRef, useEffect, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import { cn } from '../../utils';
 
 export interface ImageProps extends ComponentPropsWithoutRef<'img'> {
@@ -14,6 +14,12 @@ export interface ImageProps extends ComponentPropsWithoutRef<'img'> {
 export const Image = forwardRef<HTMLImageElement, ImageProps>(
   ({ fallback, onError, alt = '', className, ...props }, ref) => {
     const [errored, setErrored] = useState(false);
+
+    /* A new src deserves a fresh load attempt — reset the error latch. */
+    useEffect(() => {
+      setErrored(false);
+    }, [props.src]);
+
     if (errored && fallback !== undefined) return <>{fallback}</>;
     return (
       <img

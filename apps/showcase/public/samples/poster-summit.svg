@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Summit poster">
+  <defs>
+    <linearGradient id="sbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#312e81"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#sbg)"/>
+  <g fill="#e9d5ff">
+    <circle cx="150" cy="80" r="2"/><circle cx="300" cy="50" r="1.5"/><circle cx="430" cy="100" r="2"/>
+    <circle cx="580" cy="60" r="1.5"/><circle cx="700" cy="120" r="2"/><circle cx="90" cy="170" r="1.5"/>
+  </g>
+  <circle cx="620" cy="120" r="46" fill="#f5f3ff" opacity="0.95"/>
+  <path d="M0 450 L 170 220 L 300 380 L 430 200 L 560 360 L 690 260 L 800 400 L 800 450 Z" fill="#4c1d95"/>
+  <path d="M0 450 L 120 320 L 260 450 Z M 360 450 L 500 300 L 660 450 Z" fill="#2e1065"/>
+  <path d="M430 200 L 466 252 L 430 246 L 398 254 Z" fill="#ede9fe"/>
+  <text x="40" y="416" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" font-weight="700" fill="#ede9fe">Violet summit line</text>
+</svg>

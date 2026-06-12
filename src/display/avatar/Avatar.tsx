@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useEffect,
   useState,
   type ComponentPropsWithoutRef,
   type ReactNode,
@@ -99,6 +100,12 @@ export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(
     ref,
   ) => {
     const [errored, setErrored] = useState(false);
+
+    /* A new src deserves a fresh load attempt — reset the error latch. */
+    useEffect(() => {
+      setErrored(false);
+    }, [src]);
+
     const showImage = !!src && !errored && !isLoading;
 
     /* Parse union-typed `size` — preset routes to variant class, raw/object routes to inline dims. */

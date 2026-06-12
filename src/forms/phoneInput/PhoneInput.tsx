@@ -1,4 +1,4 @@
-import { forwardRef, useMemo, type HTMLAttributes } from 'react';
+import { forwardRef, useMemo, useState, type HTMLAttributes } from 'react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { inputBaseVariants } from '../InputStyles';
@@ -115,11 +115,20 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
       default: defaultValue ?? '',
       onChange: onValueChange,
     });
-    const { iso, national } = useMemo(() => splitE164(value, defaultCountry), [value, defaultCountry]);
+    /* Selected ISO is state — shared dial codes (+1 US/CA) make it unrecoverable from the value alone. Re-derive only when the value's dial prefix becomes incompatible with the selection. */
+    const [selectedIso, setSelectedIso] = useState(defaultCountry);
+    const { iso, national } = useMemo(() => {
+      const selected = PHONE_COUNTRIES.find((c) => c.iso === selectedIso);
+      if (selected && (!value || value.startsWith(selected.dial))) {
+        return { iso: selected.iso, national: value.slice(selected.dial.length).replace(/\D/g, '') };
+      }
+      return splitE164(value, defaultCountry);
+    }, [value, selectedIso, defaultCountry]);
     const country = PHONE_COUNTRIES.find((c) => c.iso === iso) ?? PHONE_COUNTRIES[0]!;
 
     const setCountry = (nextIso: string) => {
       const next = PHONE_COUNTRIES.find((c) => c.iso === nextIso) ?? country;
+      setSelectedIso(next.iso);
       setValue(`${next.dial}${national}`);
     };
     const setNational = (raw: string) => {

@@ -38,7 +38,7 @@ function describeType(v: unknown): string {
 
 function pathToString(path: Path): string {
   return path
-    .map((p) => (typeof p === 'number' ? `[${p}]` : path.indexOf(p) === 0 ? p : `.${p}`))
+    .map((p, i) => (typeof p === 'number' ? `[${p}]` : i === 0 ? p : `.${p}`))
     .join('');
 }
 

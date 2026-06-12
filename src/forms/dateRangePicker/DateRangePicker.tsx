@@ -12,7 +12,7 @@ export interface DateRangePickerProps
     SelectTriggerVariants {
   value?: DateRange | null;
   defaultValue?: DateRange | null;
-  onChange?: (range: DateRange | null) => void;
+  onValueChange?: (range: DateRange | null) => void;
   placeholder?: string;
   format?: (date: Date) => string;
   min?: Date | null;
@@ -31,7 +31,7 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
     {
       value,
       defaultValue,
-      onChange,
+      onValueChange,
       placeholder = 'Pick a range',
       format = defaultFormat,
       min,
@@ -50,7 +50,7 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
     const [range, setRange] = useControlled<DateRange | null>({
       controlled: value,
       default: defaultValue ?? null,
-      onChange,
+      onChange: onValueChange,
     });
     const [open, setOpen] = useControlled<boolean>({
       controlled: undefined,
@@ -93,7 +93,7 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
         <PopoverContent bare>
           <RangeCalendar
             value={range}
-            onChange={setRange}
+            onValueChange={setRange}
             defaultMonth={range?.start ?? new Date()}
             min={min}
             max={max}

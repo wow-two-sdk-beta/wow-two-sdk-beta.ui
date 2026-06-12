@@ -162,16 +162,17 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
     return (
       <Portal>
         <ScrollLockProvider>
-          {!hideBackdrop && (
-            <Backdrop
-              inline
-              blur={blur}
-              onClick={() => {
-                if (ctx.dismissOnOutsideClick) ctx.setOpen(false);
-              }}
-            />
-          )}
-          <div className="fixed inset-0 z-modal grid place-items-center overflow-y-auto p-4">
+          {!hideBackdrop && <Backdrop inline blur={blur} />}
+          {/* The centering wrapper covers the backdrop, so outside-click dismissal
+              lives here — a click on the padding area (target === currentTarget)
+              counts as outside. The Backdrop stays purely visual. */}
+          <div
+            className="fixed inset-0 z-modal grid place-items-center overflow-y-auto p-4"
+            onClick={(e) => {
+              if (e.target !== e.currentTarget) return;
+              if (ctx.dismissOnOutsideClick) ctx.setOpen(false);
+            }}
+          >
             <FocusScope asChild trapped loop>
               <DismissableLayer
                 disableEscape={!ctx.dismissOnEscape}

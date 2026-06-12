@@ -41,7 +41,9 @@ export function isToday(d: Date): boolean {
 
 export function addMonths(d: Date, n: number): Date {
   const c = new Date(d);
-  c.setMonth(c.getMonth() + n);
+  const month = d.getMonth() + n;
+  // Clamp to the target month's last day (Jan 31 +1 → Feb 28, not Mar 3).
+  c.setMonth(month, Math.min(d.getDate(), daysInMonth(d.getFullYear(), month)));
   return c;
 }
 

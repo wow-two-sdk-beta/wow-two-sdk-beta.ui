@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Video poster">
+  <defs>
+    <linearGradient id="vbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#374151"/>
+    </linearGradient>
+    <linearGradient id="vbar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#vbg)"/>
+  <g stroke="#4b5563" stroke-width="1" opacity="0.5">
+    <path d="M0 112 H800 M0 225 H800 M0 338 H800"/>
+  </g>
+  <circle cx="400" cy="210" r="64" fill="#0f172a" stroke="#9ca3af" stroke-width="3"/>
+  <path d="M382 178 L 442 210 L 382 242 Z" fill="#e5e7eb"/>
+  <rect x="60" y="356" width="680" height="8" rx="4" fill="#1f2937"/>
+  <rect x="60" y="356" width="260" height="8" rx="4" fill="url(#vbar)"/>
+  <text x="60" y="404" font-family="ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="700" fill="#f3f4f6">Release 2.4 walkthrough</text>
+  <text x="60" y="428" font-family="ui-sans-serif, system-ui, sans-serif" font-size="14" fill="#9ca3af">No source attached — poster + graceful empty state demo</text>
+</svg>

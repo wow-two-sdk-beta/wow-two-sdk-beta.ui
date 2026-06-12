@@ -5,6 +5,7 @@ import {
   useContext,
   useMemo,
   useRef,
+  useState,
   type ButtonHTMLAttributes,
   type ReactNode,
 } from 'react';
@@ -24,6 +25,9 @@ interface DropdownMenuContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
   triggerRef: React.MutableRefObject<HTMLButtonElement | null>;
+  /** Trigger node kept in state so anchored content re-renders once the ref attaches. */
+  triggerNode: HTMLButtonElement | null;
+  setTriggerNode: (node: HTMLButtonElement | null) => void;
   placement: MenuProps['placement'];
   offset: number;
 }
@@ -59,10 +63,11 @@ export function DropdownMenu({
     onChange: onOpenChange,
   });
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [triggerNode, setTriggerNode] = useState<HTMLButtonElement | null>(null);
 
   const ctx = useMemo<DropdownMenuContextValue>(
-    () => ({ open, setOpen, triggerRef, placement, offset }),
-    [open, setOpen, placement, offset],
+    () => ({ open, setOpen, triggerRef, triggerNode, setTriggerNode, placement, offset }),
+    [open, setOpen, triggerNode, placement, offset],
   );
 
   return <DropdownMenuContext.Provider value={ctx}>{children}</DropdownMenuContext.Provider>;
@@ -106,7 +111,7 @@ export const DropdownMenuTrigger = forwardRef<HTMLButtonElement, DropdownMenuTri
 
     return (
       <Component
-        ref={composeRefs(forwardedRef, ctx.triggerRef) as never}
+        ref={composeRefs(forwardedRef, ctx.triggerRef, ctx.setTriggerNode) as never}
         type="button"
         aria-haspopup="menu"
         aria-expanded={ctx.open}
@@ -136,7 +141,7 @@ export function DropdownMenuContent({
   return (
     <Menu
       open={ctx.open}
-      anchor={ctx.triggerRef.current}
+      anchor={ctx.triggerNode}
       onClose={() => {
         ctx.setOpen(false);
         requestAnimationFrame(() => ctx.triggerRef.current?.focus());

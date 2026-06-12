@@ -48,7 +48,11 @@ export const FilePicker = forwardRef<HTMLInputElement, FilePickerProps>(
           type="file"
           disabled={disabled}
           className="sr-only"
-          onChange={(e) => onFilesChange?.(e.target.files)}
+          onChange={(e) => {
+            onFilesChange?.(e.target.files);
+            // Reset so re-picking the same file fires change again.
+            e.target.value = '';
+          }}
           {...props}
         />
         {preview && <span className="truncate text-sm text-muted-foreground">{preview}</span>}

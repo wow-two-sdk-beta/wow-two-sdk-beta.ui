@@ -21,7 +21,7 @@ Standalone month-grid date picker — header with prev/next month nav, a 7×6 da
 - Keyboard: arrows move focused day, Home/End jump to start/end of week, PageUp/PageDown step month, Shift+PgUp/PgDn step year, Enter selects, Escape blurs (caller can wire dismissal).
 - Disabled days (via `min`/`max`/`isDisabled`) are non-interactive.
 - Days outside the target month render dimmed but remain clickable (clicking jumps the visible month).
-- ARIA: container `role="application"` with `aria-label`; day cells `role="gridcell"` (semantic-light — full grid pattern deferred).
+- ARIA: day grid is `role="grid"` with `aria-label` → 6 `role="row"` wrappers → `role="gridcell"` day cells; disabled days use `aria-disabled` (cells stay in the accessibility tree).
 
 ## Visual states (per day cell)
 `default` · `hover` · `focus-visible` · `selected` · `today` · `out-of-month` · `disabled`
@@ -31,7 +31,7 @@ Standalone month-grid date picker — header with prev/next month nav, a 7×6 da
 |---|---|---|---|---|
 | `value` | `Date \| null` | — | no | Controlled. |
 | `defaultValue` | `Date \| null` | `null` | no | Uncontrolled. |
-| `onChange` | `(d) => void` | — | no | Selection callback. |
+| `onValueChange` | `(d) => void` | — | no | Selection callback. |
 | `defaultMonth` | `Date` | today (or `value`'s month) | no | Initial visible month. |
 | `min` / `max` | `Date \| null` | — | no | Selectable range bounds. |
 | `isDisabled` | `(d) => boolean` | — | no | Custom disable predicate. |

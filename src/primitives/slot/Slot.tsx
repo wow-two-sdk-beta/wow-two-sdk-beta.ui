@@ -8,7 +8,7 @@ import {
   type ReactElement,
   type Ref,
 } from 'react';
-import { composeRefs } from '../../utils/composeRefs';
+import { useComposedRefs } from '../../utils/composeRefs';
 
 export interface SlotProps extends HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
@@ -54,14 +54,17 @@ function mergeProps(slotProps: AnyProps, childProps: AnyProps): AnyProps {
  */
 export const Slot = forwardRef<HTMLElement, SlotProps>(
   ({ children, ...slotProps }, forwardedRef) => {
-    if (!isValidElement(children)) {
+    const child = isValidElement(children)
+      ? (children as ReactElement<AnyProps> & { ref?: Ref<HTMLElement> })
+      : null;
+    const composedRef = useComposedRefs(forwardedRef, child?.ref);
+    if (!child) {
       return Children.count(children) > 1 ? Children.only(null) : null;
     }
-    const child = children as ReactElement<AnyProps> & { ref?: Ref<HTMLElement> };
     const merged = mergeProps(slotProps as AnyProps, (child.props ?? {}) as AnyProps);
     return cloneElement(child, {
       ...merged,
-      ref: composeRefs(forwardedRef, child.ref),
+      ref: composedRef,
     });
   },
 );

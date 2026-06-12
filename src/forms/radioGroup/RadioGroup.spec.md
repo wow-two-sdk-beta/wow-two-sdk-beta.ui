@@ -11,7 +11,7 @@ Mutex group of `RadioField` children. Single-value selection. Shared `name` auto
 | `value` / `defaultValue` | `string \| null` | — / `null` |
 | `onValueChange` | `(next: string \| null) => void` | — |
 | `orientation` | `'horizontal' \| 'vertical'` | `'vertical'` |
-| `isDisabled` | `boolean` | `false` |
+| `disabled` | `boolean` | `false` |
 
 ## Dependencies
 Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `Fieldset`, `Legend`, `RadioField`.

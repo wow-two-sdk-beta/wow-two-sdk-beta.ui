@@ -68,6 +68,7 @@ export const NotificationItem = forwardRef<HTMLDivElement, NotificationItemProps
         onKeyDown={
           interactive
             ? (e) => {
+                if (e.target !== e.currentTarget) return;
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   onSelect?.();

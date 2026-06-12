@@ -15,7 +15,7 @@ export interface ColorWheelProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
   value?: number;
   defaultValue?: number;
-  onChange?: (hue: number) => void;
+  onValueChange?: (hue: number) => void;
   size?: number;
   thickness?: number;
   step?: number;
@@ -36,7 +36,7 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
   {
     value,
     defaultValue,
-    onChange,
+    onValueChange,
     size = 200,
     thickness = 30,
     step = 1,
@@ -50,7 +50,7 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
   const [hue, setHue] = useControlled<number>({
     controlled: value,
     default: defaultValue ?? 0,
-    onChange,
+    onChange: onValueChange,
   });
   const trackRef = useRef<HTMLDivElement | null>(null);
 

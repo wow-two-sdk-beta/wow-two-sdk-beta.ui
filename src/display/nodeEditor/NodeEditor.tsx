@@ -1,6 +1,6 @@
 import {
   forwardRef,
-  useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -111,11 +111,15 @@ export const NodeEditor = forwardRef<HTMLDivElement, NodeEditorProps>(function N
     (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
   };
 
-  const onWheel = useCallback(
-    (e: React.WheelEvent<HTMLDivElement>) => {
+  // Wheel-zoom must be a non-passive native listener — React attaches wheel
+  // passively at the root, so `preventDefault` in `onWheel` cannot stop the
+  // page from scrolling.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
+      const rect = el.getBoundingClientRect();
       // Zoom centered on the cursor.
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
@@ -129,9 +133,10 @@ export const NodeEditor = forwardRef<HTMLDivElement, NodeEditorProps>(function N
           y: cy - (cy - v.y) * ratio,
         };
       });
-    },
-    [minZoom, maxZoom],
-  );
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [minZoom, maxZoom]);
 
   const beginNodeDrag = (e: ReactPointerEvent<HTMLDivElement>, node: NodeEditorNode) => {
     e.stopPropagation();
@@ -181,7 +186,6 @@ export const NodeEditor = forwardRef<HTMLDivElement, NodeEditorProps>(function N
       onPointerMove={onContainerPointerMove}
       onPointerUp={onContainerPointerUp}
       onPointerCancel={onContainerPointerUp}
-      onWheel={onWheel}
       className={cn(
         'relative h-96 w-full overflow-hidden rounded-md border border-border bg-muted/30 select-none',
         className,

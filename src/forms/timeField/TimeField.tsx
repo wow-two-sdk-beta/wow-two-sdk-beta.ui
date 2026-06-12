@@ -18,7 +18,7 @@ export interface TimeFieldProps
     InputBaseVariants {
   value?: TimeValue | null;
   defaultValue?: TimeValue | null;
-  onChange?: (value: TimeValue | null) => void;
+  onValueChange?: (value: TimeValue | null) => void;
 }
 
 function timeToString(t: TimeValue | null | undefined): string {
@@ -29,14 +29,14 @@ function timeToString(t: TimeValue | null | undefined): string {
 }
 
 export const TimeField = forwardRef<HTMLInputElement, TimeFieldProps>(function TimeField(
-  { value, defaultValue, onChange, size, state, className, id, disabled, required, ...rest },
+  { value, defaultValue, onValueChange, size, state, className, id, disabled, required, ...rest },
   ref,
 ) {
   const ctx = useFormControl();
   const [current, setCurrent] = useControlled<TimeValue | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange,
+    onChange: onValueChange,
   });
   return (
     <input

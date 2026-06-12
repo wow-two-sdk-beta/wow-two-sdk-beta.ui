@@ -1,6 +1,7 @@
 import {
   cloneElement,
   isValidElement,
+  useEffect,
   useRef,
   useState,
   type ReactElement,
@@ -8,6 +9,7 @@ import {
   type Ref,
 } from 'react';
 import { cn, composeRefs } from '../../utils';
+import { useControlled, useEscape, useId } from '../../hooks';
 import {
   AnchoredPositioner,
   Portal,
@@ -27,6 +29,10 @@ export interface TooltipProps {
   closeDelay?: number;
   /** Controlled open state. */
   open?: boolean;
+  /** Initial open state when uncontrolled. Default `false`. */
+  defaultOpen?: boolean;
+  /** Fires on every open-state change (hover, focus, Escape). */
+  onOpenChange?: (open: boolean) => void;
   /** Disable rendering even on hover (e.g. when content is empty). */
   disabled?: boolean;
 }
@@ -34,7 +40,9 @@ export interface TooltipProps {
 /**
  * Hover-/focus-triggered tooltip. Wraps a single child as the trigger; the
  * tooltip body renders into a Portal positioned by Floating UI. Default
- * delays mirror the OS pattern (700ms in, 0 out).
+ * delays mirror the OS pattern (700ms in, 0 out). Escape dismisses without
+ * moving focus (WCAG 1.4.13); the trigger is described by the tooltip via
+ * `aria-describedby` while open.
  */
 export function Tooltip({
   content,
@@ -42,12 +50,18 @@ export function Tooltip({
   placement = 'top',
   openDelay = 700,
   closeDelay = 0,
-  open: controlledOpen,
+  open: openProp,
+  defaultOpen = false,
+  onOpenChange,
   disabled,
 }: TooltipProps) {
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
-  const open = controlledOpen ?? uncontrolledOpen;
+  const [open, setOpen] = useControlled({
+    controlled: openProp,
+    default: defaultOpen,
+    onChange: onOpenChange,
+  });
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const tooltipId = useId('tooltip');
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -59,16 +73,34 @@ export function Tooltip({
   };
   const show = () => {
     clear();
-    openTimer.current = setTimeout(() => setUncontrolledOpen(true), openDelay);
+    openTimer.current = setTimeout(() => setOpen(true), openDelay);
   };
   const hide = () => {
     clear();
-    closeTimer.current = setTimeout(() => setUncontrolledOpen(false), closeDelay);
+    closeTimer.current = setTimeout(() => setOpen(false), closeDelay);
   };
+
+  /* Clear pending timers on unmount. */
+  useEffect(
+    () => () => {
+      if (openTimer.current) clearTimeout(openTimer.current);
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    [],
+  );
+
+  /* WCAG 1.4.13 — Escape dismisses immediately, without moving focus. */
+  useEscape(() => {
+    clear();
+    setOpen(false);
+  }, open);
+
+  const visible = !disabled && open && !!content;
 
   if (!isValidElement(children)) return children;
   const trigger = children as ReactElement<{
     ref?: Ref<HTMLElement>;
+    'aria-describedby'?: string;
     onPointerEnter?: (e: React.PointerEvent) => void;
     onPointerLeave?: (e: React.PointerEvent) => void;
     onFocus?: (e: React.FocusEvent) => void;
@@ -77,6 +109,9 @@ export function Tooltip({
 
   const cloned = cloneElement(trigger, {
     ref: composeRefs(setAnchor, trigger.ref),
+    'aria-describedby': visible
+      ? [trigger.props['aria-describedby'], tooltipId].filter(Boolean).join(' ')
+      : trigger.props['aria-describedby'],
     onPointerEnter: (e: React.PointerEvent) => {
       trigger.props.onPointerEnter?.(e);
       show();
@@ -98,10 +133,11 @@ export function Tooltip({
   return (
     <>
       {cloned}
-      {!disabled && open && content && (
+      {visible && (
         <Portal>
           <AnchoredPositioner anchor={anchor} placement={placement} offset={6}>
             <div
+              id={tooltipId}
               role="tooltip"
               className={cn(
                 'z-tooltip rounded-md bg-inverse px-2.5 py-1.5 text-xs text-inverse-foreground shadow-md',

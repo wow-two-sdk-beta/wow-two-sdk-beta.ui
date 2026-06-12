@@ -13,20 +13,20 @@ export interface DateFieldProps
     InputBaseVariants {
   value?: Date | null;
   defaultValue?: Date | null;
-  onChange?: (date: Date | null) => void;
+  onValueChange?: (date: Date | null) => void;
   min?: Date | null;
   max?: Date | null;
 }
 
 export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(function DateField(
-  { value, defaultValue, onChange, min, max, size, state, className, id, disabled, required, ...rest },
+  { value, defaultValue, onValueChange, min, max, size, state, className, id, disabled, required, ...rest },
   ref,
 ) {
   const ctx = useFormControl();
   const [current, setCurrent] = useControlled<Date | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange,
+    onChange: onValueChange,
   });
   return (
     <input

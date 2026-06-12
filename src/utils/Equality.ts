@@ -24,6 +24,6 @@ export const Equality = {
     const ak = Object.keys(a);
     const bk = Object.keys(b);
     if (ak.length !== bk.length) return false;
-    return ak.every((k) => Object.is(a[k], b[k]));
+    return ak.every((k) => Object.prototype.hasOwnProperty.call(b, k) && Object.is(a[k], b[k]));
   },
 } as const;

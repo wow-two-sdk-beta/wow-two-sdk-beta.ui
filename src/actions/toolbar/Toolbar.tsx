@@ -142,7 +142,7 @@ export function ToolbarSeparator(props: HTMLAttributes<HTMLDivElement>) {
       aria-orientation={ctx.orientation === 'vertical' ? 'horizontal' : 'vertical'}
       className={cn(
         'shrink-0 bg-border',
-        ctx.orientation === 'vertical' ? 'mx-1 h-px' : 'my-1 w-px',
+        ctx.orientation === 'vertical' ? 'mx-1 h-px' : 'my-1 w-px self-stretch',
       )}
       {...props}
     />

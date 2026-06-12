@@ -7,7 +7,7 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
 } from 'react';
-import { marked } from 'marked';
+import { Marked } from 'marked';
 import { Bold, Code, Heading1, Heading2, Italic, Link2, List, Quote } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
@@ -64,6 +64,46 @@ const linePrefix = (prefix: string) =>
     return { value: next, selStart: lineStart + prefix.length, selEnd: lineStart + updated.length };
   };
 
+const escapeHtml = (html: string) =>
+  html
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+// Only protocols a markdown link/image may navigate to from the preview;
+// anything else (javascript:, data:, vbscript:, …) is dropped.
+const SAFE_URL = /^(?:https?:|mailto:|tel:|[^a-z0-9.+-]|[a-z0-9.+-]*$)/i;
+
+const safeUrl = (href: string) => (SAFE_URL.test(href.trim()) ? href : null);
+
+// Local marked instance whose raw-HTML tokens render as escaped text, so
+// embedded HTML (e.g. `<img onerror=…>`) is inert in the default preview,
+// and whose link/image URLs are protocol-filtered (no `javascript:` links).
+// Markdown formatting is unaffected. Consumers needing real HTML supply
+// `renderPreview` and sanitize themselves.
+const previewMarked = new Marked({
+  renderer: {
+    html({ text }) {
+      return escapeHtml(text);
+    },
+    link({ href, title, tokens }) {
+      const url = safeUrl(href);
+      const text = this.parser.parseInline(tokens);
+      if (url === null) return text;
+      const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+      return `<a href="${escapeHtml(url)}"${titleAttr}>${text}</a>`;
+    },
+    image({ href, title, text }) {
+      const url = safeUrl(href);
+      if (url === null) return escapeHtml(text);
+      const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+      return `<img src="${escapeHtml(url)}" alt="${escapeHtml(text)}"${titleAttr}>`;
+    },
+  },
+});
+
 const ACTIONS: ToolbarAction[] = [
   { key: 'h1', label: 'Heading 1', icon: <Icon icon={Heading1} size={14} />, apply: linePrefix('# ') },
   { key: 'h2', label: 'Heading 2', icon: <Icon icon={Heading2} size={14} />, apply: linePrefix('## ') },
@@ -77,8 +117,10 @@ const ACTIONS: ToolbarAction[] = [
 
 /**
  * Markdown input + live preview. Toolbar wraps selection with syntax;
- * preview pane renders via `marked.parse` (or the consumer-supplied
- * `renderPreview`). Three view modes: `split` / `edit` / `preview`.
+ * preview pane renders via `marked` with raw HTML escaped to inert text
+ * (XSS-safe by default). Supply `renderPreview` to opt out — the consumer
+ * is then responsible for sanitizing. Three view modes: `split` / `edit` /
+ * `preview`.
  */
 export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProps>(
   function MarkdownEditor(
@@ -118,7 +160,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
     const previewHtml = useMemo(() => {
       if (renderPreview) return null;
       try {
-        return marked.parse(value, { async: false }) as string;
+        return previewMarked.parse(value, { async: false }) as string;
       } catch {
         return '<p>Failed to render preview.</p>';
       }

@@ -56,22 +56,19 @@ function nextOccurrence(rule: RecurrenceRule, prev: Date): Date | null {
       return addDays(prev, rule.interval);
     case 'WEEKLY': {
       if (!rule.byDay || rule.byDay.length === 0) return addDays(prev, 7 * rule.interval);
-      // Find the next allowed weekday after `prev`. After exhausting the week, jump `interval-1` weeks forward.
+      // Find the next allowed weekday in `prev`'s week (weeks start Sunday);
+      // exhausted → jump to the week `interval` weeks later and scan it.
       const allowed = new Set(rule.byDay);
       let cursor = addDays(prev, 1);
-      let weekJumps = 0;
-      const maxIter = 7 * rule.interval + 1;
-      for (let i = 0; i < maxIter; i++) {
-        const wd = JS_TO_RRULE[cursor.getDay()]!;
-        if (allowed.has(wd)) {
-          return cursor;
-        }
+      while (cursor.getDay() !== 0) {
+        if (allowed.has(JS_TO_RRULE[cursor.getDay()]!)) return cursor;
         cursor = addDays(cursor, 1);
-        if (cursor.getDay() === 0) weekJumps++;
-        if (weekJumps >= rule.interval) {
-          // Wrap to next interval window.
-          // Continue scanning — first hit wins anyway.
-        }
+      }
+      // `cursor` is the Sunday opening the following week; skip interval-1 more weeks.
+      cursor = addDays(cursor, 7 * (rule.interval - 1));
+      for (let i = 0; i < 7; i++) {
+        if (allowed.has(JS_TO_RRULE[cursor.getDay()]!)) return cursor;
+        cursor = addDays(cursor, 1);
       }
       return null;
     }

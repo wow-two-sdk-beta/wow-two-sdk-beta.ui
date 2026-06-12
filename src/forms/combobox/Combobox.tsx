@@ -46,6 +46,7 @@ interface ComboboxContextValue {
   unregisterItem: (id: string) => void;
   itemsRef: React.MutableRefObject<ComboboxItemEntry[]>;
   inputRef: React.MutableRefObject<HTMLInputElement | null>;
+  contentRef: React.MutableRefObject<HTMLDivElement | null>;
   listboxId: string;
   disabled: boolean;
   invalid?: boolean;
@@ -112,6 +113,7 @@ export function Combobox({
 
   const itemsRef = useRef<ComboboxItemEntry[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const listboxId = useId();
 
@@ -150,6 +152,7 @@ export function Combobox({
       unregisterItem,
       itemsRef,
       inputRef,
+      contentRef,
       listboxId,
       disabled,
       invalid,
@@ -186,11 +189,19 @@ export interface ComboboxInputProps
 
 export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
   function ComboboxInput(
-    { className, size, state, onKeyDown, onFocus, ...rest },
+    { className, size, state, onKeyDown, onFocus, onBlur, ...rest },
     forwardedRef,
   ) {
     const ctx = useComboboxContext();
     const inputState = state ?? (ctx.invalid ? 'invalid' : 'default');
+
+    const setActiveAndScroll = useCallback(
+      (id: string) => {
+        ctx.setActiveId(id);
+        document.getElementById(id)?.scrollIntoView({ block: 'nearest' });
+      },
+      [ctx],
+    );
 
     const moveActive = useCallback(
       (direction: 1 | -1) => {
@@ -202,9 +213,9 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
         if (nextIdx < 0) nextIdx = list.length - 1;
         if (nextIdx >= list.length) nextIdx = 0;
         const next = list[nextIdx];
-        if (next) ctx.setActiveId(next.id);
+        if (next) setActiveAndScroll(next.id);
       },
-      [ctx],
+      [ctx, setActiveAndScroll],
     );
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -225,7 +236,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
           if (ctx.open) {
             e.preventDefault();
             const first = ctx.itemsRef.current.find((i) => !i.disabled);
-            if (first) ctx.setActiveId(first.id);
+            if (first) setActiveAndScroll(first.id);
           }
           break;
         case 'End':
@@ -233,8 +244,12 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
             e.preventDefault();
             const list = ctx.itemsRef.current.filter((i) => !i.disabled);
             const last = list[list.length - 1];
-            if (last) ctx.setActiveId(last.id);
+            if (last) setActiveAndScroll(last.id);
           }
+          break;
+        case 'Tab':
+          /* Lets focus move on — DismissableLayer only closes on pointer/Escape. */
+          if (ctx.open) ctx.setOpen(false);
           break;
         case 'Enter': {
           if (!ctx.open || !ctx.activeId) return;
@@ -279,6 +294,15 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
           onFocus?.(e);
           if (!ctx.open) ctx.setOpen(true);
         }}
+        onBlur={(e) => {
+          onBlur?.(e);
+          /* `relatedTarget === null` = pointer interaction — DismissableLayer owns that path. */
+          const next = e.relatedTarget as Node | null;
+          if (!next || !ctx.open) return;
+          if (ctx.inputRef.current?.contains(next)) return;
+          if (ctx.contentRef.current?.contains(next)) return;
+          ctx.setOpen(false);
+        }}
         onKeyDown={handleKeyDown}
         className={cn(inputBaseVariants({ size, state: inputState }), className)}
         {...rest}
@@ -306,6 +330,15 @@ export function ComboboxContent({
   children,
 }: ComboboxContentProps) {
   const ctx = useComboboxContext();
+  /* Clamps a stale activeId (filtered-out item) back to the first visible option.
+     Runs after the items' register/unregister effects — children effects fire first. */
+  useEffect(() => {
+    if (!ctx.open) return;
+    const list = ctx.itemsRef.current.filter((i) => !i.disabled);
+    if (ctx.activeId && !list.some((i) => i.id === ctx.activeId)) {
+      ctx.setActiveId(list[0]?.id ?? null);
+    }
+  });
   if (!ctx.open) return null;
   /* Default to `xs` (p-1) so items breathe — same as Listbox. */
   const resolvedPadding = padding ?? 'xs';
@@ -325,6 +358,7 @@ export function ComboboxContent({
           }}
         >
           <div
+            ref={ctx.contentRef}
             id={ctx.listboxId}
             role="listbox"
             className={cn(

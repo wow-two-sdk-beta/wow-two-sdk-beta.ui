@@ -14,7 +14,7 @@ function Demo() {
   const [range, setRange] = useState<DateRange | null>(null);
   return (
     <div className="flex flex-col gap-3">
-      <RangeCalendar value={range} onChange={setRange} />
+      <RangeCalendar value={range} onValueChange={setRange} />
       <p className="text-sm text-muted-foreground">
         Range:{' '}
         {range?.start ? range.start.toDateString() : '—'}

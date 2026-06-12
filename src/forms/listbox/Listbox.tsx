@@ -53,6 +53,7 @@ interface ListboxContextValue {
   unregisterItem: (id: string) => void;
   setActiveId: (id: string | null) => void;
   indicator: ListboxIndicator;
+  disabled: boolean;
 }
 
 const ListboxContext = createContext<ListboxContextValue | null>(null);
@@ -186,7 +187,11 @@ function ListboxImpl<T>(
       if (nextIdx < 0) nextIdx = 0;
       if (nextIdx >= list.length) nextIdx = list.length - 1;
       const nextEntry = list[nextIdx];
-      if (nextEntry) setActiveId(nextEntry.id);
+      if (nextEntry) {
+        setActiveId(nextEntry.id);
+        /* Keeps the active option visible — lists are `max-h-72 overflow-y-auto`. */
+        document.getElementById(nextEntry.id)?.scrollIntoView({ block: 'nearest' });
+      }
     },
     [activeId],
   );
@@ -245,6 +250,7 @@ function ListboxImpl<T>(
       unregisterItem,
       setActiveId,
       indicator: resolvedIndicator,
+      disabled: disabled ?? false,
     }),
     [
       multiple,
@@ -255,6 +261,7 @@ function ListboxImpl<T>(
       registerItem,
       unregisterItem,
       resolvedIndicator,
+      disabled,
     ],
   );
 
@@ -411,7 +418,8 @@ export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function
       data-disabled={disabled ? '' : undefined}
       onClick={(e) => {
         onClick?.(e);
-        if (e.defaultPrevented || disabled) return;
+        /* `ctx.disabled` = listbox-level disabled — keyboard is blocked in handleKeyDown; mirror for mouse. */
+        if (e.defaultPrevented || disabled || ctx.disabled) return;
         ctx.onItemSelect(value);
       }}
       onPointerEnter={(e) => {

@@ -24,7 +24,7 @@ Date-range picker — same calendar grid as `Calendar` but selects a `{ start, e
 |---|---|---|---|---|
 | `value` | `{ start, end } \| null` | — | no | Controlled. |
 | `defaultValue` | `{ start, end } \| null` | `null` | no | Uncontrolled. |
-| `onChange` | `(range) => void` | — | no | Fires when both start + end picked. |
+| `onValueChange` | `(range) => void` | — | no | Fires when both start + end picked. |
 | `defaultMonth` | `Date` | today | no | Initial visible month. |
 | `min` / `max` | `Date \| null` | — | no | Bounds. |
 | `isDisabled` | `(d) => boolean` | — | no | Custom disable predicate. |

@@ -3,6 +3,7 @@ import {
   forwardRef,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -76,6 +77,14 @@ export function ContextMenu({ children }: ContextMenuProps) {
     [setAnchor],
   );
 
+  // Remove the body-appended virtual anchor when it is replaced or on unmount.
+  useEffect(() => {
+    if (!anchor) return;
+    return () => {
+      if (anchor.parentNode === document.body) anchor.remove();
+    };
+  }, [anchor]);
+
   const ctx = useMemo<ContextMenuContextValue>(
     () => ({ open, setOpen: handleSetOpen, anchor, setAnchor, triggerRef }),
     [open, handleSetOpen, anchor, setAnchor],
@@ -114,6 +123,9 @@ export const ContextMenuTrigger = forwardRef<HTMLDivElement, ContextMenuTriggerP
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }, []);
+
+    // Clear a pending long-press timer if the trigger unmounts mid-press.
+    useEffect(() => () => clearLongPress(), [clearLongPress]);
 
     return (
       <Component

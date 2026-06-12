@@ -17,6 +17,7 @@ export interface HeatmapCalendarProps extends HTMLAttributes<HTMLDivElement> {
   weekStart?: 0 | 1;
   cellSize?: number;
   gap?: number;
+  /** Intensity buckets (min 2, clamped). Buckets map proportionally onto the fixed 5-step tone palette — counts above 5 share palette classes between adjacent buckets. Default 5. */
   levels?: number;
   tone?: HeatmapCalendarTone;
   onCellClick?: (date: string, value: number) => void;
@@ -102,10 +103,18 @@ export const HeatmapCalendar = forwardRef<HTMLDivElement, HeatmapCalendarProps>(
     }, [year, weekStart, valueMap]);
 
     const toneSteps = TONE_CLASSES[tone];
+    /* Clamp to ≥2 so the zero step plus at least one filled step always exist. */
+    const levelCount = Math.max(2, Math.floor(levels));
     const bucket = (v: number): number => {
       if (v <= 0 || maxValue === 0) return 0;
-      const idx = Math.ceil((v / maxValue) * (levels - 1));
-      return Math.min(levels - 1, idx);
+      const idx = Math.ceil((v / maxValue) * (levelCount - 1));
+      return Math.min(levelCount - 1, idx);
+    };
+    /* The palette is a fixed 5-step ramp; map any bucket count onto it proportionally (0 → empty step, top bucket → full tone, nonzero buckets never fall back to the empty step). */
+    const stepClass = (level: number): string => {
+      if (level === 0) return toneSteps[0]!;
+      const idx = Math.round((level / (levelCount - 1)) * (toneSteps.length - 1));
+      return toneSteps[Math.max(1, idx)]!;
     };
 
     const totalWidth = columns.length * (cellSize + gap);
@@ -160,12 +169,12 @@ export const HeatmapCalendar = forwardRef<HTMLDivElement, HeatmapCalendarProps>(
                       aria-label={`${dateStr}: ${cell.value}`}
                       aria-valuenow={level}
                       aria-valuemin={0}
-                      aria-valuemax={levels - 1}
+                      aria-valuemax={levelCount - 1}
                       onClick={interactive ? () => onCellClick?.(dateStr, cell.value) : undefined}
                       style={{ width: cellSize, height: cellSize }}
                       className={cn(
                         'rounded-[2px] transition-colors',
-                        cell.inYear ? toneSteps[level] : 'bg-transparent',
+                        cell.inYear ? stepClass(level) : 'bg-transparent',
                         interactive && 'cursor-pointer hover:ring-1 hover:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       )}
                     />

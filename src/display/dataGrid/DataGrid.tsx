@@ -2,6 +2,7 @@ import {
   forwardRef,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
   type HTMLAttributes,
@@ -63,6 +64,9 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
     const [draft, setDraft] = useState('');
     const containerRef = useRef<HTMLDivElement | null>(null);
     const editRef = useRef<HTMLInputElement | HTMLSelectElement | null>(null);
+    const wasEditingRef = useRef(false);
+    const gridId = useId();
+    const cellId = (r: number, c: number) => `${gridId}-cell-${r}-${c}`;
 
     useEffect(() => {
       if (editing && editRef.current) {
@@ -70,7 +74,12 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
         if ('select' in editRef.current && typeof editRef.current.select === 'function') {
           editRef.current.select();
         }
+      } else if (!editing && wasEditingRef.current) {
+        // The editor just unmounted — without this, focus drops to <body>
+        // and the grid's keyboard navigation goes dead.
+        containerRef.current?.focus();
       }
+      wasEditingRef.current = editing;
     }, [editing]);
 
     const colCount = columns.length;
@@ -87,14 +96,17 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
     }, [columns, rows, active]);
 
     const commitEdit = useCallback(
-      (move?: 'right' | 'down') => {
+      (move?: 'right' | 'down', rawValue?: string) => {
         const col = columns[active.col];
         const row = rows[active.row];
         if (!col || row === undefined) {
           setEditing(false);
           return;
         }
-        const value = castValue(draft, col.type ?? 'text');
+        // rawValue lets editors commit synchronously with the fresh value —
+        // the draft state in this closure is stale when onChange + onCommit
+        // fire in the same event (select/boolean editors).
+        const value = castValue(rawValue ?? draft, col.type ?? 'text');
         onRowChange?.(row, col.key, value);
         setEditing(false);
         if (move === 'right') setActive((a) => ({ row: a.row, col: Math.min(colCount - 1, a.col + 1) }));
@@ -167,6 +179,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
         aria-rowcount={rowCount + 1}
         aria-colcount={colCount}
         tabIndex={0}
+        aria-activedescendant={rowCount > 0 ? cellId(active.row, active.col) : undefined}
         onKeyDown={handleKeyDown}
         className={cn(
           'overflow-auto rounded-md border border-border bg-card text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -205,6 +218,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
                   return (
                     <td
                       key={col.key}
+                      id={cellId(ri, ci)}
                       role="gridcell"
                       aria-colindex={ci + 1}
                       aria-readonly={!isEditable || undefined}
@@ -265,7 +279,7 @@ interface CellEditorProps {
   col: DataGridColumn<unknown>;
   value: string;
   onChange: (v: string) => void;
-  onCommit: (move?: 'right' | 'down') => void;
+  onCommit: (move?: 'right' | 'down', rawValue?: string) => void;
   onCancel: () => void;
 }
 
@@ -279,7 +293,7 @@ const CellEditor = forwardRef<HTMLInputElement | HTMLSelectElement, CellEditorPr
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
-            onCommit('down');
+            onCommit('down', e.target.value);
           }}
           onBlur={() => onCommit()}
           onKeyDown={(e) => {
@@ -305,7 +319,7 @@ const CellEditor = forwardRef<HTMLInputElement | HTMLSelectElement, CellEditorPr
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
-            onCommit('down');
+            onCommit('down', e.target.value);
           }}
           onBlur={() => onCommit()}
           onKeyDown={(e) => {

@@ -23,7 +23,7 @@ export interface ColorAreaProps
   defaultSaturation?: number;
   value?: number;
   defaultValue?: number;
-  onChange?: (next: ColorAreaChange) => void;
+  onValueChange?: (next: ColorAreaChange) => void;
   step?: number;
   disabled?: boolean;
   'aria-label'?: string;
@@ -36,7 +36,7 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
     defaultSaturation,
     value,
     defaultValue,
-    onChange,
+    onValueChange,
     step = 0.01,
     disabled = false,
     className,
@@ -62,9 +62,9 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
       const cv = clamp01(nextV);
       setS(cs);
       setV(cv);
-      onChange?.({ saturation: cs, value: cv });
+      onValueChange?.({ saturation: cs, value: cv });
     },
-    [onChange, setS, setV],
+    [onValueChange, setS, setV],
   );
 
   const updateFromClient = useCallback(

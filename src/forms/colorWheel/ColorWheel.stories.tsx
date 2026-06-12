@@ -14,7 +14,7 @@ function Demo() {
   const [hue, setHue] = useState(0);
   return (
     <div className="flex flex-col items-center gap-3">
-      <ColorWheel value={hue} onChange={setHue} />
+      <ColorWheel value={hue} onValueChange={setHue} />
       <p className="text-sm text-muted-foreground">Hue: {Math.round(hue)}°</p>
     </div>
   );

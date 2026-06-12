@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 /**
  * Fire `handler` when the Escape key is pressed at the document level.
@@ -7,7 +7,9 @@ import { useEffect, useRef } from 'react';
  */
 export function useEscape(handler: (event: KeyboardEvent) => void, enabled = true): void {
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+  useLayoutEffect(() => {
+    handlerRef.current = handler;
+  }, [handler]);
 
   useEffect(() => {
     if (!enabled) return;

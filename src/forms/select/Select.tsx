@@ -55,6 +55,8 @@ interface SelectContextValue {
   setOpen: (open: boolean) => void;
   selectedKey: unknown;
   hasSelection: boolean;
+  /** Holds the label captured at selection time — keeps the trigger labelled while the popover is closed. */
+  selectedLabel: ReactNode;
   onSelect: (entry: ItemRegistryEntry<unknown, unknown>) => void;
   onClear: () => void;
   keyEquals: EqualityComparer<unknown>;
@@ -84,11 +86,11 @@ function useSelectContext() {
 /** Represents the prop surface of the `Select` root. */
 export interface SelectProps<K, V = K> {
   /** Holds the selected key; `null` = explicit clear, `undefined` = uncontrolled. */
-  selected?: K | null;
+  value?: K | null;
   /** Holds the initial selected key for uncontrolled use. */
-  defaultSelected?: K | null;
+  defaultValue?: K | null;
   /** Fires when an item is picked or cleared (`null` on clear). */
-  onChange?: (selected: SelectOption<K, V> | null) => void;
+  onValueChange?: (selected: SelectOption<K, V> | null) => void;
   /** Compares keys for equality; defaults to `Equality.strictEquals`. */
   keyEquals?: EqualityComparer<K>;
   /** Disables interaction when true. */
@@ -115,9 +117,9 @@ export interface SelectProps<K, V = K> {
 }
 
 function SelectImpl<K, V = K>({
-  selected,
-  defaultSelected,
-  onChange,
+  value,
+  defaultValue,
+  onValueChange,
   keyEquals,
   disabled = false,
   isLoading = false,
@@ -137,21 +139,27 @@ function SelectImpl<K, V = K>({
     onChange: onOpenChange,
   });
   const [keyState, setKeyState] = useControlled<K | null>({
-    controlled: selected,
-    default: defaultSelected ?? null,
+    controlled: value,
+    default: defaultValue ?? null,
     /* Emits via `emitChange` below — needs both key + value, not just key. */
     onChange: undefined,
   });
   const [items, setItems] = useState<Array<ItemRegistryEntry<unknown, unknown>>>([]);
   const [query, setQuery] = useState('');
+  /* Captures `{ itemKey, label }` at selection time — items unmount on popover close, so the
+     registry alone can't label the trigger before the first open. */
+  const [selectedEntry, setSelectedEntry] = useState<{
+    itemKey: unknown;
+    label: ReactNode;
+  } | null>(null);
 
   /* Ref-stabilises consumer fns so they don't churn `useMemo` deps. */
   const keyEqualsRef = useRef(keyEquals);
   keyEqualsRef.current = keyEquals;
   const serializeKeyRef = useRef(serializeKey);
   serializeKeyRef.current = serializeKey;
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  const onValueChangeRef = useRef(onValueChange);
+  onValueChangeRef.current = onValueChange;
 
   const keyEqualsFn = useCallback<EqualityComparer<unknown>>((a, b) => {
     const fn = keyEqualsRef.current as EqualityComparer<unknown> | undefined;
@@ -199,7 +207,7 @@ function SelectImpl<K, V = K>({
 
   const emitChange = useCallback(
     (next: SelectOption<K, V> | null) => {
-      onChangeRef.current?.(next);
+      onValueChangeRef.current?.(next);
     },
     [],
   );
@@ -207,6 +215,7 @@ function SelectImpl<K, V = K>({
   const onSelect = useCallback(
     (entry: ItemRegistryEntry<unknown, unknown>) => {
       (setKeyState as (v: unknown) => void)(entry.itemKey);
+      setSelectedEntry({ itemKey: entry.itemKey, label: entry.label });
       setOpenState(false);
       setQuery('');
       emitChange({
@@ -220,10 +229,17 @@ function SelectImpl<K, V = K>({
 
   const onClear = useCallback(() => {
     (setKeyState as (v: unknown) => void)(null);
+    setSelectedEntry(null);
     emitChange(null);
   }, [setKeyState, emitChange]);
 
   const hasSelection = keyState !== null && keyState !== undefined;
+
+  /* Drops the captured label when the key changed externally (controlled updates). */
+  const selectedLabel =
+    selectedEntry && hasSelection && keyEqualsFn(selectedEntry.itemKey, keyState)
+      ? selectedEntry.label
+      : null;
 
   const ctx = useMemo<SelectContextValue>(
     () => ({
@@ -231,6 +247,7 @@ function SelectImpl<K, V = K>({
       setOpen: setOpenState,
       selectedKey: keyState,
       hasSelection,
+      selectedLabel,
       onSelect,
       onClear,
       keyEquals: keyEqualsFn,
@@ -251,6 +268,7 @@ function SelectImpl<K, V = K>({
       setOpenState,
       keyState,
       hasSelection,
+      selectedLabel,
       onSelect,
       onClear,
       keyEqualsFn,
@@ -279,6 +297,10 @@ function SelectImpl<K, V = K>({
         offset={4}
       >
         {children}
+        {/* Always-rendered — inside PopoverContent it would vanish from form submission when closed. */}
+        {name && hasSelection && (
+          <input type="hidden" name={name} value={serializeKeyFn(keyState)} />
+        )}
       </Popover>
     </SelectContext.Provider>
   );
@@ -320,6 +342,15 @@ const TRIGGER_DIVIDER_CLASSES = {
   lg: 'h-5',
 } as const;
 
+/** Contains the right-offset classes aligning the overlaid clear button with its reserved slot
+ *  (trigger `px` + chevron width + `gap-1.5` + 1px divider + `gap-1.5`). */
+const TRIGGER_CLEAR_OFFSET_CLASSES = {
+  xs: 'right-[35px]',
+  sm: 'right-[37px]',
+  md: 'right-[41px]',
+  lg: 'right-[49px]',
+} as const;
+
 /** Represents the prop surface of the `Select.Trigger`. */
 export interface SelectTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
@@ -337,61 +368,59 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
     const iconClass = TRIGGER_ICON_CLASSES[sizeKey];
     const clearBoxClass = TRIGGER_CLEAR_BOX_CLASSES[sizeKey];
     const dividerClass = TRIGGER_DIVIDER_CLASSES[sizeKey];
+    const clearOffsetClass = TRIGGER_CLEAR_OFFSET_CLASSES[sizeKey];
+    /* The clear control is a real sibling button overlaying a reserved slot — nesting an
+       interactive role inside the trigger button is invalid ARIA and keyboard-unreachable. */
     return (
-      <PopoverTrigger asChild>
-        <button
-          ref={ref}
-          type="button"
-          disabled={ctx.disabled || ctx.isLoading}
-          aria-busy={ctx.isLoading || undefined}
-          className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
-          {...rest}
-        >
-          {children ?? <SelectValue />}
-          <span className="ml-auto flex shrink-0 items-center gap-1.5">
-            {showClear && (
-              <>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Clear selection"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    ctx.onClear();
-                  }}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      ctx.onClear();
-                    }
-                  }}
+      <span className="relative inline-flex w-full">
+        <PopoverTrigger asChild>
+          <button
+            ref={ref}
+            type="button"
+            disabled={ctx.disabled || ctx.isLoading}
+            aria-busy={ctx.isLoading || undefined}
+            className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
+            {...rest}
+          >
+            {children ?? <SelectValue />}
+            <span className="ml-auto flex shrink-0 items-center gap-1.5">
+              {showClear && (
+                <>
+                  {/* Reserves the slot the overlaid clear button sits on. */}
+                  <span aria-hidden className={clearBoxClass} />
+                  {/* Separates the clear button from the chevron — `foreground/20` always contrasts. */}
+                  <span aria-hidden className={cn('w-px bg-foreground/20', dividerClass)} />
+                </>
+              )}
+              {ctx.isLoading ? (
+                <Loader2 className={cn(iconClass, 'animate-spin text-subtle-foreground')} />
+              ) : (
+                <ChevronDown
                   className={cn(
-                    'grid place-items-center rounded-full text-subtle-foreground transition-colors hover:bg-muted hover:text-foreground',
-                    clearBoxClass,
+                    iconClass,
+                    'text-muted-foreground transition-transform',
+                    ctx.open && 'rotate-180',
                   )}
-                >
-                  <X className={iconClass} />
-                </span>
-                {/* Separates the clear button from the chevron — `foreground/20` always contrasts. */}
-                <span aria-hidden className={cn('w-px bg-foreground/20', dividerClass)} />
-              </>
+                />
+              )}
+            </span>
+          </button>
+        </PopoverTrigger>
+        {showClear && (
+          <button
+            type="button"
+            aria-label="Clear selection"
+            onClick={() => ctx.onClear()}
+            className={cn(
+              'absolute top-1/2 grid -translate-y-1/2 place-items-center rounded-full text-subtle-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              clearBoxClass,
+              clearOffsetClass,
             )}
-            {ctx.isLoading ? (
-              <Loader2 className={cn(iconClass, 'animate-spin text-subtle-foreground')} />
-            ) : (
-              <ChevronDown
-                className={cn(
-                  iconClass,
-                  'text-muted-foreground transition-transform',
-                  ctx.open && 'rotate-180',
-                )}
-              />
-            )}
-          </span>
-        </button>
-      </PopoverTrigger>
+          >
+            <X className={iconClass} />
+          </button>
+        )}
+      </span>
     );
   },
 );
@@ -414,7 +443,9 @@ export function SelectValue({ placeholder, children }: SelectValueProps) {
     ? ctx.items.find((i) => ctx.keyEquals(i.itemKey, ctx.selectedKey))
     : undefined;
   const label =
-    match?.label ?? (ctx.hasSelection ? ctx.serializeKey(ctx.selectedKey) : null);
+    match?.label ??
+    ctx.selectedLabel ??
+    (ctx.hasSelection ? ctx.serializeKey(ctx.selectedKey) : null);
   return (
     <span className={cn('truncate text-left', !label && 'text-subtle-foreground')}>
       {label ?? placeholder}
@@ -502,9 +533,6 @@ export function SelectContent({
         {children}
         {showEmpty && <ListboxEmpty>{noResultsLabel}</ListboxEmpty>}
       </Listbox>
-      {ctx.name && ctx.hasSelection && (
-        <input type="hidden" name={ctx.name} value={ctx.serializeKey(ctx.selectedKey)} />
-      )}
     </PopoverContent>
   );
 }
@@ -527,7 +555,7 @@ function extractText(node: ReactNode): string {
 export interface SelectItemProps<K = unknown, V = K> {
   /** Identifies the item; drives equality, ARIA, and search. */
   itemKey: K;
-  /** Holds the rich payload returned via `onChange`; defaults to `itemKey`. */
+  /** Holds the rich payload returned via `onValueChange`; defaults to `itemKey`. */
   value?: V;
   /** Shows in the trigger when this item is selected. */
   label: ReactNode;

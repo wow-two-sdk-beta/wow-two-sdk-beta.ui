@@ -56,21 +56,25 @@ export const CountUp = forwardRef<HTMLElement, CountUpProps>(function CountUp(
       return;
     }
     if (triggerOnView && typeof IntersectionObserver !== 'undefined' && elRef.current) {
+      let cancel: (() => void) | undefined;
       const obs = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
             if (entry.isIntersecting && !startedRef.current) {
               startedRef.current = true;
-              animate();
+              cancel = animate();
             }
           }
         },
         { threshold: 0.2 },
       );
       obs.observe(elRef.current);
-      return () => obs.disconnect();
+      return () => {
+        obs.disconnect();
+        cancel?.();
+      };
     }
-    animate();
+    return animate();
 
     function animate() {
       const start = performance.now();

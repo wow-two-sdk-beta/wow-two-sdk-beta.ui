@@ -59,10 +59,12 @@ export const AnimatedNumber = forwardRef<HTMLElement, AnimatedNumberProps>(
       const tick = (now: number) => {
         const t = Math.min(1, (now - start) / duration);
         const eased = easing(t);
-        const next = from + (to - from) * eased;
+        const next = t < 1 ? from + (to - from) * eased : to;
         setDisplay(next);
+        // Track the displayed value so an interrupting tween starts from
+        // where the display actually is, not the stale pre-animation base.
+        fromRef.current = next;
         if (t < 1) raf = requestAnimationFrame(tick);
-        else fromRef.current = to;
       };
       raf = requestAnimationFrame(tick);
       return () => cancelAnimationFrame(raf);

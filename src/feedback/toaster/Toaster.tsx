@@ -163,6 +163,7 @@ export function Toaster({
       }, remaining);
       timersRef.current.set(v.id, handle);
       startRef.current.set(v.id, Date.now());
+      remainingRef.current.set(v.id, remaining);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, max, defaultDuration, paused]);

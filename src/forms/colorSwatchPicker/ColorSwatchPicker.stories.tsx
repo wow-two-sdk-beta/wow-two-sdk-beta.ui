@@ -25,7 +25,7 @@ function Demo() {
   const [color, setColor] = useState<string | null>('#3b82f6');
   return (
     <div className="flex flex-col gap-3 w-72">
-      <ColorSwatchPicker colors={PALETTE} value={color} onChange={setColor} />
+      <ColorSwatchPicker colors={PALETTE} value={color} onValueChange={setColor} />
       <p className="text-sm text-muted-foreground">Selected: {color ?? 'none'}</p>
     </div>
   );

@@ -24,7 +24,7 @@ Time input with a popover containing hour and minute lists. Use when a unified c
 |---|---|---|---|---|
 | `value` | `{ hours, minutes } \| null` | — | no | Controlled. |
 | `defaultValue` | same | `null` | no | Uncontrolled. |
-| `onChange` | `(t) => void` | — | no | Selection callback. |
+| `onValueChange` | `(t) => void` | — | no | Selection callback. |
 | `minuteStep` | `number` | `5` | no | Minute interval. |
 | `placeholder` | `string` | `'Pick a time'` | no | Trigger text when no value. |
 | `format` | `(t) => string` | `HH:MM` | no | Custom display formatter. |

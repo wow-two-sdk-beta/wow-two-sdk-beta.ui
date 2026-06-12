@@ -38,11 +38,13 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
           className={cn(
             'pointer-events-none grid h-full w-full place-items-center rounded-full border border-input bg-background transition-colors',
             'peer-checked:border-primary',
+            /* Dot opacity gate lives on this span (a peer sibling of the input) — child-selector targets the dot. peer-checked: cannot reach descendants directly. */
+            '[&>span]:opacity-0 peer-checked:[&>span]:opacity-100',
             'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1',
             'peer-disabled:opacity-50',
           )}
         >
-          <span className="h-2 w-2 rounded-full bg-primary opacity-0 peer-checked:opacity-100" />
+          <span className="h-2 w-2 rounded-full bg-primary" />
         </span>
       </span>
     );

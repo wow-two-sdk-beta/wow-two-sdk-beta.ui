@@ -19,3 +19,13 @@ export const Default: Story = {
     return <Demo />;
   },
 };
+
+export const WithoutFirstLast: Story = {
+  render: () => {
+    const Demo = () => {
+      const [page, setPage] = useState(5);
+      return <Pagination total={20} page={page} onPageChange={setPage} hideFirstLast />;
+    };
+    return <Demo />;
+  },
+};

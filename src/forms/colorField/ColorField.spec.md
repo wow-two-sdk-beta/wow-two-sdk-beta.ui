@@ -14,7 +14,7 @@ Text input for hex colors with a leading swatch preview. Validates on blur — a
 ## Required behaviors
 - Accepts hex with or without leading `#`. Auto-prepends `#` on blur if missing.
 - Invalid hex on blur: revert to last valid value, set `state="invalid"` briefly (caller can wire validation).
-- Emits `onChange(hexString)` only on valid hex (after blur or Enter).
+- Emits `onValueChange(hexString)` only on valid hex (after blur or Enter).
 - Pairs with `FormControl` (id, disabled, required, invalid, describedBy).
 
 ## Visual states
@@ -25,7 +25,7 @@ Same as `forms/InputStyles` `inputBaseVariants`.
 |---|---|---|---|---|
 | `value` | `string \| null` | — | no | Controlled hex (`#RRGGBB` or `#RRGGBBAA`). |
 | `defaultValue` | `string \| null` | `null` | no | Uncontrolled. |
-| `onChange` | `(hex \| null) => void` | — | no | Fires on commit (blur / Enter). |
+| `onValueChange` | `(hex \| null) => void` | — | no | Fires on commit (blur / Enter). |
 | `size`, `state` | — | — | no | From `inputBaseVariants`. |
 | `swatchShape` | `'square' \| 'circle'` | `'square'` | no | Swatch shape. |
 | `withAlpha` | `boolean` | `false` | no | Allow / require 8-digit hex. |

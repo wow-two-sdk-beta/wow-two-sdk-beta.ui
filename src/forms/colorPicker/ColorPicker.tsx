@@ -16,7 +16,7 @@ import { ColorSwatchPicker } from '../colorSwatchPicker';
 export interface ColorPickerProps {
   value?: string | null;
   defaultValue?: string | null;
-  onChange?: (hex: string) => void;
+  onValueChange?: (hex: string) => void;
   withAlpha?: boolean;
   presets?: string[];
   triggerSize?: ColorSwatchVariants['size'];
@@ -32,7 +32,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
   {
     value,
     defaultValue = '#3b82f6',
-    onChange,
+    onValueChange,
     withAlpha = false,
     presets,
     triggerSize = 'md',
@@ -46,7 +46,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
   const [hex, setHex] = useControlled<string | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange: onChange as ((v: string | null) => void) | undefined,
+    onChange: onValueChange as ((v: string | null) => void) | undefined,
   });
 
   // Internal HSV state (kept in sync with hex). HSV preserves picker geometry
@@ -93,12 +93,12 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
           hue={hsv.h}
           saturation={hsv.s}
           value={hsv.v}
-          onChange={({ saturation, value }) => updateHsv({ ...hsv, s: saturation, v: value })}
+          onValueChange={({ saturation, value }) => updateHsv({ ...hsv, s: saturation, v: value })}
         />
         <ColorSlider
           channel="hue"
           value={hsv.h}
-          onChange={(h) => updateHsv({ ...hsv, h })}
+          onValueChange={(h) => updateHsv({ ...hsv, h })}
           aria-label="Hue"
         />
         {withAlpha && (
@@ -106,20 +106,20 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
             channel="alpha"
             value={hsv.a ?? 1}
             color={hsv}
-            onChange={(a) => updateHsv({ ...hsv, a })}
+            onValueChange={(a) => updateHsv({ ...hsv, a })}
             aria-label="Alpha"
           />
         )}
         <ColorField
           value={hex}
-          onChange={(next) => setHex(next)}
+          onValueChange={(next) => setHex(next)}
           withAlpha={withAlpha}
         />
         {presets && presets.length > 0 && (
           <ColorSwatchPicker
             colors={presets}
             value={hex}
-            onChange={setHex}
+            onValueChange={setHex}
             swatchSize="sm"
           />
         )}

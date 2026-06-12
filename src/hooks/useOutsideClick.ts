@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react';
 
 /**
  * Fire `handler` when the user clicks outside any of the provided refs.
@@ -11,15 +11,19 @@ export function useOutsideClick(
   enabled = true,
 ): void {
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+  const refsRef = useRef(refs);
+  useLayoutEffect(() => {
+    handlerRef.current = handler;
+    refsRef.current = refs;
+  }, [handler, refs]);
 
   useEffect(() => {
     if (!enabled) return;
-    const refList = Array.isArray(refs) ? refs : [refs];
 
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as Node | null;
       if (!target) return;
+      const refList = Array.isArray(refsRef.current) ? refsRef.current : [refsRef.current];
       for (const ref of refList) {
         if (ref.current && ref.current.contains(target)) return;
       }
@@ -28,5 +32,5 @@ export function useOutsideClick(
 
     document.addEventListener('pointerdown', onPointerDown, true);
     return () => document.removeEventListener('pointerdown', onPointerDown, true);
-  }, [refs, enabled]);
+  }, [enabled]);
 }

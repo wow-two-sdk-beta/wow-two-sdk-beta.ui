@@ -1,7 +1,6 @@
 import {
   forwardRef,
   useCallback,
-  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -63,8 +62,6 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
     const gutterRef = useRef<HTMLDivElement | null>(null);
     const [scrollTop, setScrollTop] = useState(0);
 
-    useImperativeHandle(forwardedRef, () => textareaRef.current as HTMLTextAreaElement);
-
     const lineCount = useMemo(() => value.split('\n').length, [value]);
     const indentChar = useTabs ? '\t' : ' '.repeat(tabSize);
 
@@ -121,14 +118,37 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
           const lineStartOffset = before.lastIndexOf('\n') + 1;
           const blockStart = before.slice(0, lineStartOffset);
           const block = before.slice(lineStartOffset) + between;
+          let newStart: number;
+          let newEnd: number;
           if (e.shiftKey) {
             const re = useTabs ? /^\t/gm : new RegExp(`^ {1,${tabSize}}`, 'gm');
-            const next = blockStart + block.replace(re, '') + after;
-            setValue(next);
+            let removedTotal = 0;
+            let removedFirst = 0;
+            const outdented = block.replace(re, (m, offset: number) => {
+              removedTotal += m.length;
+              if (offset === 0) removedFirst = m.length;
+              return '';
+            });
+            setValue(blockStart + outdented + after);
+            newStart = Math.max(lineStartOffset, start - removedFirst);
+            newEnd = Math.max(newStart, end - removedTotal);
           } else {
-            const next = blockStart + block.replace(/^/gm, indentChar) + after;
-            setValue(next);
+            const relEnd = end - lineStartOffset;
+            let inserted = 0;
+            const indented = block.replace(/^/gm, (_m, offset: number) => {
+              if (offset < relEnd) inserted++;
+              return indentChar;
+            });
+            setValue(blockStart + indented + after);
+            newStart = start + indentChar.length;
+            newEnd = end + indentChar.length * inserted;
           }
+          requestAnimationFrame(() => {
+            if (textareaRef.current) {
+              textareaRef.current.selectionStart = newStart;
+              textareaRef.current.selectionEnd = newEnd;
+            }
+          });
         }
       }
     };
@@ -160,10 +180,14 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
         <div
           ref={gutterRef}
           aria-hidden="true"
-          className="select-none whitespace-pre overflow-hidden border-r border-border bg-muted/40 px-3 py-2 text-right text-muted-foreground tabular-nums"
-          style={{ transform: `translateY(${-scrollTop}px)` }}
+          className="select-none overflow-hidden border-r border-border bg-muted/40 text-right text-muted-foreground tabular-nums"
         >
-          {gutterText}
+          <div
+            className="whitespace-pre px-3 py-2"
+            style={{ transform: `translateY(${-scrollTop}px)` }}
+          >
+            {gutterText}
+          </div>
         </div>
         <textarea
           {...rest}

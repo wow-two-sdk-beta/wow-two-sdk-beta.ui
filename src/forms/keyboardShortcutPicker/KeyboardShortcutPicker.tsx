@@ -23,9 +23,13 @@ export interface KeyboardShortcutPickerProps
   name?: string;
 }
 
+// SSR-safe: `navigator` is undefined in Node < 21.
+const IS_MAC =
+  typeof navigator !== 'undefined' && navigator.platform?.toLowerCase().includes('mac');
+
 const MODIFIER_NAMES: Record<string, string> = {
   Control: 'Ctrl',
-  Meta: navigator?.platform?.toLowerCase?.().includes('mac') ? '⌘' : 'Meta',
+  Meta: IS_MAC ? '⌘' : 'Meta',
   Alt: 'Alt',
   Shift: 'Shift',
 };
