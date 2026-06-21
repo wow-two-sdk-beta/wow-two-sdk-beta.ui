@@ -5,28 +5,27 @@ import { Spinner } from '../spinner';
 import type { SpinnerVariants } from '../spinner/Spinner.variants';
 
 export interface LoadingOverlayProps extends HTMLAttributes<HTMLDivElement> {
-  open?: boolean;
+  isOpen?: boolean;
   label?: ReactNode;
   /** Position the scrim absolutely inside the parent (parent must be `position: relative`). */
-  inline?: boolean;
-  blur?: boolean;
+  isInline?: boolean;
+  hasBlur?: boolean;
   spinnerSize?: SpinnerVariants['size'];
   spinnerTone?: SpinnerVariants['tone'];
 }
 
 /**
- * Scrim + centered spinner. Use to block interaction with a region while a
- * long-running task is in flight. `inline` positions the scrim inside its
- * parent (which must be `position: relative`); the default covers the
+ * Scrim + centered spinner — blocks interaction with a region during a long task.
+ * `isInline` scopes the scrim to a `position: relative` parent; default covers the
  * viewport via `Backdrop`.
  */
 export const LoadingOverlay = forwardRef<HTMLDivElement, LoadingOverlayProps>(
   function LoadingOverlay(
     {
-      open = true,
+      isOpen = true,
       label = 'Loading…',
-      inline = false,
-      blur,
+      isInline = false,
+      hasBlur,
       spinnerSize = 'lg',
       spinnerTone = 'brand',
       className,
@@ -35,16 +34,16 @@ export const LoadingOverlay = forwardRef<HTMLDivElement, LoadingOverlayProps>(
     },
     ref,
   ) {
-    if (!open) return null;
+    if (!isOpen) return null;
 
-    if (inline) {
+    if (isInline) {
       return (
         <div
           ref={ref}
           role="status"
           className={cn(
             'absolute inset-0 z-banner flex flex-col items-center justify-center gap-3 bg-background/70',
-            blur && 'backdrop-blur-sm',
+            hasBlur && 'backdrop-blur-sm',
             className,
           )}
           {...rest}
@@ -58,7 +57,7 @@ export const LoadingOverlay = forwardRef<HTMLDivElement, LoadingOverlayProps>(
 
     return (
       <>
-        <Backdrop open blur={blur} className="bg-background/70" />
+        <Backdrop open isBlurred={hasBlur} className="bg-background/70" />
         <div
           ref={ref}
           role="status"

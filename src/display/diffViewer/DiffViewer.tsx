@@ -18,7 +18,7 @@ export interface DiffViewerProps extends HTMLAttributes<HTMLDivElement> {
   view?: DiffView;
   leftLabel?: ReactNode;
   rightLabel?: ReactNode;
-  showStats?: boolean;
+  hasStats?: boolean;
 }
 
 /**
@@ -27,7 +27,7 @@ export interface DiffViewerProps extends HTMLAttributes<HTMLDivElement> {
  * post-process — deferred.
  */
 export const DiffViewer = forwardRef<HTMLDivElement, DiffViewerProps>(function DiffViewer(
-  { left, right, view = 'split', leftLabel = 'Before', rightLabel = 'After', showStats = true, className, ...rest },
+  { left, right, view = 'split', leftLabel = 'Before', rightLabel = 'After', hasStats = true, className, ...rest },
   ref,
 ) {
   const rows = useMemo(() => computeDiff(left, right), [left, right]);
@@ -50,7 +50,7 @@ export const DiffViewer = forwardRef<HTMLDivElement, DiffViewerProps>(function D
       )}
       {...rest}
     >
-      {showStats && (
+      {hasStats && (
         <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-1.5 text-xs">
           <div className="text-muted-foreground">{leftLabel} → {rightLabel}</div>
           <div className="flex items-center gap-3">

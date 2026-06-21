@@ -27,7 +27,7 @@ export interface MarkdownEditorProps
   defaultView?: MarkdownEditorView;
   onViewChange?: (view: MarkdownEditorView) => void;
   renderPreview?: (markdown: string) => ReactNode;
-  invalid?: boolean;
+  isInvalid?: boolean;
   minHeight?: string;
 }
 
@@ -134,7 +134,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
       renderPreview,
       disabled,
       readOnly,
-      invalid,
+      isInvalid,
       minHeight = '18rem',
       placeholder,
       className,
@@ -185,7 +185,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
     const showEdit = view === 'split' || view === 'edit';
     const showPreview = view === 'split' || view === 'preview';
 
-    const state = invalid ? 'invalid' : 'default';
+    const state = isInvalid ? 'invalid' : 'default';
 
     return (
       <div
@@ -244,7 +244,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
               disabled={disabled}
               readOnly={readOnly}
               spellCheck={false}
-              aria-invalid={invalid || undefined}
+              aria-invalid={isInvalid || undefined}
               onChange={(e) => setValue(e.target.value)}
               className={cn(
                 'flex-1 resize-none whitespace-pre-wrap break-words bg-transparent p-3 font-mono text-sm outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed',

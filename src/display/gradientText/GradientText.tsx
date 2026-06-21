@@ -9,7 +9,7 @@ export interface GradientTextProps extends HTMLAttributes<HTMLElement> {
   via?: string;
   to?: string;
   direction?: GradientTextDirection;
-  animated?: boolean;
+  isAnimated?: boolean;
   as?: GradientTextTag;
 }
 
@@ -26,7 +26,7 @@ const DIR_TO_DEG: Record<GradientTextDirection, number> = {
 
 /**
  * Decorative gradient-filled text via `background-clip: text`. Optional
- * `animated` pans the gradient on a 4s loop (skipped under
+ * `isAnimated` pans the gradient on a 4s loop (skipped under
  * `prefers-reduced-motion` via the global `motion-reduce:` CSS guard).
  */
 export const GradientText = forwardRef<HTMLElement, GradientTextProps>(
@@ -36,7 +36,7 @@ export const GradientText = forwardRef<HTMLElement, GradientTextProps>(
       via,
       to = 'var(--color-accent, var(--color-primary))',
       direction = 'r',
-      animated,
+      isAnimated,
       as = 'span',
       className,
       style,
@@ -52,12 +52,12 @@ export const GradientText = forwardRef<HTMLElement, GradientTextProps>(
         ref={ref as React.Ref<HTMLElement>}
         className={cn(
           'inline-block bg-clip-text text-transparent',
-          animated && 'motion-safe:animate-[gradient-shift_4s_ease-in-out_infinite]',
+          isAnimated && 'motion-safe:animate-[gradient-shift_4s_ease-in-out_infinite]',
           className,
         )}
         style={{
           backgroundImage: `linear-gradient(${DIR_TO_DEG[direction]}deg, ${stops})`,
-          backgroundSize: animated ? '200% 100%' : undefined,
+          backgroundSize: isAnimated ? '200% 100%' : undefined,
           ...style,
         }}
         {...rest}

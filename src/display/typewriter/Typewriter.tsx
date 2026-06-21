@@ -13,8 +13,8 @@ export interface TypewriterProps extends Omit<HTMLAttributes<HTMLElement>, 'chil
   typeSpeed?: number;
   deleteSpeed?: number;
   pauseBetween?: number;
-  loop?: boolean;
-  cursor?: boolean;
+  canLoop?: boolean;
+  hasCursor?: boolean;
   cursorChar?: string;
   as?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 }
@@ -30,8 +30,8 @@ export const Typewriter = forwardRef<HTMLElement, TypewriterProps>(function Type
     typeSpeed = 60,
     deleteSpeed = 40,
     pauseBetween = 1500,
-    loop,
-    cursor = true,
+    canLoop,
+    hasCursor = true,
     cursorChar = '│',
     as = 'span',
     className,
@@ -40,7 +40,7 @@ export const Typewriter = forwardRef<HTMLElement, TypewriterProps>(function Type
   ref,
 ) {
   const phrases = useMemo(() => (Array.isArray(text) ? text : [text]), [text]);
-  const shouldLoop = loop ?? phrases.length > 1;
+  const shouldLoop = canLoop ?? phrases.length > 1;
   const reduced =
     typeof window !== 'undefined' &&
     (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
@@ -86,7 +86,7 @@ export const Typewriter = forwardRef<HTMLElement, TypewriterProps>(function Type
   return (
     <Tag ref={ref as React.Ref<HTMLElement>} className={cn('inline-block', className)} {...rest}>
       {fullText}
-      {cursor && !reduced && (
+      {hasCursor && !reduced && (
         <span
           aria-hidden="true"
           className="ml-0.5 inline-block motion-safe:animate-[blink-caret_1s_step-end_infinite]"

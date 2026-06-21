@@ -22,7 +22,7 @@ export const Attached: Story = {
 
 export const Spaced: Story = {
   render: () => (
-    <ButtonGroup attached={false}>
+    <ButtonGroup isAttached={false}>
       <Button>Save</Button>
       <Button variant="ghost">Cancel</Button>
     </ButtonGroup>

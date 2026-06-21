@@ -48,7 +48,7 @@ export const Blurred: Story = {
       <Dialog.Trigger className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground">
         Open with blur
       </Dialog.Trigger>
-      <Dialog.Content blur>
+      <Dialog.Content isBlurred>
         <Dialog.Close />
         <Dialog.Header>
           <Dialog.Title>Welcome</Dialog.Title>

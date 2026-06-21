@@ -138,7 +138,7 @@ export function TaskDrawer({ task, onClose, onMove, onArchive }: TaskDrawerProps
           Mark as done
         </ActionSheetAction>
         <ActionSheetAction
-          destructive
+          isDestructive
           onSelect={() => {
             onArchive(task.id);
             close();

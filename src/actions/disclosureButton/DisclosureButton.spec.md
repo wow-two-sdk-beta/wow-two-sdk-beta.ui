@@ -6,7 +6,7 @@ Trigger button with a chevron that rotates on open. Common as the header of a co
 ## Props
 | Name | Type | Default |
 |---|---|---|
-| `open` | `boolean` | controlled |
+| `isOpen` | `boolean` | controlled |
 | `defaultOpen` | `boolean` | `false` |
 | `onOpenChange` | `(open: boolean) => void` | — |
 | `chevronSide` | `'left' \| 'right'` | `'right'` |

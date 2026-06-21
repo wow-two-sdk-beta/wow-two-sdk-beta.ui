@@ -31,7 +31,7 @@ function DefaultDemo() {
       >
         <Menu.Item onSelect={() => alert('New')}>New</Menu.Item>
         <Menu.Item onSelect={() => alert('Open')}>Open…</Menu.Item>
-        <Menu.Item disabled>Save (disabled)</Menu.Item>
+        <Menu.Item isDisabled>Save (disabled)</Menu.Item>
         <Menu.Separator />
         <Menu.Item state="destructive" onSelect={() => alert('Delete')}>
           Delete

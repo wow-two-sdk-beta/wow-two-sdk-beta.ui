@@ -28,7 +28,7 @@ interface MultiProps {
 
 type ToggleButtonGroupProps = Omit<ComponentPropsWithoutRef<'div'>, 'defaultValue' | 'onChange'> & {
   orientation?: 'horizontal' | 'vertical';
-  attached?: boolean;
+  isAttached?: boolean;
 } & (SingleProps | MultiProps);
 
 interface ChildLike extends ToggleButtonProps {
@@ -40,7 +40,7 @@ export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupPro
   (props, ref) => {
     const {
       orientation = 'horizontal',
-      attached = true,
+      isAttached = true,
       className,
       children,
       type,
@@ -89,7 +89,7 @@ export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupPro
         className={cn(
           'inline-flex',
           orientation === 'horizontal' ? 'flex-row' : 'flex-col',
-          attached
+          isAttached
             ? orientation === 'horizontal'
               ? '[&>*]:rounded-none [&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md [&>*:not(:first-child)]:-ml-px'
               : '[&>*]:rounded-none [&>*:first-child]:rounded-t-md [&>*:last-child]:rounded-b-md [&>*:not(:first-child)]:-mt-px'
@@ -102,10 +102,9 @@ export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupPro
           if (!isValidElement(child)) return child;
           const c = child as ReactElement<ChildLike>;
           const childValue = c.props.value;
-          // Compose with the child's own props — an explicit `pressed` wins, and
-          // the child's own `onPressedChange` still fires before the group toggle.
+          // Compose with the child's own props — explicit `isPressed` wins; child's `onPressedChange` fires before the group toggle.
           return cloneElement(c, {
-            pressed: c.props.pressed ?? isPressed(childValue),
+            isPressed: c.props.isPressed ?? isPressed(childValue),
             onPressedChange: (pressed: boolean) => {
               c.props.onPressedChange?.(pressed);
               togglePressed(childValue);

@@ -20,10 +20,12 @@ Styled wrapper around the native HTML table elements. Use when you control the r
 ```
 
 ## Required behaviors
-- Wraps in a horizontally-scrollable container by default (use `bare` to skip).
-- Optional zebra striping on body rows via `striped`.
-- Optional hover-row highlight via `hoverable`.
-- Compact / cozy / comfortable density via `density`.
+- Wraps in a horizontally-scrollable container by default (use `isBare` to skip).
+- Scroll-wrapper corner radius via `radius`; extra wrapper classes via `containerClassName`. `className` still targets the inner `<table>`.
+- Optional zebra striping on body rows via `isStriped`.
+- Optional hover-row highlight via `isHoverable`.
+- Compact / cozy / comfortable / roomy density via `density`.
+- Header typography treatment via `Table.Head` `headVariant` (`uppercase` default, `plain` for normal-case `text-sm`).
 
 ## Visual states
 Per row: `default` · `hover` · `selected` (manual via class)
@@ -31,10 +33,17 @@ Per row: `default` · `hover` · `selected` (manual via class)
 ## Props (Root)
 | Name | Type | Default | Required | Why |
 |---|---|---|---|---|
-| `striped` | `boolean` | `false` | no | Zebra body rows. |
-| `hoverable` | `boolean` | `false` | no | Highlight body rows on hover. |
-| `density` | `'compact' \| 'cozy' \| 'comfortable'` | `'cozy'` | no | Cell padding scale. |
-| `bare` | `boolean` | `false` | no | Skip scroll container + outer border. |
+| `isStriped` | `boolean` | `false` | no | Zebra body rows. |
+| `isHoverable` | `boolean` | `false` | no | Highlight body rows on hover. |
+| `density` | `'compact' \| 'cozy' \| 'comfortable' \| 'roomy'` | `'cozy'` | no | Cell padding scale. `roomy` = `px-5 py-4`. |
+| `isBare` | `boolean` | `false` | no | Skip scroll container + outer border. |
+| `radius` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'` | no | Scroll-wrapper corner radius (ignored when `isBare`). |
+| `containerClassName` | `string` | — | no | Classes on the scroll wrapper (ignored when `isBare`). `className` lands on the inner `<table>`. |
+
+## Props (`Table.Head`)
+| Name | Type | Default | Required | Why |
+|---|---|---|---|---|
+| `headVariant` | `'uppercase' \| 'plain'` | `'uppercase'` | no | `uppercase` = `text-xs` uppercase tracking-wide (current look); `plain` = normal-case `text-sm`. |
 
 ## Composition
 Compound. Subcomponents are thin wrappers around `<thead>` / `<tbody>` / `<tfoot>` / `<tr>` / `<th>` / `<td>`.

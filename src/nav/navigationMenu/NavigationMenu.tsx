@@ -108,7 +108,7 @@ export const NavigationMenuList = forwardRef<HTMLDivElement, NavigationMenuListP
       <RovingFocusGroup
         ref={ref}
         orientation="horizontal"
-        loop
+        canLoop
         role="list"
         className={cn('flex items-center gap-1', className)}
         {...rest}
@@ -262,10 +262,8 @@ export const NavigationMenuContent = forwardRef<HTMLDivElement, NavigationMenuCo
       requestAnimationFrame(() => item.triggerRef.current?.focus());
     }, [nav, item.triggerRef]);
 
-    // Close on outside click that lands outside the trigger AND outside the content.
-    useEffect(() => {
-      // Use the existing DismissableLayer below — this effect intentionally empty.
-    }, []);
+    // Outside-click close is handled by the DismissableLayer below — this effect is intentionally empty.
+    useEffect(() => {}, []);
 
     if (!item.open) return null;
     return (

@@ -22,7 +22,7 @@ export const Bulleted: Story = {
 
 export const Ordered: Story = {
   render: () => (
-    <List ordered marker="decimal" className="w-72">
+    <List isOrdered marker="decimal" className="w-72">
       <List.Item>Step one</List.Item>
       <List.Item>Step two</List.Item>
       <List.Item>Step three</List.Item>
@@ -33,9 +33,9 @@ export const Ordered: Story = {
 export const Checked: Story = {
   render: () => (
     <List marker="check" spacing="loose" className="w-80">
-      <List.Item showCheckMarker>Created the account</List.Item>
-      <List.Item showCheckMarker>Confirmed the email</List.Item>
-      <List.Item showCheckMarker>Set up profile</List.Item>
+      <List.Item hasCheckMarker>Created the account</List.Item>
+      <List.Item hasCheckMarker>Confirmed the email</List.Item>
+      <List.Item hasCheckMarker>Set up profile</List.Item>
     </List>
   ),
 };

@@ -19,7 +19,7 @@ export interface AudioPlayerProps
   peaks?: number[];
   defaultVolume?: number;
   defaultPlaybackRate?: number;
-  compact?: boolean;
+  isCompact?: boolean;
   onPlay?: () => void;
   onPause?: () => void;
   onTimeUpdate?: (time: number, duration: number) => void;
@@ -51,7 +51,7 @@ export const AudioPlayer = forwardRef<HTMLAudioElement, AudioPlayerProps>(
       loop,
       defaultVolume = 1,
       defaultPlaybackRate = 1,
-      compact,
+      isCompact,
       onPlay,
       onPause,
       onTimeUpdate,
@@ -148,7 +148,7 @@ export const AudioPlayer = forwardRef<HTMLAudioElement, AudioPlayerProps>(
         data-playing={playing || undefined}
         className={cn(
           'flex items-center gap-3 rounded-md border border-border bg-card p-2 text-card-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          compact && 'gap-2 p-1.5',
+          isCompact && 'gap-2 p-1.5',
           className,
         )}
       >
@@ -187,10 +187,10 @@ export const AudioPlayer = forwardRef<HTMLAudioElement, AudioPlayerProps>(
           onClick={togglePlay}
           className={cn(
             'inline-flex shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            compact ? 'h-7 w-7' : 'h-9 w-9',
+            isCompact ? 'h-7 w-7' : 'h-9 w-9',
           )}
         >
-          <Icon icon={playing ? Pause : Play} size={compact ? 12 : 14} />
+          <Icon icon={playing ? Pause : Play} size={isCompact ? 12 : 14} />
         </button>
         <span className="shrink-0 text-xs tabular-nums text-muted-foreground" style={{ minWidth: '3.5rem' }}>
           {formatTime(currentTime)}
@@ -201,8 +201,8 @@ export const AudioPlayer = forwardRef<HTMLAudioElement, AudioPlayerProps>(
               peaks={peaks}
               progress={progress}
               onSeek={seekProgress}
-              width={compact ? 200 : 320}
-              height={compact ? 32 : 40}
+              width={isCompact ? 200 : 320}
+              height={isCompact ? 32 : 40}
             />
           ) : (
             <input

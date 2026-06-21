@@ -133,7 +133,7 @@ export interface IconPickerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'd
   size?: number;
   iconButtonSize?: number;
   placeholder?: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
   name?: string;
 }
 
@@ -152,7 +152,7 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
       size = 20,
       iconButtonSize = 36,
       placeholder = 'Search icons…',
-      disabled,
+      isDisabled,
       name,
       className,
       ...rest
@@ -186,7 +186,7 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
           type="search"
           value={query}
           placeholder={placeholder}
-          disabled={disabled}
+          disabled={isDisabled}
           onChange={(e) => setQuery(e.target.value)}
           className={cn(inputBaseVariants({ size: 'sm' }))}
         />
@@ -204,7 +204,7 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
                   type="button"
                   aria-pressed={selected}
                   aria-label={key}
-                  disabled={disabled}
+                  disabled={isDisabled}
                   onClick={() => setValue(key)}
                   style={{ width: iconButtonSize, height: iconButtonSize }}
                   className={cn(

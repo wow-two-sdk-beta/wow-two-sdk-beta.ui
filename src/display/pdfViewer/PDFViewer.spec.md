@@ -25,7 +25,7 @@ View a PDF inline. **First-generation** uses an `<iframe>` pointing at the PDF; 
 | `zoom` / `defaultZoom` | `number` | `100` | Percent |
 | `pageCount` | `number` | — | Optional total — if omitted, prev/next have no clamp |
 | `title` | `string` | `'PDF document'` | iframe title for SR |
-| `download` | `boolean` | `true` | Show download button |
+| `canDownload` | `boolean` | `true` | Show download button |
 | `height` | `string` | `'70vh'` | |
 
 ## Composition

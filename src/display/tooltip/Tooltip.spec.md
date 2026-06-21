@@ -12,7 +12,7 @@ Hover- and focus-triggered tooltip. Wraps a single child as the trigger; tooltip
 | `openDelay` | `number` (ms) | `700` |
 | `closeDelay` | `number` (ms) | `0` |
 | `open` | `boolean` | controlled |
-| `disabled` | `boolean` | `false` |
+| `isDisabled` | `boolean` | `false` |
 
 ## Dependencies
 Foundation: `utils/cn`, `utils/composeRefs`. Primitives: `Portal`, `AnchoredPositioner`.

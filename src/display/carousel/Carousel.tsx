@@ -43,7 +43,7 @@ export interface CarouselProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onC
   index?: number;
   defaultIndex?: number;
   onIndexChange?: (index: number) => void;
-  loop?: boolean;
+  canLoop?: boolean;
   autoPlay?: number;
   /** When set, overrides the automatic count (use for virtualised slides). */
   slidesCount?: number;
@@ -55,7 +55,7 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(function Carou
     index: indexProp,
     defaultIndex = 0,
     onIndexChange,
-    loop = false,
+    canLoop = false,
     autoPlay,
     slidesCount,
     className,
@@ -84,14 +84,14 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(function Carou
         return;
       }
       let next = i;
-      if (loop) {
+      if (canLoop) {
         next = ((i % count) + count) % count;
       } else {
         next = Math.max(0, Math.min(count - 1, i));
       }
       setIndexState(next);
     },
-    [count, loop, setIndexState],
+    [count, canLoop, setIndexState],
   );
 
   const prev = useCallback(() => setIndex(index - 1), [index, setIndex]);
@@ -101,14 +101,14 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(function Carou
   useEffect(() => {
     if (!autoPlay || paused || count === 0) return;
     const handle = window.setInterval(() => {
-      setIndex(loop ? index + 1 : Math.min(count - 1, index + 1));
+      setIndex(canLoop ? index + 1 : Math.min(count - 1, index + 1));
     }, autoPlay);
     return () => window.clearInterval(handle);
-  }, [autoPlay, paused, count, index, loop, setIndex]);
+  }, [autoPlay, paused, count, index, canLoop, setIndex]);
 
   const ctx = useMemo<CarouselContextValue>(
-    () => ({ index, setIndex, count, setCount, loop, prev, next, paused, setPaused, autoPlay }),
-    [index, setIndex, count, loop, prev, next, paused, autoPlay],
+    () => ({ index, setIndex, count, setCount, loop: canLoop, prev, next, paused, setPaused, autoPlay }),
+    [index, setIndex, count, canLoop, prev, next, paused, autoPlay],
   );
 
   return (

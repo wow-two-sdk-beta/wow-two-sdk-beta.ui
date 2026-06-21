@@ -99,7 +99,7 @@ export const Tree = forwardRef<HTMLUListElement, TreeProps>(function Tree(
       <RovingFocusGroup
         ref={ref as never}
         orientation="vertical"
-        loop
+        canLoop
         role="tree"
         className={cn('flex flex-col text-sm', className)}
         {...(rest as HTMLAttributes<HTMLDivElement>)}
@@ -183,12 +183,12 @@ function NodeRow({
 export interface TreeGroupProps extends HTMLAttributes<HTMLLIElement> {
   value: string;
   label: ReactNode;
-  disabled?: boolean;
+  isDisabled?: boolean;
   children: ReactNode;
 }
 
 export const TreeGroup = forwardRef<HTMLLIElement, TreeGroupProps>(function TreeGroup(
-  { value, label, disabled = false, className, children, ...rest },
+  { value, label, isDisabled = false, className, children, ...rest },
   ref,
 ) {
   const ctx = useTreeContext();
@@ -208,7 +208,7 @@ export const TreeGroup = forwardRef<HTMLLIElement, TreeGroupProps>(function Tree
         selected={false}
         expanded={expanded}
         hasChildren
-        disabled={disabled}
+        disabled={isDisabled}
         onActivate={() => ctx.toggleExpanded(value)}
         label={label}
       />
@@ -225,12 +225,12 @@ export const TreeGroup = forwardRef<HTMLLIElement, TreeGroupProps>(function Tree
 
 export interface TreeItemProps extends HTMLAttributes<HTMLLIElement> {
   value: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
   children: ReactNode;
 }
 
 export const TreeItem = forwardRef<HTMLLIElement, TreeItemProps>(function TreeItem(
-  { value, disabled = false, className, children, ...rest },
+  { value, isDisabled = false, className, children, ...rest },
   ref,
 ) {
   const ctx = useTreeContext();
@@ -243,7 +243,7 @@ export const TreeItem = forwardRef<HTMLLIElement, TreeItemProps>(function TreeIt
         level={level}
         selected={selected}
         hasChildren={false}
-        disabled={disabled}
+        disabled={isDisabled}
         onActivate={() => ctx.setSelectedValue(value)}
         label={children}
       />

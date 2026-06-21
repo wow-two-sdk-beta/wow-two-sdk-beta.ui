@@ -26,7 +26,7 @@ export interface TableOfContentsProps extends HTMLAttributes<HTMLElement> {
   /** Override the auto-derived active id. */
   activeId?: string | null;
   /** Apply `sticky top-4 self-start` helper classes. */
-  sticky?: boolean;
+  isSticky?: boolean;
 }
 
 function depthFromTagName(tag: string): number {
@@ -45,7 +45,7 @@ export const TableOfContents = forwardRef<HTMLElement, TableOfContentsProps>(
       source,
       headingSelector = 'h2, h3',
       activeId: activeIdProp,
-      sticky,
+      isSticky,
       className,
       ...rest
     },
@@ -78,7 +78,7 @@ export const TableOfContents = forwardRef<HTMLElement, TableOfContentsProps>(
       <nav
         ref={ref}
         aria-label="Table of contents"
-        className={cn(sticky && 'sticky top-4 self-start', className)}
+        className={cn(isSticky && 'sticky top-4 self-start', className)}
         {...rest}
       >
         <ul className="space-y-1 text-sm">

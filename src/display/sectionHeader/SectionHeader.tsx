@@ -15,7 +15,7 @@ export interface SectionHeaderProps extends Omit<ComponentPropsWithoutRef<'heade
   level?: 1 | 2 | 3 | 4 | 5 | 6;
   size?: 'md' | 'lg' | 'xl' | '2xl';
   /** Add a bottom border. Default true. */
-  bordered?: boolean;
+  isBordered?: boolean;
 }
 
 /**
@@ -24,14 +24,14 @@ export interface SectionHeaderProps extends Omit<ComponentPropsWithoutRef<'heade
  */
 export const SectionHeader = forwardRef<HTMLElement, SectionHeaderProps>(
   (
-    { title, description, actions, level = 2, size = 'lg', bordered = true, className, ...props },
+    { title, description, actions, level = 2, size = 'lg', isBordered = true, className, ...props },
     ref,
   ) => (
     <header
       ref={ref}
       className={cn(
         'flex items-start justify-between gap-4 pb-3',
-        bordered && 'border-b border-border',
+        isBordered && 'border-b border-border',
         className,
       )}
       {...props}

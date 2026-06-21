@@ -18,7 +18,7 @@ export interface DateRangePickerProps
   min?: Date | null;
   max?: Date | null;
   isDisabled?: (date: Date) => boolean;
-  invalid?: boolean;
+  isInvalid?: boolean;
   /** When `name` is set, two hidden inputs (`{name}_start`, `{name}_end`) ship the ISO values. */
   name?: string;
 }
@@ -37,7 +37,7 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
       min,
       max,
       isDisabled: dayDisabled,
-      invalid,
+      isInvalid,
       name,
       size,
       state,
@@ -56,7 +56,7 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
       controlled: undefined,
       default: false,
     });
-    const triggerState = state ?? (invalid ? 'invalid' : 'default');
+    const triggerState = state ?? (isInvalid ? 'invalid' : 'default');
 
     // Auto-close when both ends are picked.
     const wasComplete = useRef(false);
@@ -90,7 +90,7 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
             <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
           </button>
         </PopoverTrigger>
-        <PopoverContent bare>
+        <PopoverContent isBare>
           <RangeCalendar
             value={range}
             onValueChange={setRange}

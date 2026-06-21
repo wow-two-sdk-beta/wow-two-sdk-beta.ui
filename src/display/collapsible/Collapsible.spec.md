@@ -26,7 +26,7 @@ Single show/hide region — a trigger that toggles a panel. The state-managed co
 | Name | Type | Default | Required | Why |
 |---|---|---|---|---|
 | `open`, `defaultOpen`, `onOpenChange` | — | — | no | Standard. |
-| `disabled` | `boolean` | `false` | no | Block toggling. |
+| `isDisabled` | `boolean` | `false` | no | Block toggling. |
 
 ## Composition
 Compound. State on root; trigger and content read from context.
@@ -37,7 +37,7 @@ Compound. State on root; trigger and content read from context.
 
 ## Known limitations
 - No animation orchestration (relies on consumer's CSS transitions).
-- No "always render hidden" mode (deferred — may need `forceMount` later).
+- No "always render hidden" mode (deferred — may need `isForceMounted` later).
 
 ## Inspirations
 - Radix `Collapsible`.

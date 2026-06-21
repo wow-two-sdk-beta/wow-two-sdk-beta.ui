@@ -130,12 +130,12 @@ export interface StepperStepProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'value'> {
   value: string;
   description?: ReactNode;
-  disabled?: boolean;
+  isDisabled?: boolean;
   children: ReactNode;
 }
 
 export const StepperStep = forwardRef<HTMLButtonElement, StepperStepProps>(function StepperStep(
-  { value, description, disabled = false, className, onClick, children, ...rest },
+  { value, description, isDisabled = false, className, onClick, children, ...rest },
   ref,
 ) {
   const ctx = useStepperContext();
@@ -171,19 +171,19 @@ export const StepperStep = forwardRef<HTMLButtonElement, StepperStepProps>(funct
         aria-controls={panelId}
         aria-current={status === 'active' ? 'step' : undefined}
         data-status={status}
-        data-disabled={dataAttr(disabled)}
+        data-disabled={dataAttr(isDisabled)}
         tabIndex={roving.tabIndex}
-        disabled={disabled}
+        disabled={isDisabled}
         onClick={(e) => {
           onClick?.(e);
-          if (e.defaultPrevented || disabled) return;
+          if (e.defaultPrevented || isDisabled) return;
           ctx.setValue(value);
         }}
         onFocus={roving.onFocus}
         onKeyDown={roving.onKeyDown}
         className={cn(
           'group flex items-center gap-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm',
-          disabled && 'pointer-events-none opacity-50',
+          isDisabled && 'pointer-events-none opacity-50',
           className,
         )}
         {...rest}

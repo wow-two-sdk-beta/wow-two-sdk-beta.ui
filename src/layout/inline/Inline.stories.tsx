@@ -18,3 +18,13 @@ export const Tags: Story = {
     </Inline>
   ),
 };
+
+export const NoWrap: Story = {
+  render: () => (
+    <Inline wrap={false} className="w-48 overflow-hidden">
+      {['react', 'tailwind', 'tsup', 'vite', 'storybook'].map((t) => (
+        <span key={t} className="truncate rounded-full bg-muted px-2 py-0.5 text-xs">{t}</span>
+      ))}
+    </Inline>
+  ),
+};

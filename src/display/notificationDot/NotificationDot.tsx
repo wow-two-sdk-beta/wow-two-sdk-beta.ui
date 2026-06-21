@@ -5,7 +5,7 @@ export interface NotificationDotProps extends ComponentPropsWithoutRef<'span'> {
   tone?: 'destructive' | 'success' | 'warning' | 'info' | 'primary' | 'neutral';
   size?: 'xs' | 'sm' | 'md';
   /** Adds a pulsing ring around the dot. */
-  pulse?: boolean;
+  hasPulse?: boolean;
   /** When set, the dot is positioned absolutely relative to its parent. */
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 }
@@ -47,7 +47,7 @@ const POS: Record<NonNullable<NotificationDotProps['position']>, string> = {
  * absolutely-place over a parent (e.g. on an Avatar or `<Button shape="square"/circle">`).
  */
 export const NotificationDot = forwardRef<HTMLSpanElement, NotificationDotProps>(
-  ({ tone = 'destructive', size = 'sm', pulse, position, className, ...props }, ref) => (
+  ({ tone = 'destructive', size = 'sm', hasPulse, position, className, ...props }, ref) => (
     <span
       ref={ref}
       aria-hidden="true"
@@ -56,7 +56,7 @@ export const NotificationDot = forwardRef<HTMLSpanElement, NotificationDotProps>
         TONE[tone],
         SIZE[size],
         /* `relative` anchors the ::after ring; POS comes later so its `absolute` wins when positioned. */
-        pulse &&
+        hasPulse &&
           `relative after:absolute after:inset-0 after:animate-ping after:rounded-full after:opacity-75 after:content-[""] ${PULSE_TONE[tone]}`,
         position && POS[position],
         className,

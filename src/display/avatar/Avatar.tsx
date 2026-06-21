@@ -73,7 +73,7 @@ export interface AvatarProps
   alt?: string;
 
   /* When true (and no explicit non-neutral `tone` / non-solid `bgStyle`), derive a deterministic soft-color tint from `name` hash → 17-color palette. */
-  autoColor?: boolean;
+  canAutoColor?: boolean;
 
   /* Size: preset (`xs|sm|md|lg|xl|2xl`) → variant class · raw number/string → square inline · object → explicit dims. See `SizeUnion`. */
   size?: SizeUnion<AvatarSizePreset>;
@@ -87,7 +87,7 @@ export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(
       name = '',
       fallback,
       alt,
-      autoColor,
+      canAutoColor,
       tone,
       bgStyle,
       ring,
@@ -115,16 +115,16 @@ export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(
     );
     const boxStyle = sizeBox ? CssExtensions.resolveBoxSize(sizeBox) : undefined;
 
-    /* autoColor only fires when (a) name is set, (b) no explicit non-neutral tone, (c) bgStyle isn't gradient. Explicit dials win. */
+    /* Auto-color fires only when: name set, no explicit non-neutral tone, bgStyle not gradient. Explicit dials win. */
     const autoColorClass =
-      autoColor &&
+      canAutoColor &&
       name &&
       bgStyle !== 'gradient' &&
       (tone === undefined || tone === 'neutral')
         ? pickAutoColor(name)
         : undefined;
 
-    /* When autoColor is active, suppress the tone variant entirely so its theme-token classes don't compete in the cascade. */
+    /* When auto-color is active, suppress the tone variant so its theme-token classes don't compete in the cascade. */
     const effectiveTone = autoColorClass ? 'none' : tone;
 
     return (

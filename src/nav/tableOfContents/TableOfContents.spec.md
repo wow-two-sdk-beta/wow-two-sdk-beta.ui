@@ -25,7 +25,7 @@ Or auto-extract from a container:
 | `source` | `RefObject<HTMLElement>` | — | Auto-extract headings from this element. |
 | `headingSelector` | `string` | `'h2, h3'` | Used with `source`. |
 | `activeId` | `string \| null` | derived from ScrollSpy | Override active state. |
-| `sticky` | `boolean` | `false` | Sticky positioning helper class. |
+| `isSticky` | `boolean` | `false` | Sticky positioning helper class. |
 
 ## Dependencies
 Foundation: `utils`. Same domain: `nav/ScrollSpy`.

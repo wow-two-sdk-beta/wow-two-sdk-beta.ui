@@ -15,11 +15,11 @@ export interface AnnotationMarkerProps extends ButtonHTMLAttributes<HTMLButtonEl
   /** Tone — drives the highlight color. */
   tone?: AnnotationTone;
   /** Show the marker as a small floating pin without underline. */
-  pinOnly?: boolean;
+  isPinOnly?: boolean;
   /** Marks the annotation as resolved (dimmed, struck-through highlight). */
-  resolved?: boolean;
+  isResolved?: boolean;
   /** Marks the annotation as the currently focused / hovered one. */
-  active?: boolean;
+  isActive?: boolean;
 }
 
 const TONE_HIGHLIGHT: Record<AnnotationTone, string> = {
@@ -39,17 +39,16 @@ const TONE_PIN: Record<AnnotationTone, string> = {
 };
 
 /**
- * Wraps content (or stands alone) to mark an annotation. Renders as a button
- * so it's keyboard-focusable; click handlers fire the open-thread flow.
- * `pinOnly` collapses to just the small numbered chip — useful for margin
- * markers or floating layers (set `position` via `className`).
+ * Wraps content (or stands alone) to mark an annotation. Renders as a focusable
+ * button; click fires the open-thread flow. `isPinOnly` collapses to just the
+ * numbered chip — for margin markers or floating layers (position via `className`).
  */
 export const AnnotationMarker = forwardRef<HTMLButtonElement, AnnotationMarkerProps>(
   (
-    { children, index, tone = 'comment', pinOnly, resolved, active, className, ...props },
+    { children, index, tone = 'comment', isPinOnly, isResolved, isActive, className, ...props },
     ref,
   ) => {
-    const effectiveTone: AnnotationTone = resolved ? 'resolved' : tone;
+    const effectiveTone: AnnotationTone = isResolved ? 'resolved' : tone;
     const pin = (
       <span
         aria-hidden="true"
@@ -62,16 +61,16 @@ export const AnnotationMarker = forwardRef<HTMLButtonElement, AnnotationMarkerPr
       </span>
     );
 
-    if (pinOnly || children == null) {
+    if (isPinOnly || children == null) {
       return (
         <button
           ref={ref}
           type="button"
           data-tone={effectiveTone}
-          data-active={active ? '' : undefined}
+          data-active={isActive ? '' : undefined}
           className={cn(
             'inline-flex items-center gap-1 align-middle rounded-full ring-1 ring-transparent transition-shadow',
-            active && 'ring-ring',
+            isActive && 'ring-ring',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             className,
           )}
@@ -87,14 +86,14 @@ export const AnnotationMarker = forwardRef<HTMLButtonElement, AnnotationMarkerPr
         ref={ref}
         type="button"
         data-tone={effectiveTone}
-        data-active={active ? '' : undefined}
+        data-active={isActive ? '' : undefined}
         className={cn(
           'group inline-flex items-baseline gap-1 align-baseline rounded-sm px-0.5 transition-colors',
           'underline decoration-2 underline-offset-4',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           TONE_HIGHLIGHT[effectiveTone],
-          resolved && 'line-through opacity-70',
-          active && 'ring-1 ring-ring',
+          isResolved && 'line-through opacity-70',
+          isActive && 'ring-1 ring-ring',
           className,
         )}
         {...props}

@@ -15,7 +15,7 @@ Vertical list of `Collapsible`-style items where one (or multiple) can be open a
 ```
 
 ## Required behaviors
-- `type="single"` — one item open at a time. Optional `collapsible` allows closing the active item.
+- `type="single"` — one item open at a time. Optional `isCollapsible` allows closing the active item.
 - `type="multiple"` — any number of items open simultaneously.
 - Trigger toggles its item. Up/Down arrows move focus between triggers (roving). Home/End jump.
 - Each trigger is a real button (DOM focus), not active-descendant.
@@ -31,10 +31,10 @@ Vertical list of `Collapsible`-style items where one (or multiple) can be open a
 | `value` | `string \| string[]` | — | no | Controlled (string for single, array for multiple). |
 | `defaultValue` | same | — | no | Uncontrolled. |
 | `onValueChange` | `(v) => void` | — | no | Selection callback. |
-| `collapsible` | `boolean` | `false` | no | Single mode only — allow closing the active item. |
-| `disabled` | `boolean` | `false` | no | Block all triggers. |
+| `isCollapsible` | `boolean` | `false` | no | Single mode only — allow closing the active item. |
+| `isDisabled` | `boolean` | `false` | no | Block all triggers. |
 
-`Accordion.Item`: `value` (req), `disabled?`. `Accordion.Trigger` and `Accordion.Content`: same shape as `Collapsible` siblings, scoped to the parent item.
+`Accordion.Item`: `value` (req), `isDisabled?`. `Accordion.Trigger` and `Accordion.Content`: same shape as `Collapsible` siblings, scoped to the parent item.
 
 ## Composition
 Compound. Accordion root tracks active values; items participate via context. Same-domain pattern echoes `Collapsible` but adds the group-level state machine (single/multiple/collapsible).

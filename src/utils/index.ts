@@ -28,6 +28,7 @@ export { OptionalExtensions } from './OptionalExtensions';
 export { PressExtensions, type PressEvent } from './PressExtensions';
 export { HtmlElement, ButtonType } from './HtmlExtensions';
 export { Key } from './KeyboardExtensions';
+export { Environment, IS_DEV, IS_PRODUCTION } from './Environment';
 export { TransitionExtensions } from './TransitionExtensions';
 export type {
   PresenceAnimationDurationProp,

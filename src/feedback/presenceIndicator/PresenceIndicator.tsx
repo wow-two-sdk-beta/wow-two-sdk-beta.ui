@@ -7,7 +7,7 @@ export interface PresenceIndicatorProps extends Omit<ComponentPropsWithoutRef<'s
   status?: PresenceStatus;
   size?: 'xs' | 'sm' | 'md' | 'lg';
   /** Pulsing ring (only meaningful for `online`). */
-  pulse?: boolean;
+  hasPulse?: boolean;
   /** Position absolutely on a parent (use inside an Avatar wrapper). */
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
   /** Override the accessible label. Defaults to status name. */
@@ -50,7 +50,7 @@ const STATUS_LABEL: Record<PresenceStatus, string> = {
  * on an `Avatar`. Pass `position` to absolutely place on a positioned parent.
  */
 export const PresenceIndicator = forwardRef<HTMLSpanElement, PresenceIndicatorProps>(
-  ({ status = 'online', size = 'sm', pulse, position, label, className, ...props }, ref) => (
+  ({ status = 'online', size = 'sm', hasPulse, position, label, className, ...props }, ref) => (
     <span
       ref={ref}
       role="status"
@@ -66,7 +66,7 @@ export const PresenceIndicator = forwardRef<HTMLSpanElement, PresenceIndicatorPr
       )}
       {...props}
     >
-      {pulse && status === 'online' && (
+      {hasPulse && status === 'online' && (
         <span
           aria-hidden="true"
           className={cn(

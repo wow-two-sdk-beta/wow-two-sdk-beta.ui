@@ -7,7 +7,7 @@ Group Button / Link / ToggleButton children into a visually connected row or col
 | Name | Type | Default |
 |---|---|---|
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` |
-| `attached` | `boolean` | `true` |
+| `isAttached` | `boolean` | `true` |
 
 ## Dependencies
 Foundation: `utils/cn`. Children: any clickable element (Button/Link/ToggleButton).

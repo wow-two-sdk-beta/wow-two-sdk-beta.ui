@@ -21,7 +21,7 @@ export interface ColorSliderProps
   onValueChange?: (value: number) => void;
   color?: HSV;
   step?: number;
-  disabled?: boolean;
+  isDisabled?: boolean;
   'aria-label'?: string;
 }
 
@@ -67,7 +67,7 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
     onValueChange,
     color,
     step,
-    disabled = false,
+    isDisabled = false,
     className,
     'aria-label': ariaLabel,
     ...rest
@@ -99,26 +99,26 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
 
   const handlePointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       e.preventDefault();
       (e.target as Element).setPointerCapture?.(e.pointerId);
       updateFromClientX(e.clientX);
     },
-    [disabled, updateFromClientX],
+    [isDisabled, updateFromClientX],
   );
 
   const handlePointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       if (e.buttons !== 1) return;
       updateFromClientX(e.clientX);
     },
-    [disabled, updateFromClientX],
+    [isDisabled, updateFromClientX],
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       let next = val;
       switch (e.key) {
         case 'ArrowRight':
@@ -147,7 +147,7 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
       e.preventDefault();
       setVal(channel === 'hue' ? clampHue(next) : clamp01(next));
     },
-    [channel, disabled, max, setVal, stepValue, val],
+    [channel, isDisabled, max, setVal, stepValue, val],
   );
 
   /* val >= 360 pins the thumb to the right edge — clampHue would wrap the committed max back to 0. */
@@ -174,21 +174,21 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
       <div
         ref={composeRefs(trackRef)}
         role="slider"
-        tabIndex={disabled ? -1 : 0}
+        tabIndex={isDisabled ? -1 : 0}
         aria-label={ariaLabel ?? `${channel} slider`}
         aria-valuemin={0}
         aria-valuemax={max}
         aria-valuenow={Math.round(val * 100) / 100}
-        aria-disabled={disabled || undefined}
+        aria-disabled={isDisabled || undefined}
         aria-orientation="horizontal"
-        data-disabled={disabled ? '' : undefined}
+        data-disabled={isDisabled ? '' : undefined}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onKeyDown={handleKeyDown}
         style={trackStyle}
         className={cn(
           'relative h-3 w-full rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          disabled && 'pointer-events-none opacity-50',
+          isDisabled && 'pointer-events-none opacity-50',
         )}
       >
         <div

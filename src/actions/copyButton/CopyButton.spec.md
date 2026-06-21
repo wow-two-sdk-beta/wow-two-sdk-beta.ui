@@ -123,7 +123,7 @@ Inherited from Button — `size`, `padding`, `radius`, `width`, `height`, `minWi
 | `copiedAriaLabel` | `string` | — | Optional override while `copied=true` |
 | `onError` | `(error: Error) => void` | — | Fires once per error transition |
 | `variant` | (Button's variant union) | `'ghost'` | Diverges from Button's `'solid'` default |
-| `...rest` | `Omit<ButtonProps, 'onClick' \| 'children' \| 'aria-label'>` | — | Every other Button axis forwarded — `tone`, `size`, `shape`, `padding`, `radius`, `width`, `height`, `isFullWidth`, `isLoading`, `isSkeleton`, `isDisabled`, `asChild`, `onPressStart` / `onPressEnd` / `onLongPress`, native button attrs, `data-*` (except `data-state` owned by Button and `data-copied` owned by CopyButton) |
+| `...rest` | `Omit<ButtonProps, 'onClick' \| 'children' \| 'aria-label'>` | — | Every other Button axis forwarded — `tone`, `size`, `shape`, `padding`, `radius`, `width`, `height`, `isFullWidth`, `isLoading`, `isSkeleton`, `disabled`, `asChild`, `onPressStart` / `onPressEnd` / `onLongPress`, native button attrs, `data-*` (except `data-state` owned by Button and `data-copied` owned by CopyButton) |
 
 ## Storybook coverage
 

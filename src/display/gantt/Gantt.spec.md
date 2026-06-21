@@ -32,7 +32,7 @@ Tasks × time chart. Each task has a `start`/`end` (Date); rendered as a horizon
 | `from` / `to` | `Date` | derived | Visible range |
 | `cellWidth` | `number` (px/day) | `40` | |
 | `rowHeight` | `number` (px) | `36` | |
-| `showWeekends` | `boolean` | `true` | Shade Sat/Sun |
+| `hasWeekends` | `boolean` | `true` | Shade Sat/Sun |
 | `onTaskClick` | `(task) => void` | — | |
 
 ## Accessibility

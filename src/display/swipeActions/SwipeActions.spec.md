@@ -23,7 +23,7 @@ Touch-row pattern: drag a row left/right to reveal action buttons (delete, archi
 | `right` | `ReactNode` | — | Action(s) revealed by swipe-left |
 | `threshold` | `number` (px) | `60` | Minimum drag to trigger snap-open |
 | `actionWidth` | `number` (px) | `72` | Width of each action button (used for snap distance) |
-| `disabled` | `boolean` | `false` | |
+| `isDisabled` | `boolean` | `false` | |
 
 ## Accessibility
 - Actions are real `<button>`s — keyboard users tab to them directly (the swipe is a touch-only convenience).

@@ -15,7 +15,7 @@ export const Default: Story = {
       <Tabs.List>
         <Tabs.Tab value="overview">Overview</Tabs.Tab>
         <Tabs.Tab value="settings">Settings</Tabs.Tab>
-        <Tabs.Tab value="usage" disabled>Usage</Tabs.Tab>
+        <Tabs.Tab value="usage" isDisabled>Usage</Tabs.Tab>
       </Tabs.List>
       <Tabs.Panel value="overview" className="p-3">
         Overview content. Arrow keys move focus; selected tab has the underline.

@@ -28,7 +28,7 @@ Side-by-side or unified line-diff between two text strings. Own minimal LCS-base
 | `view` | `'split' \| 'unified'` | `'split'` | |
 | `leftLabel` | `ReactNode` | `'Before'` | |
 | `rightLabel` | `ReactNode` | `'After'` | |
-| `showStats` | `boolean` | `true` | "+10 −3" header |
+| `hasStats` | `boolean` | `true` | "+10 −3" header |
 
 ## Composition
 Single component (no slots). Future iteration: word-level highlight inside changed lines.

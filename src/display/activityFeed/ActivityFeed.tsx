@@ -7,7 +7,7 @@ import { cn } from '../../utils';
 
 export interface ActivityFeedProps extends HTMLAttributes<HTMLOListElement> {
   /** Compact spacing variant. */
-  dense?: boolean;
+  isDense?: boolean;
   children: ReactNode;
 }
 
@@ -24,15 +24,15 @@ export interface ActivityItemProps extends HTMLAttributes<HTMLLIElement> {
   /** Trailing actions slot (e.g. Reply / Like). */
   actions?: ReactNode;
   /** Suppress the connector line under the leading column. */
-  last?: boolean;
+  isLast?: boolean;
 }
 
 const ActivityFeedInner = forwardRef<HTMLOListElement, ActivityFeedProps>(
-  ({ dense, children, className, ...props }, ref) => (
+  ({ isDense, children, className, ...props }, ref) => (
     <ol
       ref={ref}
-      className={cn('flex list-none flex-col', dense ? 'gap-3' : 'gap-5', className)}
-      data-dense={dense ? '' : undefined}
+      className={cn('flex list-none flex-col', isDense ? 'gap-3' : 'gap-5', className)}
+      data-dense={isDense ? '' : undefined}
       {...props}
     >
       {children}
@@ -43,18 +43,18 @@ ActivityFeedInner.displayName = 'ActivityFeed';
 
 export const ActivityItem = forwardRef<HTMLLIElement, ActivityItemProps>(
   (
-    { avatar, children, timestamp, preview, actions, last, className, ...props },
+    { avatar, children, timestamp, preview, actions, isLast, className, ...props },
     ref,
   ) => (
     <li
       ref={ref}
       className={cn('relative flex gap-3', className)}
-      data-last={last ? '' : undefined}
+      data-last={isLast ? '' : undefined}
       {...props}
     >
       <div className="relative flex flex-col items-center">
         <div className="z-raised shrink-0">{avatar}</div>
-        {!last && (
+        {!isLast && (
           <span
             aria-hidden="true"
             className="mt-1 w-px flex-1 bg-border"

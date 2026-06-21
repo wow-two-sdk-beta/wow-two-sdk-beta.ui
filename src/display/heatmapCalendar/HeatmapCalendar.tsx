@@ -23,7 +23,7 @@ export interface HeatmapCalendarProps extends HTMLAttributes<HTMLDivElement> {
   onCellClick?: (date: string, value: number) => void;
   monthLabels?: string[];
   weekdayLabels?: string[];
-  showLegend?: boolean;
+  hasLegend?: boolean;
 }
 
 const DEFAULT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -53,7 +53,7 @@ export const HeatmapCalendar = forwardRef<HTMLDivElement, HeatmapCalendarProps>(
       onCellClick,
       monthLabels = DEFAULT_MONTHS,
       weekdayLabels = DEFAULT_WEEKDAYS,
-      showLegend = true,
+      hasLegend = true,
       className,
       ...rest
     },
@@ -184,7 +184,7 @@ export const HeatmapCalendar = forwardRef<HTMLDivElement, HeatmapCalendarProps>(
             ))}
           </div>
         </div>
-        {showLegend && (
+        {hasLegend && (
           <div className="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground">
             <span>Less</span>
             {toneSteps.map((cls, i) => (

@@ -19,7 +19,7 @@ export interface ColorWheelProps
   size?: number;
   thickness?: number;
   step?: number;
-  disabled?: boolean;
+  isDisabled?: boolean;
   'aria-label'?: string;
 }
 
@@ -40,7 +40,7 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
     size = 200,
     thickness = 30,
     step = 1,
-    disabled = false,
+    isDisabled = false,
     className,
     'aria-label': ariaLabel = 'Hue',
     ...rest
@@ -65,25 +65,25 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
 
   const handlePointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       e.preventDefault();
       (e.target as Element).setPointerCapture?.(e.pointerId);
       updateFromClient(e.clientX, e.clientY);
     },
-    [disabled, updateFromClient],
+    [isDisabled, updateFromClient],
   );
 
   const handlePointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled || e.buttons !== 1) return;
+      if (isDisabled || e.buttons !== 1) return;
       updateFromClient(e.clientX, e.clientY);
     },
-    [disabled, updateFromClient],
+    [isDisabled, updateFromClient],
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       let next = hue;
       switch (e.key) {
         case 'ArrowRight':
@@ -112,7 +112,7 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
       e.preventDefault();
       setHue(clampHue(next));
     },
-    [disabled, hue, setHue, step],
+    [isDisabled, hue, setHue, step],
   );
 
   const radius = (size - thickness) / 2;
@@ -132,20 +132,20 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
     <div
       ref={composeRefs(forwardedRef, trackRef)}
       role="slider"
-      tabIndex={disabled ? -1 : 0}
+      tabIndex={isDisabled ? -1 : 0}
       aria-label={ariaLabel}
       aria-valuemin={0}
       aria-valuemax={360}
       aria-valuenow={Math.round(hue)}
-      aria-disabled={disabled || undefined}
-      data-disabled={disabled ? '' : undefined}
+      aria-disabled={isDisabled || undefined}
+      data-disabled={isDisabled ? '' : undefined}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onKeyDown={handleKeyDown}
       style={wheelStyle}
       className={cn(
         'relative inline-block select-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        disabled && 'pointer-events-none opacity-50',
+        isDisabled && 'pointer-events-none opacity-50',
         className,
       )}
       {...rest}

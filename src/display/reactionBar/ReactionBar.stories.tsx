@@ -12,21 +12,21 @@ type Story = StoryObj<typeof ReactionBar>;
 
 const initial: Reaction[] = [
   { key: '👍', emoji: '👍', count: 5, users: ['Alex', 'Jordan', 'Sam', 'Riley', 'Pat'] },
-  { key: '❤️', emoji: '❤️', count: 3, reactedByMe: true, users: ['You', 'Alex', 'Jamie'] },
+  { key: '❤️', emoji: '❤️', count: 3, isReactedByMe: true, users: ['You', 'Alex', 'Jamie'] },
   { key: '🎉', emoji: '🎉', count: 1 },
   { key: '🚀', emoji: '🚀', count: 0 },
 ];
 
 export const Default: Story = { args: { reactions: initial } };
 
-export const Compact: Story = { args: { reactions: initial, compact: true } };
+export const Compact: Story = { args: { reactions: initial, isCompact: true } };
 
 export const NoAddButton: Story = {
-  args: { reactions: initial, hideAddButton: true },
+  args: { reactions: initial, hasAddButton: false },
 };
 
 export const ShowEmpty: Story = {
-  args: { reactions: initial, hideEmpty: false },
+  args: { reactions: initial, hasEmpty: true },
 };
 
 function InteractiveDemo() {
@@ -40,8 +40,8 @@ function InteractiveDemo() {
             r.key === key
               ? {
                   ...r,
-                  reactedByMe: !r.reactedByMe,
-                  count: r.count + (r.reactedByMe ? -1 : 1),
+                  isReactedByMe: !r.isReactedByMe,
+                  count: r.count + (r.isReactedByMe ? -1 : 1),
                 }
               : r,
           ),

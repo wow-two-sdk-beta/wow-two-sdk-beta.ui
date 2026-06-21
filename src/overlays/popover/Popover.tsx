@@ -136,7 +136,7 @@ export interface PopoverContentProps
   extends HTMLAttributes<HTMLDivElement>,
     SurfaceVariants {
   /** Skips the surface chrome (bg/border/shadow); keeps only z-index + animation. */
-  bare?: boolean;
+  isBare?: boolean;
   children: ReactNode;
 }
 
@@ -145,18 +145,17 @@ const DEFAULT_WIDTH = 'w-72';
 
 export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
   function PopoverContent(
-    { bare, variant, tone, radius, padding, elevation, className, children, ...rest },
+    { isBare, variant, tone, radius, padding, elevation, className, children, ...rest },
     forwardedRef,
   ) {
     const ctx = usePopoverContext();
     if (!ctx.open) return null;
     /* Default to lg padding when chrome is on (matches old `p-4`); consumer can override. */
-    const resolvedPadding = padding ?? (bare ? 'none' : 'lg');
+    const resolvedPadding = padding ?? (isBare ? 'none' : 'lg');
     return (
       <Portal>
-        {/* z-index sits on the SC root — transform creates the stacking context.
-            z-popover (80) so a popover opened from a Dialog (z-modal, 70) paints
-            above it — both portal to body, so equal z would resolve by DOM order. */}
+        {/* z-popover (80) on the SC root (transform makes the stacking context) so a
+            popover from a Dialog (z-modal, 70) paints above it — both portal to body. */}
         <AnchoredPositioner
           anchor={ctx.triggerNode}
           placement={ctx.placement}
@@ -165,12 +164,12 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
         >
           <FocusScope asChild trapped loop>
             <DismissableLayer
-              disableEscape={!ctx.dismissOnEscape}
+              isEscapeDisabled={!ctx.dismissOnEscape}
               onEscape={() => {
                 ctx.setOpen(false);
                 requestAnimationFrame(() => ctx.triggerRef.current?.focus());
               }}
-              disableOutsideClick={!ctx.dismissOnOutsideClick}
+              isOutsideClickDisabled={!ctx.dismissOnOutsideClick}
               onOutsidePointerDown={(e) => {
                 if (ctx.triggerRef.current?.contains(e.target as Node)) return;
                 ctx.setOpen(false);
@@ -182,7 +181,7 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
                 data-state="open"
                 className={cn(
                   'outline-none animate-in fade-in-0 zoom-in-95',
-                  !bare &&
+                  !isBare &&
                     cn(
                       DEFAULT_WIDTH,
                       surfaceVariants({

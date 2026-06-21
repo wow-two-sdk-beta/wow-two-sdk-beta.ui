@@ -17,7 +17,7 @@ function SingleDemo() {
       <Listbox value={value} onValueChange={setValue} aria-label="Choose fruit">
         <Listbox.Item value="apple">Apple</Listbox.Item>
         <Listbox.Item value="banana">Banana</Listbox.Item>
-        <Listbox.Item value="cherry" disabled>
+        <Listbox.Item value="cherry" isDisabled>
           Cherry (disabled)
         </Listbox.Item>
         <Listbox.Item value="durian">Durian</Listbox.Item>
@@ -30,7 +30,7 @@ function MultiDemo() {
   const [values, setValues] = useState<string[]>(['apple', 'cherry']);
   return (
     <div className="w-64">
-      <Listbox multiple value={values} onValueChange={setValues} aria-label="Choose fruits">
+      <Listbox isMultiple value={values} onValueChange={setValues} aria-label="Choose fruits">
         <Listbox.Item value="apple">Apple</Listbox.Item>
         <Listbox.Item value="banana">Banana</Listbox.Item>
         <Listbox.Item value="cherry">Cherry</Listbox.Item>
@@ -70,9 +70,37 @@ function GenericDemo() {
   );
 }
 
+function TypeaheadDemo() {
+  /* Focus the list and type. Prefix-match: "ch" jumps to Cherry. Same-letter repeat cycles:
+     pressing "b" repeatedly walks Banana → Blackberry → Blueberry. Disabled items are skipped;
+     the buffer resets after ~500ms idle. */
+  const fruits = [
+    'Apple', 'Apricot', 'Avocado', 'Banana', 'Blackberry', 'Blueberry',
+    'Cherry', 'Coconut', 'Cranberry', 'Date', 'Durian', 'Fig', 'Grape',
+  ];
+  const [value, setValue] = useState<string | undefined>('Apple');
+  return (
+    <div className="flex w-64 flex-col gap-2">
+      <p className="text-xs text-subtle-foreground">
+        Click the list, then type — e.g. “ch” → Cherry, or tap “b” repeatedly to cycle B-fruits.
+      </p>
+      <Listbox value={value} onValueChange={setValue} aria-label="Type to select a fruit">
+        {fruits.map((f) => (
+          <Listbox.Item key={f} value={f} isDisabled={f === 'Date'}>
+            {f}
+            {f === 'Date' ? ' (disabled)' : ''}
+          </Listbox.Item>
+        ))}
+      </Listbox>
+      <p className="text-xs text-subtle-foreground">Selected: {value ?? '—'}</p>
+    </div>
+  );
+}
+
 export const Default: Story = { render: () => <SingleDemo /> };
 export const Multiple: Story = { render: () => <MultiDemo /> };
 export const GenericObject: Story = { render: () => <GenericDemo /> };
+export const Typeahead: Story = { render: () => <TypeaheadDemo /> };
 
 export const Grouped: Story = {
   render: () => (

@@ -274,7 +274,7 @@ export default function FeedbackGallery() {
           <Demo label="LoadingOverlay — scoped, toggleable">
             <div className="relative h-32 overflow-hidden rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">
               Region content stays behind the scrim while work is in flight.
-              <LoadingOverlay open={overlayOn} inline blur label="Syncing…" spinnerSize="md" />
+              <LoadingOverlay isOpen={overlayOn} isInline hasBlur label="Syncing…" spinnerSize="md" />
             </div>
             <Button size="sm" variant="outline" onClick={() => setOverlayOn((v) => !v)}>
               {overlayOn ? 'Stop loading' : 'Start loading'}
@@ -355,7 +355,7 @@ export default function FeedbackGallery() {
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           <Demo label="StatusIndicator — monitoring rows">
             <div className="space-y-3">
-              <StatusIndicator tone="success" pulse label="All systems normal" description="Updated 2m ago" />
+              <StatusIndicator tone="success" hasPulse label="All systems normal" description="Updated 2m ago" />
               <StatusIndicator tone="warning" label="Elevated API latency" description="p95 at 840ms" />
               <StatusIndicator tone="destructive" label="Webhooks degraded" description="Investigating since 09:12" />
               <StatusIndicator tone="neutral" label="Maintenance mode" description="Deploys paused" />
@@ -363,7 +363,7 @@ export default function FeedbackGallery() {
           </Demo>
           <Demo label="PresenceIndicator — statuses + avatar overlay">
             <div className="flex items-center gap-4">
-              <PresenceIndicator status="online" pulse />
+              <PresenceIndicator status="online" hasPulse />
               <PresenceIndicator status="idle" />
               <PresenceIndicator status="busy" />
               <PresenceIndicator status="offline" />
@@ -379,14 +379,14 @@ export default function FeedbackGallery() {
               <TrendIndicator value={12.4} label="vs last week" />
               <TrendIndicator value={-3.2} label="vs last week" />
               <TrendIndicator value={0} label="flat" />
-              <TrendIndicator value={8.1} inverse label="error rate" />
+              <TrendIndicator value={8.1} isInverse label="error rate" />
             </div>
           </Demo>
           <Demo label="TypingIndicator — chat affordance">
             <div className="space-y-2">
               <TypingIndicator who="Rin" />
               <TypingIndicator size="lg" tone="primary" />
-              <TypingIndicator who="3 people" subtle tone="foreground" />
+              <TypingIndicator who="3 people" isSubtle tone="foreground" />
             </div>
           </Demo>
           <Demo label="LiveCursor — collaborative canvas">
@@ -477,11 +477,11 @@ export default function FeedbackGallery() {
               <span className="text-xs text-muted-foreground">Snackbar appears bottom-center with a countdown.</span>
             </div>
             <UndoBar
-              open={undoOpen}
+              isOpen={undoOpen}
               onOpenChange={setUndoOpen}
               message="Conversation archived."
               duration={4000}
-              showCountdown
+              hasCountdown
               onUndo={() => toast({ severity: 'info', title: 'Restored', description: 'Conversation moved back to inbox.' })}
             />
           </Demo>
@@ -493,7 +493,7 @@ export default function FeedbackGallery() {
               <span className="text-xs text-muted-foreground">3 steps · Esc to skip.</span>
             </div>
             <Tour
-              open={tourOpen}
+              isOpen={tourOpen}
               onOpenChange={setTourOpen}
               steps={TOUR_STEPS}
               onComplete={() => toast({ severity: 'success', title: 'Tour complete' })}
@@ -502,9 +502,9 @@ export default function FeedbackGallery() {
           <Demo label="OnboardingChecklist — derived progress">
             <div id="feedback-onboarding">
               <OnboardingChecklist title="Set up your workspace">
-                <OnboardingChecklistTask done label="Create account" description="Done during sign-up." />
+                <OnboardingChecklistTask isDone label="Create account" description="Done during sign-up." />
                 <OnboardingChecklistTask
-                  done={tasksDone.invite}
+                  isDone={tasksDone.invite}
                   label="Invite your team"
                   description="Add at least one teammate."
                   action={
@@ -514,7 +514,7 @@ export default function FeedbackGallery() {
                   }
                 />
                 <OnboardingChecklistTask
-                  done={tasksDone.repo}
+                  isDone={tasksDone.repo}
                   label="Connect a repository"
                   description="Link GitHub to enable deploys."
                   action={
@@ -550,7 +550,7 @@ export default function FeedbackGallery() {
                     title={n.title}
                     description={n.description}
                     timestamp={n.timestamp}
-                    unread={n.unread}
+                    isUnread={n.unread}
                     onSelect={() => setNotifications((ns) => ns.map((x) => (x.id === n.id ? { ...x, unread: false } : x)))}
                     onDismiss={() => setNotifications((ns) => ns.filter((x) => x.id !== n.id))}
                   />

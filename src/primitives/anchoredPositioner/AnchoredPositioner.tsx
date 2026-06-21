@@ -18,7 +18,7 @@ export interface AnchoredPositionerProps extends HTMLAttributes<HTMLDivElement> 
   /** Distance between anchor and floating element in px. Default 8. */
   offset?: number;
   /** Render the floating element only when open. */
-  open?: boolean;
+  isOpen?: boolean;
   children: ReactNode;
 }
 
@@ -37,11 +37,11 @@ export interface AnchoredPositionerProps extends HTMLAttributes<HTMLDivElement> 
  */
 export const AnchoredPositioner = forwardRef<HTMLDivElement, AnchoredPositionerProps>(
   (
-    { anchor, placement = 'bottom', offset = 8, open = true, children, style, ...props },
+    { anchor, placement = 'bottom', offset = 8, isOpen = true, children, style, ...props },
     forwardedRef,
   ) => {
     const { refs, floatingStyles } = useFloating({
-      open,
+      open: isOpen,
       placement,
       middleware: [
         offsetMiddleware(offset),
@@ -61,7 +61,7 @@ export const AnchoredPositioner = forwardRef<HTMLDivElement, AnchoredPositionerP
       elements: { reference: anchor },
     });
 
-    if (!open) return null;
+    if (!isOpen) return null;
 
     return (
       <div

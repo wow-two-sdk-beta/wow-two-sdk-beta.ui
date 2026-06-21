@@ -152,7 +152,7 @@ export default function LandingScreen() {
             wow-two-sdk-beta
           </Eyebrow>
           <Heading level={1} size="4xl" align="center">
-            <GradientText animated>@wow-two-beta/ui</GradientText>
+            <GradientText isAnimated>@wow-two-beta/ui</GradientText>
           </Heading>
           <Heading
             level={2}

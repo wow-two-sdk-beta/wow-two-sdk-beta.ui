@@ -8,7 +8,7 @@ export interface HighlightProps extends Omit<ComponentPropsWithoutRef<'span'>, '
   /** Substring(s) to highlight. Match is case-insensitive. */
   query: string | string[];
   /** When `true`, only highlights whole-word matches. Default `false`. */
-  wholeWord?: boolean;
+  isWholeWord?: boolean;
 }
 
 function escape(re: string) {
@@ -17,15 +17,15 @@ function escape(re: string) {
 
 /**
  * Wraps each occurrence of `query` (or any of `query[]`) inside the
- * `children` text in a `<Mark>`. Case-insensitive; pass `wholeWord` to
+ * `children` text in a `<Mark>`. Case-insensitive; pass `isWholeWord` to
  * avoid partial matches.
  */
 export const Highlight = forwardRef<HTMLSpanElement, HighlightProps>(
-  ({ children, query, wholeWord, className, ...props }, ref) => {
+  ({ children, query, isWholeWord, className, ...props }, ref) => {
     const queries = (Array.isArray(query) ? query : [query]).filter(Boolean);
     if (queries.length === 0) return <span ref={ref} className={cn(className)} {...props}>{children}</span>;
     const pattern = queries.map(escape).join('|');
-    const regex = new RegExp(wholeWord ? `\\b(${pattern})\\b` : `(${pattern})`, 'gi');
+    const regex = new RegExp(isWholeWord ? `\\b(${pattern})\\b` : `(${pattern})`, 'gi');
     const parts = children.split(regex);
 
     const nodes: ReactNode[] = [];

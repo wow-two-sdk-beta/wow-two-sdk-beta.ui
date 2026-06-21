@@ -6,7 +6,7 @@ Two-state button (on/off) with `aria-pressed` and `data-state="on" | "off"`. Pai
 ## Props
 | Name | Type | Default |
 |---|---|---|
-| `pressed` | `boolean` | controlled |
+| `isPressed` | `boolean` | controlled |
 | `defaultPressed` | `boolean` | `false` |
 | `onPressedChange` | `(p: boolean) => void` | — |
 | `variant` | `'solid' \| 'outline' \| 'ghost'` | `'ghost'` |

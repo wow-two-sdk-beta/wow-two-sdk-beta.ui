@@ -27,7 +27,7 @@ Queue + viewport for transient notifications. Wraps the L4 `Toast` molecule. One
 | `position` | `'top-right' \| 'top-left' \| 'top-center' \| 'bottom-right' \| 'bottom-left' \| 'bottom-center'` | `'bottom-right'` | |
 | `max` | `number` | `5` | |
 | `defaultDuration` | `number` (ms) | `5000` | Per-toast `duration` overrides this. |
-| `pauseOnHover` | `boolean` | `true` | |
+| `canPauseOnHover` | `boolean` | `true` | |
 | `gap` | `number` (px) | `8` | |
 
 ## API

@@ -21,7 +21,7 @@ export interface AudioWaveformProps extends Omit<SVGAttributes<SVGSVGElement>, '
   gap?: number;
   tone?: AudioWaveformTone;
   onSeek?: (progress: number) => void;
-  interactive?: boolean;
+  isInteractive?: boolean;
 }
 
 /**
@@ -39,7 +39,7 @@ export const AudioWaveform = forwardRef<SVGSVGElement, AudioWaveformProps>(
       gap = 1,
       tone = 'brand',
       onSeek,
-      interactive,
+      isInteractive,
       className,
       ...rest
     },
@@ -49,7 +49,7 @@ export const AudioWaveform = forwardRef<SVGSVGElement, AudioWaveformProps>(
     const barCount = Math.max(1, Math.floor(width / stepX));
     const sampled = useMemo(() => sampleTo(peaks, barCount), [peaks, barCount]);
     const playedBars = Math.round(progress * barCount);
-    const isInteractive = interactive ?? onSeek != null;
+    const resolvedInteractive = isInteractive ?? onSeek != null;
     const seekFromX = (clientX: number, rect: DOMRect) => {
       const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
       onSeek?.(x / rect.width);
@@ -80,18 +80,18 @@ export const AudioWaveform = forwardRef<SVGSVGElement, AudioWaveformProps>(
           if (typeof ref === 'function') ref(el);
           else if (ref) (ref as React.MutableRefObject<SVGSVGElement | null>).current = el;
         }}
-        role={isInteractive ? 'slider' : 'img'}
+        role={resolvedInteractive ? 'slider' : 'img'}
         aria-label="Audio waveform"
         aria-valuenow={Math.round(progress * 100)}
         aria-valuemin={0}
         aria-valuemax={100}
-        tabIndex={isInteractive ? 0 : -1}
+        tabIndex={resolvedInteractive ? 0 : -1}
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
         preserveAspectRatio="none"
         onClick={
-          isInteractive
+          resolvedInteractive
             ? (e) => {
                 const rect = svgRef.current?.getBoundingClientRect();
                 if (rect) seekFromX(e.clientX, rect);
@@ -101,7 +101,7 @@ export const AudioWaveform = forwardRef<SVGSVGElement, AudioWaveformProps>(
         onKeyDown={handleKey}
         className={cn(
           'inline-block',
-          isInteractive && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm',
+          resolvedInteractive && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm',
           TONE_CLASS[tone],
           className,
         )}

@@ -17,8 +17,8 @@ import { useControlled } from '../../hooks';
 interface StepInfo {
   id: string;
   label?: ReactNode;
-  optional?: boolean;
-  final?: boolean;
+  isOptional?: boolean;
+  isFinal?: boolean;
 }
 
 interface WizardContextValue {
@@ -79,8 +79,8 @@ export const Wizard = forwardRef<HTMLDivElement, WizardProps>(function Wizard(
       return {
         id: props.id,
         label: props.label,
-        optional: props.optional,
-        final: props.final,
+        isOptional: props.isOptional,
+        isFinal: props.isFinal,
       };
     });
 
@@ -153,7 +153,7 @@ export const Wizard = forwardRef<HTMLDivElement, WizardProps>(function Wizard(
         setIsPending(false);
       }
     }
-    if (currentStep.final) {
+    if (currentStep.isFinal) {
       setIsPending(true);
       try {
         await onComplete?.();
@@ -253,7 +253,7 @@ export const WizardSteps = forwardRef<HTMLDivElement, WizardStepsProps>(
                 {i + 1}
               </span>
               {step.label ?? step.id}
-              {step.optional && <span className="ml-1 text-[10px] opacity-70">(optional)</span>}
+              {step.isOptional && <span className="ml-1 text-[10px] opacity-70">(optional)</span>}
             </button>
           );
         })}
@@ -266,12 +266,12 @@ export interface WizardStepProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
   label?: ReactNode;
   validate?: () => boolean | Promise<boolean>;
-  optional?: boolean;
-  final?: boolean;
+  isOptional?: boolean;
+  isFinal?: boolean;
 }
 
 export const WizardStep = forwardRef<HTMLDivElement, WizardStepProps>(function WizardStep(
-  { id, label, validate, optional, final, className, children, ...rest },
+  { id, label, validate, isOptional, isFinal, className, children, ...rest },
   ref,
 ) {
   const ctx = useWizard();
@@ -280,9 +280,9 @@ export const WizardStep = forwardRef<HTMLDivElement, WizardStepProps>(function W
 
   // Register/refresh step metadata.
   useEffect(() => {
-    registerStep({ id, label, optional, final });
+    registerStep({ id, label, isOptional, isFinal });
     return () => unregisterStep(id);
-  }, [registerStep, unregisterStep, id, label, optional, final]);
+  }, [registerStep, unregisterStep, id, label, isOptional, isFinal]);
 
   useEffect(() => {
     if (validate) registerValidator(id, validate);
@@ -310,7 +310,7 @@ export interface WizardFooterProps extends HTMLAttributes<HTMLDivElement> {
   nextLabel?: ReactNode;
   submitLabel?: ReactNode;
   /** Render the Prev button when not on first step. Default true. */
-  showPrev?: boolean;
+  hasPrev?: boolean;
 }
 
 export const WizardFooter = forwardRef<HTMLDivElement, WizardFooterProps>(
@@ -319,7 +319,7 @@ export const WizardFooter = forwardRef<HTMLDivElement, WizardFooterProps>(
       prevLabel = 'Back',
       nextLabel = 'Next',
       submitLabel = 'Finish',
-      showPrev = true,
+      hasPrev = true,
       className,
       ...rest
     },
@@ -327,7 +327,7 @@ export const WizardFooter = forwardRef<HTMLDivElement, WizardFooterProps>(
   ) {
     const ctx = useWizard();
     const isFirst = ctx.currentIndex === 0;
-    const isFinal = ctx.currentStep?.final ?? false;
+    const isFinal = ctx.currentStep?.isFinal ?? false;
 
     return (
       <div
@@ -335,7 +335,7 @@ export const WizardFooter = forwardRef<HTMLDivElement, WizardFooterProps>(
         className={cn('mt-2 flex items-center justify-between gap-3', className)}
         {...rest}
       >
-        {showPrev && !isFirst && ctx.canGoBack ? (
+        {hasPrev && !isFirst && ctx.canGoBack ? (
           <button
             type="button"
             onClick={ctx.back}

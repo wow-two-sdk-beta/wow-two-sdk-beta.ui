@@ -299,7 +299,7 @@ export interface EmojiPickerProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   columns?: number;
   cellSize?: number;
   categories?: EmojiCategory[];
-  disabled?: boolean;
+  isDisabled?: boolean;
 }
 
 /**
@@ -314,7 +314,7 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
       columns = 8,
       cellSize = 28,
       categories = EMOJI,
-      disabled,
+      isDisabled,
       className,
       ...rest
     },
@@ -355,7 +355,7 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
         }}
         className={cn(
           'flex flex-col rounded-md border border-border bg-card text-card-foreground shadow-sm',
-          disabled && 'opacity-60',
+          isDisabled && 'opacity-60',
           className,
         )}
         style={{ width: columns * cellSize + 24 }}
@@ -366,7 +366,7 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
             type="search"
             value={query}
             placeholder={placeholder}
-            disabled={disabled}
+            disabled={isDisabled}
             onChange={(e) => setQuery(e.target.value)}
             className={cn(inputBaseVariants({ size: 'sm' }))}
           />
@@ -401,7 +401,7 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
             ) : (
               <div className="grid" style={{ gridTemplateColumns: `repeat(${columns}, ${cellSize}px)` }}>
                 {matches.map((e) => (
-                  <EmojiCell key={e.emoji} entry={e} cellSize={cellSize} disabled={disabled} onSelect={onSelect} />
+                  <EmojiCell key={e.emoji} entry={e} cellSize={cellSize} isDisabled={isDisabled} onSelect={onSelect} />
                 ))}
               </div>
             )
@@ -413,7 +413,7 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
                 </div>
                 <div className="grid" style={{ gridTemplateColumns: `repeat(${columns}, ${cellSize}px)` }}>
                   {cat.emojis.map((e) => (
-                    <EmojiCell key={e.emoji} entry={e} cellSize={cellSize} disabled={disabled} onSelect={onSelect} />
+                    <EmojiCell key={e.emoji} entry={e} cellSize={cellSize} isDisabled={isDisabled} onSelect={onSelect} />
                   ))}
                 </div>
               </div>
@@ -428,17 +428,17 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
 interface EmojiCellProps {
   entry: EmojiEntry;
   cellSize: number;
-  disabled?: boolean;
+  isDisabled?: boolean;
   onSelect: (emoji: string) => void;
 }
 
-function EmojiCell({ entry, cellSize, disabled, onSelect }: EmojiCellProps) {
+function EmojiCell({ entry, cellSize, isDisabled, onSelect }: EmojiCellProps) {
   return (
     <div role="gridcell">
       <button
         type="button"
         aria-label={entry.name}
-        disabled={disabled}
+        disabled={isDisabled}
         onClick={() => onSelect(entry.emoji)}
         style={{ width: cellSize, height: cellSize }}
         className="inline-flex items-center justify-center rounded-md text-lg transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

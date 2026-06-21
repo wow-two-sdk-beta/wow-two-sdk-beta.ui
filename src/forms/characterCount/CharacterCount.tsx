@@ -7,7 +7,7 @@ export interface CharacterCountProps extends Omit<ComponentPropsWithoutRef<'div'
   /** Maximum allowed length (also flips text to destructive when exceeded). */
   max: number;
   /** Show as `current / max` (default) or just `current`. */
-  showMax?: boolean;
+  isMaxShown?: boolean;
 }
 
 /**
@@ -15,7 +15,7 @@ export interface CharacterCountProps extends Omit<ComponentPropsWithoutRef<'div'
  * Goes destructive once `value > max`.
  */
 export const CharacterCount = forwardRef<HTMLDivElement, CharacterCountProps>(
-  ({ value, max, showMax = true, className, ...props }, ref) => {
+  ({ value, max, isMaxShown = true, className, ...props }, ref) => {
     const over = value > max;
     return (
       <div
@@ -28,7 +28,7 @@ export const CharacterCount = forwardRef<HTMLDivElement, CharacterCountProps>(
         )}
         {...props}
       >
-        {value}{showMax && ` / ${max}`}
+        {value}{isMaxShown && ` / ${max}`}
       </div>
     );
   },

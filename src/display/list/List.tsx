@@ -6,15 +6,15 @@ import { listItemVariants, listVariants, type ListVariants } from './List.varian
 export interface ListProps
   extends Omit<HTMLAttributes<HTMLUListElement | HTMLOListElement>, 'type'>,
     ListVariants {
-  ordered?: boolean;
+  isOrdered?: boolean;
   children: ReactNode;
 }
 
 export const List = forwardRef<HTMLUListElement | HTMLOListElement, ListProps>(function List(
-  { ordered, marker, spacing, className, children, ...rest },
+  { isOrdered, marker, spacing, className, children, ...rest },
   ref,
 ) {
-  const Component = (ordered ? 'ol' : 'ul') as 'ol';
+  const Component = (isOrdered ? 'ol' : 'ul') as 'ol';
   return (
     <Component
       ref={ref as React.Ref<HTMLOListElement>}
@@ -32,17 +32,17 @@ export interface ListItemProps extends LiHTMLAttributes<HTMLLIElement> {
   /** Trailing slot — badge, chevron, status. */
   trailing?: ReactNode;
   /** Auto-render a check marker if the parent List uses `marker="check"`. */
-  showCheckMarker?: boolean;
+  hasCheckMarker?: boolean;
   children: ReactNode;
 }
 
 export const ListItem = forwardRef<HTMLLIElement, ListItemProps>(function ListItem(
-  { leading, trailing, showCheckMarker, className, children, ...rest },
+  { leading, trailing, hasCheckMarker, className, children, ...rest },
   ref,
 ) {
   return (
     <li ref={ref} className={cn(listItemVariants(), className)} {...rest}>
-      {showCheckMarker && (
+      {hasCheckMarker && (
         <span aria-hidden="true" className="mt-0.5 shrink-0 text-primary">
           <Check className="h-4 w-4" />
         </span>

@@ -150,7 +150,7 @@ const VERTICAL_SIZE: Record<DrawerSize, string> = {
 /** Represents the prop surface of `Drawer.Content`. */
 export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement>, SurfaceVariants {
   hideBackdrop?: boolean;
-  blur?: boolean;
+  isBlurred?: boolean;
   /** Per-side max-size token. Default `md` (preserves prior behavior for right/left at `sm`-ish width via `sm:max-w-md`). */
   size?: DrawerSize;
   children: ReactNode;
@@ -160,7 +160,7 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
   function DrawerContent(
     {
       hideBackdrop,
-      blur,
+      isBlurred,
       variant,
       tone,
       radius,
@@ -193,8 +193,8 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
         <ScrollLockProvider>
           {!hideBackdrop && (
             <Backdrop
-              inline
-              blur={blur}
+              isInline
+              isBlurred={isBlurred}
               onClick={() => {
                 if (ctx.dismissOnOutsideClick) ctx.setOpen(false);
               }}
@@ -202,9 +202,9 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
           )}
           <FocusScope asChild trapped loop>
             <DismissableLayer
-              disableEscape={!ctx.dismissOnEscape}
+              isEscapeDisabled={!ctx.dismissOnEscape}
               onEscape={() => ctx.setOpen(false)}
-              disableOutsideClick
+              isOutsideClickDisabled
             >
               <div
                 ref={forwardedRef}

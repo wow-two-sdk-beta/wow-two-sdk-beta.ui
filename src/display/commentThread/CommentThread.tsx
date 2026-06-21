@@ -31,7 +31,7 @@ export interface CommentProps extends HTMLAttributes<HTMLDivElement> {
   /** Initial collapsed state for replies. */
   defaultCollapsed?: boolean;
   /** Mark as the OP / highlighted comment. */
-  highlighted?: boolean;
+  isHighlighted?: boolean;
 }
 
 const CommentThreadInner = forwardRef<HTMLDivElement, CommentThreadProps>(
@@ -60,7 +60,7 @@ export const Comment = forwardRef<HTMLDivElement, CommentProps>(
       actions,
       replies,
       defaultCollapsed = false,
-      highlighted,
+      isHighlighted,
       className,
       ...props
     },
@@ -75,10 +75,10 @@ export const Comment = forwardRef<HTMLDivElement, CommentProps>(
         ref={ref}
         role="treeitem"
         aria-expanded={hasReplies ? !collapsed : undefined}
-        data-highlighted={highlighted ? '' : undefined}
+        data-highlighted={isHighlighted ? '' : undefined}
         className={cn(
           'flex gap-2 rounded-md',
-          highlighted && 'bg-primary-soft/30 ring-1 ring-primary/20 p-2',
+          isHighlighted && 'bg-primary-soft/30 ring-1 ring-primary/20 p-2',
           className,
         )}
         {...props}

@@ -21,9 +21,9 @@ export interface JSONEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'o
   mode?: JSONEditorMode;
   defaultMode?: JSONEditorMode;
   onModeChange?: (mode: JSONEditorMode) => void;
-  disabled?: boolean;
-  readOnly?: boolean;
-  invalid?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
+  isInvalid?: boolean;
   indent?: number;
   minHeight?: string;
 }
@@ -71,9 +71,9 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
     mode: modeProp,
     defaultMode = 'tree',
     onModeChange,
-    disabled,
-    readOnly,
-    invalid,
+    isDisabled,
+    isReadOnly,
+    isInvalid,
     indent = 2,
     minHeight = '14rem',
     className,
@@ -99,11 +99,11 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
   return (
     <div
       ref={ref}
-      data-state={invalid ? 'invalid' : 'default'}
+      data-state={isInvalid ? 'invalid' : 'default'}
       className={cn(
         'flex flex-col overflow-hidden rounded-md border border-input bg-card text-card-foreground shadow-sm',
-        invalid && 'border-destructive',
-        disabled && 'opacity-60',
+        isInvalid && 'border-destructive',
+        isDisabled && 'opacity-60',
         className,
       )}
       style={{ minHeight }}
@@ -132,9 +132,9 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
       </div>
       <div className="flex-1 overflow-auto" style={{ minHeight: 0 }}>
         {mode === 'tree' ? (
-          <TreeView value={value} updateAt={updateAt} disabled={disabled} readOnly={readOnly} />
+          <TreeView value={value} updateAt={updateAt} isDisabled={isDisabled} isReadOnly={isReadOnly} />
         ) : (
-          <TextView value={value} setValue={setValue} disabled={disabled} readOnly={readOnly} indent={indent} />
+          <TextView value={value} setValue={setValue} isDisabled={isDisabled} isReadOnly={isReadOnly} indent={indent} />
         )}
       </div>
     </div>
@@ -144,14 +144,14 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
 interface TreeViewProps {
   value: unknown;
   updateAt: (path: Path, next: unknown) => void;
-  disabled?: boolean;
-  readOnly?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
 }
 
-function TreeView({ value, updateAt, disabled, readOnly }: TreeViewProps) {
+function TreeView({ value, updateAt, isDisabled, isReadOnly }: TreeViewProps) {
   return (
     <ul role="tree" className="font-mono text-sm">
-      <TreeNode keyName={null} value={value} path={[]} updateAt={updateAt} disabled={disabled} readOnly={readOnly} depth={0} />
+      <TreeNode keyName={null} value={value} path={[]} updateAt={updateAt} isDisabled={isDisabled} isReadOnly={isReadOnly} depth={0} />
     </ul>
   );
 }
@@ -161,12 +161,12 @@ interface TreeNodeProps {
   value: unknown;
   path: Path;
   updateAt: (path: Path, next: unknown) => void;
-  disabled?: boolean;
-  readOnly?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
   depth: number;
 }
 
-function TreeNode({ keyName, value, path, updateAt, disabled, readOnly, depth }: TreeNodeProps) {
+function TreeNode({ keyName, value, path, updateAt, isDisabled, isReadOnly, depth }: TreeNodeProps) {
   const type = describeType(value);
   const isObject = type === 'object' || type === 'array';
   const [open, setOpen] = useState(depth < 2);
@@ -174,7 +174,7 @@ function TreeNode({ keyName, value, path, updateAt, disabled, readOnly, depth }:
   const [draft, setDraft] = useState<string>('');
 
   const startEdit = () => {
-    if (disabled || readOnly || isObject) return;
+    if (isDisabled || isReadOnly || isObject) return;
     setEditing(true);
     setDraft(typeof value === 'string' ? value : String(value));
   };
@@ -251,7 +251,7 @@ function TreeNode({ keyName, value, path, updateAt, disabled, readOnly, depth }:
             onClick={startEdit}
             className={cn(
               'cursor-text rounded-sm px-1 text-left transition-colors',
-              !disabled && !readOnly && 'hover:bg-muted',
+              !isDisabled && !isReadOnly && 'hover:bg-muted',
               type === 'string' && 'text-info',
               type === 'number' && 'text-warning',
               type === 'boolean' && 'text-success',
@@ -279,8 +279,8 @@ function TreeNode({ keyName, value, path, updateAt, disabled, readOnly, depth }:
               value={v}
               path={[...path, k]}
               updateAt={updateAt}
-              disabled={disabled}
-              readOnly={readOnly}
+              isDisabled={isDisabled}
+              isReadOnly={isReadOnly}
               depth={depth + 1}
             />
           ))}
@@ -293,12 +293,12 @@ function TreeNode({ keyName, value, path, updateAt, disabled, readOnly, depth }:
 interface TextViewProps {
   value: unknown;
   setValue: (next: unknown) => void;
-  disabled?: boolean;
-  readOnly?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
   indent: number;
 }
 
-function TextView({ value, setValue, disabled, readOnly, indent }: TextViewProps) {
+function TextView({ value, setValue, isDisabled, isReadOnly, indent }: TextViewProps) {
   const initial = useMemo(() => safeStringify(value, indent), [value, indent]);
   const [draft, setDraft] = useState(initial);
   const [error, setError] = useState<string | null>(null);
@@ -324,8 +324,8 @@ function TextView({ value, setValue, disabled, readOnly, indent }: TextViewProps
     <div className="flex h-full flex-col">
       <textarea
         value={draft}
-        disabled={disabled}
-        readOnly={readOnly}
+        disabled={isDisabled}
+        readOnly={isReadOnly}
         spellCheck={false}
         onChange={(e) => {
           dirty.current = true;

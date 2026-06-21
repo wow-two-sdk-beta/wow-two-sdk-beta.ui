@@ -213,7 +213,7 @@ function NotificationRow({
 }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <Avatar name={actorName(item.actorId)} autoColor size="sm" />
+      <Avatar name={actorName(item.actorId)} canAutoColor size="sm" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm text-foreground">
           <span className={unread ? 'font-semibold' : 'font-medium'}>
@@ -551,9 +551,9 @@ export default function InboxScreen() {
                     {mentionItems.map((item, idx) => (
                       <ActivityFeedItem
                         key={item.id}
-                        avatar={<Avatar name={actorName(item.actorId)} autoColor size="sm" />}
+                        avatar={<Avatar name={actorName(item.actorId)} canAutoColor size="sm" />}
                         timestamp={relativeTime(item.at)}
-                        last={idx === mentionItems.length - 1}
+                        isLast={idx === mentionItems.length - 1}
                         preview={
                           item.verb === 'commented' ? item.target : undefined
                         }
@@ -647,8 +647,8 @@ export default function InboxScreen() {
             {unreadInbox.slice(0, 6).map((item) => (
               <NotificationItem
                 key={item.id}
-                unread
-                icon={<Avatar name={actorName(item.actorId)} autoColor size="xs" />}
+                isUnread
+                icon={<Avatar name={actorName(item.actorId)} canAutoColor size="xs" />}
                 title={`${actorName(item.actorId)} ${item.verb}`}
                 description={item.target}
                 timestamp={relativeTime(item.at)}
@@ -661,12 +661,12 @@ export default function InboxScreen() {
       </div>
 
       <UndoBar
-        open={undoOpen}
+        isOpen={undoOpen}
         onOpenChange={setUndoOpen}
         message={undoSnap?.label ?? ''}
         onUndo={handleUndo}
         duration={5000}
-        showCountdown
+        hasCountdown
         position="bottom-center"
       />
     </div>

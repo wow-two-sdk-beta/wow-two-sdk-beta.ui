@@ -11,7 +11,7 @@ import { cn } from '../../utils';
 export interface TiltProps extends HTMLAttributes<HTMLElement> {
   maxAngle?: number;
   perspective?: number;
-  glare?: boolean;
+  hasGlare?: boolean;
   scale?: number;
   as?: 'div' | 'section' | 'article' | 'span';
 }
@@ -26,14 +26,13 @@ interface TiltState {
 
 /**
  * 3D card tilt — `rotateX`/`rotateY` from cursor position. Disabled under
- * `prefers-reduced-motion`. Optional `glare` paints a soft highlight that
- * follows the cursor.
+ * `prefers-reduced-motion`. `hasGlare` paints a cursor-following highlight.
  */
 export const Tilt = forwardRef<HTMLElement, TiltProps>(function Tilt(
   {
     maxAngle = 12,
     perspective = 800,
-    glare,
+    hasGlare,
     scale = 1,
     as = 'div',
     className,
@@ -99,7 +98,7 @@ export const Tilt = forwardRef<HTMLElement, TiltProps>(function Tilt(
       {...rest}
     >
       {children}
-      {glare && !reduced && tilt.active && (
+      {hasGlare && !reduced && tilt.active && (
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-[inherit] mix-blend-overlay"

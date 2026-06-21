@@ -17,7 +17,7 @@ export const Inline: Story = {
       <p className="mt-2 text-sm text-muted-foreground">
         The overlay is positioned inside this card. Useful for blocking a single panel.
       </p>
-      <LoadingOverlay inline />
+      <LoadingOverlay isInline />
     </div>
   ),
 };
@@ -26,7 +26,7 @@ export const InlineWithLabel: Story = {
   render: () => (
     <div className="relative h-64 w-96 rounded-md border border-border bg-card p-4">
       <p className="text-sm">Saving form…</p>
-      <LoadingOverlay inline label="Saving changes" blur />
+      <LoadingOverlay isInline label="Saving changes" hasBlur />
     </div>
   ),
 };
@@ -47,7 +47,7 @@ export const Toggle: Story = {
           >
             Run for 1.5s
           </button>
-          <LoadingOverlay open={open} inline label="Working…" />
+          <LoadingOverlay isOpen={open} isInline label="Working…" />
         </div>
       );
     }

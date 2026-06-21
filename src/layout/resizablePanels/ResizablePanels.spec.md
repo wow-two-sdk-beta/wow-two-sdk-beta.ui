@@ -40,7 +40,7 @@ Sizes are stored as percentages summing to ~100. Separators sit *between* panels
 ## Separator props
 | Name | Type | Default | Why |
 |---|---|---|---|
-| `disabled` | `boolean` | `false` | Hides hover/cursor + ignores drag. |
+| `isDisabled` | `boolean` | `false` | Hides hover/cursor + ignores drag. |
 
 ## Composition model
 Compound. Root reads child structure to count panels and bind separators. Sizes managed centrally. Children in order: `Panel · Separator · Panel · Separator · …`.

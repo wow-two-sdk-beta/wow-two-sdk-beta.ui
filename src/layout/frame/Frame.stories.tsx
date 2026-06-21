@@ -11,5 +11,5 @@ type Story = StoryObj<typeof Frame>;
 
 export const Card: Story = { args: { children: 'Free-form content', className: 'w-80' } };
 export const Muted: Story = {
-  args: { surface: 'muted', bordered: false, children: 'Recessed surface', className: 'w-80' },
+  args: { surface: 'muted', isBordered: false, children: 'Recessed surface', className: 'w-80' },
 };

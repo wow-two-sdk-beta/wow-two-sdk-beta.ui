@@ -32,11 +32,11 @@ export interface CollapsibleProps extends HTMLAttributes<HTMLDivElement> {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  disabled?: boolean;
+  isDisabled?: boolean;
 }
 
 export const Collapsible = forwardRef<HTMLDivElement, CollapsibleProps>(function Collapsible(
-  { open: openProp, defaultOpen = false, onOpenChange, disabled = false, className, children, ...rest },
+  { open: openProp, defaultOpen = false, onOpenChange, isDisabled = false, className, children, ...rest },
   ref,
 ) {
   const [open, setOpen] = useControlled({
@@ -48,8 +48,8 @@ export const Collapsible = forwardRef<HTMLDivElement, CollapsibleProps>(function
   const triggerId = useId();
 
   const ctx = useMemo<CollapsibleContextValue>(
-    () => ({ open, setOpen, contentId, triggerId, disabled }),
-    [open, setOpen, contentId, triggerId, disabled],
+    () => ({ open, setOpen, contentId, triggerId, disabled: isDisabled }),
+    [open, setOpen, contentId, triggerId, isDisabled],
   );
 
   return (
@@ -57,7 +57,7 @@ export const Collapsible = forwardRef<HTMLDivElement, CollapsibleProps>(function
       <div
         ref={ref}
         data-state={open ? 'open' : 'closed'}
-        data-disabled={dataAttr(disabled)}
+        data-disabled={dataAttr(isDisabled)}
         className={className}
         {...rest}
       >
@@ -102,14 +102,14 @@ export const CollapsibleTrigger = forwardRef<HTMLButtonElement, CollapsibleTrigg
 
 export interface CollapsibleContentProps extends HTMLAttributes<HTMLDivElement> {
   /** Render hidden content but keep it in the DOM (for animations). */
-  forceMount?: boolean;
+  isForceMounted?: boolean;
   children: ReactNode;
 }
 
 export const CollapsibleContent = forwardRef<HTMLDivElement, CollapsibleContentProps>(
-  function CollapsibleContent({ forceMount, className, children, ...rest }, ref) {
+  function CollapsibleContent({ isForceMounted, className, children, ...rest }, ref) {
     const ctx = useCollapsibleContext();
-    if (!ctx.open && !forceMount) return null;
+    if (!ctx.open && !isForceMounted) return null;
     return (
       <div
         ref={ref}

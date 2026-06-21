@@ -17,11 +17,11 @@ export const colorSwatchVariants = tv({
       true: 'cursor-pointer transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 hover:shadow-sm',
       false: '',
     },
-    selected: {
+    isSelected: {
       true: 'ring-2 ring-ring ring-offset-1',
       false: '',
     },
-    disabled: {
+    isDisabled: {
       true: 'cursor-not-allowed opacity-50',
       false: '',
     },
@@ -30,8 +30,8 @@ export const colorSwatchVariants = tv({
     size: 'md',
     shape: 'square',
     interactive: false,
-    selected: false,
-    disabled: false,
+    isSelected: false,
+    isDisabled: false,
   },
 });
 

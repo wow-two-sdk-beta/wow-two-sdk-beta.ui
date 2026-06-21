@@ -5,7 +5,7 @@ Blocks interaction with a region (or the whole viewport) while a long-running ta
 
 ## Anatomy
 ```
-<LoadingOverlay open>
+<LoadingOverlay isOpen>
   ├── Backdrop (scrim, optional blur)
   └── center
       ├── Spinner
@@ -14,7 +14,7 @@ Blocks interaction with a region (or the whole viewport) while a long-running ta
 ```
 
 ## Required behaviors
-- When `open`, scrim covers parent (or viewport).
+- When `isOpen`, scrim covers parent (or viewport).
 - Pointer events captured by the scrim — underlying UI is non-interactive.
 - Polite live region announces label changes.
 
@@ -24,10 +24,10 @@ Blocks interaction with a region (or the whole viewport) while a long-running ta
 ## Props
 | Name | Type | Default | Why |
 |---|---|---|---|
-| `open` | `boolean` | `true` | Controls mount. |
+| `isOpen` | `boolean` | `true` | Controls mount. |
 | `label` | `ReactNode` | `'Loading…'` | Visible + announced. |
-| `inline` | `boolean` | `false` | Position inside parent (parent must be `position: relative`) instead of fixed-viewport. |
-| `blur` | `boolean` | `false` | Scrim blurs background. |
+| `isInline` | `boolean` | `false` | Position inside parent (parent must be `position: relative`) instead of fixed-viewport. |
+| `hasBlur` | `boolean` | `false` | Scrim blurs background. |
 | `spinnerSize` | `Spinner['size']` | `'lg'` | |
 | `spinnerTone` | `Spinner['tone']` | `'brand'` | |
 

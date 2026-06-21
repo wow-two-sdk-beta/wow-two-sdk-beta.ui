@@ -17,7 +17,7 @@ import {
 } from 'react';
 import { Check } from 'lucide-react';
 import { cn, surfaceVariants, type SurfaceVariants } from '../../utils';
-import { useControlled } from '../../hooks';
+import { useControlled, useTypeahead } from '../../hooks';
 import {
   listboxEmptyVariants,
   listboxGroupLabelVariants,
@@ -39,12 +39,12 @@ export type ListboxIndicator = 'check' | 'checkbox' | 'radio' | 'dot' | 'none';
 interface ItemEntry {
   id: string;
   value: unknown;
-  disabled: boolean;
+  isDisabled: boolean;
 }
 
 /** Represents the shape of the listbox context shared with descendants. */
 interface ListboxContextValue {
-  multiple: boolean;
+  isMultiple: boolean;
   values: unknown[];
   isEqual: EqualityFn<unknown>;
   activeId: string | null;
@@ -53,7 +53,7 @@ interface ListboxContextValue {
   unregisterItem: (id: string) => void;
   setActiveId: (id: string | null) => void;
   indicator: ListboxIndicator;
-  disabled: boolean;
+  isDisabled: boolean;
 }
 
 const ListboxContext = createContext<ListboxContextValue | null>(null);
@@ -65,14 +65,14 @@ function useListboxContext() {
 }
 
 type SingleProps<T> = {
-  multiple?: false;
+  isMultiple?: false;
   value?: T;
   defaultValue?: T;
   onValueChange?: (value: T | undefined) => void;
 };
 
 type MultiProps<T> = {
-  multiple: true;
+  isMultiple: true;
   value?: T[];
   defaultValue?: T[];
   onValueChange?: (value: T[]) => void;
@@ -81,11 +81,15 @@ type MultiProps<T> = {
 /** Represents the props shared between single-select and multi-select modes. */
 type CommonProps<T> = SurfaceVariants & {
   /** Disables all items when true. */
-  disabled?: boolean;
+  isDisabled?: boolean;
   /** Compares item values for equality; defaults to `Object.is`. */
   isEqual?: EqualityFn<T>;
   /** Sets the selection-indicator style; default `check` (single) or `checkbox` (multi). */
   indicator?: ListboxIndicator;
+  /** Fires after commit whenever the active (`aria-activedescendant`) option id changes —
+   *  including the initial auto-active on mount. Lets a hosting combobox mirror the id without
+   *  scraping the rendered DOM attribute. */
+  onActiveChange?: (id: string | null) => void;
   className?: string;
   children: ReactNode;
 };
@@ -102,33 +106,35 @@ function ListboxImpl<T>(
   ref: ForwardedRef<HTMLDivElement>,
 ): ReactElement {
   const {
-    multiple = false,
+    isMultiple = false,
     value,
     defaultValue,
     onValueChange,
     isEqual,
     indicator,
+    onActiveChange,
     variant,
     tone,
     radius,
     padding,
     elevation,
-    disabled,
+    isDisabled,
     className,
     children,
     onKeyDown,
     ...rest
   } = props as ListboxProps<T> & {
-    multiple?: boolean;
+    isMultiple?: boolean;
     value?: T | T[];
     defaultValue?: T | T[];
     onValueChange?: ((v: T | undefined) => void) | ((v: T[]) => void);
+    onActiveChange?: (id: string | null) => void;
   };
 
   const equals = (isEqual as EqualityFn<unknown> | undefined) ?? defaultEquals;
-  const resolvedIndicator: ListboxIndicator = indicator ?? (multiple ? 'checkbox' : 'check');
+  const resolvedIndicator: ListboxIndicator = indicator ?? (isMultiple ? 'checkbox' : 'check');
 
-  const initial: T | T[] | undefined = defaultValue ?? (multiple ? ([] as T[]) : undefined);
+  const initial: T | T[] | undefined = defaultValue ?? (isMultiple ? ([] as T[]) : undefined);
   const [current, setCurrent] = useControlled<T | T[] | undefined>({
     controlled: value,
     default: initial,
@@ -155,7 +161,7 @@ function ListboxImpl<T>(
 
   const onItemSelect = useCallback(
     (next: unknown) => {
-      if (multiple) {
+      if (isMultiple) {
         const cur = (Array.isArray(current) ? current : []) as unknown[];
         const has = cur.some((v) => equals(v, next));
         const out = has ? cur.filter((v) => !equals(v, next)) : [...cur, next];
@@ -164,22 +170,36 @@ function ListboxImpl<T>(
         (setCurrent as (v: unknown) => void)(next);
       }
     },
-    [multiple, current, setCurrent, equals],
+    [isMultiple, current, setCurrent, equals],
   );
 
   useEffect(() => {
     if (activeId) return;
     const firstSelected = items.current.find(
-      (i) => !i.disabled && values.some((v) => equals(v, i.value)),
+      (i) => !i.isDisabled && values.some((v) => equals(v, i.value)),
     );
-    const firstEnabled = items.current.find((i) => !i.disabled);
+    const firstEnabled = items.current.find((i) => !i.isDisabled);
     setActiveId((firstSelected ?? firstEnabled)?.id ?? null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* Mirrors the active id to a hosting combobox after commit. Ref-stabilised so swapping the
+     handler doesn't re-fire; runs on every `activeId` change including the initial auto-active. */
+  const onActiveChangeRef = useRef(onActiveChange);
+  onActiveChangeRef.current = onActiveChange;
+  useEffect(() => {
+    onActiveChangeRef.current?.(activeId);
+  }, [activeId]);
+
+  /** Activates an option by id and keeps it visible (lists are `max-h-72 overflow-y-auto`). */
+  const activateById = useCallback((id: string) => {
+    setActiveId(id);
+    document.getElementById(id)?.scrollIntoView({ block: 'nearest' });
+  }, []);
+
   const moveActive = useCallback(
     (direction: 1 | -1, jump = 1) => {
-      const list = items.current.filter((i) => !i.disabled);
+      const list = items.current.filter((i) => !i.isDisabled);
       if (list.length === 0) return;
       const currentIdx = list.findIndex((i) => i.id === activeId);
       let nextIdx = currentIdx + direction * jump;
@@ -187,19 +207,32 @@ function ListboxImpl<T>(
       if (nextIdx < 0) nextIdx = 0;
       if (nextIdx >= list.length) nextIdx = list.length - 1;
       const nextEntry = list[nextIdx];
-      if (nextEntry) {
-        setActiveId(nextEntry.id);
-        /* Keeps the active option visible — lists are `max-h-72 overflow-y-auto`. */
-        document.getElementById(nextEntry.id)?.scrollIntoView({ block: 'nearest' });
-      }
+      if (nextEntry) activateById(nextEntry.id);
     },
-    [activeId],
+    [activeId, activateById],
   );
+
+  /* Type-to-select over the registered options. Labels are read from the live DOM text of each
+     option (`document.getElementById` inside the user-event path → SSR-safe), so arbitrary
+     `children` work without threading a label prop. Disabled options are skipped by the matcher. */
+  const typeahead = useTypeahead<ItemEntry>({
+    items: () => items.current,
+    getLabel: (entry) => document.getElementById(entry.id)?.textContent ?? '',
+    isDisabled: (entry) => entry.isDisabled,
+    getActiveIndex: () => items.current.findIndex((i) => i.id === activeId),
+    onMatch: (entry) => activateById(entry.id),
+  });
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       onKeyDown?.(event);
-      if (event.defaultPrevented || disabled) return;
+      if (event.defaultPrevented || isDisabled) return;
+      /* Type-to-select first: a printable char (incl. Space while a buffer is active) is consumed
+         here and must not fall through to Enter/Space selection or anything else. */
+      if (typeahead.onKeyDown(event)) {
+        event.preventDefault();
+        return;
+      }
       switch (event.key) {
         case 'ArrowDown':
           event.preventDefault();
@@ -229,19 +262,19 @@ function ListboxImpl<T>(
         case ' ': {
           if (!activeId) return;
           const entry = items.current.find((i) => i.id === activeId);
-          if (!entry || entry.disabled) return;
+          if (!entry || entry.isDisabled) return;
           event.preventDefault();
           onItemSelect(entry.value);
           break;
         }
       }
     },
-    [activeId, disabled, moveActive, onItemSelect, onKeyDown],
+    [activeId, isDisabled, moveActive, onItemSelect, onKeyDown, typeahead],
   );
 
   const ctx = useMemo<ListboxContextValue>(
     () => ({
-      multiple,
+      isMultiple,
       values,
       isEqual: equals,
       activeId,
@@ -250,10 +283,10 @@ function ListboxImpl<T>(
       unregisterItem,
       setActiveId,
       indicator: resolvedIndicator,
-      disabled: disabled ?? false,
+      isDisabled: isDisabled ?? false,
     }),
     [
-      multiple,
+      isMultiple,
       values,
       equals,
       activeId,
@@ -261,7 +294,7 @@ function ListboxImpl<T>(
       registerItem,
       unregisterItem,
       resolvedIndicator,
-      disabled,
+      isDisabled,
     ],
   );
 
@@ -273,10 +306,10 @@ function ListboxImpl<T>(
       <div
         ref={ref}
         role="listbox"
-        tabIndex={disabled ? -1 : 0}
-        aria-multiselectable={multiple || undefined}
+        tabIndex={isDisabled ? -1 : 0}
+        aria-multiselectable={isMultiple || undefined}
         aria-activedescendant={activeId ?? undefined}
-        aria-disabled={disabled || undefined}
+        aria-disabled={isDisabled || undefined}
         onKeyDown={handleKeyDown}
         className={cn(
           surfaceVariants({ variant, tone, radius, padding: resolvedPadding, elevation }),
@@ -351,14 +384,14 @@ function LeadingIndicator({
 function TrailingIndicator({
   indicator,
   isSelected,
-  multiple,
+  isMultiple,
 }: {
   indicator: ListboxIndicator;
   isSelected: boolean;
-  multiple: boolean;
+  isMultiple: boolean;
 }) {
   if (indicator === 'check' && isSelected) {
-    return <Check className={cn('h-4 w-4 shrink-0', !multiple && 'opacity-80')} />;
+    return <Check className={cn('h-4 w-4 shrink-0', !isMultiple && 'opacity-80')} />;
   }
   return null;
 }
@@ -370,14 +403,14 @@ export interface ListboxItemProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   /** Holds the item value; compared via the parent listbox's `isEqual`. */
   value: unknown;
   /** Disables this item when true. */
-  disabled?: boolean;
+  isDisabled?: boolean;
   /** Overrides the listbox-level indicator for this single item. */
   indicator?: ListboxIndicator;
   children: ReactNode;
 }
 
 export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function ListboxItem(
-  { value, disabled = false, indicator: itemIndicator, className, children, onClick, onPointerEnter, ...rest },
+  { value, isDisabled = false, indicator: itemIndicator, className, children, onClick, onPointerEnter, ...rest },
   forwardedRef,
 ) {
   const ctx = useListboxContext();
@@ -386,13 +419,13 @@ export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function
   const indicator = itemIndicator ?? ctx.indicator;
 
   useEffect(() => {
-    ctx.registerItem({ id, value, disabled });
+    ctx.registerItem({ id, value, isDisabled });
     return () => ctx.unregisterItem(id);
-  }, [ctx, id, value, disabled]);
+  }, [ctx, id, value, isDisabled]);
 
   const isSelected = ctx.values.some((v) => ctx.isEqual(v, value));
   const isActive = ctx.activeId === id;
-  const state = disabled
+  const state = isDisabled
     ? 'disabled'
     : isSelected
       ? 'selected'
@@ -412,26 +445,31 @@ export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function
       id={id}
       role="option"
       aria-selected={isSelected}
-      aria-disabled={disabled || undefined}
+      aria-disabled={isDisabled || undefined}
       data-active={isActive ? '' : undefined}
       data-selected={isSelected ? '' : undefined}
-      data-disabled={disabled ? '' : undefined}
+      data-disabled={isDisabled ? '' : undefined}
       onClick={(e) => {
         onClick?.(e);
-        /* `ctx.disabled` = listbox-level disabled — keyboard is blocked in handleKeyDown; mirror for mouse. */
-        if (e.defaultPrevented || disabled || ctx.disabled) return;
+        /* `ctx.isDisabled` = listbox-level disabled — keyboard is blocked in handleKeyDown; mirror for mouse. */
+        if (e.defaultPrevented || isDisabled || ctx.isDisabled) return;
         ctx.onItemSelect(value);
       }}
       onPointerEnter={(e) => {
         onPointerEnter?.(e);
-        if (!disabled) ctx.setActiveId(id);
+        if (!isDisabled) ctx.setActiveId(id);
       }}
       className={cn(listboxItemVariants({ state }), className)}
       {...rest}
     >
       <LeadingIndicator indicator={indicator} isSelected={isSelected} />
-      <span className="flex min-w-0 flex-1 items-center gap-2">{children}</span>
-      <TrailingIndicator indicator={indicator} isSelected={isSelected} multiple={ctx.multiple} />
+      {/* `data-listbox-item-content` is a stable hook for hosts that need to target the option's
+          content wrapper (e.g. Select's `matchWidth` truncation) without a brittle structural
+          selector. */}
+      <span data-listbox-item-content className="flex min-w-0 flex-1 items-center gap-2">
+        {children}
+      </span>
+      <TrailingIndicator indicator={indicator} isSelected={isSelected} isMultiple={ctx.isMultiple} />
     </div>
   );
 });

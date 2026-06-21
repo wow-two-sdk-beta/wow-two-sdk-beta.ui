@@ -11,16 +11,16 @@ export type UndoBarPosition =
   | 'bottom-center';
 
 export interface UndoBarProps {
-  open: boolean;
+  isOpen: boolean;
   onOpenChange?: (open: boolean) => void;
   message: ReactNode;
   onUndo?: () => void;
   undoLabel?: string;
   /** ms until auto-dismiss; `Infinity` = sticky. Default 5000. */
   duration?: number;
-  pauseOnHover?: boolean;
+  canPauseOnHover?: boolean;
   position?: UndoBarPosition;
-  showCountdown?: boolean;
+  hasCountdown?: boolean;
   className?: string;
 }
 
@@ -39,15 +39,15 @@ const POSITION: Record<UndoBarPosition, string> = {
  * `Toaster` instead.
  */
 export function UndoBar({
-  open,
+  isOpen,
   onOpenChange,
   message,
   onUndo,
   undoLabel = 'Undo',
   duration = 5000,
-  pauseOnHover = true,
+  canPauseOnHover = true,
   position = 'bottom-center',
-  showCountdown = false,
+  hasCountdown = false,
   className,
 }: UndoBarProps) {
   const [progress, setProgress] = useState(1);
@@ -57,7 +57,7 @@ export function UndoBar({
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!open) {
+    if (!isOpen) {
       remainingRef.current = duration;
       setProgress(1);
       return;
@@ -69,7 +69,7 @@ export function UndoBar({
     if (paused) return;
 
     startRef.current = performance.now();
-    if (!showCountdown) {
+    if (!hasCountdown) {
       // No visible countdown — a single timeout, no per-frame re-renders.
       const handle = window.setTimeout(() => {
         onOpenChange?.(false);
@@ -96,19 +96,19 @@ export function UndoBar({
       const elapsed = performance.now() - startRef.current;
       remainingRef.current = Math.max(0, remainingRef.current - elapsed);
     };
-  }, [open, duration, paused, showCountdown, onOpenChange]);
+  }, [isOpen, duration, paused, hasCountdown, onOpenChange]);
 
-  if (!open) return null;
+  if (!isOpen) return null;
 
   return (
     <Portal>
       <div
         role="status"
         aria-live="polite"
-        onMouseEnter={() => pauseOnHover && setPaused(true)}
-        onMouseLeave={() => pauseOnHover && setPaused(false)}
-        onFocus={() => pauseOnHover && setPaused(true)}
-        onBlur={() => pauseOnHover && setPaused(false)}
+        onMouseEnter={() => canPauseOnHover && setPaused(true)}
+        onMouseLeave={() => canPauseOnHover && setPaused(false)}
+        onFocus={() => canPauseOnHover && setPaused(true)}
+        onBlur={() => canPauseOnHover && setPaused(false)}
         className={cn(
           'fixed z-toast flex items-center gap-3 overflow-hidden text-sm animate-in fade-in-0 slide-in-from-bottom-2',
           surfaceVariants({ variant: 'surface', radius: 'md', padding: 'sm', elevation: 3 }),
@@ -130,7 +130,7 @@ export function UndoBar({
             {undoLabel}
           </button>
         )}
-        {showCountdown && duration !== Infinity && (
+        {hasCountdown && duration !== Infinity && (
           <div className="absolute bottom-0 left-0 h-0.5 w-full bg-border">
             <div
               className="h-full bg-primary transition-[width] duration-100 ease-linear"

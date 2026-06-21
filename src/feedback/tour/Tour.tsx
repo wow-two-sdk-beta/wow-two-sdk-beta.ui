@@ -18,7 +18,7 @@ export interface TourStep {
 }
 
 export interface TourProps {
-  open?: boolean;
+  isOpen?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   steps: TourStep[];
@@ -67,7 +67,7 @@ function placementCoords(rect: Rect, placement: NonNullable<TourStep['placement'
  * step's target + a floating tooltip with Next / Prev / Skip / Done.
  */
 export function Tour({
-  open: openProp,
+  isOpen: openProp,
   defaultOpen = false,
   onOpenChange,
   steps,

@@ -31,7 +31,7 @@ GitHub-contributions style year heatmap. Each cell = a day; intensity color enco
 | `onCellClick` | `(date: string, value: number) => void` | — | |
 | `monthLabels` | `string[]` | `['Jan',...]` | |
 | `weekdayLabels` | `string[]` | `['Sun',...]` | |
-| `showLegend` | `boolean` | `true` | |
+| `hasLegend` | `boolean` | `true` | |
 
 ## Accessibility
 - Each cell is a `<button>` with `aria-label` ("2026-03-12: 12").

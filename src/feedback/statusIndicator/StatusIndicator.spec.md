@@ -9,7 +9,7 @@ Two-line status block — colored dot + label + helper. Use on monitoring/status
 | `tone` | `'success' \| 'warning' \| 'destructive' \| 'info' \| 'neutral'` | `'success'` |
 | `label` | `ReactNode` | — (required) |
 | `description` | `ReactNode` | — |
-| `pulse` | `boolean` | `false` |
+| `hasPulse` | `boolean` | `false` |
 
 ## Dependencies
 Foundation: `utils/cn`.

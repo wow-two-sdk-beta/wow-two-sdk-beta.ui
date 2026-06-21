@@ -150,14 +150,14 @@ const deployColumns: DataTableColumn<Deployment>[] = [
   {
     key: 'id',
     header: 'Deploy',
-    sortable: true,
+    isSortable: true,
     accessor: (r) => r.id,
     cell: (r) => <span className="font-mono text-xs">{r.id}</span>,
   },
   {
     key: 'service',
     header: 'Service',
-    sortable: true,
+    isSortable: true,
     accessor: (r) => r.service,
     cell: (r) => (
       <span className="inline-flex items-center gap-2">
@@ -178,7 +178,7 @@ const deployColumns: DataTableColumn<Deployment>[] = [
     header: 'Triggered by',
     cell: (r) => (
       <span className="inline-flex items-center gap-2">
-        <Avatar size="xs" name={userName(r.actorId)} autoColor />
+        <Avatar size="xs" name={userName(r.actorId)} canAutoColor />
         <span className="text-sm">{userName(r.actorId)}</span>
       </span>
     ),
@@ -186,7 +186,7 @@ const deployColumns: DataTableColumn<Deployment>[] = [
   {
     key: 'status',
     header: 'Status',
-    sortable: true,
+    isSortable: true,
     accessor: (r) => r.status,
     cell: (r) => (
       <Badge size="sm" variant={DEPLOY_BADGE[r.status]}>
@@ -197,7 +197,7 @@ const deployColumns: DataTableColumn<Deployment>[] = [
   {
     key: 'durationSec',
     header: 'Duration',
-    sortable: true,
+    isSortable: true,
     align: 'right',
     accessor: (r) => r.durationSec,
     cell: (r) => <span className="tabular-nums">{r.durationSec}s</span>,
@@ -205,7 +205,7 @@ const deployColumns: DataTableColumn<Deployment>[] = [
   {
     key: 'at',
     header: 'When',
-    sortable: true,
+    isSortable: true,
     accessor: (r) => r.at,
     cell: (r) => <span className="whitespace-nowrap text-muted-foreground">{fmtDateTime(r.at)}</span>,
   },
@@ -229,7 +229,7 @@ const initialGridRows: GridRow[] = projectTasks.slice(0, 6).map((t) => ({
 }));
 
 const gridColumns: DataGridColumn<GridRow>[] = [
-  { key: 'id', header: 'ID', accessor: (r) => r.id, editable: false, width: '6rem' },
+  { key: 'id', header: 'ID', accessor: (r) => r.id, isEditable: false, width: '6rem' },
   { key: 'title', header: 'Title', accessor: (r) => r.title, type: 'text' },
   {
     key: 'status',
@@ -510,7 +510,7 @@ export default function DashboardScreen() {
                 <TrendIndicator
                   size="xs"
                   value={errorRate.delta}
-                  inverse
+                  isInverse
                   label={`vs ${errorRate.comparedTo}`}
                 />
                 <Sparkline
@@ -519,7 +519,7 @@ export default function DashboardScreen() {
                   width={110}
                   height={30}
                   tone="danger"
-                  showLast
+                  hasLast
                   ariaLabel="Errors per day"
                 />
               </div>
@@ -555,7 +555,7 @@ export default function DashboardScreen() {
                 width={140}
                 height={24}
                 tone="muted"
-                showLast
+                hasLast
                 ariaLabel="API requests trend"
               />
             </span>
@@ -605,7 +605,7 @@ export default function DashboardScreen() {
                       setSort(next);
                       setPage(1);
                     }}
-                    hoverable
+                    isHoverable
                     density="compact"
                     onRowClick={(r) =>
                       toast({
@@ -630,7 +630,7 @@ export default function DashboardScreen() {
                 }
               >
                 <DataGrid<GridRow>
-                  dense
+                  isDense
                   columns={gridColumns}
                   rows={gridRows}
                   rowKey={(r) => r.id}
@@ -642,12 +642,12 @@ export default function DashboardScreen() {
             {/* Side column */}
             <div className="min-w-0 space-y-6">
               <Panel title="Activity">
-                <ActivityFeed dense>
+                <ActivityFeed isDense>
                   {feedItems.map((item, idx) => (
                     <ActivityItem
                       key={item.id}
-                      last={idx === feedItems.length - 1}
-                      avatar={<Avatar size="sm" name={userName(item.actorId)} autoColor />}
+                      isLast={idx === feedItems.length - 1}
+                      avatar={<Avatar size="sm" name={userName(item.actorId)} canAutoColor />}
                       timestamp={fmtDateTime(item.at)}
                       actions={
                         !item.read ? (

@@ -25,7 +25,7 @@ export interface ChatComposerProps
   /** Placeholder text. */
   placeholder?: string;
   /** Disable the input + send button. */
-  disabled?: boolean;
+  isDisabled?: boolean;
   /** Slot rendered on the leading edge of the toolbar (e.g. attach button). */
   leading?: ReactNode;
   /** Slot rendered between the leading slot and the send button. */
@@ -33,7 +33,7 @@ export interface ChatComposerProps
   /** Replace or hide the default send button. */
   sendButton?: ReactNode;
   /** Hide the send button entirely (e.g. when consumer renders a custom CTA). */
-  hideSendButton?: boolean;
+  isSendButtonHidden?: boolean;
   /** When the textarea should submit. `enter` = Enter alone (default).
    *  `mod-enter` = Cmd/Ctrl+Enter (Enter inserts a newline). */
   submitOn?: SubmitTrigger;
@@ -60,11 +60,11 @@ export const ChatComposer = forwardRef<HTMLTextAreaElement, ChatComposerProps>(
       onValueChange,
       onSubmit,
       placeholder = 'Write a message…',
-      disabled,
+      isDisabled,
       leading,
       trailing,
       sendButton,
-      hideSendButton,
+      isSendButtonHidden,
       submitOn = 'enter',
       maxHeight = 200,
       textareaProps,
@@ -97,7 +97,7 @@ export const ChatComposer = forwardRef<HTMLTextAreaElement, ChatComposerProps>(
     const handleSubmit = (e?: FormEvent) => {
       e?.preventDefault();
       const trimmed = value.trim();
-      if (!trimmed || disabled) return;
+      if (!trimmed || isDisabled) return;
       onSubmit?.(trimmed);
       if (valueProp === undefined) setValue('');
     };
@@ -122,7 +122,7 @@ export const ChatComposer = forwardRef<HTMLTextAreaElement, ChatComposerProps>(
         className={cn(
           'flex w-full items-end gap-2 rounded-2xl border border-input bg-background px-3 py-2',
           'focus-within:ring-2 focus-within:ring-ring',
-          disabled && 'cursor-not-allowed opacity-60',
+          isDisabled && 'cursor-not-allowed opacity-60',
           className,
         )}
         {...props}
@@ -136,18 +136,18 @@ export const ChatComposer = forwardRef<HTMLTextAreaElement, ChatComposerProps>(
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder={placeholder}
-          disabled={disabled}
+          disabled={isDisabled}
           className={cn(
             'flex-1 resize-none bg-transparent py-1 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:outline-none',
             textareaProps?.className,
           )}
         />
         {trailing && <div className="flex shrink-0 items-center gap-1 self-end pb-1">{trailing}</div>}
-        {!hideSendButton && (
+        {!isSendButtonHidden && (
           sendButton ?? (
             <button
               type="submit"
-              disabled={disabled || isEmpty}
+              disabled={isDisabled || isEmpty}
               aria-label="Send message"
               className={cn(
                 'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full self-end',

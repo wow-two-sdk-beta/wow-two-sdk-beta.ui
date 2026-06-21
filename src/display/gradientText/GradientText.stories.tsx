@@ -17,7 +17,7 @@ export const Animated: Story = {
   render: () => (
     <GradientText
       as="h2"
-      animated
+      isAnimated
       from="oklch(0.65 0.25 280)"
       via="oklch(0.7 0.2 200)"
       to="oklch(0.75 0.2 140)"

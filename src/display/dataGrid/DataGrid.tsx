@@ -22,7 +22,7 @@ export interface DataGridColumn<T> {
   cell?: (row: T) => ReactNode;
   type?: DataGridCellType;
   options?: Array<{ value: string | number; label: ReactNode }>;
-  editable?: boolean;
+  isEditable?: boolean;
   width?: string;
   align?: 'left' | 'right' | 'center';
 }
@@ -32,7 +32,7 @@ export interface DataGridProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, '
   rows: T[];
   rowKey: (row: T) => string;
   onRowChange?: (row: T, colKey: string, value: unknown) => void;
-  dense?: boolean;
+  isDense?: boolean;
 }
 
 interface CellPos {
@@ -56,7 +56,7 @@ function castValue(raw: string, type: DataGridCellType): unknown {
  */
 export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
   function DataGrid(
-    { columns, rows, rowKey, onRowChange, dense, className, ...rest },
+    { columns, rows, rowKey, onRowChange, isDense, className, ...rest },
     ref,
   ) {
     const [active, setActive] = useState<CellPos>({ row: 0, col: 0 });
@@ -89,7 +89,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
       const col = columns[active.col];
       const row = rows[active.row];
       if (!col || row === undefined) return;
-      if (col.editable === false) return;
+      if (col.isEditable === false) return;
       const raw = col.accessor(row);
       setDraft(raw == null ? '' : String(raw));
       setEditing(true);
@@ -166,7 +166,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
       }
     };
 
-    const cellPad = dense ? 'px-2 py-1' : 'px-3 py-2';
+    const cellPad = isDense ? 'px-2 py-1' : 'px-3 py-2';
 
     return (
       <div
@@ -213,7 +213,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
                 {columns.map((col, ci) => {
                   const isActive = active.row === ri && active.col === ci;
                   const value = col.accessor(row);
-                  const isEditable = col.editable !== false;
+                  const isEditable = col.isEditable !== false;
                   const isEditing = editing && isActive;
                   return (
                     <td

@@ -22,8 +22,8 @@ export interface RecurrenceEditorProps extends Omit<HTMLAttributes<HTMLDivElemen
   onValueChange?: (rule: RecurrenceRule) => void;
   from?: Date;
   previewCount?: number;
-  disabled?: boolean;
-  readOnly?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
   /** When set, emits a hidden input with the serialized `RRULE:` string. */
   name?: string;
 }
@@ -117,8 +117,8 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
       onValueChange,
       from = new Date(),
       previewCount = 5,
-      disabled,
-      readOnly,
+      isDisabled,
+      isReadOnly,
       name,
       className,
       ...rest
@@ -154,7 +154,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
         ref={ref}
         className={cn(
           'flex flex-col gap-3 rounded-md border border-border bg-card p-4 text-card-foreground shadow-sm',
-          disabled && 'opacity-60',
+          isDisabled && 'opacity-60',
           className,
         )}
         {...rest}
@@ -166,15 +166,15 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
             min={1}
             max={999}
             value={rule.interval}
-            disabled={disabled}
-            readOnly={readOnly}
+            disabled={isDisabled}
+            readOnly={isReadOnly}
             onChange={(e) => update({ interval: Math.max(1, Number(e.target.value) || 1) })}
             className={cn(inputBaseVariants({ size: 'sm' }), 'w-16')}
           />
           <select
             aria-label="Frequency"
             value={rule.freq}
-            disabled={disabled}
+            disabled={isDisabled}
             onChange={(e) => update({ freq: e.target.value as RecurrenceFreq })}
             className={cn(inputBaseVariants({ size: 'sm' }), 'w-32')}
           >
@@ -197,7 +197,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
                     type="button"
                     role="checkbox"
                     aria-checked={checked}
-                    disabled={disabled || readOnly}
+                    disabled={isDisabled || isReadOnly}
                     onClick={() => {
                       const set = new Set(rule.byDay ?? []);
                       if (set.has(wd)) set.delete(wd);
@@ -227,8 +227,8 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               min={1}
               max={31}
               value={rule.byMonthDay ?? from.getDate()}
-              disabled={disabled}
-              readOnly={readOnly}
+              disabled={isDisabled}
+              readOnly={isReadOnly}
               onChange={(e) => update({ byMonthDay: Math.min(31, Math.max(1, Number(e.target.value) || 1)) })}
               className={cn(inputBaseVariants({ size: 'sm' }), 'w-20')}
             />
@@ -242,7 +242,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               type="radio"
               name={`${name ?? 'rule'}-end`}
               checked={endMode === 'never'}
-              disabled={disabled || readOnly}
+              disabled={isDisabled || isReadOnly}
               onChange={() => update({ count: undefined, until: null })}
             />
             Never
@@ -252,7 +252,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               type="radio"
               name={`${name ?? 'rule'}-end`}
               checked={endMode === 'count'}
-              disabled={disabled || readOnly}
+              disabled={isDisabled || isReadOnly}
               onChange={() => update({ count: rule.count ?? 10, until: null })}
             />
             After
@@ -260,7 +260,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               type="number"
               min={1}
               value={rule.count ?? ''}
-              disabled={disabled || readOnly || endMode !== 'count'}
+              disabled={isDisabled || isReadOnly || endMode !== 'count'}
               onChange={(e) => update({ count: Math.max(1, Number(e.target.value) || 1), until: null })}
               className={cn(inputBaseVariants({ size: 'sm' }), 'w-20')}
             />
@@ -271,14 +271,14 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               type="radio"
               name={`${name ?? 'rule'}-end`}
               checked={endMode === 'until'}
-              disabled={disabled || readOnly}
+              disabled={isDisabled || isReadOnly}
               onChange={() => update({ until: addMonths(from, 6), count: undefined })}
             />
             On
             <input
               type="date"
               value={formatISODate(rule.until ?? null)}
-              disabled={disabled || readOnly || endMode !== 'until'}
+              disabled={isDisabled || isReadOnly || endMode !== 'until'}
               onChange={(e) => update({ until: parseISODate(e.target.value), count: undefined })}
               className={cn(inputBaseVariants({ size: 'sm' }), 'w-44')}
             />

@@ -6,6 +6,11 @@ export interface InlineProps extends ComponentPropsWithoutRef<'div'> {
   gap?: '0' | '1' | '2' | '3' | '4' | '6' | '8';
   /** Vertical alignment. Default `center`. */
   align?: 'start' | 'center' | 'end' | 'baseline';
+  /**
+   * Whether children wrap onto multiple lines. Default `true` (`flex-wrap`).
+   * Set `false` (`flex-nowrap`) for tight single-line rows that should truncate.
+   */
+  wrap?: boolean;
 }
 
 const GAP: Record<NonNullable<InlineProps['gap']>, string> = {
@@ -23,10 +28,16 @@ const ALIGN: Record<NonNullable<InlineProps['align']>, string> = {
  * inline button groups, breadcrumb-like sequences.
  */
 export const Inline = forwardRef<HTMLDivElement, InlineProps>(
-  ({ gap = '2', align = 'center', className, ...props }, ref) => (
+  ({ gap = '2', align = 'center', wrap = true, className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex flex-wrap', GAP[gap], ALIGN[align], className)}
+      className={cn(
+        'flex',
+        wrap ? 'flex-wrap' : 'flex-nowrap',
+        GAP[gap],
+        ALIGN[align],
+        className,
+      )}
       {...props}
     />
   ),

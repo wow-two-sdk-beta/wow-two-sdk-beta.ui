@@ -9,7 +9,7 @@ export interface FrameProps extends ComponentPropsWithoutRef<'div'> {
   /** Surface background — `card` (raised) or `muted` (recessed). Default `card`. */
   surface?: 'card' | 'muted' | 'transparent';
   /** Show the border. Default `true`. */
-  bordered?: boolean;
+  isBordered?: boolean;
 }
 
 const PADDING: Record<NonNullable<FrameProps['padding']>, string> = {
@@ -29,14 +29,14 @@ const SURFACE: Record<NonNullable<FrameProps['surface']>, string> = {
  * Use when you want the visual but not the structured Header/Body/Footer.
  */
 export const Frame = forwardRef<HTMLDivElement, FrameProps>(
-  ({ padding = '4', radius = 'md', surface = 'card', bordered = true, className, ...props }, ref) => (
+  ({ padding = '4', radius = 'md', surface = 'card', isBordered = true, className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
         SURFACE[surface],
         PADDING[padding],
         RADIUS[radius],
-        bordered && 'border border-border',
+        isBordered && 'border border-border',
         className,
       )}
       {...props}

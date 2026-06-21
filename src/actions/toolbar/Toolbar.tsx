@@ -35,7 +35,7 @@ export const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(function Toolbar
       <RovingFocusGroup
         ref={ref as never}
         orientation={orientation}
-        loop
+        canLoop
         role="toolbar"
         aria-orientation={orientation}
         data-orientation={orientation}

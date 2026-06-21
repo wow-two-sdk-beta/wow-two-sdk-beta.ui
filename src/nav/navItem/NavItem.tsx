@@ -24,9 +24,8 @@ const SIZE: Record<NonNullable<NavItemProps['size']>, string> = {
 };
 
 /**
- * Sidebar / nav row — icon + label + trailing slot + active state. Use as
- * a clickable Link (default `<a>`) or pass `asChild` to forward to a router
- * Link. Sets `aria-current="page"` when `isActive`.
+ * Sidebar / nav row — icon + label + trailing slot + active state. Default `<a>`;
+ * pass `asChild` to forward to a router Link. Sets `aria-current="page"` when `isActive`.
  */
 export const NavItem = forwardRef<HTMLAnchorElement, NavItemProps>(
   ({ asChild, icon, children, trailing, isActive, size = 'md', className, ...props }, ref) => {

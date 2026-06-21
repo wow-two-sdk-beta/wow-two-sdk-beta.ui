@@ -257,7 +257,7 @@ export default function OnboardingScreen() {
       )}
 
       <Tour
-        open={tourOpen}
+        isOpen={tourOpen}
         onOpenChange={setTourOpen}
         steps={TOUR_STEPS}
         onComplete={() => {
@@ -276,7 +276,7 @@ export default function OnboardingScreen() {
               <OnboardingChecklistTask
                 label="Take the product tour"
                 description="Four quick stops around this screen."
-                done={tourDone}
+                isDone={tourDone}
                 action={
                   <Button size="xs" variant="soft" tone="neutral" onClick={() => setTourOpen(true)}>
                     Start
@@ -286,17 +286,17 @@ export default function OnboardingScreen() {
               <OnboardingChecklistTask
                 label="Create your workspace"
                 description="Run the setup wizard on the right."
-                done={wizardDone}
+                isDone={wizardDone}
               />
               <OnboardingChecklistTask
                 label="Pick a plan"
                 description="Chosen in step 2 of the wizard."
-                done={planChosen}
+                isDone={planChosen}
               />
               <OnboardingChecklistTask
                 label="Invite your team"
                 description="Select teammates in the wizard, or send to everyone."
-                done={invitesSent}
+                isDone={invitesSent}
                 action={
                   <Button size="xs" variant="soft" tone="neutral" onClick={sendInvites}>
                     Invite all
@@ -306,7 +306,7 @@ export default function OnboardingScreen() {
               <OnboardingChecklistTask
                 label="Provision an environment"
                 description="Use the provisioning sandbox below the wizard."
-                done={provisionDone}
+                isDone={provisionDone}
               />
             </OnboardingChecklist>
           </div>
@@ -390,7 +390,7 @@ export default function OnboardingScreen() {
                 </p>
               </WizardStep>
 
-              <WizardStep id="team" label="Team" optional>
+              <WizardStep id="team" label="Team" isOptional>
                 <div className="text-sm font-medium text-foreground">Invite teammates</div>
                 <ul className="flex flex-col gap-2">
                   {INVITEES.map((u) => {
@@ -427,7 +427,7 @@ export default function OnboardingScreen() {
                 </p>
               </WizardStep>
 
-              <WizardStep id="review" label="Review" final>
+              <WizardStep id="review" label="Review" isFinal>
                 <div className="rounded-md border border-border bg-background p-4">
                   <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
                     <dt className="text-muted-foreground">Workspace</dt>
@@ -493,7 +493,7 @@ export default function OnboardingScreen() {
                 Database <span className="block font-medium text-foreground">postgres 17</span>
               </li>
             </ul>
-            <LoadingOverlay open={provisioning} inline blur label="Provisioning staging-eu-1…" />
+            <LoadingOverlay isOpen={provisioning} isInline hasBlur label="Provisioning staging-eu-1…" />
           </section>
         </div>
       </div>

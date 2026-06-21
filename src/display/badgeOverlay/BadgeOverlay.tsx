@@ -9,7 +9,7 @@ export interface BadgeOverlayProps extends ComponentPropsWithoutRef<'div'> {
   /** Position of the badge relative to the wrapper. Default `top-right`. */
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
   /** Hide badge when truthy (e.g. when count is 0). */
-  hidden?: boolean;
+  isHidden?: boolean;
 }
 
 const POS: Record<NonNullable<BadgeOverlayProps['position']>, string> = {
@@ -25,10 +25,10 @@ const POS: Record<NonNullable<BadgeOverlayProps['position']>, string> = {
  * `Avatar`, icon, or `<Button shape="square"/circle">`.
  */
 export const BadgeOverlay = forwardRef<HTMLDivElement, BadgeOverlayProps>(
-  ({ children, badge, position = 'top-right', hidden, className, ...props }, ref) => (
+  ({ children, badge, position = 'top-right', isHidden, className, ...props }, ref) => (
     <div ref={ref} className={cn('relative inline-flex', className)} {...props}>
       {children}
-      {!hidden && (
+      {!isHidden && (
         <span className={cn('absolute z-raised', POS[position])}>{badge}</span>
       )}
     </div>

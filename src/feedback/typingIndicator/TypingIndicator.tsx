@@ -9,7 +9,7 @@ export interface TypingIndicatorProps extends Omit<ComponentPropsWithoutRef<'spa
   /** Color of the dots; defaults to muted. */
   tone?: 'muted' | 'primary' | 'foreground';
   /** Tone-down dot opacity at rest (between bounces). */
-  subtle?: boolean;
+  isSubtle?: boolean;
 }
 
 const SIZE: Record<NonNullable<TypingIndicatorProps['size']>, string> = {
@@ -30,12 +30,12 @@ const TONE: Record<NonNullable<TypingIndicatorProps['tone']>, string> = {
  * visible at full opacity when motion is reduced.
  */
 export const TypingIndicator = forwardRef<HTMLSpanElement, TypingIndicatorProps>(
-  ({ who, size = 'md', tone = 'muted', subtle, className, ...props }, ref) => {
+  ({ who, size = 'md', tone = 'muted', isSubtle, className, ...props }, ref) => {
     const dot = cn(
       'inline-block rounded-full motion-safe:animate-bounce',
       SIZE[size],
       TONE[tone],
-      subtle && 'motion-safe:opacity-60',
+      isSubtle && 'motion-safe:opacity-60',
     );
     return (
       <span

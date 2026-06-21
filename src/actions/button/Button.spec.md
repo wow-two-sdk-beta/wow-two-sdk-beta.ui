@@ -28,7 +28,8 @@ Two independent axes — `variant × tone`. Pattern borrowed from Mantine and Ra
 | `outline` | Transparent background, visible border, tone-colored text. Mid weight. |
 | `ghost` | Transparent until hover, then tinted. Low weight. |
 | `link` | Looks like a link (text + underline on hover). No padding/border/bg. Lowest weight. |
-| `glass` | Semi-transparent inverse-bg + `backdrop-blur` + tone-colored text/icon. For buttons over images/video/unpredictable backgrounds. |
+| `glass` | Dark semi-transparent surface (`bg-black/45`) + `backdrop-blur` + light text. For buttons over images/video/unpredictable backgrounds. `danger` tone reddens the hover/active wash. |
+| `glass-surface` | Same as `glass` plus a faint white hairline border (`border-white/10`) for structure against busy imagery. |
 
 **`tone`** — semantic intent:
 
@@ -40,7 +41,7 @@ Two independent axes — `variant × tone`. Pattern borrowed from Mantine and Ra
 | `success` | Confirm a positive action |
 | `warning` | Caution-flagged action |
 
-7 × 5 = 35 combos. All theme tokens already exist in [`src/index.css`](../../index.css) (light + dark). `glass` uses `--color-inverse` + `--color-inverse-foreground` for the surface; `tone` colors the text/icon/border on top.
+8 × 5 = 40 combos. Theme tokens for the opaque variants exist in [`src/index.css`](../../index.css) (light + dark). The `glass` / `glass-surface` pair uses a fixed dark wash (`bg-black/45`) with light text rather than theme tokens — only the `danger` tone wires a tone-colored hover/active wash today; the other tones render identically to the base dark glass.
 
 ## Sizing & spacing
 
@@ -145,9 +146,9 @@ Default is truncate because buttons appear in dense UIs (toolbars, cards, tables
 | `hover` | tone shifts (variant-dependent) | — | (absent) |
 | `focus-visible` | 2px ring in `--ring` color | — | (absent) |
 | `active` | subtle press affordance (color-shift; transform disabled under `prefers-reduced-motion`) | — | (absent) |
-| `disabled` | opacity 0.5 + `cursor-not-allowed` | Removed from focus order, no click events | `disabled` |
-| `isLoading` | spinner replaces leading slot; `loadingText` may replace children; `forced-colors` border preserved | Click blocked, `aria-busy=true`, focus retained | `isLoading` |
-| `isSkeleton` | All children + slots `visibility: hidden` (preserves box dimensions); bg becomes `bg-muted` with shimmer animation overlay | Click blocked (`pointer-events-none`), `aria-busy=true`, removed from tab order (`tabindex=-1`) | `isSkeleton` |
+| `isDisabled` | opacity 0.5 + `cursor-not-allowed` | Removed from focus order, no click events | `disabled` |
+| `isLoading` | spinner replaces leading slot; `loadingText` may replace children (else `children` kept `sr-only`); `forced-colors` border preserved | Click blocked, `aria-busy=true` + `aria-disabled=true`, focus retained (NOT native-disabled) | `isLoading` |
+| `isSkeleton` | All children + slots `visibility: hidden` (preserves box dimensions); bg becomes `bg-muted` with shimmer animation overlay | Click blocked (`pointer-events-none`), `aria-busy=true` + `aria-disabled=true`, removed from tab order (`tabindex=-1`) | `isSkeleton` |
 
 `data-state` is the observable-state attribute ([Standard rule 10](./Button.standard.md#states)) — analytics, integration tests, and CSS attribute selectors target it without prop drilling.
 
@@ -160,8 +161,8 @@ Mutually exclusive — if both are set, `isSkeleton` takes precedence + a dev-mo
 
 - **`type`** — defaults to `'button'`, NOT browser-default `'submit'` ([Standard rule 2](./Button.standard.md#behavior)).
 - **Keyboard** — Enter and Space activate (native).
-- **`disabled`** — native attr. Removes from focus order, suppresses click events. Sets `data-state="disabled"`.
-- **`isLoading`** — non-native. Sets `aria-busy=true`, blocks `onClick`, replaces leading slot with inlined spinner SVG, sets `data-state="loading"`. **Does NOT set native `disabled`** ([Standard rule 4](./Button.standard.md#behavior)).
+- **`isDisabled`** — forwarded to the native `disabled` attribute. Removes from focus order, suppresses click events. Sets `data-state="disabled"`. When the prop is omitted, the value is **inherited from an enclosing `FormField`** via `useFormControl()` (reads its `isDisabled`; falls back to standalone `false` when there is no surrounding context).
+- **`isLoading`** — non-native. Sets `aria-busy=true` AND `aria-disabled=true`, blocks `onClick`, replaces leading slot with inlined spinner SVG, sets `data-state="loading"`. **Does NOT set native `disabled`** — the button stays focusable and SR-addressable so the loading state is announced ([Standard rule 4](./Button.standard.md#behavior)). When `loadingText` is omitted, the original `children` are retained in an `sr-only` span so the accessible name survives (the spinner is `aria-hidden`).
 - **`loadingText`** — optional. When present + `loading=true`, replaces `children` (e.g., `"Saving…"`). No default value — consumer always supplies (i18n discipline; [Standard rule 19](./Button.standard.md#internationalization)).
 - **`isSkeleton`** — non-native. Content-loading state — signals the button's *label* is awaiting backend data, distinct from `isLoading` (which signals the user's *action* is in flight). When `true`: children + leading + trailing all become `visibility: hidden` (preserves intrinsic box dimensions so the button doesn't shift layout when real content arrives), bg becomes `bg-muted` with shimmer overlay, sets `aria-busy=true`, blocks clicks via `pointer-events-none`, removes from tab order via `tabindex=-1`, sets `data-state="skeleton"`. Mutually exclusive with `isLoading` — if both, `isSkeleton` wins + dev-mode warns.
 - **Form association** — native `form` attribute forwarded ([Standard rule 5](./Button.standard.md#behavior)).
@@ -211,10 +212,10 @@ A long-press-suppressed click does NOT advance the throttle window (the gate hap
 ## Accessibility
 
 - Renders native `<button>` (or any element via `asChild`) — keyboard, focus, role, ARIA inherited.
-- **`aria-label` REQUIRED when there is no visible text** (icon-only). Library does not auto-generate ([Standard rule 12](./Button.standard.md#accessibility)).
-- `aria-busy` set automatically when `loading=true`.
+- **`aria-label` REQUIRED when there is no visible text** (icon-only). Library does not auto-generate ([Standard rule 12](./Button.standard.md#accessibility)). A **dev-mode `console.warn`** fires when an icon-only button (no text `children`) carries neither `aria-label` nor `aria-labelledby` (guarded on `process.env.NODE_ENV !== 'production'`).
+- `aria-busy` set automatically when `isLoading=true`. `aria-disabled` is **also** set while `isLoading` or `isSkeleton` so the inert-while-loading state is announced — the button is deliberately NOT native-`disabled`, so it stays focusable / SR-addressable.
 - Focus ring meets WCAG AA contrast on every variant × tone combo at the default theme ([Standard rule 16](./Button.standard.md#accessibility)).
-- Min hit target 24×24 — `xs` meets this exactly. Touch contexts SHOULD use `sm`+ ([Standard rules 13–14](./Button.standard.md#accessibility)).
+- Min hit target 24×24 — `xs` meets this exactly, with a `min-h-6 min-w-6` floor so a `--ui-density-scale < 1` cannot shrink it below 24×24. Touch contexts SHOULD use `sm`+ ([Standard rules 13–14](./Button.standard.md#accessibility)).
 - **`forced-colors` mode**: every variant carries a `border` (1px transparent for borderless variants); `system-color` keywords preserve user color choices ([Standard rule 15](./Button.standard.md#accessibility)).
 - **`ghost` and `link` on touch**: `:active` provides press feedback (touch fires `:active` on tap) ([Standard rule 17](./Button.standard.md#pointer-types)).
 
@@ -237,7 +238,7 @@ A long-press-suppressed click does NOT advance the throttle window (the gate hap
 **Content-loading via `isSkeleton` prop** — built-in (see Behavior). Reason for built-in (not `<Skeleton>` wrapper): content-sized buttons have no fixed width for an external Skeleton to match; built-in skeleton uses the button's actual rendered dimensions (children remain in DOM but invisible).
 
 ```tsx
-<Button skeleton={!user.name}>Edit {user.name}</Button>
+<Button isSkeleton={!user.name}>Edit {user.name}</Button>
 {/* While user.name is undefined: button renders as greyed shimmer at correct size.  */}
 {/* When user.name resolves: zero layout shift, label appears.                       */}
 ```
@@ -264,7 +265,7 @@ import { useFormStatus } from 'react-dom';
 
 function SubmitButton({ children }) {
   const { pending } = useFormStatus();
-  return <Button type="submit" loading={pending}>{children}</Button>;
+  return <Button type="submit" isLoading={pending}>{children}</Button>;
 }
 
 <form action={serverAction}>
@@ -289,8 +290,9 @@ No JS needed; browser handles the toggle. Falls through `...rest`.
 
 | Name | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `'solid' \| 'soft' \| 'surface' \| 'outline' \| 'ghost' \| 'link' \| 'glass'` | `'solid'` | Visual treatment |
+| `variant` | `'solid' \| 'soft' \| 'surface' \| 'outline' \| 'ghost' \| 'link' \| 'glass' \| 'glass-surface'` | `'solid'` | Visual treatment |
 | `tone` | `'primary' \| 'neutral' \| 'danger' \| 'success' \| 'warning'` | `'primary'` | Semantic intent |
+| `color` | `ColorProp` | — | Per-instance color override. String → lib derives all slots; object → override individual slots (`bg`/`text`/`soft`/`softText`/`ring`). Applied as scoped CSS vars on the active `tone` |
 | `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Preset bundle |
 | `padding` | `PaddingToken \| { x?: SizeValue, y?: SizeValue }` | from `size` | Independent override |
 | `radius` | `RadiusToken \| SizeValue` | from `size` | Independent override |
@@ -298,15 +300,17 @@ No JS needed; browser handles the toggle. Falls through `...rest`.
 | `height` | `SizeValue` | — | Explicit height override |
 | `minWidth` | `SizeValue` | — | Reserve min width so label changes don't reflow |
 | `minHeight` | `SizeValue` | — | Reserve min height (symmetric with `minWidth`) |
+| `boxSize` | `SizeValue` | — | Square shorthand — fallback for both `width` and `height`. Explicit `width`/`height` win. Pairs with `shape="square"` / `"circle"` for icon buttons |
 | `shape` | `'default' \| 'square' \| 'circle'` | `'default'` | Aspect ratio |
 | `isFullWidth` | `boolean` | `false` | Stretch to container |
 | `leadingSlot` | `ReactNode` | — | Slot before children (logical start) |
 | `trailingSlot` | `ReactNode` | — | Slot after children (logical end) |
+| `loadingSlot` | `ReactNode` | — | Custom indicator shown in place of the built-in `<Spinner/>` when `isLoading`. When provided, this slot wins over the default spinner |
 | `isMultiline` | `boolean` | `false` | Allow multi-line label |
-| `isLoading` | `boolean` | `false` | Action-loading: spinner in leading, `aria-busy`, blocks clicks, `data-state="loading"` |
+| `isLoading` | `boolean` | `false` | Action-loading: spinner in leading, `aria-busy` + `aria-disabled`, blocks clicks, `data-state="loading"`. When `loadingText` is omitted, `children` are kept in an `sr-only` span so the accessible name survives |
 | `loadingText` | `string` | — | Replaces `children` when loading. No default — consumer supplies |
-| `isSkeleton` | `boolean` | `false` | Content-loading: hides content, shimmer bg, `aria-busy`, `tabindex=-1`, `data-state="skeleton"`. Mutually exclusive with `isLoading` |
-| `disabled` | `boolean` | `false` | Native attr; emits `data-state="disabled"` |
+| `isSkeleton` | `boolean` | `false` | Content-loading: hides content, shimmer bg, `aria-busy` + `aria-disabled`, `tabindex=-1`, `data-state="skeleton"`. Mutually exclusive with `isLoading` |
+| `isDisabled` | `boolean` | `false` (inherited from `FormField` when omitted) | Forwarded to the native `disabled` attr; emits `data-state="disabled"`. Inherited from an enclosing `FormField` via `useFormControl()` when the local prop is `undefined` |
 | `type` | `'button' \| 'submit' \| 'reset'` | `'button'` | Native attr (defaults to `button`, not `submit`) |
 | `asChild` | `boolean` | `false` | Render as child via `Slot` |
 | `onPressStart` | `(event) => void` | — | Fires on press begin (pointer-down OR Space/Enter keydown) |
@@ -318,7 +322,15 @@ No JS needed; browser handles the toggle. Falls through `...rest`.
 
 ## Storybook coverage
 
-**Parked.** See [`system/sessions/ui-beta-build/context.md`](../../../../system/sessions/ui-beta-build/context.md) — to be designed after Button implementation lands. Likely shape: playground (controls-driven) + variant×tone matrix + states matrix (with `@storybook/addon-pseudo-states`) + composition recipes (asChild as link, leading/trailing icons, fullWidth, density preview).
+Three story files ship today:
+
+| File | Title | Covers |
+|---|---|---|
+| `Button.stories.tsx` | `Actions/Button/Playground` | Controls-driven playground — every prop wired as an argType (`variant` includes `glass` + `glass-surface`; `isDisabled` boolean). |
+| `Button.matrix.stories.tsx` | `Actions/Button/Matrix` | Visual matrices: `VariantsByTone`, `VariantsByToneOnImage`, `GlassVariantsOnImage` (glass / glass-surface over a photo), `Sizes`, `Shapes`, `States` (default/disabled/loading/skeleton), `WithIcons`, `LongLabels`, `RTL`, `Density`. Plus failure-mode + a11y coverage: `IconOnlyMissingLabel` (anti-pattern — fires the icon-only dev-warn), `LoadingWithoutLoadingText` (accessible name preserved via `sr-only`), `ForcedColors` (high-contrast — every variant keeps a visible border, rule 15), `DisabledAllVariants` (disabled × every variant incl. surface / link / glass / glass-surface). |
+| `Button.recipes.stories.tsx` | `Actions/Button/Recipes` | 15 real-world usage recipes: `PrimaryCTA`, `DangerWithIcon`, `IconOnlyToolbar`, `Loading`, `Skeleton`, `CustomLoadingSlot`, `GlassOverlay`, `AsChildLink`, `FullWidthForm`, `LinkInline`, `LongPress`, `DebouncedClick`, `PressLifecycle`, `FixedWidthOnLabelChange`, `CustomColors`. |
+
+Pseudo-state coverage (`:hover` / `:focus-visible` / `:active`) is driven by the `storybook-addon-pseudo-states` toolbar over the matrices rather than enumerated as separate stories.
 
 ## Non-goals
 

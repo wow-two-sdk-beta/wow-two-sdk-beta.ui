@@ -1,22 +1,23 @@
 import { tv, type VariantProps } from '../../utils';
+import { inputBaseVariants } from '../InputStyles';
 
+/**
+ * Extends the shared `inputBaseVariants` so the trigger's height, border,
+ * focus-ring, disabled, and per-size paddings stay in lockstep with `TextInput`.
+ * Only trigger-specific extras are added here:
+ * - `justify-between` + `gap-2` to push the chevron/clear cluster to the end,
+ * - `data-[state=open]:border-border-strong` to mirror the hover border while open.
+ */
 export const selectTriggerVariants = tv({
-  base: 'flex w-full items-center justify-between gap-2 rounded-md border bg-popover text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60 data-[state=open]:border-border-strong',
+  extend: inputBaseVariants,
+  base: 'items-center justify-between gap-2 data-[state=open]:border-border-strong',
   variants: {
     size: {
-      xs: 'h-7 gap-1.5 px-2.5 text-[11px]',
-      sm: 'h-8 px-2.5 text-sm',
-      md: 'h-10 px-3 text-sm',
-      lg: 'h-12 px-4 text-base',
+      xs: 'gap-1.5',
+      sm: '',
+      md: '',
+      lg: '',
     },
-    state: {
-      default: 'border-input hover:border-border-strong',
-      invalid: 'border-destructive focus-visible:ring-destructive',
-    },
-  },
-  defaultVariants: {
-    size: 'md',
-    state: 'default',
   },
 });
 

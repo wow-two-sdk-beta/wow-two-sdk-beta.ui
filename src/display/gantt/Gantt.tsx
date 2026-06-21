@@ -31,7 +31,7 @@ export interface GanttProps extends HTMLAttributes<HTMLDivElement> {
   cellWidth?: number;
   rowHeight?: number;
   labelWidth?: number;
-  showWeekends?: boolean;
+  hasWeekends?: boolean;
   onTaskClick?: (task: GanttTask) => void;
 }
 
@@ -71,7 +71,7 @@ export const Gantt = forwardRef<HTMLDivElement, GanttProps>(function Gantt(
     cellWidth = 40,
     rowHeight = 36,
     labelWidth = 200,
-    showWeekends = true,
+    hasWeekends = true,
     onTaskClick,
     className,
     ...rest
@@ -138,7 +138,7 @@ export const Gantt = forwardRef<HTMLDivElement, GanttProps>(function Gantt(
                     key={i}
                     className={cn(
                       'border-r border-border text-[10px] tabular-nums',
-                      isWeekend && showWeekends && 'bg-muted/40',
+                      isWeekend && hasWeekends && 'bg-muted/40',
                       isFirstOfMonth && 'border-l-2 border-l-border-strong',
                     )}
                     style={{ width: cellWidth }}
@@ -178,7 +178,7 @@ export const Gantt = forwardRef<HTMLDivElement, GanttProps>(function Gantt(
                           style={{ width: cellWidth }}
                           className={cn(
                             'border-r border-border/60',
-                            isWeekend && showWeekends && 'bg-muted/30',
+                            isWeekend && hasWeekends && 'bg-muted/30',
                           )}
                         />
                       );

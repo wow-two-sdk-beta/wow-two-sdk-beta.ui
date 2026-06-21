@@ -21,7 +21,7 @@ export interface ScrollRevealProps extends HTMLAttributes<HTMLElement> {
   duration?: number;
   delay?: number;
   threshold?: number;
-  once?: boolean;
+  isOnce?: boolean;
   as?: 'div' | 'section' | 'article' | 'span' | 'li';
 }
 
@@ -47,7 +47,7 @@ export const ScrollReveal = forwardRef<HTMLElement, ScrollRevealProps>(
       duration = 600,
       delay = 0,
       threshold = 0.1,
-      once = true,
+      isOnce = true,
       as = 'div',
       className,
       style,
@@ -77,8 +77,8 @@ export const ScrollReveal = forwardRef<HTMLElement, ScrollRevealProps>(
           for (const entry of entries) {
             if (entry.isIntersecting) {
               setRevealed(true);
-              if (once) obs.disconnect();
-            } else if (!once) {
+              if (isOnce) obs.disconnect();
+            } else if (!isOnce) {
               setRevealed(false);
             }
           }
@@ -87,7 +87,7 @@ export const ScrollReveal = forwardRef<HTMLElement, ScrollRevealProps>(
       );
       obs.observe(el);
       return () => obs.disconnect();
-    }, [reduced, threshold, once]);
+    }, [reduced, threshold, isOnce]);
 
     const Tag = as as ElementType;
     return (

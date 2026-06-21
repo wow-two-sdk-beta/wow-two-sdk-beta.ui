@@ -60,7 +60,7 @@ export const AutoColor: Story = {
         'Jack Singh',
         'Kate Tan',
       ].map((n) => (
-        <Avatar key={n} name={n} autoColor />
+        <Avatar key={n} name={n} canAutoColor />
       ))}
     </div>
   ),
@@ -99,7 +99,7 @@ export const Loading: Story = {
 export const Combined: Story = {
   render: () => (
     <div className="flex items-center gap-4">
-      <Avatar name="Alice Brown" autoColor ring="primary" size="lg" />
+      <Avatar name="Alice Brown" canAutoColor ring="primary" size="lg" />
       <Avatar name="Bob Smith" tone="danger" bgStyle="gradient" ring="danger" size="lg" />
       <Avatar name="Charlie Davis" tone="success" shape="square" ring="success" size="lg" />
       <Avatar src="https://i.pravatar.cc/120?img=15" name="Dana Lee" ring="primary" size="lg" />

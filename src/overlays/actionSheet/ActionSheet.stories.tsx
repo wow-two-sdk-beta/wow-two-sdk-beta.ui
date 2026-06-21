@@ -30,7 +30,7 @@ export const Default: Story = {
           >
             <ActionSheetAction onSelect={() => alert('Save')}>Save changes</ActionSheetAction>
             <ActionSheetAction onSelect={() => alert('Share')}>Share</ActionSheetAction>
-            <ActionSheetAction destructive onSelect={() => alert('Delete')}>
+            <ActionSheetAction isDestructive onSelect={() => alert('Delete')}>
               Delete
             </ActionSheetAction>
             <ActionSheetCancel />

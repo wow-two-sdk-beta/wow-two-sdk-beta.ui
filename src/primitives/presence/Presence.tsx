@@ -11,7 +11,7 @@ import { useComposedRefs } from '../../utils/composeRefs';
 
 export interface PresenceProps {
   /** Whether the content should be present. Toggle false to trigger exit. */
-  present: boolean;
+  isPresent: boolean;
   /** Single React element child — receives `ref` and `data-state` ("open" | "closed"). */
   children: ReactElement;
 }
@@ -40,15 +40,15 @@ function getTotalDurationMs(node: HTMLElement): number {
 
 /**
  * Defer unmount until the child's exit animation/transition finishes.
- * Pass `present={false}` to start the exit; the child stays mounted with
+ * Pass `isPresent={false}` to start the exit; the child stays mounted with
  * `data-state="closed"` until its own `animationend`/`transitionend` fires
  * (or a computed-duration timeout as a fallback). If no exit animation
  * actually starts, the child unmounts immediately. On enter, the child
  * mounts with `data-state="closed"` and flips to `"open"` on the next
  * frame so enter transitions play.
  */
-export function Presence({ present, children }: PresenceProps): ReactElement | null {
-  const [rendered, setRendered] = useState(present);
+export function Presence({ isPresent, children }: PresenceProps): ReactElement | null {
+  const [rendered, setRendered] = useState(isPresent);
   const [dataState, setDataState] = useState<'open' | 'closed'>('closed');
   const ref = useRef<HTMLElement | null>(null);
 
@@ -60,7 +60,7 @@ export function Presence({ present, children }: PresenceProps): ReactElement | n
   // Enter — mount closed, then flip to open on the next frame (double rAF
   // so the closed styles are committed and painted first) to run transitions.
   useEffect(() => {
-    if (!present) return;
+    if (!isPresent) return;
     if (!rendered) {
       setRendered(true);
       return;
@@ -74,13 +74,13 @@ export function Presence({ present, children }: PresenceProps): ReactElement | n
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
     };
-  }, [present, rendered, dataState]);
+  }, [isPresent, rendered, dataState]);
 
   // Exit — flip to closed, then unmount when the child's own exit
   // animation/transition ends; immediately if none starts within a frame
   // window; or after the computed total duration as a safety net.
   useEffect(() => {
-    if (present) return;
+    if (isPresent) return;
     const node = ref.current;
     if (!node) {
       setRendered(false);
@@ -122,7 +122,7 @@ export function Presence({ present, children }: PresenceProps): ReactElement | n
       cancelAnimationFrame(raf2);
       if (timer !== undefined) window.clearTimeout(timer);
     };
-  }, [present]);
+  }, [isPresent]);
 
   if (!rendered || !child) return null;
   return cloneElement(child, {

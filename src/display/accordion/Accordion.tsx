@@ -49,7 +49,7 @@ type SingleProps = {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  collapsible?: boolean;
+  isCollapsible?: boolean;
 };
 
 type MultipleProps = {
@@ -57,15 +57,15 @@ type MultipleProps = {
   value?: string[];
   defaultValue?: string[];
   onValueChange?: (value: string[]) => void;
-  collapsible?: never;
+  isCollapsible?: never;
 };
 
 export type AccordionProps = HTMLAttributes<HTMLDivElement> &
   (SingleProps | MultipleProps) & {
-    disabled?: boolean;
+    isDisabled?: boolean;
   };
 
-export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Accordion(
+const AccordionRoot = forwardRef<HTMLDivElement, AccordionProps>(function Accordion(
   props,
   ref,
 ) {
@@ -74,8 +74,8 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Acc
     value,
     defaultValue,
     onValueChange,
-    collapsible = false,
-    disabled = false,
+    isCollapsible = false,
+    isDisabled = false,
     className,
     children,
     ...rest
@@ -84,7 +84,7 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Acc
     value?: string | string[];
     defaultValue?: string | string[];
     onValueChange?: ((v: string) => void) | ((v: string[]) => void);
-    collapsible?: boolean;
+    isCollapsible?: boolean;
   };
 
   const initial = defaultValue ?? (type === 'multiple' ? [] : '');
@@ -106,18 +106,18 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Acc
         setCurrent(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
       } else {
         if (current === val) {
-          if (collapsible) setCurrent('');
+          if (isCollapsible) setCurrent('');
         } else {
           setCurrent(val);
         }
       }
     },
-    [collapsible, current, setCurrent, type],
+    [isCollapsible, current, setCurrent, type],
   );
 
   const ctx = useMemo<AccordionContextValue>(
-    () => ({ isOpen, toggle, disabled }),
-    [isOpen, toggle, disabled],
+    () => ({ isOpen, toggle, disabled: isDisabled }),
+    [isOpen, toggle, isDisabled],
   );
 
   return (
@@ -125,7 +125,7 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Acc
       <RovingFocusGroup
         ref={ref as never}
         orientation="vertical"
-        loop
+        canLoop
         className={cn('flex flex-col', className)}
         {...rest}
       >
@@ -137,17 +137,17 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Acc
 
 export interface AccordionItemProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
   children: ReactNode;
 }
 
 export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(
-  function AccordionItem({ value, disabled = false, className, children, ...rest }, ref) {
+  function AccordionItem({ value, isDisabled = false, className, children, ...rest }, ref) {
     const accordion = useAccordionContext();
     const open = accordion.isOpen(value);
     const contentId = useId();
     const triggerId = useId();
-    const itemDisabled = disabled || accordion.disabled;
+    const itemDisabled = isDisabled || accordion.disabled;
 
     const itemCtx = useMemo<AccordionItemContextValue>(
       () => ({ value, open, contentId, triggerId, disabled: itemDisabled }),
@@ -246,14 +246,16 @@ export const AccordionContent = forwardRef<HTMLDivElement, AccordionContentProps
   },
 );
 
-type AccordionComponent = typeof Accordion & {
-  Item: typeof AccordionItem;
-  Trigger: typeof AccordionTrigger;
-  Content: typeof AccordionContent;
-};
+/**
+ * Compound `Accordion` — the root carries the sub-component statics so
+ * `Accordion.Item` / `.Trigger` / `.Content` are type-safe from both the named
+ * and default exports. The flat `AccordionItem` / `AccordionTrigger` /
+ * `AccordionContent` exports remain available for direct import.
+ */
+export const Accordion = Object.assign(AccordionRoot, {
+  Item: AccordionItem,
+  Trigger: AccordionTrigger,
+  Content: AccordionContent,
+});
 
-(Accordion as AccordionComponent).Item = AccordionItem;
-(Accordion as AccordionComponent).Trigger = AccordionTrigger;
-(Accordion as AccordionComponent).Content = AccordionContent;
-
-export default Accordion as AccordionComponent;
+export default Accordion;

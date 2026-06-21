@@ -145,7 +145,7 @@ function ScaffoldingSection() {
       <Grid>
         <Demo label="Label + TextInput">
           <div className="flex max-w-xs flex-col gap-1.5">
-            <Label htmlFor="fg-name" required>
+            <Label htmlFor="fg-name" isRequired>
               Project name
             </Label>
             <TextInput id="fg-name" placeholder="wow-two" defaultValue="haven" />
@@ -298,7 +298,7 @@ function TextInputsSection() {
         </Demo>
         <Demo label="CronInput — human preview">
           <div className="max-w-sm">
-            <CronInput value={cron} onValueChange={setCron} showPreview />
+            <CronInput value={cron} onValueChange={setCron} hasPreview />
           </div>
         </Demo>
       </Grid>
@@ -331,7 +331,7 @@ function ChoiceSection() {
               onChange={(e) => setAgreed(e.target.checked)}
               aria-label="Agree"
             />
-            <Checkbox indeterminate aria-label="Partially selected" />
+            <Checkbox isIndeterminate aria-label="Partially selected" />
             <Checkbox disabled aria-label="Disabled" />
           </div>
         </Demo>
@@ -446,6 +446,8 @@ const FRUITS = [
 function SelectionSection() {
   const [picked, setPicked] = useState<string | undefined>('banana');
   const [fruitKey, setFruitKey] = useState<string | null>('apple');
+  const [groupedKey, setGroupedKey] = useState<string | null>('react');
+  const [regionKey, setRegionKey] = useState<string | null>(null);
   const [stack, setStack] = useState<string[]>(['react']);
   const [comboValue, setComboValue] = useState('');
   const [comboInput, setComboInput] = useState('');
@@ -465,7 +467,7 @@ function SelectionSection() {
             <Listbox value={picked} onValueChange={setPicked} aria-label="Pick a fruit">
               <ListboxItem value="apple">Apple</ListboxItem>
               <ListboxItem value="banana">Banana</ListboxItem>
-              <ListboxItem value="cherry" disabled>
+              <ListboxItem value="cherry" isDisabled>
                 Cherry (sold out)
               </ListboxItem>
               <ListboxItem value="durian">Durian</ListboxItem>
@@ -479,17 +481,69 @@ function SelectionSection() {
               onValueChange={(opt: SelectOption<string> | null) =>
                 setFruitKey(opt?.itemKey ?? null)
               }
-              clearable
+              isClearable
             >
               <SelectTrigger>
                 <SelectValue placeholder="Choose a fruit…" />
               </SelectTrigger>
-              <SelectContent searchable matchWidth>
+              <SelectContent isSearchable matchWidth>
                 {FRUITS.map((f) => (
                   <SelectItem key={f.value} itemKey={f.value} label={f.label} />
                 ))}
               </SelectContent>
             </Select>
+          </div>
+        </Demo>
+        <Demo label="Select — groups, separator + disabled option">
+          <div className="max-w-xs">
+            <Select<string>
+              value={groupedKey}
+              onValueChange={(opt: SelectOption<string> | null) =>
+                setGroupedKey(opt?.itemKey ?? null)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a framework…" />
+              </SelectTrigger>
+              <SelectContent matchWidth>
+                <Select.Group label="Frontend">
+                  <SelectItem itemKey="react" label="React" />
+                  <SelectItem itemKey="vue" label="Vue" />
+                  <SelectItem itemKey="svelte" label="Svelte (waitlisted)" isDisabled />
+                </Select.Group>
+                <Select.Separator />
+                <Select.Group label="Backend">
+                  <SelectItem itemKey="dotnet" label=".NET" />
+                  <SelectItem itemKey="node" label="Node" />
+                </Select.Group>
+              </SelectContent>
+            </Select>
+          </div>
+        </Demo>
+        <Demo label="Select — invalid via FormField error">
+          <div className="max-w-xs">
+            <FormField
+              label="Region"
+              error={regionKey ? undefined : 'Select a region to continue.'}
+              isRequired
+            >
+              <Select<string>
+                value={regionKey}
+                onValueChange={(opt: SelectOption<string> | null) =>
+                  setRegionKey(opt?.itemKey ?? null)
+                }
+                isClearable
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a region…" />
+                </SelectTrigger>
+                <SelectContent matchWidth>
+                  <SelectItem itemKey="us-east" label="US East" />
+                  <SelectItem itemKey="eu-west" label="EU West" />
+                  <SelectItem itemKey="ap-south" label="AP South" />
+                </SelectContent>
+              </Select>
+            </FormField>
           </div>
         </Demo>
         <Demo label="MultiSelect — tag chips in trigger">
@@ -774,7 +828,7 @@ function EditorsSection() {
       <Grid>
         <Demo label="Editable — preview / input / submit / cancel">
           <div className="flex flex-col gap-1.5">
-            <Editable value={title} onValueChange={setTitle} submitOnBlur={false}>
+            <Editable value={title} onValueChange={setTitle} canSubmitOnBlur={false}>
               <EditablePreview />
               <EditableInput size="sm" />
               <EditableSubmit />
@@ -855,7 +909,7 @@ function CompositeSection() {
             <WizardStep id="details" label="Details" className="py-3 text-sm">
               Tell us about your team.
             </WizardStep>
-            <WizardStep id="confirm" label="Confirm" final className="py-3 text-sm">
+            <WizardStep id="confirm" label="Confirm" isFinal className="py-3 text-sm">
               {wizardDone ? 'All done — workspace created.' : 'Review and finish.'}
             </WizardStep>
             <WizardFooter />

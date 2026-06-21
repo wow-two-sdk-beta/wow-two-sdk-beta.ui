@@ -19,7 +19,7 @@ export const Default: Story = {
     function Demo() {
       const [open, setOpen] = useState(false);
       return (
-        <AppShell sidebarOpen={open} onSidebarOpenChange={setOpen}>
+        <AppShell isSidebarOpen={open} onSidebarOpenChange={setOpen}>
           <AppShell.Header>
             <button
               type="button"

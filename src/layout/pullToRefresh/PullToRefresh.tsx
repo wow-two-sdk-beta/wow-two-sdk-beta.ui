@@ -15,7 +15,7 @@ export interface PullToRefreshProps extends HTMLAttributes<HTMLDivElement> {
   onRefresh: () => Promise<void> | void;
   threshold?: number;
   maxPull?: number;
-  disabled?: boolean;
+  isDisabled?: boolean;
   children: ReactNode;
 }
 
@@ -26,7 +26,7 @@ export interface PullToRefreshProps extends HTMLAttributes<HTMLDivElement> {
  */
 export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
   function PullToRefresh(
-    { onRefresh, threshold = 60, maxPull = 120, disabled, className, children, ...rest },
+    { onRefresh, threshold = 60, maxPull = 120, isDisabled, className, children, ...rest },
     forwardedRef,
   ) {
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -35,7 +35,7 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
     const [refreshing, setRefreshing] = useState(false);
 
     const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled || refreshing) return;
+      if (isDisabled || refreshing) return;
       const el = containerRef.current;
       if (!el || el.scrollTop > 0) return;
       startYRef.current = e.clientY;
@@ -77,9 +77,8 @@ export const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(
       }
     };
 
-    // Touch: the browser's native vertical pan would fire pointercancel and kill
-    // the gesture. preventDefault the touchmove only when a pull is in progress
-    // (started at scrollTop 0, moving down) — normal scrolling stays native.
+    // Touch: native vertical pan fires pointercancel and kills the gesture.
+    // preventDefault touchmove only mid-pull (scrollTop 0, moving down); normal scroll stays native.
     useEffect(() => {
       const el = containerRef.current;
       if (!el) return;

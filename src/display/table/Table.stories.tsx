@@ -11,7 +11,7 @@ type Story = StoryObj<typeof Table>;
 
 export const Default: Story = {
   render: () => (
-    <Table striped hoverable className="w-full">
+    <Table isStriped isHoverable className="w-full">
       <Table.Caption>Recent invoices</Table.Caption>
       <Table.Head>
         <Table.Row>
@@ -53,7 +53,7 @@ export const Default: Story = {
 
 export const Compact: Story = {
   render: () => (
-    <Table density="compact" hoverable>
+    <Table density="compact" isHoverable>
       <Table.Head>
         <Table.Row>
           <Table.HeaderCell>Key</Table.HeaderCell>
@@ -68,6 +68,38 @@ export const Compact: Story = {
         <Table.Row>
           <Table.Cell>version</Table.Cell>
           <Table.Cell>0.0.13</Table.Cell>
+        </Table.Row>
+      </Table.Body>
+    </Table>
+  ),
+};
+
+// Custom-styled comparison table: round wrapper, normal-case heads, roomy cells.
+export const CustomComparison: Story = {
+  render: () => (
+    <Table
+      radius="2xl"
+      density="roomy"
+      isHoverable
+      containerClassName="border-border/60 shadow-sm"
+    >
+      <Table.Head headVariant="plain">
+        <Table.Row>
+          <Table.HeaderCell>Plan</Table.HeaderCell>
+          <Table.HeaderCell>Free</Table.HeaderCell>
+          <Table.HeaderCell>Pro</Table.HeaderCell>
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        <Table.Row>
+          <Table.Cell className="font-medium">Projects</Table.Cell>
+          <Table.Cell>3</Table.Cell>
+          <Table.Cell>Unlimited</Table.Cell>
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="font-medium">Seats</Table.Cell>
+          <Table.Cell>1</Table.Cell>
+          <Table.Cell>Up to 25</Table.Cell>
         </Table.Row>
       </Table.Body>
     </Table>

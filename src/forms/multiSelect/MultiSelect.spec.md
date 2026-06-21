@@ -1,7 +1,7 @@
 # MultiSelect
 
 ## Purpose
-Multi-select dropdown — button trigger that opens a floating listbox in `multiple` mode. Selected values render as removable tags inside the trigger. Use when users pick zero-to-many from a small/medium set.
+Multi-select dropdown — button trigger that opens a floating listbox in `isMultiple` mode. Selected values render as removable tags inside the trigger. Use when users pick zero-to-many from a small/medium set.
 
 ## Anatomy
 ```
@@ -33,10 +33,10 @@ Trigger: `default` · `hover` · `focus-visible` · `open` · `invalid` · `disa
 | `value` | `string[]` | — | no | Controlled selection. |
 | `defaultValue` | `string[]` | `[]` | no | Uncontrolled initial. |
 | `onValueChange` | `(v[]) => void` | — | no | Selection callback. |
-| `disabled`, `name`, `invalid`, `defaultOpen`, `open`, `onOpenChange` | — | — | no | Same shape as `Select`. |
+| `isDisabled`, `name`, `isInvalid`, `defaultOpen`, `open`, `onOpenChange` | — | — | no | Same shape as `Select`. |
 
 ## Composition
-Compound. Reuses `Listbox` in `multiple` mode for the panel + items.
+Compound. Reuses `Listbox` in `isMultiple` mode for the panel + items.
 
 ## Dependencies
 Foundation: same as `Select`. Same-domain: `forms/listbox`, `display/tag` is **not** allowed (cross-domain) — tags rendered inline with local styling.

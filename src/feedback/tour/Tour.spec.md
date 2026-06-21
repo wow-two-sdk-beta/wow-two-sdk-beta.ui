@@ -5,7 +5,7 @@ Step-by-step product walkthrough. Each step targets an element by selector / ref
 
 ## Anatomy
 ```
-<Tour open onOpenChange steps={[{ target, title, body, placement }]}>
+<Tour isOpen onOpenChange steps={[{ target, title, body, placement }]}>
   → renders backdrop with cutout + floating tooltip
 </Tour>
 ```
@@ -22,7 +22,7 @@ Step-by-step product walkthrough. Each step targets an element by selector / ref
 ## Props (root)
 | Name | Type | Default | Why |
 |---|---|---|---|
-| `open` / `defaultOpen` / `onOpenChange` | controlled | uncontrolled | |
+| `isOpen` / `defaultOpen` / `onOpenChange` | controlled | uncontrolled | |
 | `steps` | `TourStep[]` | required | List of steps |
 | `currentStep` / `defaultCurrentStep` / `onStepChange` | controlled by index | uncontrolled by default | |
 | `onComplete` | `() => void` | — | Final-step Done |

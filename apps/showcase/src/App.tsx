@@ -60,7 +60,7 @@ export function App() {
       <ThemeBodySync />
       <Toaster />
       <AppShell
-        sidebarOpen={sidebarOpen}
+        isSidebarOpen={sidebarOpen}
         onSidebarOpenChange={setSidebarOpen}
         sidebarBreakpoint="lg"
       >

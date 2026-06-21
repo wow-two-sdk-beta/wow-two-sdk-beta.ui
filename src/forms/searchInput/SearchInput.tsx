@@ -15,7 +15,7 @@ export interface SearchInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
     InputBaseVariants {
   /** Show a clear (×) button when the input has a value. Default true. */
-  clearable?: boolean;
+  isClearable?: boolean;
   onClear?: () => void;
 }
 
@@ -33,7 +33,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
       disabled,
       required,
       readOnly,
-      clearable = true,
+      isClearable = true,
       onClear,
       onChange,
       defaultValue,
@@ -50,7 +50,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     const isControlled = value !== undefined;
     const [uncontrolled, setUncontrolled] = useState(defaultValue ?? '');
     const currentValue = isControlled ? value : uncontrolled;
-    const showClear = clearable && String(currentValue ?? '').length > 0;
+    const showClear = isClearable && String(currentValue ?? '').length > 0;
 
     const handleClear = () => {
       const el = inputRef.current;

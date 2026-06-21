@@ -8,7 +8,7 @@
 |---|---|---|---|
 | `maxAngle` | `number` (deg) | `12` | Max tilt angle in either axis |
 | `perspective` | `number` (px) | `800` | CSS perspective |
-| `glare` | `boolean` | `false` | Add a soft glare highlight following the cursor |
+| `hasGlare` | `boolean` | `false` | Add a soft glare highlight following the cursor |
 | `scale` | `number` | `1` | Scale up while hovered (1.0 = none) |
 | `as` | tag | `'div'` | |
 

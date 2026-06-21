@@ -126,7 +126,7 @@ function PresenceDemo() {
         {present ? 'Animate out' : 'Animate in'}
       </Button>
       <div className="h-14 w-full">
-        <Presence present={present}>
+        <Presence isPresent={present}>
           <div className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground transition-all duration-300 data-[state=closed]:translate-y-1 data-[state=closed]:opacity-0 data-[state=open]:translate-y-0 data-[state=open]:opacity-100">
             I fade + slide before unmounting
           </div>
@@ -281,7 +281,7 @@ function RovingFocusDemo() {
   const [picked, setPicked] = useState('—');
   return (
     <Demo caption="RovingFocusGroup — one tab stop for the whole group; Arrow keys / Home / End move focus between chips.">
-      <RovingFocusGroup orientation="horizontal" loop className="flex flex-wrap gap-2">
+      <RovingFocusGroup orientation="horizontal" canLoop className="flex flex-wrap gap-2">
         {['One', 'Two', 'Three', 'Four', 'Five'].map((label) => (
           <RovingChip key={label} label={label} onPick={setPicked} />
         ))}
@@ -315,7 +315,7 @@ function DirectionProviderDemo() {
         <DirectionProvider dir="rtl">
           <div dir="rtl" className="flex flex-col items-start gap-2">
             <DirectionBadge />
-            <RovingFocusGroup orientation="horizontal" loop className="flex flex-wrap gap-2">
+            <RovingFocusGroup orientation="horizontal" canLoop className="flex flex-wrap gap-2">
               {['Alif', 'Ba', 'Ta'].map((label) => (
                 <RovingChip key={label} label={label} onPick={setPicked} />
               ))}
@@ -434,7 +434,7 @@ function ScrollLockDemo() {
       <Button size="xs" variant={locked ? 'solid' : 'soft'} onClick={() => setLocked((l) => !l)}>
         {locked ? 'Unlock body scroll' : 'Lock body scroll'}
       </Button>
-      <ScrollLockProvider enabled={locked}>
+      <ScrollLockProvider isEnabled={locked}>
         <span className="text-xs text-muted-foreground">
           {locked ? 'body scroll is locked — try scrolling the page' : 'scroll unaffected'}
         </span>

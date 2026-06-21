@@ -50,7 +50,7 @@ export const Default: Story = {
 export const Loop: Story = {
   render: () => (
     <div className="w-[28rem]">
-      <Carousel loop>
+      <Carousel canLoop>
         <CarouselViewport>
           <CarouselSlides>
             {SLIDES.map((s, i) => (
@@ -71,7 +71,7 @@ export const Loop: Story = {
 export const AutoPlay: Story = {
   render: () => (
     <div className="w-[28rem]">
-      <Carousel loop autoPlay={2500}>
+      <Carousel canLoop autoPlay={2500}>
         <CarouselViewport>
           <CarouselSlides>
             {SLIDES.map((s, i) => (

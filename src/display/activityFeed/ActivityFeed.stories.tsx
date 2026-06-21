@@ -55,7 +55,7 @@ export const Project: Story = {
         <ActivityFeed.Item
           avatar={<Avatar name="Riley" size="sm" />}
           timestamp="yesterday"
-          last
+          isLast
         >
           <Strong>riley_w</Strong> deployed <Link>v1.4.0</Link> to staging
         </ActivityFeed.Item>
@@ -67,14 +67,14 @@ export const Project: Story = {
 export const Dense: Story = {
   render: () => (
     <div className="w-[420px]">
-      <ActivityFeed dense>
+      <ActivityFeed isDense>
         <ActivityFeed.Item avatar={<Avatar name="Pat" size="sm" />} timestamp="1m ago">
           <Strong>pat_q</Strong> reacted with 🎉
         </ActivityFeed.Item>
         <ActivityFeed.Item avatar={<Avatar name="Alex" size="sm" />} timestamp="3m ago">
           <Strong>alex_park</Strong> joined the project
         </ActivityFeed.Item>
-        <ActivityFeed.Item avatar={<Avatar name="Sam" size="sm" />} timestamp="5m ago" last>
+        <ActivityFeed.Item avatar={<Avatar name="Sam" size="sm" />} timestamp="5m ago" isLast>
           <Strong>sam_io</Strong> changed status to <Strong>Online</Strong>
         </ActivityFeed.Item>
       </ActivityFeed>

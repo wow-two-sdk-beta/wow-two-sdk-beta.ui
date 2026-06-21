@@ -12,19 +12,19 @@ export interface ColorSwatchPickerProps
   onValueChange?: (color: string) => void;
   swatchSize?: ColorSwatchVariants['size'];
   swatchShape?: ColorSwatchVariants['shape'];
-  disabled?: boolean;
+  isDisabled?: boolean;
 }
 
 interface ItemProps {
   color: string;
-  selected: boolean;
-  disabled: boolean;
+  isSelected: boolean;
+  isDisabled: boolean;
   size?: ColorSwatchVariants['size'];
   shape?: ColorSwatchVariants['shape'];
   onSelect: (color: string) => void;
 }
 
-function ColorSwatchItem({ color, selected, disabled, size, shape, onSelect }: ItemProps) {
+function ColorSwatchItem({ color, isSelected, isDisabled, size, shape, onSelect }: ItemProps) {
   const roving = useRovingFocusItem();
   return (
     <ColorSwatch
@@ -32,8 +32,8 @@ function ColorSwatchItem({ color, selected, disabled, size, shape, onSelect }: I
       color={color}
       size={size}
       shape={shape}
-      selected={selected}
-      disabled={disabled}
+      isSelected={isSelected}
+      isDisabled={isDisabled}
       tabIndex={roving.tabIndex}
       onClick={() => onSelect(color)}
       onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) => {
@@ -58,7 +58,7 @@ export function ColorSwatchPicker({
   onValueChange,
   swatchSize = 'md',
   swatchShape = 'square',
-  disabled = false,
+  isDisabled = false,
   className,
   ...rest
 }: ColorSwatchPickerProps) {
@@ -71,7 +71,7 @@ export function ColorSwatchPicker({
   return (
     <RovingFocusGroup
       orientation="both"
-      loop
+      canLoop
       className={cn('flex flex-wrap gap-1.5', className)}
       {...rest}
     >
@@ -79,8 +79,8 @@ export function ColorSwatchPicker({
         <ColorSwatchItem
           key={c}
           color={c}
-          selected={selected === c}
-          disabled={disabled}
+          isSelected={selected === c}
+          isDisabled={isDisabled}
           size={swatchSize}
           shape={swatchShape}
           onSelect={(color) => setSelected(color)}

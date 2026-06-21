@@ -148,7 +148,7 @@ export default function ProjectsScreen() {
     {
       key: 'title',
       header: 'Task',
-      sortable: true,
+      isSortable: true,
       width: '34%',
       accessor: (t) => t.title,
       cell: (t) => (
@@ -158,7 +158,7 @@ export default function ProjectsScreen() {
     {
       key: 'status',
       header: 'Status',
-      sortable: true,
+      isSortable: true,
       accessor: (t) => TASK_STATUSES.indexOf(t.status),
       cell: (t) => (
         <Status tone={STATUS_META[t.status].tone} size="sm">
@@ -169,7 +169,7 @@ export default function ProjectsScreen() {
     {
       key: 'priority',
       header: 'Priority',
-      sortable: true,
+      isSortable: true,
       accessor: (t) => PRIORITY_ORDER.indexOf(t.priority),
       cell: (t) => (
         <Badge size="sm" variant={PRIORITY_META[t.priority].variant}>
@@ -195,7 +195,7 @@ export default function ProjectsScreen() {
     {
       key: 'due',
       header: 'Due',
-      sortable: true,
+      isSortable: true,
       accessor: (t) => t.due ?? '9999-12-31',
       cell: (t) => <span className="tabular-nums text-muted-foreground">{formatDue(t.due)}</span>,
     },
@@ -240,7 +240,7 @@ export default function ProjectsScreen() {
                 <ToggleButton
                   key={status}
                   size="xs"
-                  pressed={statusFilter === status}
+                  isPressed={statusFilter === status}
                   onPressedChange={(pressed) => {
                     setStatusFilter(pressed ? status : 'all');
                     setPage(1);
@@ -256,7 +256,7 @@ export default function ProjectsScreen() {
                 <ToggleButton
                   key={priority}
                   size="xs"
-                  pressed={priorityFilter === priority}
+                  isPressed={priorityFilter === priority}
                   onPressedChange={(pressed) => {
                     setPriorityFilter(pressed ? priority : 'all');
                     setPage(1);

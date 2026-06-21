@@ -27,9 +27,9 @@ export interface TagsInputProps
   delimiters?: string[];
   /** Predicate gating committed tags. Default: non-empty after trim. */
   validate?: (tag: string) => boolean;
-  allowDuplicates?: boolean;
+  allowsDuplicates?: boolean;
   max?: number;
-  invalid?: boolean;
+  isInvalid?: boolean;
   /** Hidden input emits comma-joined value. */
   name?: string;
   tagVariant?: TagVariants['variant'];
@@ -49,9 +49,9 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
     placeholder = 'Add tag…',
     delimiters = [','],
     validate = (t) => t.trim().length > 0,
-    allowDuplicates = false,
+    allowsDuplicates = false,
     max,
-    invalid,
+    isInvalid,
     disabled,
     readOnly,
     name,
@@ -77,18 +77,18 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [pendingDelete, setPendingDelete] = useState(false);
-  const state = invalid ? 'invalid' : 'default';
+  const state = isInvalid ? 'invalid' : 'default';
 
   const commit = useCallback(
     (raw: string) => {
       const trimmed = raw.trim();
       if (!trimmed || !validate(trimmed)) return;
-      if (!allowDuplicates && tags.includes(trimmed)) return;
+      if (!allowsDuplicates && tags.includes(trimmed)) return;
       if (max != null && tags.length >= max) return;
       setTags([...tags, trimmed]);
       setText('');
     },
-    [tags, validate, allowDuplicates, max, setTags, setText],
+    [tags, validate, allowsDuplicates, max, setTags, setText],
   );
 
   const removeAt = useCallback(
@@ -138,7 +138,7 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
       onClick={handleContainerClick}
       data-disabled={disabled || undefined}
       data-readonly={readOnly || undefined}
-      data-invalid={invalid || undefined}
+      data-invalid={isInvalid || undefined}
       className={cn(
         inputBaseVariants({ size, state }),
         'h-auto min-h-10 flex-wrap items-center gap-1.5 py-1.5',
@@ -165,7 +165,7 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
         placeholder={tags.length === 0 ? placeholder : undefined}
         disabled={disabled}
         readOnly={readOnly}
-        aria-invalid={invalid || undefined}
+        aria-invalid={isInvalid || undefined}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={(e) => {

@@ -69,9 +69,9 @@ export interface PhoneInputProps extends Omit<HTMLAttributes<HTMLDivElement>, 'd
   defaultValue?: string;
   onValueChange?: (e164: string) => void;
   defaultCountry?: string;
-  disabled?: boolean;
-  readOnly?: boolean;
-  invalid?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
+  isInvalid?: boolean;
   placeholder?: string;
   name?: string;
 }
@@ -100,9 +100,9 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
       defaultValue,
       onValueChange,
       defaultCountry = 'US',
-      disabled,
-      readOnly,
-      invalid,
+      isDisabled,
+      isReadOnly,
+      isInvalid,
       placeholder = '(555) 555-5555',
       name,
       className,
@@ -141,8 +141,8 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
         ref={ref}
         className={cn(
           'inline-flex items-stretch overflow-hidden rounded-md border bg-background',
-          invalid ? 'border-destructive' : 'border-input',
-          disabled && 'opacity-60',
+          isInvalid ? 'border-destructive' : 'border-input',
+          isDisabled && 'opacity-60',
           className,
         )}
         {...rest}
@@ -150,7 +150,7 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
         <select
           aria-label="Country"
           value={iso}
-          disabled={disabled || readOnly}
+          disabled={isDisabled || isReadOnly}
           onChange={(e) => setCountry(e.target.value)}
           className={cn(
             'h-10 cursor-pointer border-r border-input bg-card pl-2 pr-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -169,9 +169,9 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
           autoComplete="tel-national"
           value={national}
           placeholder={placeholder}
-          disabled={disabled}
-          readOnly={readOnly}
-          aria-invalid={invalid || undefined}
+          disabled={isDisabled}
+          readOnly={isReadOnly}
+          aria-invalid={isInvalid || undefined}
           onChange={(e) => setNational(e.target.value)}
           className={cn(
             inputBaseVariants({ size: 'md' }),

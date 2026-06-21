@@ -29,7 +29,7 @@ export const Default: Story = {
       }
     >
       <NotificationCenter.Item
-        unread
+        isUnread
         icon={<Avatar name="Alex Park" size="sm" />}
         title="Alex commented on your PR"
         description="“Looks great — left two small notes inline.”"
@@ -38,7 +38,7 @@ export const Default: Story = {
         onDismiss={() => {}}
       />
       <NotificationCenter.Item
-        unread
+        isUnread
         icon={
           <span className="grid h-7 w-7 place-items-center rounded-full bg-success-soft text-success-soft-foreground">
             <GitPullRequest className="h-4 w-4" />
@@ -50,7 +50,7 @@ export const Default: Story = {
         onSelect={() => {}}
       />
       <NotificationCenter.Item
-        unread
+        isUnread
         icon={
           <span className="grid h-7 w-7 place-items-center rounded-full bg-destructive-soft text-destructive-soft-foreground">
             <ShieldAlert className="h-4 w-4" />
@@ -90,7 +90,7 @@ export const SingleUnread: Story = {
   render: () => (
     <NotificationCenter count={1}>
       <NotificationCenter.Item
-        unread
+        isUnread
         icon={<Avatar name="Sam" size="sm" />}
         title="Sam invited you to a thread"
         description="“Want to talk about the v2 dashboard?”"

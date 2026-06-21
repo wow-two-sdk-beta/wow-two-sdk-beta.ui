@@ -5,7 +5,7 @@ Editable spreadsheet-grade table. Click a cell → edit; arrow-keys navigate; En
 
 ## Anatomy
 ```
-<DataGrid columns rows onRowChange editableColumns?>
+<DataGrid columns rows onRowChange isDense?>
   ├── header (col labels)
   └── body (rows × cells)
        └── active cell: <input> in edit mode, <span> in read mode
@@ -13,14 +13,14 @@ Editable spreadsheet-grade table. Click a cell → edit; arrow-keys navigate; En
 ```
 
 ## Required behaviors
-- Click cell → enter edit mode (if column is editable).
+- Click cell → enter edit mode (if column is `isEditable`).
 - Arrow keys move active cell (read mode).
 - Enter or F2 → enter edit mode.
 - Escape in edit mode → revert.
 - Tab in edit mode → commit + move right.
 - Enter in edit mode → commit + move down.
 - Per-column type: `'text' | 'number' | 'select' | 'boolean'`. Determines edit input.
-- Per-column `editable` flag (default `true`).
+- Per-column `isEditable` flag (default `true`).
 
 ## Props
 | Name | Type | Default | Why |
@@ -29,7 +29,7 @@ Editable spreadsheet-grade table. Click a cell → edit; arrow-keys navigate; En
 | `rows` | `T[]` | required | |
 | `rowKey` | `(row: T) => string` | required | |
 | `onRowChange` | `(row: T, colKey: string, value: unknown) => void` | required | Per-cell commit |
-| `dense` | `boolean` | `false` | Smaller row height |
+| `isDense` | `boolean` | `false` | Smaller row height |
 
 ## Composition
 Single component. Internal state: `activeCell`, `editing`, `draftValue`. No compound surface.

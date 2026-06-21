@@ -23,14 +23,14 @@ export interface ColorFieldProps
   defaultValue?: string | null;
   onValueChange?: (hex: string | null) => void;
   swatchShape?: 'square' | 'circle';
-  withAlpha?: boolean;
+  hasAlpha?: boolean;
 }
 
-function commitHex(text: string, withAlpha: boolean): string | null {
+function commitHex(text: string, hasAlpha: boolean): string | null {
   const normalised = text.startsWith('#') ? text : `#${text}`;
   const rgb = parseHex(normalised);
   if (!rgb) return null;
-  return formatHex(rgb, { withAlpha });
+  return formatHex(rgb, { withAlpha: hasAlpha });
 }
 
 export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function ColorField(
@@ -39,7 +39,7 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function
     defaultValue,
     onValueChange,
     swatchShape = 'square',
-    withAlpha = false,
+    hasAlpha = false,
     size,
     state,
     className,
@@ -70,7 +70,7 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function
       setCommitted(null);
       return;
     }
-    const next = commitHex(draft, withAlpha);
+    const next = commitHex(draft, hasAlpha);
     if (next) {
       setCommitted(next);
       setDraft(next);

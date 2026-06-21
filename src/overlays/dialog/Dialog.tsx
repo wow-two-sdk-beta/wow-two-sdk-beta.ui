@@ -126,7 +126,7 @@ export interface DialogContentProps extends HTMLAttributes<HTMLDivElement>, Surf
   /** Disables the default backdrop when true. */
   hideBackdrop?: boolean;
   /** Applies a backdrop blur. */
-  blur?: boolean;
+  isBlurred?: boolean;
   children: ReactNode;
 }
 
@@ -134,7 +134,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
   function DialogContent(
     {
       hideBackdrop,
-      blur,
+      isBlurred,
       variant,
       tone,
       radius,
@@ -162,10 +162,9 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
     return (
       <Portal>
         <ScrollLockProvider>
-          {!hideBackdrop && <Backdrop inline blur={blur} />}
-          {/* The centering wrapper covers the backdrop, so outside-click dismissal
-              lives here — a click on the padding area (target === currentTarget)
-              counts as outside. The Backdrop stays purely visual. */}
+          {!hideBackdrop && <Backdrop isInline isBlurred={isBlurred} />}
+          {/* Outside-click dismissal lives on the centering wrapper (it covers the
+              backdrop): a click on the padding (target === currentTarget) = outside. */}
           <div
             className="fixed inset-0 z-modal grid place-items-center overflow-y-auto p-4"
             onClick={(e) => {
@@ -175,9 +174,9 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
           >
             <FocusScope asChild trapped loop>
               <DismissableLayer
-                disableEscape={!ctx.dismissOnEscape}
+                isEscapeDisabled={!ctx.dismissOnEscape}
                 onEscape={() => ctx.setOpen(false)}
-                disableOutsideClick
+                isOutsideClickDisabled
               >
                 <div
                   ref={forwardedRef}

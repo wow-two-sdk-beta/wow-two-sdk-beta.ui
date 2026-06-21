@@ -11,3 +11,8 @@ export { useMediaQuery } from './useMediaQuery';
 export { useReducedMotion } from './useReducedMotion';
 export { useClipboard, type UseClipboardOptions, type ClipboardControls } from './useClipboard';
 export { useDebounceHandler } from './useDebounceHandler';
+export {
+  useTypeahead,
+  type UseTypeaheadOptions,
+  type UseTypeaheadReturn,
+} from './useTypeahead';

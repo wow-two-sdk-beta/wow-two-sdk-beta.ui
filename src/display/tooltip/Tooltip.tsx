@@ -34,7 +34,7 @@ export interface TooltipProps {
   /** Fires on every open-state change (hover, focus, Escape). */
   onOpenChange?: (open: boolean) => void;
   /** Disable rendering even on hover (e.g. when content is empty). */
-  disabled?: boolean;
+  isDisabled?: boolean;
 }
 
 /**
@@ -53,7 +53,7 @@ export function Tooltip({
   open: openProp,
   defaultOpen = false,
   onOpenChange,
-  disabled,
+  isDisabled,
 }: TooltipProps) {
   const [open, setOpen] = useControlled({
     controlled: openProp,
@@ -95,7 +95,7 @@ export function Tooltip({
     setOpen(false);
   }, open);
 
-  const visible = !disabled && open && !!content;
+  const visible = !isDisabled && open && !!content;
 
   if (!isValidElement(children)) return children;
   const trigger = children as ReactElement<{

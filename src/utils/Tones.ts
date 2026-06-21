@@ -4,7 +4,14 @@ import type { Tone } from './StyleTokens';
    `surfaceVariants` and `buttonVariants` (and any future variant config). */
 
 /** Represents a tone-family — the variant group that picks the same bg/border/text palette. */
-export type ToneFamily = 'solid' | 'soft' | 'surface' | 'outline' | 'glass' | 'glassOutline';
+export type ToneFamily =
+  | 'solid'
+  | 'soft'
+  | 'surface'
+  | 'outline'
+  | 'glass'
+  | 'glassOutline'
+  | 'subtle';
 
 /** Contains the cross-engine palette: bg / text (+ border where applicable) per tone-family × tone. */
 export const Tones: Record<ToneFamily, Record<Tone, string>> = {
@@ -61,5 +68,18 @@ export const Tones: Record<ToneFamily, Record<Tone, string>> = {
     success: 'border-success/50 bg-success/30 text-success-foreground',
     warning: 'border-warning/50 bg-warning/30 text-warning-foreground',
     info: 'border-info/50 bg-info/30 text-info-foreground',
+  },
+  /**
+   * Low-alpha tinted fill + neutral `border-border`, no shadow. The understated
+   * "tinted panel / section band" look — quieter than `soft`, flatter than `surface`.
+   * Neutral fills from the muted token; coloured tones tint their `-soft` token at low alpha.
+   */
+  subtle: {
+    neutral: 'border-border bg-muted/30 text-foreground',
+    primary: 'border-primary/20 bg-primary-soft/60 text-foreground',
+    danger: 'border-destructive/20 bg-destructive-soft/60 text-foreground',
+    success: 'border-success/20 bg-success-soft/60 text-foreground',
+    warning: 'border-warning/20 bg-warning-soft/60 text-foreground',
+    info: 'border-info/20 bg-info-soft/60 text-foreground',
   },
 };

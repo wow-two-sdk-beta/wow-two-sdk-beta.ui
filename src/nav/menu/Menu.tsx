@@ -148,11 +148,11 @@ export interface MenuItemProps
   /** Fired when the item is activated (Enter / Space / click). Menu closes after. */
   onSelect?: () => void;
   /** Disable activation. */
-  disabled?: boolean;
+  isDisabled?: boolean;
 }
 
 export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function MenuItem(
-  { onSelect, disabled = false, state, className, onClick, onKeyDown, children, ...rest },
+  { onSelect, isDisabled = false, state, className, onClick, onKeyDown, children, ...rest },
   forwardedRef,
 ) {
   const ctx = useMenuContext();
@@ -160,9 +160,9 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
   const ref = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    ctx.registerItem({ id, ref: ref.current, disabled });
+    ctx.registerItem({ id, ref: ref.current, disabled: isDisabled });
     return () => ctx.unregisterItem(id);
-  }, [ctx, id, disabled]);
+  }, [ctx, id, isDisabled]);
 
   const moveFocus = useCallback(
     (target: 1 | -1 | 'first' | 'last') => {
@@ -184,7 +184,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
 
   const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
     onKeyDown?.(e);
-    if (e.defaultPrevented || disabled) return;
+    if (e.defaultPrevented || isDisabled) return;
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
@@ -211,18 +211,18 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
     }
   };
 
-  const itemState = state ?? (disabled ? 'disabled' : 'default');
+  const itemState = state ?? (isDisabled ? 'disabled' : 'default');
   return (
     <button
       ref={composeRefs(forwardedRef, ref)}
       type="button"
       role="menuitem"
-      disabled={disabled}
-      aria-disabled={disabled || undefined}
-      data-disabled={disabled ? '' : undefined}
+      disabled={isDisabled}
+      aria-disabled={isDisabled || undefined}
+      data-disabled={isDisabled ? '' : undefined}
       onClick={(e) => {
         onClick?.(e);
-        if (e.defaultPrevented || disabled) return;
+        if (e.defaultPrevented || isDisabled) return;
         onSelect?.();
         ctx.onClose();
       }}

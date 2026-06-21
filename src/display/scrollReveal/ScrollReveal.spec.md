@@ -10,7 +10,7 @@ Wraps children; observes when the wrapper enters the viewport via `IntersectionO
 | `duration` | `number` (ms) | `600` | |
 | `delay` | `number` (ms) | `0` | |
 | `threshold` | `number` | `0.1` | IO threshold |
-| `once` | `boolean` | `true` | Reveal-then-stay vs every-time |
+| `isOnce` | `boolean` | `true` | Reveal-then-stay vs every-time |
 | `as` | tag | `'div'` | |
 
 ## Accessibility

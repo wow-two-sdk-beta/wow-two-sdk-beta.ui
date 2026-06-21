@@ -8,7 +8,7 @@ Text with a gradient color fill via `background-clip: text`. Optional animated g
 |---|---|---|---|
 | `from` / `via` / `to` | `string` (CSS color) | brand defaults | Gradient stops |
 | `direction` | `'r' \| 'l' \| 't' \| 'b' \| 'tr' \| 'br' \| 'tl' \| 'bl'` | `'r'` | Gradient direction |
-| `animated` | `boolean` | `false` | Pan the gradient horizontally on a 4s loop |
+| `isAnimated` | `boolean` | `false` | Pan the gradient horizontally on a 4s loop |
 | `as` | `'span' \| 'div' \| 'h1'..'h6' \| 'p'` | `'span'` | Tag |
 
 ## Accessibility

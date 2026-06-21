@@ -40,7 +40,7 @@ export const Default: Story = {
           </div>
 
           <Tour
-            open={open}
+            isOpen={open}
             onOpenChange={setOpen}
             steps={[
               {

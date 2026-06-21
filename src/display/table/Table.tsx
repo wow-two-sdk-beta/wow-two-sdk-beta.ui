@@ -10,17 +10,20 @@ import {
 } from 'react';
 import { cn } from '../../utils';
 
-export type TableDensity = 'compact' | 'cozy' | 'comfortable';
+export type TableDensity = 'compact' | 'cozy' | 'comfortable' | 'roomy';
+
+/** Radius applied to the scroll wrapper. Mirrors the shared surface radius scale. */
+export type TableRadius = 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 interface TableContextValue {
-  striped: boolean;
-  hoverable: boolean;
+  isStriped: boolean;
+  isHoverable: boolean;
   density: TableDensity;
 }
 
 const TableContext = createContext<TableContextValue>({
-  striped: false,
-  hoverable: false,
+  isStriped: false,
+  isHoverable: false,
   density: 'cozy',
 });
 
@@ -28,21 +31,45 @@ const DENSITY_CELL: Record<TableDensity, string> = {
   compact: 'px-2 py-1.5 text-sm',
   cozy: 'px-3 py-2 text-sm',
   comfortable: 'px-4 py-3 text-sm',
+  roomy: 'px-5 py-4 text-sm',
+};
+
+const WRAPPER_RADIUS: Record<TableRadius, string> = {
+  none: 'rounded-none',
+  sm: 'rounded-sm',
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  xl: 'rounded-xl',
+  '2xl': 'rounded-2xl',
 };
 
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
-  striped?: boolean;
-  hoverable?: boolean;
+  isStriped?: boolean;
+  isHoverable?: boolean;
   density?: TableDensity;
-  bare?: boolean;
+  isBare?: boolean;
+  /** Corner radius of the scroll wrapper (ignored when `isBare`). */
+  radius?: TableRadius;
+  /** Classes applied to the scroll wrapper (ignored when `isBare`). `className` still lands on the inner `<table>`. */
+  containerClassName?: string;
   children: ReactNode;
 }
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
-  { striped = false, hoverable = false, density = 'cozy', bare = false, className, children, ...rest },
+  {
+    isStriped = false,
+    isHoverable = false,
+    density = 'cozy',
+    isBare = false,
+    radius = 'md',
+    containerClassName,
+    className,
+    children,
+    ...rest
+  },
   ref,
 ) {
-  const ctx = { striped, hoverable, density };
+  const ctx = { isStriped, isHoverable, density };
   const tableEl = (
     <table
       ref={ref}
@@ -54,8 +81,14 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
   );
   return (
     <TableContext.Provider value={ctx}>
-      {bare ? tableEl : (
-        <div className="relative w-full overflow-x-auto rounded-md border border-border">
+      {isBare ? tableEl : (
+        <div
+          className={cn(
+            'relative w-full overflow-x-auto border border-border',
+            WRAPPER_RADIUS[radius],
+            containerClassName,
+          )}
+        >
           {tableEl}
         </div>
       )}
@@ -63,12 +96,25 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
   );
 });
 
-export const TableHead = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
-  function TableHead({ className, ...rest }, ref) {
+/** Header typography treatment. `uppercase` is the default look; `plain` keeps normal-case `text-sm` heads. */
+export type TableHeadVariant = 'uppercase' | 'plain';
+
+const HEAD_VARIANT: Record<TableHeadVariant, string> = {
+  uppercase: 'text-xs font-semibold uppercase tracking-wide text-muted-foreground',
+  plain: 'text-sm font-semibold text-foreground',
+};
+
+export interface TableHeadProps extends HTMLAttributes<HTMLTableSectionElement> {
+  /** Typography treatment for the header row. Defaults to `uppercase` (current look). */
+  headVariant?: TableHeadVariant;
+}
+
+export const TableHead = forwardRef<HTMLTableSectionElement, TableHeadProps>(
+  function TableHead({ className, headVariant = 'uppercase', ...rest }, ref) {
     return (
       <thead
         ref={ref}
-        className={cn('border-b border-border bg-muted/50 text-xs font-semibold uppercase tracking-wide text-muted-foreground', className)}
+        className={cn('border-b border-border bg-muted/50', HEAD_VARIANT[headVariant], className)}
         {...rest}
       />
     );
@@ -82,8 +128,8 @@ export const TableBody = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTML
       <tbody
         ref={ref}
         className={cn(
-          ctx.striped && '[&>tr:nth-child(even)]:bg-muted/30',
-          ctx.hoverable && '[&>tr:hover]:bg-muted',
+          ctx.isStriped && '[&>tr:nth-child(even)]:bg-muted/30',
+          ctx.isHoverable && '[&>tr:hover]:bg-muted',
           className,
         )}
         {...rest}

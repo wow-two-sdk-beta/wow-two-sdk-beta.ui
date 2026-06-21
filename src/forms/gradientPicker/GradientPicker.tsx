@@ -22,7 +22,7 @@ export interface GradientPickerProps extends Omit<HTMLAttributes<HTMLDivElement>
   value?: Gradient;
   defaultValue?: Gradient;
   onValueChange?: (value: Gradient) => void;
-  disabled?: boolean;
+  isDisabled?: boolean;
   name?: string;
 }
 
@@ -49,7 +49,7 @@ export function gradientToCss(g: Gradient): string {
  */
 export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
   function GradientPicker(
-    { value: valueProp, defaultValue, onValueChange, disabled, name, className, ...rest },
+    { value: valueProp, defaultValue, onValueChange, isDisabled, name, className, ...rest },
     ref,
   ) {
     const [gradient, setGradient] = useControlled({
@@ -84,7 +84,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
         ref={ref}
         className={cn(
           'flex flex-col gap-3 rounded-md border border-border bg-card p-3 text-card-foreground shadow-sm',
-          disabled && 'opacity-60',
+          isDisabled && 'opacity-60',
           className,
         )}
         {...rest}
@@ -98,7 +98,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
                 type="button"
                 role="radio"
                 aria-checked={gradient.kind === k}
-                disabled={disabled}
+                disabled={isDisabled}
                 onClick={() => update({ kind: k })}
                 className={cn(
                   'inline-flex h-6 items-center rounded px-2 text-xs font-medium transition-colors',
@@ -119,7 +119,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
                 min={0}
                 max={360}
                 value={gradient.angle}
-                disabled={disabled}
+                disabled={isDisabled}
                 onChange={(e) => update({ angle: Math.max(0, Math.min(360, Number(e.target.value) || 0)) })}
                 className={cn(inputBaseVariants({ size: 'sm' }), 'w-20')}
               />
@@ -142,14 +142,14 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
               <input
                 type="color"
                 value={stop.color}
-                disabled={disabled}
+                disabled={isDisabled}
                 onChange={(e) => updateStop(i, { color: e.target.value })}
                 className="h-7 w-10 cursor-pointer rounded-sm border border-input bg-background"
               />
               <input
                 type="text"
                 value={stop.color}
-                disabled={disabled}
+                disabled={isDisabled}
                 onChange={(e) => updateStop(i, { color: e.target.value })}
                 className={cn(inputBaseVariants({ size: 'sm' }), 'flex-1 font-mono')}
               />
@@ -158,7 +158,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
                 min={0}
                 max={100}
                 value={stop.position}
-                disabled={disabled}
+                disabled={isDisabled}
                 onChange={(e) => updateStop(i, { position: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
                 className={cn(inputBaseVariants({ size: 'sm' }), 'w-16')}
               />
@@ -166,7 +166,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
               <button
                 type="button"
                 aria-label="Remove stop"
-                disabled={disabled || gradient.stops.length <= 2}
+                disabled={isDisabled || gradient.stops.length <= 2}
                 onClick={() => removeStop(i)}
                 className="inline-flex h-7 w-7 items-center justify-center rounded text-destructive hover:bg-destructive-soft disabled:pointer-events-none disabled:opacity-40"
               >
@@ -178,7 +178,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
 
         <button
           type="button"
-          disabled={disabled}
+          disabled={isDisabled}
           onClick={addStop}
           className="inline-flex h-8 w-full items-center justify-center gap-1 rounded-md border border-dashed border-border text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
         >

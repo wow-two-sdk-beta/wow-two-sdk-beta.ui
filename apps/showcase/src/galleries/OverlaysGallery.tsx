@@ -124,7 +124,7 @@ function BlurredDialog() {
   return (
     <Dialog>
       <DialogTrigger className={TRIGGER_CLS}>Open with blur</DialogTrigger>
-      <DialogContent blur>
+      <DialogContent isBlurred>
         <DialogClose />
         <DialogHeader>
           <DialogTitle>Blurred backdrop</DialogTitle>
@@ -321,7 +321,7 @@ function PhotoActionSheet() {
           Save to album
         </ActionSheetAction>
         <ActionSheetAction onSelect={() => setLastAction('Share')}>Share</ActionSheetAction>
-        <ActionSheetAction destructive onSelect={() => setLastAction('Delete')}>
+        <ActionSheetAction isDestructive onSelect={() => setLastAction('Delete')}>
           Delete
         </ActionSheetAction>
         <ActionSheetCancel />
@@ -389,8 +389,8 @@ function ContainedBackdrop({ blur }: { blur?: boolean }) {
       </div>
       <Backdrop
         open={open}
-        inline
-        blur={blur}
+        isInline
+        isBlurred={blur}
         onClick={() => setOpen(false)}
         className="absolute z-10 cursor-pointer"
       />

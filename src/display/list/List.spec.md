@@ -16,7 +16,7 @@ This is L4: **basic list semantics + presets**. For interactive selection lists 
 ```
 
 ## Required behaviors
-- Renders `<ul>` (default) or `<ol>` (when `ordered`).
+- Renders `<ul>` (default) or `<ol>` (when `isOrdered`).
 - `marker` prop: `'none' | 'disc' | 'decimal' | 'check'` controls bullet style.
 - `Item` accepts `leading` (icon/avatar) + `trailing` (badge/chevron) slots.
 - ARIA: native list semantics, no extra roles.
@@ -27,11 +27,11 @@ This is L4: **basic list semantics + presets**. For interactive selection lists 
 ## Props
 | Name | Type | Default | Required | Why |
 |---|---|---|---|---|
-| `ordered` | `boolean` | `false` | no | Render as `<ol>`. |
+| `isOrdered` | `boolean` | `false` | no | Render as `<ol>`. |
 | `marker` | `'none' \| 'disc' \| 'decimal' \| 'check'` | `'none'` | no | Bullet preset. |
 | `spacing` | `'tight' \| 'normal' \| 'loose'` | `'normal'` | no | Item spacing. |
 
-`List.Item`: `leading?`, `trailing?`, `children`.
+`List.Item`: `leading?`, `trailing?`, `hasCheckMarker?`, `children`.
 
 ## Composition
 Self-contained. Distinct from `forms/Listbox` (selection) and a future virtualized/data-bound list.

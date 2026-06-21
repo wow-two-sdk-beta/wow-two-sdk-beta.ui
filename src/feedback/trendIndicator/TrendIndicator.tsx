@@ -9,7 +9,7 @@ export interface TrendIndicatorProps extends Omit<ComponentPropsWithoutRef<'span
   /** Optional formatter (default: `${sign}${value}%`). */
   format?: (value: number) => ReactNode;
   /** When `true`, an increase reads as bad (e.g. error rate, churn). */
-  inverse?: boolean;
+  isInverse?: boolean;
   /** Small trailing label, e.g. "vs last week". */
   label?: ReactNode;
   size?: 'xs' | 'sm' | 'md';
@@ -28,13 +28,13 @@ const SIZE_ICON: Record<NonNullable<TrendIndicatorProps['size']>, number> = {
 
 /**
  * Up / down / flat arrow + value + optional label. Used inside `Stat` and
- * dashboard tiles. Pass `inverse` for metrics where higher is worse.
+ * dashboard tiles. Pass `isInverse` for metrics where higher is worse.
  */
 export const TrendIndicator = forwardRef<HTMLSpanElement, TrendIndicatorProps>(
-  ({ value, format, inverse, label, size = 'sm', className, ...props }, ref) => {
+  ({ value, format, isInverse, label, size = 'sm', className, ...props }, ref) => {
     const direction = value > 0 ? 'up' : value < 0 ? 'down' : 'flat';
     const positive =
-      direction === 'flat' ? false : (direction === 'up') !== Boolean(inverse);
+      direction === 'flat' ? false : (direction === 'up') !== Boolean(isInverse);
     const tone =
       direction === 'flat' ? 'text-muted-foreground' : positive ? 'text-success' : 'text-destructive';
     const arrow = direction === 'up' ? TrendingUp : direction === 'down' ? TrendingDown : Minus;

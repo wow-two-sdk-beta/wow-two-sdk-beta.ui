@@ -23,7 +23,7 @@ Mobile gesture: drag down past a threshold while at scrollTop=0 to trigger an as
 | `onRefresh` | `() => Promise<void> \| void` | — | Required |
 | `threshold` | `number` (px) | `60` | Minimum pull to trigger |
 | `maxPull` | `number` (px) | `120` | Cap on visual displacement |
-| `disabled` | `boolean` | `false` | |
+| `isDisabled` | `boolean` | `false` | |
 
 ## Accessibility
 - Refresh state announces via internal `<Announce>` ("Refreshing…" / "Refreshed").

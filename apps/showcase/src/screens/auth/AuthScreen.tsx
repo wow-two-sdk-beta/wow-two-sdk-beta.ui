@@ -337,7 +337,7 @@ export default function AuthScreen() {
               value={pin}
               onValueChange={setPin}
               onComplete={handlePinComplete}
-              disabled={verifying}
+              isDisabled={verifying}
             />
             <div className="h-5">
               {verifying && <InlineSpinner>Verifying code…</InlineSpinner>}
@@ -375,7 +375,7 @@ export default function AuthScreen() {
       {stage === 'success' && (
         <Card className="w-full max-w-md">
           {/* One-shot burst on entering the success stage — mounts only here. */}
-          <Confetti autoFire particleCount={90} />
+          <Confetti canAutoFire particleCount={90} />
           <Card.Body className="flex flex-col items-center gap-3 pt-8 text-center">
             <div className="grid h-12 w-12 place-items-center rounded-full bg-success text-2xl text-success-foreground">
               ✓

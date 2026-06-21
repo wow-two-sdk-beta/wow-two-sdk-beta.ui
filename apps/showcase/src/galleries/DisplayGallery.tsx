@@ -170,13 +170,13 @@ const INVOICE_BADGE: Record<Invoice['status'], 'success' | 'warning' | 'danger'>
 };
 
 const INVOICE_COLUMNS: DataTableColumn<Invoice>[] = [
-  { key: 'id', header: 'Invoice', accessor: (r) => r.id, sortable: true },
-  { key: 'customer', header: 'Customer', accessor: (r) => r.customer, sortable: true },
+  { key: 'id', header: 'Invoice', accessor: (r) => r.id, isSortable: true },
+  { key: 'customer', header: 'Customer', accessor: (r) => r.customer, isSortable: true },
   {
     key: 'total',
     header: 'Total',
     accessor: (r) => r.total,
-    sortable: true,
+    isSortable: true,
     align: 'right',
     cell: (r) => `$${r.total.toFixed(2)}`,
   },
@@ -225,7 +225,7 @@ const CAL_EVENTS: EventCalendarEvent[] = [
     title: 'Release 0.4',
     start: new Date(2026, 5, 12, 0, 0),
     end: new Date(2026, 5, 12, 23, 59),
-    allDay: true,
+    isAllDay: true,
     color: 'var(--color-warning)',
   },
   {
@@ -315,9 +315,9 @@ const NODE_EDITOR_EDGES: NodeEditorEdge[] = [
 ];
 
 const INITIAL_REACTIONS: Reaction[] = [
-  { key: 'up', emoji: '👍', count: 4, reactedByMe: false, users: ['Maya', 'Tom'] },
-  { key: 'heart', emoji: '❤️', count: 2, reactedByMe: true, users: ['You', 'Lena'] },
-  { key: 'rocket', emoji: '🚀', count: 0, reactedByMe: false },
+  { key: 'up', emoji: '👍', count: 4, isReactedByMe: false, users: ['Maya', 'Tom'] },
+  { key: 'heart', emoji: '❤️', count: 2, isReactedByMe: true, users: ['You', 'Lena'] },
+  { key: 'rocket', emoji: '🚀', count: 0, isReactedByMe: false },
 ];
 
 const INITIAL_TAGS = ['react', 'typescript', 'tailwind', 'vite'];
@@ -418,7 +418,7 @@ export default function DisplayGallery() {
     setReactions((prev) =>
       prev.map((r) =>
         r.key === key
-          ? { ...r, reactedByMe: !r.reactedByMe, count: r.count + (r.reactedByMe ? -1 : 1) }
+          ? { ...r, isReactedByMe: !r.isReactedByMe, count: r.count + (r.isReactedByMe ? -1 : 1) }
           : r,
       ),
     );
@@ -428,7 +428,7 @@ export default function DisplayGallery() {
     setReactions((prev) =>
       prev.some((r) => r.key === 'party')
         ? prev
-        : [...prev, { key: 'party', emoji: '🎉', count: 1, reactedByMe: true }],
+        : [...prev, { key: 'party', emoji: '🎉', count: 1, isReactedByMe: true }],
     );
   };
 
@@ -461,7 +461,7 @@ export default function DisplayGallery() {
               <Text size="sm" color="success" weight="semibold">
                 Success tone, semibold.
               </Text>
-              <Text size="sm" tabular>
+              <Text size="sm" isTabular>
                 1,024 / 2,048 tabular nums
               </Text>
             </div>
@@ -483,7 +483,7 @@ export default function DisplayGallery() {
                 as="span"
                 from="var(--color-success)"
                 to="var(--color-info)"
-                animated
+                isAnimated
                 className="text-xl font-semibold"
               >
                 Animated success → info
@@ -537,7 +537,7 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
             <Typewriter
               className="text-lg font-medium text-foreground"
               text={['Ship the beta.', 'Fix forward.', 'Never gate on review.']}
-              loop
+              canLoop
             />
           </Demo>
           <Demo label="Separator">
@@ -579,7 +579,7 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
             <div className="flex items-center gap-3">
               <CountBadge value={3} />
               <CountBadge value={128} max={99} variant="danger" />
-              <CountBadge value={0} hideZero={false} variant="outline" />
+              <CountBadge value={0} canHideZero={false} variant="outline" />
             </div>
           </Demo>
           <Demo label="Tag (removable)">
@@ -597,7 +597,7 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
           </Demo>
           <Demo label="Status">
             <div className="flex flex-wrap items-center gap-4">
-              <Status tone="success" pulse>
+              <Status tone="success" hasPulse>
                 Operational
               </Status>
               <Status tone="warning">Degraded</Status>
@@ -612,7 +612,7 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
           <Demo label="NotificationDot">
             <div className="flex items-center gap-6">
               <span className="flex items-center gap-2 text-sm text-foreground">
-                <NotificationDot tone="destructive" pulse /> alerts
+                <NotificationDot tone="destructive" hasPulse /> alerts
               </span>
               <span className="flex items-center gap-2 text-sm text-foreground">
                 <NotificationDot tone="success" size="sm" /> synced
@@ -631,7 +631,7 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
                 position="bottom-right"
                 badge={<NotificationDot tone="success" size="sm" />}
               >
-                <Avatar name="Maya K" autoColor />
+                <Avatar name="Maya K" canAutoColor />
               </BadgeOverlay>
             </div>
           </Demo>
@@ -653,12 +653,12 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
                 Consider a Q3 footnote
               </AnnotationMarker>{' '}
               so the chart matches the report.{' '}
-              <AnnotationMarker index={3} tone="issue" resolved>
+              <AnnotationMarker index={3} tone="issue" isResolved>
                 This number was wrong
               </AnnotationMarker>{' '}
-              — fixed in v2. A bare pin <AnnotationMarker index={4} tone="note" pinOnly /> can
+              — fixed in v2. A bare pin <AnnotationMarker index={4} tone="note" isPinOnly /> can
               anchor a margin note, and{' '}
-              <AnnotationMarker index={5} tone="note" active>
+              <AnnotationMarker index={5} tone="note" isActive>
                 this one is active
               </AnnotationMarker>
               .
@@ -673,19 +673,19 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
         <DemoGrid>
           <Demo label="Avatar">
             <div className="flex items-center gap-3">
-              <Avatar name="Sulton R" autoColor size="lg" />
-              <Avatar name="Maya Kim" autoColor />
+              <Avatar name="Sulton R" canAutoColor size="lg" />
+              <Avatar name="Maya Kim" canAutoColor />
               <Avatar name="Tom Ito" size="sm" />
               <Avatar fallback={<span aria-hidden>★</span>} size="sm" />
             </div>
           </Demo>
           <Demo label="AvatarGroup">
             <AvatarGroup max={3} size="md">
-              <Avatar name="Sulton R" autoColor />
-              <Avatar name="Maya Kim" autoColor />
-              <Avatar name="Tom Ito" autoColor />
-              <Avatar name="Lena Park" autoColor />
-              <Avatar name="Omar Aziz" autoColor />
+              <Avatar name="Sulton R" canAutoColor />
+              <Avatar name="Maya Kim" canAutoColor />
+              <Avatar name="Tom Ito" canAutoColor />
+              <Avatar name="Lena Park" canAutoColor />
+              <Avatar name="Omar Aziz" canAutoColor />
             </AvatarGroup>
           </Demo>
           <Demo label="Image (loaded + fallback)">
@@ -799,7 +799,7 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
         />
         <DemoGrid>
           <Demo label="Accordion">
-            <Accordion type="single" defaultValue="a" collapsible>
+            <Accordion type="single" defaultValue="a" isCollapsible>
               <AccordionItem value="a">
                 <AccordionTrigger>What is beta-forever?</AccordionTrigger>
                 <AccordionContent>
@@ -816,7 +816,7 @@ export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
                   </Text>
                 </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="c" disabled>
+              <AccordionItem value="c" isDisabled>
                 <AccordionTrigger>Disabled item</AccordionTrigger>
                 <AccordionContent>
                   <Text size="sm">Hidden.</Text>
@@ -879,7 +879,7 @@ ESM ⚡ build success in 412ms`}</Code>
                 <TreeGroup value="display" label="display">
                   <TreeItem value="badge">Badge.tsx</TreeItem>
                   <TreeItem value="card">Card.tsx</TreeItem>
-                  <TreeItem value="locked" disabled>
+                  <TreeItem value="locked" isDisabled>
                     Internal.ts
                   </TreeItem>
                 </TreeGroup>
@@ -898,11 +898,11 @@ ESM ⚡ build success in 412ms`}</Code>
           <Demo label="List / ListItem">
             <div className="flex gap-8">
               <List marker="check" spacing="tight">
-                <ListItem showCheckMarker>Tokens wired</ListItem>
-                <ListItem showCheckMarker>Stories written</ListItem>
-                <ListItem showCheckMarker>Gallery rendered</ListItem>
+                <ListItem hasCheckMarker>Tokens wired</ListItem>
+                <ListItem hasCheckMarker>Stories written</ListItem>
+                <ListItem hasCheckMarker>Gallery rendered</ListItem>
               </List>
-              <List ordered marker="decimal" spacing="tight">
+              <List isOrdered marker="decimal" spacing="tight">
                 <ListItem trailing={<Badge size="sm">new</Badge>}>Install</ListItem>
                 <ListItem>Import</ListItem>
                 <ListItem>Compose</ListItem>
@@ -926,16 +926,16 @@ ESM ⚡ build success in 412ms`}</Code>
             </Timeline>
           </Demo>
           <Demo label="ActivityFeed">
-            <ActivityFeed dense>
+            <ActivityFeed isDense>
               <ActivityFeed.Item
-                avatar={<Avatar name="Maya Kim" size="xs" autoColor />}
+                avatar={<Avatar name="Maya Kim" size="xs" canAutoColor />}
                 timestamp="2h ago"
                 actions={<GhostButton>Reply</GhostButton>}
               >
                 <strong>Maya</strong> commented on <strong>Badge</strong>
               </ActivityFeed.Item>
               <ActivityFeed.Item
-                avatar={<Avatar name="Tom Ito" size="xs" autoColor />}
+                avatar={<Avatar name="Tom Ito" size="xs" canAutoColor />}
                 timestamp="4h ago"
                 preview={
                   <div className="rounded-md border border-border bg-muted p-2 text-xs text-muted-foreground">
@@ -948,7 +948,7 @@ ESM ⚡ build success in 412ms`}</Code>
               <ActivityFeed.Item
                 avatar={<Avatar name="CI Bot" size="xs" />}
                 timestamp="6h ago"
-                last
+                isLast
               >
                 <strong>CI</strong> published <Code>0.0.412</Code>
               </ActivityFeed.Item>
@@ -987,7 +987,7 @@ ESM ⚡ build success in 412ms`}</Code>
         <SectionHeader title="Tables & grids" description="Static table, sortable DataTable, editable DataGrid." />
         <DemoGrid>
           <Demo label="Table (compound)" wide>
-            <Table striped hoverable density="compact">
+            <Table isStriped isHoverable density="compact">
               <TableCaption>Subpath exports by domain</TableCaption>
               <TableHead>
                 <TableRow>
@@ -1032,8 +1032,8 @@ ESM ⚡ build success in 412ms`}</Code>
               data={INVOICES}
               rowKey={(r) => r.id}
               defaultSortBy={{ columnKey: 'total', direction: 'desc' }}
-              striped
-              hoverable
+              isStriped
+              isHoverable
               onRowClick={(r) => setPickedInvoice(r.id)}
             />
             <Text size="xs" color="muted" className="mt-2">
@@ -1099,7 +1099,7 @@ ESM ⚡ build success in 412ms`}</Code>
           </Demo>
           <Demo label="Sparkline">
             <div className="flex items-end gap-6">
-              <Sparkline data={SPARK_DATA} ariaLabel="Upward trend" showLast />
+              <Sparkline data={SPARK_DATA} ariaLabel="Upward trend" hasLast />
               <Sparkline data={SPARK_DATA} variant="area" tone="success" ariaLabel="Area trend" />
               <Sparkline data={SPARK_FLAT} variant="bar" tone="danger" ariaLabel="Downward bars" />
               <Sparkline data={SPARK_FLAT} variant="dot" tone="muted" ariaLabel="Dot series" />
@@ -1109,7 +1109,7 @@ ESM ⚡ build success in 412ms`}</Code>
             <AudioWaveform
               peaks={WAVE_PEAKS}
               progress={waveProgress}
-              interactive
+              isInteractive
               onSeek={setWaveProgress}
               width={280}
               height={48}
@@ -1119,7 +1119,7 @@ ESM ⚡ build success in 412ms`}</Code>
             </Text>
           </Demo>
           <Demo label="HeatmapCalendar" wide>
-            <HeatmapCalendar values={HEATMAP_VALUES} year={2026} tone="success" showLegend />
+            <HeatmapCalendar values={HEATMAP_VALUES} year={2026} tone="success" hasLegend />
           </Demo>
         </DemoGrid>
       </section>
@@ -1177,7 +1177,7 @@ ESM ⚡ build success in 412ms`}</Code>
           </Demo>
           <Demo label="Carousel" wide>
             <div className="max-w-md">
-              <Carousel loop>
+              <Carousel canLoop>
                 <CarouselViewport>
                   <CarouselSlides>
                     {CAROUSEL_SLIDES.map((s) => (
@@ -1208,7 +1208,7 @@ ESM ⚡ build success in 412ms`}</Code>
               view={diffView}
               leftLabel="greet.js (old)"
               rightLabel="greet.js (new)"
-              showStats
+              hasStats
             />
           </Demo>
           <Demo label="NodeEditor (drag nodes, wheel zooms)" wide>
@@ -1222,7 +1222,7 @@ ESM ⚡ build success in 412ms`}</Code>
         <SectionHeader title="Motion & effects" description="Marquee, reveal, tilt, confetti." />
         <DemoGrid>
           <Demo label="Marquee" wide>
-            <Marquee speed={18} pauseOnHover gap={16}>
+            <Marquee speed={18} canPauseOnHover gap={16}>
               {INITIAL_TAGS.concat(['storybook', 'tokens', 'beta-forever']).map((t) => (
                 <Tag key={t} variant="info">
                   {t}
@@ -1231,14 +1231,14 @@ ESM ⚡ build success in 412ms`}</Code>
             </Marquee>
           </Demo>
           <Demo label="ScrollReveal">
-            <ScrollReveal effect="slide-up" duration={500} once>
+            <ScrollReveal effect="slide-up" duration={500} isOnce>
               <div className="rounded-md border border-border bg-muted p-4 text-sm text-foreground">
                 Revealed when scrolled into view.
               </div>
             </ScrollReveal>
           </Demo>
           <Demo label="Tilt (hover)">
-            <Tilt maxAngle={10} glare>
+            <Tilt maxAngle={10} hasGlare>
               <div className="flex h-28 items-center justify-center rounded-lg border border-border bg-card text-sm font-medium text-card-foreground">
                 Tilt me
               </div>
@@ -1259,13 +1259,13 @@ ESM ⚡ build success in 412ms`}</Code>
         <DemoGrid>
           <Demo label="ChatBubble">
             <div className="flex flex-col gap-2">
-              <ChatBubble side="start" author="Maya" avatar={<Avatar name="Maya Kim" size="xs" autoColor />} timestamp="09:12">
+              <ChatBubble side="start" author="Maya" avatar={<Avatar name="Maya Kim" size="xs" canAutoColor />} timestamp="09:12">
                 Did the display gallery land?
               </ChatBubble>
               <ChatBubble side="end" tone="primary" status="read" timestamp="09:13">
                 Yep — all 66 components on one page.
               </ChatBubble>
-              <ChatBubble side="end" tone="primary" status="sending" tailless>
+              <ChatBubble side="end" tone="primary" status="sending" isTailless>
                 Coverage manifest should be green now.
               </ChatBubble>
               <ChatBubble tone="system">Tom joined the channel</ChatBubble>
@@ -1280,17 +1280,17 @@ ESM ⚡ build success in 412ms`}</Code>
           <Demo label="MessageList" wide>
             <MessageList className="h-64 rounded-md border border-border bg-background p-3" header={<Text size="xs" color="muted" align="center" as="div">Beginning of conversation</Text>} footer={<Text size="xs" color="muted" as="div">Maya is typing…</Text>}>
               <MessageList.DaySeparator label="Yesterday" />
-              <ChatBubble side="start" author="Maya" avatar={<Avatar name="Maya Kim" size="xs" autoColor />}>
+              <ChatBubble side="start" author="Maya" avatar={<Avatar name="Maya Kim" size="xs" canAutoColor />}>
                 Pushed the token refactor.
               </ChatBubble>
               <ChatBubble side="end" tone="primary" status="read">
                 Reviewing now.
               </ChatBubble>
               <MessageList.DaySeparator label="Today" />
-              <ChatBubble side="start" author="Maya" avatar={<Avatar name="Maya Kim" size="xs" autoColor />}>
+              <ChatBubble side="start" author="Maya" avatar={<Avatar name="Maya Kim" size="xs" canAutoColor />}>
                 Gallery page is up — scroll for the heatmap.
               </ChatBubble>
-              <ChatBubble side="end" tone="primary" status="delivered" footer={<ReactionBar compact hideAddButton reactions={[{ key: 'up', emoji: '👍', count: 1, reactedByMe: true }]} />}>
+              <ChatBubble side="end" tone="primary" status="delivered" footer={<ReactionBar isCompact hasAddButton={false} reactions={[{ key: 'up', emoji: '👍', count: 1, isReactedByMe: true }]} />}>
                 Looks great. Shipping it.
               </ChatBubble>
             </MessageList>
@@ -1300,10 +1300,10 @@ ESM ⚡ build success in 412ms`}</Code>
               <ThreadView
                 title="Thread"
                 subtitle="in #ui-beta"
-                hideCloseButton
+                hasCloseButton={false}
                 replyCount="2 replies"
                 parent={
-                  <ChatBubble side="start" author="Tom" avatar={<Avatar name="Tom Ito" size="xs" autoColor />}>
+                  <ChatBubble side="start" author="Tom" avatar={<Avatar name="Tom Ito" size="xs" canAutoColor />}>
                     Should Status pulse by default?
                   </ChatBubble>
                 }
@@ -1314,7 +1314,7 @@ ESM ⚡ build success in 412ms`}</Code>
                   />
                 }
               >
-                <ChatBubble side="start" author="Maya" avatar={<Avatar name="Maya Kim" size="xs" autoColor />}>
+                <ChatBubble side="start" author="Maya" avatar={<Avatar name="Maya Kim" size="xs" canAutoColor />}>
                   Only for live states, I'd say.
                 </ChatBubble>
                 <ChatBubble side="end" tone="primary" status="read">
@@ -1327,14 +1327,14 @@ ESM ⚡ build success in 412ms`}</Code>
             <CommentThread>
               <CommentThread.Comment
                 author="sulton"
-                avatar={<Avatar name="Sulton R" size="sm" autoColor />}
+                avatar={<Avatar name="Sulton R" size="sm" canAutoColor />}
                 timestamp="3h ago"
                 badge={
                   <Badge size="sm" variant="brand">
                     OP
                   </Badge>
                 }
-                highlighted
+                isHighlighted
                 actions={
                   <>
                     <GhostButton>Reply</GhostButton>
@@ -1344,7 +1344,7 @@ ESM ⚡ build success in 412ms`}</Code>
                 replies={
                   <CommentThread.Comment
                     author="maya"
-                    avatar={<Avatar name="Maya Kim" size="sm" autoColor />}
+                    avatar={<Avatar name="Maya Kim" size="sm" canAutoColor />}
                     timestamp="2h ago"
                     actions={<GhostButton>Reply</GhostButton>}
                   >

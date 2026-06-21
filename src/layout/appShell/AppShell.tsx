@@ -33,7 +33,7 @@ interface AppShellContextValue {
   sidebarWidth: string;
   asideWidth: string;
   sidebarBreakpoint: Breakpoint;
-  sidebarOpen: boolean;
+  isSidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   isSidebarCollapsed: boolean;
   isAsideHidden: boolean;
@@ -52,7 +52,7 @@ export interface AppShellProps extends HTMLAttributes<HTMLDivElement> {
   asideWidth?: string;
   sidebarBreakpoint?: Breakpoint;
   asideBreakpoint?: Breakpoint;
-  sidebarOpen?: boolean;
+  isSidebarOpen?: boolean;
   defaultSidebarOpen?: boolean;
   onSidebarOpenChange?: (open: boolean) => void;
   children: ReactNode;
@@ -69,7 +69,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
     asideWidth = '280px',
     sidebarBreakpoint = 'lg',
     asideBreakpoint = 'xl',
-    sidebarOpen: sidebarOpenProp,
+    isSidebarOpen: sidebarOpenProp,
     defaultSidebarOpen = false,
     onSidebarOpenChange,
     className,
@@ -78,7 +78,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
   },
   ref,
 ) {
-  const [sidebarOpen, setSidebarOpen] = useControlled({
+  const [isSidebarOpen, setSidebarOpen] = useControlled({
     controlled: sidebarOpenProp,
     default: defaultSidebarOpen,
     onChange: onSidebarOpenChange,
@@ -92,12 +92,12 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
       sidebarWidth,
       asideWidth,
       sidebarBreakpoint,
-      sidebarOpen,
+      isSidebarOpen,
       setSidebarOpen,
       isSidebarCollapsed,
       isAsideHidden,
     }),
-    [sidebarWidth, asideWidth, sidebarBreakpoint, sidebarOpen, setSidebarOpen, isSidebarCollapsed, isAsideHidden],
+    [sidebarWidth, asideWidth, sidebarBreakpoint, isSidebarOpen, setSidebarOpen, isSidebarCollapsed, isAsideHidden],
   );
 
   const gridTemplate = isSidebarCollapsed
@@ -150,7 +150,7 @@ export const AppShellSidebar = forwardRef<HTMLElement, AppShellSidebarProps>(
 
     if (ctx.isSidebarCollapsed) {
       return (
-        <Drawer open={ctx.sidebarOpen} onOpenChange={ctx.setSidebarOpen} side="left">
+        <Drawer open={ctx.isSidebarOpen} onOpenChange={ctx.setSidebarOpen} side="left">
           <DrawerContent className="w-72 max-w-[80%]">
             <nav className={cn('flex h-full flex-col', className)}>{children}</nav>
           </DrawerContent>

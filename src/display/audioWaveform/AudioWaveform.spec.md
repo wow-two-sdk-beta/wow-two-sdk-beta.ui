@@ -16,7 +16,7 @@ SVG layer of bars. Tone-agnostic (uses `currentColor` for played, `text-muted-fo
 | `gap` | `number` (px) | `1` | Between bars |
 | `tone` | `'brand' \| 'success' \| 'warning' \| 'danger' \| 'muted' \| 'current'` | `'brand'` | Played-bar color |
 | `onSeek` | `(progress: number) => void` | — | Click-to-seek |
-| `interactive` | `boolean` | derived from `onSeek` | Forces seek cursor |
+| `isInteractive` | `boolean` | derived from `onSeek` | Forces seek cursor |
 
 ## Accessibility
 - `role="slider"` with `aria-valuenow / aria-valuemin / aria-valuemax` reflecting progress.

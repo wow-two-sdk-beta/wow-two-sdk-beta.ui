@@ -8,7 +8,7 @@ export interface MarqueeProps extends HTMLAttributes<HTMLDivElement> {
   direction?: MarqueeDirection;
   /** Seconds for one full traversal of the inner content. */
   speed?: number;
-  pauseOnHover?: boolean;
+  canPauseOnHover?: boolean;
   gap?: number;
   children: ReactNode;
 }
@@ -18,7 +18,7 @@ export interface MarqueeProps extends HTMLAttributes<HTMLDivElement> {
  * loop animated by `-50%`. Pause-on-hover toggles `animation-play-state`.
  */
 export const Marquee = forwardRef<HTMLDivElement, MarqueeProps>(function Marquee(
-  { direction = 'left', speed = 30, pauseOnHover = true, gap = 48, className, children, ...rest },
+  { direction = 'left', speed = 30, canPauseOnHover = true, gap = 48, className, children, ...rest },
   ref,
 ) {
   const horizontal = direction === 'left' || direction === 'right';
@@ -45,7 +45,7 @@ export const Marquee = forwardRef<HTMLDivElement, MarqueeProps>(function Marquee
         className={cn(
           'flex shrink-0',
           horizontal ? 'items-center' : 'flex-col items-center',
-          pauseOnHover && 'group-hover/marquee:[animation-play-state:paused]',
+          canPauseOnHover && 'group-hover/marquee:[animation-play-state:paused]',
         )}
         style={{
           animation: reducedMotion

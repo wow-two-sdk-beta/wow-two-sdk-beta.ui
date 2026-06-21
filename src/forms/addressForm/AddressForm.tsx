@@ -64,9 +64,9 @@ export interface AddressFormProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   value?: Address;
   defaultValue?: Address;
   onValueChange?: (address: Address) => void;
-  disabled?: boolean;
-  readOnly?: boolean;
-  compact?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
+  isCompact?: boolean;
   /** Prefix for hidden inputs (`{name}.line1`, etc.). */
   name?: string;
 }
@@ -80,7 +80,7 @@ const EMPTY: Address = { country: 'US', line1: '', city: '', region: '', postalC
  */
 export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
   function AddressForm(
-    { value: valueProp, defaultValue, onValueChange, disabled, readOnly, compact, name, className, ...rest },
+    { value: valueProp, defaultValue, onValueChange, isDisabled, isReadOnly, isCompact, name, className, ...rest },
     ref,
   ) {
     const [address, setAddress] = useControlled({
@@ -111,7 +111,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
           <select
             id={ids.country}
             value={address.country}
-            disabled={disabled || readOnly}
+            disabled={isDisabled || isReadOnly}
             onChange={(e) => update({ country: e.target.value, region: '' })}
             className={cn(inputBaseVariants({ size: 'md' }))}
           >
@@ -133,8 +133,8 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
             type="text"
             autoComplete="address-line1"
             value={address.line1}
-            disabled={disabled}
-            readOnly={readOnly}
+            disabled={isDisabled}
+            readOnly={isReadOnly}
             onChange={(e) => update({ line1: e.target.value })}
             className={cn(inputBaseVariants({ size: 'md' }))}
           />
@@ -149,14 +149,14 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
             type="text"
             autoComplete="address-line2"
             value={address.line2 ?? ''}
-            disabled={disabled}
-            readOnly={readOnly}
+            disabled={isDisabled}
+            readOnly={isReadOnly}
             onChange={(e) => update({ line2: e.target.value })}
             className={cn(inputBaseVariants({ size: 'md' }))}
           />
         </div>
         {/* City + Region + Postal */}
-        <div className={cn('grid gap-3', compact ? 'grid-cols-1' : 'grid-cols-3')}>
+        <div className={cn('grid gap-3', isCompact ? 'grid-cols-1' : 'grid-cols-3')}>
           <div className="flex flex-col gap-1">
             <label htmlFor={ids.city} className="text-xs font-medium text-foreground">
               City
@@ -166,8 +166,8 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
               type="text"
               autoComplete="address-level2"
               value={address.city}
-              disabled={disabled}
-              readOnly={readOnly}
+              disabled={isDisabled}
+              readOnly={isReadOnly}
               onChange={(e) => update({ city: e.target.value })}
               className={cn(inputBaseVariants({ size: 'md' }))}
             />
@@ -180,7 +180,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
               <select
                 id={ids.region}
                 value={address.region}
-                disabled={disabled || readOnly}
+                disabled={isDisabled || isReadOnly}
                 onChange={(e) => update({ region: e.target.value })}
                 className={cn(inputBaseVariants({ size: 'md' }))}
               >
@@ -197,8 +197,8 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
                 type="text"
                 autoComplete="address-level1"
                 value={address.region}
-                disabled={disabled}
-                readOnly={readOnly}
+                disabled={isDisabled}
+                readOnly={isReadOnly}
                 onChange={(e) => update({ region: e.target.value })}
                 className={cn(inputBaseVariants({ size: 'md' }))}
               />
@@ -213,8 +213,8 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
               type="text"
               autoComplete="postal-code"
               value={address.postalCode}
-              disabled={disabled}
-              readOnly={readOnly}
+              disabled={isDisabled}
+              readOnly={isReadOnly}
               onChange={(e) => update({ postalCode: e.target.value })}
               className={cn(inputBaseVariants({ size: 'md' }))}
             />

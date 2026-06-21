@@ -30,7 +30,7 @@ Raw floating menu primitive — bring-your-own-anchor and bring-your-own-open-st
 | `offset` | `number` | `6` | no | Distance from anchor. |
 | `aria-label` | `string` | — | recommended | A11y label for the menu. |
 
-`Menu.Item`: `onSelect?`, `disabled?`, `children`, all native button props.
+`Menu.Item`: `onSelect?`, `isDisabled?`, `children`, all native button props.
 
 ## Composition
 Compound with parent-owned state. `DropdownMenu` / `ContextMenu` / `Menubar` wrap `Menu` with their own open-state machinery.

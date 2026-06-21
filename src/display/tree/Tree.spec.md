@@ -34,7 +34,7 @@ Hierarchical list with expandable folder nodes and selectable leaf nodes. Use fo
 | `defaultExpanded` | `string[]` | `[]` | no | Uncontrolled. |
 | `onExpandedChange` | `(values) => void` | — | no | Expansion callback. |
 
-`Tree.Group`: `value`, `label`, `disabled?`. `Tree.Item`: `value`, `disabled?`.
+`Tree.Group`: `value`, `label`, `isDisabled?`. `Tree.Item`: `value`, `isDisabled?`.
 
 ## Composition
 Compound. Tree root manages selected + expanded sets. Groups/items participate via context.

@@ -8,7 +8,7 @@ export interface StatusIndicatorProps extends Omit<ComponentPropsWithoutRef<'div
   /** Smaller secondary line (e.g. "Updated 2m ago"). */
   description?: ReactNode;
   /** Optional pulsing ring for "live" indication. */
-  pulse?: boolean;
+  hasPulse?: boolean;
 }
 
 const TONE: Record<NonNullable<StatusIndicatorProps['tone']>, string> = {
@@ -25,7 +25,7 @@ const TONE: Record<NonNullable<StatusIndicatorProps['tone']>, string> = {
  * `display/Status`.
  */
 export const StatusIndicator = forwardRef<HTMLDivElement, StatusIndicatorProps>(
-  ({ tone = 'success', label, description, pulse, className, ...props }, ref) => (
+  ({ tone = 'success', label, description, hasPulse, className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn('flex items-start gap-3', className)}
@@ -33,7 +33,7 @@ export const StatusIndicator = forwardRef<HTMLDivElement, StatusIndicatorProps>(
     >
       <span className="relative mt-1 inline-flex">
         <span className={cn('inline-block h-2.5 w-2.5 rounded-full', TONE[tone])} />
-        {pulse && (
+        {hasPulse && (
           <span
             className={cn(
               'absolute inset-0 inline-block rounded-full opacity-75 animate-ping',

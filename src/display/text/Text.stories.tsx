@@ -13,7 +13,7 @@ export const Default: Story = { args: { children: 'Body text — the quick brown
 export const Muted: Story = { args: { color: 'muted', children: 'Subtle copy.' } };
 export const Truncated: Story = {
   render: () => (
-    <Text truncate className="w-48">
+    <Text isTruncated className="w-48">
       Long text that overflows and should be truncated with ellipsis.
     </Text>
   ),

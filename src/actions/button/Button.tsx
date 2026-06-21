@@ -19,6 +19,7 @@ import {
   ButtonType,
   CssExtensions,
   HtmlElement,
+  IS_DEV,
   Key,
   OptionalExtensions,
   PressExtensions,
@@ -33,6 +34,7 @@ import {
   type SizeValue,
 } from '../../utils';
 import { Slot } from '../../primitives';
+import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
 import { Spinner } from '../../icons';
 import { useDebounceHandler } from '../../hooks';
 import { buttonVariants, type ButtonVariants } from './Button.variants';
@@ -43,15 +45,8 @@ const COMPONENT_NAME = 'Button';
 type ButtonSizePreset = Extract<SizePreset, 'xs' | 'sm' | 'md' | 'lg' | 'xl'>;
 const BUTTON_SIZE_PRESETS: ReadonlySet<string> = new Set<ButtonSizePreset>(['xs', 'sm', 'md', 'lg', 'xl']);
 
-/**
- * Union accepted by Button's `size` prop:
- * - preset: `'xs' | 'sm' | 'md' | 'lg' | 'xl'` — applies the variant class (height + padding + font)
- * - `number`: raw px, applied to both width and height (square shorthand)
- * - `string` (non-preset): any CSS unit (`'2rem'`, `'24px'`), applied to both width and height
- * - object: `{ width?, height?, minWidth?, minHeight?, boxSize? }` — explicit per-dim overrides
- *
- * Raw or object forms set inline dimensions only — no padding/font baseline. Combine with `padding` if text-bearing.
- */
+/* `size`: preset (variant class) | number/string (square inline dims) | `{width,height,minWidth,minHeight,boxSize}`.
+   Raw/object forms set inline dims only — pair with `padding` if text-bearing. */
 export type ButtonSize = SizeUnion<ButtonSizePreset>;
 
 /* Observable state surfaced via the `data-state` DOM attribute. */
@@ -68,7 +63,7 @@ export interface ButtonProps
   /* Preset name OR raw value OR explicit dim object — see `ButtonSize` for details. */
   size?: ButtonSize;
 
-  /* Per-instance color override. Single string (`'#3b82f6'`, `'oklch(...)'`, etc.) → lib derives all slots. Object → override individual slots (bg/text/soft/softText/ring). Overrides apply to the active `tone`'s theme tokens locally — every Tailwind utility (`bg-{tone}`, `hover:bg-{tone}/X`, etc.) picks them up automatically. */
+  /* Per-instance color override for the active `tone`. String → all slots derived; object → per-slot (bg/text/soft/softText/ring). Sets local CSS vars that `bg-{tone}` etc. pick up. */
   color?: ColorProp;
 
   /* Slot before children (logical start). */
@@ -89,7 +84,7 @@ export interface ButtonProps
   /* Content-loading: hides content (preserves dimensions) + shimmer. Mutually exclusive with `isLoading`. */
   isSkeleton?: boolean;
 
-  /* Removes from focus order, blocks clicks. Forwards to native `disabled`. */
+  /* Removes from focus order, blocks clicks. Forwards to native `disabled`. Inherited from an enclosing `FormField` when omitted. */
   isDisabled?: boolean;
 
   /* Stretches to fill container width. */
@@ -190,17 +185,20 @@ function useButtonInteractivity(opts: UseButtonInteractivityOptions) {
 
   const handlePointerDown = (e: PointerEvent<HTMLButtonElement>) => {
     if (opts.isInactive) return;
+    // Cancel any pending timer, then arm only on the first pointer of a gesture — a second
+    // pointer-down must not stack a second long-press timer.
+    cancelLongPress();
     if (!isPressingRef.current) {
       isPressingRef.current = true;
       longPressFiredRef.current = false;
       opts.onPressStart?.(e);
-    }
-    if (opts.onLongPress) {
-      longPressTimerRef.current = setTimeout(() => {
-        longPressFiredRef.current = true;
-        opts.onLongPress?.(e);
-        longPressTimerRef.current = undefined;
-      }, opts.longPressDelay);
+      if (opts.onLongPress) {
+        longPressTimerRef.current = setTimeout(() => {
+          longPressFiredRef.current = true;
+          opts.onLongPress?.(e);
+          longPressTimerRef.current = undefined;
+        }, opts.longPressDelay);
+      }
     }
   };
 
@@ -313,7 +311,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    if (isLoading && isSkeleton) {
+    if (IS_DEV && isLoading && isSkeleton) {
       console.warn(
         `[${COMPONENT_NAME}] \`isLoading\` and \`isSkeleton\` are mutually exclusive — \`isSkeleton\` takes precedence.`,
       );
@@ -324,21 +322,38 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       longPressDelay < PressExtensions.longPressDelay.min ||
       longPressDelay > PressExtensions.longPressDelay.max
     ) {
-      console.warn(
-        `[${COMPONENT_NAME}] longPressDelay=${longPressDelay}ms is outside reasonable range (${PressExtensions.longPressDelay.min}–${PressExtensions.longPressDelay.max}ms). Falling back to ${PressExtensions.longPressDelay.default}ms.`,
-      );
+      if (IS_DEV) {
+        console.warn(
+          `[${COMPONENT_NAME}] longPressDelay=${longPressDelay}ms is outside reasonable range (${PressExtensions.longPressDelay.min}–${PressExtensions.longPressDelay.max}ms). Falling back to ${PressExtensions.longPressDelay.default}ms.`,
+        );
+      }
       safeLongPressDelay = PressExtensions.longPressDelay.default;
     }
 
+    if (
+      IS_DEV &&
+      (children === undefined || children === null || children === false) &&
+      rest['aria-label'] === undefined &&
+      rest['aria-labelledby'] === undefined
+    ) {
+      console.warn(
+        `[${COMPONENT_NAME}] icon-only button (no text children) is missing an accessible name — pass \`aria-label\` or \`aria-labelledby\` (Button.standard.md rule 12).`,
+      );
+    }
+
+    /* Inherit disabled-state from an enclosing `FormField` when the local prop is omitted; standalone when no context. */
+    const formControl = useFormControl();
+    const resolvedDisabled = isDisabled ?? formControl?.isDisabled ?? false;
+
     const skeletonActive = !!isSkeleton;
     const loadingActive = !skeletonActive && !!isLoading;
-    const isInactive = loadingActive || skeletonActive || !!isDisabled;
+    const isInactive = loadingActive || skeletonActive || resolvedDisabled;
 
     const dataState: ButtonDataState | undefined = skeletonActive
       ? ButtonDataState.Skeleton
       : loadingActive
         ? ButtonDataState.Loading
-        : isDisabled
+        : resolvedDisabled
           ? ButtonDataState.Disabled
           : undefined;
 
@@ -390,7 +405,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const content = loadingActive ? (
       <>
         {loadingSlot ?? <Spinner />}
-        {loadingText !== undefined && <span>{loadingText}</span>}
+        {loadingText !== undefined ? (
+          <span>{loadingText}</span>
+        ) : (
+          // No loadingText: keep children in sr-only so the accessible name survives (Spinner is aria-hidden).
+          <span className="sr-only">{children}</span>
+        )}
       </>
     ) : (
       <>
@@ -400,7 +420,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       </>
     );
 
-    /* asChild bypasses the fragment-wrapped content so Slot can merge className/style onto the user's element. leadingSlot/trailingSlot/isLoading rendering aren't supported in asChild mode — consumer owns the rendered children entirely. */
+    /* asChild → Slot merges onto the user's element; leadingSlot/trailingSlot/isLoading aren't rendered (consumer owns children). */
     const renderedContent = asChild ? children : content;
 
     return (
@@ -419,8 +439,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className,
         )}
         style={overrideStyle}
-        disabled={OptionalExtensions.from(isDisabled, true)}
+        disabled={OptionalExtensions.from(resolvedDisabled, true)}
         aria-busy={OptionalExtensions.from(loadingActive || skeletonActive, true)}
+        aria-disabled={OptionalExtensions.from(loadingActive || skeletonActive, true)}
         tabIndex={OptionalExtensions.from(skeletonActive, -1)}
         data-state={dataState}
         {...eventHandlers}

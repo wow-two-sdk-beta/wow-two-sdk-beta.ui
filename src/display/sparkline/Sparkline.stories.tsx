@@ -16,11 +16,11 @@ export const Variants: Story = {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <span className="w-12 text-xs text-muted-foreground">line</span>
-        <Sparkline data={data} variant="line" showLast />
+        <Sparkline data={data} variant="line" hasLast />
       </div>
       <div className="flex items-center gap-3">
         <span className="w-12 text-xs text-muted-foreground">area</span>
-        <Sparkline data={data} variant="area" showLast />
+        <Sparkline data={data} variant="area" hasLast />
       </div>
       <div className="flex items-center gap-3">
         <span className="w-12 text-xs text-muted-foreground">bar</span>

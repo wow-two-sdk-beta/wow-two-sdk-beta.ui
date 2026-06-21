@@ -27,13 +27,13 @@ export const Default: Story = {
   render: () => (
     <DataTable<User>
       columns={[
-        { key: 'name', header: 'Name', accessor: (r) => r.name, sortable: true },
-        { key: 'email', header: 'Email', accessor: (r) => r.email, sortable: true },
+        { key: 'name', header: 'Name', accessor: (r) => r.name, isSortable: true },
+        { key: 'email', header: 'Email', accessor: (r) => r.email, isSortable: true },
         {
           key: 'role',
           header: 'Role',
           accessor: (r) => r.role,
-          sortable: true,
+          isSortable: true,
           cell: (r) => (
             <span className="inline-flex items-center rounded-sm bg-muted px-1.5 py-0.5 text-xs">
               {r.role}
@@ -45,7 +45,7 @@ export const Default: Story = {
           header: 'Joined',
           accessor: (r) => r.joinedAt,
           cell: (r) => r.joinedAt.toLocaleDateString(),
-          sortable: true,
+          isSortable: true,
           align: 'right',
         },
       ]}

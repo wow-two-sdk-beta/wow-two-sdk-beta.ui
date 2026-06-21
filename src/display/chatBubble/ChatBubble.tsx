@@ -24,9 +24,9 @@ export interface ChatBubbleProps extends HTMLAttributes<HTMLDivElement> {
   /** Delivery state. Hidden when `side === 'start'` by default. */
   status?: ChatStatus;
   /** Force-show status even on the inbound side. */
-  showStatusOnStart?: boolean;
+  canShowStatusOnStart?: boolean;
   /** Hide the bubble's tail (for stacked / grouped messages). */
-  tailless?: boolean;
+  isTailless?: boolean;
   /** Reactions / footer slot (e.g. `<ReactionBar />`). */
   footer?: ReactNode;
   /** Bubble body. */
@@ -64,8 +64,8 @@ export const ChatBubble = forwardRef<HTMLDivElement, ChatBubbleProps>(
       author,
       timestamp,
       status,
-      showStatusOnStart,
-      tailless,
+      canShowStatusOnStart,
+      isTailless,
       footer,
       children,
       className,
@@ -76,7 +76,7 @@ export const ChatBubble = forwardRef<HTMLDivElement, ChatBubbleProps>(
     const isEnd = side === 'end';
     const effectiveTone: ChatTone = tone ?? (isEnd ? 'primary' : 'default');
     const isSystem = effectiveTone === 'system';
-    const showStatus = !!status && (isEnd || showStatusOnStart);
+    const showStatus = !!status && (isEnd || canShowStatusOnStart);
 
     if (isSystem) {
       return (
@@ -116,7 +116,7 @@ export const ChatBubble = forwardRef<HTMLDivElement, ChatBubbleProps>(
             className={cn(
               'relative inline-block px-3 py-2 text-sm break-words',
               TONE_BASE[effectiveTone],
-              tailless ? 'rounded-2xl' : isEnd ? 'rounded-2xl rounded-br-sm' : 'rounded-2xl rounded-bl-sm',
+              isTailless ? 'rounded-2xl' : isEnd ? 'rounded-2xl rounded-br-sm' : 'rounded-2xl rounded-bl-sm',
             )}
           >
             {children}

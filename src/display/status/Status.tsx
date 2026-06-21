@@ -4,7 +4,7 @@ import { cn } from '../../utils';
 export interface StatusProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
   tone?: 'success' | 'warning' | 'destructive' | 'info' | 'neutral';
   /** Optional pulsing ring around the dot. */
-  pulse?: boolean;
+  hasPulse?: boolean;
   /** Visual size — drives dot dimensions, text size, and gap. Default `md`. */
   size?: 'xs' | 'sm' | 'md';
   children?: ReactNode;
@@ -30,7 +30,7 @@ const SIZE: Record<NonNullable<StatusProps['size']>, { wrapper: string; dot: str
  * the bare positioned dot.
  */
 export const Status = forwardRef<HTMLSpanElement, StatusProps>(
-  ({ tone = 'success', pulse, size = 'md', className, children, ...props }, ref) => {
+  ({ tone = 'success', hasPulse, size = 'md', className, children, ...props }, ref) => {
     const sz = SIZE[size];
     return (
       <span
@@ -40,7 +40,7 @@ export const Status = forwardRef<HTMLSpanElement, StatusProps>(
       >
         <span className="relative inline-flex">
           <span className={cn('inline-block rounded-full', sz.dot, TONE[tone])} />
-          {pulse && (
+          {hasPulse && (
             <span
               className={cn(
                 'absolute inset-0 inline-block rounded-full opacity-75 animate-ping',

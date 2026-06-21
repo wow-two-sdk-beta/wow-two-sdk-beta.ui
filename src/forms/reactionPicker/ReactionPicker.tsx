@@ -12,7 +12,7 @@ export interface ReactionPickerProps extends Omit<HTMLAttributes<HTMLDivElement>
   /** Fires when the trailing "more" button is clicked (open full picker). */
   onMore?: () => void;
   /** Hide the trailing "more" button. */
-  hideMore?: boolean;
+  isMoreHidden?: boolean;
   /** Compact button size. */
   size?: 'sm' | 'md';
 }
@@ -36,7 +36,7 @@ export const ReactionPicker = forwardRef<HTMLDivElement, ReactionPickerProps>(
       selected,
       onSelect,
       onMore,
-      hideMore,
+      isMoreHidden,
       size = 'md',
       className,
       ...props
@@ -74,7 +74,7 @@ export const ReactionPicker = forwardRef<HTMLDivElement, ReactionPickerProps>(
           </button>
         );
       })}
-      {!hideMore && onMore && (
+      {!isMoreHidden && onMore && (
         <button
           type="button"
           aria-label="More reactions"

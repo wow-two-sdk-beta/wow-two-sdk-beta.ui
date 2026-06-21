@@ -9,8 +9,8 @@ export interface CronInputProps
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  invalid?: boolean;
-  showPreview?: boolean;
+  isInvalid?: boolean;
+  hasPreview?: boolean;
 }
 
 const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -149,10 +149,10 @@ export const CronInput = forwardRef<HTMLInputElement, CronInputProps>(
       defaultValue,
       onValueChange,
       placeholder = '* * * * *',
-      invalid,
+      isInvalid,
       size,
       state,
-      showPreview = true,
+      hasPreview = true,
       disabled,
       readOnly,
       name,
@@ -167,7 +167,7 @@ export const CronInput = forwardRef<HTMLInputElement, CronInputProps>(
       onChange: onValueChange,
     });
     const preview = useMemo(() => parseCron(value), [value]);
-    const isError = invalid || preview.startsWith('Invalid') || preview.startsWith('Cron');
+    const isError = isInvalid || preview.startsWith('Invalid') || preview.startsWith('Cron');
     const inputState = isError ? 'invalid' : (state ?? 'default');
 
     return (
@@ -185,7 +185,7 @@ export const CronInput = forwardRef<HTMLInputElement, CronInputProps>(
           onChange={(e) => setValue(e.target.value)}
           className={cn(inputBaseVariants({ size, state: inputState }), 'font-mono')}
         />
-        {showPreview && (
+        {hasPreview && (
           <div
             aria-live="polite"
             className={cn(

@@ -70,7 +70,7 @@ const DIRECTION_LABEL_SIDE: Record<SpeedDialDirection, 'left' | 'right'> = {
 export interface SpeedDialProps {
   position?: SpeedDialPosition;
   direction?: SpeedDialDirection;
-  open?: boolean;
+  isOpen?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   gap?: number;
@@ -81,7 +81,7 @@ export interface SpeedDialProps {
 export function SpeedDial({
   position = 'bottom-right',
   direction,
-  open: openProp,
+  isOpen: openProp,
   defaultOpen = false,
   onOpenChange,
   gap = 12,

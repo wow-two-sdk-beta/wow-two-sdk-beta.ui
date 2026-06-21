@@ -24,8 +24,8 @@ export interface PinInputProps extends Omit<ComponentPropsWithoutRef<'div'>, 'ch
   /** Cell visual size. Default `md`. */
   size?: 'sm' | 'md' | 'lg';
   /** Render each cell as `*` (good for verification codes). */
-  mask?: boolean;
-  disabled?: boolean;
+  isMasked?: boolean;
+  isDisabled?: boolean;
 }
 
 const SIZE: Record<NonNullable<PinInputProps['size']>, string> = {
@@ -48,8 +48,8 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
       onComplete,
       type = 'numeric',
       size = 'md',
-      mask,
-      disabled,
+      isMasked,
+      isDisabled,
       className,
       ...props
     },
@@ -114,11 +114,11 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
             ref={(el) => {
               inputs.current[i] = el;
             }}
-            type={mask ? 'password' : 'text'}
+            type={isMasked ? 'password' : 'text'}
             inputMode={type === 'numeric' ? 'numeric' : 'text'}
             autoComplete="one-time-code"
             maxLength={1}
-            disabled={disabled}
+            disabled={isDisabled}
             value={ch}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}

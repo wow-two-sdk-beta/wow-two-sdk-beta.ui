@@ -37,7 +37,7 @@ export const TriggerOnView: Story = {
   render: () => (
     <div>
       <p className="mb-[60vh] text-sm text-muted-foreground">Scroll down to trigger…</p>
-      <CountUp to={9999} triggerOnView as="div" className="text-5xl font-bold text-primary" />
+      <CountUp to={9999} canTriggerOnView as="div" className="text-5xl font-bold text-primary" />
     </div>
   ),
 };

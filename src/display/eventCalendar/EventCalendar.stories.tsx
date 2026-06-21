@@ -22,10 +22,10 @@ const EVENTS: EventCalendarEvent[] = [
   { id: 'e1', title: 'Standup', start: at(0, 9), end: at(0, 9, 30), color: 'var(--color-primary-soft)' },
   { id: 'e2', title: 'Lunch', start: at(0, 12), end: at(0, 13) },
   { id: 'e3', title: 'Design review', start: at(1, 14), end: at(1, 15, 30), color: 'var(--color-warning-soft)' },
-  { id: 'e4', title: 'Off-site', start: at(2, 0), end: at(3, 23, 59), color: 'var(--color-success-soft)', allDay: true },
+  { id: 'e4', title: 'Off-site', start: at(2, 0), end: at(3, 23, 59), color: 'var(--color-success-soft)', isAllDay: true },
   { id: 'e5', title: '1:1 with Bob', start: at(3, 11), end: at(3, 12) },
   { id: 'e6', title: 'Sprint planning', start: at(5, 10), end: at(5, 11, 30) },
-  { id: 'e7', title: 'Conference', start: at(8, 0), end: at(10, 23, 59), allDay: true, color: 'var(--color-info-soft)' },
+  { id: 'e7', title: 'Conference', start: at(8, 0), end: at(10, 23, 59), isAllDay: true, color: 'var(--color-info-soft)' },
 ];
 
 export const Default: Story = {

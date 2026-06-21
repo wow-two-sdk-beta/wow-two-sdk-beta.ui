@@ -25,7 +25,7 @@ export interface ColorAreaProps
   defaultValue?: number;
   onValueChange?: (next: ColorAreaChange) => void;
   step?: number;
-  disabled?: boolean;
+  isDisabled?: boolean;
   'aria-label'?: string;
 }
 
@@ -38,7 +38,7 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
     defaultValue,
     onValueChange,
     step = 0.01,
-    disabled = false,
+    isDisabled = false,
     className,
     'aria-label': ariaLabel = 'Saturation and value',
     ...rest
@@ -81,25 +81,25 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
 
   const handlePointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       e.preventDefault();
       (e.target as Element).setPointerCapture?.(e.pointerId);
       updateFromClient(e.clientX, e.clientY);
     },
-    [disabled, updateFromClient],
+    [isDisabled, updateFromClient],
   );
 
   const handlePointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled || e.buttons !== 1) return;
+      if (isDisabled || e.buttons !== 1) return;
       updateFromClient(e.clientX, e.clientY);
     },
-    [disabled, updateFromClient],
+    [isDisabled, updateFromClient],
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       const big = step * 10;
       let nextS = s;
       let nextV = v;
@@ -136,7 +136,7 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
       e.preventDefault();
       emit(nextS, nextV);
     },
-    [disabled, emit, s, step, v],
+    [isDisabled, emit, s, step, v],
   );
 
   const baseColor = `hsl(${hue}, 100%, 50%)`;
@@ -156,18 +156,18 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
     <div
       ref={composeRefs(forwardedRef, trackRef)}
       role="slider"
-      tabIndex={disabled ? -1 : 0}
+      tabIndex={isDisabled ? -1 : 0}
       aria-label={ariaLabel}
       aria-valuetext={`saturation ${(s * 100).toFixed(0)}%, value ${(v * 100).toFixed(0)}%`}
-      aria-disabled={disabled || undefined}
-      data-disabled={disabled ? '' : undefined}
+      aria-disabled={isDisabled || undefined}
+      data-disabled={isDisabled ? '' : undefined}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onKeyDown={handleKeyDown}
       style={trackStyle}
       className={cn(
         'relative aspect-square w-full select-none rounded-md border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        disabled && 'pointer-events-none opacity-50',
+        isDisabled && 'pointer-events-none opacity-50',
         className,
       )}
       {...rest}

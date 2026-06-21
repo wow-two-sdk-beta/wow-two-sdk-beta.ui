@@ -96,7 +96,7 @@ function firstName(id: string): string {
 function UserAvatar({ user, size = 'sm' }: { user: User; size?: 'xs' | 'sm' }) {
   return (
     <span className="relative inline-flex">
-      <Avatar name={user.name} autoColor size={size} />
+      <Avatar name={user.name} canAutoColor size={size} />
       <PresenceIndicator
         status={PRESENCE[user.status]}
         size="xs"
@@ -231,7 +231,7 @@ export default function ChatScreen() {
       key: r.emoji,
       emoji: r.emoji,
       count: r.count,
-      reactedByMe: r.userIds.includes(ME),
+      isReactedByMe: r.userIds.includes(ME),
       users: r.userIds.map(userName),
     }));
 
@@ -332,7 +332,7 @@ export default function ChatScreen() {
                   leading={<span aria-hidden="true">#</span>}
                   trailing={
                     unread[c.id] ? (
-                      <NotificationDot tone="primary" size="sm" pulse />
+                      <NotificationDot tone="primary" size="sm" hasPulse />
                     ) : (
                       <span className="text-xs tabular-nums">{c.memberIds.length}</span>
                     )
@@ -376,7 +376,7 @@ export default function ChatScreen() {
           <div className="ml-auto flex items-center gap-3">
             <AvatarGroup max={4} size="sm">
               {memberUsers.map((u) => (
-                <Avatar key={u.id} name={u.name} autoColor />
+                <Avatar key={u.id} name={u.name} canAutoColor />
               ))}
             </AvatarGroup>
             <SearchInput
@@ -396,7 +396,7 @@ export default function ChatScreen() {
             <div className="flex flex-col gap-2">
               <div className="flex h-4 items-center px-1">
                 {typingVisible && (
-                  <TypingIndicator who={firstName(typistId)} size="sm" subtle />
+                  <TypingIndicator who={firstName(typistId)} size="sm" isSubtle />
                 )}
               </div>
               <ChatComposer
@@ -468,7 +468,7 @@ export default function ChatScreen() {
                   author={!mine ? author?.name : undefined}
                   avatar={!mine && author ? <UserAvatar user={author} size="xs" /> : undefined}
                   timestamp={timeOf(r.sentAt)}
-                  tailless
+                  isTailless
                 >
                   {r.text}
                 </ChatBubble>

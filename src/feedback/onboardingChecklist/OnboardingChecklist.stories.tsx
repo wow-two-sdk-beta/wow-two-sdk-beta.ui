@@ -24,23 +24,23 @@ export const Default: Story = {
       );
       return (
         <div className="w-[28rem]">
-          <OnboardingChecklist title="Set up your workspace" dismissOnComplete>
+          <OnboardingChecklist title="Set up your workspace" canDismissOnComplete>
             <OnboardingChecklistTask
               label="Complete profile"
               description="Add a name, avatar, and bio."
-              done={done.profile}
+              isDone={done.profile}
               action={action('profile')}
             />
             <OnboardingChecklistTask
               label="Invite teammates"
               description="Send invite links to up to 5 teammates."
-              done={done.invite}
+              isDone={done.invite}
               action={action('invite')}
             />
             <OnboardingChecklistTask
               label="Connect an integration"
               description="Link Slack, GitHub, or Jira."
-              done={done.integration}
+              isDone={done.integration}
               action={action('integration')}
             />
           </OnboardingChecklist>

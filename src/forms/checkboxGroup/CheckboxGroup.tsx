@@ -15,7 +15,7 @@ interface CheckboxGroupProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, '
   /** Fires whenever selection changes. */
   onValueChange?: (next: string[]) => void;
   /** Disable the whole group. */
-  disabled?: boolean;
+  isDisabled?: boolean;
   /** Layout direction. Default `vertical`. */
   orientation?: 'horizontal' | 'vertical';
   /** `<CheckboxField>` children with `value="…"` attached. */
@@ -37,7 +37,7 @@ export const CheckboxGroup = forwardRef<HTMLFieldSetElement, CheckboxGroupProps>
       value,
       defaultValue,
       onValueChange,
-      disabled,
+      isDisabled,
       orientation = 'vertical',
       className,
       children,
@@ -57,7 +57,7 @@ export const CheckboxGroup = forwardRef<HTMLFieldSetElement, CheckboxGroupProps>
     };
 
     return (
-      <Fieldset ref={ref} disabled={disabled} className={cn(className)} {...props}>
+      <Fieldset ref={ref} disabled={isDisabled} className={cn(className)} {...props}>
         {legend && <Legend>{legend}</Legend>}
         <div className={cn('flex gap-3', orientation === 'vertical' ? 'flex-col' : 'flex-row flex-wrap')}>
           {Children.map(children, (child) => {

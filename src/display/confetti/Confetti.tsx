@@ -30,7 +30,7 @@ export interface ConfettiProps {
   lifetime?: number;
   origin?: ConfettiOrigin;
   /** Auto-fire on mount. Useful for one-shot confetti on a route landing. */
-  autoFire?: boolean;
+  canAutoFire?: boolean;
 }
 
 export interface ConfettiHandle {
@@ -56,7 +56,7 @@ const DEFAULT_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#a855f7', '
 let nextParticleId = 0;
 
 /**
- * Confetti burst. Imperative `fire()` via ref or `autoFire` on mount. SVG
+ * Confetti burst. Imperative `fire()` via ref or `canAutoFire` on mount. SVG
  * particles animated by rAF. No-op under `prefers-reduced-motion`.
  */
 export const Confetti = forwardRef<ConfettiHandle, ConfettiProps>(function Confetti(
@@ -68,7 +68,7 @@ export const Confetti = forwardRef<ConfettiHandle, ConfettiProps>(function Confe
     velocity = 500,
     lifetime = 3000,
     origin,
-    autoFire,
+    canAutoFire,
   },
   forwardedRef,
 ) {
@@ -118,8 +118,8 @@ export const Confetti = forwardRef<ConfettiHandle, ConfettiProps>(function Confe
   useImperativeHandle(forwardedRef, () => ({ fire: spawn }), [spawn]);
 
   useEffect(() => {
-    if (autoFire) spawn();
-  }, [autoFire, spawn]);
+    if (canAutoFire) spawn();
+  }, [canAutoFire, spawn]);
 
   // Animation loop.
   useEffect(() => {

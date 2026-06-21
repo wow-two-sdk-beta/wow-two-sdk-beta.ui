@@ -10,7 +10,7 @@ Coordinates a row/column of `ToggleButton` children. `type="single"` tracks one 
 | `value` / `defaultValue` | `string \| null` (single) or `string[]` (multi) | — / `null` or `[]` |
 | `onValueChange` | callback | — |
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` |
-| `attached` | `boolean` | `true` |
+| `isAttached` | `boolean` | `true` |
 
 Each child `<ToggleButton>` must declare a `value` prop matching the group's value.
 

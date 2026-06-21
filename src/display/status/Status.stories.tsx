@@ -9,6 +9,6 @@ const meta: Meta<typeof Status> = {
 export default meta;
 type Story = StoryObj<typeof Status>;
 
-export const Online: Story = { args: { tone: 'success', children: 'Online', pulse: true } };
+export const Online: Story = { args: { tone: 'success', children: 'Online', hasPulse: true } };
 export const Degraded: Story = { args: { tone: 'warning', children: 'Degraded' } };
 export const Down: Story = { args: { tone: 'destructive', children: 'Down' } };

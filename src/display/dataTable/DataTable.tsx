@@ -24,7 +24,7 @@ export interface DataTableColumn<T> {
   header: ReactNode;
   accessor?: (row: T) => unknown;
   cell?: (row: T, index: number) => ReactNode;
-  sortable?: boolean;
+  isSortable?: boolean;
   align?: 'left' | 'center' | 'right';
   width?: string;
 }
@@ -37,10 +37,10 @@ export interface DataTableProps<T> {
   sortBy?: DataTableSort | null;
   defaultSortBy?: DataTableSort | null;
   onSortChange?: (sort: DataTableSort | null) => void;
-  striped?: boolean;
-  hoverable?: boolean;
+  isStriped?: boolean;
+  isHoverable?: boolean;
   density?: TableDensity;
-  bare?: boolean;
+  isBare?: boolean;
   emptyContent?: ReactNode;
   className?: string;
   'aria-label'?: string;
@@ -63,10 +63,10 @@ export function DataTable<T>({
   sortBy,
   defaultSortBy,
   onSortChange,
-  striped,
-  hoverable = !!onRowClick,
+  isStriped,
+  isHoverable = !!onRowClick,
   density,
-  bare,
+  isBare,
   emptyContent = 'No results.',
   className,
   'aria-label': ariaLabel,
@@ -104,10 +104,10 @@ export function DataTable<T>({
 
   return (
     <Table
-      striped={striped}
-      hoverable={hoverable}
+      isStriped={isStriped}
+      isHoverable={isHoverable}
       density={density}
-      bare={bare}
+      isBare={isBare}
       className={className}
       aria-label={ariaLabel}
     >
@@ -119,7 +119,7 @@ export function DataTable<T>({
               ? sort?.direction === 'asc'
                 ? 'ascending'
                 : 'descending'
-              : col.sortable
+              : col.isSortable
                 ? 'none'
                 : undefined;
             return (
@@ -129,7 +129,7 @@ export function DataTable<T>({
                 style={col.width ? { width: col.width } : undefined}
                 className={alignClass(col.align)}
               >
-                {col.sortable ? (
+                {col.isSortable ? (
                   <button
                     type="button"
                     onClick={() => cycleSort(col.key)}

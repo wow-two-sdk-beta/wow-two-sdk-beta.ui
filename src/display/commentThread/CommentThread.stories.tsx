@@ -31,7 +31,7 @@ export const Nested: Story = {
           author="alex_park"
           timestamp="2h ago"
           badge={<Badge variant="default" size="sm">OP</Badge>}
-          highlighted
+          isHighlighted
           actions={
             <>
               <VoteBtn />

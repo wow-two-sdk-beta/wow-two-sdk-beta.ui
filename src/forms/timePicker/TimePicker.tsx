@@ -16,7 +16,7 @@ export interface TimePickerProps
   minuteStep?: number;
   placeholder?: string;
   format?: (time: TimeValue) => string;
-  invalid?: boolean;
+  isInvalid?: boolean;
   name?: string;
 }
 
@@ -33,7 +33,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
     minuteStep = 5,
     placeholder = 'Pick a time',
     format = defaultFormat,
-    invalid,
+    isInvalid,
     name,
     size,
     state,
@@ -74,7 +74,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
     });
   }, [open]);
 
-  const triggerState = state ?? (invalid ? 'invalid' : 'default');
+  const triggerState = state ?? (isInvalid ? 'invalid' : 'default');
 
   const update = (next: Partial<TimeValue>) => {
     const merged: TimeValue = {
@@ -100,7 +100,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
           <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
         </button>
       </PopoverTrigger>
-      <PopoverContent bare>
+      <PopoverContent isBare>
         <div className="flex gap-1 rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-md">
           <div
             ref={hoursRef}

@@ -10,8 +10,8 @@ Type out text one character at a time, with a blinking caret. Optional phrase lo
 | `typeSpeed` | `number` (ms/char) | `60` | |
 | `deleteSpeed` | `number` (ms/char) | `40` | |
 | `pauseBetween` | `number` (ms) | `1500` | After typing a phrase |
-| `loop` | `boolean` | `true` (when array) | Cycle through phrases |
-| `cursor` | `boolean` | `true` | Show blinking caret |
+| `canLoop` | `boolean` | `true` (when array) | Cycle through phrases |
+| `hasCursor` | `boolean` | `true` | Show blinking caret |
 | `cursorChar` | `string` | `'│'` | |
 | `as` | tag | `'span'` | |
 

@@ -4,7 +4,7 @@ import { useFormControl } from '../../primitives/formControlContext/FormControlC
 
 export interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   /** Show a `*` indicator. Auto-derived from `FormControl.isRequired` when present. */
-  required?: boolean;
+  isRequired?: boolean;
   /** Visual size. Default `md`. */
   size?: 'xs' | 'sm' | 'md';
 }
@@ -20,9 +20,9 @@ const SIZE: Record<NonNullable<LabelProps['size']>, string> = {
  * it auto-fills `htmlFor` and `id`. Standalone use: pass `htmlFor` directly.
  */
 export const Label = forwardRef<HTMLLabelElement, LabelProps>(
-  ({ className, required, size = 'md', htmlFor, id, children, ...props }, ref) => {
+  ({ className, isRequired: isRequiredProp, size = 'md', htmlFor, id, children, ...props }, ref) => {
     const ctx = useFormControl();
-    const isRequired = required ?? ctx?.isRequired ?? false;
+    const isRequired = isRequiredProp ?? ctx?.isRequired ?? false;
     return (
       <label
         ref={ref}

@@ -15,7 +15,7 @@ export interface SwipeActionsProps extends HTMLAttributes<HTMLDivElement> {
   threshold?: number;
   /** Used to compute snap distance. Width per action button (px). */
   actionWidth?: number;
-  disabled?: boolean;
+  isDisabled?: boolean;
   children: ReactNode;
 }
 
@@ -35,7 +35,7 @@ export const SwipeActions = forwardRef<HTMLDivElement, SwipeActionsProps>(
       right,
       threshold = 60,
       actionWidth = 72,
-      disabled,
+      isDisabled,
       className,
       children,
       ...rest
@@ -54,7 +54,7 @@ export const SwipeActions = forwardRef<HTMLDivElement, SwipeActionsProps>(
     const rightMax = rightSlots * actionWidth;
 
     const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       startXRef.current = e.clientX;
       startOffsetRef.current = offset;
       suppressClickRef.current = false;
@@ -62,7 +62,7 @@ export const SwipeActions = forwardRef<HTMLDivElement, SwipeActionsProps>(
     };
 
     const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (disabled || startXRef.current == null) return;
+      if (isDisabled || startXRef.current == null) return;
       if (Math.abs(e.clientX - startXRef.current) > CLICK_SUPPRESS_SLOP) {
         suppressClickRef.current = true;
       }

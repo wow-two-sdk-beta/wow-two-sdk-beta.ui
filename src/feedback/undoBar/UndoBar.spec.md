@@ -13,7 +13,7 @@ Snackbar-style notification with a single "Undo" action. Common after destructiv
 ```
 
 ## Required behaviors
-- `open` controls mount.
+- `isOpen` controls mount.
 - Auto-dismisses after `duration` (ms). `Infinity` = sticky.
 - Click `Undo` → calls `onUndo`, closes.
 - Pause-on-hover (configurable).
@@ -21,15 +21,15 @@ Snackbar-style notification with a single "Undo" action. Common after destructiv
 ## Props
 | Name | Type | Default | Why |
 |---|---|---|---|
-| `open` | `boolean` | — | Controlled |
+| `isOpen` | `boolean` | — | Controlled |
 | `onOpenChange` | `(open: boolean) => void` | — | |
 | `message` | `ReactNode` | — | Body |
 | `onUndo` | `() => void` | — | Action callback |
 | `undoLabel` | `string` | `'Undo'` | |
 | `duration` | `number` (ms) | `5000` | Auto-dismiss; `Infinity` = sticky |
-| `pauseOnHover` | `boolean` | `true` | |
+| `canPauseOnHover` | `boolean` | `true` | |
 | `position` | same union as Toaster | `'bottom-center'` | |
-| `showCountdown` | `boolean` | `false` | Render shrinking bar |
+| `hasCountdown` | `boolean` | `false` | Render shrinking bar |
 
 ## Accessibility
 - `role="status"` + `aria-live="polite"`.

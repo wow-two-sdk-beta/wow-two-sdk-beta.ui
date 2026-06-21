@@ -17,7 +17,7 @@ export function BoardView({ tasks, onTaskClick }: BoardViewProps) {
           <Card key={status} className="flex flex-col">
             <Card.Header className="flex flex-row items-center justify-between gap-2">
               <Card.Title className="text-sm">{STATUS_META[status].label}</Card.Title>
-              <CountBadge value={column.length} hideZero={false} variant="neutral" />
+              <CountBadge value={column.length} canHideZero={false} variant="neutral" />
             </Card.Header>
             <Card.Body className="flex flex-1 flex-col gap-2">
               {column.length === 0 ? (

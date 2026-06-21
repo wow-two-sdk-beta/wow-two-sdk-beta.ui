@@ -23,7 +23,7 @@ export const Static: Story = {
 export const PointerOnly: Story = {
   render: () => (
     <div className="relative h-64 w-full rounded-md border border-border bg-muted/40">
-      <LiveCursor x={120} y={80} pointerOnly color="#dc2626" />
+      <LiveCursor x={120} y={80} isPointerOnly color="#dc2626" />
     </div>
   ),
 };

@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../utils';
+import { tv, Tones, type VariantProps } from '../../utils';
 
 /** Button visual surface — see Button.standard.md + Button.spec.md. */
 export const buttonVariants = tv({
@@ -30,10 +30,11 @@ export const buttonVariants = tv({
       outline: 'bg-transparent',
       ghost: 'bg-transparent',
       link: 'bg-transparent !h-auto !p-0 !rounded-none underline-offset-4 hover:underline focus-visible:ring-offset-0',
-      glass:
-        'bg-black/45 text-white/70 backdrop-blur-md hover:bg-black/65 hover:text-white active:bg-black/75',
-      'glass-surface':
-        'bg-black/45 text-white/70 backdrop-blur-md hover:bg-black/65 hover:text-white active:bg-black/75 border-white/10',
+      // Base = neutral/default tone: dark image-overlay wash + blur. Non-neutral tones resolve
+      // through the shared `Tones.glass` palette via compoundVariants below (so tone + color
+      // overrides apply). `backdrop-blur-md` stays here for every tone.
+      glass: 'backdrop-blur-md',
+      'glass-surface': 'backdrop-blur-md border-white/10',
     },
     tone: {
       primary: '',
@@ -43,7 +44,10 @@ export const buttonVariants = tv({
       warning: '',
     },
     size: {
-      xs: 'h-[calc(1.5rem*var(--ui-density-scale,1))] px-[calc(0.5rem*var(--ui-density-scale,1))] text-xs rounded-sm gap-1',
+      // min-h/min-w floor keeps the hit-target ≥ 24×24 (WCAG 2.2 SC 2.5.8) even when
+      // --ui-density-scale < 1 would otherwise shrink it below the floor. Applies to
+      // square/circle xs too (the min-h sets the box height; min-w the width).
+      xs: 'h-[calc(1.5rem*var(--ui-density-scale,1))] min-h-6 min-w-6 px-[calc(0.5rem*var(--ui-density-scale,1))] text-xs rounded-sm gap-1',
       sm: 'h-[calc(2rem*var(--ui-density-scale,1))] px-[calc(0.75rem*var(--ui-density-scale,1))] text-sm rounded-md gap-1.5',
       md: 'h-[calc(2.5rem*var(--ui-density-scale,1))] px-[calc(1rem*var(--ui-density-scale,1))] text-sm rounded-md gap-2',
       lg: 'h-[calc(3rem*var(--ui-density-scale,1))] px-[calc(1.5rem*var(--ui-density-scale,1))] text-base rounded-lg gap-2',
@@ -107,10 +111,19 @@ export const buttonVariants = tv({
     { variant: 'link', tone: 'warning',  class: 'text-warning' },
 
     // === GLASS / GLASS-SURFACE × tone ===
-    // Only `danger` is wired today (matches old image-overlay convention: red on hover).
-    // Other tones are inert — base dark glass renders identically across tones.
-    { variant: 'glass',         tone: 'danger', class: 'hover:bg-destructive/65 active:bg-destructive/75' },
-    { variant: 'glass-surface', tone: 'danger', class: 'hover:bg-destructive/65 active:bg-destructive/75' },
+    // neutral = the image-overlay default: fixed dark wash + light text (reads over any imagery).
+    { variant: ['glass', 'glass-surface'], tone: 'neutral', class: 'bg-black/45 text-white/70 hover:bg-black/65 hover:text-white active:bg-black/75' },
+    // Every other tone resolves through the shared `Tones.glass` palette (`bg-{tone}/30 text-{tone}-foreground`)
+    // so `tone="success"` etc. AND per-instance `color` overrides actually apply, plus a tone-matched hover/active wash.
+    { variant: ['glass', 'glass-surface'], tone: 'primary', class: `${Tones.glass.primary} hover:bg-primary/45 active:bg-primary/55` },
+    { variant: ['glass', 'glass-surface'], tone: 'danger',  class: `${Tones.glass.danger} hover:bg-destructive/45 active:bg-destructive/55` },
+    { variant: ['glass', 'glass-surface'], tone: 'success', class: `${Tones.glass.success} hover:bg-success/45 active:bg-success/55` },
+    { variant: ['glass', 'glass-surface'], tone: 'warning', class: `${Tones.glass.warning} hover:bg-warning/45 active:bg-warning/55` },
+    // glass-surface non-neutral tones swap the white hairline for a tone-accent border (50% alpha).
+    { variant: 'glass-surface', tone: 'primary', class: 'border-primary/50' },
+    { variant: 'glass-surface', tone: 'danger',  class: 'border-destructive/50' },
+    { variant: 'glass-surface', tone: 'success', class: 'border-success/50' },
+    { variant: 'glass-surface', tone: 'warning', class: 'border-warning/50' },
   ],
   defaultVariants: {
     variant: 'solid',

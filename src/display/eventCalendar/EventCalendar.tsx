@@ -21,7 +21,7 @@ export interface EventCalendarEvent {
   start: Date;
   end: Date;
   color?: string;
-  allDay?: boolean;
+  isAllDay?: boolean;
 }
 
 export interface EventCalendarProps extends HTMLAttributes<HTMLDivElement> {
@@ -308,7 +308,7 @@ function MonthView({ date, events, weekStart, onEventClick, onSlotClick }: Month
                   )}
                   aria-label={`${typeof e.title === 'string' ? e.title : e.id} at ${e.start.toLocaleTimeString()}`}
                 >
-                  {e.allDay ? '• ' : ''}
+                  {e.isAllDay ? '• ' : ''}
                   {e.title ?? '(no title)'}
                 </button>
               ))}
@@ -340,9 +340,9 @@ function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotC
   const dayDates = Array.from({ length: days }, (_, i) => addDays(firstDay, i));
 
   const eventsForDay = (d: Date) =>
-    events.filter((e) => !e.allDay && isSameDay(d, e.start));
+    events.filter((e) => !e.isAllDay && isSameDay(d, e.start));
   const allDayForDay = (d: Date) =>
-    events.filter((e) => e.allDay && isInRange(d, e.start, e.end));
+    events.filter((e) => e.isAllDay && isInRange(d, e.start, e.end));
 
   return (
     <div className="flex">
@@ -538,7 +538,7 @@ function AgendaView({ date, events, onEventClick }: AgendaViewProps) {
                     <span className="flex-1">
                       <span className="block text-sm font-medium">{e.title ?? '(no title)'}</span>
                       <span className="block text-xs text-muted-foreground tabular-nums">
-                        {e.allDay
+                        {e.isAllDay
                           ? 'All day'
                           : `${e.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – ${e.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
                       </span>

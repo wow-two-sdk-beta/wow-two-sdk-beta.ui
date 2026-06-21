@@ -24,6 +24,8 @@ export const surfaceVariants = tv({
       elevated: 'shadow-xl',
       /* Opaque fill, no border, no shadow — embedded sub-panels inside another surface. */
       flat: '',
+      /* Low-alpha tinted fill + neutral border, no shadow — section bands, tinted panels. */
+      subtle: 'border',
     },
 
     tone: { neutral: '', primary: '', danger: '', success: '', warning: '', info: '' },
@@ -107,6 +109,14 @@ export const surfaceVariants = tv({
     { variant: 'glass-outline', tone: 'success', class: Tones.glassOutline.success },
     { variant: 'glass-outline', tone: 'warning', class: Tones.glassOutline.warning },
     { variant: 'glass-outline', tone: 'info', class: Tones.glassOutline.info },
+
+    /* subtle — low-alpha tinted fill + neutral border, no shadow. */
+    { variant: 'subtle', tone: 'neutral', class: Tones.subtle.neutral },
+    { variant: 'subtle', tone: 'primary', class: Tones.subtle.primary },
+    { variant: 'subtle', tone: 'danger', class: Tones.subtle.danger },
+    { variant: 'subtle', tone: 'success', class: Tones.subtle.success },
+    { variant: 'subtle', tone: 'warning', class: Tones.subtle.warning },
+    { variant: 'subtle', tone: 'info', class: Tones.subtle.info },
   ],
 
   defaultVariants: {

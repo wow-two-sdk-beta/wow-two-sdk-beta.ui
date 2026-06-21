@@ -24,13 +24,13 @@ export interface MessageListProps extends HTMLAttributes<HTMLDivElement> {
   footer?: ReactNode;
   /** Auto-scroll to bottom when children change *and* the viewer is near
    *  the bottom. Default true. */
-  stickToBottom?: boolean;
+  isSticky?: boolean;
   /** Threshold (px) considered "at bottom" for stickiness. Default 32. */
   bottomThreshold?: number;
   /** Show a floating "jump to bottom" button when scrolled away. Default true. */
-  showJumpToBottom?: boolean;
+  hasJumpToBottom?: boolean;
   /** Reverse-render messages (newest at top). v1 keeps natural top→bottom. */
-  reverse?: boolean;
+  isReversed?: boolean;
   children: ReactNode;
 }
 
@@ -62,17 +62,17 @@ const MessageListInner = forwardRef<MessageListHandle, MessageListProps>(
     {
       header,
       footer,
-      stickToBottom = true,
+      isSticky = true,
       bottomThreshold = 32,
-      showJumpToBottom = true,
-      reverse: _reverse,
+      hasJumpToBottom = true,
+      isReversed: _isReversed,
       children,
       className,
       ...props
     },
     ref,
   ) => {
-    void _reverse;
+    void _isReversed;
     const scrollerRef = useRef<HTMLDivElement | null>(null);
     // Near-bottom state recorded *before* a new message commits (in onScroll).
     // Measuring inside the layout effect would see the just-committed message,
@@ -99,8 +99,8 @@ const MessageListInner = forwardRef<MessageListHandle, MessageListProps>(
     );
 
     useLayoutEffect(() => {
-      if (stickToBottom && nearBottomRef.current) scrollToBottom('auto');
-    }, [children, stickToBottom, scrollToBottom]);
+      if (isSticky && nearBottomRef.current) scrollToBottom('auto');
+    }, [children, isSticky, scrollToBottom]);
 
     useEffect(() => {
       const el = scrollerRef.current;
@@ -127,7 +127,7 @@ const MessageListInner = forwardRef<MessageListHandle, MessageListProps>(
           <div className="flex flex-col gap-2">{children}</div>
         </div>
         {footer && <div className="shrink-0 border-t border-border px-3 py-2">{footer}</div>}
-        {showJumpToBottom && !atBottom && (
+        {hasJumpToBottom && !atBottom && (
           <button
             type="button"
             onClick={() => scrollToBottom('smooth')}

@@ -12,7 +12,7 @@ export interface SparklineProps extends Omit<SVGAttributes<SVGSVGElement>, 'widt
   tone?: SparklineTone;
   min?: number;
   max?: number;
-  showLast?: boolean;
+  hasLast?: boolean;
   /** Accessible label summarizing the trend. */
   ariaLabel?: string;
 }
@@ -40,7 +40,7 @@ export const Sparkline = forwardRef<SVGSVGElement, SparklineProps>(function Spar
     tone = 'brand',
     min: minProp,
     max: maxProp,
-    showLast,
+    hasLast,
     ariaLabel = 'Trend',
     className,
     ...rest
@@ -113,7 +113,7 @@ export const Sparkline = forwardRef<SVGSVGElement, SparklineProps>(function Spar
           ))}
         </g>
       )}
-      {showLast && data.length > 0 && variant !== 'dot' && (
+      {hasLast && data.length > 0 && variant !== 'dot' && (
         <circle cx={lastX} cy={lastY} r={2.5} fill="currentColor" />
       )}
     </svg>

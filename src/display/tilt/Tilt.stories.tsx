@@ -29,7 +29,7 @@ export const Default: Story = {
 export const WithGlare: Story = {
   render: () => (
     <div className="p-12">
-      <Tilt glare scale={1.05} className="cursor-pointer">
+      <Tilt hasGlare scale={1.05} className="cursor-pointer">
         <div className="rounded-xl bg-gradient-to-br from-primary to-info p-12 text-center text-white shadow-xl">
           <h2 className="text-3xl font-bold">Hover me</h2>
           <p className="mt-2 text-sm opacity-80">Tilt with glare highlight following the cursor.</p>

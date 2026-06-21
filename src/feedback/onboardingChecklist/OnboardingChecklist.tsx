@@ -24,7 +24,7 @@ const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 export interface OnboardingChecklistProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: ReactNode;
   defaultOpen?: boolean;
-  dismissOnComplete?: boolean;
+  canDismissOnComplete?: boolean;
   /** ms after 100% before unmounting. */
   dismissDelay?: number;
   onDismiss?: () => void;
@@ -33,14 +33,14 @@ export interface OnboardingChecklistProps extends Omit<HTMLAttributes<HTMLDivEle
 
 /**
  * Onboarding task card. Children are `OnboardingChecklist.Task` elements;
- * progress is auto-derived from their `done` props.
+ * progress is auto-derived from their `isDone` props.
  */
 export const OnboardingChecklist = forwardRef<HTMLDivElement, OnboardingChecklistProps>(
   function OnboardingChecklist(
     {
       title = 'Get started',
       defaultOpen = true,
-      dismissOnComplete = false,
+      canDismissOnComplete = false,
       dismissDelay = 2000,
       onDismiss,
       className,
@@ -58,17 +58,17 @@ export const OnboardingChecklist = forwardRef<HTMLDivElement, OnboardingChecklis
         (c.type as { displayName?: string }).displayName === 'OnboardingChecklistTask',
     );
     const total = tasks.length;
-    const done = tasks.filter((t) => t.props.done).length;
+    const done = tasks.filter((t) => t.props.isDone).length;
     const complete = total > 0 && done === total;
 
     useEffect(() => {
-      if (!dismissOnComplete || !complete || dismissed) return;
+      if (!canDismissOnComplete || !complete || dismissed) return;
       const handle = window.setTimeout(() => {
         setDismissed(true);
         onDismiss?.();
       }, dismissDelay);
       return () => window.clearTimeout(handle);
-    }, [complete, dismissOnComplete, dismissDelay, dismissed, onDismiss]);
+    }, [complete, canDismissOnComplete, dismissDelay, dismissed, onDismiss]);
 
     const ctx = useMemo<OnboardingContextValue>(() => ({ open, setOpen }), [open]);
 
@@ -125,7 +125,7 @@ export const OnboardingChecklist = forwardRef<HTMLDivElement, OnboardingChecklis
 export interface OnboardingChecklistTaskProps extends HTMLAttributes<HTMLLIElement> {
   label: ReactNode;
   description?: ReactNode;
-  done?: boolean;
+  isDone?: boolean;
   action?: ReactNode;
 }
 
@@ -133,16 +133,16 @@ export const OnboardingChecklistTask = forwardRef<
   HTMLLIElement,
   OnboardingChecklistTaskProps
 >(function OnboardingChecklistTask(
-  { label, description, done = false, action, className, ...rest },
+  { label, description, isDone = false, action, className, ...rest },
   ref,
 ) {
   return (
     <li
       ref={ref}
-      data-done={done || undefined}
+      data-done={isDone || undefined}
       className={cn(
         'flex items-start gap-3 px-4 py-3 transition-colors',
-        done && 'opacity-60',
+        isDone && 'opacity-60',
         className,
       )}
       {...rest}
@@ -151,20 +151,20 @@ export const OnboardingChecklistTask = forwardRef<
         aria-hidden="true"
         className={cn(
           'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border',
-          done ? 'border-success bg-success text-success-foreground' : 'border-border',
+          isDone ? 'border-success bg-success text-success-foreground' : 'border-border',
         )}
       >
-        {done && <Icon icon={Check} size={12} />}
+        {isDone && <Icon icon={Check} size={12} />}
       </span>
       <div className="min-w-0 flex-1">
-        <div className={cn('text-sm font-medium text-foreground', done && 'line-through')}>
+        <div className={cn('text-sm font-medium text-foreground', isDone && 'line-through')}>
           {label}
         </div>
         {description && (
           <div className="mt-0.5 text-xs text-muted-foreground">{description}</div>
         )}
       </div>
-      {action && !done && <div className="shrink-0">{action}</div>}
+      {action && !isDone && <div className="shrink-0">{action}</div>}
     </li>
   );
 });

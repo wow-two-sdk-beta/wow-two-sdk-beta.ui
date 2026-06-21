@@ -21,8 +21,8 @@ export interface CodeEditorProps
   /** Forward-compat hint; unused by this first-gen component. */
   language?: string;
   tabSize?: number;
-  useTabs?: boolean;
-  invalid?: boolean;
+  isTabIndented?: boolean;
+  isInvalid?: boolean;
   /** CSS minHeight on the surface (default `12rem`). */
   minHeight?: string;
 }
@@ -40,10 +40,10 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
       onValueChange,
       language,
       tabSize = 2,
-      useTabs = false,
+      isTabIndented = false,
       disabled,
       readOnly,
-      invalid,
+      isInvalid,
       minHeight = '12rem',
       placeholder,
       className,
@@ -63,7 +63,7 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
     const [scrollTop, setScrollTop] = useState(0);
 
     const lineCount = useMemo(() => value.split('\n').length, [value]);
-    const indentChar = useTabs ? '\t' : ' '.repeat(tabSize);
+    const indentChar = isTabIndented ? '\t' : ' '.repeat(tabSize);
 
     const insertAtSelection = useCallback(
       (insert: string, selStart: number, selEnd: number) => {
@@ -88,7 +88,7 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
             // Outdent at cursor's line.
             const lineStart = value.lastIndexOf('\n', start - 1) + 1;
             const lineSlice = value.slice(lineStart, start);
-            const match = useTabs ? /^\t/ : new RegExp(`^ {1,${tabSize}}`);
+            const match = isTabIndented ? /^\t/ : new RegExp(`^ {1,${tabSize}}`);
             const m = match.exec(lineSlice);
             if (m) {
               const next = value.slice(0, lineStart) + lineSlice.slice(m[0].length) + value.slice(start);
@@ -121,7 +121,7 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
           let newStart: number;
           let newEnd: number;
           if (e.shiftKey) {
-            const re = useTabs ? /^\t/gm : new RegExp(`^ {1,${tabSize}}`, 'gm');
+            const re = isTabIndented ? /^\t/gm : new RegExp(`^ {1,${tabSize}}`, 'gm');
             let removedTotal = 0;
             let removedFirst = 0;
             const outdented = block.replace(re, (m, offset: number) => {
@@ -153,7 +153,7 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
       }
     };
 
-    const state = invalid ? 'invalid' : 'default';
+    const state = isInvalid ? 'invalid' : 'default';
 
     // Generate line-number string once per line count.
     const gutterText = useMemo(
@@ -203,7 +203,7 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
           readOnly={readOnly}
           spellCheck={false}
           placeholder={placeholder}
-          aria-invalid={invalid || undefined}
+          aria-invalid={isInvalid || undefined}
           className="block flex-1 resize-none whitespace-pre overflow-auto bg-transparent px-3 py-2 outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed"
         />
       </div>

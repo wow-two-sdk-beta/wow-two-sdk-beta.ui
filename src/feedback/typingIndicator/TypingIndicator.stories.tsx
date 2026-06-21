@@ -14,4 +14,4 @@ export const WithWho: Story = { args: { who: 'Alex' } };
 export const Multiple: Story = { args: { who: 'Alex, Jordan and 1 other' } };
 export const Primary: Story = { args: { tone: 'primary', who: 'Sam' } };
 export const Large: Story = { args: { size: 'lg' } };
-export const Subtle: Story = { args: { subtle: true, who: 'Riley' } };
+export const Subtle: Story = { args: { isSubtle: true, who: 'Riley' } };

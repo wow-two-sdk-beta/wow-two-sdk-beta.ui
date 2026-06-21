@@ -9,7 +9,7 @@ export interface DisclosureButtonProps
   /** Visible label (left-aligned). */
   children?: ReactNode;
   /** Controlled open state. */
-  open?: boolean;
+  isOpen?: boolean;
   /** Uncontrolled initial state. */
   defaultOpen?: boolean;
   /** Fires whenever open state changes. */
@@ -23,7 +23,7 @@ export const DisclosureButton = forwardRef<HTMLButtonElement, DisclosureButtonPr
   (
     {
       children,
-      open,
+      isOpen,
       defaultOpen = false,
       onOpenChange,
       onClick,
@@ -35,7 +35,7 @@ export const DisclosureButton = forwardRef<HTMLButtonElement, DisclosureButtonPr
     ref,
   ) => {
     const [value, setValue] = useControlled({
-      controlled: open,
+      controlled: isOpen,
       default: defaultOpen,
       onChange: onOpenChange,
     });

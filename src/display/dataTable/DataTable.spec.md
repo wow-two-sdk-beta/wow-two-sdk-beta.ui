@@ -29,7 +29,7 @@ Inherits from `Table`. Sortable headers show hover/focus styling.
 | `sortBy` | `{ columnKey, direction } \| null` | — | no | Controlled sort. |
 | `defaultSortBy` | same | `null` | no | Uncontrolled. |
 | `onSortChange` | `(sort) => void` | — | no | Sort callback. |
-| `striped`, `hoverable`, `density`, `bare` | — | — | no | Forwarded to `Table`. |
+| `isStriped`, `isHoverable`, `density`, `isBare` | — | — | no | Forwarded to `Table`. |
 | `emptyContent` | `ReactNode` | `'No results.'` | no | Fallback when `data` is empty. |
 
 `DataTableColumn<T>`:
@@ -37,7 +37,7 @@ Inherits from `Table`. Sortable headers show hover/focus styling.
 - `header`: ReactNode shown in the header
 - `accessor?`: `(row) => unknown` — for sorting + default cell rendering
 - `cell?`: `(row, index) => ReactNode` — custom cell render
-- `sortable?`: boolean
+- `isSortable?`: boolean
 - `align?`: `'left' \| 'center' \| 'right'`
 - `width?`: CSS width string
 

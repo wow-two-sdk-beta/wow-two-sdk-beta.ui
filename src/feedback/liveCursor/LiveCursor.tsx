@@ -11,18 +11,16 @@ export interface LiveCursorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
   /** CSS color used for the pointer fill and label background. */
   color?: string;
   /** Smooth movement between updates. Defaults to true; auto-disables with reduced motion. */
-  smooth?: boolean;
+  isSmooth?: boolean;
   /** Pixels offset for the label relative to the pointer. */
   labelOffset?: { x?: number; y?: number };
   /** Hide the label and show only the pointer. */
-  pointerOnly?: boolean;
+  isPointerOnly?: boolean;
 }
 
 /**
- * Remote-user cursor for collaborative canvases. Wrap in a `relative`-
- * positioned container; the cursor places itself absolutely at `(x, y)`.
- * Movement is smoothed with a short transition unless `prefers-reduced-
- * motion: reduce` is set.
+ * Remote-user cursor for collaborative canvases. Wrap in a `relative` parent;
+ * places itself absolutely at `(x, y)`, smoothing movement unless reduced-motion.
  */
 export const LiveCursor = forwardRef<HTMLDivElement, LiveCursorProps>(
   (
@@ -31,9 +29,9 @@ export const LiveCursor = forwardRef<HTMLDivElement, LiveCursorProps>(
       y,
       name,
       color = 'var(--color-primary)',
-      smooth = true,
+      isSmooth = true,
       labelOffset,
-      pointerOnly,
+      isPointerOnly,
       className,
       style,
       ...props
@@ -41,7 +39,7 @@ export const LiveCursor = forwardRef<HTMLDivElement, LiveCursorProps>(
     ref,
   ) => {
     const reducedMotion = useReducedMotion();
-    const useTransition = smooth && !reducedMotion;
+    const useTransition = isSmooth && !reducedMotion;
     const lx = labelOffset?.x ?? 12;
     const ly = labelOffset?.y ?? 16;
 
@@ -77,7 +75,7 @@ export const LiveCursor = forwardRef<HTMLDivElement, LiveCursorProps>(
             strokeLinejoin="round"
           />
         </svg>
-        {name && !pointerOnly && (
+        {name && !isPointerOnly && (
           <span
             className="absolute whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-medium leading-none text-white shadow-sm"
             style={{ backgroundColor: color, transform: `translate(${lx}px, ${ly}px)` }}

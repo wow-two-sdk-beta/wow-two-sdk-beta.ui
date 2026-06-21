@@ -37,7 +37,7 @@ export const WithWaveform: Story = {
 export const Compact: Story = {
   render: () => (
     <div className="w-[28rem]">
-      <AudioPlayer src={SAMPLE_MP3} peaks={PEAKS} compact />
+      <AudioPlayer src={SAMPLE_MP3} peaks={PEAKS} isCompact />
     </div>
   ),
 };

@@ -94,7 +94,7 @@ function ProfileTab() {
       <SectionCard title="Avatar">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <div className="flex flex-col items-center gap-2">
-            <Avatar name={fullName} autoColor size="2xl" />
+            <Avatar name={fullName} canAutoColor size="2xl" />
             <span className="text-xs text-muted-foreground">
               {avatarFileName ?? 'Initials fallback'}
             </span>
@@ -286,12 +286,15 @@ function PreferencesTab() {
         </RadioGroup>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-foreground">Timezone</span>
+          <FormField
+            label="Timezone"
+            helper={timezone ? 'Used for digests and scheduled deploys.' : undefined}
+            error={timezone ? undefined : 'Pick a timezone — clearing it wires invalid state to the Select.'}
+          >
             <Select<string>
               value={timezone}
               onValueChange={(opt) => setTimezone(opt?.itemKey ?? null)}
-              clearable
+              isClearable
             >
               <SelectTrigger>
                 <SelectValue placeholder="Pick a timezone…" />
@@ -302,7 +305,7 @@ function PreferencesTab() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </FormField>
 
           <div className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-foreground">Language</span>
@@ -437,7 +440,7 @@ function WorkspaceTab() {
           <ul className="flex flex-col divide-y divide-border rounded-md border border-border">
             {memberMatches.slice(0, 5).map((u) => (
               <li key={u.id} className="flex items-center gap-3 px-3 py-2">
-                <Avatar name={u.name} autoColor size="sm" />
+                <Avatar name={u.name} canAutoColor size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm text-foreground">{u.name}</p>
                   <p className="truncate text-xs text-muted-foreground">@{u.handle}</p>

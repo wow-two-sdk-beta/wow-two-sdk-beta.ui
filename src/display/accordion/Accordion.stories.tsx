@@ -11,7 +11,7 @@ type Story = StoryObj<typeof Accordion>;
 
 export const Single: Story = {
   render: () => (
-    <Accordion type="single" defaultValue="q-1" collapsible className="w-96 rounded-md border border-border">
+    <Accordion type="single" defaultValue="q-1" isCollapsible className="w-96 rounded-md border border-border">
       <Accordion.Item value="q-1">
         <Accordion.Trigger>Is it accessible?</Accordion.Trigger>
         <Accordion.Content>Yes — it follows the WAI-ARIA Accordion pattern.</Accordion.Content>
@@ -20,7 +20,7 @@ export const Single: Story = {
         <Accordion.Trigger>Is it animated?</Accordion.Trigger>
         <Accordion.Content>Default uses a fade. CSS-driven; consumer can extend.</Accordion.Content>
       </Accordion.Item>
-      <Accordion.Item value="q-3" disabled>
+      <Accordion.Item value="q-3" isDisabled>
         <Accordion.Trigger>Disabled item</Accordion.Trigger>
         <Accordion.Content>Cannot expand.</Accordion.Content>
       </Accordion.Item>

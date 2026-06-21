@@ -8,18 +8,17 @@ export interface CountBadgeProps extends Omit<ComponentPropsWithoutRef<'span'>, 
   /** Cap value — shows "max+" when exceeded. Default 99. */
   max?: number;
   /** Hide entirely when count is 0. Default true. */
-  hideZero?: boolean;
+  canHideZero?: boolean;
   variant?: BadgeProps['variant'];
 }
 
 /**
- * Numeric badge for notification / inbox counts. Displays "{value}" or
- * "{max}+" once the cap is exceeded. Hides when `value === 0` unless
- * `hideZero={false}`.
+ * Numeric badge for notification / inbox counts. Shows "{value}" or "{max}+"
+ * past the cap. Hides when `value === 0` unless `canHideZero={false}`.
  */
 export const CountBadge = forwardRef<HTMLSpanElement, CountBadgeProps>(
-  ({ value, max = 99, hideZero = true, variant = 'danger', className, ...props }, ref) => {
-    if (value === 0 && hideZero) return null;
+  ({ value, max = 99, canHideZero = true, variant = 'danger', className, ...props }, ref) => {
+    if (value === 0 && canHideZero) return null;
     const display = value > max ? `${max}+` : `${value}`;
     return (
       <Badge

@@ -188,16 +188,16 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
       <Portal>
         <ScrollLockProvider>
           <Backdrop
-            inline
+            isInline
             onClick={() => {
               if (dismissOnOutsideClick) setOpen(false);
             }}
           />
           <FocusScope asChild trapped loop>
             <DismissableLayer
-              disableEscape={!dismissOnEscape}
+              isEscapeDisabled={!dismissOnEscape}
               onEscape={() => setOpen(false)}
-              disableOutsideClick
+              isOutsideClickDisabled
             >
               <div
                 ref={(el) => {
@@ -254,9 +254,8 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
   );
 });
 
-// Re-export shared chrome subcomponents under the BottomSheet namespace — they
-// wire `id={titleId}` / `id={descriptionId}` so the sheet's `aria-labelledby` /
-// `aria-describedby` resolve to an accessible name.
+// Re-export shared chrome under the BottomSheet namespace — they wire
+// `id={titleId}`/`id={descriptionId}` so the sheet's aria-labelledby/describedby resolve.
 export const BottomSheetTitle = OverlayTitle;
 export const BottomSheetDescription = OverlayDescription;
 

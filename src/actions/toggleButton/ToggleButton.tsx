@@ -17,9 +17,9 @@ export interface ToggleButtonProps
   extends Omit<ButtonProps, 'variant' | 'tone' | 'children' | 'title' | 'aria-label' | 'color'>,
     ToggleButtonVariants {
   /* Controlled pressed state. */
-  pressed?: boolean;
+  isPressed?: boolean;
 
-  /* Uncontrolled initial state. Ignored if `pressed` is set. */
+  /* Uncontrolled initial state. Ignored if `isPressed` is set. */
   defaultPressed?: boolean;
 
   /* Fires whenever pressed state changes. */
@@ -42,7 +42,7 @@ export interface ToggleButtonProps
 export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
   (
     {
-      pressed,
+      isPressed,
       defaultPressed,
       onPressedChange,
       onClick,
@@ -58,7 +58,7 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
     ref,
   ) => {
     const [value, setValue] = useControlled({
-      controlled: pressed,
+      controlled: isPressed,
       default: defaultPressed ?? false,
       onChange: onPressedChange,
     });

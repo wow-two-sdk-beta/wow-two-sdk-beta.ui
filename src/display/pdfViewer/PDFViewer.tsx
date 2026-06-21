@@ -14,7 +14,7 @@ export interface PDFViewerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'ti
   onZoomChange?: (zoom: number) => void;
   pageCount?: number;
   title?: string;
-  download?: boolean;
+  canDownload?: boolean;
   height?: string;
 }
 
@@ -37,7 +37,7 @@ export const PDFViewer = forwardRef<HTMLDivElement, PDFViewerProps>(function PDF
     onZoomChange,
     pageCount,
     title = 'PDF document',
-    download = true,
+    canDownload = true,
     height = '70vh',
     className,
     ...rest
@@ -129,7 +129,7 @@ export const PDFViewer = forwardRef<HTMLDivElement, PDFViewerProps>(function PDF
           <Icon icon={ZoomIn} size={14} />
         </button>
         <div className="ml-auto flex items-center gap-1">
-          {download && (
+          {canDownload && (
             <a
               href={src}
               download

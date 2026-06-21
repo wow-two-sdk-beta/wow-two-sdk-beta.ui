@@ -15,7 +15,7 @@ export const Explicit: Story = {
   render: () => (
     <div className="grid grid-cols-[180px_1fr] gap-6">
       <TableOfContents
-        sticky
+        isSticky
         items={HEADINGS.map((id, i) => ({ id, label: id.replace(/-/g, ' '), depth: i % 2 === 0 ? 0 : 1 }))}
       />
       <div>
@@ -38,7 +38,7 @@ export const AutoExtract: Story = {
       const ref = useRef<HTMLDivElement>(null);
       return (
         <div className="grid grid-cols-[180px_1fr] gap-6">
-          <TableOfContents sticky source={ref} headingSelector="h2" />
+          <TableOfContents isSticky source={ref} headingSelector="h2" />
           <div ref={ref}>
             {HEADINGS.map((id) => (
               <section id={id} key={id} className="min-h-[40vh] py-6">

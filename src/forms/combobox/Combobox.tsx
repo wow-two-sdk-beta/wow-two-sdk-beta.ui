@@ -29,7 +29,7 @@ import {
 interface ComboboxItemEntry {
   id: string;
   value: string;
-  disabled: boolean;
+  isDisabled: boolean;
   label: ReactNode;
 }
 
@@ -48,8 +48,8 @@ interface ComboboxContextValue {
   inputRef: React.MutableRefObject<HTMLInputElement | null>;
   contentRef: React.MutableRefObject<HTMLDivElement | null>;
   listboxId: string;
-  disabled: boolean;
-  invalid?: boolean;
+  isDisabled: boolean;
+  isInvalid?: boolean;
   selectItem: (entry: ComboboxItemEntry, options?: { close?: boolean }) => void;
 }
 
@@ -68,8 +68,8 @@ export interface ComboboxProps {
   inputValue?: string;
   defaultInputValue?: string;
   onInputChange?: (input: string) => void;
-  disabled?: boolean;
-  invalid?: boolean;
+  isDisabled?: boolean;
+  isInvalid?: boolean;
   name?: string;
   defaultOpen?: boolean;
   open?: boolean;
@@ -86,8 +86,8 @@ export function Combobox({
   inputValue,
   defaultInputValue,
   onInputChange,
-  disabled = false,
-  invalid,
+  isDisabled = false,
+  isInvalid,
   name,
   defaultOpen = false,
   open: openProp,
@@ -154,8 +154,8 @@ export function Combobox({
       inputRef,
       contentRef,
       listboxId,
-      disabled,
-      invalid,
+      isDisabled,
+      isInvalid,
       selectItem,
     }),
     [
@@ -169,8 +169,8 @@ export function Combobox({
       registerItem,
       unregisterItem,
       listboxId,
-      disabled,
-      invalid,
+      isDisabled,
+      isInvalid,
       selectItem,
     ],
   );
@@ -193,7 +193,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
     forwardedRef,
   ) {
     const ctx = useComboboxContext();
-    const inputState = state ?? (ctx.invalid ? 'invalid' : 'default');
+    const inputState = state ?? (ctx.isInvalid ? 'invalid' : 'default');
 
     const setActiveAndScroll = useCallback(
       (id: string) => {
@@ -205,7 +205,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
 
     const moveActive = useCallback(
       (direction: 1 | -1) => {
-        const list = ctx.itemsRef.current.filter((i) => !i.disabled);
+        const list = ctx.itemsRef.current.filter((i) => !i.isDisabled);
         if (list.length === 0) return;
         const idx = list.findIndex((i) => i.id === ctx.activeId);
         let nextIdx = idx + direction;
@@ -220,7 +220,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       onKeyDown?.(e);
-      if (e.defaultPrevented || ctx.disabled) return;
+      if (e.defaultPrevented || ctx.isDisabled) return;
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -235,14 +235,14 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
         case 'Home':
           if (ctx.open) {
             e.preventDefault();
-            const first = ctx.itemsRef.current.find((i) => !i.disabled);
+            const first = ctx.itemsRef.current.find((i) => !i.isDisabled);
             if (first) setActiveAndScroll(first.id);
           }
           break;
         case 'End':
           if (ctx.open) {
             e.preventDefault();
-            const list = ctx.itemsRef.current.filter((i) => !i.disabled);
+            const list = ctx.itemsRef.current.filter((i) => !i.isDisabled);
             const last = list[list.length - 1];
             if (last) setActiveAndScroll(last.id);
           }
@@ -254,7 +254,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
         case 'Enter': {
           if (!ctx.open || !ctx.activeId) return;
           const entry = ctx.itemsRef.current.find((i) => i.id === ctx.activeId);
-          if (!entry || entry.disabled) return;
+          if (!entry || entry.isDisabled) return;
           e.preventDefault();
           ctx.selectItem(entry);
           break;
@@ -281,8 +281,8 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
         aria-controls={ctx.listboxId}
         aria-activedescendant={ctx.activeId ?? undefined}
         aria-autocomplete="list"
-        aria-disabled={ctx.disabled || undefined}
-        disabled={ctx.disabled}
+        aria-disabled={ctx.isDisabled || undefined}
+        disabled={ctx.isDisabled}
         value={ctx.inputValue}
         onChange={(e) => {
           ctx.setInputValue(e.target.value);
@@ -334,7 +334,7 @@ export function ComboboxContent({
      Runs after the items' register/unregister effects — children effects fire first. */
   useEffect(() => {
     if (!ctx.open) return;
-    const list = ctx.itemsRef.current.filter((i) => !i.disabled);
+    const list = ctx.itemsRef.current.filter((i) => !i.isDisabled);
     if (ctx.activeId && !list.some((i) => i.id === ctx.activeId)) {
       ctx.setActiveId(list[0]?.id ?? null);
     }
@@ -388,33 +388,33 @@ export function ComboboxContent({
 
 export interface ComboboxItemProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
   children: ReactNode;
 }
 
 export const ComboboxItem = forwardRef<HTMLDivElement, ComboboxItemProps>(function ComboboxItem(
-  { value, disabled = false, className, children, onClick, onPointerEnter, ...rest },
+  { value, isDisabled = false, className, children, onClick, onPointerEnter, ...rest },
   forwardedRef,
 ) {
   const ctx = useComboboxContext();
   const id = useId();
 
   useEffect(() => {
-    ctx.registerItem({ id, value, disabled, label: children });
+    ctx.registerItem({ id, value, isDisabled, label: children });
     return () => ctx.unregisterItem(id);
-  }, [ctx, id, value, disabled, children]);
+  }, [ctx, id, value, isDisabled, children]);
 
   // Auto-set first matching item active on render if no active id.
   useEffect(() => {
     if (!ctx.activeId) {
-      const list = ctx.itemsRef.current.filter((i) => !i.disabled);
+      const list = ctx.itemsRef.current.filter((i) => !i.isDisabled);
       if (list[0]) ctx.setActiveId(list[0].id);
     }
   }, [ctx]);
 
   const isSelected = ctx.value === value;
   const isActive = ctx.activeId === id;
-  const state = disabled
+  const state = isDisabled
     ? 'disabled'
     : isSelected
       ? 'selected'
@@ -428,17 +428,17 @@ export const ComboboxItem = forwardRef<HTMLDivElement, ComboboxItemProps>(functi
       id={id}
       role="option"
       aria-selected={isSelected}
-      aria-disabled={disabled || undefined}
+      aria-disabled={isDisabled || undefined}
       data-active={isActive ? '' : undefined}
       data-selected={isSelected ? '' : undefined}
       onClick={(e) => {
         onClick?.(e);
-        if (e.defaultPrevented || disabled) return;
-        ctx.selectItem({ id, value, disabled, label: children });
+        if (e.defaultPrevented || isDisabled) return;
+        ctx.selectItem({ id, value, isDisabled, label: children });
       }}
       onPointerEnter={(e) => {
         onPointerEnter?.(e);
-        if (!disabled) ctx.setActiveId(id);
+        if (!isDisabled) ctx.setActiveId(id);
       }}
       className={cn(listboxItemVariants({ state }), className)}
       {...rest}

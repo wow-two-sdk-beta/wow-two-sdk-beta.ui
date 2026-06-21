@@ -70,9 +70,9 @@ export const Dense: Story = {
   render: () => (
     <div className="w-[36rem]">
       <DataGrid<Person>
-        dense
+        isDense
         columns={[
-          { key: 'name', header: 'Name', accessor: (r) => r.name, editable: false },
+          { key: 'name', header: 'Name', accessor: (r) => r.name, isEditable: false },
           { key: 'age', header: 'Age', accessor: (r) => r.age, type: 'number', align: 'right' },
         ]}
         rows={INITIAL}

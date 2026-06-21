@@ -183,7 +183,7 @@ export default function BillingScreen() {
                 value={planId}
                 onValueChange={setPlanId}
                 orientation="horizontal"
-                disabled={paid}
+                isDisabled={paid}
                 aria-label="Subscription plan"
               >
                 {PLANS.map((p) => (
@@ -206,7 +206,7 @@ export default function BillingScreen() {
                 title={`Invoice ${invoice.id}`}
                 description={`${invoice.customer} · ${invoice.customerEmail}`}
                 size="md"
-                bordered={false}
+                isBordered={false}
                 actions={
                   paid ? (
                     <Badge variant="success">paid</Badge>
@@ -217,7 +217,7 @@ export default function BillingScreen() {
               />
             </Card.Header>
             <Card.Body className="flex flex-col gap-4">
-              <Table density="cozy" hoverable>
+              <Table density="cozy" isHoverable>
                 <TableHead>
                   <TableRow>
                     <TableHeaderCell>SKU</TableHeaderCell>
@@ -357,7 +357,7 @@ export default function BillingScreen() {
 
             <Fieldset className="flex flex-col gap-3" disabled={paid}>
               <Legend>Billing address</Legend>
-              <AddressForm value={address} onValueChange={setAddress} disabled={paid} />
+              <AddressForm value={address} onValueChange={setAddress} isDisabled={paid} />
             </Fieldset>
 
             {submitAttempted && hasErrors && !paid && (

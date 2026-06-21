@@ -9,7 +9,7 @@ const calendarEvents = events.map((e) => ({
   title: e.title,
   start: new Date(e.start),
   end: new Date(e.end),
-  allDay: e.allDay,
+  isAllDay: e.allDay,
 }));
 
 const scheduleResourceIds = [...new Set(scheduleEntries.map((e) => e.ownerId))];

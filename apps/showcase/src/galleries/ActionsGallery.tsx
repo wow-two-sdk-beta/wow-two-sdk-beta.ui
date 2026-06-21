@@ -100,6 +100,38 @@ function ButtonSection() {
         <Button tone="success">Success</Button>
         <Button tone="warning">Warning</Button>
       </Demo>
+      <Demo label="Button — tone sweep (soft)">
+        <Button variant="soft" tone="primary">Primary</Button>
+        <Button variant="soft" tone="neutral">Neutral</Button>
+        <Button variant="soft" tone="danger">Danger</Button>
+        <Button variant="soft" tone="success">Success</Button>
+        <Button variant="soft" tone="warning">Warning</Button>
+      </Demo>
+      <Demo label="Button — tone sweep (outline)">
+        <Button variant="outline" tone="primary">Primary</Button>
+        <Button variant="outline" tone="neutral">Neutral</Button>
+        <Button variant="outline" tone="danger">Danger</Button>
+        <Button variant="outline" tone="success">Success</Button>
+        <Button variant="outline" tone="warning">Warning</Button>
+      </Demo>
+      <Demo label="Button — glass + glass-surface (over imagery)">
+        <div
+          className="flex w-full flex-wrap items-center gap-3 rounded-md p-6"
+          style={{
+            backgroundImage:
+              'linear-gradient(120deg, #1e3a8a 0%, #6d28d9 45%, #be185d 100%)',
+          }}
+        >
+          <Button variant="glass">Glass</Button>
+          <Button variant="glass-surface">Glass surface</Button>
+          <Button variant="glass" shape="circle" aria-label="Favorite">
+            <StarGlyph />
+          </Button>
+          <Button variant="glass-surface" leadingSlot={<PlusGlyph />}>
+            Add
+          </Button>
+        </div>
+      </Demo>
       <Demo label="Button — sizes">
         <Button size="xs">XS</Button>
         <Button size="sm">SM</Button>
@@ -197,7 +229,7 @@ function LinkAndGroupSection() {
         </ButtonGroup>
       </Demo>
       <Demo label="ButtonGroup — detached + vertical">
-        <ButtonGroup attached={false}>
+        <ButtonGroup isAttached={false}>
           <Button variant="soft">Save</Button>
           <Button variant="soft" tone="neutral">
             Cancel
@@ -231,7 +263,7 @@ function ToggleSection() {
     >
       <Demo label="ToggleButton — controlled + render-prop label">
         <ToggleButton
-          pressed={muted}
+          isPressed={muted}
           onPressedChange={setMuted}
           aria-label={({ pressed }) => (pressed ? 'Unmute' : 'Mute')}
           title={({ pressed }) => (pressed ? 'Unmute' : 'Mute')}
@@ -256,7 +288,7 @@ function ToggleSection() {
         <span className="text-sm text-muted-foreground">align: {align ?? 'none'}</span>
       </Demo>
       <Demo label="ToggleButtonGroup — multi (uncontrolled, detached)">
-        <ToggleButtonGroup type="multi" defaultValue={['bold']} attached={false} aria-label="Text style">
+        <ToggleButtonGroup type="multi" defaultValue={['bold']} isAttached={false} aria-label="Text style">
           <ToggleButton value="bold" variant="outline">
             Bold
           </ToggleButton>
@@ -308,7 +340,7 @@ function UtilityButtonsSection() {
       </Demo>
       <Demo label="DisclosureButton — controlled with panel">
         <div className="w-full">
-          <DisclosureButton open={faqOpen} onOpenChange={setFaqOpen}>
+          <DisclosureButton isOpen={faqOpen} onOpenChange={setFaqOpen}>
             What does beta-forever mean?
           </DisclosureButton>
           {faqOpen && (

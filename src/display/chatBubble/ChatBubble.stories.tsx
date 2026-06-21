@@ -45,7 +45,7 @@ export const SystemNote: Story = {
 export const Tailless: Story = {
   args: {
     side: 'end',
-    tailless: true,
+    isTailless: true,
     children: 'Stacking with the message above (no tail).',
   },
 };
@@ -59,9 +59,9 @@ export const WithReactions: Story = {
     children: 'Just shipped the v2 dashboard 🎉',
     footer: (
       <ReactionBar
-        hideAddButton
+        hasAddButton={false}
         reactions={[
-          { key: '🎉', emoji: '🎉', count: 4, reactedByMe: true },
+          { key: '🎉', emoji: '🎉', count: 4, isReactedByMe: true },
           { key: '🚀', emoji: '🚀', count: 2 },
         ]}
       />
@@ -83,7 +83,7 @@ export const Conversation: Story = {
       <ChatBubble side="end" status="read" timestamp="9:42 AM">
         Yes, just now. Partial was mid-flight.
       </ChatBubble>
-      <ChatBubble side="end" tailless status="read" timestamp="9:42 AM">
+      <ChatBubble side="end" isTailless status="read" timestamp="9:42 AM">
         Re-running for the missing rows.
       </ChatBubble>
       <ChatBubble tone="system">Alex left the channel</ChatBubble>

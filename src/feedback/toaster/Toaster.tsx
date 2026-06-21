@@ -98,7 +98,7 @@ export interface ToasterProps {
   max?: number;
   /** ms; per-toast `duration` overrides. Default 5000. `Infinity` to disable. */
   defaultDuration?: number;
-  pauseOnHover?: boolean;
+  canPauseOnHover?: boolean;
   gap?: number;
   className?: string;
 }
@@ -115,7 +115,7 @@ export function Toaster({
   position = 'bottom-right',
   max = 5,
   defaultDuration = 5000,
-  pauseOnHover = true,
+  canPauseOnHover = true,
   gap = 8,
   className,
 }: ToasterProps) {
@@ -178,7 +178,7 @@ export function Toaster({
   }, []);
 
   const handlePause = () => {
-    if (!pauseOnHover || paused) return;
+    if (!canPauseOnHover || paused) return;
     setPaused(true);
     for (const [id, h] of timersRef.current) {
       window.clearTimeout(h);
@@ -191,7 +191,7 @@ export function Toaster({
   };
 
   const handleResume = () => {
-    if (!pauseOnHover || !paused) return;
+    if (!canPauseOnHover || !paused) return;
     setPaused(false);
   };
 

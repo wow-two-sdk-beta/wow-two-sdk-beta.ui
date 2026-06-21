@@ -7,7 +7,7 @@ export interface PasswordStrengthProps extends Omit<ComponentPropsWithoutRef<'di
   /** Override the score (0–4). When set, internal scoring is bypassed. */
   score?: 0 | 1 | 2 | 3 | 4;
   /** Hide the textual label under the bar. */
-  hideLabel?: boolean;
+  isLabelHidden?: boolean;
 }
 
 const LABELS = ['Too weak', 'Weak', 'Fair', 'Strong', 'Excellent'];
@@ -28,7 +28,7 @@ function scorePassword(pw: string): 0 | 1 | 2 | 3 | 4 {
  * `score` to override (e.g. drive from `zxcvbn`).
  */
 export const PasswordStrength = forwardRef<HTMLDivElement, PasswordStrengthProps>(
-  ({ value, score, hideLabel, className, ...props }, ref) => {
+  ({ value, score, isLabelHidden, className, ...props }, ref) => {
     const s: 0 | 1 | 2 | 3 | 4 = score ?? (value.length === 0 ? 0 : scorePassword(value));
     const label = LABELS[s] ?? '';
     const tone = TONE[s] ?? 'bg-destructive';
@@ -45,7 +45,7 @@ export const PasswordStrength = forwardRef<HTMLDivElement, PasswordStrengthProps
             />
           ))}
         </div>
-        {!hideLabel && value && (
+        {!isLabelHidden && value && (
           <div className="text-xs text-muted-foreground">{label}</div>
         )}
       </div>

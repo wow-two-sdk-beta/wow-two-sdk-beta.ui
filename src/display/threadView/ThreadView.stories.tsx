@@ -28,7 +28,7 @@ export const Standard: Story = {
             timestamp="9:41 AM"
             footer={
               <ReactionBar
-                hideAddButton
+                hasAddButton={false}
                 reactions={[{ key: '👀', emoji: '👀', count: 3 }]}
               />
             }

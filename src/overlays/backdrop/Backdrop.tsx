@@ -6,19 +6,16 @@ export interface BackdropProps extends HTMLAttributes<HTMLDivElement> {
   /** Mount state. Default `true`. */
   open?: boolean;
   /** Apply backdrop-blur. */
-  blur?: boolean;
+  isBlurred?: boolean;
   /** When `'none'`, clicks pass through. Default `'auto'`. */
   pointerEvents?: 'auto' | 'none';
   /** Skip the Portal wrap — render in place. */
-  inline?: boolean;
+  isInline?: boolean;
 }
 
-/**
- * Fixed-position scrim. Used by Dialog / Drawer / LoadingOverlay; also a
- * public component for custom overlay surfaces.
- */
+/** Fixed-position scrim. Used by Dialog / Drawer / LoadingOverlay; also public for custom overlay surfaces. */
 export const Backdrop = forwardRef<HTMLDivElement, BackdropProps>(function Backdrop(
-  { open = true, blur, pointerEvents = 'auto', inline, className, style, ...rest },
+  { open = true, isBlurred, pointerEvents = 'auto', isInline, className, style, ...rest },
   ref,
 ) {
   if (!open) return null;
@@ -29,11 +26,11 @@ export const Backdrop = forwardRef<HTMLDivElement, BackdropProps>(function Backd
       style={{ pointerEvents, ...style }}
       className={cn(
         'fixed inset-0 z-overlay bg-black/50 animate-in fade-in-0',
-        blur && 'backdrop-blur-sm',
+        isBlurred && 'backdrop-blur-sm',
         className,
       )}
       {...rest}
     />
   );
-  return inline ? node : <Portal>{node}</Portal>;
+  return isInline ? node : <Portal>{node}</Portal>;
 });

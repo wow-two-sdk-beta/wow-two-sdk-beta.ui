@@ -18,7 +18,7 @@ export interface DatePickerProps
   min?: Date | null;
   max?: Date | null;
   isDisabled?: (date: Date) => boolean;
-  invalid?: boolean;
+  isInvalid?: boolean;
   /** When `name` is set, a hidden input ships the ISO value with form submission. */
   name?: string;
 }
@@ -36,7 +36,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
     min,
     max,
     isDisabled: dayDisabled,
-    invalid,
+    isInvalid,
     name,
     size,
     state,
@@ -56,7 +56,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
     default: false,
   });
 
-  const triggerState = state ?? (invalid ? 'invalid' : 'default');
+  const triggerState = state ?? (isInvalid ? 'invalid' : 'default');
 
   return (
     <Popover open={open} onOpenChange={setOpen} placement="bottom-start" offset={6}>
@@ -74,7 +74,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
           <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
         </button>
       </PopoverTrigger>
-      <PopoverContent bare>
+      <PopoverContent isBare>
         <Calendar
           value={date}
           onValueChange={(d) => {

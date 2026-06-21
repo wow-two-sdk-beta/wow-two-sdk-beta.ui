@@ -17,6 +17,7 @@ Selection list with keyboard navigation. Single- or multi-select. Use standalone
 ## Required behaviors
 - Roving focus across items: ↑/↓ arrow, Home/End, PageUp/PageDown.
 - Enter / Space selects focused item.
+- Type-to-select (typeahead, via `useTypeahead`): typing printable chars moves the active option to the matching item — prefix-match the buffer, repeated single char cycles matches, disabled items skipped, buffer resets after ~500ms idle. Space is a typeable char while a buffer is active; otherwise it selects.
 - Single mode: selecting a different item replaces current.
 - Multi mode: selecting toggles; selected items show a check.
 - Disabled items are skipped by keyboard nav and ignore pointer.
@@ -28,14 +29,14 @@ Selection list with keyboard navigation. Single- or multi-select. Use standalone
 ## Props
 | Name | Type | Default | Required | Why |
 |---|---|---|---|---|
-| `value` | `string \| string[]` | — | no | Controlled selection. Array iff `multiple`. |
+| `value` | `string \| string[]` | — | no | Controlled selection. Array iff `isMultiple`. |
 | `defaultValue` | `string \| string[]` | — | no | Uncontrolled initial selection. |
 | `onValueChange` | `(v) => void` | — | no | Fires on selection change. |
-| `multiple` | `boolean` | `false` | no | Toggle multi-select. |
+| `isMultiple` | `boolean` | `false` | no | Toggle multi-select. |
 | `aria-label` | `string` | — | recommended | Required for a11y when no labelled-by. |
-| `disabled` | `boolean` | `false` | no | Disable all items. |
+| `isDisabled` | `boolean` | `false` | no | Disable all items. |
 
-`Listbox.Item`: `value` (req), `disabled?`, children.
+`Listbox.Item`: `value` (req), `isDisabled?`, children.
 
 ## Composition
 Compound — `Listbox.Item`, `Listbox.Group`, `Listbox.Separator`, `Listbox.Empty`. Items register via context for keyboard nav.
@@ -46,11 +47,10 @@ Compound — `Listbox.Item`, `Listbox.Group`, `Listbox.Separator`, `Listbox.Empt
 - For standalone use, focus moves to the listbox on tab; arrow keys navigate; Enter/Space select.
 
 ## Dependencies
-Foundation: `utils/cn`, `hooks/useControlled`, `hooks/useId`. Same-domain: none.
+Foundation: `utils/cn`, `hooks/useControlled`, `hooks/useId`, `hooks/useTypeahead`. Same-domain: none.
 
 ## Known limitations
 - No virtualization (deferred to P6).
-- No type-to-search (deferred — needs `useTypeahead` hook).
 - No drag-to-reorder.
 
 ## Inspirations

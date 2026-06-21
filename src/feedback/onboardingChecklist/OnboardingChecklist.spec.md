@@ -24,7 +24,7 @@ First-run task list that tracks per-task completion + total progress; collapsibl
 |---|---|---|---|
 | `title` | `ReactNode` | `'Get started'` | |
 | `defaultOpen` | `boolean` | `true` | Collapsed by default if `false` |
-| `dismissOnComplete` | `boolean` | `false` | Hide after all tasks done |
+| `canDismissOnComplete` | `boolean` | `false` | Hide after all tasks done |
 | `dismissDelay` | `number` (ms) | `2000` | After completion |
 | `onDismiss` | `() => void` | — | Called when component decides to unmount |
 
@@ -33,7 +33,7 @@ First-run task list that tracks per-task completion + total progress; collapsibl
 |---|---|---|---|
 | `label` | `ReactNode` | — | |
 | `description` | `ReactNode` | — | |
-| `done` | `boolean` | `false` | Checked state |
+| `isDone` | `boolean` | `false` | Checked state |
 | `action` | `ReactNode` | — | CTA (button) |
 
 ## Accessibility

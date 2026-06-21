@@ -91,7 +91,7 @@ export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(function TabsL
     <RovingFocusGroup
       ref={ref as never}
       orientation={ctx.orientation}
-      loop
+      canLoop
       role="tablist"
       aria-orientation={ctx.orientation}
       data-orientation={ctx.orientation}
@@ -110,18 +110,17 @@ export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(function TabsL
 export interface TabsTabProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'value'> {
   value: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
 }
 
 export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function TabsTab(
-  { value, disabled = false, className, onClick, onFocus, children, ...rest },
+  { value, isDisabled = false, className, onClick, onFocus, children, ...rest },
   ref,
 ) {
   const ctx = useTabsContext();
   const selected = ctx.value === value;
-  // Selected tab is the Tab stop (per APG) — seeds/syncs the roving
-  // focusedId whenever focus is outside the tablist.
-  const roving = useRovingFocusItem({ active: selected });
+  // Selected tab is the Tab stop (per APG) — seeds/syncs roving focusedId when focus is outside the tablist.
+  const roving = useRovingFocusItem({ isActive: selected });
   const tabId = `${ctx.baseId}-tab-${value}`;
   const panelId = `${ctx.baseId}-panel-${value}`;
 
@@ -138,18 +137,18 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
       aria-selected={selected}
       aria-controls={panelId}
       data-state={selected ? 'active' : 'inactive'}
-      data-disabled={dataAttr(disabled)}
+      data-disabled={dataAttr(isDisabled)}
       tabIndex={roving.tabIndex}
-      disabled={disabled}
+      disabled={isDisabled}
       onClick={(e) => {
         onClick?.(e);
-        if (e.defaultPrevented || disabled) return;
+        if (e.defaultPrevented || isDisabled) return;
         ctx.setValue(value);
       }}
       onFocus={(e) => {
         onFocus?.(e);
         roving.onFocus();
-        if (ctx.activationMode === 'automatic' && !disabled) {
+        if (ctx.activationMode === 'automatic' && !isDisabled) {
           ctx.setValue(value);
         }
       }}

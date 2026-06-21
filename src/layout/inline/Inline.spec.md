@@ -8,6 +8,9 @@ Wrapping horizontal row with consistent gap. For chips/tag rows, inline action g
 |---|---|---|
 | `gap` | `'0' \| '1' \| '2' \| '3' \| '4' \| '6' \| '8'` | `'2'` |
 | `align` | `'start' \| 'center' \| 'end' \| 'baseline'` | `'center'` |
+| `wrap` | `boolean` | `true` |
+
+`wrap={false}` → `flex-nowrap` for tight single-line truncating rows.
 
 ## Dependencies
 Foundation: `utils/cn`.

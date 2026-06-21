@@ -425,7 +425,8 @@
       "useOutsideClick",
       "useReducedMotion",
       "useResizeObserver",
-      "useScrollLock"
+      "useScrollLock",
+      "useTypeahead"
     ],
     "icons": [
       "Icon",
@@ -435,8 +436,11 @@
       "ButtonType",
       "ColorExtensions",
       "CssExtensions",
+      "Environment",
       "Equality",
       "HtmlElement",
+      "IS_DEV",
+      "IS_PRODUCTION",
       "Key",
       "Layer",
       "OptionalExtensions",

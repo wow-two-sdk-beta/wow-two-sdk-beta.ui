@@ -19,7 +19,7 @@ Single `<div>` rendered into a Portal. No children layout — purely visual.
 | Name | Type | Default | Required | Why |
 |---|---|---|---|---|
 | `open` | `boolean` | `true` | no | Control mount. |
-| `blur` | `boolean` | `false` | no | Apply `backdrop-blur-sm`. |
+| `isBlurred` | `boolean` | `false` | no | Apply `backdrop-blur-sm`. |
 | `pointerEvents` | `'auto' \| 'none'` | `'auto'` | no | When `none`, clicks pass through. |
 | `onClick` | `(e) => void` | — | no | Click-on-scrim handler. |
 

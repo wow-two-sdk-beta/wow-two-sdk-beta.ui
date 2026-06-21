@@ -172,7 +172,7 @@ export const Overlay = forwardRef<HTMLElement, OverlayProps>(
     if (isPresenceMode) {
       const root = renderRoot();
       if (!root) return null;
-      return <Presence present={isOpen}>{root}</Presence>;
+      return <Presence isPresent={isOpen}>{root}</Presence>;
     }
 
     return renderRoot();

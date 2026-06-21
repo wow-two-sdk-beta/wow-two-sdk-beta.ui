@@ -11,7 +11,7 @@ Inline tiny chart for trends — line / area / bar / dot. SVG-based; no scales, 
 | `width` / `height` | `number` (px) | `120` / `32` | |
 | `tone` | `'brand' \| 'success' \| 'warning' \| 'danger' \| 'muted' \| 'current'` | `'brand'` | Color via `currentColor` (when `current`) or token |
 | `min` / `max` | `number` | derived from data | Override scale |
-| `showLast` | `boolean` | `false` | Add a dot at the last point |
+| `hasLast` | `boolean` | `false` | Add a dot at the last point |
 | `ariaLabel` | `string` | `'Trend'` | SR-only summary (e.g. "Sales: 12, 15, 19, 24"). |
 
 ## Accessibility

@@ -200,7 +200,7 @@ export default function MediaScreen() {
     <div ref={rootRef} className="mx-auto flex max-w-5xl flex-col gap-10 pb-24">
       {/* Hero — GradientText + Marquee flourish */}
       <header className="space-y-4">
-        <GradientText as="h1" animated direction="r" className="text-3xl font-bold tracking-tight">
+        <GradientText as="h1" isAnimated direction="r" className="text-3xl font-bold tracking-tight">
           Media library
         </GradientText>
         <p className="max-w-2xl text-sm text-muted-foreground">
@@ -333,7 +333,7 @@ export default function MediaScreen() {
           title="Featured reel"
           description="Looping carousel of the poster set — arrow keys work while focused."
         />
-        <Carousel loop>
+        <Carousel canLoop>
           <CarouselViewport aria-label="Featured posters">
             <CarouselSlides>
               {CAROUSEL_ITEMS.map((item) => (
@@ -391,7 +391,7 @@ export default function MediaScreen() {
             <div className="text-xs font-medium text-foreground">Frame · muted</div>
             <p className="mt-1 text-xs text-muted-foreground">Recessed well — good behind waveforms.</p>
           </Frame>
-          <Tilt glare scale={1.03} maxAngle={10} className="rounded-md">
+          <Tilt hasGlare scale={1.03} maxAngle={10} className="rounded-md">
             <Frame surface="card" padding="0" radius="md" className="overflow-hidden">
               <AspectRatio ratio={16 / 9}>
                 <Image

@@ -9,7 +9,7 @@ export interface PasswordInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
     InputBaseVariants {
   /** Whether to render the visibility-toggle button. Default true. */
-  toggleable?: boolean;
+  hasToggle?: boolean;
 }
 
 /**
@@ -26,7 +26,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
       disabled,
       required,
       readOnly,
-      toggleable = true,
+      hasToggle = true,
       autoComplete = 'current-password',
       ...props
     },
@@ -50,10 +50,10 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           readOnly={readOnly ?? ctx?.isReadOnly}
           aria-invalid={ctx?.isInvalid || undefined}
           aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
-          className={cn(inputBaseVariants({ size, state: finalState }), toggleable && 'pr-10')}
+          className={cn(inputBaseVariants({ size, state: finalState }), hasToggle && 'pr-10')}
           {...props}
         />
-        {toggleable && (
+        {hasToggle && (
           <button
             type="button"
             disabled={isDisabled}

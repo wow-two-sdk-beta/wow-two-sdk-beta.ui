@@ -15,7 +15,7 @@ export const Idle: Story = { args: { status: 'idle' } };
 export const Busy: Story = { args: { status: 'busy' } };
 export const Offline: Story = { args: { status: 'offline' } };
 export const Invisible: Story = { args: { status: 'invisible' } };
-export const Pulsing: Story = { args: { status: 'online', pulse: true, size: 'md' } };
+export const Pulsing: Story = { args: { status: 'online', hasPulse: true, size: 'md' } };
 
 export const OnAvatar: Story = {
   render: (args) => (

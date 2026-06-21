@@ -229,7 +229,7 @@ export default function LayoutGallery() {
               <Frame padding="4" surface="muted" radius="lg">
                 <p className="text-xs text-muted-foreground">surface=&quot;muted&quot; radius=&quot;lg&quot;</p>
               </Frame>
-              <Frame padding="4" bordered={false} surface="muted">
+              <Frame padding="4" isBordered={false} surface="muted">
                 <p className="text-xs text-muted-foreground">bordered=&#123;false&#125;</p>
               </Frame>
             </Grid>

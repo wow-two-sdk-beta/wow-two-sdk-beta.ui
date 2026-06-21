@@ -24,12 +24,12 @@ export type ColorSwatchProps =
  * ensures partial-alpha colors render correctly.
  */
 export const ColorSwatch = forwardRef<HTMLElement, ColorSwatchProps>(function ColorSwatch(
-  { color = '#000000', size, shape, selected, disabled, className, onClick, style, ...rest },
+  { color = '#000000', size, shape, isSelected, isDisabled, className, onClick, style, ...rest },
   ref,
 ) {
   const interactive = !!onClick;
   const classes = cn(
-    colorSwatchVariants({ size, shape, interactive, selected, disabled }),
+    colorSwatchVariants({ size, shape, interactive, isSelected, isDisabled }),
     className,
   );
   // Layer the color on top of the checkerboard via box-shadow inset — keeps
@@ -45,7 +45,7 @@ export const ColorSwatch = forwardRef<HTMLElement, ColorSwatchProps>(function Co
       <button
         ref={ref as React.Ref<HTMLButtonElement>}
         type="button"
-        disabled={disabled}
+        disabled={isDisabled}
         onClick={onClick}
         style={styleWithColor}
         className={classes}

@@ -28,7 +28,7 @@ Items render as a flex stack offset from the trigger. Direction derived from `po
 |---|---|---|---|
 | `position` | `'bottom-right' \| 'bottom-left' \| 'top-right' \| 'top-left'` | `'bottom-right'` | Mirrors `FAB`'s positions; deciding fan direction. |
 | `direction` | `'up' \| 'down' \| 'left' \| 'right'` | derived from `position` | Override the auto-direction. |
-| `open` / `defaultOpen` / `onOpenChange` | controlled state | uncontrolled by default | |
+| `isOpen` / `defaultOpen` / `onOpenChange` | controlled state | uncontrolled by default | |
 | `gap` | `number` (px) | `12` | Spacing between items. |
 
 ## Action props

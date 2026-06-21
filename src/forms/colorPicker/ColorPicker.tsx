@@ -17,10 +17,10 @@ export interface ColorPickerProps {
   value?: string | null;
   defaultValue?: string | null;
   onValueChange?: (hex: string) => void;
-  withAlpha?: boolean;
+  hasAlpha?: boolean;
   presets?: string[];
   triggerSize?: ColorSwatchVariants['size'];
-  disabled?: boolean;
+  isDisabled?: boolean;
   name?: string;
   className?: string;
   'aria-label'?: string;
@@ -33,10 +33,10 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
     value,
     defaultValue = '#3b82f6',
     onValueChange,
-    withAlpha = false,
+    hasAlpha = false,
     presets,
     triggerSize = 'md',
-    disabled = false,
+    isDisabled = false,
     name,
     className,
     'aria-label': ariaLabel = 'Pick a color',
@@ -59,16 +59,16 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
     if (!parsed) return;
     // Only update internal HSV if the *committed* hex differs from what our
     // HSV currently produces — avoids hue collapsing when SV passes through 0.
-    const currentHex = hsvToHex(hsv, { withAlpha });
+    const currentHex = hsvToHex(hsv, { withAlpha: hasAlpha });
     if (currentHex.toLowerCase() !== hex.toLowerCase()) {
       setHsvState({ ...parsed, a: hsv.a });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hex, withAlpha]);
+  }, [hex, hasAlpha]);
 
   const updateHsv = (next: HSV) => {
     setHsvState(next);
-    setHex(hsvToHex(next, { withAlpha }));
+    setHex(hsvToHex(next, { withAlpha: hasAlpha }));
   };
 
   return (
@@ -78,7 +78,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
           ref={ref}
           type="button"
           aria-label={ariaLabel}
-          disabled={disabled}
+          disabled={isDisabled}
           className={cn(
             'inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-sm transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60',
             className,
@@ -101,7 +101,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
           onValueChange={(h) => updateHsv({ ...hsv, h })}
           aria-label="Hue"
         />
-        {withAlpha && (
+        {hasAlpha && (
           <ColorSlider
             channel="alpha"
             value={hsv.a ?? 1}
@@ -113,7 +113,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
         <ColorField
           value={hex}
           onValueChange={(next) => setHex(next)}
-          withAlpha={withAlpha}
+          hasAlpha={hasAlpha}
         />
         {presets && presets.length > 0 && (
           <ColorSwatchPicker

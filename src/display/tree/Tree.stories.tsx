@@ -24,7 +24,7 @@ export const Default: Story = {
         <Tree.Item value="src/index.ts">index.ts</Tree.Item>
       </Tree.Group>
       <Tree.Item value="package.json">package.json</Tree.Item>
-      <Tree.Item value="tsconfig.json" disabled>tsconfig.json (disabled)</Tree.Item>
+      <Tree.Item value="tsconfig.json" isDisabled>tsconfig.json (disabled)</Tree.Item>
     </Tree>
   ),
 };

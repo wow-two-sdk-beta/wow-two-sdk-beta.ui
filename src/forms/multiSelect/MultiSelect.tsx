@@ -31,9 +31,9 @@ interface MultiSelectContextValue {
   labels: Record<string, ReactNode>;
   registerLabel: (value: string, label: ReactNode) => void;
   unregisterLabel: (value: string) => void;
-  disabled: boolean;
+  isDisabled: boolean;
   name?: string;
-  invalid?: boolean;
+  isInvalid?: boolean;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextValue | null>(null);
@@ -48,9 +48,9 @@ export interface MultiSelectProps {
   value?: string[];
   defaultValue?: string[];
   onValueChange?: (value: string[]) => void;
-  disabled?: boolean;
+  isDisabled?: boolean;
   name?: string;
-  invalid?: boolean;
+  isInvalid?: boolean;
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -62,9 +62,9 @@ export function MultiSelect({
   value,
   defaultValue,
   onValueChange,
-  disabled = false,
+  isDisabled = false,
   name,
-  invalid,
+  isInvalid,
   defaultOpen = false,
   open: openProp,
   onOpenChange,
@@ -104,9 +104,9 @@ export function MultiSelect({
       labels,
       registerLabel,
       unregisterLabel,
-      disabled,
+      isDisabled,
       name,
-      invalid,
+      isInvalid,
     }),
     [
       openState,
@@ -116,9 +116,9 @@ export function MultiSelect({
       labels,
       registerLabel,
       unregisterLabel,
-      disabled,
+      isDisabled,
       name,
-      invalid,
+      isInvalid,
     ],
   );
 
@@ -153,13 +153,13 @@ export const MultiSelectTrigger = forwardRef<HTMLButtonElement, MultiSelectTrigg
     ref,
   ) {
     const ctx = useMultiSelectContext();
-    const triggerState = state ?? (ctx.invalid ? 'invalid' : 'default');
+    const triggerState = state ?? (ctx.isInvalid ? 'invalid' : 'default');
     return (
       <PopoverTrigger asChild>
         <button
           ref={ref}
           type="button"
-          disabled={ctx.disabled}
+          disabled={ctx.isDisabled}
           onKeyDown={(e) => {
             onKeyDown?.(e);
             if (e.defaultPrevented) return;
@@ -205,7 +205,7 @@ export function MultiSelectTags({ placeholder }: MultiSelectTagsProps) {
           className="inline-flex items-center gap-1 rounded-sm bg-muted px-1.5 py-0.5 text-xs"
         >
           {ctx.labels[v] ?? v}
-          {!ctx.disabled && (
+          {!ctx.isDisabled && (
             <span
               role="button"
               tabIndex={-1}
@@ -251,7 +251,7 @@ export function MultiSelectContent({
       className={cn('w-auto min-w-[var(--anchor-width)] overflow-hidden', className)}
     >
       <Listbox<string>
-        multiple
+        isMultiple
         value={ctx.values}
         onValueChange={(v) => ctx.setValues(v)}
         variant="flat"
@@ -265,7 +265,7 @@ export function MultiSelectContent({
 
 export interface MultiSelectItemProps {
   value: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
   className?: string;
   children: ReactNode;
 }

@@ -15,7 +15,7 @@ export interface CountUpProps extends Omit<HTMLAttributes<HTMLElement>, 'childre
   duration?: number;
   easing?: (t: number) => number;
   format?: (value: number) => ReactNode;
-  triggerOnView?: boolean;
+  canTriggerOnView?: boolean;
   as?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 }
 
@@ -29,7 +29,7 @@ function prefersReducedMotion(): boolean {
 
 /**
  * Number that animates up to `to` on mount (or on enter-viewport when
- * `triggerOnView`). rAF tween; respects `prefers-reduced-motion` (jumps
+ * `canTriggerOnView`). rAF tween; respects `prefers-reduced-motion` (jumps
  * straight to `to`).
  */
 export const CountUp = forwardRef<HTMLElement, CountUpProps>(function CountUp(
@@ -39,14 +39,14 @@ export const CountUp = forwardRef<HTMLElement, CountUpProps>(function CountUp(
     duration = 1500,
     easing = easeOutCubic,
     format = defaultFormat,
-    triggerOnView = false,
+    canTriggerOnView = false,
     as = 'span',
     className,
     ...rest
   },
   ref,
 ) {
-  const [value, setValue] = useState(triggerOnView ? from : to);
+  const [value, setValue] = useState(canTriggerOnView ? from : to);
   const elRef = useRef<HTMLElement | null>(null);
   const startedRef = useRef(false);
 
@@ -55,7 +55,7 @@ export const CountUp = forwardRef<HTMLElement, CountUpProps>(function CountUp(
       setValue(to);
       return;
     }
-    if (triggerOnView && typeof IntersectionObserver !== 'undefined' && elRef.current) {
+    if (canTriggerOnView && typeof IntersectionObserver !== 'undefined' && elRef.current) {
       let cancel: (() => void) | undefined;
       const obs = new IntersectionObserver(
         (entries) => {
@@ -88,7 +88,7 @@ export const CountUp = forwardRef<HTMLElement, CountUpProps>(function CountUp(
       raf = requestAnimationFrame(tick);
       return () => cancelAnimationFrame(raf);
     }
-  }, [to, from, duration, easing, triggerOnView]);
+  }, [to, from, duration, easing, canTriggerOnView]);
 
   const Tag = as as ElementType;
   return (

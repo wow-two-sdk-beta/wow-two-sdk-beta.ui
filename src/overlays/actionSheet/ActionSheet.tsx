@@ -45,9 +45,8 @@ export function ActionSheet({
   className,
   children,
 }: ActionSheetProps) {
-  // We can't intercept `setOpen` from Drawer's context directly, so the
-  // ActionSheet owns the open state and drives Drawer fully controlled —
-  // that way `ctx.setOpen` works in both controlled and uncontrolled modes.
+  // ActionSheet owns open state + drives Drawer fully controlled, so `ctx.setOpen`
+  // works in both controlled and uncontrolled modes (Drawer's context isn't interceptable).
   const [resolvedOpen, setOpen] = useControlled({
     controlled: open,
     default: defaultOpen ?? false,
@@ -90,12 +89,12 @@ export function ActionSheet({
 
 export interface ActionSheetActionProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onSelect?: () => void;
-  destructive?: boolean;
+  isDestructive?: boolean;
 }
 
 export const ActionSheetAction = forwardRef<HTMLButtonElement, ActionSheetActionProps>(
   function ActionSheetAction(
-    { className, onSelect, destructive, onClick, children, type = 'button', ...rest },
+    { className, onSelect, isDestructive, onClick, children, type = 'button', ...rest },
     ref,
   ) {
     const ctx = useActionSheetContext();
@@ -111,7 +110,7 @@ export const ActionSheetAction = forwardRef<HTMLButtonElement, ActionSheetAction
         }}
         className={cn(
           'flex h-12 w-full items-center justify-center bg-card px-4 text-base font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
-          destructive ? 'text-destructive' : 'text-foreground',
+          isDestructive ? 'text-destructive' : 'text-foreground',
           className,
         )}
         {...rest}

@@ -23,16 +23,16 @@ interface EditableContextValue {
   value: string;
   draft: string;
   setDraft: (v: string) => void;
-  editing: boolean;
+  isEditing: boolean;
   setEditing: (open: boolean) => void;
   submit: () => void;
   cancel: () => void;
   placeholder: string;
-  disabled: boolean;
-  readOnly: boolean;
-  submitOnBlur: boolean;
-  submitOnEnter: boolean;
-  cancelOnEscape: boolean;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  canSubmitOnBlur: boolean;
+  canSubmitOnEnter: boolean;
+  canCancelOnEscape: boolean;
   inputRef: React.MutableRefObject<HTMLInputElement | null>;
 }
 
@@ -48,15 +48,15 @@ export interface EditableProps {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  editing?: boolean;
+  isEditing?: boolean;
   defaultEditing?: boolean;
   onEditingChange?: (editing: boolean) => void;
   placeholder?: string;
-  submitOnBlur?: boolean;
-  submitOnEnter?: boolean;
-  cancelOnEscape?: boolean;
-  disabled?: boolean;
-  readOnly?: boolean;
+  canSubmitOnBlur?: boolean;
+  canSubmitOnEnter?: boolean;
+  canCancelOnEscape?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
   name?: string;
   className?: string;
   children: ReactNode;
@@ -66,15 +66,15 @@ export function Editable({
   value: valueProp,
   defaultValue,
   onValueChange,
-  editing: editingProp,
+  isEditing: editingProp,
   defaultEditing = false,
   onEditingChange,
   placeholder = 'Click to edit',
-  submitOnBlur = true,
-  submitOnEnter = true,
-  cancelOnEscape = true,
-  disabled = false,
-  readOnly = false,
+  canSubmitOnBlur = true,
+  canSubmitOnEnter = true,
+  canCancelOnEscape = true,
+  isDisabled = false,
+  isReadOnly = false,
   name,
   className,
   children,
@@ -112,16 +112,16 @@ export function Editable({
       value,
       draft,
       setDraft,
-      editing,
+      isEditing: editing,
       setEditing,
       submit,
       cancel,
       placeholder,
-      disabled,
-      readOnly,
-      submitOnBlur,
-      submitOnEnter,
-      cancelOnEscape,
+      isDisabled,
+      isReadOnly,
+      canSubmitOnBlur,
+      canSubmitOnEnter,
+      canCancelOnEscape,
       inputRef,
     }),
     [
@@ -132,11 +132,11 @@ export function Editable({
       submit,
       cancel,
       placeholder,
-      disabled,
-      readOnly,
-      submitOnBlur,
-      submitOnEnter,
-      cancelOnEscape,
+      isDisabled,
+      isReadOnly,
+      canSubmitOnBlur,
+      canSubmitOnEnter,
+      canCancelOnEscape,
     ],
   );
 
@@ -155,9 +155,9 @@ export type EditablePreviewProps = HTMLAttributes<HTMLSpanElement>;
 export const EditablePreview = forwardRef<HTMLSpanElement, EditablePreviewProps>(
   function EditablePreview({ className, onClick, onKeyDown, ...rest }, forwardedRef) {
     const ctx = useEditableContext();
-    if (ctx.editing) return null;
+    if (ctx.isEditing) return null;
     const isEmpty = !ctx.value;
-    const interactive = !ctx.disabled && !ctx.readOnly;
+    const interactive = !ctx.isDisabled && !ctx.isReadOnly;
     return (
       <span
         ref={forwardedRef}
@@ -203,22 +203,22 @@ export const EditableInput = forwardRef<HTMLInputElement, EditableInputProps>(
     const ctx = useEditableContext();
 
     useEffect(() => {
-      if (ctx.editing && ctx.inputRef.current) {
+      if (ctx.isEditing && ctx.inputRef.current) {
         ctx.inputRef.current.focus();
         const len = ctx.inputRef.current.value.length;
         ctx.inputRef.current.setSelectionRange(len, len);
       }
-    }, [ctx.editing, ctx.inputRef]);
+    }, [ctx.isEditing, ctx.inputRef]);
 
-    if (!ctx.editing) return null;
+    if (!ctx.isEditing) return null;
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       onKeyDown?.(e);
       if (e.defaultPrevented) return;
-      if (ctx.submitOnEnter && e.key === 'Enter') {
+      if (ctx.canSubmitOnEnter && e.key === 'Enter') {
         e.preventDefault();
         ctx.submit();
-      } else if (ctx.cancelOnEscape && e.key === 'Escape') {
+      } else if (ctx.canCancelOnEscape && e.key === 'Escape') {
         e.preventDefault();
         ctx.cancel();
       }
@@ -229,14 +229,14 @@ export const EditableInput = forwardRef<HTMLInputElement, EditableInputProps>(
         ref={composeRefs(forwardedRef, ctx.inputRef)}
         type="text"
         value={ctx.draft}
-        disabled={ctx.disabled}
-        readOnly={ctx.readOnly}
+        disabled={ctx.isDisabled}
+        readOnly={ctx.isReadOnly}
         onChange={(e) => ctx.setDraft(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={(e) => {
           onBlur?.(e);
           if (e.defaultPrevented) return;
-          if (ctx.submitOnBlur) ctx.submit();
+          if (ctx.canSubmitOnBlur) ctx.submit();
         }}
         className={cn(inputBaseVariants({ size, state }), className)}
         {...rest}
@@ -250,7 +250,7 @@ export type EditableButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 export const EditableSubmit = forwardRef<HTMLButtonElement, EditableButtonProps>(
   function EditableSubmit({ className, onClick, children, type = 'button', ...rest }, forwardedRef) {
     const ctx = useEditableContext();
-    if (!ctx.editing) return null;
+    if (!ctx.isEditing) return null;
     return (
       <button
         ref={forwardedRef}
@@ -278,7 +278,7 @@ export const EditableSubmit = forwardRef<HTMLButtonElement, EditableButtonProps>
 export const EditableCancel = forwardRef<HTMLButtonElement, EditableButtonProps>(
   function EditableCancel({ className, onClick, children, type = 'button', ...rest }, forwardedRef) {
     const ctx = useEditableContext();
-    if (!ctx.editing) return null;
+    if (!ctx.isEditing) return null;
     return (
       <button
         ref={forwardedRef}

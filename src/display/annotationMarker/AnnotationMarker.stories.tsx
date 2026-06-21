@@ -22,14 +22,14 @@ export const InlineIssue: Story = {
 };
 
 export const Resolved: Story = {
-  args: { children: 'this part', index: 4, tone: 'comment', resolved: true },
+  args: { children: 'this part', index: 4, tone: 'comment', isResolved: true },
 };
 
 export const Active: Story = {
-  args: { children: 'focus here', index: 5, tone: 'note', active: true },
+  args: { children: 'focus here', index: 5, tone: 'note', isActive: true },
 };
 
-export const PinOnly: Story = { args: { index: 7, tone: 'comment', pinOnly: true } };
+export const PinOnly: Story = { args: { index: 7, tone: 'comment', isPinOnly: true } };
 
 export const InProse: Story = {
   render: () => (
@@ -43,7 +43,7 @@ export const InProse: Story = {
         Consider adding a Q3 footnote
       </AnnotationMarker>{' '}
       so the chart matches the report.{' '}
-      <AnnotationMarker index={3} tone="issue" resolved>
+      <AnnotationMarker index={3} tone="issue" isResolved>
         This number was wrong
       </AnnotationMarker>{' '}
       — fixed in the v2 sheet.

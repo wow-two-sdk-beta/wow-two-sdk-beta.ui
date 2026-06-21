@@ -24,11 +24,11 @@ export const Default: Story = {
             Delete item
           </button>
           <UndoBar
-            open={open}
+            isOpen={open}
             onOpenChange={setOpen}
             message="Item deleted"
             onUndo={() => alert('Restored!')}
-            showCountdown
+            hasCountdown
           />
         </div>
       );
@@ -51,7 +51,7 @@ export const Sticky: Story = {
             Show sticky bar
           </button>
           <UndoBar
-            open={open}
+            isOpen={open}
             onOpenChange={setOpen}
             message="Permanent action — must explicitly undo"
             onUndo={() => alert('Undone')}

@@ -30,7 +30,7 @@
 | `defaultVolume` | `number` (0..1) | `1` | |
 | `defaultPlaybackRate` | `number` | `1` | |
 | `onPlay` / `onPause` / `onTimeUpdate` / `onEnded` | callbacks | — | Forwarded |
-| `compact` | `boolean` | `false` | Smaller height variant |
+| `isCompact` | `boolean` | `false` | Smaller height variant |
 
 ## Accessibility
 - `<audio>` retains semantics; we add play button with `aria-label="Play"` / "Pause".

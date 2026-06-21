@@ -30,7 +30,7 @@ export interface FileUploadProps
   /** Cap total accepted files (multiple mode). Excess go to `rejected`. */
   maxFiles?: number;
   onFilesChange?: (accepted: File[], rejected: FileRejection[]) => void;
-  invalid?: boolean;
+  isInvalid?: boolean;
   label?: ReactNode;
   hint?: ReactNode;
   children?: ReactNode;
@@ -63,7 +63,7 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
     maxFiles,
     onFilesChange,
     disabled,
-    invalid,
+    isInvalid,
     label = 'Drop files here, or click to browse',
     hint,
     children,
@@ -171,7 +171,7 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
     }
   };
 
-  const showError = invalid || dragState === 'reject';
+  const showError = isInvalid || dragState === 'reject';
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>

@@ -29,7 +29,7 @@ Top-level page frame: Header / Sidebar / Main / Aside / Footer slots arranged in
 | `asideWidth` | `string` | `'280px'` | |
 | `sidebarBreakpoint` | `'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'lg'` | Collapse below this |
 | `asideBreakpoint` | `'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'xl'` | Hide below this |
-| `sidebarOpen` / `defaultSidebarOpen` / `onSidebarOpenChange` | controlled | uncontrolled (drawer mode) | Mobile sidebar state |
+| `isSidebarOpen` / `defaultSidebarOpen` / `onSidebarOpenChange` | controlled | uncontrolled (drawer mode) | Mobile sidebar state |
 
 ## Composition
 Compound — slots auto-positioned by their child key (Header → top, Sidebar → left, Main → main, Aside → right, Footer → bottom).

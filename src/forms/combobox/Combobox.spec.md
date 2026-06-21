@@ -36,7 +36,7 @@ Input: same as `forms/inputBase`. Items: same as `Listbox.Item`.
 | `inputValue` | `string` | — | no | Controlled input text. |
 | `defaultInputValue` | `string` | `''` | no | Uncontrolled initial input. |
 | `onInputChange` | `(v) => void` | — | no | Fires on every input keystroke. |
-| `disabled`, `name`, `invalid` | — | — | no | Same shape as `Select`. |
+| `isDisabled`, `name`, `isInvalid` | — | — | no | Same shape as `Select`. |
 
 ## Composition
 Combobox manages its own item registry + active-descendant (does NOT use `Listbox` internally — different focus model). Reuses `listboxVariants` for visual parity.

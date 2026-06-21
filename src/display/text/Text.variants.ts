@@ -32,10 +32,10 @@ export const textVariants = tv({
       right: 'text-right',
       justify: 'text-justify',
     },
-    truncate: {
+    isTruncated: {
       true: 'truncate',
     },
-    tabular: {
+    isTabular: {
       true: 'tabular-nums',
     },
   },

@@ -40,7 +40,7 @@ export interface CheckboxProps
   size?: SizeUnion<CheckboxSizePreset>;
 
   /* Tristate visual — input stays `checked={false}` but renders as a dash with the same checked-state styling. */
-  indeterminate?: boolean;
+  isIndeterminate?: boolean;
 
   /* Per-instance color override (string seed or slot object). Overrides the active `tone`'s theme tokens locally. */
   color?: ColorProp;
@@ -102,7 +102,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     {
       className,
       size = 'md',
-      indeterminate,
+      isIndeterminate,
       variant = 'solid',
       tone = 'primary',
       color,
@@ -120,8 +120,8 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     /* Sync the native indeterminate property — it has no attribute, so it's only reachable imperatively. */
     const inputRef = useRef<HTMLInputElement | null>(null);
     useEffect(() => {
-      if (inputRef.current) inputRef.current.indeterminate = Boolean(indeterminate);
-    }, [indeterminate]);
+      if (inputRef.current) inputRef.current.indeterminate = Boolean(isIndeterminate);
+    }, [isIndeterminate]);
 
     /* Parse union-typed `size` — preset routes to box+icon class lookup, raw/object routes to inline dims. */
     const { preset: sizePreset, box: sizeBox } = CssExtensions.parseSizeUnion<CheckboxSizePreset>(
@@ -148,7 +148,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           disabled={isDisabled}
           required={required ?? ctx?.isRequired}
           checked={checked}
-          aria-checked={indeterminate ? 'mixed' : undefined}
+          aria-checked={isIndeterminate ? 'mixed' : undefined}
           aria-invalid={ctx?.isInvalid || undefined}
           aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
           className="peer absolute inset-0 m-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
@@ -158,13 +158,13 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           aria-hidden="true"
           className={cn(
             checkboxVariants({ variant, tone }),
-            indeterminate
+            isIndeterminate
               ? INDETERMINATE_CHECKED_CLASS[variant][tone]
               /* Opacity gate lives on this span (a peer sibling of the input) — child-selector targets the SVG. peer-checked: cannot reach descendants directly. */
               : '[&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100',
           )}
         >
-          {indeterminate ? (
+          {isIndeterminate ? (
             <Minus className={iconClass} />
           ) : (
             <Check className={iconClass} />

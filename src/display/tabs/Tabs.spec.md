@@ -32,7 +32,7 @@ Switch between content panels via a row of tabs. Each tab is associated with a p
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | no | Layout + arrow-key axis. |
 | `activationMode` | `'automatic' \| 'manual'` | `'automatic'` | no | Whether arrow-key focus auto-activates. |
 
-`Tabs.Tab`: `value` (req), `disabled?`. `Tabs.Panel`: `value` (req).
+`Tabs.Tab`: `value` (req), `isDisabled?`. `Tabs.Panel`: `value` (req).
 
 ## Composition
 Compound with shared root context.

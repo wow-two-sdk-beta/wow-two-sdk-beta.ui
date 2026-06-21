@@ -100,8 +100,7 @@ export function CommandPalette({
   const itemsRef = useRef<CommandItemEntry[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
-  // Items register via effects after render — bump a version so renders/effects
-  // that read the mutable registry recompute once items exist (fresh-open flow).
+  // Items register via effects post-render; bump a version so registry readers recompute once items exist (fresh-open flow).
   const [registryVersion, setRegistryVersion] = useState(0);
   const inputId = useId();
   const listboxId = useId();
@@ -368,7 +367,7 @@ export interface CommandPaletteItemProps extends HTMLAttributes<HTMLDivElement> 
   value: string;
   /** Text used by the filter; defaults to `value`. Pass when children include icons. */
   searchText?: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
   onSelect?: () => void;
   closeOnSelect?: boolean;
   children: ReactNode;
@@ -379,7 +378,7 @@ export const CommandPaletteItem = forwardRef<HTMLDivElement, CommandPaletteItemP
     {
       value,
       searchText,
-      disabled = false,
+      isDisabled = false,
       onSelect,
       closeOnSelect = true,
       className,
@@ -398,27 +397,26 @@ export const CommandPaletteItem = forwardRef<HTMLDivElement, CommandPaletteItemP
       searchText ??
       (typeof children === 'string' ? children : Array.isArray(children) ? children.filter((c) => typeof c === 'string').join(' ') : value);
 
-    // Depend on the stable callbacks, not `ctx` — registering bumps the registry
-    // version (new ctx identity), which would otherwise re-run this effect forever.
+    // Depend on stable callbacks, not `ctx`: registering bumps registryVersion (new ctx identity), which would re-run this effect forever.
     const { registerItem, unregisterItem } = ctx;
     useEffect(() => {
       registerItem({
         id,
         value,
         searchText: resolvedSearch,
-        disabled,
+        disabled: isDisabled,
         onSelect: () => onSelect?.(),
         closeOnSelect,
       });
       return () => unregisterItem(id);
-    }, [registerItem, unregisterItem, id, value, resolvedSearch, disabled, onSelect, closeOnSelect]);
+    }, [registerItem, unregisterItem, id, value, resolvedSearch, isDisabled, onSelect, closeOnSelect]);
 
     // Hide if filtered out.
     const matches = ctx.inputValue === '' || ctx.filter(resolvedSearch, ctx.inputValue);
     if (!matches) return null;
 
     const isActive = ctx.activeId === id;
-    const state = disabled ? 'disabled' : isActive ? 'active' : 'default';
+    const state = isDisabled ? 'disabled' : isActive ? 'active' : 'default';
 
     return (
       <div
@@ -426,17 +424,17 @@ export const CommandPaletteItem = forwardRef<HTMLDivElement, CommandPaletteItemP
         id={id}
         role="option"
         aria-selected={isActive}
-        aria-disabled={disabled || undefined}
+        aria-disabled={isDisabled || undefined}
         data-active={isActive ? '' : undefined}
         onClick={(e) => {
           onClick?.(e);
-          if (e.defaultPrevented || disabled) return;
+          if (e.defaultPrevented || isDisabled) return;
           onSelect?.();
           if (closeOnSelect) ctx.setOpen(false);
         }}
         onPointerEnter={(e) => {
           onPointerEnter?.(e);
-          if (!disabled) ctx.setActiveId(id);
+          if (!isDisabled) ctx.setActiveId(id);
         }}
         className={cn(listboxItemVariants({ state }), className)}
         {...rest}

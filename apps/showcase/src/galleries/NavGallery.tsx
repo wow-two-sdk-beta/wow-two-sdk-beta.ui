@@ -452,7 +452,7 @@ export default function NavGallery() {
                   >
                     Toggle theme
                   </CommandPaletteItem>
-                  <CommandPaletteItem value="billing" disabled>
+                  <CommandPaletteItem value="billing" isDisabled>
                     Billing (disabled)
                   </CommandPaletteItem>
                 </CommandPaletteGroup>

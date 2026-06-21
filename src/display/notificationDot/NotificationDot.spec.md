@@ -8,7 +8,7 @@ Tiny colored dot for unread/notification indicators. Optionally positioned absol
 |---|---|---|
 | `tone` | `'destructive' \| 'success' \| 'warning' \| 'info' \| 'primary' \| 'neutral'` | `'destructive'` |
 | `size` | `'xs' \| 'sm' \| 'md'` | `'sm'` |
-| `pulse` | `boolean` | `false` |
+| `hasPulse` | `boolean` | `false` |
 | `position` | `'top-right' \| 'top-left' \| 'bottom-right' \| 'bottom-left'` | none (inline) |
 
 ## Dependencies

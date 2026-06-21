@@ -332,7 +332,7 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>(
 ResizablePanel.displayName = 'ResizablePanel';
 
 export interface ResizableSeparatorProps extends HTMLAttributes<HTMLDivElement> {
-  disabled?: boolean;
+  isDisabled?: boolean;
 }
 
 interface ResizableSeparatorInnerProps extends ResizableSeparatorProps {
@@ -341,7 +341,7 @@ interface ResizableSeparatorInnerProps extends ResizableSeparatorProps {
 
 function ResizableSeparatorInner({
   index,
-  disabled,
+  isDisabled,
   className,
   onKeyDown,
   onDoubleClick,
@@ -351,7 +351,7 @@ function ResizableSeparatorInner({
   const [dragging, setDragging] = useState(false);
 
   const handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     if (e.button !== 0) return;
     e.preventDefault();
     setDragging(true);
@@ -365,7 +365,7 @@ function ResizableSeparatorInner({
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(e);
-    if (e.defaultPrevented || disabled) return;
+    if (e.defaultPrevented || isDisabled) return;
     const step = e.shiftKey ? 10 : 1;
     if (ctx.orientation === 'horizontal') {
       if (e.key === 'ArrowLeft') {
@@ -386,8 +386,7 @@ function ResizableSeparatorInner({
     }
   };
 
-  // Announce the panel BEFORE the separator — ArrowRight/ArrowDown grow that one,
-  // so its size moves in the same direction as the key.
+  // Announce the panel BEFORE the separator — ArrowRight/ArrowDown grow it, so size moves with the key.
   const ariaValueNow = ctx.sizes[index] ?? 50;
   const panelBefore = ctx.panels.current[index];
 
@@ -398,14 +397,14 @@ function ResizableSeparatorInner({
       aria-valuenow={Math.round(ariaValueNow)}
       aria-valuemin={panelBefore?.minSize ?? 0}
       aria-valuemax={panelBefore?.maxSize ?? 100}
-      aria-disabled={disabled || undefined}
-      tabIndex={disabled ? -1 : 0}
+      aria-disabled={isDisabled || undefined}
+      tabIndex={isDisabled ? -1 : 0}
       data-dragging={dragging || undefined}
       onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       onDoubleClick={(e) => {
         onDoubleClick?.(e);
-        if (e.defaultPrevented || disabled) return;
+        if (e.defaultPrevented || isDisabled) return;
         ctx.resetPair(index);
       }}
       className={cn(
@@ -414,7 +413,7 @@ function ResizableSeparatorInner({
           ? 'w-1 cursor-col-resize hover:bg-border-strong data-[dragging]:bg-primary'
           : 'h-1 cursor-row-resize hover:bg-border-strong data-[dragging]:bg-primary',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        disabled && 'cursor-default opacity-50 hover:bg-border',
+        isDisabled && 'cursor-default opacity-50 hover:bg-border',
         className,
       )}
       {...rest}

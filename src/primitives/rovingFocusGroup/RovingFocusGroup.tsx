@@ -38,7 +38,7 @@ const RovingFocusContext = createContext<RovingFocusContextValue | null>(null);
 
 export interface RovingFocusGroupProps extends HTMLAttributes<HTMLDivElement> {
   orientation?: Orientation;
-  loop?: boolean;
+  canLoop?: boolean;
   children: ReactNode;
 }
 
@@ -49,7 +49,7 @@ export interface RovingFocusGroupProps extends HTMLAttributes<HTMLDivElement> {
  */
 export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps>(
   function RovingFocusGroup(
-    { orientation = 'horizontal', loop = true, children, ...props },
+    { orientation = 'horizontal', canLoop = true, children, ...props },
     ref,
   ) {
     const items = useRef<ItemEntry[]>([]);
@@ -115,10 +115,10 @@ export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps
         let next = idx;
         if ((event.key === nextHorizKey && isHoriz) || (event.key === 'ArrowDown' && isVert)) {
           next = idx + 1;
-          if (next >= list.length) next = loop ? 0 : list.length - 1;
+          if (next >= list.length) next = canLoop ? 0 : list.length - 1;
         } else if ((event.key === prevHorizKey && isHoriz) || (event.key === 'ArrowUp' && isVert)) {
           next = idx - 1;
-          if (next < 0) next = loop ? list.length - 1 : 0;
+          if (next < 0) next = canLoop ? list.length - 1 : 0;
         } else if (event.key === 'Home') {
           next = 0;
         } else if (event.key === 'End') {
@@ -131,7 +131,7 @@ export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps
         const entry = list[next];
         if (entry) setFocusedId(entry.id);
       },
-      [orientation, loop, direction],
+      [orientation, canLoop, direction],
     );
 
     const value = useMemo(
@@ -158,11 +158,8 @@ export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps
 );
 
 export interface UseRovingFocusItemOptions {
-  /**
-   * Marks this item as the preferred tab stop while focus is outside the
-   * group (e.g. the selected tab), per the APG composite-widget pattern.
-   */
-  active?: boolean;
+  /** Preferred tab stop while focus is outside the group (e.g. the selected tab) — APG composite-widget pattern. */
+  isActive?: boolean;
 }
 
 export interface UseRovingFocusItemReturn {
@@ -180,7 +177,7 @@ export interface UseRovingFocusItemReturn {
 export function useRovingFocusItem(
   options: UseRovingFocusItemOptions = {},
 ): UseRovingFocusItemReturn {
-  const { active = false } = options;
+  const { isActive = false } = options;
   const context = useContext(RovingFocusContext);
   const id = useId();
   const ref = useRef<HTMLElement | null>(null);
@@ -211,7 +208,7 @@ export function useRovingFocusItem(
   const setFocusedId = context?.setFocusedId;
   const groupRef = context?.groupRef;
   useEffect(() => {
-    if (!active || !setFocusedId || !groupRef) return;
+    if (!isActive || !setFocusedId || !groupRef) return;
     const groupNode = groupRef.current;
     if (!groupNode || !groupNode.contains(document.activeElement)) setFocusedId(id);
     const onFocusOut = (event: FocusEvent) => {
@@ -220,7 +217,7 @@ export function useRovingFocusItem(
     };
     groupNode?.addEventListener('focusout', onFocusOut);
     return () => groupNode?.removeEventListener('focusout', onFocusOut);
-  }, [active, setFocusedId, groupRef, id]);
+  }, [isActive, setFocusedId, groupRef, id]);
 
   return {
     ref: (node) => {

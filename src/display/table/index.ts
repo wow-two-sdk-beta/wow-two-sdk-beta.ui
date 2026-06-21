@@ -8,7 +8,10 @@ export {
   TableCell,
   TableCaption,
   type TableProps,
+  type TableHeadProps,
   type TableHeaderCellProps,
   type TableCellProps,
   type TableDensity,
+  type TableRadius,
+  type TableHeadVariant,
 } from './Table';

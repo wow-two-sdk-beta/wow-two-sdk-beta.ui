@@ -33,8 +33,8 @@ export interface KnobProps extends Omit<HTMLAttributes<HTMLDivElement>, 'default
   arcDegrees?: number;
   tone?: KnobTone;
   format?: (value: number) => ReactNode;
-  showValue?: boolean;
-  disabled?: boolean;
+  isValueShown?: boolean;
+  isDisabled?: boolean;
   name?: string;
   'aria-label'?: string;
 }
@@ -60,8 +60,8 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
     arcDegrees = 270,
     tone = 'brand',
     format = (v) => v.toFixed(2),
-    showValue = true,
-    disabled,
+    isValueShown = true,
+    isDisabled,
     name,
     className,
     'aria-label': ariaLabel = 'Knob',
@@ -89,13 +89,13 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
   );
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (disabled || e.button !== 0) return;
+    if (isDisabled || e.button !== 0) return;
     dragStateRef.current = { startY: e.clientY, startValue: value };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (disabled || !dragStateRef.current) return;
+    if (isDisabled || !dragStateRef.current) return;
     const dy = dragStateRef.current.startY - e.clientY; // up = increase
     const range = max - min;
     const sensitivity = range / 200; // 200px drag = full range
@@ -113,17 +113,17 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
     const el = containerRef.current;
     if (!el) return;
     const handleWheel = (e: WheelEvent) => {
-      if (disabled) return;
+      if (isDisabled) return;
       e.preventDefault();
       const delta = e.deltaY < 0 ? step : -step;
       setClamped(value + delta);
     };
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, [disabled, step, value, setClamped]);
+  }, [isDisabled, step, value, setClamped]);
 
   const handleKey = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     const s = e.shiftKey ? largeStep : step;
     switch (e.key) {
       case 'ArrowUp':
@@ -179,8 +179,8 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
       aria-valuemin={min}
       aria-valuemax={max}
       aria-orientation="vertical"
-      aria-disabled={disabled || undefined}
-      tabIndex={disabled ? -1 : 0}
+      aria-disabled={isDisabled || undefined}
+      tabIndex={isDisabled ? -1 : 0}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -190,7 +190,7 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
       className={cn(
         'relative inline-flex select-none items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         TONE_CLASS[tone],
-        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-grab active:cursor-grabbing',
+        isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-grab active:cursor-grabbing',
         className,
       )}
       {...rest}
@@ -221,7 +221,7 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
           strokeLinecap="round"
         />
       </svg>
-      {showValue && (
+      {isValueShown && (
         <span
           aria-hidden="true"
           className="absolute inset-0 grid place-items-center text-[10px] font-medium tabular-nums text-foreground"

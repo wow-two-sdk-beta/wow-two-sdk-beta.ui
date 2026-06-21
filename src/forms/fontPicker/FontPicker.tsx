@@ -34,7 +34,7 @@ export interface FontPickerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'd
   fonts?: FontOption[];
   placeholder?: string;
   previewText?: string;
-  disabled?: boolean;
+  isDisabled?: boolean;
   name?: string;
 }
 
@@ -51,7 +51,7 @@ export const FontPicker = forwardRef<HTMLDivElement, FontPickerProps>(
       fonts = BUILT_IN_FONTS,
       placeholder = 'Select font…',
       previewText = 'The quick brown fox',
-      disabled,
+      isDisabled,
       name,
       className,
       ...rest
@@ -80,7 +80,7 @@ export const FontPicker = forwardRef<HTMLDivElement, FontPickerProps>(
           <PopoverTrigger asChild>
             <button
               type="button"
-              disabled={disabled}
+              disabled={isDisabled}
               aria-haspopup="listbox"
               aria-expanded={open}
               className={cn(
@@ -93,7 +93,7 @@ export const FontPicker = forwardRef<HTMLDivElement, FontPickerProps>(
               <Icon icon={ChevronDown} size={14} className="text-muted-foreground" />
             </button>
           </PopoverTrigger>
-          <PopoverContent bare className="w-[20rem] p-2">
+          <PopoverContent isBare className="w-[20rem] p-2">
             <input
               type="search"
               autoFocus

@@ -8,7 +8,7 @@ Numeric badge — inbox/notification counts. Caps at `max` (default 99) and rend
 |---|---|---|
 | `value` | `number` | — (required) |
 | `max` | `number` | `99` |
-| `hideZero` | `boolean` | `true` |
+| `canHideZero` | `boolean` | `true` |
 | `variant` | Badge variant | `'danger'` |
 
 ## Dependencies

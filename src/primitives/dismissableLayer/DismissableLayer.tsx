@@ -20,9 +20,9 @@ export interface DismissableLayerProps extends HTMLAttributes<HTMLDivElement> {
   /** Called when a pointerdown lands outside this layer's DOM and this is topmost. */
   onOutsidePointerDown?: (event: PointerEvent) => void;
   /** Disable the Escape listener for this layer. */
-  disableEscape?: boolean;
+  isEscapeDisabled?: boolean;
   /** Disable the outside-pointer-down listener for this layer. */
-  disableOutsideClick?: boolean;
+  isOutsideClickDisabled?: boolean;
 }
 
 /**
@@ -32,14 +32,13 @@ export interface DismissableLayerProps extends HTMLAttributes<HTMLDivElement> {
  */
 export const DismissableLayer = forwardRef<HTMLDivElement, DismissableLayerProps>(
   (
-    { onEscape, onOutsidePointerDown, disableEscape, disableOutsideClick, ...props },
+    { onEscape, onOutsidePointerDown, isEscapeDisabled, isOutsideClickDisabled, ...props },
     forwardedRef,
   ) => {
     const ref = useRef<HTMLDivElement | null>(null);
 
-    // Keep callbacks in refs so the registration effect runs exactly once on
-    // mount — re-registering on callback identity changes would splice the
-    // layer to the end of the stack and corrupt dismissal ordering.
+    // Keep callbacks in refs so registration runs once on mount; re-registering
+    // on identity change would reorder the stack and corrupt dismissal ordering.
     const onEscapeRef = useRef(onEscape);
     const onOutsidePointerDownRef = useRef(onOutsidePointerDown);
     useEffect(() => {
@@ -63,7 +62,7 @@ export const DismissableLayer = forwardRef<HTMLDivElement, DismissableLayerProps
     }, []);
 
     useEffect(() => {
-      if (disableEscape) return;
+      if (isEscapeDisabled) return;
       const onKeyDown = (e: KeyboardEvent) => {
         if (e.key !== 'Escape') return;
         const top = layerStack[layerStack.length - 1];
@@ -71,10 +70,10 @@ export const DismissableLayer = forwardRef<HTMLDivElement, DismissableLayerProps
       };
       document.addEventListener('keydown', onKeyDown);
       return () => document.removeEventListener('keydown', onKeyDown);
-    }, [disableEscape]);
+    }, [isEscapeDisabled]);
 
     useEffect(() => {
-      if (disableOutsideClick) return;
+      if (isOutsideClickDisabled) return;
       const onPointer = (e: PointerEvent) => {
         const top = layerStack[layerStack.length - 1];
         if (!top || top.node !== ref.current) return;
@@ -84,7 +83,7 @@ export const DismissableLayer = forwardRef<HTMLDivElement, DismissableLayerProps
       };
       document.addEventListener('pointerdown', onPointer, true);
       return () => document.removeEventListener('pointerdown', onPointer, true);
-    }, [disableOutsideClick]);
+    }, [isOutsideClickDisabled]);
 
     const composedRef = useComposedRefs(forwardedRef, ref);
     return <div ref={composedRef} {...props} />;

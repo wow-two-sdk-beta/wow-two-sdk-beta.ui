@@ -2,7 +2,7 @@ import { type ReactNode } from 'react';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
 export interface ScrollLockProviderProps {
-  enabled?: boolean;
+  isEnabled?: boolean;
   children: ReactNode;
 }
 
@@ -11,7 +11,7 @@ export interface ScrollLockProviderProps {
  * follow a child's mount lifecycle (e.g. inside a Modal's portal).
  * Multiple wrappers stack; lock releases when the count reaches zero.
  */
-export function ScrollLockProvider({ enabled = true, children }: ScrollLockProviderProps) {
-  useScrollLock(enabled);
+export function ScrollLockProvider({ isEnabled = true, children }: ScrollLockProviderProps) {
+  useScrollLock(isEnabled);
   return <>{children}</>;
 }

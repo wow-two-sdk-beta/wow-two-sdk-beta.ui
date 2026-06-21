@@ -3,9 +3,8 @@ import { cn } from '../../utils';
 
 export interface SeparatorProps extends ComponentPropsWithoutRef<'div'> {
   orientation?: 'horizontal' | 'vertical';
-  /** When `true`, the separator is purely decorative — `role="none"` and
-   *  unannounced. Default `true`. Set `false` when meaningful in context. */
-  decorative?: boolean;
+  /** Purely decorative — `role="none"`, unannounced. Default `true`; set `false` when meaningful in context. */
+  isDecorative?: boolean;
 }
 
 /**
@@ -13,11 +12,11 @@ export interface SeparatorProps extends ComponentPropsWithoutRef<'div'> {
  * for column dividers (use inside a flex/grid with explicit height).
  */
 export const Separator = forwardRef<HTMLDivElement, SeparatorProps>(
-  ({ orientation = 'horizontal', decorative = true, className, ...props }, ref) => (
+  ({ orientation = 'horizontal', isDecorative = true, className, ...props }, ref) => (
     <div
       ref={ref}
-      role={decorative ? 'none' : 'separator'}
-      aria-orientation={decorative ? undefined : orientation}
+      role={isDecorative ? 'none' : 'separator'}
+      aria-orientation={isDecorative ? undefined : orientation}
       className={cn(
         'bg-border',
         orientation === 'horizontal' ? 'h-px w-full' : 'w-px self-stretch',

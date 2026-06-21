@@ -9,7 +9,7 @@ export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps
   ({ className, ...props }, ref) => (
     <ToggleButtonGroup
       ref={ref}
-      attached
+      isAttached
       className={cn(
         'rounded-md bg-muted p-1',
         '[&>*]:!rounded-md [&>*]:!ml-0 [&>*]:!border-transparent [&>*]:!bg-transparent',

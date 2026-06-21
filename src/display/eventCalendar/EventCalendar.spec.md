@@ -25,7 +25,7 @@ Full event-display calendar with month / week / day / agenda views. Events are r
 ## Props
 | Name | Type | Default | Why |
 |---|---|---|---|
-| `events` | `Array<{ id; start; end; title?; color?; allDay?: boolean }>` | required | |
+| `events` | `Array<{ id; start; end; title?; color?; isAllDay?: boolean }>` | required | |
 | `view` / `defaultView` / `onViewChange` | `'month' \| 'week' \| 'day' \| 'agenda'` | `'month'` | |
 | `date` / `defaultDate` / `onDateChange` | `Date` | today | Anchor |
 | `weekStart` | `0 \| 1` | `0` | |

@@ -41,10 +41,7 @@ export interface ContextMenuProps {
   children: ReactNode;
 }
 
-/**
- * Build a virtual element at coordinates — Floating UI accepts a
- * getBoundingClientRect-only object as a "reference".
- */
+/** Build a zero-size virtual element at coordinates to anchor Floating UI. */
 function makeVirtualAnchor(x: number, y: number): HTMLElement {
   const el = document.createElement('div');
   el.style.position = 'fixed';
@@ -95,13 +92,13 @@ export function ContextMenu({ children }: ContextMenuProps) {
 
 export interface ContextMenuTriggerProps extends HTMLAttributes<HTMLDivElement> {
   asChild?: boolean;
-  disabled?: boolean;
+  isDisabled?: boolean;
   children: ReactNode;
 }
 
 export const ContextMenuTrigger = forwardRef<HTMLDivElement, ContextMenuTriggerProps>(
   function ContextMenuTrigger(
-    { asChild, disabled, onContextMenu, onPointerDown, onPointerCancel, onPointerUp, children, ...rest },
+    { asChild, isDisabled, onContextMenu, onPointerDown, onPointerCancel, onPointerUp, children, ...rest },
     forwardedRef,
   ) {
     const ctx = useContextMenuContext();
@@ -111,12 +108,12 @@ export const ContextMenuTrigger = forwardRef<HTMLDivElement, ContextMenuTriggerP
     const handleContextMenu = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
         onContextMenu?.(e);
-        if (e.defaultPrevented || disabled) return;
+        if (e.defaultPrevented || isDisabled) return;
         e.preventDefault();
         ctx.setAnchor(makeVirtualAnchor(e.clientX, e.clientY));
         ctx.setOpen(true);
       },
-      [ctx, disabled, onContextMenu],
+      [ctx, isDisabled, onContextMenu],
     );
 
     const clearLongPress = useCallback(() => {
@@ -133,7 +130,7 @@ export const ContextMenuTrigger = forwardRef<HTMLDivElement, ContextMenuTriggerP
         onContextMenu={handleContextMenu}
         onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
           onPointerDown?.(e);
-          if (e.defaultPrevented || disabled || e.pointerType !== 'touch') return;
+          if (e.defaultPrevented || isDisabled || e.pointerType !== 'touch') return;
           const x = e.clientX;
           const y = e.clientY;
           longPressTimer.current = setTimeout(() => {

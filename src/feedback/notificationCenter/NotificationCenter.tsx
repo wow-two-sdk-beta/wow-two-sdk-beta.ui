@@ -32,7 +32,7 @@ export interface NotificationItemProps extends Omit<HTMLAttributes<HTMLDivElemen
   /** Timestamp / relative time label. */
   timestamp?: ReactNode;
   /** Marks this row as unread (bold + leading dot). */
-  unread?: boolean;
+  isUnread?: boolean;
   /** Trailing actions slot. */
   actions?: ReactNode;
   /** Fires when the row is clicked / activated. */
@@ -48,7 +48,7 @@ export const NotificationItem = forwardRef<HTMLDivElement, NotificationItemProps
       title,
       description,
       timestamp,
-      unread,
+      isUnread,
       actions,
       onSelect,
       onDismiss,
@@ -63,7 +63,7 @@ export const NotificationItem = forwardRef<HTMLDivElement, NotificationItemProps
         ref={ref}
         role={interactive ? 'button' : undefined}
         tabIndex={interactive ? 0 : undefined}
-        data-unread={unread ? '' : undefined}
+        data-unread={isUnread ? '' : undefined}
         onClick={onSelect}
         onKeyDown={
           interactive
@@ -80,12 +80,12 @@ export const NotificationItem = forwardRef<HTMLDivElement, NotificationItemProps
           'group/notif relative flex gap-3 rounded-md px-3 py-2.5 text-sm',
           interactive &&
             'cursor-pointer hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          unread && 'bg-primary-soft/30',
+          isUnread && 'bg-primary-soft/30',
           className,
         )}
         {...props}
       >
-        {unread && (
+        {isUnread && (
           <span
             aria-hidden="true"
             className="absolute left-1 top-3 inline-block h-2 w-2 rounded-full bg-primary"
@@ -97,7 +97,7 @@ export const NotificationItem = forwardRef<HTMLDivElement, NotificationItemProps
             <span
               className={cn(
                 'truncate text-foreground',
-                unread ? 'font-semibold' : 'font-medium',
+                isUnread ? 'font-semibold' : 'font-medium',
               )}
             >
               {title}

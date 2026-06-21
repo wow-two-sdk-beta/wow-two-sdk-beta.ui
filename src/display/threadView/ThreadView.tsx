@@ -21,8 +21,8 @@ export interface ThreadViewProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   composer?: ReactNode;
   /** Fires when the close button is clicked. */
   onClose?: () => void;
-  /** Hide the close button. */
-  hideCloseButton?: boolean;
+  /** Render the close button. Default true. */
+  hasCloseButton?: boolean;
 }
 
 /**
@@ -40,7 +40,7 @@ export const ThreadView = forwardRef<HTMLDivElement, ThreadViewProps>(
       children,
       composer,
       onClose,
-      hideCloseButton,
+      hasCloseButton = true,
       className,
       ...props
     },
@@ -66,7 +66,7 @@ export const ThreadView = forwardRef<HTMLDivElement, ThreadViewProps>(
             <div className="text-sm font-semibold text-foreground">{title}</div>
             {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
           </div>
-          {!hideCloseButton && onClose && (
+          {hasCloseButton && onClose && (
             <button
               type="button"
               onClick={onClose}

@@ -18,3 +18,13 @@ export const ThreeColumns: Story = {
     </Grid>
   ),
 };
+
+export const Responsive: Story = {
+  render: () => (
+    <Grid columns={{ base: '1', sm: '2', lg: '3' }} gap={{ base: '2', lg: '6' }}>
+      {Array.from({ length: 6 }, (_, i) => (
+        <div key={i} className="rounded-md bg-neutral-100 p-4 text-center">{i + 1}</div>
+      ))}
+    </Grid>
+  ),
+};
