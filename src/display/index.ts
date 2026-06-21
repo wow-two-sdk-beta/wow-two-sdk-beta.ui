@@ -64,3 +64,6 @@ export * from './messageList';
 export * from './threadView';
 export * from './commentThread';
 export * from './activityFeed';
+export * from './featureCard';
+export * from './stepCard';
+export * from './pricingCard';
