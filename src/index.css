@@ -58,6 +58,18 @@
   --color-info-700: #0e7490;
   --color-info-900: #164e63;
 
+  --color-accent-50: #f0fdfa;
+  --color-accent-100: #ccfbf1;
+  --color-accent-200: #99f6e4;
+  --color-accent-300: #5eead4;
+  --color-accent-400: #2dd4bf;
+  --color-accent-500: #14b8a6;
+  --color-accent-600: #0d9488;
+  --color-accent-700: #0f766e;
+  --color-accent-800: #115e59;
+  --color-accent-900: #134e4a;
+  --color-accent-950: #042f2e;
+
   /* ---------- semantic tokens (light mode defaults) ---------- */
 
   /* Surfaces */
@@ -105,6 +117,12 @@
   --color-info-foreground: #ffffff;
   --color-info-soft: #ecfeff;
   --color-info-soft-foreground: #0e7490;
+
+  /* Accent (secondary "pop" — teal). Emphasis distinct from primary: active/On, highlights, badges. */
+  --color-accent: #0d9488;
+  --color-accent-foreground: #ffffff;
+  --color-accent-soft: #ccfbf1;
+  --color-accent-soft-foreground: #115e59;
 
   /* Radii — preserve our pre-v4 scale (some values shift in v4 defaults) */
   --radius-md: 0.5rem;
@@ -181,12 +199,27 @@
   --color-info-foreground: #ffffff;
   --color-info-soft: #164e63;
   --color-info-soft-foreground: #cffafe;
+
+  --color-accent: #2dd4bf;
+  --color-accent-foreground: #042f2e;
+  --color-accent-soft: #134e4a;
+  --color-accent-soft-foreground: #5eead4;
 }
 
 /* Body defaults so consumers get sane page colors out of the box. */
 html, body {
   background-color: var(--color-background);
   color: var(--color-foreground);
+}
+
+/* Ambient surface treatments — opt-in via Card `ambient="sheen|glow"`. Layer a gradient over the
+ * surface's bg-color. `sheen` lifts the top edge (visible on dark, ~invisible on light); `glow` adds a
+ * primary-tinted corner wash for expressive / hero surfaces. */
+.surface-sheen {
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.05), transparent 55%);
+}
+.surface-glow {
+  background-image: radial-gradient(135% 135% at 100% 112%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 52%);
 }
 
 @keyframes indeterminate {

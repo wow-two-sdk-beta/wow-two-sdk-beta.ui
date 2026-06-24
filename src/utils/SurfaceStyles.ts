@@ -59,6 +59,13 @@ export const surfaceVariants = tv({
       4: 'shadow-xl',
       5: 'shadow-2xl',
     },
+
+    /* Optional ambient gradient overlay — layers over the variant's bg-color. Dark-leaning: `sheen` lifts the top edge (≈ invisible on light), `glow` adds a primary-tinted corner wash. */
+    ambient: {
+      none: '',
+      sheen: 'surface-sheen',
+      glow: 'surface-glow',
+    },
   },
 
   compoundVariants: [
@@ -144,3 +151,6 @@ export type SurfacePadding = NonNullable<SurfaceVariants['padding']>;
 
 /** Represents the shadow-depth override (0–5); omitted means the variant decides. */
 export type SurfaceElevation = NonNullable<SurfaceVariants['elevation']>;
+
+/** Represents the optional ambient gradient overlay (none · sheen · glow); omitted = none. */
+export type SurfaceAmbient = NonNullable<SurfaceVariants['ambient']>;

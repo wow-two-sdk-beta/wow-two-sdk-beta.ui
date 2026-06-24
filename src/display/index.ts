@@ -67,3 +67,4 @@ export * from './activityFeed';
 export * from './featureCard';
 export * from './stepCard';
 export * from './pricingCard';
+export * from './sortable';
