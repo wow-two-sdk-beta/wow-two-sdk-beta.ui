@@ -16,3 +16,4 @@ export * from './formControlContext';
 export * from './scrollLockProvider';
 export * from './overlayArrow';
 export * from './announce';
+export * from './colorModeProvider';
