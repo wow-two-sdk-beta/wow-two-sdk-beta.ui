@@ -13,7 +13,7 @@ export interface TextInputProps
  * actually needs).
  */
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
-  ({ className, size, state, id, disabled, required, readOnly, ...props }, ref) => {
+  ({ className, size, state, border, ring, id, disabled, required, readOnly, ...props }, ref) => {
     const ctx = useFormControl();
     const finalState = state ?? (ctx?.isInvalid ? 'invalid' : 'default');
     return (
@@ -26,7 +26,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         readOnly={readOnly ?? ctx?.isReadOnly}
         aria-invalid={ctx?.isInvalid || undefined}
         aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
-        className={cn(inputBaseVariants({ size, state: finalState }), className)}
+        className={cn(inputBaseVariants({ size, state: finalState, border, ring }), className)}
         {...props}
       />
     );

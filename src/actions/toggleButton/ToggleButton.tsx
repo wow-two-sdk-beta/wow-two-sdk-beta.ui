@@ -3,6 +3,7 @@ import { cn, type ColorProp } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Button, type ButtonProps } from '../button/Button';
 import { toggleButtonVariants, type ToggleButtonVariants } from './ToggleButton.variants';
+import { Tooltip } from '../../display/tooltip';
 
 const COMPONENT_NAME = 'ToggleButton';
 
@@ -36,6 +37,9 @@ export interface ToggleButtonProps
 
   /* Per-instance color override — applies to the active `tone`'s theme tokens. See `ColorProp`. */
   color?: ColorProp;
+
+  /* Optional rich tooltip (SDK `Tooltip`) shown on hover/focus — use for icon-only toggles. */
+  tooltip?: ReactNode;
 }
 
 /* Two-state action button (on/off) — sets `aria-pressed` + `data-pressed="true|false"`. Wraps Button to inherit size union, shape, asChild, loading, padding/radius. Press appearance lives in `toggleButtonVariants` (variant × tone matrix); ToggleButton's own appearance overrides Button's neutral-ghost baseline via class order. */
@@ -52,6 +56,7 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
       className,
       children,
       title,
+      tooltip,
       'aria-label': ariaLabel,
       ...buttonProps
     },
@@ -72,7 +77,7 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
     const resolvedAriaLabel =
       typeof ariaLabel === 'function' ? ariaLabel({ pressed: value }) : ariaLabel;
 
-    return (
+    const button = (
       <Button
         ref={ref}
         /* Ghost baseline — ToggleButton's compound classes paint over Button's defaults via class order. tone is forwarded so per-instance `color` overrides hit the right `--color-{tone}` slot. */
@@ -93,6 +98,8 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
         {renderedChildren}
       </Button>
     );
+
+    return tooltip ? <Tooltip content={tooltip}>{button}</Tooltip> : button;
   },
 );
 

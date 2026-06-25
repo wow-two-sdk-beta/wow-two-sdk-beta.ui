@@ -42,6 +42,8 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function
     hasAlpha = false,
     size,
     state,
+    border,
+    ring,
     className,
     id,
     disabled,
@@ -111,7 +113,7 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function
           }
         }}
         className={cn(
-          inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? 'invalid' : 'default') }),
+          inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? 'invalid' : 'default'), border, ring }),
           'pl-9 font-mono uppercase',
           className,
         )}
