@@ -1,6 +1,6 @@
 {
   "name": "@wow-two-beta/ui",
-  "version": "0.0.62",
+  "version": "0.0.63",
   "description": "Beta-forever React UI library for the wow-two ecosystem.",
   "license": "MIT",
   "repository": {
