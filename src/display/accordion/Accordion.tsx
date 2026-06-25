@@ -12,7 +12,7 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { cn, dataAttr } from '../../utils';
 import { useControlled } from '../../hooks';
-import { RovingFocusGroup, useRovingFocusItem } from '../../primitives';
+import { Presence, RovingFocusGroup, useRovingFocusItem } from '../../primitives';
 
 interface AccordionContextValue {
   isOpen: (value: string) => boolean;
@@ -229,19 +229,33 @@ export interface AccordionContentProps extends HTMLAttributes<HTMLDivElement> {
 export const AccordionContent = forwardRef<HTMLDivElement, AccordionContentProps>(
   function AccordionContent({ className, children, ...rest }, ref) {
     const item = useAccordionItemContext();
-    if (!item.open) return null;
     return (
-      <div
-        ref={ref}
-        id={item.contentId}
-        role="region"
-        aria-labelledby={item.triggerId}
-        data-state="open"
-        className={cn('overflow-hidden px-3 pb-3 text-sm text-foreground', className)}
-        {...rest}
-      >
-        {children}
-      </div>
+      <Presence isPresent={item.open}>
+        {/*
+          Height expand/collapse via grid-template-rows 0fr -> 1fr. The outer
+          grid row is what animates; the inner `min-h-0 overflow-hidden` track
+          clips the content so it can collapse to zero height. `data-state`
+          (and `ref`) are injected by Presence so the exit transition can play
+          before unmount. Motion-safe-gated; reduced-motion gets an instant snap.
+        */}
+        <div
+          ref={ref}
+          id={item.contentId}
+          role="region"
+          aria-labelledby={item.triggerId}
+          className={cn(
+            'grid text-sm text-foreground',
+            'motion-safe:transition-[grid-template-rows] motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out) motion-reduce:transition-none',
+            'data-[state=open]:grid-rows-[1fr] data-[state=closed]:grid-rows-[0fr]',
+            className,
+          )}
+          {...rest}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="px-3 pb-3">{children}</div>
+          </div>
+        </div>
+      </Presence>
     );
   },
 );

@@ -7,6 +7,7 @@ import {
   useId,
   useMemo,
   useRef,
+  useState,
   type AnchorHTMLAttributes,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
@@ -14,11 +15,12 @@ import {
 } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn, surfaceVariants } from '../../utils';
-import { useControlled } from '../../hooks';
+import { useControlled, useReducedMotion } from '../../hooks';
 import {
   AnchoredPositioner,
   DismissableLayer,
   Portal,
+  Presence,
   RovingFocusGroup,
   useRovingFocusItem,
 } from '../../primitives';
@@ -252,20 +254,63 @@ export interface NavigationMenuContentProps extends HTMLAttributes<HTMLDivElemen
   children: ReactNode;
 }
 
+/**
+ * Animated panel cloned by `Presence`, which injects `data-state`
+ * ("open" | "closed") + a `ref` onto this element so the pop tokens below run
+ * gated on that state. forwardRef + `{...props}` spread are required so the ref
+ * and `data-state` actually land here.
+ */
+const NavigationMenuPanel = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  function NavigationMenuPanel({ className, children, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          /* pop (fade + slight scale) gated on data-state; motion-safe so
+             reduced-motion users get no movement. */
+          'min-w-[12rem] outline-none',
+          'motion-safe:data-[state=open]:animate-(--animate-pop-in)',
+          'motion-safe:data-[state=closed]:animate-(--animate-pop-out)',
+          'motion-reduce:animate-none',
+          surfaceVariants({ variant: 'surface', radius: 'md', padding: 'md' }),
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+
 export const NavigationMenuContent = forwardRef<HTMLDivElement, NavigationMenuContentProps>(
   function NavigationMenuContent({ className, children, ...rest }, ref) {
     const nav = useNavContext();
     const item = useNavItemContext();
+    const reducedMotion = useReducedMotion();
 
     const handleClose = useCallback(() => {
       nav.setActiveId(null);
       requestAnimationFrame(() => item.triggerRef.current?.focus());
     }, [nav, item.triggerRef]);
 
-    // Outside-click close is handled by the DismissableLayer below — this effect is intentionally empty.
-    useEffect(() => {}, []);
+    /* Keep the positioner / dismiss layer mounted while the pop-out plays — the
+       stack hard-unmounts on `!open`, which would kill the exit. Opening flips
+       this true synchronously; closing defers the unmount until the panel's exit
+       animation ends (`onAnimationEnd` below). Under reduced motion no animation
+       fires, so drop it on the next frame instead. */
+    const [mounted, setMounted] = useState(item.open);
+    useEffect(() => {
+      if (item.open) {
+        setMounted(true);
+        return;
+      }
+      if (!reducedMotion) return;
+      const raf = requestAnimationFrame(() => setMounted(false));
+      return () => cancelAnimationFrame(raf);
+    }, [item.open, reducedMotion]);
 
-    if (!item.open) return null;
+    if (!mounted) return null;
     return (
       <Portal>
         <AnchoredPositioner
@@ -281,20 +326,21 @@ export const NavigationMenuContent = forwardRef<HTMLDivElement, NavigationMenuCo
               nav.setActiveId(null);
             }}
           >
-            <div
-              ref={ref}
-              id={item.contentId}
-              aria-labelledby={item.triggerId}
-              data-state="open"
-              className={cn(
-                'min-w-[12rem] outline-none animate-in fade-in-0 zoom-in-95',
-                surfaceVariants({ variant: 'surface', radius: 'md', padding: 'md' }),
-                className,
-              )}
-              {...rest}
-            >
-              {children}
-            </div>
+            <Presence isPresent={item.open}>
+              <NavigationMenuPanel
+                ref={ref}
+                id={item.contentId}
+                aria-labelledby={item.triggerId}
+                className={className}
+                onAnimationEnd={() => {
+                  /* Drop the positioner stack once the exit animation completes. */
+                  if (!item.open) setMounted(false);
+                }}
+                {...rest}
+              >
+                {children}
+              </NavigationMenuPanel>
+            </Presence>
           </DismissableLayer>
         </AnchoredPositioner>
       </Portal>

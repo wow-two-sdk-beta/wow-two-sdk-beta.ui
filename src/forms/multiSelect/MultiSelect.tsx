@@ -175,9 +175,12 @@ export const MultiSelectTrigger = forwardRef<HTMLButtonElement, MultiSelectTrigg
           {...rest}
         >
           {children ?? <MultiSelectTags />}
+          {/* Chevron rotate kept; gated motion-safe so reduced-motion users get an
+              instant flip, not a tween. Panel pop-in/out is owned by PopoverContent
+              (Presence + --animate-pop-*). */}
           <ChevronDown
             className={cn(
-              'h-4 w-4 shrink-0 self-center text-muted-foreground transition-transform',
+              'h-4 w-4 shrink-0 self-center text-muted-foreground motion-safe:transition-transform',
               ctx.open && 'rotate-180',
             )}
           />

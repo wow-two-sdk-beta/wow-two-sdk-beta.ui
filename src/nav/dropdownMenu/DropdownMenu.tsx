@@ -3,15 +3,17 @@ import {
   forwardRef,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
   type ButtonHTMLAttributes,
+  type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { composeRefs } from '../../utils';
-import { Slot } from '../../primitives';
-import { useControlled } from '../../hooks';
+import { cn, composeRefs } from '../../utils';
+import { Presence, Slot } from '../../primitives';
+import { useControlled, useReducedMotion } from '../../hooks';
 import {
   Menu,
   MenuItem,
@@ -132,15 +134,61 @@ export interface DropdownMenuContentProps {
   children: ReactNode;
 }
 
+/**
+ * Animated panel handed to `Menu` as its child. `Presence` clones `data-state`
+ * ("open" | "closed") + a `ref` onto this element, so the pop tokens below run
+ * gated on that state. forwardRef + `{...props}` spread are required so the ref
+ * and `data-state` actually land here.
+ */
+const DropdownMenuPanel = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  function DropdownMenuPanel({ className, children, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          /* pop (fade + slight scale) gated on data-state; motion-safe so
+             reduced-motion users get no movement. */
+          'motion-safe:data-[state=open]:animate-(--animate-pop-in)',
+          'motion-safe:data-[state=closed]:animate-(--animate-pop-out)',
+          'motion-reduce:animate-none',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+
 export function DropdownMenuContent({
   className,
   'aria-label': ariaLabel,
   children,
 }: DropdownMenuContentProps) {
   const ctx = useDropdownMenuContext();
+  const reducedMotion = useReducedMotion();
+  /* Keep `Menu` (positioner / focus scope / dismiss layer) mounted while the
+     pop-out plays — `Menu` hard-unmounts on `!open`, which would kill the exit.
+     Opening flips this true synchronously; closing defers the unmount until the
+     panel's exit animation ends (`onAnimationEnd` below). Under reduced motion
+     no animation fires, so drop it on the next frame instead. */
+  const [mounted, setMounted] = useState(ctx.open);
+  useEffect(() => {
+    if (ctx.open) {
+      setMounted(true);
+      return;
+    }
+    if (!reducedMotion) return;
+    const raf = requestAnimationFrame(() => setMounted(false));
+    return () => cancelAnimationFrame(raf);
+  }, [ctx.open, reducedMotion]);
+
+  if (!mounted) return null;
+
   return (
     <Menu
-      open={ctx.open}
+      open={mounted}
       anchor={ctx.triggerNode}
       onClose={() => {
         ctx.setOpen(false);
@@ -149,9 +197,18 @@ export function DropdownMenuContent({
       placement={ctx.placement}
       offset={ctx.offset}
       aria-label={ariaLabel}
-      className={className}
     >
-      {children}
+      <Presence isPresent={ctx.open}>
+        <DropdownMenuPanel
+          className={className}
+          onAnimationEnd={() => {
+            /* Drop `Menu` once the exit animation completes. */
+            if (!ctx.open) setMounted(false);
+          }}
+        >
+          {children}
+        </DropdownMenuPanel>
+      </Presence>
     </Menu>
   );
 }

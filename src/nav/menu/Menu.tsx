@@ -14,7 +14,7 @@ import {
 } from 'react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
 import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
-import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
+import { AnchoredPositioner, DismissableLayer, Portal, Presence } from '../../primitives';
 import {
   menuItemVariants,
   menuLabelVariants,
@@ -91,7 +91,9 @@ export function Menu({
     [registerItem, unregisterItem, onClose],
   );
 
-  if (!open) return null;
+  // No hard `if (!open) return null` — Presence (below) keeps the surface
+  // mounted through its pop-out exit, flipping data-state to "closed" and
+  // deferring unmount until the animation ends.
   return (
     <MenuContext.Provider value={ctx}>
       <Portal>
@@ -101,17 +103,19 @@ export function Menu({
           offset={offset}
           className="z-dropdown"
         >
-          <FocusScope asChild trapped loop>
-            <DismissableLayer
-              onEscape={onClose}
-              onOutsidePointerDown={(e) => {
-                if (anchor?.contains(e.target as Node)) return;
-                onClose();
-              }}
-            >
-              <div
+          {/* Presence drives data-state on the menu surface and defers unmount until the
+              pop-out finishes. FocusScope `asChild` + DismissableLayer (forwardRef, spreads
+              props) relay Presence's ref + data-state down onto the surface div. */}
+          <Presence isPresent={open}>
+            <FocusScope asChild trapped loop>
+              <DismissableLayer
                 role="menu"
                 aria-label={ariaLabel}
+                onEscape={onClose}
+                onOutsidePointerDown={(e) => {
+                  if (anchor?.contains(e.target as Node)) return;
+                  onClose();
+                }}
                 className={cn(
                   surfaceVariants({
                     variant: variant ?? 'surface',
@@ -121,6 +125,9 @@ export function Menu({
                     elevation,
                   }),
                   menuVariants(),
+                  'motion-safe:data-[state=open]:animate-(--animate-pop-in)',
+                  'motion-safe:data-[state=closed]:animate-(--animate-pop-out)',
+                  'motion-reduce:animate-none',
                   className,
                 )}
                 onKeyDown={(e) => {
@@ -133,9 +140,9 @@ export function Menu({
                 }}
               >
                 {children}
-              </div>
-            </DismissableLayer>
-          </FocusScope>
+              </DismissableLayer>
+            </FocusScope>
+          </Presence>
         </AnchoredPositioner>
       </Portal>
     </MenuContext.Provider>

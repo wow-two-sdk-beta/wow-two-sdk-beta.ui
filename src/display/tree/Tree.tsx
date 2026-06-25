@@ -11,7 +11,7 @@ import {
 import { ChevronRight } from 'lucide-react';
 import { cn, dataAttr } from '../../utils';
 import { useControlled } from '../../hooks';
-import { RovingFocusGroup, useRovingFocusItem } from '../../primitives';
+import { Presence, RovingFocusGroup, useRovingFocusItem } from '../../primitives';
 
 interface TreeContextValue {
   selectedValue: string | null;
@@ -212,16 +212,51 @@ export const TreeGroup = forwardRef<HTMLLIElement, TreeGroupProps>(function Tree
         onActivate={() => ctx.toggleExpanded(value)}
         label={label}
       />
-      {expanded && (
-        <TreeLevelContext.Provider value={{ level: level + 1 }}>
-          <ul role="group" className="flex flex-col">
-            {children}
-          </ul>
-        </TreeLevelContext.Provider>
-      )}
+      {/* Presence keeps the group mounted through the collapse so the exit
+          plays before unmount (the old `{expanded && …}` hard-unmount killed it).
+          It injects ref + data-state onto TreeGroupContent, which animates height
+          via grid-template-rows 0fr -> 1fr. */}
+      <Presence isPresent={expanded}>
+        <TreeGroupContent level={level + 1}>{children}</TreeGroupContent>
+      </Presence>
     </li>
   );
 });
+
+interface TreeGroupContentProps extends HTMLAttributes<HTMLDivElement> {
+  level: number;
+  children: ReactNode;
+}
+
+/* Inner element rendered by <Presence>: receives ref + data-state via {...rest}.
+ * Expand/collapse animates content HEIGHT via grid-template-rows 0fr -> 1fr; the
+ * inner `min-h-0 overflow-hidden` track clips the group so it can shrink to zero.
+ * No fade (height only) — the chevron handles the rotate. Motion-safe-gated;
+ * reduced-motion gets an instant snap. */
+const TreeGroupContent = forwardRef<HTMLDivElement, TreeGroupContentProps>(
+  function TreeGroupContent({ level, className, children, ...rest }, ref) {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'grid',
+          'motion-safe:transition-[grid-template-rows] motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out) motion-reduce:transition-none',
+          'data-[state=open]:grid-rows-[1fr] data-[state=closed]:grid-rows-[0fr]',
+          className,
+        )}
+        {...rest}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <TreeLevelContext.Provider value={{ level }}>
+            <ul role="group" className="flex flex-col">
+              {children}
+            </ul>
+          </TreeLevelContext.Provider>
+        </div>
+      </div>
+    );
+  },
+);
 
 export interface TreeItemProps extends HTMLAttributes<HTMLLIElement> {
   value: string;

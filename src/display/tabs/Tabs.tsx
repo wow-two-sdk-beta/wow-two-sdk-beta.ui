@@ -185,6 +185,9 @@ export const TabsPanel = forwardRef<HTMLDivElement, TabsPanelProps>(function Tab
   const panelId = `${ctx.baseId}-panel-${value}`;
   return (
     <div
+      // Remount on switch so the active panel cross-fades in. Only the active
+      // panel is mounted (APG) — no Presence/exit; the outgoing panel just unmounts.
+      key={ctx.value}
       ref={ref}
       id={panelId}
       role="tabpanel"
@@ -192,6 +195,7 @@ export const TabsPanel = forwardRef<HTMLDivElement, TabsPanelProps>(function Tab
       tabIndex={0}
       className={cn(
         'flex-1 outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'motion-safe:animate-(--animate-fade-in)',
         className,
       )}
       {...rest}

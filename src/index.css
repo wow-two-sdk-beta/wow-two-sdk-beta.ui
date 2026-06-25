@@ -133,6 +133,29 @@
   /* Indeterminate progress animation — keyframes defined below */
   --animate-indeterminate: indeterminate 1.4s ease-in-out infinite;
 
+  /* ---------- Motion (enter/exit transitions) ----------
+   * Durations + easings + composable enter/exit animations. Consume via `animate-(--animate-*)`
+   * gated on `data-[state=open|closed]`, hosted by `Presence`/`Overlay` (defers unmount for exits).
+   * Reduced-motion: wrap usage in `motion-safe:` (and/or `motion-reduce:animate-none`). */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);   /* enter — decelerate */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);    /* exit — accelerate */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-fade-in: fade-in var(--duration-base) var(--ease-out);
+  --animate-fade-out: fade-out var(--duration-fast) var(--ease-in);
+  --animate-pop-in: pop-in var(--duration-base) var(--ease-out);
+  --animate-pop-out: pop-out var(--duration-fast) var(--ease-in);
+  --animate-slide-in-top: slide-in-top var(--duration-base) var(--ease-out);
+  --animate-slide-out-top: slide-out-top var(--duration-fast) var(--ease-in);
+  --animate-slide-in-bottom: slide-in-bottom var(--duration-base) var(--ease-out);
+  --animate-slide-out-bottom: slide-out-bottom var(--duration-fast) var(--ease-in);
+  --animate-slide-in-left: slide-in-left var(--duration-base) var(--ease-out);
+  --animate-slide-out-left: slide-out-left var(--duration-fast) var(--ease-in);
+  --animate-slide-in-right: slide-in-right var(--duration-base) var(--ease-out);
+  --animate-slide-out-right: slide-out-right var(--duration-fast) var(--ease-in);
+
   /* ---------- Layers (z-index) ----------
    * Semantic stacking tiers. TS const lives in `src/utils/Layers.ts`.
    * Tailwind v4 auto-generates `z-{name}` utilities from these.
@@ -221,6 +244,21 @@ html, body {
 .surface-glow {
   background-image: radial-gradient(135% 135% at 100% 112%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 52%);
 }
+
+/* Enter/exit primitives — paired with the `--animate-*` tokens above. Subtle (8px) slides for
+ * popovers/menus/toasts; full-edge drawer/sheet slides use component-level translate utilities. */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes pop-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.96); } }
+@keyframes slide-in-top { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slide-out-top { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+@keyframes slide-in-bottom { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slide-out-bottom { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(8px); } }
+@keyframes slide-in-left { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slide-out-left { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-8px); } }
+@keyframes slide-in-right { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slide-out-right { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(8px); } }
 
 @keyframes indeterminate {
   0% {

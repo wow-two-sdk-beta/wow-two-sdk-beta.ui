@@ -17,6 +17,7 @@ import {
   DismissableLayer,
   OverlayArrow,
   Portal,
+  Presence,
   Slot,
   type AnchoredPositionerProps,
   type OverlayArrowProps,
@@ -149,58 +150,83 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
     forwardedRef,
   ) {
     const ctx = usePopoverContext();
-    if (!ctx.open) return null;
     /* Default to lg padding when chrome is on (matches old `p-4`); consumer can override. */
     const resolvedPadding = padding ?? (isBare ? 'none' : 'lg');
     return (
-      <Portal>
-        {/* z-popover (80) on the SC root (transform makes the stacking context) so a
-            popover from a Dialog (z-modal, 70) paints above it — both portal to body. */}
-        <AnchoredPositioner
-          anchor={ctx.triggerNode}
-          placement={ctx.placement}
-          offset={ctx.offset}
-          className="z-popover"
-        >
-          <FocusScope asChild trapped loop>
-            <DismissableLayer
-              isEscapeDisabled={!ctx.dismissOnEscape}
-              onEscape={() => {
-                ctx.setOpen(false);
-                requestAnimationFrame(() => ctx.triggerRef.current?.focus());
-              }}
-              isOutsideClickDisabled={!ctx.dismissOnOutsideClick}
-              onOutsidePointerDown={(e) => {
-                if (ctx.triggerRef.current?.contains(e.target as Node)) return;
-                ctx.setOpen(false);
-              }}
-            >
-              <div
-                ref={forwardedRef}
-                role="dialog"
-                data-state="open"
-                className={cn(
-                  'outline-none animate-in fade-in-0 zoom-in-95',
-                  !isBare &&
-                    cn(
-                      DEFAULT_WIDTH,
-                      surfaceVariants({
-                        variant,
-                        tone,
-                        radius,
-                        padding: resolvedPadding,
-                        elevation,
-                      }),
-                    ),
-                  className,
-                )}
-                {...rest}
+      <Presence isPresent={ctx.open}>
+        {/* `Presence` injects ref + data-state onto this portal root and defers
+            unmount until its exit anim ends. The panel pop is driven off this
+            root's state via `group-data-[state=*]` on the surface below. */}
+        <PopoverPortalRoot>
+          {/* z-popover (80) on the SC root (transform makes the stacking context) so a
+              popover from a Dialog (z-modal, 70) paints above it — both portal to body. */}
+          <AnchoredPositioner
+            anchor={ctx.triggerNode}
+            placement={ctx.placement}
+            offset={ctx.offset}
+            className="z-popover"
+          >
+            <FocusScope asChild trapped loop>
+              <DismissableLayer
+                isEscapeDisabled={!ctx.dismissOnEscape}
+                onEscape={() => {
+                  ctx.setOpen(false);
+                  requestAnimationFrame(() => ctx.triggerRef.current?.focus());
+                }}
+                isOutsideClickDisabled={!ctx.dismissOnOutsideClick}
+                onOutsidePointerDown={(e) => {
+                  if (ctx.triggerRef.current?.contains(e.target as Node)) return;
+                  ctx.setOpen(false);
+                }}
               >
-                {children}
-              </div>
-            </DismissableLayer>
-          </FocusScope>
-        </AnchoredPositioner>
+                <div
+                  ref={forwardedRef}
+                  role="dialog"
+                  className={cn(
+                    /* pop (fade+scale) gated on the portal-root data-state + motion-safe
+                       so reduced-motion users get no movement. */
+                    'outline-none',
+                    'motion-safe:group-data-[state=open]:animate-(--animate-pop-in)',
+                    'motion-safe:group-data-[state=closed]:animate-(--animate-pop-out) motion-reduce:animate-none',
+                    !isBare &&
+                      cn(
+                        DEFAULT_WIDTH,
+                        surfaceVariants({
+                          variant,
+                          tone,
+                          radius,
+                          padding: resolvedPadding,
+                          elevation,
+                        }),
+                      ),
+                    className,
+                  )}
+                  {...rest}
+                >
+                  {children}
+                </div>
+              </DismissableLayer>
+            </FocusScope>
+          </AnchoredPositioner>
+        </PopoverPortalRoot>
+      </Presence>
+    );
+  },
+);
+
+/**
+ * `Presence`-clonable root: a single element that accepts `ref` + `data-state`
+ * (injected by `Presence`) and renders inside a `Portal`. Marked `group` so the
+ * panel below animates off its `data-[state]`. Holds no layout of its own
+ * (`display: contents`) so the anchored positioning of children is unaffected.
+ */
+const PopoverPortalRoot = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  function PopoverPortalRoot({ children, className, ...props }, ref) {
+    return (
+      <Portal>
+        <div ref={ref} className={cn('group contents', className)} {...props}>
+          {children}
+        </div>
       </Portal>
     );
   },

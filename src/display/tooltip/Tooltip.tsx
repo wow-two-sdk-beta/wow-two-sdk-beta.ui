@@ -1,20 +1,48 @@
 import {
   cloneElement,
+  forwardRef,
   isValidElement,
   useEffect,
   useRef,
   useState,
+  type HTMLAttributes,
   type ReactElement,
   type ReactNode,
   type Ref,
 } from 'react';
 import { cn, composeRefs } from '../../utils';
-import { useControlled, useEscape, useId } from '../../hooks';
+import { useControlled, useEscape, useId, useReducedMotion } from '../../hooks';
 import {
   AnchoredPositioner,
   Portal,
+  Presence,
   type AnchoredPositionerProps,
 } from '../../primitives';
+
+/**
+ * Animated tooltip body. `forwardRef` + `{...props}` spread so `Presence` can
+ * inject its `ref` (for transition/animation-end detection) and the
+ * `data-state="open" | "closed"` that drives the enter/exit keyframes.
+ * Motion is gated on `data-state` and behind `motion-safe:` so reduced-motion
+ * users get an instant show/hide.
+ */
+const TooltipContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className, children, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        'z-tooltip rounded-md bg-inverse px-2.5 py-1.5 text-xs text-inverse-foreground shadow-md',
+        'motion-safe:data-[state=open]:animate-(--animate-pop-in)',
+        'motion-safe:data-[state=closed]:animate-(--animate-pop-out)',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  ),
+);
+TooltipContent.displayName = 'TooltipContent';
 
 export interface TooltipProps {
   /** Tooltip body. */
@@ -95,7 +123,18 @@ export function Tooltip({
     setOpen(false);
   }, open);
 
+  const reducedMotion = useReducedMotion();
   const visible = !isDisabled && open && !!content;
+
+  /* Keep the Portal + positioner mounted while the exit animation plays.
+     Becomes true with `visible`; cleared on the body's pop-out `animationend`
+     (see `onAnimationEnd` below). With reduced motion no exit animation runs,
+     so tear the shell down immediately on close. */
+  const [mounted, setMounted] = useState(visible);
+  useEffect(() => {
+    if (visible) setMounted(true);
+    else if (reducedMotion) setMounted(false);
+  }, [visible, reducedMotion]);
 
   if (!isValidElement(children)) return children;
   const trigger = children as ReactElement<{
@@ -133,19 +172,25 @@ export function Tooltip({
   return (
     <>
       {cloned}
-      {visible && (
+      {mounted && (
         <Portal>
-          <AnchoredPositioner anchor={anchor} placement={placement} offset={6}>
-            <div
-              id={tooltipId}
-              role="tooltip"
-              className={cn(
-                'z-tooltip rounded-md bg-inverse px-2.5 py-1.5 text-xs text-inverse-foreground shadow-md',
-                'animate-in fade-in-0 zoom-in-95',
-              )}
-            >
-              {content}
-            </div>
+          <AnchoredPositioner
+            anchor={anchor}
+            placement={placement}
+            offset={6}
+            /* Exit animation bubbles up from TooltipContent; once the
+               closed-state pop-out ends, tear down the Portal shell. Also
+               covers the reduced-motion path, where no animation runs and
+               Presence has already unmounted the body. */
+            onAnimationEnd={() => {
+              if (!visible) setMounted(false);
+            }}
+          >
+            <Presence isPresent={visible}>
+              <TooltipContent id={tooltipId} role="tooltip">
+                {content}
+              </TooltipContent>
+            </Presence>
           </AnchoredPositioner>
         </Portal>
       )}

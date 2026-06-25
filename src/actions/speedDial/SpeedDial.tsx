@@ -7,12 +7,14 @@ import {
   useMemo,
   useRef,
   type ButtonHTMLAttributes,
+  type HTMLAttributes,
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
 import { Plus, X } from 'lucide-react';
 import { cn, composeRefs } from '../../utils';
 import { useControlled, useEscape, useOutsideClick } from '../../hooks';
+import { Presence } from '../../primitives';
 import { Icon } from '../../icons';
 import { FAB } from '../fab';
 import type { FABVariants } from '../fab/FAB.variants';
@@ -36,6 +38,43 @@ function useSpeedDialContext() {
   if (!ctx) throw new Error('SpeedDial.* must be used inside <SpeedDial>');
   return ctx;
 }
+
+/**
+ * `Presence`-clonable list: a single `forwardRef` element that spreads
+ * `data-state` (injected by `Presence`) + `ref` onto its node. Marked `group`
+ * so each action item animates off its `data-[state]`; carries its own fade so
+ * `Presence` has an animation on *this* node to watch before unmount. `forwardRef`
+ * + `{...props}` spread are required so the ref and `data-state` actually land here.
+ */
+const SpeedDialList = forwardRef<HTMLUListElement, HTMLAttributes<HTMLUListElement>>(
+  function SpeedDialList({ className, children, ...props }, ref) {
+    return (
+      <ul
+        ref={ref}
+        role="menu"
+        className={cn(
+          'group absolute flex',
+          /* list fade gated on data-state; motion-safe so reduced-motion users
+             get no movement. */
+          'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
+          'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
+          'motion-reduce:animate-none',
+          /* Per-item enter stagger: ramp `animation-delay` on the first few items
+             while opening only (closed → delay 0 so no item outlasts the list's
+             own fade-out, which gates unmount). */
+          'motion-safe:group-data-[state=open]:[&>li:nth-child(2)]:[animation-delay:40ms]',
+          'motion-safe:group-data-[state=open]:[&>li:nth-child(3)]:[animation-delay:80ms]',
+          'motion-safe:group-data-[state=open]:[&>li:nth-child(4)]:[animation-delay:120ms]',
+          'motion-safe:group-data-[state=open]:[&>li:nth-child(n+5)]:[animation-delay:160ms]',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </ul>
+    );
+  },
+);
 
 const POSITION_TO_DIRECTION: Record<SpeedDialPosition, SpeedDialDirection> = {
   'bottom-right': 'up',
@@ -151,19 +190,19 @@ export function SpeedDial({
         onKeyDown={handleKeyDown}
         className={cn('fixed', POSITION_OFFSETS[position], className)}
       >
-        {open && (
-          <ul
-            role="menu"
+        {/* `Presence` clones `data-state` ("open" | "closed") + a `ref` onto the
+            list and defers unmount until its fade-out ends — keeps the exit from
+            being killed by the hard `!open` unmount. Items pop in/out off the
+            list's `group` state (see `SpeedDialAction`), staggered on enter. */}
+        <Presence isPresent={open}>
+          <SpeedDialList
             data-direction={resolvedDirection}
             style={{ gap }}
-            className={cn(
-              'absolute flex animate-in fade-in-0',
-              DIRECTION_TO_STACK[resolvedDirection],
-            )}
+            className={DIRECTION_TO_STACK[resolvedDirection]}
           >
             {actionChildren}
-          </ul>
-        )}
+          </SpeedDialList>
+        </Presence>
         {triggerChildren}
       </div>
     </SpeedDialContext.Provider>
@@ -234,7 +273,18 @@ export const SpeedDialAction = forwardRef<HTMLButtonElement, SpeedDialActionProp
     const ctx = useSpeedDialContext();
     const labelSide = DIRECTION_LABEL_SIDE[ctx.direction];
     return (
-      <li role="none" className="flex items-center gap-2" data-side={labelSide}>
+      <li
+        role="none"
+        data-side={labelSide}
+        className={cn(
+          'flex items-center gap-2',
+          /* fade+scale each action off the list's `group` state; motion-safe so
+             reduced-motion users get no movement (delay ramp lives on the list). */
+          'motion-safe:group-data-[state=open]:animate-(--animate-pop-in)',
+          'motion-safe:group-data-[state=closed]:animate-(--animate-pop-out)',
+          'motion-reduce:animate-none',
+        )}
+      >
         {tooltip && labelSide === 'left' && (
           <span className="rounded-md bg-popover px-2 py-1 text-xs text-popover-foreground shadow">
             {tooltip}

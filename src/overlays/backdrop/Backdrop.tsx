@@ -1,6 +1,6 @@
 import { forwardRef, type HTMLAttributes } from 'react';
 import { cn } from '../../utils';
-import { Portal } from '../../primitives';
+import { Portal, Presence } from '../../primitives';
 
 export interface BackdropProps extends HTMLAttributes<HTMLDivElement> {
   /** Mount state. Default `true`. */
@@ -18,19 +18,22 @@ export const Backdrop = forwardRef<HTMLDivElement, BackdropProps>(function Backd
   { open = true, isBlurred, pointerEvents = 'auto', isInline, className, style, ...rest },
   ref,
 ) {
-  if (!open) return null;
+  // `data-state` is injected by <Presence>; the fade tokens are gated on it so
+  // enter plays on mount and exit plays before Presence defers the unmount.
   const node = (
     <div
       ref={ref}
-      data-state={open ? 'open' : 'closed'}
       style={{ pointerEvents, ...style }}
       className={cn(
-        'fixed inset-0 z-overlay bg-black/50 animate-in fade-in-0',
+        'fixed inset-0 z-overlay bg-black/50',
+        'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
+        'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
         isBlurred && 'backdrop-blur-sm',
         className,
       )}
       {...rest}
     />
   );
-  return isInline ? node : <Portal>{node}</Portal>;
+  const presence = <Presence isPresent={open}>{node}</Presence>;
+  return isInline ? presence : <Portal>{presence}</Portal>;
 });

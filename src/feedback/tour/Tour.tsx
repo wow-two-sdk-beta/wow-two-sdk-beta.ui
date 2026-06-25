@@ -1,14 +1,17 @@
 import {
+  forwardRef,
   useCallback,
   useEffect,
   useId,
   useState,
+  type CSSProperties,
+  type HTMLAttributes,
   type ReactNode,
   type RefObject,
 } from 'react';
 import { cn } from '../../utils';
-import { useControlled } from '../../hooks';
-import { Announce, Portal } from '../../primitives';
+import { useControlled, useReducedMotion } from '../../hooks';
+import { Announce, Portal, Presence } from '../../primitives';
 
 export interface TourStep {
   target: string | RefObject<HTMLElement>;
@@ -93,8 +96,25 @@ export function Tour({
   const titleId = useId();
   const descId = useId();
   const maskId = useId();
+  const reducedMotion = useReducedMotion();
 
   const step = steps[currentStep];
+
+  /* Keep the Portal (scrim + tooltip) mounted while the pop-out plays — the
+     component hard-unmounts on `!open`, which would kill the exit. Opening
+     flips this true synchronously; closing defers the unmount until the
+     tooltip's exit animation ends (`onAnimationEnd` below). Under reduced
+     motion no animation fires, so drop it on the next frame instead. */
+  const [mounted, setMounted] = useState(open);
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      return;
+    }
+    if (!reducedMotion) return;
+    const raf = requestAnimationFrame(() => setMounted(false));
+    return () => cancelAnimationFrame(raf);
+  }, [open, reducedMotion]);
 
   // Update rect when step changes / window scrolls / resizes.
   useEffect(() => {
@@ -148,7 +168,7 @@ export function Tour({
     onSkip?.();
   }, [setOpen, onSkip]);
 
-  if (!open || !step) return null;
+  if (!mounted || !step) return null;
 
   const placement = step.placement ?? 'bottom';
   const tooltipCoords = rect ? placementCoords(rect, placement) : null;
@@ -157,8 +177,10 @@ export function Tour({
   return (
     <Portal>
       {/* SVG mask backdrop with cutout around target. Skipped while the
-          target is unresolvable so a bare scrim never blocks the page. */}
-      {rect && (
+          target is unresolvable so a bare scrim never blocks the page.
+          Gated on `open` (not `mounted`) so the scrim clears immediately on
+          close while the tooltip plays its pop-out before unmount. */}
+      {open && rect && (
         <svg
           aria-hidden="true"
           className="pointer-events-auto fixed inset-0 z-modal h-full w-full"
@@ -186,64 +208,70 @@ export function Tour({
         </svg>
       )}
 
-      {/* Tooltip */}
+      {/* Tooltip — wrapped in `Presence` so its pop-out plays before the
+          component unmounts. `Presence` clones `data-state` ("open" | "closed")
+          + a `ref` onto the panel, so the pop tokens run gated on that state;
+          the exit's `onAnimationEnd` drops `mounted`. */}
       {tooltipCoords && (
-        <div
-          role="dialog"
-          aria-modal="false"
-          aria-labelledby={titleId}
-          aria-describedby={descId}
-          style={{
-            position: 'fixed',
-            top: tooltipCoords.top,
-            left: tooltipCoords.left,
-            transform: tooltipCoords.transform,
-          }}
-          className={cn(
-            'z-popover w-72 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-lg outline-none animate-in fade-in-0 zoom-in-95',
-          )}
-        >
-          {step.title && (
-            <div id={titleId} className="text-sm font-semibold">
-              {step.title}
-            </div>
-          )}
-          {step.body && (
-            <div id={descId} className={cn('text-sm text-muted-foreground', step.title && 'mt-1.5')}>
-              {step.body}
-            </div>
-          )}
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <span className="text-xs text-muted-foreground">
-              {currentStep + 1} / {steps.length}
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={skip}
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                Skip
-              </button>
-              {currentStep > 0 && (
+        <Presence isPresent={open}>
+          <TourTooltip
+            role="dialog"
+            aria-modal="false"
+            aria-labelledby={titleId}
+            aria-describedby={descId}
+            style={{
+              position: 'fixed',
+              top: tooltipCoords.top,
+              left: tooltipCoords.left,
+              transform: tooltipCoords.transform,
+            }}
+            onAnimationEnd={() => {
+              /* Drop the Portal once the exit animation completes. */
+              if (!open) setMounted(false);
+            }}
+          >
+            {step.title && (
+              <div id={titleId} className="text-sm font-semibold">
+                {step.title}
+              </div>
+            )}
+            {step.body && (
+              <div id={descId} className={cn('text-sm text-muted-foreground', step.title && 'mt-1.5')}>
+                {step.body}
+              </div>
+            )}
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className="text-xs text-muted-foreground">
+                {currentStep + 1} / {steps.length}
+              </span>
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={goPrev}
-                  className="inline-flex h-7 items-center rounded-md border border-border bg-background px-2.5 text-xs font-medium hover:bg-muted"
+                  onClick={skip}
+                  className="text-xs text-muted-foreground hover:text-foreground"
                 >
-                  Back
+                  Skip
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={goNext}
-                className="inline-flex h-7 items-center rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                {currentStep >= steps.length - 1 ? 'Done' : 'Next'}
-              </button>
+                {currentStep > 0 && (
+                  <button
+                    type="button"
+                    onClick={goPrev}
+                    className="inline-flex h-7 items-center rounded-md border border-border bg-background px-2.5 text-xs font-medium hover:bg-muted"
+                  >
+                    Back
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={goNext}
+                  className="inline-flex h-7 items-center rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  {currentStep >= steps.length - 1 ? 'Done' : 'Next'}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+          </TourTooltip>
+        </Presence>
       )}
 
       <Announce politeness="polite">
@@ -254,3 +282,32 @@ export function Tour({
     </Portal>
   );
 }
+
+/**
+ * `Presence`-clonable tooltip panel: a single `forwardRef` element that
+ * spreads `data-state` ("open" | "closed", injected by `Presence`) + the
+ * `ref` onto its node, so the pop (fade + slight scale) runs gated on that
+ * state. forwardRef + `{...props}` spread are required so the ref and
+ * `data-state` actually land here. `motion-safe` so reduced-motion users get
+ * no movement.
+ */
+const TourTooltip = forwardRef<
+  HTMLDivElement,
+  HTMLAttributes<HTMLDivElement> & { style?: CSSProperties }
+>(function TourTooltip({ className, children, ...props }, ref) {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        'z-popover w-72 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-lg outline-none',
+        'motion-safe:data-[state=open]:animate-(--animate-pop-in)',
+        'motion-safe:data-[state=closed]:animate-(--animate-pop-out)',
+        'motion-reduce:animate-none',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+});

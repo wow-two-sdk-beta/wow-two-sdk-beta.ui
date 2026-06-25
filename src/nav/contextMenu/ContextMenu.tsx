@@ -10,7 +10,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { composeRefs } from '../../utils';
+import { cn, composeRefs } from '../../utils';
 import { Slot } from '../../primitives';
 import {
   Menu,
@@ -178,7 +178,10 @@ export function ContextMenuContent({
       placement={placement}
       offset={offset}
       aria-label={ariaLabel}
-      className={className}
+      // Enter-only pop: the surface mounts when `open` flips true, so the
+      // anim fires once on mount. motion-safe gates it for reduced-motion.
+      // (Exit anim is owned by the shared Menu's unmount gate — see note below.)
+      className={cn('motion-safe:animate-(--animate-pop-in)', className)}
     >
       {children}
     </Menu>

@@ -1,12 +1,14 @@
 import {
+  forwardRef,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type HTMLAttributes,
   type ReactNode,
 } from 'react';
 import { cn } from '../../utils';
-import { Announce, Portal } from '../../primitives';
+import { Announce, Portal, Presence } from '../../primitives';
 import { Toast } from '../toast';
 import type { ToastSimpleVariants } from '../toastSimple/ToastSimple.variants';
 
@@ -93,6 +95,27 @@ const POSITION_CLASSES: Record<ToasterPosition, string> = {
   'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2 items-center',
 };
 
+/**
+ * Enter/exit animation per position, gated on `data-state` (set by `Presence`)
+ * and `motion-safe:` so reduced-motion users get an instant swap. Corner
+ * toasts slide along their horizontal edge; centered toasts slide along the
+ * vertical axis they're anchored to. Exit anims are shorter (`--duration-fast`).
+ */
+const MOTION_CLASSES: Record<ToasterPosition, string> = {
+  'top-right':
+    'motion-safe:data-[state=open]:animate-(--animate-slide-in-right) motion-safe:data-[state=closed]:animate-(--animate-slide-out-right) motion-reduce:animate-none',
+  'top-left':
+    'motion-safe:data-[state=open]:animate-(--animate-slide-in-left) motion-safe:data-[state=closed]:animate-(--animate-slide-out-left) motion-reduce:animate-none',
+  'top-center':
+    'motion-safe:data-[state=open]:animate-(--animate-slide-in-top) motion-safe:data-[state=closed]:animate-(--animate-slide-out-top) motion-reduce:animate-none',
+  'bottom-right':
+    'motion-safe:data-[state=open]:animate-(--animate-slide-in-right) motion-safe:data-[state=closed]:animate-(--animate-slide-out-right) motion-reduce:animate-none',
+  'bottom-left':
+    'motion-safe:data-[state=open]:animate-(--animate-slide-in-left) motion-safe:data-[state=closed]:animate-(--animate-slide-out-left) motion-reduce:animate-none',
+  'bottom-center':
+    'motion-safe:data-[state=open]:animate-(--animate-slide-in-bottom) motion-safe:data-[state=closed]:animate-(--animate-slide-out-bottom) motion-reduce:animate-none',
+};
+
 export interface ToasterProps {
   position?: ToasterPosition;
   max?: number;
@@ -106,6 +129,38 @@ export interface ToasterProps {
 interface VisibleToast extends ToastEntry {
   resolvedDuration: number;
 }
+
+/**
+ * Per-toast animated wrapper. `forwardRef` + `{...props}` spread so the
+ * `data-state` Presence sets lands on this node (and Presence can ref it to
+ * await `animationend` before unmount). Carries the slide+fade motion classes.
+ *
+ * Runs an unmount-only cleanup that calls `onRemoved` — since `Presence` keeps
+ * this child mounted until its exit animation ends, that cleanup is our
+ * "exit finished" signal (the read-only `Presence` API exposes no callback).
+ */
+interface ToastItemProps extends HTMLAttributes<HTMLDivElement> {
+  motionClass: string;
+  onRemoved?: () => void;
+}
+
+const ToastItem = forwardRef<HTMLDivElement, ToastItemProps>(
+  ({ motionClass, onRemoved, className, children, ...props }, ref) => {
+    const onRemovedRef = useRef(onRemoved);
+    onRemovedRef.current = onRemoved;
+    useEffect(() => () => onRemovedRef.current?.(), []);
+    return (
+      <div
+        ref={ref}
+        className={cn('pointer-events-auto w-80', motionClass, className)}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+ToastItem.displayName = 'ToastItem';
 
 /**
  * Viewport that subscribes to the global `toaster` store and renders toasts
@@ -134,6 +189,41 @@ export function Toaster({
     ...t,
     resolvedDuration: t.duration ?? defaultDuration,
   }));
+  const visibleIds = useMemo(() => new Set(visible.map((v) => v.id)), [visible]);
+
+  // Toasts that just left `visible` (dismissed, or pushed out of the FIFO
+  // window) but must still play their exit animation. Kept mounted with
+  // `data-state="closed"` until `Presence` unmounts the child — `ToastItem`
+  // then fires `onRemoved`, pruning the entry here.
+  const [exiting, setExiting] = useState<VisibleToast[]>([]);
+  const prevVisibleRef = useRef<VisibleToast[]>([]);
+
+  useEffect(() => {
+    const gone = prevVisibleRef.current.filter((p) => !visibleIds.has(p.id));
+    prevVisibleRef.current = visible;
+    setExiting((cur) => {
+      const known = new Set(cur.map((e) => e.id));
+      // Add newly-gone toasts; drop any that re-entered `visible`.
+      const merged = [...cur, ...gone.filter((g) => !known.has(g.id))].filter(
+        (e) => !visibleIds.has(e.id),
+      );
+      return merged.length === cur.length &&
+        merged.every((e, i) => e.id === cur[i]?.id)
+        ? cur
+        : merged;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleIds]);
+
+  const removeExiting = (id: string) =>
+    setExiting((cur) => cur.filter((e) => e.id !== id));
+
+  // Visible (present) first, then the ones animating out.
+  const rendered: Array<VisibleToast & { present: boolean }> = [
+    ...visible.map((v) => ({ ...v, present: true })),
+    ...exiting.map((e) => ({ ...e, present: false })),
+  ];
+
   const latestTitle =
     typeof visible[visible.length - 1]?.title === 'string'
       ? (visible[visible.length - 1]!.title as string)
@@ -143,10 +233,10 @@ export function Toaster({
 
   // Schedule auto-dismiss timers.
   useEffect(() => {
-    const visibleIds = new Set(visible.map((v) => v.id));
+    const ids = new Set(visible.map((v) => v.id));
     // Clear timers for items that are no longer visible.
     for (const [id, h] of timersRef.current) {
-      if (!visibleIds.has(id)) {
+      if (!ids.has(id)) {
         window.clearTimeout(h);
         timersRef.current.delete(id);
         remainingRef.current.delete(id);
@@ -195,7 +285,7 @@ export function Toaster({
     setPaused(false);
   };
 
-  if (visible.length === 0) {
+  if (rendered.length === 0) {
     return (
       <Portal>
         <Announce politeness="polite" />
@@ -218,17 +308,22 @@ export function Toaster({
           className,
         )}
       >
-        {visible.map((t) => (
-          <div key={t.id} className="pointer-events-auto w-80 animate-in fade-in-0 slide-in-from-bottom-2">
-            <Toast
-              icon={t.icon}
-              title={t.title}
-              description={t.description}
-              severity={t.severity}
-              actions={t.action}
-              onClose={() => toaster.dismiss(t.id)}
-            />
-          </div>
+        {rendered.map((t) => (
+          <Presence key={t.id} isPresent={t.present}>
+            <ToastItem
+              motionClass={MOTION_CLASSES[position]}
+              onRemoved={t.present ? undefined : () => removeExiting(t.id)}
+            >
+              <Toast
+                icon={t.icon}
+                title={t.title}
+                description={t.description}
+                severity={t.severity}
+                actions={t.action}
+                onClose={() => toaster.dismiss(t.id)}
+              />
+            </ToastItem>
+          </Presence>
         ))}
       </div>
       <Announce politeness="polite">{latestTitle}</Announce>

@@ -15,7 +15,7 @@ import {
 import { FocusScope } from '@radix-ui/react-focus-scope';
 import { cn, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
-import { DismissableLayer, Portal, ScrollLockProvider } from '../../primitives';
+import { DismissableLayer, Portal, Presence, ScrollLockProvider } from '../../primitives';
 import { Backdrop } from '../backdrop';
 import {
   OverlayChromeProvider,
@@ -104,6 +104,12 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
   const startYRef = useRef<number | null>(null);
   const startHeightRef = useRef(0);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
+  // Keeps the portal subtree (scroll lock + backdrop + sheet) mounted while the
+  // exit animation plays after `open` flips false; the per-node <Presence>
+  // wrappers defer their own unmount, and this flag releases the scroll lock
+  // only once they've finished. Mirrors the "open OR exiting" gate other
+  // overlays use, while preserving the no-lock-when-closed behavior.
+  const [isExiting, setIsExiting] = useState(false);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -111,6 +117,19 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
   useEffect(() => {
     if (open) setCurrentSnap(Math.min(initialSnap, snapPoints.length - 1));
   }, [open, initialSnap, snapPoints.length]);
+
+  // Drive the trailing-mount flag: opening clears it; closing holds the subtree
+  // mounted for one exit cycle (longest motion token = base duration) so the
+  // slide-down + backdrop fade can play, then drops it to release scroll lock.
+  useEffect(() => {
+    if (open) {
+      setIsExiting(false);
+      return;
+    }
+    setIsExiting(true);
+    const timer = window.setTimeout(() => setIsExiting(false), 320);
+    return () => window.clearTimeout(timer);
+  }, [open]);
 
   const ctx = useMemo<BottomSheetContextValue>(
     () => ({ open, setOpen, currentSnap, setCurrentSnap, snapPoints }),
@@ -174,7 +193,9 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
     }
   };
 
-  if (!open) return null;
+  // Mounted whenever open OR mid-exit — the <Presence> wrappers below defer
+  // their own unmount until the slide-down / fade-out finishes.
+  if (!open && !isExiting) return null;
 
   const heightStyle: string | number = (() => {
     if (dragHeight != null) return `${dragHeight}px`;
@@ -187,45 +208,67 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
     <BottomSheetContext.Provider value={ctx}>
       <Portal>
         <ScrollLockProvider>
-          <Backdrop
-            isInline
-            onClick={() => {
-              if (dismissOnOutsideClick) setOpen(false);
-            }}
-          />
+          {/* Backdrop in its own Presence so its fade-out plays before unmount;
+              `Presence` injects `data-state` onto it and the fade tokens gate on it. */}
+          <Presence isPresent={open}>
+            <Backdrop
+              isInline
+              className={cn(
+                'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
+                'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
+              )}
+              onClick={() => {
+                if (dismissOnOutsideClick) setOpen(false);
+              }}
+            />
+          </Presence>
           <FocusScope asChild trapped loop>
             <DismissableLayer
               isEscapeDisabled={!dismissOnEscape}
               onEscape={() => setOpen(false)}
               isOutsideClickDisabled
             >
-              <div
-                ref={(el) => {
-                  sheetRef.current = el;
-                  if (typeof forwardedRef === 'function') forwardedRef(el);
-                  else if (forwardedRef) (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
-                }}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby={titleId}
-                aria-describedby={descriptionId}
-                style={{
-                  height: heightStyle,
-                  transition: dragHeight == null ? 'height 220ms ease-out' : 'none',
-                }}
-                className={cn(
-                  'fixed inset-x-0 bottom-0 z-modal flex flex-col rounded-t-xl border-t outline-none',
-                  surfaceVariants({
-                    variant: variant ?? 'elevated',
-                    tone,
-                    radius: radius ?? 'none',
-                    padding: padding ?? 'none',
-                    elevation: elevation ?? 5,
-                  }),
-                  className,
-                )}
-                {...rest}
-              >
+              {/* The sheet panel is the Presence-animated node — it carries
+                  `data-state` (injected via {...props}) and the slide classes.
+                  FULL slide from the bottom edge: translate-y-full when closed,
+                  driven by `transition-transform` (the inline transition also
+                  carries `transform` so the height + slide animate together).
+                  Gated `motion-safe` + `motion-reduce` so reduced-motion users
+                  get no movement. */}
+              <Presence isPresent={open}>
+                <div
+                  ref={(el) => {
+                    sheetRef.current = el;
+                    if (typeof forwardedRef === 'function') forwardedRef(el);
+                    else if (forwardedRef) (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+                  }}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby={titleId}
+                  aria-describedby={descriptionId}
+                  style={{
+                    height: heightStyle,
+                    transition:
+                      dragHeight == null
+                        ? 'height 220ms ease-out, transform var(--duration-base) var(--ease-out)'
+                        : 'none',
+                  }}
+                  className={cn(
+                    'fixed inset-x-0 bottom-0 z-modal flex flex-col rounded-t-xl border-t outline-none',
+                    'will-change-transform',
+                    'motion-safe:data-[state=closed]:translate-y-full',
+                    'motion-reduce:translate-y-0',
+                    surfaceVariants({
+                      variant: variant ?? 'elevated',
+                      tone,
+                      radius: radius ?? 'none',
+                      padding: padding ?? 'none',
+                      elevation: elevation ?? 5,
+                    }),
+                    className,
+                  )}
+                  {...rest}
+                >
                 <div
                   role="separator"
                   aria-orientation="horizontal"
@@ -245,7 +288,8 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
                 <div className="flex-1 overflow-y-auto px-4 pb-4">
                   <OverlayChromeProvider value={chromeCtx}>{children}</OverlayChromeProvider>
                 </div>
-              </div>
+                </div>
+              </Presence>
             </DismissableLayer>
           </FocusScope>
         </ScrollLockProvider>

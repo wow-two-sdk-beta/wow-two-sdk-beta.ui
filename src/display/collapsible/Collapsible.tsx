@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { cn, dataAttr } from '../../utils';
 import { useControlled } from '../../hooks';
-import { Slot } from '../../primitives';
+import { Slot, Presence } from '../../primitives';
 
 interface CollapsibleContextValue {
   open: boolean;
@@ -106,26 +106,57 @@ export interface CollapsibleContentProps extends HTMLAttributes<HTMLDivElement> 
   children: ReactNode;
 }
 
-export const CollapsibleContent = forwardRef<HTMLDivElement, CollapsibleContentProps>(
-  function CollapsibleContent({ isForceMounted, className, children, ...rest }, ref) {
+/* Inner element rendered by <Presence>: receives ref + data-state via {...props}.
+ * Animates content height through grid-template-rows 0fr -> 1fr (gated on
+ * data-state) and layers a fade on the inner pane. Reduced-motion users get the
+ * resolved height/opacity with no transition (motion-safe / motion-reduce). */
+const CollapsibleContentInner = forwardRef<HTMLDivElement, CollapsibleContentProps>(
+  function CollapsibleContentInner(
+    { isForceMounted, className, children, ...props },
+    ref,
+  ) {
     const ctx = useCollapsibleContext();
-    if (!ctx.open && !isForceMounted) return null;
     return (
       <div
         ref={ref}
         id={ctx.contentId}
         role="region"
         aria-labelledby={ctx.triggerId}
-        data-state={ctx.open ? 'open' : 'closed'}
-        hidden={!ctx.open}
+        hidden={!ctx.open && !isForceMounted}
         className={cn(
-          'overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+          'grid grid-rows-[0fr] motion-safe:transition-[grid-template-rows]',
+          'motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out)',
+          'data-[state=open]:grid-rows-[1fr]',
           className,
         )}
-        {...rest}
+        {...props}
       >
-        {children}
+        <div
+          className={cn(
+            'min-h-0 overflow-hidden',
+            'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
+            'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
+            'motion-reduce:animate-none',
+          )}
+          data-state={ctx.open ? 'open' : 'closed'}
+        >
+          {children}
+        </div>
       </div>
+    );
+  },
+);
+
+export const CollapsibleContent = forwardRef<HTMLDivElement, CollapsibleContentProps>(
+  function CollapsibleContent(props, ref) {
+    const ctx = useCollapsibleContext();
+    if (props.isForceMounted) {
+      return <CollapsibleContentInner ref={ref} data-state={ctx.open ? 'open' : 'closed'} {...props} />;
+    }
+    return (
+      <Presence isPresent={ctx.open}>
+        <CollapsibleContentInner ref={ref} {...props} />
+      </Presence>
     );
   },
 );

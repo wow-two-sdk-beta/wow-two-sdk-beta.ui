@@ -19,6 +19,7 @@ import {
   AnchoredPositioner,
   OverlayArrow,
   Portal,
+  Presence,
   type AnchoredPositionerProps,
   type OverlayArrowProps,
 } from '../../primitives';
@@ -156,10 +157,17 @@ export interface HoverCardContentProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
-export const HoverCardContent = forwardRef<HTMLDivElement, HoverCardContentProps>(
-  function HoverCardContent({ className, children, onPointerEnter, onPointerLeave, ...rest }, forwardedRef) {
+/*
+ * Presence clones its single child and injects `ref` + `data-state` onto it,
+ * so that child must be the animated element. Portal/AnchoredPositioner can't
+ * carry those props down to the styled div, so this forwardRef panel bridges
+ * them: Presence drives this panel, the panel renders the Portal → positioner
+ * tree, and forwards `ref` + the injected `data-state` (via `...rest`) onto the
+ * inner div that carries the pop transition.
+ */
+const HoverCardPanel = forwardRef<HTMLDivElement, HoverCardContentProps>(
+  function HoverCardPanel({ className, children, onPointerEnter, onPointerLeave, ...rest }, forwardedRef) {
     const ctx = useHoverCardContext();
-    if (!ctx.open) return null;
     return (
       <Portal>
         <AnchoredPositioner
@@ -170,7 +178,6 @@ export const HoverCardContent = forwardRef<HTMLDivElement, HoverCardContentProps
         >
           <div
             ref={forwardedRef}
-            data-state="open"
             onPointerEnter={(e) => {
               onPointerEnter?.(e);
               ctx.cancelHide();
@@ -180,7 +187,8 @@ export const HoverCardContent = forwardRef<HTMLDivElement, HoverCardContentProps
               ctx.hide();
             }}
             className={cn(
-              'w-64 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95',
+              'w-64 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none',
+              'motion-safe:data-[state=open]:animate-(--animate-pop-in) motion-safe:data-[state=closed]:animate-(--animate-pop-out) motion-reduce:animate-none',
               className,
             )}
             {...rest}
@@ -189,6 +197,17 @@ export const HoverCardContent = forwardRef<HTMLDivElement, HoverCardContentProps
           </div>
         </AnchoredPositioner>
       </Portal>
+    );
+  },
+);
+
+export const HoverCardContent = forwardRef<HTMLDivElement, HoverCardContentProps>(
+  function HoverCardContent(props, forwardedRef) {
+    const ctx = useHoverCardContext();
+    return (
+      <Presence isPresent={ctx.open}>
+        <HoverCardPanel ref={forwardedRef} {...props} />
+      </Presence>
     );
   },
 );

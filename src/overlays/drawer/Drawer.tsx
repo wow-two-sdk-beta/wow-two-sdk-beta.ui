@@ -13,7 +13,7 @@ import {
 import { FocusScope } from '@radix-ui/react-focus-scope';
 import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
-import { DismissableLayer, Portal, ScrollLockProvider, Slot } from '../../primitives';
+import { DismissableLayer, Portal, Presence, ScrollLockProvider, Slot } from '../../primitives';
 import { Backdrop } from '../backdrop';
 import {
   OverlayBody,
@@ -124,11 +124,26 @@ export const DrawerTrigger = forwardRef<HTMLButtonElement, DrawerTriggerProps>(
 
 export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
+// Full-edge slide: the panel rests at translate-0 when open and is pushed
+// fully off its own edge when closed. `transition-transform` (gated on
+// `motion-safe:`) animates both enter and exit via Presence's data-state flip.
 const SIDE_BASE: Record<DrawerSide, string> = {
-  right: 'inset-y-0 right-0 h-full w-full border-l animate-in slide-in-from-right',
-  left: 'inset-y-0 left-0 h-full w-full border-r animate-in slide-in-from-left',
-  top: 'inset-x-0 top-0 w-full border-b animate-in slide-in-from-top',
-  bottom: 'inset-x-0 bottom-0 w-full border-t animate-in slide-in-from-bottom',
+  right:
+    'inset-y-0 right-0 h-full w-full border-l ' +
+    'motion-safe:transition-transform motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out) ' +
+    'data-[state=closed]:translate-x-full',
+  left:
+    'inset-y-0 left-0 h-full w-full border-r ' +
+    'motion-safe:transition-transform motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out) ' +
+    'data-[state=closed]:-translate-x-full',
+  top:
+    'inset-x-0 top-0 w-full border-b ' +
+    'motion-safe:transition-transform motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out) ' +
+    'data-[state=closed]:-translate-y-full',
+  bottom:
+    'inset-x-0 bottom-0 w-full border-t ' +
+    'motion-safe:transition-transform motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out) ' +
+    'data-[state=closed]:translate-y-full',
 };
 
 const HORIZONTAL_SIZE: Record<DrawerSize, string> = {
@@ -155,6 +170,83 @@ export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement>, Surf
   size?: DrawerSize;
   children: ReactNode;
 }
+
+/**
+ * The full portal subtree (scroll-lock + backdrop + focus-trap + dialog panel),
+ * rendered as the single child of `<Presence>`. Presence injects `data-state`
+ * ("open" | "closed") + a `ref` here; both are forwarded to the dialog panel —
+ * the element whose `transition-transform` end defers unmount — and `data-state`
+ * is mirrored onto the backdrop so its fade runs in lock-step with the slide.
+ * Keeping the whole subtree inside Presence holds the focus-trap + scroll-lock
+ * active through the exit animation and releases them on unmount.
+ */
+interface DrawerSurfaceProps extends HTMLAttributes<HTMLDivElement> {
+  ctx: DrawerContextValue;
+  hideBackdrop?: boolean;
+  isBlurred?: boolean;
+  chromeCtx: OverlayChromeContextValue;
+  surfaceClassName?: string;
+  children: ReactNode;
+}
+
+const DrawerSurface = forwardRef<HTMLDivElement, DrawerSurfaceProps>(function DrawerSurface(
+  {
+    ctx,
+    hideBackdrop,
+    isBlurred,
+    chromeCtx,
+    surfaceClassName,
+    children,
+    // `data-state` is injected by Presence; default to "open" when rendered standalone.
+    'data-state': dataState = 'open',
+    ...rest
+  }: DrawerSurfaceProps & { 'data-state'?: 'open' | 'closed' },
+  forwardedRef,
+) {
+  return (
+    <Portal>
+      <ScrollLockProvider>
+        {!hideBackdrop && (
+          <Backdrop
+            isInline
+            isBlurred={isBlurred}
+            data-state={dataState}
+            className={cn(
+              // Backdrop fade driven by the same data-state Presence flips (motion-safe).
+              'motion-safe:transition-opacity motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out)',
+              'data-[state=closed]:opacity-0',
+            )}
+            onClick={() => {
+              if (ctx.dismissOnOutsideClick) ctx.setOpen(false);
+            }}
+          />
+        )}
+        <FocusScope asChild trapped loop>
+          <DismissableLayer
+            isEscapeDisabled={!ctx.dismissOnEscape}
+            onEscape={() => ctx.setOpen(false)}
+            isOutsideClickDisabled
+          >
+            <div
+              ref={forwardedRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={ctx.titleId}
+              aria-describedby={ctx.descriptionId}
+              data-state={dataState}
+              data-side={ctx.side}
+              className={surfaceClassName}
+              {...rest}
+            >
+              <OverlayChromeProvider value={chromeCtx}>{children}</OverlayChromeProvider>
+            </div>
+          </DismissableLayer>
+        </FocusScope>
+      </ScrollLockProvider>
+    </Portal>
+  );
+});
+DrawerSurface.displayName = 'DrawerSurface';
 
 export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
   function DrawerContent(
@@ -187,54 +279,37 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(
       [ctx.titleId, ctx.descriptionId, close],
     );
 
-    if (!ctx.open) return null;
+    const surfaceClassName = cn(
+      'fixed z-modal flex flex-col gap-4 outline-none',
+      surfaceVariants({
+        variant: variant ?? 'elevated',
+        tone,
+        radius: radius ?? 'none',
+        padding: padding ?? 'xl',
+        elevation: elevation ?? 3,
+      }),
+      SIDE_BASE[ctx.side],
+      sizeClass,
+      className,
+    );
+
+    // Presence keeps the subtree mounted through the exit slide, flipping
+    // data-state open→closed and deferring unmount until the panel's
+    // transition ends.
     return (
-      <Portal>
-        <ScrollLockProvider>
-          {!hideBackdrop && (
-            <Backdrop
-              isInline
-              isBlurred={isBlurred}
-              onClick={() => {
-                if (ctx.dismissOnOutsideClick) ctx.setOpen(false);
-              }}
-            />
-          )}
-          <FocusScope asChild trapped loop>
-            <DismissableLayer
-              isEscapeDisabled={!ctx.dismissOnEscape}
-              onEscape={() => ctx.setOpen(false)}
-              isOutsideClickDisabled
-            >
-              <div
-                ref={forwardedRef}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby={ctx.titleId}
-                aria-describedby={ctx.descriptionId}
-                data-state="open"
-                data-side={ctx.side}
-                className={cn(
-                  'fixed z-modal flex flex-col gap-4 outline-none',
-                  surfaceVariants({
-                    variant: variant ?? 'elevated',
-                    tone,
-                    radius: radius ?? 'none',
-                    padding: padding ?? 'xl',
-                    elevation: elevation ?? 3,
-                  }),
-                  SIDE_BASE[ctx.side],
-                  sizeClass,
-                  className,
-                )}
-                {...rest}
-              >
-                <OverlayChromeProvider value={chromeCtx}>{children}</OverlayChromeProvider>
-              </div>
-            </DismissableLayer>
-          </FocusScope>
-        </ScrollLockProvider>
-      </Portal>
+      <Presence isPresent={ctx.open}>
+        <DrawerSurface
+          ref={forwardedRef}
+          ctx={ctx}
+          hideBackdrop={hideBackdrop}
+          isBlurred={isBlurred}
+          chromeCtx={chromeCtx}
+          surfaceClassName={surfaceClassName}
+          {...rest}
+        >
+          {children}
+        </DrawerSurface>
+      </Presence>
     );
   },
 );

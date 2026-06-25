@@ -16,7 +16,7 @@ import {
 import { Check } from 'lucide-react';
 import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
-import { AnchoredPositioner, DismissableLayer, Portal } from '../../primitives';
+import { AnchoredPositioner, DismissableLayer, Portal, Presence } from '../../primitives';
 import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
 import {
   listboxVariants,
@@ -339,52 +339,79 @@ export function ComboboxContent({
       ctx.setActiveId(list[0]?.id ?? null);
     }
   });
-  if (!ctx.open) return null;
   /* Default to `xs` (p-1) so items breathe — same as Listbox. */
   const resolvedPadding = padding ?? 'xs';
   return (
-    <Portal>
-      <AnchoredPositioner
-        anchor={ctx.inputRef.current}
-        placement={placement}
-        offset={offset}
-        className="z-dropdown"
-      >
-        <DismissableLayer
-          onEscape={() => ctx.setOpen(false)}
-          onOutsidePointerDown={(e) => {
-            if (ctx.inputRef.current?.contains(e.target as Node)) return;
-            ctx.setOpen(false);
-          }}
+    <Presence isPresent={ctx.open}>
+      {/* `Presence` injects ref + data-state onto this portal root and defers
+          unmount until its exit anim ends, so the pop-out plays before the
+          listbox leaves the tree. The panel pop is driven off this root's
+          state via `group-data-[state=*]` on the listbox below. */}
+      <ComboboxPortalRoot>
+        <AnchoredPositioner
+          anchor={ctx.inputRef.current}
+          placement={placement}
+          offset={offset}
+          className="z-dropdown"
         >
-          <div
-            ref={ctx.contentRef}
-            id={ctx.listboxId}
-            role="listbox"
-            className={cn(
-              surfaceVariants({
-                variant,
-                tone,
-                radius,
-                padding: resolvedPadding,
-                elevation,
-              }),
-              listboxVariants(),
-              className,
-            )}
-            style={
-              ctx.inputRef.current
-                ? { minWidth: ctx.inputRef.current.offsetWidth }
-                : undefined
-            }
+          <DismissableLayer
+            onEscape={() => ctx.setOpen(false)}
+            onOutsidePointerDown={(e) => {
+              if (ctx.inputRef.current?.contains(e.target as Node)) return;
+              ctx.setOpen(false);
+            }}
           >
-            {children}
-          </div>
-        </DismissableLayer>
-      </AnchoredPositioner>
-    </Portal>
+            <div
+              ref={ctx.contentRef}
+              id={ctx.listboxId}
+              role="listbox"
+              className={cn(
+                /* pop (fade+scale) gated on the portal-root data-state + motion-safe
+                   so reduced-motion users get no movement. */
+                'motion-safe:group-data-[state=open]:animate-(--animate-pop-in)',
+                'motion-safe:group-data-[state=closed]:animate-(--animate-pop-out) motion-reduce:animate-none',
+                surfaceVariants({
+                  variant,
+                  tone,
+                  radius,
+                  padding: resolvedPadding,
+                  elevation,
+                }),
+                listboxVariants(),
+                className,
+              )}
+              style={
+                ctx.inputRef.current
+                  ? { minWidth: ctx.inputRef.current.offsetWidth }
+                  : undefined
+              }
+            >
+              {children}
+            </div>
+          </DismissableLayer>
+        </AnchoredPositioner>
+      </ComboboxPortalRoot>
+    </Presence>
   );
 }
+
+/**
+ * `Presence`-clonable root: a single element that accepts `ref` + `data-state`
+ * (injected by `Presence`) and renders inside a `Portal`. Marked `group` so the
+ * listbox panel animates off its `data-[state]`. Holds no layout of its own
+ * (`display: contents`) so the anchored positioning of children is unaffected.
+ */
+const ComboboxPortalRoot = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  function ComboboxPortalRoot({ children, className, ...props }, ref) {
+    return (
+      <Portal>
+        <div ref={ref} className={cn('group contents', className)} {...props}>
+          {children}
+        </div>
+      </Portal>
+    );
+  },
+);
 
 export interface ComboboxItemProps extends HTMLAttributes<HTMLDivElement> {
   value: string;

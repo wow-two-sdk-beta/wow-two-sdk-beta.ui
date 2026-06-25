@@ -13,7 +13,7 @@ import {
 import { FocusScope } from '@radix-ui/react-focus-scope';
 import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../utils';
 import { useControlled } from '../../hooks';
-import { DismissableLayer, Portal, ScrollLockProvider, Slot } from '../../primitives';
+import { DismissableLayer, Portal, Presence, ScrollLockProvider, Slot } from '../../primitives';
 import { Backdrop } from '../backdrop';
 import {
   OverlayBody,
@@ -158,53 +158,96 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
       [ctx.titleId, ctx.descriptionId, close],
     );
 
-    if (!ctx.open) return null;
     return (
       <Portal>
         <ScrollLockProvider>
-          {!hideBackdrop && <Backdrop isInline isBlurred={isBlurred} />}
+          {/* Backdrop in its own Presence so its fade-out plays before unmount.
+              `Presence` injects `data-state` + `ref` onto the cloned child, which is
+              the animating node it watches for `animationend` — so each animated
+              element gets its own Presence (one cloned child = one watched node). */}
+          {!hideBackdrop && (
+            <Presence isPresent={ctx.open}>
+              <DialogBackdrop isBlurred={isBlurred} />
+            </Presence>
+          )}
           {/* Outside-click dismissal lives on the centering wrapper (it covers the
-              backdrop): a click on the padding (target === currentTarget) = outside. */}
-          <div
-            className="fixed inset-0 z-modal grid place-items-center overflow-y-auto p-4"
-            onClick={(e) => {
-              if (e.target !== e.currentTarget) return;
-              if (ctx.dismissOnOutsideClick) ctx.setOpen(false);
-            }}
-          >
-            <FocusScope asChild trapped loop>
-              <DismissableLayer
-                isEscapeDisabled={!ctx.dismissOnEscape}
-                onEscape={() => ctx.setOpen(false)}
-                isOutsideClickDisabled
-              >
-                <div
-                  ref={forwardedRef}
-                  role={ctx.role}
-                  aria-modal="true"
-                  aria-labelledby={ctx.titleId}
-                  aria-describedby={ctx.descriptionId}
-                  data-state="open"
-                  className={cn(
-                    'relative w-full max-w-lg animate-in fade-in-0 zoom-in-95',
-                    surfaceVariants({
-                      variant: variant ?? 'elevated',
-                      tone,
-                      radius: radius ?? 'lg',
-                      padding: padding ?? 'xl',
-                      elevation,
-                    }),
-                    className,
-                  )}
-                  {...rest}
+              backdrop): a click on the padding (target === currentTarget) = outside.
+              The wrapper is the Presence-animated node — `Presence` injects
+              `data-state` + `ref` onto it and watches *its own* animations (no
+              subtree walk), so the wrapper carries a (transparent) fade and the
+              visible pop lands on the panel via `group-data-[state=*]`. Both share
+              the same token timing, so the wrapper fade gates unmount correctly. */}
+          <Presence isPresent={ctx.open}>
+            <div
+              className={cn(
+                'group fixed inset-0 z-modal grid place-items-center overflow-y-auto p-4',
+                'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
+                'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
+              )}
+              onClick={(e) => {
+                if (e.target !== e.currentTarget) return;
+                if (ctx.dismissOnOutsideClick) ctx.setOpen(false);
+              }}
+            >
+              <FocusScope asChild trapped loop>
+                <DismissableLayer
+                  isEscapeDisabled={!ctx.dismissOnEscape}
+                  onEscape={() => ctx.setOpen(false)}
+                  isOutsideClickDisabled
                 >
-                  <OverlayChromeProvider value={chromeCtx}>{children}</OverlayChromeProvider>
-                </div>
-              </DismissableLayer>
-            </FocusScope>
-          </div>
+                  <div
+                    ref={forwardedRef}
+                    role={ctx.role}
+                    aria-modal="true"
+                    aria-labelledby={ctx.titleId}
+                    aria-describedby={ctx.descriptionId}
+                    className={cn(
+                      'relative w-full max-w-lg',
+                      'motion-safe:group-data-[state=open]:animate-(--animate-pop-in)',
+                      'motion-safe:group-data-[state=closed]:animate-(--animate-pop-out)',
+                      surfaceVariants({
+                        variant: variant ?? 'elevated',
+                        tone,
+                        radius: radius ?? 'lg',
+                        padding: padding ?? 'xl',
+                        elevation,
+                      }),
+                      className,
+                    )}
+                    {...rest}
+                  >
+                    <OverlayChromeProvider value={chromeCtx}>{children}</OverlayChromeProvider>
+                  </div>
+                </DismissableLayer>
+              </FocusScope>
+            </div>
+          </Presence>
         </ScrollLockProvider>
       </Portal>
+    );
+  },
+);
+
+/**
+ * `Presence`-clonable backdrop: a single `forwardRef` element that spreads
+ * `data-state` (injected by `Presence`) onto its node and animates the scrim
+ * fade off it. Kept `open` (mount is controlled by `Presence`, not the prop) so
+ * the fade-out can play before unmount.
+ */
+const DialogBackdrop = forwardRef<HTMLDivElement, { isBlurred?: boolean } & HTMLAttributes<HTMLDivElement>>(
+  function DialogBackdrop({ isBlurred, className, ...props }, ref) {
+    return (
+      <Backdrop
+        ref={ref}
+        isInline
+        isBlurred={isBlurred}
+        className={cn(
+          'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
+          'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
+          className,
+        )}
+        {...props}
+      />
     );
   },
 );

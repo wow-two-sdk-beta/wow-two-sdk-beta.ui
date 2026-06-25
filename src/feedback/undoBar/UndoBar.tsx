@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import { cn, surfaceVariants } from '../../utils';
-import { Portal } from '../../primitives';
+import { Portal, Presence } from '../../primitives';
 
 export type UndoBarPosition =
   | 'top-right'
@@ -98,47 +105,80 @@ export function UndoBar({
     };
   }, [isOpen, duration, paused, hasCountdown, onOpenChange]);
 
-  if (!isOpen) return null;
-
   return (
+    /* Static positioning wrapper holds the fixed corner + (for `*-center`) the
+       centering `-translate-x-1/2`; the inner `UndoBarPanel` carries the slide
+       keyframe, whose own `translateY` would otherwise clobber that centering
+       translate if both sat on one node. `Portal` stays mounted; `Presence`
+       owns the panel's mount so the exit (slide-out + fade) plays before
+       unmount, cloning `ref` + `data-state` onto the panel for its motion. */
     <Portal>
-      <div
-        role="status"
-        aria-live="polite"
-        onMouseEnter={() => canPauseOnHover && setPaused(true)}
-        onMouseLeave={() => canPauseOnHover && setPaused(false)}
-        onFocus={() => canPauseOnHover && setPaused(true)}
-        onBlur={() => canPauseOnHover && setPaused(false)}
-        className={cn(
-          'fixed z-toast flex items-center gap-3 overflow-hidden text-sm animate-in fade-in-0 slide-in-from-bottom-2',
-          surfaceVariants({ variant: 'surface', radius: 'md', padding: 'sm', elevation: 3 }),
-          'px-4 py-2.5',
-          POSITION[position],
-          className,
-        )}
-      >
-        <span className="flex-1">{message}</span>
-        {onUndo && (
-          <button
-            type="button"
-            onClick={() => {
-              onUndo();
-              onOpenChange?.(false);
-            }}
-            className="font-medium text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-1"
+      <div className={cn('fixed z-toast', POSITION[position])}>
+        <Presence isPresent={isOpen}>
+          <UndoBarPanel
+            onMouseEnter={() => canPauseOnHover && setPaused(true)}
+            onMouseLeave={() => canPauseOnHover && setPaused(false)}
+            onFocus={() => canPauseOnHover && setPaused(true)}
+            onBlur={() => canPauseOnHover && setPaused(false)}
+            className={className}
           >
-            {undoLabel}
-          </button>
-        )}
-        {hasCountdown && duration !== Infinity && (
-          <div className="absolute bottom-0 left-0 h-0.5 w-full bg-border">
-            <div
-              className="h-full bg-primary transition-[width] duration-100 ease-linear"
-              style={{ width: `${progress * 100}%` }}
-            />
-          </div>
-        )}
+            <span className="flex-1">{message}</span>
+            {onUndo && (
+              <button
+                type="button"
+                onClick={() => {
+                  onUndo();
+                  onOpenChange?.(false);
+                }}
+                className="font-medium text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-1"
+              >
+                {undoLabel}
+              </button>
+            )}
+            {hasCountdown && duration !== Infinity && (
+              <div className="absolute bottom-0 left-0 h-0.5 w-full bg-border">
+                <div
+                  className="h-full bg-primary transition-[width] duration-100 ease-linear"
+                  style={{ width: `${progress * 100}%` }}
+                />
+              </div>
+            )}
+          </UndoBarPanel>
+        </Presence>
       </div>
     </Portal>
   );
 }
+
+/**
+ * `Presence`-clonable bar: a single `forwardRef` element that spreads the
+ * injected `ref` + `data-state` ("open" | "closed") onto its node and runs the
+ * enter/exit tokens off that state. forwardRef + `{...props}` are required so
+ * the ref and `data-state` actually land here. Enter slides up from below +
+ * fades in; exit slides down + fades out. Reduced motion gets neither.
+ */
+const UndoBarPanel = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  function UndoBarPanel({ className, children, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        role="status"
+        aria-live="polite"
+        className={cn(
+          'relative flex items-center gap-3 overflow-hidden text-sm',
+          surfaceVariants({ variant: 'surface', radius: 'md', padding: 'sm', elevation: 3 }),
+          'px-4 py-2.5',
+          /* slide-in-bottom/out-bottom carry their own fade; gated on data-state +
+             motion-safe so reduced-motion users get no movement. */
+          'motion-safe:data-[state=open]:animate-(--animate-slide-in-bottom)',
+          'motion-safe:data-[state=closed]:animate-(--animate-slide-out-bottom)',
+          'motion-reduce:animate-none',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  },
+);
