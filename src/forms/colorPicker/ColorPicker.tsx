@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useState, type ReactNode } from 'react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
@@ -24,6 +24,8 @@ export interface ColorPickerProps {
   name?: string;
   className?: string;
   'aria-label'?: string;
+  /** Custom trigger element; when set, replaces the default swatch + hex-value button. Must be a single focusable element (it becomes the popover trigger via `asChild`). */
+  trigger?: ReactNode;
 }
 
 const FALLBACK_HSV: HSV = { h: 217, s: 0.91, v: 0.96, a: 1 };
@@ -40,6 +42,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
     name,
     className,
     'aria-label': ariaLabel = 'Pick a color',
+    trigger,
   },
   ref,
 ) {
@@ -74,19 +77,21 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
-          ref={ref}
-          type="button"
-          aria-label={ariaLabel}
-          disabled={isDisabled}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-sm transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60',
-            className,
-          )}
-        >
-          <ColorSwatch color={hex ?? '#00000000'} size={triggerSize} />
-          <span className="font-mono uppercase">{hex ?? '—'}</span>
-        </button>
+        {trigger ?? (
+          <button
+            ref={ref}
+            type="button"
+            aria-label={ariaLabel}
+            disabled={isDisabled}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-sm transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60',
+              className,
+            )}
+          >
+            <ColorSwatch color={hex ?? '#00000000'} size={triggerSize} />
+            <span className="font-mono uppercase">{hex ?? '—'}</span>
+          </button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="flex w-64 flex-col gap-3">
         <ColorArea

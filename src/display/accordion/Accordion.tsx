@@ -252,7 +252,7 @@ export const AccordionContent = forwardRef<HTMLDivElement, AccordionContentProps
           {...rest}
         >
           <div className="min-h-0 overflow-hidden">
-            <div className="px-3 pb-3">{children}</div>
+            <div className="px-3 py-3">{children}</div>
           </div>
         </div>
       </Presence>
