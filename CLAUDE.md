@@ -79,6 +79,12 @@ Templates exist at [`docs/templates/component-standard.md`](./docs/templates/com
 - Build: `tsup` (ESM) + `tsc --emitDeclarationOnly` (DTS) · Dev: `vite` (in playground) · Catalog: Storybook 8 + `@tailwindcss/vite` plugin · Lint: ESLint 9 flat config + `eslint-plugin-boundaries`
 - Pkg manager: `pnpm` workspace (root pkg + `apps/playground`)
 
+## Theming
+
+- "Use theme X" / generate a brand theme → **[`THEMES.md`](./THEMES.md)** (token contract, curated ids, `generateTheme` seed, how to apply: import `@wow-two-beta/ui/themes.css` + add `theme-{id}` & `dark`).
+- Themes carry a `validated | candidate` status — `validated` (e.g. `smart-qr`) is app-proven and safe for production; `candidate` is AA-proven but not yet app-validated. Prefer `validated` for real apps. Full lifecycle in `THEMES.md`.
+- Engine lives in `src/themes/` (OKLCH, no color library); ships at `@wow-two-beta/ui/themes` + `themes.css` + `themes.json`. [Studio](https://wow-two-sdk-beta.github.io/wow-two-sdk-beta.ui/theme-studio).
+
 ## Working rules
 
 - **Build first, standardize later.** First-gen components ship code + stories + barrel only. The standardization pass (per-component, separate chats, later phase) adds `*.standard.md` + `*.spec.md`.

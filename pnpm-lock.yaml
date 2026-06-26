@@ -162,6 +162,43 @@ importers:
         specifier: ^6.0.0
         version: 6.4.2(jiti@2.6.1)(lightningcss@1.32.0)
 
+  apps/theme-studio:
+    dependencies:
+      '@wow-two-beta/ui':
+        specifier: workspace:*
+        version: link:../..
+      react:
+        specifier: ^19.0.0
+        version: 19.2.5
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.5(react@19.2.5)
+      react-router-dom:
+        specifier: ^7.0.0
+        version: 7.17.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.1.0
+        version: 4.2.4(vite@6.4.2(jiti@2.6.1)(lightningcss@1.32.0))
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: ^4.3.4
+        version: 4.7.0(vite@6.4.2(jiti@2.6.1)(lightningcss@1.32.0))
+      tailwindcss:
+        specifier: ^4.1.0
+        version: 4.2.4
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.2(jiti@2.6.1)(lightningcss@1.32.0)
+
 packages:
 
   '@adobe/css-tools@4.4.4':

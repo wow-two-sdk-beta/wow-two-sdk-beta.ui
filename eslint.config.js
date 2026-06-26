@@ -10,6 +10,7 @@ export default tseslint.config(
       'storybook-static/**',
       'node_modules/**',
       'apps/**',
+      'scripts/**',
       '*.config.{js,ts}',
       '.storybook/**',
     ],
@@ -26,7 +27,7 @@ export default tseslint.config(
       'boundaries/elements': [
         {
           type: 'foundation',
-          pattern: 'src/(tokens|tailwind|utils|hooks|icons|primitives)/**',
+          pattern: 'src/(tokens|tailwind|utils|hooks|icons|primitives|themes)/**',
         },
         {
           type: 'domain',

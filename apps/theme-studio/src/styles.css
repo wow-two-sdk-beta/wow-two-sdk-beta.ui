@@ -1,0 +1,5 @@
+/* Theme-studio CSS entry. The lib stylesheet only auto-detects Tailwind sources
+   relative to the app root, so library source classes (e.g. AppShell's
+   [grid-area:*]) would never compile here — @source adds the lib src tree. */
+@import '@wow-two-beta/ui/styles.css';
+@source "../../../src";

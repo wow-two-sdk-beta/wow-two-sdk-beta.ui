@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # commit version bump + push tags
+  contents: write   # commit version bump + push tags + create GitHub Releases
   pages: write      # deploy Storybook to GitHub Pages
   id-token: write   # OIDC for Pages deploy
 
@@ -57,6 +57,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "::notice::Releasing v$VERSION"
 
+      # --- npm publish: the release gate. Everything below must NOT block it. ---
       - name: Publish to npm
         run: npm publish --access public
         env:
@@ -71,14 +72,85 @@ jobs:
           git tag "v${{ steps.bump.outputs.version }}"
           git push --follow-tags
 
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="v${VERSION}"
+          BASE_URL="https://wow-two-sdk-beta.github.io/wow-two-sdk-beta.ui"
+
+          # Previous tag (the one before this just-pushed tag). Empty on first release.
+          PREV=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || true)
+          if [ -n "$PREV" ]; then
+            RANGE="${PREV}..HEAD"
+            echo "::notice::Changelog range ${RANGE}"
+          else
+            RANGE="HEAD"
+            echo "::notice::First release — using full history"
+          fi
+
+          # Collect "<type>|<subject>" lines, skipping the [skip ci] release commit.
+          LOG=$(git log "$RANGE" --no-merges --pretty=format:'%s' \
+            | grep -vF '[skip ci]' || true)
+
+          section() {
+            # $1 = conventional-commit type, $2 = section heading
+            local body
+            body=$(printf '%s\n' "$LOG" \
+              | grep -E "^$1(\(.+\))?!?:" \
+              | sed -E "s/^$1(\(.+\))?!?:[[:space:]]*//" \
+              | sed -E 's/^/- /' || true)
+            if [ -n "$body" ]; then
+              printf '### %s\n\n%s\n\n' "$2" "$body"
+            fi
+          }
+
+          {
+            echo "Published \`@wow-two-beta/ui\` v${VERSION} to npm."
+            echo
+            CHANGELOG=$(
+              section 'feat'     'Features'
+              section 'fix'      'Fixes'
+              section 'refactor' 'Refactors'
+              section 'docs'     'Docs'
+              section 'chore'    'Chores'
+            )
+            if [ -n "$CHANGELOG" ]; then
+              echo "## Changelog"
+              echo
+              # $(...) strips trailing newlines, so re-add the blank separator.
+              printf '%s\n\n' "$CHANGELOG"
+            else
+              echo "_No conventional-commit changes since ${PREV:-the beginning}._"
+              echo
+            fi
+            echo "## Live"
+            echo
+            echo "- [Storybook](${BASE_URL}/) — component catalog"
+            echo "- [Showcase](${BASE_URL}/showcase) — gallery app"
+            echo "- [Theme Studio](${BASE_URL}/theme-studio) — theme generator"
+          } > release-notes.md
+
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes-file release-notes.md
+
+      # --- Pages apps: built AFTER publish so a broken app can't block the release. ---
       - name: Build Storybook
         run: pnpm build:storybook
 
       - name: Build showcase
         run: pnpm --filter showcase build
 
-      - name: Merge showcase into Pages artifact
-        run: cp -r apps/showcase/dist storybook-static/showcase
+      - name: Build theme-studio
+        run: pnpm --filter theme-studio build
+
+      - name: Merge apps into Pages artifact
+        run: |
+          cp -r apps/showcase/dist storybook-static/showcase
+          cp -r apps/theme-studio/dist storybook-static/theme-studio
 
       - name: Upload Storybook artifact
         uses: actions/upload-pages-artifact@v3

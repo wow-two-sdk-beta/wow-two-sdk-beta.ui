@@ -5,6 +5,7 @@ const folders = [
   'hooks',
   'icons',
   'primitives',
+  'themes',
   'actions',
   'display',
   'feedback',

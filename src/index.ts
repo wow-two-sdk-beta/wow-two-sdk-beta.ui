@@ -3,6 +3,7 @@ export * as utils from './utils';
 export * as hooks from './hooks';
 export * as icons from './icons';
 export * as primitives from './primitives';
+export * as themes from './themes';
 
 // Domains — flat re-export for convenience
 export * from './actions';

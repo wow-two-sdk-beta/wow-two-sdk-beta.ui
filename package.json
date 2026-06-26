@@ -57,6 +57,11 @@
       "import": "./dist/primitives/index.js",
       "default": "./dist/primitives/index.js"
     },
+    "./themes": {
+      "types": "./dist/themes/index.d.ts",
+      "import": "./dist/themes/index.js",
+      "default": "./dist/themes/index.js"
+    },
     "./actions": {
       "types": "./dist/actions/index.d.ts",
       "import": "./dist/actions/index.js",
@@ -93,10 +98,12 @@
       "default": "./dist/overlays/index.js"
     },
     "./styles.css": "./dist/index.css",
+    "./themes.css": "./dist/themes.css",
+    "./themes.json": "./dist/themes.json",
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly --outDir dist && cp src/index.css dist/index.css",
+    "build": "tsup && tsc --emitDeclarationOnly --outDir dist && cp src/index.css dist/index.css && node scripts/build-themes-css.mjs",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
