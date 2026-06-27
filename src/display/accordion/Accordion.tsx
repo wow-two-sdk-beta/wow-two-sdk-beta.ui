@@ -251,9 +251,9 @@ export const AccordionContent = forwardRef<HTMLDivElement, AccordionContentProps
           )}
           {...rest}
         >
-          <div className="min-h-0 overflow-hidden">
-            <div className="px-3 py-3">{children}</div>
-          </div>
+          {/* Content padding is consumer-owned (no default) — wrap children with your own
+              padding so each panel sets any value; it collapses cleanly inside this clip. */}
+          <div className="min-h-0 overflow-hidden">{children}</div>
         </div>
       </Presence>
     );

@@ -40,6 +40,9 @@ export interface ToggleButtonProps
 
   /* Optional rich tooltip (SDK `Tooltip`) shown on hover/focus — use for icon-only toggles. */
   tooltip?: ReactNode;
+
+  /* Render element. `'div'` (role=button + Space/Enter keyboard) lets you nest INTERACTIVE children (a color picker, a link) inside a segment without invalid button-in-button markup. Default `'button'`. */
+  as?: 'button' | 'div';
 }
 
 /* Two-state action button (on/off) — sets `aria-pressed` + `data-pressed="true|false"`. Wraps Button to inherit size union, shape, asChild, loading, padding/radius. Press appearance lives in `toggleButtonVariants` (variant × tone matrix); ToggleButton's own appearance overrides Button's neutral-ghost baseline via class order. */
@@ -58,6 +61,7 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
       title,
       tooltip,
       'aria-label': ariaLabel,
+      as = 'button',
       ...buttonProps
     },
     ref,
@@ -77,6 +81,8 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
     const resolvedAriaLabel =
       typeof ariaLabel === 'function' ? ariaLabel({ pressed: value }) : ariaLabel;
 
+    const isDiv = as === 'div';
+
     const button = (
       <Button
         ref={ref}
@@ -84,6 +90,8 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
         variant="ghost"
         tone={tone ?? undefined}
         color={color}
+        /* `as="div"` → render through Slot onto a real <div> so consumers may nest interactive children (button-in-button is invalid markup). Keyboard parity added on the div below. */
+        asChild={isDiv}
         aria-pressed={value}
         aria-label={resolvedAriaLabel}
         data-pressed={value ? 'true' : 'false'}
@@ -95,7 +103,22 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
         className={cn(toggleButtonVariants({ variant, tone }), className)}
         {...buttonProps}
       >
-        {renderedChildren}
+        {isDiv ? (
+          <div
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                setValue(!value);
+              }
+            }}
+          >
+            {renderedChildren}
+          </div>
+        ) : (
+          renderedChildren
+        )}
       </Button>
     );
 
