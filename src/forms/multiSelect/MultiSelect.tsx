@@ -58,7 +58,7 @@ export interface MultiSelectProps {
   children: ReactNode;
 }
 
-export function MultiSelect({
+function MultiSelectRoot({
   value,
   defaultValue,
   onValueChange,
@@ -140,6 +140,7 @@ export function MultiSelect({
     </MultiSelectContext.Provider>
   );
 }
+MultiSelectRoot.displayName = 'MultiSelect';
 
 export interface MultiSelectTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
@@ -286,22 +287,14 @@ export const MultiSelectItem = forwardRef<HTMLDivElement, MultiSelectItemProps>(
   },
 );
 
-type MultiSelectComponent = typeof MultiSelect & {
-  Trigger: typeof MultiSelectTrigger;
-  Tags: typeof MultiSelectTags;
-  Content: typeof MultiSelectContent;
-  Item: typeof MultiSelectItem;
-  Group: typeof ListboxGroup;
-  Separator: typeof ListboxSeparator;
-  Empty: typeof ListboxEmpty;
-};
+export const MultiSelect = Object.assign(MultiSelectRoot, {
+  Trigger: MultiSelectTrigger,
+  Tags: MultiSelectTags,
+  Content: MultiSelectContent,
+  Item: MultiSelectItem,
+  Group: ListboxGroup,
+  Separator: ListboxSeparator,
+  Empty: ListboxEmpty,
+});
 
-(MultiSelect as MultiSelectComponent).Trigger = MultiSelectTrigger;
-(MultiSelect as MultiSelectComponent).Tags = MultiSelectTags;
-(MultiSelect as MultiSelectComponent).Content = MultiSelectContent;
-(MultiSelect as MultiSelectComponent).Item = MultiSelectItem;
-(MultiSelect as MultiSelectComponent).Group = ListboxGroup;
-(MultiSelect as MultiSelectComponent).Separator = ListboxSeparator;
-(MultiSelect as MultiSelectComponent).Empty = ListboxEmpty;
-
-export default MultiSelect as MultiSelectComponent;
+export default MultiSelect;

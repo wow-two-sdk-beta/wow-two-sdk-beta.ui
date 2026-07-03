@@ -63,7 +63,7 @@ export interface AppShellProps extends HTMLAttributes<HTMLDivElement> {
  * Footer`. CSS-grid layout; sidebar collapses to a Drawer below
  * `sidebarBreakpoint`.
  */
-export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppShell(
+const AppShellRoot = forwardRef<HTMLDivElement, AppShellProps>(function AppShell(
   {
     sidebarWidth = '240px',
     asideWidth = '280px',
@@ -240,24 +240,17 @@ export const AppShellFooter = forwardRef<HTMLElement, AppShellFooterProps>(
   },
 );
 
-type AppShellComponent = typeof AppShell & {
-  Header: typeof AppShellHeader;
-  Sidebar: typeof AppShellSidebar;
-  Main: typeof AppShellMain;
-  Content: typeof AppShellContent;
-  Aside: typeof AppShellAside;
-  Footer: typeof AppShellFooter;
-};
-
-(AppShell as AppShellComponent).Header = AppShellHeader;
-(AppShell as AppShellComponent).Sidebar = AppShellSidebar;
-(AppShell as AppShellComponent).Main = AppShellMain;
-(AppShell as AppShellComponent).Content = AppShellContent;
-(AppShell as AppShellComponent).Aside = AppShellAside;
-(AppShell as AppShellComponent).Footer = AppShellFooter;
+export const AppShell = Object.assign(AppShellRoot, {
+  Header: AppShellHeader,
+  Sidebar: AppShellSidebar,
+  Main: AppShellMain,
+  Content: AppShellContent,
+  Aside: AppShellAside,
+  Footer: AppShellFooter,
+});
 
 export function useAppShell() {
   return useAppShellContext();
 }
 
-export default AppShell as AppShellComponent;
+export default AppShell;

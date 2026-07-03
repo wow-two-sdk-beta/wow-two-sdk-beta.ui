@@ -50,7 +50,7 @@ export interface CarouselProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onC
   children: ReactNode;
 }
 
-export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(function Carousel(
+const CarouselRoot = forwardRef<HTMLDivElement, CarouselProps>(function Carousel(
   {
     index: indexProp,
     defaultIndex = 0,
@@ -330,22 +330,14 @@ export const CarouselDot = forwardRef<HTMLButtonElement, CarouselDotProps>(
   },
 );
 
-type CarouselComponent = typeof Carousel & {
-  Viewport: typeof CarouselViewport;
-  Slides: typeof CarouselSlides;
-  Slide: typeof CarouselSlide;
-  Prev: typeof CarouselPrev;
-  Next: typeof CarouselNext;
-  Dots: typeof CarouselDots;
-  Dot: typeof CarouselDot;
-};
+export const Carousel = Object.assign(CarouselRoot, {
+  Viewport: CarouselViewport,
+  Slides: CarouselSlides,
+  Slide: CarouselSlide,
+  Prev: CarouselPrev,
+  Next: CarouselNext,
+  Dots: CarouselDots,
+  Dot: CarouselDot,
+});
 
-(Carousel as CarouselComponent).Viewport = CarouselViewport;
-(Carousel as CarouselComponent).Slides = CarouselSlides;
-(Carousel as CarouselComponent).Slide = CarouselSlide;
-(Carousel as CarouselComponent).Prev = CarouselPrev;
-(Carousel as CarouselComponent).Next = CarouselNext;
-(Carousel as CarouselComponent).Dots = CarouselDots;
-(Carousel as CarouselComponent).Dot = CarouselDot;
-
-export default Carousel as CarouselComponent;
+export default Carousel;

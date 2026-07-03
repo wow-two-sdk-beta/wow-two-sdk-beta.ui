@@ -18,7 +18,7 @@ export const Custom: Story = {
   args: { emojis: ['🐛', '✅', '❓', '🔥', '🤝'] },
 };
 
-export const NoMore: Story = { args: { hideMore: true } };
+export const NoMore: Story = { args: { isMoreHidden: true } };
 
 function InteractiveDemo() {
   const [picked, setPicked] = useState<string[]>([]);

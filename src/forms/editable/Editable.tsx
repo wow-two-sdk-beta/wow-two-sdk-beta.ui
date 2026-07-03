@@ -62,7 +62,7 @@ export interface EditableProps {
   children: ReactNode;
 }
 
-export function Editable({
+function EditableRoot({
   value: valueProp,
   defaultValue,
   onValueChange,
@@ -149,6 +149,7 @@ export function Editable({
     </EditableContext.Provider>
   );
 }
+EditableRoot.displayName = 'Editable';
 
 export type EditablePreviewProps = HTMLAttributes<HTMLSpanElement>;
 
@@ -302,16 +303,11 @@ export const EditableCancel = forwardRef<HTMLButtonElement, EditableButtonProps>
   },
 );
 
-type EditableComponent = typeof Editable & {
-  Preview: typeof EditablePreview;
-  Input: typeof EditableInput;
-  Submit: typeof EditableSubmit;
-  Cancel: typeof EditableCancel;
-};
+export const Editable = Object.assign(EditableRoot, {
+  Preview: EditablePreview,
+  Input: EditableInput,
+  Submit: EditableSubmit,
+  Cancel: EditableCancel,
+});
 
-(Editable as EditableComponent).Preview = EditablePreview;
-(Editable as EditableComponent).Input = EditableInput;
-(Editable as EditableComponent).Submit = EditableSubmit;
-(Editable as EditableComponent).Cancel = EditableCancel;
-
-export default Editable as EditableComponent;
+export default Editable;

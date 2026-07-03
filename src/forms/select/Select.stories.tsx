@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useEffect, useRef, useState } from 'react';
 import { Select, type SelectOption } from './Select';
 import { Equality } from '../../utils';
-import { FormField } from '../formField';
+import { Field } from '../field';
 
 type TriggerSize = 'xs' | 'sm' | 'md' | 'lg';
 
@@ -238,14 +238,14 @@ const FRUIT_LABELS: Record<string, string> = {
   durian: 'Durian',
 };
 
-function FormFieldDemo() {
-  /* Proves the new FormField wiring: the trigger inherits id + aria-describedby
+function FieldDemo() {
+  /* Proves the new Field wiring: the trigger inherits id + aria-describedby
      (helper/error) and is named by the field label — no manual aria plumbing. */
   const [k, setK] = useState<string | null>(null);
   const error = k === null ? 'Pick a fruit to continue.' : undefined;
   return (
     <div className="w-72">
-      <FormField
+      <Field
         label="Favourite fruit"
         helper="One of the four on offer."
         error={error}
@@ -261,7 +261,7 @@ function FormFieldDemo() {
             ))}
           </Select.Content>
         </Select>
-      </FormField>
+      </Field>
     </div>
   );
 }
@@ -483,7 +483,6 @@ function DependentDropdownDemo() {
 }
 
 interface PlaygroundArgs {
-  size: TriggerSize;
   isDisabled: boolean;
   isLoading: boolean;
   isClearable: boolean;
@@ -506,7 +505,7 @@ function PlaygroundDemo(args: PlaygroundArgs) {
         isInvalid={args.isInvalid}
         getOptionLabel={(key) => FRUIT_LABELS[key as string]}
       >
-        <Select.Trigger size={args.size}>
+        <Select.Trigger size="md">
           <Select.Value placeholder={args.placeholder} />
         </Select.Trigger>
         <Select.Content isSearchable={args.isSearchable} matchWidth={args.matchWidth}>
@@ -527,7 +526,7 @@ export const Searchable: Story = { render: () => <SearchableDemo /> };
 export const TypeToSelect: Story = { render: () => <TypeToSelectDemo /> };
 export const Loading: Story = { render: () => <LoadingDemo /> };
 export const KvSplit: Story = { render: () => <KvSplitDemo /> };
-export const InFormField: Story = { render: () => <FormFieldDemo /> };
+export const InField: Story = { render: () => <FieldDemo /> };
 export const DisabledOption: Story = { render: () => <DisabledOptionDemo /> };
 export const SizeMatrix: Story = { render: () => <SizeMatrixDemo /> };
 export const ControlledOpen: Story = { render: () => <ControlledOpenDemo /> };
@@ -551,11 +550,11 @@ export const Invalid: Story = {
 };
 
 export const InvalidWithError: Story = {
-  /* `FormField error=…` flips the context to invalid; the trigger reflects it as
+  /* `Field error=…` flips the context to invalid; the trigger reflects it as
      `state='invalid'` + `aria-invalid` and ships `aria-describedby` to the message. */
   render: () => (
     <div className="w-72">
-      <FormField label="Plan" error="Choose a plan before saving.">
+      <Field label="Plan" error="Choose a plan before saving.">
         <Select<string>>
           <Select.Trigger>
             <Select.Value placeholder="Select a plan..." />
@@ -566,7 +565,7 @@ export const InvalidWithError: Story = {
             <Select.Item itemKey="team" label="Team" />
           </Select.Content>
         </Select>
-      </FormField>
+      </Field>
     </div>
   ),
 };
@@ -590,9 +589,8 @@ export const Disabled: Story = {
   ),
 };
 
-export const Playground: Story = {
+export const Playground: StoryObj<typeof PlaygroundDemo> = {
   args: {
-    size: 'md',
     isDisabled: false,
     isLoading: false,
     isClearable: true,
@@ -602,7 +600,6 @@ export const Playground: Story = {
     placeholder: 'Pick a fruit...',
   },
   argTypes: {
-    size: { control: 'inline-radio', options: ['xs', 'sm', 'md', 'lg'] },
     isDisabled: { control: 'boolean' },
     isLoading: { control: 'boolean' },
     isClearable: { control: 'boolean' },
@@ -611,5 +608,5 @@ export const Playground: Story = {
     matchWidth: { control: 'boolean' },
     placeholder: { control: 'text' },
   },
-  render: (args) => <PlaygroundDemo {...(args as unknown as PlaygroundArgs)} />,
+  render: (args) => <PlaygroundDemo {...args} />,
 };

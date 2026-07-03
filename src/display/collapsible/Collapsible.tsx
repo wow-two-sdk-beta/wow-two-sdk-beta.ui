@@ -35,7 +35,7 @@ export interface CollapsibleProps extends HTMLAttributes<HTMLDivElement> {
   isDisabled?: boolean;
 }
 
-export const Collapsible = forwardRef<HTMLDivElement, CollapsibleProps>(function Collapsible(
+const CollapsibleRoot = forwardRef<HTMLDivElement, CollapsibleProps>(function Collapsible(
   { open: openProp, defaultOpen = false, onOpenChange, isDisabled = false, className, children, ...rest },
   ref,
 ) {
@@ -161,12 +161,9 @@ export const CollapsibleContent = forwardRef<HTMLDivElement, CollapsibleContentP
   },
 );
 
-type CollapsibleComponent = typeof Collapsible & {
-  Trigger: typeof CollapsibleTrigger;
-  Content: typeof CollapsibleContent;
-};
+export const Collapsible = Object.assign(CollapsibleRoot, {
+  Trigger: CollapsibleTrigger,
+  Content: CollapsibleContent,
+});
 
-(Collapsible as CollapsibleComponent).Trigger = CollapsibleTrigger;
-(Collapsible as CollapsibleComponent).Content = CollapsibleContent;
-
-export default Collapsible as CollapsibleComponent;
+export default Collapsible;

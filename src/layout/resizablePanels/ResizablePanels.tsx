@@ -60,7 +60,7 @@ function countPanels(children: ReactNode): number {
   return n;
 }
 
-export const ResizablePanels = forwardRef<HTMLDivElement, ResizablePanelsProps>(
+const ResizablePanelsRoot = forwardRef<HTMLDivElement, ResizablePanelsProps>(
   function ResizablePanels(
     { orientation = 'horizontal', defaultSizes, sizes: sizesProp, onSizesChange, className, children, ...rest },
     forwardedRef,
@@ -428,12 +428,9 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
 );
 ResizableSeparator.displayName = 'ResizableSeparator';
 
-type ResizablePanelsComponent = typeof ResizablePanels & {
-  Panel: typeof ResizablePanel;
-  Separator: typeof ResizableSeparator;
-};
+export const ResizablePanels = Object.assign(ResizablePanelsRoot, {
+  Panel: ResizablePanel,
+  Separator: ResizableSeparator,
+});
 
-(ResizablePanels as ResizablePanelsComponent).Panel = ResizablePanel;
-(ResizablePanels as ResizablePanelsComponent).Separator = ResizableSeparator;
-
-export default ResizablePanels as ResizablePanelsComponent;
+export default ResizablePanels;

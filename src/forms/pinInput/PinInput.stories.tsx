@@ -11,5 +11,5 @@ type Story = StoryObj<typeof PinInput>;
 
 export const Default: Story = {};
 export const Four: Story = { args: { length: 4 } };
-export const Masked: Story = { args: { mask: true, length: 4 } };
+export const Masked: Story = { args: { isMasked: true, length: 4 } };
 export const Alphanumeric: Story = { args: { type: 'alphanumeric', length: 6 } };

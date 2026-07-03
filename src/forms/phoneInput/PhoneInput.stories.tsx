@@ -30,5 +30,5 @@ export const Empty: Story = {
 };
 
 export const Invalid: Story = {
-  render: () => <PhoneInput defaultValue="+19" invalid />,
+  render: () => <PhoneInput defaultValue="+19" isInvalid />,
 };

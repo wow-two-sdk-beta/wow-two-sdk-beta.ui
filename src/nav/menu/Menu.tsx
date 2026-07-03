@@ -59,7 +59,7 @@ export interface MenuProps extends SurfaceVariants {
   children: ReactNode;
 }
 
-export function Menu({
+function MenuRoot({
   open,
   anchor,
   onClose,
@@ -148,6 +148,7 @@ export function Menu({
     </MenuContext.Provider>
   );
 }
+MenuRoot.displayName = 'Menu';
 
 export interface MenuItemProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onSelect'>,
@@ -282,16 +283,11 @@ export function MenuSeparator(props: HTMLAttributes<HTMLDivElement>) {
   return <div role="separator" className={menuSeparatorVariants()} {...props} />;
 }
 
-type MenuComponent = typeof Menu & {
-  Item: typeof MenuItem;
-  Group: typeof MenuGroup;
-  Label: typeof MenuLabel;
-  Separator: typeof MenuSeparator;
-};
+export const Menu = Object.assign(MenuRoot, {
+  Item: MenuItem,
+  Group: MenuGroup,
+  Label: MenuLabel,
+  Separator: MenuSeparator,
+});
 
-(Menu as MenuComponent).Item = MenuItem;
-(Menu as MenuComponent).Group = MenuGroup;
-(Menu as MenuComponent).Label = MenuLabel;
-(Menu as MenuComponent).Separator = MenuSeparator;
-
-export default Menu as MenuComponent;
+export default Menu;

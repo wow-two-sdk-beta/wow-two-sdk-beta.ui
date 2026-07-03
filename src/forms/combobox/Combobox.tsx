@@ -79,7 +79,7 @@ export interface ComboboxProps {
   children: ReactNode;
 }
 
-export function Combobox({
+function ComboboxRoot({
   value,
   defaultValue,
   onValueChange,
@@ -182,6 +182,7 @@ export function Combobox({
     </ComboboxContext.Provider>
   );
 }
+ComboboxRoot.displayName = 'Combobox';
 
 export interface ComboboxInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'size'>,
@@ -507,20 +508,13 @@ export function ComboboxEmpty({ children, className, ...rest }: HTMLAttributes<H
   );
 }
 
-type ComboboxComponent = typeof Combobox & {
-  Input: typeof ComboboxInput;
-  Content: typeof ComboboxContent;
-  Item: typeof ComboboxItem;
-  Group: typeof ComboboxGroup;
-  Separator: typeof ComboboxSeparator;
-  Empty: typeof ComboboxEmpty;
-};
+export const Combobox = Object.assign(ComboboxRoot, {
+  Input: ComboboxInput,
+  Content: ComboboxContent,
+  Item: ComboboxItem,
+  Group: ComboboxGroup,
+  Separator: ComboboxSeparator,
+  Empty: ComboboxEmpty,
+});
 
-(Combobox as ComboboxComponent).Input = ComboboxInput;
-(Combobox as ComboboxComponent).Content = ComboboxContent;
-(Combobox as ComboboxComponent).Item = ComboboxItem;
-(Combobox as ComboboxComponent).Group = ComboboxGroup;
-(Combobox as ComboboxComponent).Separator = ComboboxSeparator;
-(Combobox as ComboboxComponent).Empty = ComboboxEmpty;
-
-export default Combobox as ComboboxComponent;
+export default Combobox;

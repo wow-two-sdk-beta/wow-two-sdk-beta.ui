@@ -88,7 +88,7 @@ interface SelectContextValue {
   setActiveDescendant: (id: string | null) => void;
   /** Holds the DOM node of the inner Listbox — keyboard bridge re-dispatches onto it. */
   listboxRef: React.MutableRefObject<HTMLDivElement | null>;
-  /** Form-control wiring inherited from a surrounding `<FormField>` (null when standalone). */
+  /** Form-control wiring inherited from a surrounding `<Field>` (null when standalone). */
   fieldId?: string;
   labelId?: string;
   describedBy?: string;
@@ -164,7 +164,7 @@ function SelectImpl<K, V = K>({
   placement = 'bottom',
   children,
 }: SelectProps<K, V>): ReactElement {
-  /* Inherits id/disabled/required/invalid/describedby from a surrounding <FormField>;
+  /* Inherits id/disabled/required/invalid/describedby from a surrounding <Field>;
      standalone props win when provided, context fills the gaps. */
   const field = useFormControl();
   const finalDisabled = (isDisabled ?? field?.isDisabled) ?? false;
@@ -494,7 +494,7 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
     const clearBoxClass = TRIGGER_CLEAR_BOX_CLASSES[sizeKey];
     const dividerClass = TRIGGER_DIVIDER_CLASSES[sizeKey];
     const clearOffsetClass = TRIGGER_CLEAR_OFFSET_CLASSES[sizeKey];
-    /* Names the trigger from the FormField label when present; an explicit aria-label always wins. */
+    /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
     const labelledBy = !ariaLabel ? ctx.labelId : undefined;
     /* The clear control is a real sibling button overlaying a reserved slot — nesting an
        interactive role inside the trigger button is invalid ARIA and keyboard-unreachable. */

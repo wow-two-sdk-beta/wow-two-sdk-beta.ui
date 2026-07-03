@@ -10,4 +10,4 @@ export default meta;
 type Story = StoryObj<typeof Label>;
 
 export const Default: Story = { args: { children: 'Email' } };
-export const Required: Story = { args: { required: true, children: 'Email' } };
+export const Required: Story = { args: { isRequired: true, children: 'Email' } };

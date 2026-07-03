@@ -34,7 +34,7 @@ export const Empty: Story = {
 export const Tabs: Story = {
   render: () => (
     <div className="w-[40rem]">
-      <CodeEditor defaultValue={SAMPLE} useTabs tabSize={4} />
+      <CodeEditor defaultValue={SAMPLE} isTabIndented tabSize={4} />
     </div>
   ),
 };
@@ -50,7 +50,7 @@ export const ReadOnly: Story = {
 export const Invalid: Story = {
   render: () => (
     <div className="w-[40rem]">
-      <CodeEditor defaultValue="syntax error here" invalid />
+      <CodeEditor defaultValue="syntax error here" isInvalid />
     </div>
   ),
 };

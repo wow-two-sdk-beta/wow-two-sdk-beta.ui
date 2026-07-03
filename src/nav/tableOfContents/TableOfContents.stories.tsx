@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useRef } from 'react';
+import { useRef, type RefObject } from 'react';
 import { TableOfContents } from './TableOfContents';
 
 const meta: Meta = {
@@ -38,7 +38,7 @@ export const AutoExtract: Story = {
       const ref = useRef<HTMLDivElement>(null);
       return (
         <div className="grid grid-cols-[180px_1fr] gap-6">
-          <TableOfContents isSticky source={ref} headingSelector="h2" />
+          <TableOfContents isSticky source={ref as RefObject<HTMLElement>} headingSelector="h2" />
           <div ref={ref}>
             {HEADINGS.map((id) => (
               <section id={id} key={id} className="min-h-[40vh] py-6">

@@ -3,6 +3,7 @@ import { cn } from '../../utils';
 import { useId } from '../../hooks';
 import { Label } from '../label/Label';
 
+/** @deprecated Prefer `Field` (was `FormField`) or compose `Label` + a control directly. */
 export interface LabeledInputProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
   label: ReactNode;
   /** The input element. Receives a generated `id` linked to the label. */
@@ -12,8 +13,11 @@ export interface LabeledInputProps extends Omit<ComponentPropsWithoutRef<'div'>,
 }
 
 /**
- * Lighter alternative to `FormField` — just `Label` + control, no helper /
- * error / context wiring. Good for compact inline forms.
+ * Lighter alternative to `Field` — just `Label` + control, no helper / error /
+ * context wiring. Good for compact inline forms.
+ *
+ * @deprecated Prefer `Field` (was `FormField`) for label + control + helper/error,
+ * or compose `Label` + a control directly. Kept for one release.
  */
 export const LabeledInput = forwardRef<HTMLDivElement, LabeledInputProps>(
   ({ label, children, trailing, className, ...props }, ref) => {

@@ -36,7 +36,7 @@ export interface ActionSheetProps {
  * iOS-style action sheet — opinionated bottom Drawer with stacked button rows
  * and a separated Cancel.
  */
-export function ActionSheet({
+function ActionSheetRoot({
   open,
   defaultOpen,
   onOpenChange,
@@ -86,6 +86,7 @@ export function ActionSheet({
     </ActionSheetContext.Provider>
   );
 }
+ActionSheetRoot.displayName = 'ActionSheet';
 
 export interface ActionSheetActionProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onSelect?: () => void;
@@ -147,12 +148,9 @@ export const ActionSheetCancel = forwardRef<HTMLButtonElement, ActionSheetCancel
   },
 );
 
-type ActionSheetComponent = typeof ActionSheet & {
-  Action: typeof ActionSheetAction;
-  Cancel: typeof ActionSheetCancel;
-};
+export const ActionSheet = Object.assign(ActionSheetRoot, {
+  Action: ActionSheetAction,
+  Cancel: ActionSheetCancel,
+});
 
-(ActionSheet as ActionSheetComponent).Action = ActionSheetAction;
-(ActionSheet as ActionSheetComponent).Cancel = ActionSheetCancel;
-
-export default ActionSheet as ActionSheetComponent;
+export default ActionSheet;

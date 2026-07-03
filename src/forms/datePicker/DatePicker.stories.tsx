@@ -32,7 +32,7 @@ export const WithDefault: Story = {
 export const Invalid: Story = {
   render: () => (
     <div className="w-72">
-      <DatePicker invalid placeholder="Required" />
+      <DatePicker isInvalid placeholder="Required" />
     </div>
   ),
 };

@@ -58,7 +58,7 @@ export const Disabled: Story = {
 export const Invalid: Story = {
   render: () => (
     <div className="w-96">
-      <TagsInput defaultValue={['oops']} invalid />
+      <TagsInput defaultValue={['oops']} isInvalid />
     </div>
   ),
 };

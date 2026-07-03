@@ -44,7 +44,7 @@ export const TextMode: Story = {
 export const ReadOnly: Story = {
   render: () => (
     <div className="w-[40rem]">
-      <JSONEditor defaultValue={SAMPLE} readOnly />
+      <JSONEditor defaultValue={SAMPLE} isReadOnly />
     </div>
   ),
 };

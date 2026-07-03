@@ -1,12 +1,12 @@
 // Shared header / title / description / body / footer / close subcomponents
-// for Dialog and Drawer. Co-located in `overlays/` as a domain-internal helper.
+// for Modal and Drawer. Co-located in `overlays/` as a domain-internal helper.
 //
-// Each consuming overlay (Dialog, Drawer) wraps its content with
+// Each consuming overlay (Modal, Drawer) wraps its content with
 // `OverlayChromeProvider`, supplying the `titleId`, `descriptionId`, and a
 // `close()` action. The shared subcomponents read from this context.
 //
 // Naming convention: `Overlay*` for shared chrome pieces; consumers re-export
-// them under their own name (e.g. `Dialog.Header = OverlayHeader`).
+// them under their own name (e.g. `Modal.Header = OverlayHeader`).
 
 import {
   createContext,
@@ -35,7 +35,7 @@ function useOverlayChromeContext() {
   const ctx = useContext(OverlayChromeContext);
   if (!ctx)
     throw new Error(
-      'Overlay chrome subcomponents must be used inside an OverlayChromeProvider (Dialog / Drawer)',
+      'Overlay chrome subcomponents must be used inside an OverlayChromeProvider (Modal / Drawer)',
     );
   return ctx;
 }

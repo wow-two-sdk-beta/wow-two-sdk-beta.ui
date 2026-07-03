@@ -51,7 +51,7 @@ export interface DropdownMenuProps {
   children: ReactNode;
 }
 
-export function DropdownMenu({
+function DropdownMenuRoot({
   open: openProp,
   defaultOpen = false,
   onOpenChange,
@@ -74,6 +74,7 @@ export function DropdownMenu({
 
   return <DropdownMenuContext.Provider value={ctx}>{children}</DropdownMenuContext.Provider>;
 }
+DropdownMenuRoot.displayName = 'DropdownMenu';
 
 export interface DropdownMenuTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -213,20 +214,13 @@ export function DropdownMenuContent({
   );
 }
 
-type DropdownMenuComponent = typeof DropdownMenu & {
-  Trigger: typeof DropdownMenuTrigger;
-  Content: typeof DropdownMenuContent;
-  Item: typeof MenuItem;
-  Group: typeof MenuGroup;
-  Label: typeof MenuLabel;
-  Separator: typeof MenuSeparator;
-};
+export const DropdownMenu = Object.assign(DropdownMenuRoot, {
+  Trigger: DropdownMenuTrigger,
+  Content: DropdownMenuContent,
+  Item: MenuItem,
+  Group: MenuGroup,
+  Label: MenuLabel,
+  Separator: MenuSeparator,
+});
 
-(DropdownMenu as DropdownMenuComponent).Trigger = DropdownMenuTrigger;
-(DropdownMenu as DropdownMenuComponent).Content = DropdownMenuContent;
-(DropdownMenu as DropdownMenuComponent).Item = MenuItem;
-(DropdownMenu as DropdownMenuComponent).Group = MenuGroup;
-(DropdownMenu as DropdownMenuComponent).Label = MenuLabel;
-(DropdownMenu as DropdownMenuComponent).Separator = MenuSeparator;
-
-export default DropdownMenu as DropdownMenuComponent;
+export default DropdownMenu;

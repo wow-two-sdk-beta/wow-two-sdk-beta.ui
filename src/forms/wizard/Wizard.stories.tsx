@@ -49,7 +49,7 @@ export const Default: Story = {
                 />
               </label>
             </WizardStep>
-            <WizardStep id="review" label="Review" final>
+            <WizardStep id="review" label="Review" isFinal>
               <div className="rounded-md bg-muted p-3 text-sm">
                 <p>Name: <strong>{name}</strong></p>
                 <p>Email: <strong>{email}</strong></p>

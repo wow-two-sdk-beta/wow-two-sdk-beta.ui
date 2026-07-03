@@ -26,7 +26,7 @@ export interface FormControlProviderProps {
 
 /**
  * Wires Label ↔ control ↔ HelperText/ErrorMessage via stable IDs and shared
- * state flags. Used by `FormField` (L4) — atoms (Input, Label, etc.) read
+ * state flags. Used by `Field` (L4) — atoms (Input, Label, etc.) read
  * via `useFormControl()` to get the right `id`/`htmlFor`/`aria-describedby`.
  */
 export function FormControlProvider({

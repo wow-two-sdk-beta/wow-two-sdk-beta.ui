@@ -26,7 +26,7 @@ export interface ToolbarProps extends HTMLAttributes<HTMLDivElement> {
   orientation?: 'horizontal' | 'vertical';
 }
 
-export const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(function Toolbar(
+const ToolbarRoot = forwardRef<HTMLDivElement, ToolbarProps>(function Toolbar(
   { orientation = 'horizontal', className, children, ...rest },
   ref,
 ) {
@@ -149,14 +149,10 @@ export function ToolbarSeparator(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-type ToolbarComponent = typeof Toolbar & {
-  Button: typeof ToolbarButton;
-  Link: typeof ToolbarLink;
-  Separator: typeof ToolbarSeparator;
-};
+export const Toolbar = Object.assign(ToolbarRoot, {
+  Button: ToolbarButton,
+  Link: ToolbarLink,
+  Separator: ToolbarSeparator,
+});
 
-(Toolbar as ToolbarComponent).Button = ToolbarButton;
-(Toolbar as ToolbarComponent).Link = ToolbarLink;
-(Toolbar as ToolbarComponent).Separator = ToolbarSeparator;
-
-export default Toolbar as ToolbarComponent;
+export default Toolbar;

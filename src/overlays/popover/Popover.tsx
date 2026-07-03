@@ -55,7 +55,7 @@ export interface PopoverProps {
   children: ReactNode;
 }
 
-export function Popover({
+function PopoverRoot({
   open: openProp,
   defaultOpen = false,
   onOpenChange,
@@ -90,6 +90,7 @@ export function Popover({
 
   return <PopoverContext.Provider value={ctx}>{children}</PopoverContext.Provider>;
 }
+PopoverRoot.displayName = 'Popover';
 
 export interface PopoverTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -159,7 +160,7 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
             root's state via `group-data-[state=*]` on the surface below. */}
         <PopoverPortalRoot>
           {/* z-popover (80) on the SC root (transform makes the stacking context) so a
-              popover from a Dialog (z-modal, 70) paints above it — both portal to body. */}
+              popover from a Modal (z-modal, 70) paints above it — both portal to body. */}
           <AnchoredPositioner
             anchor={ctx.triggerNode}
             placement={ctx.placement}
@@ -236,14 +237,10 @@ export function PopoverArrow({ className, ...rest }: OverlayArrowProps) {
   return <OverlayArrow className={cn('text-popover', className)} {...rest} />;
 }
 
-type PopoverComponent = typeof Popover & {
-  Trigger: typeof PopoverTrigger;
-  Content: typeof PopoverContent;
-  Arrow: typeof PopoverArrow;
-};
+export const Popover = Object.assign(PopoverRoot, {
+  Trigger: PopoverTrigger,
+  Content: PopoverContent,
+  Arrow: PopoverArrow,
+});
 
-(Popover as PopoverComponent).Trigger = PopoverTrigger;
-(Popover as PopoverComponent).Content = PopoverContent;
-(Popover as PopoverComponent).Arrow = PopoverArrow;
-
-export default Popover as PopoverComponent;
+export default Popover;

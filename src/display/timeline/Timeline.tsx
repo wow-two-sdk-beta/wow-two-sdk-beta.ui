@@ -30,7 +30,7 @@ export interface TimelineProps extends HTMLAttributes<HTMLOListElement> {
   children: ReactNode;
 }
 
-export const Timeline = forwardRef<HTMLOListElement, TimelineProps>(function Timeline(
+const TimelineRoot = forwardRef<HTMLOListElement, TimelineProps>(function Timeline(
   { align = 'left', className, children, ...rest },
   ref,
 ) {
@@ -143,14 +143,10 @@ export function TimelineDescription({
   );
 }
 
-type TimelineComponent = typeof Timeline & {
-  Item: typeof TimelineItem;
-  Title: typeof TimelineTitle;
-  Description: typeof TimelineDescription;
-};
+export const Timeline = Object.assign(TimelineRoot, {
+  Item: TimelineItem,
+  Title: TimelineTitle,
+  Description: TimelineDescription,
+});
 
-(Timeline as TimelineComponent).Item = TimelineItem;
-(Timeline as TimelineComponent).Title = TimelineTitle;
-(Timeline as TimelineComponent).Description = TimelineDescription;
-
-export default Timeline as TimelineComponent;
+export default Timeline;

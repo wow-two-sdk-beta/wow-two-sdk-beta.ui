@@ -54,7 +54,7 @@ function makeVirtualAnchor(x: number, y: number): HTMLElement {
   return el;
 }
 
-export function ContextMenu({ children }: ContextMenuProps) {
+function ContextMenuRoot({ children }: ContextMenuProps) {
   const [open, setOpen] = useState(false);
   const [anchor, setAnchorState] = useState<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -89,6 +89,7 @@ export function ContextMenu({ children }: ContextMenuProps) {
 
   return <ContextMenuContext.Provider value={ctx}>{children}</ContextMenuContext.Provider>;
 }
+ContextMenuRoot.displayName = 'ContextMenu';
 
 export interface ContextMenuTriggerProps extends HTMLAttributes<HTMLDivElement> {
   asChild?: boolean;
@@ -188,20 +189,13 @@ export function ContextMenuContent({
   );
 }
 
-type ContextMenuComponent = typeof ContextMenu & {
-  Trigger: typeof ContextMenuTrigger;
-  Content: typeof ContextMenuContent;
-  Item: typeof MenuItem;
-  Group: typeof MenuGroup;
-  Label: typeof MenuLabel;
-  Separator: typeof MenuSeparator;
-};
+export const ContextMenu = Object.assign(ContextMenuRoot, {
+  Trigger: ContextMenuTrigger,
+  Content: ContextMenuContent,
+  Item: MenuItem,
+  Group: MenuGroup,
+  Label: MenuLabel,
+  Separator: MenuSeparator,
+});
 
-(ContextMenu as ContextMenuComponent).Trigger = ContextMenuTrigger;
-(ContextMenu as ContextMenuComponent).Content = ContextMenuContent;
-(ContextMenu as ContextMenuComponent).Item = MenuItem;
-(ContextMenu as ContextMenuComponent).Group = MenuGroup;
-(ContextMenu as ContextMenuComponent).Label = MenuLabel;
-(ContextMenu as ContextMenuComponent).Separator = MenuSeparator;
-
-export default ContextMenu as ContextMenuComponent;
+export default ContextMenu;

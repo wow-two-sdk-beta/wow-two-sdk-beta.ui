@@ -13,7 +13,7 @@ export interface BackdropProps extends HTMLAttributes<HTMLDivElement> {
   isInline?: boolean;
 }
 
-/** Fixed-position scrim. Used by Dialog / Drawer / LoadingOverlay; also public for custom overlay surfaces. */
+/** Fixed-position scrim. Used by Modal / Drawer / LoadingOverlay; also public for custom overlay surfaces. */
 export const Backdrop = forwardRef<HTMLDivElement, BackdropProps>(function Backdrop(
   { open = true, isBlurred, pointerEvents = 'auto', isInline, className, style, ...rest },
   ref,

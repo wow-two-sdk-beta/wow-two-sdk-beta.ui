@@ -36,7 +36,7 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'default
   activationMode?: 'automatic' | 'manual';
 }
 
-export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
+const TabsRoot = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
   {
     value,
     defaultValue,
@@ -205,14 +205,10 @@ export const TabsPanel = forwardRef<HTMLDivElement, TabsPanelProps>(function Tab
   );
 });
 
-type TabsComponent = typeof Tabs & {
-  List: typeof TabsList;
-  Tab: typeof TabsTab;
-  Panel: typeof TabsPanel;
-};
+export const Tabs = Object.assign(TabsRoot, {
+  List: TabsList,
+  Tab: TabsTab,
+  Panel: TabsPanel,
+});
 
-(Tabs as TabsComponent).List = TabsList;
-(Tabs as TabsComponent).Tab = TabsTab;
-(Tabs as TabsComponent).Panel = TabsPanel;
-
-export default Tabs as TabsComponent;
+export default Tabs;

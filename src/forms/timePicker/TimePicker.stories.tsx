@@ -33,7 +33,7 @@ export const FifteenMinuteSteps: Story = {
 export const Invalid: Story = {
   render: () => (
     <div className="w-72">
-      <TimePicker invalid placeholder="Required" />
+      <TimePicker isInvalid placeholder="Required" />
     </div>
   ),
 };

@@ -54,7 +54,7 @@ export interface HoverCardProps {
   children: ReactNode;
 }
 
-export function HoverCard({
+function HoverCardRoot({
   open: openProp,
   defaultOpen = false,
   onOpenChange,
@@ -113,6 +113,7 @@ export function HoverCard({
 
   return <HoverCardContext.Provider value={ctx}>{children}</HoverCardContext.Provider>;
 }
+HoverCardRoot.displayName = 'HoverCard';
 
 export interface HoverCardTriggerProps {
   asChild?: boolean;
@@ -216,14 +217,10 @@ export function HoverCardArrow({ className, ...rest }: OverlayArrowProps) {
   return <OverlayArrow className={cn('text-popover', className)} {...rest} />;
 }
 
-type HoverCardComponent = typeof HoverCard & {
-  Trigger: typeof HoverCardTrigger;
-  Content: typeof HoverCardContent;
-  Arrow: typeof HoverCardArrow;
-};
+export const HoverCard = Object.assign(HoverCardRoot, {
+  Trigger: HoverCardTrigger,
+  Content: HoverCardContent,
+  Arrow: HoverCardArrow,
+});
 
-(HoverCard as HoverCardComponent).Trigger = HoverCardTrigger;
-(HoverCard as HoverCardComponent).Content = HoverCardContent;
-(HoverCard as HoverCardComponent).Arrow = HoverCardArrow;
-
-export default HoverCard as HoverCardComponent;
+export default HoverCard;

@@ -11,7 +11,7 @@ export interface CharacterCountProps extends Omit<ComponentPropsWithoutRef<'div'
 }
 
 /**
- * Counter for character-limited fields. Drop in below a Textarea / Input.
+ * Counter for character-limited fields. Drop in below a TextareaInput / Input.
  * Goes destructive once `value > max`.
  */
 export const CharacterCount = forwardRef<HTMLDivElement, CharacterCountProps>(

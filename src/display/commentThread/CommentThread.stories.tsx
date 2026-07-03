@@ -30,7 +30,7 @@ export const Nested: Story = {
           avatar={<Avatar name="Alex Park" size="sm" />}
           author="alex_park"
           timestamp="2h ago"
-          badge={<Badge variant="default" size="sm">OP</Badge>}
+          badge={<Badge variant="neutral" size="sm">OP</Badge>}
           isHighlighted
           actions={
             <>

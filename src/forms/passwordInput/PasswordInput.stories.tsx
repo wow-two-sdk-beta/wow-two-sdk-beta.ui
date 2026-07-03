@@ -10,4 +10,4 @@ export default meta;
 type Story = StoryObj<typeof PasswordInput>;
 
 export const Default: Story = { args: { placeholder: 'Password' } };
-export const NoToggle: Story = { args: { toggleable: false, placeholder: 'Password' } };
+export const NoToggle: Story = { args: { hasToggle: false, placeholder: 'Password' } };

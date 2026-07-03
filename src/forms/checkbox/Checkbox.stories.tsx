@@ -44,7 +44,7 @@ export const Indeterminate: Story = {
     <div className="flex items-center gap-4">
       {VARIANTS.map((v) => (
         <label key={v} className="inline-flex items-center gap-2">
-          <Checkbox variant={v} indeterminate />
+          <Checkbox variant={v} isIndeterminate />
           <span>{v}</span>
         </label>
       ))}
@@ -65,7 +65,7 @@ export const Matrix: Story = {
                 <div className="flex items-center gap-3">
                   <Checkbox variant={v} tone={t} />
                   <Checkbox variant={v} tone={t} defaultChecked />
-                  <Checkbox variant={v} tone={t} indeterminate />
+                  <Checkbox variant={v} tone={t} isIndeterminate />
                 </div>
                 <div className="text-xs text-muted-foreground">{t}</div>
               </div>
@@ -103,7 +103,7 @@ export const Disabled: Story = {
     <div className="flex items-center gap-4">
       <Checkbox disabled />
       <Checkbox disabled defaultChecked />
-      <Checkbox disabled indeterminate />
+      <Checkbox disabled isIndeterminate />
     </div>
   ),
 };

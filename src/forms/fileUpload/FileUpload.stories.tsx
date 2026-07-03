@@ -72,5 +72,5 @@ export const Disabled: Story = {
 };
 
 export const Invalid: Story = {
-  render: () => <div className="w-[28rem]"><FileUpload invalid hint="At least one file required" /></div>,
+  render: () => <div className="w-[28rem]"><FileUpload isInvalid hint="At least one file required" /></div>,
 };

@@ -17,7 +17,7 @@ import { Search } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Icon } from '../../icons';
-import { Dialog, DialogContent } from '../../overlays/dialog';
+import { Modal, ModalContent } from '../../overlays/modal';
 import {
   listboxEmptyVariants,
   listboxGroupLabelVariants,
@@ -75,7 +75,7 @@ export interface CommandPaletteProps {
   children: ReactNode;
 }
 
-export function CommandPalette({
+function CommandPaletteRoot({
   open: openProp,
   defaultOpen = false,
   onOpenChange,
@@ -175,25 +175,26 @@ export function CommandPalette({
 
   return (
     <CommandPaletteContext.Provider value={ctx}>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Modal open={open} onOpenChange={setOpen}>
         {children}
-      </Dialog>
+      </Modal>
     </CommandPaletteContext.Provider>
   );
 }
+CommandPaletteRoot.displayName = 'CommandPalette';
 
 export type CommandPaletteContentProps = HTMLAttributes<HTMLDivElement>;
 
 export const CommandPaletteContent = forwardRef<HTMLDivElement, CommandPaletteContentProps>(
   function CommandPaletteContent({ className, children, ...rest }, forwardedRef) {
     return (
-      <DialogContent
+      <ModalContent
         ref={forwardedRef}
         className={cn('w-full max-w-xl gap-0 overflow-hidden p-0', className)}
         {...rest}
       >
         {children}
-      </DialogContent>
+      </ModalContent>
     );
   },
 );
@@ -468,22 +469,14 @@ export const CommandPaletteEmpty = forwardRef<HTMLDivElement, CommandPaletteEmpt
   },
 );
 
-type CommandPaletteComponent = typeof CommandPalette & {
-  Content: typeof CommandPaletteContent;
-  Input: typeof CommandPaletteInput;
-  List: typeof CommandPaletteList;
-  Group: typeof CommandPaletteGroup;
-  Item: typeof CommandPaletteItem;
-  Empty: typeof CommandPaletteEmpty;
-  Separator: typeof CommandPaletteSeparator;
-};
+export const CommandPalette = Object.assign(CommandPaletteRoot, {
+  Content: CommandPaletteContent,
+  Input: CommandPaletteInput,
+  List: CommandPaletteList,
+  Group: CommandPaletteGroup,
+  Item: CommandPaletteItem,
+  Empty: CommandPaletteEmpty,
+  Separator: CommandPaletteSeparator,
+});
 
-(CommandPalette as CommandPaletteComponent).Content = CommandPaletteContent;
-(CommandPalette as CommandPaletteComponent).Input = CommandPaletteInput;
-(CommandPalette as CommandPaletteComponent).List = CommandPaletteList;
-(CommandPalette as CommandPaletteComponent).Group = CommandPaletteGroup;
-(CommandPalette as CommandPaletteComponent).Item = CommandPaletteItem;
-(CommandPalette as CommandPaletteComponent).Empty = CommandPaletteEmpty;
-(CommandPalette as CommandPaletteComponent).Separator = CommandPaletteSeparator;
-
-export default CommandPalette as CommandPaletteComponent;
+export default CommandPalette;

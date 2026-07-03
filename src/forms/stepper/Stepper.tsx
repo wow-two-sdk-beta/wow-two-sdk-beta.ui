@@ -41,7 +41,7 @@ export interface StepperProps extends Omit<HTMLAttributes<HTMLDivElement>, 'defa
   orientation?: 'horizontal' | 'vertical';
 }
 
-export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
+const StepperRoot = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
   {
     value,
     defaultValue,
@@ -254,14 +254,10 @@ export const StepperPanel = forwardRef<HTMLDivElement, StepperPanelProps>(functi
   );
 });
 
-type StepperComponent = typeof Stepper & {
-  List: typeof StepperList;
-  Step: typeof StepperStep;
-  Panel: typeof StepperPanel;
-};
+export const Stepper = Object.assign(StepperRoot, {
+  List: StepperList,
+  Step: StepperStep,
+  Panel: StepperPanel,
+});
 
-(Stepper as StepperComponent).List = StepperList;
-(Stepper as StepperComponent).Step = StepperStep;
-(Stepper as StepperComponent).Panel = StepperPanel;
-
-export default Stepper as StepperComponent;
+export default Stepper;

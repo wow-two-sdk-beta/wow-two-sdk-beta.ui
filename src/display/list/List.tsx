@@ -10,7 +10,7 @@ export interface ListProps
   children: ReactNode;
 }
 
-export const List = forwardRef<HTMLUListElement | HTMLOListElement, ListProps>(function List(
+const ListRoot = forwardRef<HTMLUListElement | HTMLOListElement, ListProps>(function List(
   { isOrdered, marker, spacing, className, children, ...rest },
   ref,
 ) {
@@ -58,10 +58,8 @@ export const ListItem = forwardRef<HTMLLIElement, ListItemProps>(function ListIt
   );
 });
 
-type ListComponent = typeof List & {
-  Item: typeof ListItem;
-};
+export const List = Object.assign(ListRoot, {
+  Item: ListItem,
+});
 
-(List as ListComponent).Item = ListItem;
-
-export default List as ListComponent;
+export default List;

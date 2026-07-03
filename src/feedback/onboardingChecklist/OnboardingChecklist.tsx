@@ -35,7 +35,7 @@ export interface OnboardingChecklistProps extends Omit<HTMLAttributes<HTMLDivEle
  * Onboarding task card. Children are `OnboardingChecklist.Task` elements;
  * progress is auto-derived from their `isDone` props.
  */
-export const OnboardingChecklist = forwardRef<HTMLDivElement, OnboardingChecklistProps>(
+const OnboardingChecklistRoot = forwardRef<HTMLDivElement, OnboardingChecklistProps>(
   function OnboardingChecklist(
     {
       title = 'Get started',
@@ -170,11 +170,9 @@ export const OnboardingChecklistTask = forwardRef<
 });
 OnboardingChecklistTask.displayName = 'OnboardingChecklistTask';
 
-type OnboardingChecklistComponent = typeof OnboardingChecklist & {
-  Task: typeof OnboardingChecklistTask;
-};
-
-(OnboardingChecklist as OnboardingChecklistComponent).Task = OnboardingChecklistTask;
+export const OnboardingChecklist = Object.assign(OnboardingChecklistRoot, {
+  Task: OnboardingChecklistTask,
+});
 
 export function useOnboardingChecklist() {
   const ctx = useContext(OnboardingContext);
@@ -182,4 +180,4 @@ export function useOnboardingChecklist() {
   return ctx;
 }
 
-export default OnboardingChecklist as OnboardingChecklistComponent;
+export default OnboardingChecklist;

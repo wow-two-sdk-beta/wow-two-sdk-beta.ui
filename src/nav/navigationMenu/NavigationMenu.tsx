@@ -61,7 +61,7 @@ export interface NavigationMenuProps extends Omit<HTMLAttributes<HTMLElement>, '
   onValueChange?: (value: string | null) => void;
 }
 
-export const NavigationMenu = forwardRef<HTMLElement, NavigationMenuProps>(
+const NavigationMenuRoot = forwardRef<HTMLElement, NavigationMenuProps>(
   function NavigationMenu(
     {
       value,
@@ -348,18 +348,12 @@ export const NavigationMenuContent = forwardRef<HTMLDivElement, NavigationMenuCo
   },
 );
 
-type NavigationMenuComponent = typeof NavigationMenu & {
-  List: typeof NavigationMenuList;
-  Item: typeof NavigationMenuItem;
-  Trigger: typeof NavigationMenuTrigger;
-  Content: typeof NavigationMenuContent;
-  Link: typeof NavigationMenuLink;
-};
+export const NavigationMenu = Object.assign(NavigationMenuRoot, {
+  List: NavigationMenuList,
+  Item: NavigationMenuItem,
+  Trigger: NavigationMenuTrigger,
+  Content: NavigationMenuContent,
+  Link: NavigationMenuLink,
+});
 
-(NavigationMenu as NavigationMenuComponent).List = NavigationMenuList;
-(NavigationMenu as NavigationMenuComponent).Item = NavigationMenuItem;
-(NavigationMenu as NavigationMenuComponent).Trigger = NavigationMenuTrigger;
-(NavigationMenu as NavigationMenuComponent).Content = NavigationMenuContent;
-(NavigationMenu as NavigationMenuComponent).Link = NavigationMenuLink;
-
-export default NavigationMenu as NavigationMenuComponent;
+export default NavigationMenu;

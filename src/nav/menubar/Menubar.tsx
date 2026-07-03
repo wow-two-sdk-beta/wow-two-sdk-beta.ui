@@ -68,7 +68,7 @@ export interface MenubarProps
   children: ReactNode;
 }
 
-export const Menubar = forwardRef<HTMLDivElement, MenubarProps>(function Menubar(
+const MenubarRoot = forwardRef<HTMLDivElement, MenubarProps>(function Menubar(
   { value, defaultValue = null, onValueChange, className, children, ...rest },
   ref,
 ) {
@@ -277,22 +277,14 @@ export function MenubarContent({
   );
 }
 
-type MenubarComponent = typeof Menubar & {
-  Menu: typeof MenubarMenu;
-  Trigger: typeof MenubarTrigger;
-  Content: typeof MenubarContent;
-  Item: typeof MenuItem;
-  Group: typeof MenuGroup;
-  Label: typeof MenuLabel;
-  Separator: typeof MenuSeparator;
-};
+export const Menubar = Object.assign(MenubarRoot, {
+  Menu: MenubarMenu,
+  Trigger: MenubarTrigger,
+  Content: MenubarContent,
+  Item: MenuItem,
+  Group: MenuGroup,
+  Label: MenuLabel,
+  Separator: MenuSeparator,
+});
 
-(Menubar as MenubarComponent).Menu = MenubarMenu;
-(Menubar as MenubarComponent).Trigger = MenubarTrigger;
-(Menubar as MenubarComponent).Content = MenubarContent;
-(Menubar as MenubarComponent).Item = MenuItem;
-(Menubar as MenubarComponent).Group = MenuGroup;
-(Menubar as MenubarComponent).Label = MenuLabel;
-(Menubar as MenubarComponent).Separator = MenuSeparator;
-
-export default Menubar as MenubarComponent;
+export default Menubar;

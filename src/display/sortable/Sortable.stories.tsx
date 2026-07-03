@@ -16,6 +16,7 @@ const reorder = <T,>(list: T[], from: number, to: number): T[] => {
   const next = [...list];
   const clamped = Math.max(0, Math.min(next.length - 1, to));
   const [item] = next.splice(from, 1);
+  if (item === undefined) return next;
   next.splice(clamped, 0, item);
   return next;
 };

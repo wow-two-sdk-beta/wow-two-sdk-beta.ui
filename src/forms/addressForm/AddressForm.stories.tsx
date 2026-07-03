@@ -34,7 +34,7 @@ export const Default: Story = {
 export const Compact: Story = {
   render: () => (
     <div className="w-80">
-      <AddressForm compact />
+      <AddressForm isCompact />
     </div>
   ),
 };

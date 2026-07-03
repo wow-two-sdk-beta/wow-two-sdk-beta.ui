@@ -30,7 +30,7 @@ function MultiDemo() {
   const [values, setValues] = useState<string[]>(['apple', 'cherry']);
   return (
     <div className="w-64">
-      <Listbox isMultiple value={values} onValueChange={setValues} aria-label="Choose fruits">
+      <Listbox<string> isMultiple value={values} onValueChange={setValues} aria-label="Choose fruits">
         <Listbox.Item value="apple">Apple</Listbox.Item>
         <Listbox.Item value="banana">Banana</Listbox.Item>
         <Listbox.Item value="cherry">Cherry</Listbox.Item>

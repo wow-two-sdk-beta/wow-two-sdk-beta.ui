@@ -71,7 +71,7 @@ export interface BottomSheetProps extends HTMLAttributes<HTMLDivElement>, Surfac
  * between heights; releasing snaps to the nearest point. Past the lowest
  * snap with `dragToDismiss`, the sheet closes.
  */
-export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function BottomSheet(
+const BottomSheetRoot = forwardRef<HTMLDivElement, BottomSheetProps>(function BottomSheet(
   {
     open: openProp,
     defaultOpen = false,
@@ -303,12 +303,9 @@ export const BottomSheet = forwardRef<HTMLDivElement, BottomSheetProps>(function
 export const BottomSheetTitle = OverlayTitle;
 export const BottomSheetDescription = OverlayDescription;
 
-type BottomSheetComponent = typeof BottomSheet & {
-  Title: typeof BottomSheetTitle;
-  Description: typeof BottomSheetDescription;
-};
+export const BottomSheet = Object.assign(BottomSheetRoot, {
+  Title: BottomSheetTitle,
+  Description: BottomSheetDescription,
+});
 
-(BottomSheet as BottomSheetComponent).Title = BottomSheetTitle;
-(BottomSheet as BottomSheetComponent).Description = BottomSheetDescription;
-
-export default BottomSheet as BottomSheetComponent;
+export default BottomSheet;

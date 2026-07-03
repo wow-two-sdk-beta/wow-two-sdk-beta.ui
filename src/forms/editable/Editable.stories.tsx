@@ -20,7 +20,7 @@ export const Default: Story = {
 
 export const WithButtons: Story = {
   render: () => (
-    <Editable defaultValue="Inline title" submitOnBlur={false}>
+    <Editable defaultValue="Inline title" canSubmitOnBlur={false}>
       <EditablePreview />
       <EditableInput size="sm" />
       <EditableSubmit />
@@ -60,7 +60,7 @@ export const Empty: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <Editable defaultValue="Locked" disabled>
+    <Editable defaultValue="Locked" isDisabled>
       <EditablePreview />
       <EditableInput size="sm" />
     </Editable>

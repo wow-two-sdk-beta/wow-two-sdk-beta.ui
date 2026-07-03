@@ -57,7 +57,7 @@ export interface DrawerProps {
   children: ReactNode;
 }
 
-export function Drawer({
+function DrawerRoot({
   open: openProp,
   defaultOpen = false,
   onOpenChange,
@@ -91,6 +91,7 @@ export function Drawer({
 
   return <DrawerContext.Provider value={ctx}>{children}</DrawerContext.Provider>;
 }
+DrawerRoot.displayName = 'Drawer';
 
 export interface DrawerTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -322,24 +323,15 @@ export const DrawerBody = OverlayBody;
 export const DrawerFooter = OverlayFooter;
 export const DrawerClose = OverlayCloseButton;
 
-type DrawerComponent = typeof Drawer & {
-  Trigger: typeof DrawerTrigger;
-  Content: typeof DrawerContent;
-  Header: typeof DrawerHeader;
-  Title: typeof DrawerTitle;
-  Description: typeof DrawerDescription;
-  Body: typeof DrawerBody;
-  Footer: typeof DrawerFooter;
-  Close: typeof DrawerClose;
-};
+export const Drawer = Object.assign(DrawerRoot, {
+  Trigger: DrawerTrigger,
+  Content: DrawerContent,
+  Header: DrawerHeader,
+  Title: DrawerTitle,
+  Description: DrawerDescription,
+  Body: DrawerBody,
+  Footer: DrawerFooter,
+  Close: DrawerClose,
+});
 
-(Drawer as DrawerComponent).Trigger = DrawerTrigger;
-(Drawer as DrawerComponent).Content = DrawerContent;
-(Drawer as DrawerComponent).Header = DrawerHeader;
-(Drawer as DrawerComponent).Title = DrawerTitle;
-(Drawer as DrawerComponent).Description = DrawerDescription;
-(Drawer as DrawerComponent).Body = DrawerBody;
-(Drawer as DrawerComponent).Footer = DrawerFooter;
-(Drawer as DrawerComponent).Close = DrawerClose;
-
-export default Drawer as DrawerComponent;
+export default Drawer;

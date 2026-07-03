@@ -117,7 +117,7 @@ export interface SpeedDialProps {
   children: ReactNode;
 }
 
-export function SpeedDial({
+function SpeedDialRoot({
   position = 'bottom-right',
   direction,
   isOpen: openProp,
@@ -208,6 +208,7 @@ export function SpeedDial({
     </SpeedDialContext.Provider>
   );
 }
+SpeedDialRoot.displayName = 'SpeedDial';
 
 export interface SpeedDialTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -320,12 +321,9 @@ export const SpeedDialAction = forwardRef<HTMLButtonElement, SpeedDialActionProp
   },
 );
 
-type SpeedDialComponent = typeof SpeedDial & {
-  Trigger: typeof SpeedDialTrigger;
-  Action: typeof SpeedDialAction;
-};
+export const SpeedDial = Object.assign(SpeedDialRoot, {
+  Trigger: SpeedDialTrigger,
+  Action: SpeedDialAction,
+});
 
-(SpeedDial as SpeedDialComponent).Trigger = SpeedDialTrigger;
-(SpeedDial as SpeedDialComponent).Action = SpeedDialAction;
-
-export default SpeedDial as SpeedDialComponent;
+export default SpeedDial;

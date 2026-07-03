@@ -55,7 +55,7 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   children: ReactNode;
 }
 
-export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
+const TableRoot = forwardRef<HTMLTableElement, TableProps>(function Table(
   {
     isStriped = false,
     isHoverable = false,
@@ -211,22 +211,14 @@ export const TableCaption = forwardRef<
   );
 });
 
-type TableComponent = typeof Table & {
-  Head: typeof TableHead;
-  Body: typeof TableBody;
-  Footer: typeof TableFooter;
-  Row: typeof TableRow;
-  HeaderCell: typeof TableHeaderCell;
-  Cell: typeof TableCell;
-  Caption: typeof TableCaption;
-};
+export const Table = Object.assign(TableRoot, {
+  Head: TableHead,
+  Body: TableBody,
+  Footer: TableFooter,
+  Row: TableRow,
+  HeaderCell: TableHeaderCell,
+  Cell: TableCell,
+  Caption: TableCaption,
+});
 
-(Table as TableComponent).Head = TableHead;
-(Table as TableComponent).Body = TableBody;
-(Table as TableComponent).Footer = TableFooter;
-(Table as TableComponent).Row = TableRow;
-(Table as TableComponent).HeaderCell = TableHeaderCell;
-(Table as TableComponent).Cell = TableCell;
-(Table as TableComponent).Caption = TableCaption;
-
-export default Table as TableComponent;
+export default Table;

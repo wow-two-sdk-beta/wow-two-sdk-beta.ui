@@ -36,7 +36,7 @@ export const Default: Story = { render: () => <Demo /> };
 export const WithAlpha: Story = {
   render: () => (
     <div className="p-4">
-      <ColorPicker withAlpha defaultValue="#3b82f680" />
+      <ColorPicker hasAlpha defaultValue="#3b82f680" />
     </div>
   ),
 };

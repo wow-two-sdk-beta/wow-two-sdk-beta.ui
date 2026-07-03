@@ -54,7 +54,7 @@ export interface WizardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
-export const Wizard = forwardRef<HTMLDivElement, WizardProps>(function Wizard(
+const WizardRoot = forwardRef<HTMLDivElement, WizardProps>(function Wizard(
   {
     currentStep: currentStepProp,
     defaultCurrentStep,
@@ -360,14 +360,10 @@ export const WizardFooter = forwardRef<HTMLDivElement, WizardFooterProps>(
   },
 );
 
-type WizardComponent = typeof Wizard & {
-  Steps: typeof WizardSteps;
-  Step: typeof WizardStep;
-  Footer: typeof WizardFooter;
-};
+export const Wizard = Object.assign(WizardRoot, {
+  Steps: WizardSteps,
+  Step: WizardStep,
+  Footer: WizardFooter,
+});
 
-(Wizard as WizardComponent).Steps = WizardSteps;
-(Wizard as WizardComponent).Step = WizardStep;
-(Wizard as WizardComponent).Footer = WizardFooter;
-
-export default Wizard as WizardComponent;
+export default Wizard;

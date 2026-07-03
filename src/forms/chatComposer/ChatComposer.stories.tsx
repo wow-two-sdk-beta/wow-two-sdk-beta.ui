@@ -41,7 +41,7 @@ export const ModEnterToSend: Story = {
 };
 
 export const Disabled: Story = {
-  args: { disabled: true, placeholder: 'Read-only conversation' },
+  args: { isDisabled: true, placeholder: 'Read-only conversation' },
 };
 
 function ControlledDemo() {

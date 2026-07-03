@@ -105,7 +105,7 @@
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly --outDir dist && cp src/index.css dist/index.css && node scripts/build-themes-css.mjs",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build -o storybook-static",

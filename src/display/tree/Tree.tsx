@@ -47,7 +47,7 @@ export interface TreeProps extends Omit<HTMLAttributes<HTMLUListElement>, 'defau
   onExpandedChange?: (values: string[]) => void;
 }
 
-export const Tree = forwardRef<HTMLUListElement, TreeProps>(function Tree(
+const TreeRoot = forwardRef<HTMLUListElement, TreeProps>(function Tree(
   {
     selectedValue,
     defaultSelectedValue,
@@ -286,12 +286,9 @@ export const TreeItem = forwardRef<HTMLLIElement, TreeItemProps>(function TreeIt
   );
 });
 
-type TreeComponent = typeof Tree & {
-  Group: typeof TreeGroup;
-  Item: typeof TreeItem;
-};
+export const Tree = Object.assign(TreeRoot, {
+  Group: TreeGroup,
+  Item: TreeItem,
+});
 
-(Tree as TreeComponent).Group = TreeGroup;
-(Tree as TreeComponent).Item = TreeItem;
-
-export default Tree as TreeComponent;
+export default Tree;

@@ -43,8 +43,8 @@ export const Interactive: Story = {
   render: () => (
     <div className="flex items-center gap-2">
       <ColorSwatch color="#f59e0b" onClick={() => alert('clicked')} aria-label="Amber" />
-      <ColorSwatch color="#f59e0b" onClick={() => {}} selected aria-label="Selected" />
-      <ColorSwatch color="#f59e0b" onClick={() => {}} disabled aria-label="Disabled" />
+      <ColorSwatch color="#f59e0b" onClick={() => {}} isSelected aria-label="Selected" />
+      <ColorSwatch color="#f59e0b" onClick={() => {}} isDisabled aria-label="Disabled" />
     </div>
   ),
 };

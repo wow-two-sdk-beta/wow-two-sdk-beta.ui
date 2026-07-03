@@ -84,7 +84,7 @@ export interface ButtonProps
   /* Content-loading: hides content (preserves dimensions) + shimmer. Mutually exclusive with `isLoading`. */
   isSkeleton?: boolean;
 
-  /* Removes from focus order, blocks clicks. Forwards to native `disabled`. Inherited from an enclosing `FormField` when omitted. */
+  /* Removes from focus order, blocks clicks. Forwards to native `disabled`. Inherited from an enclosing `Field` when omitted. */
   isDisabled?: boolean;
 
   /* Stretches to fill container width. */
@@ -341,7 +341,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       );
     }
 
-    /* Inherit disabled-state from an enclosing `FormField` when the local prop is omitted; standalone when no context. */
+    /* Inherit disabled-state from an enclosing `Field` when the local prop is omitted; standalone when no context. */
     const formControl = useFormControl();
     const resolvedDisabled = isDisabled ?? formControl?.isDisabled ?? false;
 

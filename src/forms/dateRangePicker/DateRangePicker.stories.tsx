@@ -25,7 +25,7 @@ export const Default: Story = { render: () => <Demo /> };
 export const Invalid: Story = {
   render: () => (
     <div className="w-96">
-      <DateRangePicker invalid placeholder="Required range" />
+      <DateRangePicker isInvalid placeholder="Required range" />
     </div>
   ),
 };
