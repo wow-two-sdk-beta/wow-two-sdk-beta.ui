@@ -3,15 +3,38 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Icon } from '../../icons';
-import {
-  addDays,
-  addMonths,
-  isSameDay,
-  isToday,
-  MONTHS_LONG,
-  startOfDay,
-  WEEKDAYS_SHORT,
-} from '../../forms/DateExtensions';
+import { MONTHS_LONG, WEEKDAYS_SHORT } from '../../forms/DateExtensions';
+
+// EventCalendar renders month/week/day/agenda views with intra-day time slots,
+// so its model is a native `Date` (wall-clock date + time), not `Temporal.PlainDate`.
+// The shared `DateExtensions` calendar-math helpers are PlainDate-typed; keep the
+// small Date-based equivalents local here until this component is ported to a
+// Temporal datetime type in its own pass.
+function startOfDay(d: Date): Date {
+  const c = new Date(d);
+  c.setHours(0, 0, 0, 0);
+  return c;
+}
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+function isToday(d: Date): boolean {
+  return isSameDay(d, new Date());
+}
+function addDays(d: Date, n: number): Date {
+  const c = new Date(d);
+  c.setDate(c.getDate() + n);
+  return c;
+}
+function addMonths(d: Date, n: number): Date {
+  const c = new Date(d);
+  c.setMonth(d.getMonth() + n, d.getDate());
+  return c;
+}
 
 export type EventCalendarView = 'month' | 'week' | 'day' | 'agenda';
 

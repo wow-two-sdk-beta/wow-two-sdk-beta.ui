@@ -1,27 +1,26 @@
 import { forwardRef, useEffect, useMemo, useRef, type ButtonHTMLAttributes } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { Clock } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
-import { type TimeValue } from '../timeField';
 
 export interface TimePickerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'defaultValue'>,
     SelectTriggerVariants {
-  value?: TimeValue | null;
-  defaultValue?: TimeValue | null;
-  onValueChange?: (time: TimeValue | null) => void;
+  value?: Temporal.PlainTime | null;
+  defaultValue?: Temporal.PlainTime | null;
+  onValueChange?: (time: Temporal.PlainTime | null) => void;
   /** Minute interval. Default 5. */
   minuteStep?: number;
   placeholder?: string;
-  format?: (time: TimeValue) => string;
+  format?: (time: Temporal.PlainTime) => string;
   isInvalid?: boolean;
   name?: string;
 }
 
-const defaultFormat = (t: TimeValue) =>
-  `${String(t.hours).padStart(2, '0')}:${String(t.minutes).padStart(2, '0')}`;
+const defaultFormat = (t: Temporal.PlainTime) => t.toString({ smallestUnit: 'minute' });
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
@@ -43,7 +42,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
   },
   forwardedRef,
 ) {
-  const [time, setTime] = useControlled<TimeValue | null>({
+  const [time, setTime] = useControlled<Temporal.PlainTime | null>({
     controlled: value,
     default: defaultValue ?? null,
     onChange: onValueChange,
@@ -76,11 +75,11 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
 
   const triggerState = state ?? (isInvalid ? 'invalid' : 'default');
 
-  const update = (next: Partial<TimeValue>) => {
-    const merged: TimeValue = {
-      hours: next.hours ?? time?.hours ?? 0,
-      minutes: next.minutes ?? time?.minutes ?? 0,
-    };
+  const update = (next: { hour?: number; minute?: number }) => {
+    const merged = Temporal.PlainTime.from({
+      hour: next.hour ?? time?.hour ?? 0,
+      minute: next.minute ?? time?.minute ?? 0,
+    });
     setTime(merged);
   };
 
@@ -109,7 +108,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
             className="flex max-h-56 flex-col gap-0.5 overflow-y-auto pr-1"
           >
             {HOURS.map((h) => {
-              const selected = time?.hours === h;
+              const selected = time?.hour === h;
               return (
                 <button
                   key={h}
@@ -117,7 +116,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
                   role="option"
                   aria-selected={selected}
                   data-selected={selected ? '' : undefined}
-                  onClick={() => update({ hours: h })}
+                  onClick={() => update({ hour: h })}
                   className={cn(
                     'grid h-8 w-12 place-items-center rounded-sm text-sm transition-colors hover:bg-muted',
                     selected && 'bg-primary text-primary-foreground hover:bg-primary',
@@ -136,7 +135,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
             className="flex max-h-56 flex-col gap-0.5 overflow-y-auto pl-1"
           >
             {minutes.map((m) => {
-              const selected = time?.minutes === m;
+              const selected = time?.minute === m;
               return (
                 <button
                   key={m}
@@ -144,7 +143,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
                   role="option"
                   aria-selected={selected}
                   data-selected={selected ? '' : undefined}
-                  onClick={() => update({ minutes: m })}
+                  onClick={() => update({ minute: m })}
                   className={cn(
                     'grid h-8 w-12 place-items-center rounded-sm text-sm transition-colors hover:bg-muted',
                     selected && 'bg-primary text-primary-foreground hover:bg-primary',
@@ -158,11 +157,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
         </div>
       </PopoverContent>
       {name && time && (
-        <input
-          type="hidden"
-          name={name}
-          value={`${String(time.hours).padStart(2, '0')}:${String(time.minutes).padStart(2, '0')}`}
-        />
+        <input type="hidden" name={name} value={time.toString({ smallestUnit: 'minute' })} />
       )}
     </Popover>
   );

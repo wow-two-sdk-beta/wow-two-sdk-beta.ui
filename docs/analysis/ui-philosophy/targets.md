@@ -1,6 +1,6 @@
 # UI Implementation Targets — what we'll build
 
-*Last updated: 2026-05-04*
+*Last updated: 2026-07-04*
 
 > Companion: [`ideas.md`](./ideas.md) — universe of options.
 >
@@ -183,6 +183,7 @@ Currently **EVERY** component is en-US-locked. The largest single gap. Plan:
 | Auto-save | **SKIP** — consumer pattern |
 | Dirty/touched tracking | **MAYBE** — depends on form root verdict |
 | File field with progress | **NEXT** — FileUpload (Dropzone) in batch 7 |
+| Date/time value type | **NOW — Temporal adopted** — date/time components speak `Temporal.PlainDate` / `Temporal.PlainTime` (via `@js-temporal/polyfill`); ecosystem standard, replaces native `Date` |
 | Hidden input emit (DatePicker, ColorPicker, etc.) | **DONE** — pattern locked |
 | FormData / native form interop | **DONE** |
 | ARIA wiring (label/control/error) | **DONE** |

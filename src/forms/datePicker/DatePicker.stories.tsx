@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { DatePicker } from './DatePicker';
 
 const meta: Meta<typeof DatePicker> = {
@@ -11,7 +12,7 @@ export default meta;
 type Story = StoryObj<typeof DatePicker>;
 
 function Demo() {
-  const [date, setDate] = useState<Date | null>(null);
+  const [date, setDate] = useState<Temporal.PlainDate | null>(null);
   return (
     <div className="w-72">
       <DatePicker value={date} onValueChange={setDate} />
@@ -24,7 +25,7 @@ export const Default: Story = { render: () => <Demo /> };
 export const WithDefault: Story = {
   render: () => (
     <div className="w-72">
-      <DatePicker defaultValue={new Date()} />
+      <DatePicker defaultValue={Temporal.Now.plainDateISO()} />
     </div>
   ),
 };

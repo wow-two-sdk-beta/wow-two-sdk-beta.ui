@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { TimeField, type TimeValue } from './TimeField';
+import { Temporal } from '@js-temporal/polyfill';
+import { TimeField } from './TimeField';
 
 const meta: Meta<typeof TimeField> = {
   title: 'Forms/TimeField',
@@ -11,12 +12,12 @@ export default meta;
 type Story = StoryObj<typeof TimeField>;
 
 function Demo() {
-  const [time, setTime] = useState<TimeValue | null>(null);
+  const [time, setTime] = useState<Temporal.PlainTime | null>(null);
   return (
     <div className="flex flex-col gap-3 w-72">
       <TimeField value={time} onValueChange={setTime} />
       <p className="text-sm text-muted-foreground">
-        Value: {time ? `${String(time.hours).padStart(2, '0')}:${String(time.minutes).padStart(2, '0')}` : 'none'}
+        Value: {time ? time.toString({ smallestUnit: 'minute' }) : 'none'}
       </p>
     </div>
   );

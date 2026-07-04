@@ -1,10 +1,11 @@
 import { forwardRef, useEffect, useRef, type ButtonHTMLAttributes } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
-import { formatISODate } from '../DateExtensions';
+import { formatISODate, today } from '../DateExtensions';
 import { RangeCalendar, type DateRange } from '../rangeCalendar';
 
 export interface DateRangePickerProps
@@ -14,17 +15,17 @@ export interface DateRangePickerProps
   defaultValue?: DateRange | null;
   onValueChange?: (range: DateRange | null) => void;
   placeholder?: string;
-  format?: (date: Date) => string;
-  min?: Date | null;
-  max?: Date | null;
-  isDisabled?: (date: Date) => boolean;
+  format?: (date: Temporal.PlainDate) => string;
+  min?: Temporal.PlainDate | null;
+  max?: Temporal.PlainDate | null;
+  isDisabled?: (date: Temporal.PlainDate) => boolean;
   isInvalid?: boolean;
   /** When `name` is set, two hidden inputs (`{name}_start`, `{name}_end`) ship the ISO values. */
   name?: string;
 }
 
-const defaultFormat = (d: Date) =>
-  d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+const defaultFormat = (d: Temporal.PlainDate) =>
+  d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
 export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProps>(
   function DateRangePicker(
@@ -94,7 +95,7 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
           <RangeCalendar
             value={range}
             onValueChange={setRange}
-            defaultMonth={range?.start ?? new Date()}
+            defaultMonth={range?.start ?? today()}
             min={min}
             max={max}
             isDisabled={dayDisabled}

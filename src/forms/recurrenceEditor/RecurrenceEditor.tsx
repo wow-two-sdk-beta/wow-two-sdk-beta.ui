@@ -1,7 +1,8 @@
 import { forwardRef, useMemo, type HTMLAttributes } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
-import { addDays, addMonths, formatISODate, parseISODate } from '../DateExtensions';
+import { addDays, addMonths, daysInMonth, formatISODate, parseISODate, sundayIndex, today } from '../DateExtensions';
 import { inputBaseVariants } from '../InputStyles';
 
 export type RecurrenceFreq = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
@@ -13,14 +14,14 @@ export interface RecurrenceRule {
   byDay?: RecurrenceWeekday[];
   byMonthDay?: number;
   count?: number;
-  until?: Date | null;
+  until?: Temporal.PlainDate | null;
 }
 
 export interface RecurrenceEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue'> {
   value?: RecurrenceRule;
   defaultValue?: RecurrenceRule;
   onValueChange?: (rule: RecurrenceRule) => void;
-  from?: Date;
+  from?: Temporal.PlainDate;
   previewCount?: number;
   isDisabled?: boolean;
   isReadOnly?: boolean;
@@ -50,7 +51,10 @@ function serializeRule(r: RecurrenceRule): string {
   return `RRULE:${parts.join(';')}`;
 }
 
-function nextOccurrence(rule: RecurrenceRule, prev: Date): Date | null {
+function nextOccurrence(
+  rule: RecurrenceRule,
+  prev: Temporal.PlainDate,
+): Temporal.PlainDate | null {
   switch (rule.freq) {
     case 'DAILY':
       return addDays(prev, rule.interval);
@@ -60,14 +64,14 @@ function nextOccurrence(rule: RecurrenceRule, prev: Date): Date | null {
       // exhausted → jump to the week `interval` weeks later and scan it.
       const allowed = new Set(rule.byDay);
       let cursor = addDays(prev, 1);
-      while (cursor.getDay() !== 0) {
-        if (allowed.has(JS_TO_RRULE[cursor.getDay()]!)) return cursor;
+      while (sundayIndex(cursor) !== 0) {
+        if (allowed.has(JS_TO_RRULE[sundayIndex(cursor)]!)) return cursor;
         cursor = addDays(cursor, 1);
       }
       // `cursor` is the Sunday opening the following week; skip interval-1 more weeks.
       cursor = addDays(cursor, 7 * (rule.interval - 1));
       for (let i = 0; i < 7; i++) {
-        if (allowed.has(JS_TO_RRULE[cursor.getDay()]!)) return cursor;
+        if (allowed.has(JS_TO_RRULE[sundayIndex(cursor)]!)) return cursor;
         cursor = addDays(cursor, 1);
       }
       return null;
@@ -75,27 +79,30 @@ function nextOccurrence(rule: RecurrenceRule, prev: Date): Date | null {
     case 'MONTHLY': {
       const next = addMonths(prev, rule.interval);
       if (rule.byMonthDay) {
-        next.setDate(rule.byMonthDay);
+        // Clamp to the month's length so day 31 in a 30-day month lands on the last day.
+        const day = Math.min(rule.byMonthDay, daysInMonth(next.year, next.month));
+        return next.with({ day });
       }
       return next;
     }
-    case 'YEARLY': {
-      const c = new Date(prev);
-      c.setFullYear(c.getFullYear() + rule.interval);
-      return c;
-    }
+    case 'YEARLY':
+      return prev.add({ years: rule.interval });
   }
 }
 
-function buildPreview(rule: RecurrenceRule, from: Date, count: number): Date[] {
-  const out: Date[] = [];
+function buildPreview(
+  rule: RecurrenceRule,
+  from: Temporal.PlainDate,
+  count: number,
+): Temporal.PlainDate[] {
+  const out: Temporal.PlainDate[] = [];
   let cursor = from;
   // Include `from` if it satisfies the rule (simplification: always include for visual hint).
-  out.push(new Date(cursor));
+  out.push(cursor);
   for (let i = 0; i < count - 1; i++) {
     const next = nextOccurrence(rule, cursor);
     if (!next) break;
-    if (rule.until && next > rule.until) break;
+    if (rule.until && Temporal.PlainDate.compare(next, rule.until) > 0) break;
     if (rule.count && out.length >= rule.count) break;
     out.push(next);
     cursor = next;
@@ -115,7 +122,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
       value,
       defaultValue,
       onValueChange,
-      from = new Date(),
+      from = today(),
       previewCount = 5,
       isDisabled,
       isReadOnly,
@@ -226,7 +233,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               type="number"
               min={1}
               max={31}
-              value={rule.byMonthDay ?? from.getDate()}
+              value={rule.byMonthDay ?? from.day}
               disabled={isDisabled}
               readOnly={isReadOnly}
               onChange={(e) => update({ byMonthDay: Math.min(31, Math.max(1, Number(e.target.value) || 1)) })}

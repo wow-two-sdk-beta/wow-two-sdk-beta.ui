@@ -1,4 +1,5 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { useFormControl } from '../../primitives/formControlContext/FormControlContext';
@@ -11,11 +12,11 @@ export interface DateFieldProps
       'type' | 'value' | 'defaultValue' | 'onChange' | 'min' | 'max' | 'size'
     >,
     InputBaseVariants {
-  value?: Date | null;
-  defaultValue?: Date | null;
-  onValueChange?: (date: Date | null) => void;
-  min?: Date | null;
-  max?: Date | null;
+  value?: Temporal.PlainDate | null;
+  defaultValue?: Temporal.PlainDate | null;
+  onValueChange?: (date: Temporal.PlainDate | null) => void;
+  min?: Temporal.PlainDate | null;
+  max?: Temporal.PlainDate | null;
 }
 
 export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(function DateField(
@@ -23,7 +24,7 @@ export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(function D
   ref,
 ) {
   const ctx = useFormControl();
-  const [current, setCurrent] = useControlled<Date | null>({
+  const [current, setCurrent] = useControlled<Temporal.PlainDate | null>({
     controlled: value,
     default: defaultValue ?? null,
     onChange: onValueChange,

@@ -1,30 +1,31 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
-import { formatISODate } from '../DateExtensions';
+import { formatISODate, today } from '../DateExtensions';
 import { Calendar } from '../calendar';
 
 export interface DatePickerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'defaultValue'>,
     SelectTriggerVariants {
-  value?: Date | null;
-  defaultValue?: Date | null;
-  onValueChange?: (date: Date | null) => void;
+  value?: Temporal.PlainDate | null;
+  defaultValue?: Temporal.PlainDate | null;
+  onValueChange?: (date: Temporal.PlainDate | null) => void;
   placeholder?: string;
-  format?: (date: Date) => string;
-  min?: Date | null;
-  max?: Date | null;
-  isDisabled?: (date: Date) => boolean;
+  format?: (date: Temporal.PlainDate) => string;
+  min?: Temporal.PlainDate | null;
+  max?: Temporal.PlainDate | null;
+  isDisabled?: (date: Temporal.PlainDate) => boolean;
   isInvalid?: boolean;
   /** When `name` is set, a hidden input ships the ISO value with form submission. */
   name?: string;
 }
 
-const defaultFormat = (d: Date) =>
-  d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+const defaultFormat = (d: Temporal.PlainDate) =>
+  d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
 export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(function DatePicker(
   {
@@ -46,7 +47,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
   },
   forwardedRef,
 ) {
-  const [date, setDate] = useControlled<Date | null>({
+  const [date, setDate] = useControlled<Temporal.PlainDate | null>({
     controlled: value,
     default: defaultValue ?? null,
     onChange: onValueChange,
@@ -81,7 +82,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
             setDate(d);
             setOpen(false);
           }}
-          defaultMonth={date ?? new Date()}
+          defaultMonth={date ?? today()}
           min={min}
           max={max}
           isDisabled={dayDisabled}

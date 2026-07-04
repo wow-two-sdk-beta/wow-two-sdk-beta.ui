@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { TimePicker } from './TimePicker';
-import type { TimeValue } from '../timeField';
 
 const meta: Meta<typeof TimePicker> = {
   title: 'Forms/TimePicker',
@@ -12,7 +12,7 @@ export default meta;
 type Story = StoryObj<typeof TimePicker>;
 
 function Demo() {
-  const [time, setTime] = useState<TimeValue | null>(null);
+  const [time, setTime] = useState<Temporal.PlainTime | null>(null);
   return (
     <div className="w-72">
       <TimePicker value={time} onValueChange={setTime} />
@@ -25,7 +25,7 @@ export const Default: Story = { render: () => <Demo /> };
 export const FifteenMinuteSteps: Story = {
   render: () => (
     <div className="w-72">
-      <TimePicker minuteStep={15} defaultValue={{ hours: 9, minutes: 0 }} />
+      <TimePicker minuteStep={15} defaultValue={Temporal.PlainTime.from('09:00')} />
     </div>
   ),
 };

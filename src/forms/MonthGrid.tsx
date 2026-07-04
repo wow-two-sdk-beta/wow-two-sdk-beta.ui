@@ -18,6 +18,7 @@ import {
   type ButtonHTMLAttributes,
   type KeyboardEvent,
 } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../utils';
 import {
@@ -29,6 +30,7 @@ import {
   isSameDay,
   isToday,
   startOfMonth,
+  sundayIndex,
 } from './DateExtensions';
 
 export interface MonthGridDayProps
@@ -42,19 +44,22 @@ export interface MonthGridDayProps
 
 export interface MonthGridProps {
   /** First day of the visible month (use `startOfMonth(date)`). */
-  viewMonth: Date;
+  viewMonth: Temporal.PlainDate;
   /** Called when prev/next steps the visible month. */
-  onViewMonthChange: (date: Date) => void;
+  onViewMonthChange: (date: Temporal.PlainDate) => void;
   /** The currently focused day (cell tabIndex=0). */
-  focusedDate: Date;
+  focusedDate: Temporal.PlainDate;
   /** Called by keyboard navigation. */
-  onFocusedDateChange: (date: Date) => void;
+  onFocusedDateChange: (date: Temporal.PlainDate) => void;
   /** Predicate marking a day as disabled. */
-  isDayDisabled?: (date: Date) => boolean;
+  isDayDisabled?: (date: Temporal.PlainDate) => boolean;
   /** Click / Enter / Space activation. */
-  onDayActivate?: (date: Date, meta: { outOfMonth: boolean }) => void;
+  onDayActivate?: (date: Temporal.PlainDate, meta: { outOfMonth: boolean }) => void;
   /** Extra per-day attributes for selection styling and hover handlers. */
-  dayProps?: (date: Date, meta: { outOfMonth: boolean }) => MonthGridDayProps | undefined;
+  dayProps?: (
+    date: Temporal.PlainDate,
+    meta: { outOfMonth: boolean },
+  ) => MonthGridDayProps | undefined;
   'aria-label'?: string;
   className?: string;
 }
@@ -84,7 +89,7 @@ export function MonthGrid({
   useEffect(() => {
     if (!interactedRef.current) return;
     const cell = gridRef.current?.querySelector<HTMLButtonElement>(
-      `[data-date="${focusedDate.toDateString()}"]`,
+      `[data-date="${focusedDate.toString()}"]`,
     );
     cell?.focus();
   }, [focusedDate]);
@@ -101,7 +106,7 @@ export function MonthGrid({
   }, []);
 
   const moveFocus = useCallback(
-    (next: Date, dir: 1 | -1) => {
+    (next: Temporal.PlainDate, dir: 1 | -1) => {
       let target = next;
       if (isDayDisabled) {
         // Skip disabled days in the movement direction…
@@ -122,10 +127,7 @@ export function MonthGrid({
         if (isDayDisabled(target)) return; // nothing focusable in reach — stay put
       }
       interactedRef.current = true;
-      if (
-        target.getMonth() !== viewMonth.getMonth() ||
-        target.getFullYear() !== viewMonth.getFullYear()
-      ) {
+      if (target.month !== viewMonth.month || target.year !== viewMonth.year) {
         onViewMonthChange(startOfMonth(target));
       }
       onFocusedDateChange(target);
@@ -134,7 +136,7 @@ export function MonthGrid({
   );
 
   const onCellKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLButtonElement>, date: Date, outOfMonth: boolean) => {
+    (e: KeyboardEvent<HTMLButtonElement>, date: Temporal.PlainDate, outOfMonth: boolean) => {
       switch (e.key) {
         case 'ArrowRight':
           e.preventDefault();
@@ -156,11 +158,11 @@ export function MonthGrid({
           // Scan toward the origin so a disabled week start clamps to the
           // first enabled day of the week instead of leaving it.
           e.preventDefault();
-          moveFocus(addDays(date, -date.getDay()), 1);
+          moveFocus(addDays(date, -sundayIndex(date)), 1);
           break;
         case 'End':
           e.preventDefault();
-          moveFocus(addDays(date, 6 - date.getDay()), -1);
+          moveFocus(addDays(date, 6 - sundayIndex(date)), -1);
           break;
         case 'PageDown':
           e.preventDefault();
@@ -180,8 +182,8 @@ export function MonthGrid({
     [moveFocus, onDayActivate, isDayDisabled],
   );
 
-  const dayDisabled = (date: Date) => isDayDisabled?.(date) ?? false;
-  const cells = buildMonthGrid(viewMonth.getFullYear(), viewMonth.getMonth());
+  const dayDisabled = (date: Temporal.PlainDate) => isDayDisabled?.(date) ?? false;
+  const cells = buildMonthGrid(viewMonth.year, viewMonth.month);
   const weeks = Array.from({ length: 6 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
 
   // Roving tab stop — the focused date unless it's disabled (e.g. today before
@@ -213,7 +215,7 @@ export function MonthGrid({
           <ChevronLeft className="h-4 w-4" />
         </button>
         <div className="text-sm font-medium" aria-live="polite">
-          {MONTHS_LONG[viewMonth.getMonth()]} {viewMonth.getFullYear()}
+          {MONTHS_LONG[viewMonth.month - 1]} {viewMonth.year}
         </div>
         <button
           type="button"
@@ -252,10 +254,10 @@ export function MonthGrid({
 
               return (
                 <button
-                  key={date.toDateString()}
+                  key={date.toString()}
                   type="button"
                   role="gridcell"
-                  data-date={date.toDateString()}
+                  data-date={date.toString()}
                   aria-disabled={disabled || undefined}
                   data-today={isToday(date) ? '' : undefined}
                   data-out-of-month={outOfMonth ? '' : undefined}
@@ -279,7 +281,7 @@ export function MonthGrid({
                     cellClassName,
                   )}
                 >
-                  {date.getDate()}
+                  {date.day}
                 </button>
               );
             })}

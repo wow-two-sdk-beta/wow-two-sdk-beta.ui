@@ -1,19 +1,14 @@
 import { forwardRef, useState, type HTMLAttributes } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
-import {
-  isDateDisabled,
-  isInRange,
-  isSameDay,
-  isToday,
-  startOfDay,
-  startOfMonth,
-} from '../DateExtensions';
+import { isDateDisabled, isInRange, isSameDay, isToday, startOfMonth, today } from '../DateExtensions';
 import { MonthGrid } from '../MonthGrid';
 
+/** A completed date range. Both ends are set; the in-progress state is internal. */
 export interface DateRange {
-  start: Date | null;
-  end: Date | null;
+  start: Temporal.PlainDate;
+  end: Temporal.PlainDate;
 }
 
 export interface RangeCalendarProps
@@ -21,10 +16,10 @@ export interface RangeCalendarProps
   value?: DateRange | null;
   defaultValue?: DateRange | null;
   onValueChange?: (range: DateRange) => void;
-  defaultMonth?: Date;
-  min?: Date | null;
-  max?: Date | null;
-  isDisabled?: (date: Date) => boolean;
+  defaultMonth?: Temporal.PlainDate;
+  min?: Temporal.PlainDate | null;
+  max?: Temporal.PlainDate | null;
+  isDisabled?: (date: Temporal.PlainDate) => boolean;
   'aria-label'?: string;
 }
 
@@ -49,33 +44,36 @@ export const RangeCalendar = forwardRef<HTMLDivElement, RangeCalendarProps>(
       default: defaultValue ?? null,
       onChange: onValueChange as ((v: DateRange | null) => void) | undefined,
     });
-    const [viewMonth, setViewMonth] = useState<Date>(
-      () => startOfMonth(defaultMonth ?? range?.start ?? new Date()),
+    const [viewMonth, setViewMonth] = useState<Temporal.PlainDate>(
+      () => startOfMonth(defaultMonth ?? range?.start ?? today()),
     );
-    const [focusedDate, setFocusedDate] = useState<Date>(() => range?.start ?? new Date());
-    const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
-    const [pendingStart, setPendingStart] = useState<Date | null>(null);
+    const [focusedDate, setFocusedDate] = useState<Temporal.PlainDate>(
+      () => range?.start ?? today(),
+    );
+    const [hoveredDate, setHoveredDate] = useState<Temporal.PlainDate | null>(null);
+    const [pendingStart, setPendingStart] = useState<Temporal.PlainDate | null>(null);
 
-    const handleActivate = (date: Date) => {
+    const handleActivate = (date: Temporal.PlainDate) => {
       if (!pendingStart) {
+        // First click opens a pending range; the public value clears until both
+        // ends are set (a `DateRange` always carries a real start and end).
         setPendingStart(date);
-        setRange({ start: date, end: null });
+        setRange(null);
         return;
       }
-      const startTime = startOfDay(pendingStart).getTime();
-      const endTime = startOfDay(date).getTime();
-      const finalStart = startTime <= endTime ? pendingStart : date;
-      const finalEnd = startTime <= endTime ? date : pendingStart;
+      const forward = Temporal.PlainDate.compare(pendingStart, date) <= 0;
+      const finalStart = forward ? pendingStart : date;
+      const finalEnd = forward ? date : pendingStart;
       setRange({ start: finalStart, end: finalEnd });
       setPendingStart(null);
     };
 
-    const previewEnd = pendingStart ? hoveredDate : range?.end;
-    const isStart = (d: Date) =>
+    const previewEnd = pendingStart ? hoveredDate : (range?.end ?? null);
+    const isStart = (d: Temporal.PlainDate) =>
       isSameDay(d, range?.start ?? null) || isSameDay(d, pendingStart);
-    const isEnd = (d: Date) => isSameDay(d, range?.end ?? null);
-    const inRange = (d: Date) =>
-      isInRange(d, pendingStart ?? range?.start, previewEnd ?? null);
+    const isEnd = (d: Temporal.PlainDate) => isSameDay(d, range?.end ?? null);
+    const inRange = (d: Temporal.PlainDate) =>
+      isInRange(d, pendingStart ?? range?.start, previewEnd);
 
     return (
       <div ref={ref} className={cn(className)} {...rest}>

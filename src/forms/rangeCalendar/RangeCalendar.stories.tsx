@@ -17,9 +17,9 @@ function Demo() {
       <RangeCalendar value={range} onValueChange={setRange} />
       <p className="text-sm text-muted-foreground">
         Range:{' '}
-        {range?.start ? range.start.toDateString() : '—'}
+        {range?.start ? range.start.toString() : '—'}
         {' → '}
-        {range?.end ? range.end.toDateString() : '—'}
+        {range?.end ? range.end.toString() : '—'}
       </p>
     </div>
   );

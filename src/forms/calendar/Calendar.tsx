@@ -1,25 +1,26 @@
 import { forwardRef, useState, type HTMLAttributes } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
-import { isDateDisabled, isSameDay, isToday, startOfMonth } from '../DateExtensions';
+import { isDateDisabled, isSameDay, isToday, startOfMonth, today } from '../DateExtensions';
 import { MonthGrid } from '../MonthGrid';
 
 export interface CalendarProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
   /** Controlled selected date. */
-  value?: Date | null;
+  value?: Temporal.PlainDate | null;
   /** Uncontrolled initial selection. */
-  defaultValue?: Date | null;
+  defaultValue?: Temporal.PlainDate | null;
   /** Selection callback. */
-  onValueChange?: (date: Date) => void;
+  onValueChange?: (date: Temporal.PlainDate) => void;
   /** Initial visible month (uncontrolled). */
-  defaultMonth?: Date;
+  defaultMonth?: Temporal.PlainDate;
   /** Minimum selectable date. */
-  min?: Date | null;
+  min?: Temporal.PlainDate | null;
   /** Maximum selectable date. */
-  max?: Date | null;
+  max?: Temporal.PlainDate | null;
   /** Custom disable predicate. */
-  isDisabled?: (date: Date) => boolean;
+  isDisabled?: (date: Temporal.PlainDate) => boolean;
   /** A11y label. */
   'aria-label'?: string;
 }
@@ -39,15 +40,15 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
   },
   ref,
 ) {
-  const [selected, setSelected] = useControlled<Date | null>({
+  const [selected, setSelected] = useControlled<Temporal.PlainDate | null>({
     controlled: value,
     default: defaultValue ?? null,
-    onChange: onValueChange as ((v: Date | null) => void) | undefined,
+    onChange: onValueChange as ((v: Temporal.PlainDate | null) => void) | undefined,
   });
-  const [viewMonth, setViewMonth] = useState<Date>(
-    () => startOfMonth(defaultMonth ?? selected ?? new Date()),
+  const [viewMonth, setViewMonth] = useState<Temporal.PlainDate>(
+    () => startOfMonth(defaultMonth ?? selected ?? today()),
   );
-  const [focusedDate, setFocusedDate] = useState<Date>(() => selected ?? new Date());
+  const [focusedDate, setFocusedDate] = useState<Temporal.PlainDate>(() => selected ?? today());
 
   return (
     <div ref={ref} className={cn(className)} {...rest}>

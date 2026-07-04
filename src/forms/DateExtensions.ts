@@ -1,8 +1,12 @@
 // Shared date helpers for Calendar / DatePicker / DateField / RangeCalendar.
 // Co-located in `forms/` so imports stay within-domain.
 //
-// Native Date only — no date-fns / luxon dependency. All helpers operate on
-// local time (no UTC math) since calendar UIs are inherently local.
+// Temporal-based — the ecosystem standardizes on the Temporal API (dates =
+// `Temporal.*`). `Temporal.PlainDate` carries calendar math (no timezone), so
+// these helpers are inherently local/wall-clock, which is what calendar UIs want.
+// `Temporal.PlainTime` carries hour/minute for the time components.
+
+import { Temporal } from '@js-temporal/polyfill';
 
 export const WEEKDAYS_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 export const MONTHS_LONG = [
@@ -20,131 +24,133 @@ export const MONTHS_LONG = [
   'December',
 ];
 
-export function startOfDay(d: Date): Date {
-  const c = new Date(d);
-  c.setHours(0, 0, 0, 0);
-  return c;
+/** Sunday-anchored column index (0 = Sun … 6 = Sat) for a PlainDate. */
+export function sundayIndex(d: Temporal.PlainDate): number {
+  // Temporal `dayOfWeek` is 1 (Mon) … 7 (Sun); map Sunday to 0 for our Su-first grid.
+  return d.dayOfWeek % 7;
 }
 
-export function isSameDay(a: Date | null | undefined, b: Date | null | undefined): boolean {
+/** Today as a PlainDate in the local time zone. */
+export function today(): Temporal.PlainDate {
+  return Temporal.Now.plainDateISO();
+}
+
+export function isSameDay(
+  a: Temporal.PlainDate | null | undefined,
+  b: Temporal.PlainDate | null | undefined,
+): boolean {
   if (!a || !b) return false;
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+  return a.equals(b);
 }
 
-export function isToday(d: Date): boolean {
-  return isSameDay(d, new Date());
+export function isToday(d: Temporal.PlainDate): boolean {
+  return d.equals(today());
 }
 
-export function addMonths(d: Date, n: number): Date {
-  const c = new Date(d);
-  const month = d.getMonth() + n;
-  // Clamp to the target month's last day (Jan 31 +1 → Feb 28, not Mar 3).
-  c.setMonth(month, Math.min(d.getDate(), daysInMonth(d.getFullYear(), month)));
-  return c;
+/** Add `n` months; Temporal clamps to the target month's last day (Jan 31 +1 → Feb 28). */
+export function addMonths(d: Temporal.PlainDate, n: number): Temporal.PlainDate {
+  return d.add({ months: n });
 }
 
-export function addDays(d: Date, n: number): Date {
-  const c = new Date(d);
-  c.setDate(c.getDate() + n);
-  return c;
+export function addDays(d: Temporal.PlainDate, n: number): Temporal.PlainDate {
+  return d.add({ days: n });
 }
 
-export function startOfMonth(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
+/** First day of `d`'s month. */
+export function startOfMonth(d: Temporal.PlainDate): Temporal.PlainDate {
+  return d.with({ day: 1 });
 }
 
+/** Number of days in the given year/month (1-indexed month). */
 export function daysInMonth(year: number, month: number): number {
-  // month is 0-indexed; setting day 0 of next month gives last day of month.
-  return new Date(year, month + 1, 0).getDate();
+  return Temporal.PlainDate.from({ year, month, day: 1 }).daysInMonth;
 }
 
 /**
  * Build the 6-week (42-cell) grid that the calendar UI renders.
- * Cells outside the target month carry `outOfMonth: true`.
+ * `year`/`month` are 1-indexed (Temporal convention). Cells outside the target
+ * month carry `outOfMonth: true`.
  */
-export function buildMonthGrid(year: number, month: number): { date: Date; outOfMonth: boolean }[] {
-  const first = new Date(year, month, 1);
-  const firstWeekday = first.getDay(); // 0 (Sun) – 6 (Sat)
-  const start = addDays(first, -firstWeekday);
-  const cells: { date: Date; outOfMonth: boolean }[] = [];
+export function buildMonthGrid(
+  year: number,
+  month: number,
+): { date: Temporal.PlainDate; outOfMonth: boolean }[] {
+  const first = Temporal.PlainDate.from({ year, month, day: 1 });
+  const start = first.subtract({ days: sundayIndex(first) });
+  const cells: { date: Temporal.PlainDate; outOfMonth: boolean }[] = [];
   for (let i = 0; i < 42; i++) {
-    const date = addDays(start, i);
-    cells.push({ date, outOfMonth: date.getMonth() !== month });
+    const date = start.add({ days: i });
+    cells.push({ date, outOfMonth: date.month !== month });
   }
   return cells;
 }
 
-/** Format Date → "YYYY-MM-DD" for native `<input type="date">` value. */
-export function formatISODate(d: Date | null | undefined): string {
+/** Format PlainDate → "YYYY-MM-DD" for a native `<input type="date">` value. */
+export function formatISODate(d: Temporal.PlainDate | null | undefined): string {
   if (!d) return '';
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return d.toString();
 }
 
-/** Parse "YYYY-MM-DD" → Date (local time). Returns null for invalid input. */
-export function parseISODate(s: string | null | undefined): Date | null {
+/** Parse "YYYY-MM-DD" → PlainDate. Returns null for invalid input. */
+export function parseISODate(s: string | null | undefined): Temporal.PlainDate | null {
   if (!s) return null;
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
-  if (!m) return null;
-  const [, y, mo, d] = m;
-  if (!y || !mo || !d) return null;
-  const date = new Date(Number(y), Number(mo) - 1, Number(d));
-  if (isNaN(date.getTime())) return null;
-  return date;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  try {
+    return Temporal.PlainDate.from(s, { overflow: 'reject' });
+  } catch {
+    return null;
+  }
 }
 
-/** Format Date → "HH:MM" for native `<input type="time">` value. */
-export function formatISOTime(d: Date | null | undefined): string {
-  if (!d) return '';
-  const h = String(d.getHours()).padStart(2, '0');
-  const m = String(d.getMinutes()).padStart(2, '0');
-  return `${h}:${m}`;
+/** Format PlainTime → "HH:MM" for a native `<input type="time">` value. */
+export function formatISOTime(t: Temporal.PlainTime | null | undefined): string {
+  if (!t) return '';
+  return t.toString({ smallestUnit: 'minute' });
 }
 
-/** Parse "HH:MM" → { hours, minutes }. Returns null for invalid input. */
-export function parseISOTime(s: string | null | undefined): { hours: number; minutes: number } | null {
+/** Parse "HH:MM" → PlainTime. Returns null for invalid input. */
+export function parseISOTime(s: string | null | undefined): Temporal.PlainTime | null {
   if (!s) return null;
-  const m = /^(\d{2}):(\d{2})$/.exec(s);
-  if (!m) return null;
-  const [, h, mi] = m;
-  if (!h || !mi) return null;
-  const hours = Number(h);
-  const minutes = Number(mi);
-  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
-  return { hours, minutes };
+  if (!/^\d{2}:\d{2}$/.test(s)) return null;
+  try {
+    return Temporal.PlainTime.from(s, { overflow: 'reject' });
+  } catch {
+    return null;
+  }
 }
 
-export function clampDate(d: Date, min?: Date | null, max?: Date | null): Date {
-  if (min && d < min) return min;
-  if (max && d > max) return max;
+export function clampDate(
+  d: Temporal.PlainDate,
+  min?: Temporal.PlainDate | null,
+  max?: Temporal.PlainDate | null,
+): Temporal.PlainDate {
+  if (min && Temporal.PlainDate.compare(d, min) < 0) return min;
+  if (max && Temporal.PlainDate.compare(d, max) > 0) return max;
   return d;
 }
 
 export function isDateDisabled(
-  d: Date,
-  options: { min?: Date | null; max?: Date | null; isDisabled?: (d: Date) => boolean },
+  d: Temporal.PlainDate,
+  options: {
+    min?: Temporal.PlainDate | null;
+    max?: Temporal.PlainDate | null;
+    isDisabled?: (d: Temporal.PlainDate) => boolean;
+  },
 ): boolean {
   const { min, max, isDisabled } = options;
-  if (min && startOfDay(d) < startOfDay(min)) return true;
-  if (max && startOfDay(d) > startOfDay(max)) return true;
+  if (min && Temporal.PlainDate.compare(d, min) < 0) return true;
+  if (max && Temporal.PlainDate.compare(d, max) > 0) return true;
   if (isDisabled?.(d)) return true;
   return false;
 }
 
 export function isInRange(
-  d: Date,
-  start: Date | null | undefined,
-  end: Date | null | undefined,
+  d: Temporal.PlainDate,
+  start: Temporal.PlainDate | null | undefined,
+  end: Temporal.PlainDate | null | undefined,
 ): boolean {
   if (!start || !end) return false;
-  const t = startOfDay(d).getTime();
-  const s = startOfDay(start).getTime();
-  const e = startOfDay(end).getTime();
-  return t >= Math.min(s, e) && t <= Math.max(s, e);
+  const lo = Temporal.PlainDate.compare(start, end) <= 0 ? start : end;
+  const hi = Temporal.PlainDate.compare(start, end) <= 0 ? end : start;
+  return Temporal.PlainDate.compare(d, lo) >= 0 && Temporal.PlainDate.compare(d, hi) <= 0;
 }

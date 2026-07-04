@@ -48,3 +48,16 @@ export const WithPresets: Story = {
     </div>
   ),
 };
+
+export const TriggerVariants: Story = {
+  render: () => (
+    <div className="flex items-start gap-6 p-4">
+      {(['full', 'swatch', 'value'] as const).map((v) => (
+        <div key={v} className="flex flex-col items-center gap-2">
+          <ColorPicker defaultValue="#8b5cf6" triggerVariant={v} />
+          <span className="font-mono text-xs text-muted-foreground">{v}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};

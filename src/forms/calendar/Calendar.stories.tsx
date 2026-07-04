@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { Calendar } from './Calendar';
 
 const meta: Meta<typeof Calendar> = {
@@ -11,30 +12,29 @@ export default meta;
 type Story = StoryObj<typeof Calendar>;
 
 function Demo() {
-  const [date, setDate] = useState<Date | null>(new Date());
+  const [date, setDate] = useState<Temporal.PlainDate | null>(Temporal.Now.plainDateISO());
   return (
     <div className="flex flex-col gap-3">
       <Calendar value={date} onValueChange={setDate} />
       <p className="text-sm text-muted-foreground">
-        Selected: {date ? date.toDateString() : 'none'}
+        Selected: {date ? date.toString() : 'none'}
       </p>
     </div>
   );
 }
 
 function MinMaxDemo() {
-  const today = new Date();
-  const min = new Date(today);
-  min.setDate(today.getDate() - 7);
-  const max = new Date(today);
-  max.setDate(today.getDate() + 14);
+  const today = Temporal.Now.plainDateISO();
+  const min = today.subtract({ days: 7 });
+  const max = today.add({ days: 14 });
   return <Calendar min={min} max={max} aria-label="Bounded calendar" />;
 }
 
 function DisabledWeekendsDemo() {
   return (
     <Calendar
-      isDisabled={(d) => d.getDay() === 0 || d.getDay() === 6}
+      // Temporal `dayOfWeek`: 6 = Saturday, 7 = Sunday.
+      isDisabled={(d) => d.dayOfWeek === 6 || d.dayOfWeek === 7}
       aria-label="Weekdays only"
     />
   );

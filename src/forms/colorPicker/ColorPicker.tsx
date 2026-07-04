@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState, type ReactNode } from 'react';
+import { forwardRef, useEffect, useState, type ReactNode, type Ref } from 'react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
@@ -20,6 +20,13 @@ export interface ColorPickerProps {
   hasAlpha?: boolean;
   presets?: string[];
   triggerSize?: ColorSwatchVariants['size'];
+  /**
+   * Which built-in trigger to render (ignored when `trigger` is set):
+   * - `full` *(default)* — swatch + hex-value text, framed button.
+   * - `swatch` — a bare interactive swatch, no text (compact toolbars, tiles).
+   * - `value` — hex-value text only, no swatch (dense / code contexts).
+   */
+  triggerVariant?: 'full' | 'swatch' | 'value';
   isDisabled?: boolean;
   name?: string;
   className?: string;
@@ -30,6 +37,10 @@ export interface ColorPickerProps {
 
 const FALLBACK_HSV: HSV = { h: 217, s: 0.91, v: 0.96, a: 1 };
 
+// The swatch trigger's real open handler is composed on by Popover's `asChild`
+// Slot; ColorSwatch only needs a truthy `onClick` to render as a <button>.
+const NOOP = () => {};
+
 export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(function ColorPicker(
   {
     value,
@@ -38,6 +49,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
     hasAlpha = false,
     presets,
     triggerSize = 'md',
+    triggerVariant = 'full',
     isDisabled = false,
     name,
     className,
@@ -77,21 +89,34 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
   return (
     <Popover>
       <PopoverTrigger asChild>
-        {trigger ?? (
-          <button
-            ref={ref}
-            type="button"
-            aria-label={ariaLabel}
-            disabled={isDisabled}
-            className={cn(
-              'inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-sm transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60',
-              className,
-            )}
-          >
-            <ColorSwatch color={hex ?? '#00000000'} size={triggerSize} />
-            <span className="font-mono uppercase">{hex ?? '—'}</span>
-          </button>
-        )}
+        {trigger ??
+          (triggerVariant === 'swatch' ? (
+            // Bare interactive swatch — ColorSwatch is a real <button> here (given onClick),
+            // so it becomes the popover trigger via Slot with no wrapper chrome.
+            <ColorSwatch
+              ref={ref as Ref<HTMLElement>}
+              color={hex ?? '#00000000'}
+              size={triggerSize}
+              onClick={NOOP}
+              aria-label={ariaLabel}
+              isDisabled={isDisabled}
+              className={className}
+            />
+          ) : (
+            <button
+              ref={ref}
+              type="button"
+              aria-label={ariaLabel}
+              disabled={isDisabled}
+              className={cn(
+                'inline-flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 text-sm transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60',
+                className,
+              )}
+            >
+              {triggerVariant === 'full' && <ColorSwatch color={hex ?? '#00000000'} size={triggerSize} />}
+              <span className="font-mono uppercase">{hex ?? '—'}</span>
+            </button>
+          ))}
       </PopoverTrigger>
       <PopoverContent className="flex w-64 flex-col gap-3">
         <ColorArea
