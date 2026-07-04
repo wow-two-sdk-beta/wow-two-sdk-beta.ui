@@ -1,48 +1,37 @@
 import { forwardRef, useMemo, type HTMLAttributes, type ReactNode } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
 import { Icon } from '../../icons';
-import { MONTHS_LONG, WEEKDAYS_SHORT } from '../../forms/DateExtensions';
+import {
+  MONTHS_LONG,
+  WEEKDAYS_SHORT,
+  addDays,
+  formatZonedTime,
+  isToday,
+  isZonedDayInRange,
+  isZonedOnDay,
+  minZoned,
+  maxZoned,
+  minutesBetween,
+  nowZoned,
+  zonedAtHour,
+} from '../../forms/DateExtensions';
 
-// EventCalendar renders month/week/day/agenda views with intra-day time slots,
-// so its model is a native `Date` (wall-clock date + time), not `Temporal.PlainDate`.
-// The shared `DateExtensions` calendar-math helpers are PlainDate-typed; keep the
-// small Date-based equivalents local here until this component is ported to a
-// Temporal datetime type in its own pass.
-function startOfDay(d: Date): Date {
-  const c = new Date(d);
-  c.setHours(0, 0, 0, 0);
-  return c;
-}
-function isSameDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-function isToday(d: Date): boolean {
-  return isSameDay(d, new Date());
-}
-function addDays(d: Date, n: number): Date {
-  const c = new Date(d);
-  c.setDate(c.getDate() + n);
-  return c;
-}
-function addMonths(d: Date, n: number): Date {
-  const c = new Date(d);
-  c.setMonth(d.getMonth() + n, d.getDate());
-  return c;
-}
+// EventCalendar models events as absolute instants (a wall-clock time in a
+// specific zone) — `Temporal.ZonedDateTime`, the peer of .NET `DateTimeOffset`.
+// The month/week grid + navigation project down to `Temporal.PlainDate`; the
+// intra-day time-slot geometry does its math on `ZonedDateTime` (`.hour`,
+// `.add`, `until`). Both come from the shared, Temporal-based `DateExtensions`.
 
 export type EventCalendarView = 'month' | 'week' | 'day' | 'agenda';
 
 export interface EventCalendarEvent {
   id: string;
   title?: ReactNode;
-  start: Date;
-  end: Date;
+  start: Temporal.ZonedDateTime;
+  end: Temporal.ZonedDateTime;
   color?: string;
   isAllDay?: boolean;
 }
@@ -52,28 +41,23 @@ export interface EventCalendarProps extends HTMLAttributes<HTMLDivElement> {
   view?: EventCalendarView;
   defaultView?: EventCalendarView;
   onViewChange?: (view: EventCalendarView) => void;
-  date?: Date;
-  defaultDate?: Date;
-  onDateChange?: (date: Date) => void;
+  /** The focused instant; its calendar day drives the visible month/week/day. */
+  date?: Temporal.ZonedDateTime;
+  defaultDate?: Temporal.ZonedDateTime;
+  onDateChange?: (date: Temporal.ZonedDateTime) => void;
   weekStart?: 0 | 1;
   hourRange?: [number, number];
   onEventClick?: (event: EventCalendarEvent) => void;
-  onSlotClick?: (date: Date, hour?: number) => void;
+  /** Fired on an empty slot: `day` is the clicked calendar day, `hour` the grid hour (time views). */
+  onSlotClick?: (day: Temporal.PlainDate, hour?: number) => void;
 }
 
-function startOfWeek(d: Date, weekStart: 0 | 1): Date {
-  const c = startOfDay(d);
-  const diff = (c.getDay() - weekStart + 7) % 7;
-  c.setDate(c.getDate() - diff);
-  return c;
-}
-
-function isInRange(d: Date, start: Date, end: Date): boolean {
-  return d >= startOfDay(start) && d <= startOfDay(end);
-}
-
-function minutesSince(reference: Date, target: Date): number {
-  return (target.getTime() - reference.getTime()) / 60000;
+/** First visible day of the week that contains `d`, honoring `weekStart`. */
+function startOfWeek(d: Temporal.PlainDate, weekStart: 0 | 1): Temporal.PlainDate {
+  // Temporal `dayOfWeek`: 1 (Mon) … 7 (Sun). Map to a Sunday=0 index, then shift.
+  const sundayIdx = d.dayOfWeek % 7;
+  const diff = (sundayIdx - weekStart + 7) % 7;
+  return d.subtract({ days: diff });
 }
 
 /**
@@ -105,62 +89,68 @@ export const EventCalendar = forwardRef<HTMLDivElement, EventCalendarProps>(
       default: defaultView,
       onChange: onViewChange,
     });
-    const [date, setDate] = useControlled({
+    const [date, setDate] = useControlled<Temporal.ZonedDateTime>({
       controlled: dateProp,
-      default: defaultDate ?? new Date(),
+      default: defaultDate ?? nowZoned(),
       onChange: onDateChange,
     });
 
+    // Calendar day the view is anchored on, in the focus instant's own zone.
+    const focusDay = useMemo(() => date.toPlainDate(), [date]);
+
     const sortedEvents = useMemo(
-      () => [...events].sort((a, b) => a.start.getTime() - b.start.getTime()),
+      () =>
+        [...events].sort((a, b) =>
+          Temporal.ZonedDateTime.compare(a.start, b.start),
+        ),
       [events],
     );
 
     const goPrev = () => {
       switch (view) {
         case 'month':
-          setDate(addMonths(date, -1));
+          setDate(date.add({ months: -1 }));
           break;
         case 'week':
-          setDate(addDays(date, -7));
+          setDate(date.add({ days: -7 }));
           break;
         case 'day':
         case 'agenda':
-          setDate(addDays(date, -1));
+          setDate(date.add({ days: -1 }));
           break;
       }
     };
     const goNext = () => {
       switch (view) {
         case 'month':
-          setDate(addMonths(date, 1));
+          setDate(date.add({ months: 1 }));
           break;
         case 'week':
-          setDate(addDays(date, 7));
+          setDate(date.add({ days: 7 }));
           break;
         case 'day':
         case 'agenda':
-          setDate(addDays(date, 1));
+          setDate(date.add({ days: 1 }));
           break;
       }
     };
-    const goToday = () => setDate(new Date());
+    const goToday = () => setDate(nowZoned());
 
     const title = useMemo(() => {
       switch (view) {
         case 'month':
-          return `${MONTHS_LONG[date.getMonth()]} ${date.getFullYear()}`;
+          return `${MONTHS_LONG[focusDay.month - 1]} ${focusDay.year}`;
         case 'week': {
-          const ws = startOfWeek(date, weekStart);
+          const ws = startOfWeek(focusDay, weekStart);
           const we = addDays(ws, 6);
-          return `${ws.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${we.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+          return `${ws.toLocaleString(undefined, { month: 'short', day: 'numeric' })} – ${we.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
         }
         case 'day':
-          return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+          return focusDay.toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
         case 'agenda':
-          return `Upcoming from ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+          return `Upcoming from ${focusDay.toLocaleString(undefined, { month: 'short', day: 'numeric' })}`;
       }
-    }, [view, date, weekStart]);
+    }, [view, focusDay, weekStart]);
 
     return (
       <div
@@ -218,7 +208,8 @@ export const EventCalendar = forwardRef<HTMLDivElement, EventCalendarProps>(
         <div className="flex-1 overflow-auto" style={{ minHeight: 0 }}>
           {view === 'month' && (
             <MonthView
-              date={date}
+              focusDay={focusDay}
+              timeZone={date.timeZoneId}
               events={sortedEvents}
               weekStart={weekStart}
               onEventClick={onEventClick}
@@ -227,10 +218,10 @@ export const EventCalendar = forwardRef<HTMLDivElement, EventCalendarProps>(
           )}
           {view === 'week' && (
             <TimeGridView
-              date={date}
+              timeZone={date.timeZoneId}
               events={sortedEvents}
               days={7}
-              firstDay={startOfWeek(date, weekStart)}
+              firstDay={startOfWeek(focusDay, weekStart)}
               hourRange={hourRange}
               onEventClick={onEventClick}
               onSlotClick={onSlotClick}
@@ -238,17 +229,17 @@ export const EventCalendar = forwardRef<HTMLDivElement, EventCalendarProps>(
           )}
           {view === 'day' && (
             <TimeGridView
-              date={date}
+              timeZone={date.timeZoneId}
               events={sortedEvents}
               days={1}
-              firstDay={startOfDay(date)}
+              firstDay={focusDay}
               hourRange={hourRange}
               onEventClick={onEventClick}
               onSlotClick={onSlotClick}
             />
           )}
           {view === 'agenda' && (
-            <AgendaView date={date} events={sortedEvents} onEventClick={onEventClick} />
+            <AgendaView focusDay={focusDay} events={sortedEvents} onEventClick={onEventClick} />
           )}
         </div>
       </div>
@@ -257,29 +248,29 @@ export const EventCalendar = forwardRef<HTMLDivElement, EventCalendarProps>(
 );
 
 interface MonthViewProps {
-  date: Date;
+  focusDay: Temporal.PlainDate;
+  timeZone: string;
   events: EventCalendarEvent[];
   weekStart: 0 | 1;
   onEventClick?: (event: EventCalendarEvent) => void;
-  onSlotClick?: (date: Date, hour?: number) => void;
+  onSlotClick?: (day: Temporal.PlainDate, hour?: number) => void;
 }
 
-function MonthView({ date, events, weekStart, onEventClick, onSlotClick }: MonthViewProps) {
+function MonthView({ focusDay, timeZone, events, weekStart, onEventClick, onSlotClick }: MonthViewProps) {
   // Reorder weekdays per weekStart.
   const weekdayHeaders = Array.from({ length: 7 }, (_, i) => WEEKDAYS_SHORT[(i + weekStart) % 7]!);
-  // buildMonthGrid is Sunday-anchored; build the grid here so the first
-  // column matches weekStart and dates land under the right headers.
-  const month = date.getMonth();
-  const first = new Date(date.getFullYear(), month, 1);
-  const lead = (first.getDay() - weekStart + 7) % 7;
-  const gridStart = addDays(first, -lead);
+  // Build a 42-cell grid whose first column matches weekStart so dates land
+  // under the right headers (buildMonthGrid is Sunday-anchored, so build here).
+  const month = focusDay.month;
+  const first = focusDay.with({ day: 1 });
+  const gridStart = startOfWeek(first, weekStart);
   const cells = Array.from({ length: 42 }, (_, i) => {
-    const d = addDays(gridStart, i);
-    return { date: d, outOfMonth: d.getMonth() !== month };
+    const day = gridStart.add({ days: i });
+    return { day, outOfMonth: day.month !== month };
   });
 
-  const eventsForDay = (d: Date) =>
-    events.filter((e) => isInRange(d, e.start, e.end));
+  const eventsForDay = (day: Temporal.PlainDate) =>
+    events.filter((e) => isZonedDayInRange(startOfCellInstant(day, timeZone), e.start, e.end));
 
   return (
     <div className="grid h-full grid-cols-7 border-l border-t border-border">
@@ -292,28 +283,28 @@ function MonthView({ date, events, weekStart, onEventClick, onSlotClick }: Month
         </div>
       ))}
       {cells.map((cell, i) => {
-        const cellEvents = eventsForDay(cell.date);
+        const cellEvents = eventsForDay(cell.day);
         return (
           <div
             key={i}
             className={cn(
               'flex flex-col border-b border-r border-border p-1 text-xs',
               cell.outOfMonth && 'bg-muted/20',
-              isToday(cell.date) && 'bg-primary-soft/20',
+              isToday(cell.day) && 'bg-primary-soft/20',
             )}
             style={{ minHeight: 96 }}
           >
             <button
               type="button"
-              onClick={() => onSlotClick?.(cell.date)}
+              onClick={() => onSlotClick?.(cell.day)}
               className={cn(
                 'mb-1 self-start rounded-sm px-1 text-xs tabular-nums transition-colors',
                 cell.outOfMonth ? 'text-muted-foreground' : 'text-foreground',
-                isToday(cell.date) && 'bg-primary text-primary-foreground',
+                isToday(cell.day) && 'bg-primary text-primary-foreground',
                 'hover:bg-muted',
               )}
             >
-              {cell.date.getDate()}
+              {cell.day.day}
             </button>
             <div className="flex flex-col gap-0.5">
               {cellEvents.slice(0, 3).map((e) => (
@@ -329,7 +320,7 @@ function MonthView({ date, events, weekStart, onEventClick, onSlotClick }: Month
                     'truncate rounded-sm px-1.5 py-0.5 text-left text-[11px] font-medium transition-colors hover:brightness-95',
                     !e.color && 'bg-primary-soft text-primary-soft-foreground',
                   )}
-                  aria-label={`${typeof e.title === 'string' ? e.title : e.id} at ${e.start.toLocaleTimeString()}`}
+                  aria-label={`${typeof e.title === 'string' ? e.title : e.id} at ${formatZonedTime(e.start)}`}
                 >
                   {e.isAllDay ? '• ' : ''}
                   {e.title ?? '(no title)'}
@@ -346,26 +337,33 @@ function MonthView({ date, events, weekStart, onEventClick, onSlotClick }: Month
   );
 }
 
-interface TimeGridViewProps {
-  date: Date;
-  events: EventCalendarEvent[];
-  days: number;
-  firstDay: Date;
-  hourRange: [number, number];
-  onEventClick?: (event: EventCalendarEvent) => void;
-  onSlotClick?: (date: Date, hour?: number) => void;
+/** Midnight instant for a calendar day in `timeZone` — the range-anchor for all-day/multi-day spans. */
+function startOfCellInstant(day: Temporal.PlainDate, timeZone: string): Temporal.ZonedDateTime {
+  return zonedAtHour(day, 0, timeZone);
 }
 
-function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotClick }: TimeGridViewProps) {
+interface TimeGridViewProps {
+  timeZone: string;
+  events: EventCalendarEvent[];
+  days: number;
+  firstDay: Temporal.PlainDate;
+  hourRange: [number, number];
+  onEventClick?: (event: EventCalendarEvent) => void;
+  onSlotClick?: (day: Temporal.PlainDate, hour?: number) => void;
+}
+
+function TimeGridView({ timeZone, events, days, firstDay, hourRange, onEventClick, onSlotClick }: TimeGridViewProps) {
   const [startHour, endHour] = hourRange;
   const visibleHours = endHour - startHour;
   const HOUR_PX = 48;
-  const dayDates = Array.from({ length: days }, (_, i) => addDays(firstDay, i));
+  const dayDates = Array.from({ length: days }, (_, i) => firstDay.add({ days: i }));
 
-  const eventsForDay = (d: Date) =>
-    events.filter((e) => !e.isAllDay && isSameDay(d, e.start));
-  const allDayForDay = (d: Date) =>
-    events.filter((e) => e.isAllDay && isInRange(d, e.start, e.end));
+  const eventsForDay = (day: Temporal.PlainDate) =>
+    events.filter((e) => !e.isAllDay && isZonedOnDay(e.start, day));
+  const allDayForDay = (day: Temporal.PlainDate) =>
+    events.filter((e) => e.isAllDay && isZonedDayInRange(startOfCellInstant(day, timeZone), e.start, e.end));
+
+  const now = nowZoned();
 
   return (
     <div className="flex">
@@ -394,7 +392,7 @@ function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotC
                 isToday(d) && 'bg-primary-soft/30',
               )}
             >
-              {d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })}
+              {d.toLocaleString(undefined, { weekday: 'short', day: 'numeric' })}
             </div>
           ))}
           {/* All-day row */}
@@ -430,8 +428,8 @@ function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotC
           {/* Time grid columns */}
           {dayDates.map((d, di) => {
             const list = eventsForDay(d);
-            const dayStart = new Date(d);
-            dayStart.setHours(startHour, 0, 0, 0);
+            const dayStart = zonedAtHour(d, startHour, timeZone);
+            const dayEnd = zonedAtHour(d, endHour, timeZone);
             return (
               <div
                 key={`g-${di}`}
@@ -449,8 +447,7 @@ function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotC
                 ))}
                 {/* Today line */}
                 {isToday(d) && (() => {
-                  const now = new Date();
-                  const minutes = now.getHours() * 60 + now.getMinutes() - startHour * 60;
+                  const minutes = minutesBetween(dayStart, now);
                   if (minutes < 0 || minutes > visibleHours * 60) return null;
                   const top = (minutes / 60) * HOUR_PX;
                   return (
@@ -463,12 +460,10 @@ function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotC
                 })()}
                 {/* Events */}
                 {list.map((e) => {
-                  const start = e.start < dayStart ? dayStart : e.start;
-                  const dayEnd = new Date(d);
-                  dayEnd.setHours(endHour, 0, 0, 0);
-                  const end = e.end > dayEnd ? dayEnd : e.end;
-                  const topMin = minutesSince(dayStart, start);
-                  const durMin = Math.max(15, minutesSince(start, end));
+                  const start = maxZoned(e.start, dayStart);
+                  const end = minZoned(e.end, dayEnd);
+                  const topMin = minutesBetween(dayStart, start);
+                  const durMin = Math.max(15, minutesBetween(start, end));
                   const top = (topMin / 60) * HOUR_PX;
                   const height = (durMin / 60) * HOUR_PX;
                   return (
@@ -493,7 +488,7 @@ function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotC
                     >
                       <div className="truncate">{e.title ?? '(no title)'}</div>
                       <div className="text-[10px] opacity-80 tabular-nums">
-                        {start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {formatZonedTime(start)}
                       </div>
                     </button>
                   );
@@ -508,18 +503,25 @@ function TimeGridView({ events, days, firstDay, hourRange, onEventClick, onSlotC
 }
 
 interface AgendaViewProps {
-  date: Date;
+  focusDay: Temporal.PlainDate;
   events: EventCalendarEvent[];
   onEventClick?: (event: EventCalendarEvent) => void;
 }
 
-function AgendaView({ date, events, onEventClick }: AgendaViewProps) {
-  const horizon = addDays(date, 30);
-  const upcoming = events.filter((e) => e.end >= date && e.start <= horizon);
-  // Group by date.
+function AgendaView({ focusDay, events, onEventClick }: AgendaViewProps) {
+  const horizon = focusDay.add({ days: 30 });
+  const upcoming = events.filter((e) => {
+    const startDay = e.start.toPlainDate();
+    const endDay = e.end.toPlainDate();
+    return (
+      Temporal.PlainDate.compare(endDay, focusDay) >= 0 &&
+      Temporal.PlainDate.compare(startDay, horizon) <= 0
+    );
+  });
+  // Group by calendar day of the event start.
   const groups = new Map<string, EventCalendarEvent[]>();
   for (const e of upcoming) {
-    const key = e.start.toDateString();
+    const key = e.start.toPlainDate().toString();
     const list = groups.get(key);
     if (list) list.push(e);
     else groups.set(key, [e]);
@@ -530,16 +532,16 @@ function AgendaView({ date, events, onEventClick }: AgendaViewProps) {
   return (
     <ul className="divide-y divide-border">
       {Array.from(groups.entries()).map(([key, list]) => {
-        const groupDate = list[0]!.start;
+        const groupDay = list[0]!.start.toPlainDate();
         return (
           <li key={key} className="px-4 py-3">
             <div
               className={cn(
                 'mb-2 text-xs font-semibold uppercase text-muted-foreground',
-                isToday(groupDate) && 'text-primary',
+                isToday(groupDay) && 'text-primary',
               )}
             >
-              {groupDate.toLocaleDateString(undefined, {
+              {groupDay.toLocaleString(undefined, {
                 weekday: 'long',
                 month: 'short',
                 day: 'numeric',
@@ -563,7 +565,7 @@ function AgendaView({ date, events, onEventClick }: AgendaViewProps) {
                       <span className="block text-xs text-muted-foreground tabular-nums">
                         {e.isAllDay
                           ? 'All day'
-                          : `${e.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – ${e.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                          : `${formatZonedTime(e.start)} – ${formatZonedTime(e.end)}`}
                       </span>
                     </span>
                   </button>

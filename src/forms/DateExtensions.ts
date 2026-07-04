@@ -154,3 +154,86 @@ export function isInRange(
   const hi = Temporal.PlainDate.compare(start, end) <= 0 ? end : start;
   return Temporal.PlainDate.compare(d, lo) >= 0 && Temporal.PlainDate.compare(d, hi) <= 0;
 }
+
+/** Signed whole-day count from `a` to `b` (positive when `b` is later). */
+export function daysBetween(a: Temporal.PlainDate, b: Temporal.PlainDate): number {
+  return a.until(b, { largestUnit: 'day' }).days;
+}
+
+/** True when `d` falls on a Saturday or Sunday. */
+export function isWeekend(d: Temporal.PlainDate): boolean {
+  // Temporal `dayOfWeek`: 1 (Mon) … 7 (Sun); 6 = Sat, 7 = Sun.
+  return d.dayOfWeek === 6 || d.dayOfWeek === 7;
+}
+
+// ── Datetime helpers (ZonedDateTime) ──────────────────────────────────────
+// EventCalendar / ScheduleView model absolute instants (a wall-clock time in a
+// specific zone) — the `Temporal.ZonedDateTime` peer of .NET `DateTimeOffset`.
+// The grid + navigation still project down to `Temporal.PlainDate` (via the
+// helpers above); these cover the intra-day time-slot math the grid needs.
+
+/** Now as a ZonedDateTime in the local (system) time zone. */
+export function nowZoned(): Temporal.ZonedDateTime {
+  return Temporal.Now.zonedDateTimeISO();
+}
+
+/** The calendar day a ZonedDateTime falls on (its wall-clock PlainDate). */
+export function zonedToPlainDate(z: Temporal.ZonedDateTime): Temporal.PlainDate {
+  return z.toPlainDate();
+}
+
+/** True when two ZonedDateTimes land on the same wall-clock day (same zone assumed). */
+export function isSameZonedDay(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): boolean {
+  return a.toPlainDate().equals(b.toPlainDate());
+}
+
+/** True when a ZonedDateTime falls on `day` (its wall-clock date equals `day`). */
+export function isZonedOnDay(z: Temporal.ZonedDateTime, day: Temporal.PlainDate): boolean {
+  return z.toPlainDate().equals(day);
+}
+
+/** Start-of-day (00:00, zone-correct) for `day` in `z`'s time zone. */
+export function startOfZonedDay(day: Temporal.PlainDate, timeZone: Temporal.TimeZoneLike): Temporal.ZonedDateTime {
+  return day.toZonedDateTime({ timeZone, plainTime: Temporal.PlainTime.from('00:00') });
+}
+
+/** `day` at hour `hour` (minutes/seconds zeroed), zone-correct, in `timeZone`. */
+export function zonedAtHour(
+  day: Temporal.PlainDate,
+  hour: number,
+  timeZone: Temporal.TimeZoneLike,
+): Temporal.ZonedDateTime {
+  return day.toZonedDateTime({
+    timeZone,
+    plainTime: new Temporal.PlainTime(hour),
+  });
+}
+
+/** Signed minutes from `a` to `b` (positive when `b` is later). */
+export function minutesBetween(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): number {
+  return a.until(b, { largestUnit: 'minute', smallestUnit: 'minute' }).minutes;
+}
+
+/** Later of two instants. */
+export function maxZoned(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
+  return Temporal.ZonedDateTime.compare(a, b) >= 0 ? a : b;
+}
+
+/** Earlier of two instants. */
+export function minZoned(a: Temporal.ZonedDateTime, b: Temporal.ZonedDateTime): Temporal.ZonedDateTime {
+  return Temporal.ZonedDateTime.compare(a, b) <= 0 ? a : b;
+}
+
+/** True when `z`'s calendar day lies within [start, end] (inclusive, by day). */
+export function isZonedDayInRange(
+  z: Temporal.ZonedDateTime,
+  start: Temporal.ZonedDateTime,
+  end: Temporal.ZonedDateTime,
+): boolean {
+  return isInRange(z.toPlainDate(), start.toPlainDate(), end.toPlainDate());
+}
+
+/** Format a ZonedDateTime's time-of-day as "HH:MM" (locale-aware). */
+export function formatZonedTime(z: Temporal.ZonedDateTime): string {
+  return z.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
+}

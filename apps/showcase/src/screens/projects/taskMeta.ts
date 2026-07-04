@@ -1,5 +1,8 @@
 /** Shared meta maps + date helpers for the Projects screen. Deterministic. */
+import { Temporal } from '@js-temporal/polyfill';
 import type { TaskPriority, TaskStatus, UserStatus } from '../../fixtures';
+
+const LOCAL_TZ = Temporal.Now.timeZoneId();
 
 export type StatusTone = 'success' | 'warning' | 'destructive' | 'info' | 'neutral';
 export type BadgeVariant = 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'info';
@@ -30,23 +33,23 @@ export const USER_STATUS_TONE: Record<UserStatus, StatusTone> = {
   offline: 'neutral',
 };
 
-/** Parse a date-only ISO string ('2026-06-12') as a LOCAL date. */
-export function parseDateOnly(iso: string): Date {
-  const [y = 2026, m = 1, d = 1] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d);
+/** Parse a date-only ISO string ('2026-06-12') as a calendar date. */
+export function parseDateOnly(iso: string): Temporal.PlainDate {
+  return Temporal.PlainDate.from(iso);
 }
 
-/** Combine a date-only ISO day + 'HH:mm' into a LOCAL Date. */
-export function parseDateTime(day: string, hhmm: string): Date {
-  const base = parseDateOnly(day);
+/** Combine a date-only ISO day + 'HH:mm' into a LOCAL-zone instant. */
+export function parseDateTime(day: string, hhmm: string): Temporal.ZonedDateTime {
   const [h = 0, min = 0] = hhmm.split(':').map(Number);
-  base.setHours(h, min, 0, 0);
-  return base;
+  return parseDateOnly(day).toZonedDateTime({
+    timeZone: LOCAL_TZ,
+    plainTime: new Temporal.PlainTime(h, min),
+  });
 }
 
 export function formatDue(due: string | null): string {
   if (!due) return 'Unscheduled';
-  return parseDateOnly(due).toLocaleDateString(undefined, {
+  return parseDateOnly(due).toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

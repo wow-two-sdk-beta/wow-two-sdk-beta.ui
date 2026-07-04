@@ -1,5 +1,13 @@
 import { forwardRef, useMemo, type HTMLAttributes, type ReactNode } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../utils';
+import { formatZonedTime, minutesBetween, nowZoned, zonedAtHour } from '../../forms/DateExtensions';
+
+// ScheduleView models bookings as absolute instants (a wall-clock time in a
+// specific zone) — `Temporal.ZonedDateTime`, the peer of .NET `DateTimeOffset`.
+// The single-day header projects down to the day's calendar date; the
+// intra-day slot geometry does its math on `ZonedDateTime` (`.hour`, `.add`,
+// `until`) via the shared, Temporal-based `DateExtensions`.
 
 export interface ScheduleResource {
   id: string;
@@ -10,8 +18,8 @@ export interface ScheduleResource {
 export interface ScheduleBooking {
   id: string;
   resourceId: string;
-  start: Date;
-  end: Date;
+  start: Temporal.ZonedDateTime;
+  end: Temporal.ZonedDateTime;
   label?: ReactNode;
   color?: string;
 }
@@ -19,22 +27,13 @@ export interface ScheduleBooking {
 export interface ScheduleViewProps extends HTMLAttributes<HTMLDivElement> {
   resources: ScheduleResource[];
   bookings: ScheduleBooking[];
-  date?: Date;
+  /** The day to render; its calendar date + time zone anchor the grid. */
+  date?: Temporal.ZonedDateTime;
   hourRange?: [number, number];
   slotMinutes?: number;
   onBookingClick?: (booking: ScheduleBooking) => void;
-  onSlotClick?: (resourceId: string, time: Date) => void;
+  onSlotClick?: (resourceId: string, time: Temporal.ZonedDateTime) => void;
   renderBooking?: (booking: ScheduleBooking) => ReactNode;
-}
-
-function dateAtHour(base: Date, hour: number, minute = 0): Date {
-  const c = new Date(base);
-  c.setHours(hour, minute, 0, 0);
-  return c;
-}
-
-function diffMinutes(a: Date, b: Date): number {
-  return (b.getTime() - a.getTime()) / 60000;
 }
 
 /**
@@ -45,7 +44,7 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
   {
     resources,
     bookings,
-    date = new Date(),
+    date = nowZoned(),
     hourRange = [8, 20],
     slotMinutes = 30,
     onBookingClick,
@@ -59,7 +58,10 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
   const [startHour, endHour] = hourRange;
   const totalMinutes = (endHour - startHour) * 60;
   const slotCount = Math.ceil(totalMinutes / slotMinutes);
-  const dayStart = useMemo(() => dateAtHour(date, startHour), [date, startHour]);
+  const dayStart = useMemo(
+    () => zonedAtHour(date.toPlainDate(), startHour, date.timeZoneId),
+    [date, startHour],
+  );
 
   const bookingsByResource = useMemo(() => {
     const map = new Map<string, ScheduleBooking[]>();
@@ -85,7 +87,7 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
       {/* Hour header */}
       <div className="sticky top-0 z-raised flex border-b border-border bg-muted/40">
         <div className="w-32 shrink-0 border-r border-border px-3 py-2 text-xs font-medium text-muted-foreground">
-          {date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+          {date.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
         </div>
         <div className="flex-1 grid" style={{ gridTemplateColumns: `repeat(${endHour - startHour}, 1fr)` }}>
           {Array.from({ length: endHour - startHour }, (_, i) => (
@@ -121,13 +123,12 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
                   style={{ gridTemplateColumns: `repeat(${slotCount}, 1fr)` }}
                 >
                   {Array.from({ length: slotCount }, (_, i) => {
-                    const slotTime = new Date(dayStart);
-                    slotTime.setMinutes(slotTime.getMinutes() + i * slotMinutes);
+                    const slotTime = dayStart.add({ minutes: i * slotMinutes });
                     return (
                       <button
                         key={i}
                         type="button"
-                        aria-label={`Empty slot at ${slotTime.toLocaleTimeString()}`}
+                        aria-label={`Empty slot at ${formatZonedTime(slotTime)}`}
                         onClick={() => onSlotClick(resource.id, slotTime)}
                         className="hover:bg-primary-soft/30"
                       />
@@ -137,8 +138,8 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
               )}
               {/* Bookings */}
               {items.map((booking) => {
-                const offsetMin = Math.max(0, diffMinutes(dayStart, booking.start));
-                const durMin = Math.max(15, diffMinutes(booking.start, booking.end));
+                const offsetMin = Math.max(0, minutesBetween(dayStart, booking.start));
+                const durMin = Math.max(15, minutesBetween(booking.start, booking.end));
                 const left = (offsetMin / totalMinutes) * 100;
                 const width = (durMin / totalMinutes) * 100;
                 const color = booking.color ?? resource.color;
@@ -147,7 +148,7 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
                     key={booking.id}
                     type="button"
                     role="button"
-                    aria-label={`${resource.label} ${booking.start.toLocaleTimeString()} – ${booking.end.toLocaleTimeString()}: ${booking.label ?? ''}`}
+                    aria-label={`${resource.label} ${formatZonedTime(booking.start)} – ${formatZonedTime(booking.end)}: ${booking.label ?? ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       onBookingClick?.(booking);
@@ -170,9 +171,9 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
                       <>
                         <div className="truncate">{booking.label ?? booking.id}</div>
                         <div className="text-[10px] opacity-70 tabular-nums">
-                          {booking.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {formatZonedTime(booking.start)}
                           {' – '}
-                          {booking.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {formatZonedTime(booking.end)}
                         </div>
                       </>
                     )}

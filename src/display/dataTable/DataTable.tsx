@@ -1,4 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { cn } from '../../utils';
 import { useControlled } from '../../hooks';
@@ -51,6 +52,17 @@ function defaultCompare(a: unknown, b: unknown): number {
   if (a === null || a === undefined) return 1;
   if (b === null || b === undefined) return -1;
   if (typeof a === 'number' && typeof b === 'number') return a - b;
+  if (a instanceof Temporal.PlainDate && b instanceof Temporal.PlainDate)
+    return Temporal.PlainDate.compare(a, b);
+  if (a instanceof Temporal.PlainTime && b instanceof Temporal.PlainTime)
+    return Temporal.PlainTime.compare(a, b);
+  if (a instanceof Temporal.PlainDateTime && b instanceof Temporal.PlainDateTime)
+    return Temporal.PlainDateTime.compare(a, b);
+  if (a instanceof Temporal.ZonedDateTime && b instanceof Temporal.ZonedDateTime)
+    return Temporal.ZonedDateTime.compare(a, b);
+  // Native `Date` retained: DataTable cells hold arbitrary consumer values, so a
+  // consumer may still put a `Date` in a column — this is a generic value
+  // comparator, not a date-value API surface.
   if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
   return String(a).localeCompare(String(b));
 }

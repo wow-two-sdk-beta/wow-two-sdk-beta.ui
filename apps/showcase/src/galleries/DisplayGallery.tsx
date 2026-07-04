@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import {
   Accordion,
   AccordionContent,
@@ -112,13 +113,14 @@ const WAVE_PEAKS = Array.from({ length: 56 }, (_, i) =>
   0.25 + 0.7 * Math.abs(Math.sin(i * 0.45) * Math.cos(i * 0.12)),
 );
 
-function buildHeatmapValues(): Record<string, number> {
-  const values: Record<string, number> = {};
+function buildHeatmapValues(): Map<Temporal.PlainDate, number> {
+  const values = new Map<Temporal.PlainDate, number>();
   for (let month = 0; month < 12; month += 1) {
     for (let day = 1; day <= 28; day += 3) {
-      const mm = String(month + 1).padStart(2, '0');
-      const dd = String(day).padStart(2, '0');
-      values[`2026-${mm}-${dd}`] = (month * 5 + day * 3) % 9;
+      values.set(
+        Temporal.PlainDate.from({ year: 2026, month: month + 1, day }),
+        (month * 5 + day * 3) % 9,
+      );
     }
   }
   return values;
@@ -206,33 +208,39 @@ const GRID_ROWS: GridRow[] = [
   { id: 'g3', name: 'Carol', points: 28, role: 'viewer', active: false },
 ];
 
+/** Local-zone ZonedDateTime for a fixed wall-clock June 2026 slot. */
+const zdt = (day: number, hour: number, minute = 0): Temporal.ZonedDateTime =>
+  Temporal.PlainDateTime.from({ year: 2026, month: 6, day, hour, minute }).toZonedDateTime(
+    Temporal.Now.timeZoneId(),
+  );
+
 const CAL_EVENTS: EventCalendarEvent[] = [
   {
     id: 'standup',
     title: 'Standup',
-    start: new Date(2026, 5, 8, 9, 30),
-    end: new Date(2026, 5, 8, 9, 45),
+    start: zdt(8, 9, 30),
+    end: zdt(8, 9, 45),
   },
   {
     id: 'design',
     title: 'Design review',
-    start: new Date(2026, 5, 10, 14, 0),
-    end: new Date(2026, 5, 10, 15, 0),
+    start: zdt(10, 14, 0),
+    end: zdt(10, 15, 0),
     color: 'var(--color-success)',
   },
   {
     id: 'release',
     title: 'Release 0.4',
-    start: new Date(2026, 5, 12, 0, 0),
-    end: new Date(2026, 5, 12, 23, 59),
+    start: zdt(12, 0, 0),
+    end: zdt(12, 23, 59),
     isAllDay: true,
     color: 'var(--color-warning)',
   },
   {
     id: 'retro',
     title: 'Retro',
-    start: new Date(2026, 5, 12, 16, 0),
-    end: new Date(2026, 5, 12, 17, 0),
+    start: zdt(12, 16, 0),
+    end: zdt(12, 17, 0),
   },
 ];
 
@@ -246,48 +254,51 @@ const SCHEDULE_BOOKINGS = [
   {
     id: 'b1',
     resourceId: 'room-a',
-    start: new Date(2026, 5, 10, 9, 0),
-    end: new Date(2026, 5, 10, 10, 30),
+    start: zdt(10, 9, 0),
+    end: zdt(10, 10, 30),
     label: 'Sprint planning',
   },
   {
     id: 'b2',
     resourceId: 'room-b',
-    start: new Date(2026, 5, 10, 11, 0),
-    end: new Date(2026, 5, 10, 12, 0),
+    start: zdt(10, 11, 0),
+    end: zdt(10, 12, 0),
     label: '1:1',
     color: 'var(--color-success)',
   },
   {
     id: 'b3',
     resourceId: 'room-c',
-    start: new Date(2026, 5, 10, 13, 0),
-    end: new Date(2026, 5, 10, 15, 0),
+    start: zdt(10, 13, 0),
+    end: zdt(10, 15, 0),
     label: 'Workshop',
   },
 ];
+
+/** Date-only calendar date in June 2026. */
+const jun = (day: number): Temporal.PlainDate => Temporal.PlainDate.from({ year: 2026, month: 6, day });
 
 const GANTT_TASKS = [
   {
     id: 't1',
     label: 'Design tokens',
-    start: new Date(2026, 5, 1),
-    end: new Date(2026, 5, 6),
+    start: jun(1),
+    end: jun(6),
     progress: 1,
   },
   {
     id: 't2',
     label: 'Component build',
-    start: new Date(2026, 5, 5),
-    end: new Date(2026, 5, 16),
+    start: jun(5),
+    end: jun(16),
     progress: 0.6,
     color: 'var(--color-primary)',
   },
   {
     id: 't3',
     label: 'Showcase app',
-    start: new Date(2026, 5, 12),
-    end: new Date(2026, 5, 22),
+    start: jun(12),
+    end: jun(22),
     progress: 0.2,
     color: 'var(--color-success)',
   },
@@ -298,7 +309,7 @@ const GANTT_DEPS = [
   { from: 't2', to: 't3' },
 ];
 
-const GANTT_MILESTONES = [{ id: 'm1', label: 'Beta cut', date: new Date(2026, 5, 18) }];
+const GANTT_MILESTONES = [{ id: 'm1', label: 'Beta cut', date: jun(18) }];
 
 const NODE_EDITOR_NODES: NodeEditorNode[] = [
   { id: 'input', x: 30, y: 30, label: 'Input' },
@@ -1132,7 +1143,7 @@ ESM ⚡ build success in 412ms`}</Code>
             <EventCalendar
               events={CAL_EVENTS}
               defaultView="month"
-              defaultDate={new Date(2026, 5, 10)}
+              defaultDate={zdt(10, 0)}
               onEventClick={(e) => setPickedEvent(String(e.id))}
             />
             <Text size="xs" color="muted" className="mt-2">
@@ -1143,7 +1154,7 @@ ESM ⚡ build success in 412ms`}</Code>
             <ScheduleView
               resources={SCHEDULE_RESOURCES}
               bookings={SCHEDULE_BOOKINGS}
-              date={new Date(2026, 5, 10)}
+              date={zdt(10, 0)}
               hourRange={[8, 18]}
             />
           </Demo>
@@ -1152,8 +1163,8 @@ ESM ⚡ build success in 412ms`}</Code>
               tasks={GANTT_TASKS}
               dependencies={GANTT_DEPS}
               milestones={GANTT_MILESTONES}
-              from={new Date(2026, 5, 1)}
-              to={new Date(2026, 5, 28)}
+              from={jun(1)}
+              to={jun(28)}
             />
           </Demo>
         </DemoGrid>

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { EventCalendar, type EventCalendarEvent, type EventCalendarView } from './EventCalendar';
 
 const meta: Meta = {
@@ -10,13 +11,11 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const TODAY = new Date();
-const at = (offsetDays: number, hour: number, minute = 0) => {
-  const d = new Date(TODAY);
-  d.setDate(d.getDate() + offsetDays);
-  d.setHours(hour, minute, 0, 0);
-  return d;
-};
+// Absolute instants in the local zone — anchored to the start of today so the
+// stories render deterministically relative to "now".
+const TODAY_MIDNIGHT = Temporal.Now.zonedDateTimeISO().round({ smallestUnit: 'day', roundingMode: 'floor' });
+const at = (offsetDays: number, hour: number, minute = 0) =>
+  TODAY_MIDNIGHT.add({ days: offsetDays, hours: hour, minutes: minute });
 
 const EVENTS: EventCalendarEvent[] = [
   { id: 'e1', title: 'Standup', start: at(0, 9), end: at(0, 9, 30), color: 'var(--color-primary-soft)' },
@@ -39,7 +38,7 @@ export const Default: Story = {
             view={view}
             onViewChange={setView}
             onEventClick={(e) => alert(`Event: ${e.title}`)}
-            onSlotClick={(d, h) => alert(`Slot: ${d.toLocaleDateString()} ${h ?? ''}`)}
+            onSlotClick={(d, h) => alert(`Slot: ${d.toLocaleString()} ${h ?? ''}`)}
           />
         </div>
       );

@@ -1,14 +1,19 @@
 /** Calendar view — month EventCalendar + single-day ScheduleView (June 2026 fixtures). */
+import { Temporal } from '@js-temporal/polyfill';
 import { EventCalendar, ScheduleView } from '@wow-two-beta/ui/display';
 import { useToaster } from '@wow-two-beta/ui/feedback';
 import { events, scheduleEntries, usersById } from '../../fixtures';
 import { parseDateOnly, parseDateTime } from './taskMeta';
 
+const LOCAL_TZ = Temporal.Now.timeZoneId();
+
+// Event start/end are absolute UTC instants (ISO strings ending in `Z`) →
+// EventCalendar takes ZonedDateTime; resolve each instant into the local zone.
 const calendarEvents = events.map((e) => ({
   id: e.id,
   title: e.title,
-  start: new Date(e.start),
-  end: new Date(e.end),
+  start: Temporal.Instant.from(e.start).toZonedDateTimeISO(LOCAL_TZ),
+  end: Temporal.Instant.from(e.end).toZonedDateTimeISO(LOCAL_TZ),
   isAllDay: e.allDay,
 }));
 
@@ -34,7 +39,7 @@ export function CalendarView() {
       <EventCalendar
         events={calendarEvents}
         defaultView="month"
-        defaultDate={parseDateOnly('2026-06-12')}
+        defaultDate={Temporal.PlainDate.from('2026-06-12').toZonedDateTime(LOCAL_TZ)}
         hourRange={[7, 19]}
         onEventClick={(event) => {
           const source = events.find((e) => e.id === event.id);
@@ -57,12 +62,12 @@ export function CalendarView() {
         <ScheduleView
           resources={scheduleResources}
           bookings={scheduleBookings}
-          date={parseDateOnly('2026-06-12')}
+          date={parseDateOnly('2026-06-12').toZonedDateTime(LOCAL_TZ)}
           hourRange={[8, 18]}
           onBookingClick={(booking) => {
             toast({
               title: typeof booking.label === 'string' ? booking.label : booking.id,
-              description: `${booking.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – ${booking.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+              description: `${booking.start.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' })} – ${booking.end.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' })}`,
               severity: 'neutral',
             });
           }}

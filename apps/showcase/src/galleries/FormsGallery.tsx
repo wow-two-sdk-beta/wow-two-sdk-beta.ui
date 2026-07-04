@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { SectionHeader } from '@wow-two-beta/ui/display';
 import {
   AddressForm,
@@ -100,7 +101,6 @@ import {
   type Gradient,
   type RecurrenceRule,
   type SelectOption,
-  type TimeValue,
 } from '@wow-two-beta/ui/forms';
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
@@ -591,18 +591,18 @@ function SelectionSection() {
 
 /* ── 5 · date & time ─────────────────────────────────────────────────── */
 
-const JUNE = new Date(2026, 5, 1);
+const JUNE = Temporal.PlainDate.from('2026-06-01');
 
 function DateTimeSection() {
-  const [day, setDay] = useState<Date | null>(new Date(2026, 5, 12));
+  const [day, setDay] = useState<Temporal.PlainDate | null>(Temporal.PlainDate.from('2026-06-12'));
   const [range, setRange] = useState<DateRange | null>({
-    start: new Date(2026, 5, 8),
-    end: new Date(2026, 5, 12),
+    start: Temporal.PlainDate.from('2026-06-08'),
+    end: Temporal.PlainDate.from('2026-06-12'),
   });
-  const [fieldDate, setFieldDate] = useState<Date | null>(new Date(2026, 5, 1));
-  const [time, setTime] = useState<TimeValue | null>({ hours: 9, minutes: 30 });
-  const [pickedDate, setPickedDate] = useState<Date | null>(null);
-  const [pickedTime, setPickedTime] = useState<TimeValue | null>(null);
+  const [fieldDate, setFieldDate] = useState<Temporal.PlainDate | null>(Temporal.PlainDate.from('2026-06-01'));
+  const [time, setTime] = useState<Temporal.PlainTime | null>(Temporal.PlainTime.from('09:30'));
+  const [pickedDate, setPickedDate] = useState<Temporal.PlainDate | null>(null);
+  const [pickedTime, setPickedTime] = useState<Temporal.PlainTime | null>(null);
   const [pickedRange, setPickedRange] = useState<DateRange | null>(null);
   return (
     <section className="flex flex-col gap-4">
@@ -851,7 +851,7 @@ function EditorsSection() {
             <RecurrenceEditor
               value={rule}
               onValueChange={setRule}
-              from={new Date(2026, 5, 1)}
+              from={Temporal.PlainDate.from('2026-06-01')}
               previewCount={3}
             />
           </div>

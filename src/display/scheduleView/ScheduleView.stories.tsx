@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Temporal } from '@js-temporal/polyfill';
 import { ScheduleView, type ScheduleBooking, type ScheduleResource } from './ScheduleView';
 
 const meta: Meta<typeof ScheduleView> = {
@@ -9,12 +10,10 @@ const meta: Meta<typeof ScheduleView> = {
 export default meta;
 type Story = StoryObj<typeof ScheduleView>;
 
-const TODAY = new Date();
-const at = (h: number, m = 0) => {
-  const d = new Date(TODAY);
-  d.setHours(h, m, 0, 0);
-  return d;
-};
+const TZ = Temporal.Now.timeZoneId();
+const TODAY = Temporal.Now.zonedDateTimeISO(TZ);
+const at = (h: number, m = 0): Temporal.ZonedDateTime =>
+  TODAY.toPlainDate().toZonedDateTime({ timeZone: TZ, plainTime: new Temporal.PlainTime(h, m) });
 
 const RESOURCES: ScheduleResource[] = [
   { id: 'r1', label: 'Room A' },
@@ -39,7 +38,7 @@ export const Default: Story = {
         bookings={BOOKINGS}
         date={TODAY}
         onBookingClick={(b) => alert(`Booking: ${b.label}`)}
-        onSlotClick={(r, t) => alert(`${r} @ ${t.toLocaleTimeString()}`)}
+        onSlotClick={(r, t) => alert(`${r} @ ${t.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' })}`)}
       />
     </div>
   ),

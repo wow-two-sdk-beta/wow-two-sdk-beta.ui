@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Temporal } from '@js-temporal/polyfill';
 import { HeatmapCalendar } from './HeatmapCalendar';
 
 const meta: Meta<typeof HeatmapCalendar> = {
@@ -9,20 +10,14 @@ const meta: Meta<typeof HeatmapCalendar> = {
 export default meta;
 type Story = StoryObj<typeof HeatmapCalendar>;
 
-function generateValues(year: number) {
-  const values: Record<string, number> = {};
-  const start = new Date(year, 0, 1);
-  const end = new Date(year, 11, 31);
-  const cur = new Date(start);
-  while (cur <= end) {
+function generateValues(year: number): Map<Temporal.PlainDate, number> {
+  const values = new Map<Temporal.PlainDate, number>();
+  const end = Temporal.PlainDate.from({ year, month: 12, day: 31 });
+  let cur = Temporal.PlainDate.from({ year, month: 1, day: 1 });
+  while (Temporal.PlainDate.compare(cur, end) <= 0) {
     const v = Math.random() < 0.4 ? Math.floor(Math.random() * 30) : 0;
-    if (v > 0) {
-      const y = cur.getFullYear();
-      const m = String(cur.getMonth() + 1).padStart(2, '0');
-      const d = String(cur.getDate()).padStart(2, '0');
-      values[`${y}-${m}-${d}`] = v;
-    }
-    cur.setDate(cur.getDate() + 1);
+    if (v > 0) values.set(cur, v);
+    cur = cur.add({ days: 1 });
   }
   return values;
 }
@@ -46,7 +41,7 @@ export const Clickable: Story = {
     <HeatmapCalendar
       values={VALUES_2026}
       year={2026}
-      onCellClick={(date, value) => alert(`${date}: ${value}`)}
+      onCellClick={(date, value) => alert(`${date.toString()}: ${value}`)}
     />
   ),
 };

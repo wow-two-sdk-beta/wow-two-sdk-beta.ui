@@ -62,6 +62,11 @@
       "import": "./dist/themes/index.js",
       "default": "./dist/themes/index.js"
     },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "import": "./dist/http/index.js",
+      "default": "./dist/http/index.js"
+    },
     "./actions": {
       "types": "./dist/actions/index.d.ts",
       "import": "./dist/actions/index.js",

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Temporal } from '@js-temporal/polyfill';
 import { Gantt, type GanttTask } from './Gantt';
 
 const meta: Meta<typeof Gantt> = {
@@ -9,12 +10,8 @@ const meta: Meta<typeof Gantt> = {
 export default meta;
 type Story = StoryObj<typeof Gantt>;
 
-const TODAY = new Date();
-const day = (offset: number) => {
-  const d = new Date(TODAY);
-  d.setDate(d.getDate() + offset);
-  return d;
-};
+const TODAY = Temporal.Now.plainDateISO();
+const day = (offset: number): Temporal.PlainDate => TODAY.add({ days: offset });
 
 const TASKS: GanttTask[] = [
   { id: 't1', label: 'Research', start: day(0), end: day(4), progress: 1 },

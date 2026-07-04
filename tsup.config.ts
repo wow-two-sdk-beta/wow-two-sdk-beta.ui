@@ -6,6 +6,7 @@ const folders = [
   'icons',
   'primitives',
   'themes',
+  'http',
   'actions',
   'display',
   'feedback',

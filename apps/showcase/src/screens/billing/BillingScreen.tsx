@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { Button } from '@wow-two-beta/ui/actions';
 import {
   Badge,
@@ -74,13 +75,13 @@ const DEFAULT_ADDRESS: Address = {
 };
 
 /* Fixed literal — no clock reads. */
-const DEFAULT_BILLING_DATE = new Date(2026, 6, 1);
+const DEFAULT_BILLING_DATE = Temporal.PlainDate.from('2026-07-01');
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
 
-const dateLabel = (d: Date | null) =>
+const dateLabel = (d: Temporal.PlainDate | null) =>
   d
-    ? d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    ? d.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
     : '—';
 
 /* ------------------------------------------------------------------ */
@@ -98,7 +99,7 @@ export default function BillingScreen() {
   const [phone, setPhone] = useState('');
   const [creditUsd, setCreditUsd] = useState(25);
   const [taxRate, setTaxRate] = useState(8.5);
-  const [billingDate, setBillingDate] = useState<Date | null>(DEFAULT_BILLING_DATE);
+  const [billingDate, setBillingDate] = useState<Temporal.PlainDate | null>(DEFAULT_BILLING_DATE);
   const [address, setAddress] = useState<Address>(DEFAULT_ADDRESS);
 
   /* Flow */
@@ -348,8 +349,8 @@ export default function BillingScreen() {
                 <DatePicker
                   value={billingDate}
                   onValueChange={setBillingDate}
-                  min={new Date(2026, 5, 1)}
-                  max={new Date(2026, 11, 31)}
+                  min={Temporal.PlainDate.from('2026-06-01')}
+                  max={Temporal.PlainDate.from('2026-12-31')}
                   placeholder="Pick a billing date"
                 />
               </FormField>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Temporal } from '@js-temporal/polyfill';
 import { Button, Toolbar, ToolbarButton, ToolbarSeparator } from '@wow-two-beta/ui/actions';
 import {
   ActivityFeed,
@@ -267,8 +268,8 @@ const gridColumns: DataGridColumn<GridRow>[] = [
 ];
 
 /* Heatmap + weekly deploy series (all static fixture-derived). */
-const heatmapValues: Record<string, number> = Object.fromEntries(
-  heatmapDays.map((d) => [d.date, d.count]),
+const heatmapValues = new Map<Temporal.PlainDate, number>(
+  heatmapDays.map((d) => [Temporal.PlainDate.from(d.date), d.count]),
 );
 const deployFreqPoints = deployFrequency.map((d) => d.count);
 const peakWeek = deployFreqPoints.length > 0 ? Math.max(...deployFreqPoints) : 0;
@@ -578,7 +579,7 @@ export default function DashboardScreen() {
                     onCellClick={(date, value) =>
                       toast({
                         severity: 'info',
-                        title: date,
+                        title: date.toString(),
                         description: `${value} deploy${value === 1 ? '' : 's'} that day.`,
                       })
                     }
