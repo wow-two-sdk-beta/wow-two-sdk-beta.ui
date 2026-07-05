@@ -4,7 +4,7 @@ import { tv, Tones, type VariantProps } from '../../utils';
 export const buttonVariants = tv({
   base: [
     // layout
-    'inline-flex items-center justify-center gap-2',
+    'group inline-flex items-center justify-center gap-2',
     // typography
     'font-medium align-middle',
     // borders (forced-colors fallback)
@@ -29,6 +29,10 @@ export const buttonVariants = tv({
       surface: '',
       outline: 'bg-transparent',
       ghost: 'bg-transparent',
+      // Borderless + transparent at rest; on hover / focus-visible a bordered chip is
+      // revealed (border + bg + foreground text). Per-tone reveal target set via
+      // compoundVariants below. Pairs with `hoverSlot` for the icon-swap affordance.
+      reveal: 'bg-transparent border-transparent',
       link: 'bg-transparent !h-auto !p-0 !rounded-none underline-offset-4 hover:underline focus-visible:ring-offset-0',
       // Base = neutral/default tone: dark image-overlay wash + blur. Non-neutral tones resolve
       // through the shared `Tones.glass` palette via compoundVariants below (so tone + color
@@ -102,6 +106,16 @@ export const buttonVariants = tv({
     { variant: 'ghost', tone: 'danger',   class: 'text-destructive hover:bg-destructive/10 active:bg-destructive/15' },
     { variant: 'ghost', tone: 'success',  class: 'text-success hover:bg-success/10 active:bg-success/15' },
     { variant: 'ghost', tone: 'warning',  class: 'text-warning hover:bg-warning/10 active:bg-warning/15' },
+
+    // === REVEAL × tone (idle: muted transparent · hover/focus-visible: bordered chip revealed) ===
+    // Idle text sits at reduced emphasis (muted-foreground / tone-tinted); hover & focus-visible
+    // resolve the border + a surface background + full-emphasis foreground so a bordered chip
+    // "appears". neutral is the common case (borderless icon affordance).
+    { variant: 'reveal', tone: 'primary',  class: 'text-primary/70 hover:border-border hover:bg-background hover:text-primary focus-visible:border-border focus-visible:bg-background focus-visible:text-primary active:bg-muted/70' },
+    { variant: 'reveal', tone: 'neutral',  class: 'text-muted-foreground hover:border-border hover:bg-background hover:text-foreground focus-visible:border-border focus-visible:bg-background focus-visible:text-foreground active:bg-muted/70' },
+    { variant: 'reveal', tone: 'danger',   class: 'text-destructive/70 hover:border-border hover:bg-background hover:text-destructive focus-visible:border-border focus-visible:bg-background focus-visible:text-destructive active:bg-muted/70' },
+    { variant: 'reveal', tone: 'success',  class: 'text-success/70 hover:border-border hover:bg-background hover:text-success focus-visible:border-border focus-visible:bg-background focus-visible:text-success active:bg-muted/70' },
+    { variant: 'reveal', tone: 'warning',  class: 'text-warning/70 hover:border-border hover:bg-background hover:text-warning focus-visible:border-border focus-visible:bg-background focus-visible:text-warning active:bg-muted/70' },
 
     // === LINK × tone (h/padding/radius cleared by variant) ===
     { variant: 'link', tone: 'primary',  class: 'text-primary' },

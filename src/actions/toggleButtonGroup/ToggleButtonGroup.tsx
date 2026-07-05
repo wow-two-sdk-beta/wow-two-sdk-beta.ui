@@ -29,6 +29,13 @@ interface MultiProps {
 type ToggleButtonGroupProps = Omit<ComponentPropsWithoutRef<'div'>, 'defaultValue' | 'onChange'> & {
   orientation?: 'horizontal' | 'vertical';
   isAttached?: boolean;
+  /**
+   * Visual style.
+   * - `default` — standard button row/column (borders + attached radii).
+   * - `segmented` — iOS-style connected pill row on a muted track; the active
+   *   segment lifts to a `background` surface. Forces `isAttached`.
+   */
+  variant?: 'default' | 'segmented';
 } & (SingleProps | MultiProps);
 
 interface ChildLike extends ToggleButtonProps {
@@ -41,6 +48,7 @@ export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupPro
     const {
       orientation = 'horizontal',
       isAttached = true,
+      variant = 'default',
       className,
       children,
       type,
@@ -50,6 +58,9 @@ export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupPro
       ...rest
     } = props;
     const mode: Mode = type === 'multi' ? 'multi' : 'single';
+    const isSegmented = variant === 'segmented';
+    // Segmented is inherently an attached pill row — the muted track only reads as one control when its segments touch.
+    const attached = isSegmented || isAttached;
 
     const [singleValue, setSingleValue] = useControlled<string | null>({
       controlled: mode === 'single' ? (value as string | null | undefined) : undefined,
@@ -89,11 +100,17 @@ export const ToggleButtonGroup = forwardRef<HTMLDivElement, ToggleButtonGroupPro
         className={cn(
           'inline-flex',
           orientation === 'horizontal' ? 'flex-row' : 'flex-col',
-          isAttached
+          attached
             ? orientation === 'horizontal'
               ? '[&>*]:rounded-none [&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md [&>*:not(:first-child)]:-ml-px'
               : '[&>*]:rounded-none [&>*:first-child]:rounded-t-md [&>*:last-child]:rounded-b-md [&>*:not(:first-child)]:-mt-px'
             : 'gap-2',
+          // Segmented: muted track + reset segment chrome; active segment lifts to a `background` surface.
+          isSegmented && [
+            'rounded-md bg-muted p-1',
+            '[&>*]:!rounded-md [&>*]:!ml-0 [&>*]:!border-transparent [&>*]:!bg-transparent',
+            '[&>*[data-pressed=true]]:!bg-background [&>*[data-pressed=true]]:!text-foreground [&>*[data-pressed=true]]:shadow-sm',
+          ],
           className,
         )}
         {...rest}

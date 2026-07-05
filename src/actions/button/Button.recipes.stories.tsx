@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { Heart, Plus, Trash2, Pencil, ArrowRight, Save } from 'lucide-react';
+import { Heart, Plus, Trash2, Pencil, ArrowRight, ArrowLeftRight, Save } from 'lucide-react';
 import { Icon } from '../../icons';
 import { Overlay } from '../../layout/overlay';
 import { Button } from './Button';
@@ -48,6 +48,27 @@ export const IconOnlyToolbar: Story = {
       <Button variant="ghost" size="sm" shape="square" tone="danger" aria-label="Delete">
         <Icon icon={Trash2} size={16} />
       </Button>
+    </div>
+  ),
+};
+
+/* Reveal-on-hover icon swap (`variant="reveal"` + `hoverSlot`) — the smart-qr `SwapConnector`
+   affordance. Idle: borderless, muted single `→`. Hover / focus-visible: a bordered chip is
+   revealed AND the glyph swaps to `↔`. Pure CSS — no JS hover state. Tab to it to see the
+   focus-visible reveal too. */
+export const RevealSwap: Story = {
+  render: () => (
+    <div className="flex items-center gap-6">
+      <Button
+        variant="reveal"
+        tone="neutral"
+        shape="square"
+        aria-label="Swap connector"
+        hoverSlot={<Icon icon={ArrowLeftRight} size={16} />}
+      >
+        <Icon icon={ArrowRight} size={16} />
+      </Button>
+      <span className="text-xs text-muted-foreground">hover or focus me — `→` becomes `↔`, chip appears</span>
     </div>
   ),
 };

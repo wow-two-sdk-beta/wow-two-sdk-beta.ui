@@ -1,23 +1,15 @@
 import { forwardRef } from 'react';
-import { cn } from '../../utils';
 import { ToggleButtonGroup, type ToggleButtonGroupProps } from '../toggleButtonGroup/ToggleButtonGroup';
 
-export type SegmentedControlProps = ToggleButtonGroupProps;
+export type SegmentedControlProps = Omit<ToggleButtonGroupProps, 'variant'>;
 
-/** Visual variant of ToggleButtonGroup — iOS-style connected pill row. */
-export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps>(
-  ({ className, ...props }, ref) => (
-    <ToggleButtonGroup
-      ref={ref}
-      isAttached
-      className={cn(
-        'rounded-md bg-muted p-1',
-        '[&>*]:!rounded-md [&>*]:!ml-0 [&>*]:!border-transparent [&>*]:!bg-transparent',
-        '[&>*[data-pressed=true]]:!bg-background [&>*[data-pressed=true]]:!text-foreground [&>*[data-pressed=true]]:shadow-sm',
-        className,
-      )}
-      {...(props as ToggleButtonGroupProps)}
-    />
-  ),
-);
+/**
+ * iOS-style connected pill row.
+ *
+ * @deprecated Use `ToggleButtonGroup variant="segmented"` — this is now a thin alias that
+ * forwards to it. Kept for back-compat; will be removed in a future beta.
+ */
+export const SegmentedControl = forwardRef<HTMLDivElement, SegmentedControlProps>((props, ref) => (
+  <ToggleButtonGroup ref={ref} variant="segmented" {...(props as ToggleButtonGroupProps)} />
+));
 SegmentedControl.displayName = 'SegmentedControl';

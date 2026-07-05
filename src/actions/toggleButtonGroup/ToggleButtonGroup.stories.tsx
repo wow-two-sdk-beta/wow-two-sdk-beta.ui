@@ -29,3 +29,14 @@ export const Multi: Story = {
     </ToggleButtonGroup>
   ),
 };
+
+/** iOS-style pill row on a muted track — supersedes the deprecated `SegmentedControl`. */
+export const Segmented: Story = {
+  render: () => (
+    <ToggleButtonGroup variant="segmented" type="single" defaultValue="week">
+      <ToggleButton value="day">Day</ToggleButton>
+      <ToggleButton value="week">Week</ToggleButton>
+      <ToggleButton value="month">Month</ToggleButton>
+    </ToggleButtonGroup>
+  ),
+};

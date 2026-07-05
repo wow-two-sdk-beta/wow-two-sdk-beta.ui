@@ -72,6 +72,11 @@ export interface ButtonProps
   /* Slot after children (logical end). */
   trailingSlot?: ReactNode;
 
+  /* Content shown in place of `children` on hover / focus-visible (CSS-only swap — no JS hover state).
+     Idle → `children` visible; hover/focus-visible → `hoverSlot` visible. Pairs with `variant="reveal"`
+     for a reveal-on-hover icon swap. When undefined, `children` renders normally. */
+  hoverSlot?: ReactNode;
+
   /* Custom indicator shown in place of the built-in `<Spinner/>` when `isLoading` is true. */
   loadingSlot?: ReactNode;
 
@@ -286,6 +291,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       boxSize,
       leadingSlot,
       trailingSlot,
+      hoverSlot,
       loadingSlot,
       isLoading,
       loadingText,
@@ -411,6 +417,25 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           // No loadingText: keep children in sr-only so the accessible name survives (Spinner is aria-hidden).
           <span className="sr-only">{children}</span>
         )}
+      </>
+    ) : hoverSlot !== undefined ? (
+      <>
+        {leadingSlot}
+        {/* CSS-only hover/focus-visible swap: `children` occupies the box and reserves its size;
+            `hoverSlot` overlays it centered. Toggle via `group-hover`/`group-focus-visible` on the
+            root `group` — no JS hover state. `aria-hidden` on the hidden layer so AT reads one label. */}
+        <span className="relative inline-flex items-center justify-center">
+          <span className="inline-flex items-center justify-center group-hover:invisible group-focus-visible:invisible">
+            {children}
+          </span>
+          <span
+            aria-hidden
+            className="invisible absolute inset-0 inline-flex items-center justify-center group-hover:visible group-focus-visible:visible"
+          >
+            {hoverSlot}
+          </span>
+        </span>
+        {trailingSlot}
       </>
     ) : (
       <>
