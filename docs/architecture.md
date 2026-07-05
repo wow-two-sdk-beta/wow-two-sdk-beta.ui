@@ -27,14 +27,14 @@ Foundation is internally ordered (informal — not ESLint-enforced, but respecte
 - **`hooks`** — pure React hooks (state, refs, observers). May use `utils`.
 - **`icons`** — `<Icon>` registry. May use `utils`.
 - **`primitives`** — headless components (Slot, Portal, FocusScope, etc.). Behavior + a11y only, no visuals beyond layout. May use `utils` + `hooks`. **This is L2.**
-- **`themes`** — OKLCH theming engine + tokens (exported at `@wow-two-beta/ui/themes`).
+- **`themes`** — OKLCH theming engine + tokens (JS at `@wow-two-beta/ui/foundation/themes`; `themes.css` / `themes.json` stay top-level).
 - **`http`** — HTTP client helpers.
 
 ## Domain layer
 
 Pure value-types + operations — no React, no presentation. Depends only on foundation.
 
-- **`color`** — the `Gradient` union + `withStop` / `reverseStops`, `GradientType`; color math. Exported at `@wow-two-beta/ui/color`.
+- **`color`** — the `Gradient` union + `withStop` / `reverseStops` / `withAngle` / `withRadius`, `GradientType`; color math. Exported at `@wow-two-beta/ui/domain/color`.
 
 ## Why the foundation rule
 

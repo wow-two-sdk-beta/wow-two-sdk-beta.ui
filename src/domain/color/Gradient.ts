@@ -46,8 +46,20 @@ function reverseStops(gradient: Gradient): Gradient {
   return { ...gradient, stops };
 }
 
+/** Returns the gradient with its linear angle set (no-op on a radial gradient). */
+function withAngle(gradient: Gradient, angle: number): Gradient {
+  return gradient.type === GradientType.Linear ? { ...gradient, angle } : gradient;
+}
+
+/** Returns the gradient with its radial radius set (no-op on a linear gradient). */
+function withRadius(gradient: Gradient, radius: number): Gradient {
+  return gradient.type === GradientType.Radial ? { ...gradient, radius } : gradient;
+}
+
 /** Operations over a `Gradient` value — the companion to the `Gradient` type. */
 export const Gradient = {
   withStop,
   reverseStops,
+  withAngle,
+  withRadius,
 };
