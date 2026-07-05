@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Button } from '@wow-two-beta/ui/actions';
-import { Avatar, Tabs, TabsList, TabsTab, TabsPanel } from '@wow-two-beta/ui/display';
-import { useToaster } from '@wow-two-beta/ui/feedback';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
+import { Avatar, Tabs, TabsList, TabsTab, TabsPanel } from '@wow-two-beta/ui/presentation/display';
+import { useToaster } from '@wow-two-beta/ui/presentation/feedback';
 import {
   Checkbox,
   CheckboxField,
@@ -38,7 +38,7 @@ import {
   TagsInput,
   TextInput,
   UrlInput,
-} from '@wow-two-beta/ui/forms';
+} from '@wow-two-beta/ui/presentation/forms';
 import { users } from '../../fixtures';
 
 /* Deterministic profile defaults — derived from the fixture owner (usr-001). */

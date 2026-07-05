@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
  * Emit dist/themes.css + dist/themes.json from the curated registry.
  *
- * Runs AFTER tsup has compiled src/ → dist/ (so dist/themes/index.js exists).
+ * Runs AFTER tsup has compiled src/ → dist/ (so dist/foundation/themes/index.js exists).
  * Wired into the package `build` script. Pure Node, no extra deps.
  *
  * Outputs:
@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const distThemes = resolve(here, '../dist/themes/index.js');
+const distThemes = resolve(here, '../dist/foundation/themes/index.js');
 
 const { THEMES, emitAllThemesCss, emitThemesManifest } = await import(distThemes);
 

@@ -100,7 +100,7 @@ import {
   type NodeEditorEdge,
   type NodeEditorNode,
   type Reaction,
-} from '@wow-two-beta/ui/display';
+} from '@wow-two-beta/ui/presentation/display';
 
 /* ------------------------------------------------------------------ */
 /* Deterministic fixtures                                             */
@@ -530,7 +530,7 @@ export default function DisplayGallery() {
               <Text size="sm">
                 Install via <Code>pnpm add @wow-two-beta/ui</Code>
               </Text>
-              <Code variant="block">{`import { Badge } from '@wow-two-beta/ui/display';
+              <Code variant="block">{`import { Badge } from '@wow-two-beta/ui/presentation/display';
 
 export const Pill = () => <Badge variant="brand">beta</Badge>;`}</Code>
             </div>

@@ -1,6 +1,6 @@
 /** Projects screen — task tracker with Table / Board / Timeline / Calendar views. */
 import { useMemo, useState } from 'react';
-import { Button, SegmentedControl, ToggleButton } from '@wow-two-beta/ui/actions';
+import { Button, SegmentedControl, ToggleButton } from '@wow-two-beta/ui/presentation/actions';
 import {
   Badge,
   DataTable,
@@ -10,8 +10,8 @@ import {
   Tag,
   type DataTableColumn,
   type DataTableSort,
-} from '@wow-two-beta/ui/display';
-import { StatusIndicator, useToaster } from '@wow-two-beta/ui/feedback';
+} from '@wow-two-beta/ui/presentation/display';
+import { StatusIndicator, useToaster } from '@wow-two-beta/ui/presentation/feedback';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -19,7 +19,7 @@ import {
   MenuItem,
   MenuSeparator,
   Pagination,
-} from '@wow-two-beta/ui/nav';
+} from '@wow-two-beta/ui/presentation/nav';
 import {
   projectTasks,
   usersById,

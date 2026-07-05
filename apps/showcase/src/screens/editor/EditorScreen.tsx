@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, CopyButton } from '@wow-two-beta/ui/actions';
+import { Button, CopyButton } from '@wow-two-beta/ui/presentation/actions';
 import {
   Code,
   DiffViewer,
@@ -11,8 +11,8 @@ import {
   Quote,
   SectionHeader,
   Snippet,
-} from '@wow-two-beta/ui/display';
-import { useToaster } from '@wow-two-beta/ui/feedback';
+} from '@wow-two-beta/ui/presentation/display';
+import { useToaster } from '@wow-two-beta/ui/presentation/feedback';
 import {
   CharacterCount,
   CodeEditor,
@@ -25,8 +25,8 @@ import {
   Label,
   MarkdownEditor,
   Textarea,
-} from '@wow-two-beta/ui/forms';
-import { ScrollSpy, TableOfContents } from '@wow-two-beta/ui/nav';
+} from '@wow-two-beta/ui/presentation/forms';
+import { ScrollSpy, TableOfContents } from '@wow-two-beta/ui/presentation/nav';
 import { users } from '../../fixtures';
 
 /* ------------------------------------------------------------------ */

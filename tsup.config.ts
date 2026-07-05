@@ -1,25 +1,37 @@
 import { defineConfig } from 'tsup';
 
-const folders = [
-  'utils',
-  'hooks',
-  'icons',
-  'primitives',
-  'themes',
-  'http',
-  'actions',
-  'display',
-  'feedback',
-  'forms',
-  'layout',
-  'nav',
-  'overlays',
-];
+// Component group -> physical layer folder under `src/`. Public subpaths are now
+// layer-prefixed (`@wow-two-beta/ui/<layer>/<group>`) and `dist/` mirrors the
+// layers 1:1 (`dist/<layer>/<group>/index.*`). Keep in sync with `package.json`
+// exports and `apps/lib-source-alias.mjs`.
+const subpathLayer: Record<string, 'foundation' | 'domain' | 'presentation'> = {
+  utils: 'foundation',
+  hooks: 'foundation',
+  icons: 'foundation',
+  primitives: 'foundation',
+  themes: 'foundation',
+  http: 'foundation',
+  color: 'domain',
+  actions: 'presentation',
+  display: 'presentation',
+  feedback: 'presentation',
+  forms: 'presentation',
+  layout: 'presentation',
+  nav: 'presentation',
+  overlays: 'presentation',
+};
 
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
-    ...Object.fromEntries(folders.map((f) => [`${f}/index`, `src/${f}/index.ts`])),
+    // Entry KEY = dist path (`dist/<layer>/<group>/index.js`) — mirrors the
+    // layered source folder so the emitted subpath matches the public export.
+    ...Object.fromEntries(
+      Object.entries(subpathLayer).map(([group, layer]) => [
+        `${layer}/${group}/index`,
+        `src/${layer}/${group}/index.ts`,
+      ]),
+    ),
   },
   format: ['esm'],
   banner: { js: '"use client";' }, // whole lib is client-side — keep chunks importable from RSC

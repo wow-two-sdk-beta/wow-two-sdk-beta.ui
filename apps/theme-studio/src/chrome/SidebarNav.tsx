@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { NavItem } from '@wow-two-beta/ui/nav';
+import { NavItem } from '@wow-two-beta/ui/presentation/nav';
 import { ROUTES } from '../routes';
 
 /* Sidebar nav driven by ROUTES; rows are lib NavItem anchors. Plain left-click

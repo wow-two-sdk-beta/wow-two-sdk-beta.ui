@@ -6,9 +6,9 @@ import {
   AppShellHeader,
   AppShellMain,
   AppShellSidebar,
-} from '@wow-two-beta/ui/layout';
-import { Toaster } from '@wow-two-beta/ui/feedback';
-import { Button } from '@wow-two-beta/ui/actions';
+} from '@wow-two-beta/ui/presentation/layout';
+import { Toaster } from '@wow-two-beta/ui/presentation/feedback';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
 import { ROUTES } from './routes';
 import { ThemeStudioProvider } from './theme/ThemeContext';
 import { SidebarNav } from './chrome/SidebarNav';

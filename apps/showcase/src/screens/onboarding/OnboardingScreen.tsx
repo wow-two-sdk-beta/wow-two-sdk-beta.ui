@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button } from '@wow-two-beta/ui/actions';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
 import {
   Banner,
   Callout,
@@ -10,7 +10,7 @@ import {
   Tour,
   useToaster,
   type TourStep,
-} from '@wow-two-beta/ui/feedback';
+} from '@wow-two-beta/ui/presentation/feedback';
 import {
   ChoiceCard,
   LabeledInput,
@@ -19,7 +19,7 @@ import {
   Wizard,
   WizardFooter,
   WizardStep,
-} from '@wow-two-beta/ui/forms';
+} from '@wow-two-beta/ui/presentation/forms';
 import {
   HoverCard,
   HoverCardContent,
@@ -27,8 +27,8 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@wow-two-beta/ui/overlays';
-import { Announce } from '@wow-two-beta/ui/primitives';
+} from '@wow-two-beta/ui/presentation/overlays';
+import { Announce } from '@wow-two-beta/ui/foundation/primitives';
 import { users, type User } from '../../fixtures';
 
 /* ------------------------------- fixed data ------------------------------- */

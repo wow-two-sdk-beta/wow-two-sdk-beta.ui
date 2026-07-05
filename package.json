@@ -37,70 +37,75 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.js",
-      "default": "./dist/utils/index.js"
+    "./foundation/utils": {
+      "types": "./dist/foundation/utils/index.d.ts",
+      "import": "./dist/foundation/utils/index.js",
+      "default": "./dist/foundation/utils/index.js"
     },
-    "./hooks": {
-      "types": "./dist/hooks/index.d.ts",
-      "import": "./dist/hooks/index.js",
-      "default": "./dist/hooks/index.js"
+    "./foundation/hooks": {
+      "types": "./dist/foundation/hooks/index.d.ts",
+      "import": "./dist/foundation/hooks/index.js",
+      "default": "./dist/foundation/hooks/index.js"
     },
-    "./icons": {
-      "types": "./dist/icons/index.d.ts",
-      "import": "./dist/icons/index.js",
-      "default": "./dist/icons/index.js"
+    "./foundation/icons": {
+      "types": "./dist/foundation/icons/index.d.ts",
+      "import": "./dist/foundation/icons/index.js",
+      "default": "./dist/foundation/icons/index.js"
     },
-    "./primitives": {
-      "types": "./dist/primitives/index.d.ts",
-      "import": "./dist/primitives/index.js",
-      "default": "./dist/primitives/index.js"
+    "./foundation/primitives": {
+      "types": "./dist/foundation/primitives/index.d.ts",
+      "import": "./dist/foundation/primitives/index.js",
+      "default": "./dist/foundation/primitives/index.js"
     },
-    "./themes": {
-      "types": "./dist/themes/index.d.ts",
-      "import": "./dist/themes/index.js",
-      "default": "./dist/themes/index.js"
+    "./foundation/themes": {
+      "types": "./dist/foundation/themes/index.d.ts",
+      "import": "./dist/foundation/themes/index.js",
+      "default": "./dist/foundation/themes/index.js"
     },
-    "./http": {
-      "types": "./dist/http/index.d.ts",
-      "import": "./dist/http/index.js",
-      "default": "./dist/http/index.js"
+    "./foundation/http": {
+      "types": "./dist/foundation/http/index.d.ts",
+      "import": "./dist/foundation/http/index.js",
+      "default": "./dist/foundation/http/index.js"
     },
-    "./actions": {
-      "types": "./dist/actions/index.d.ts",
-      "import": "./dist/actions/index.js",
-      "default": "./dist/actions/index.js"
+    "./domain/color": {
+      "types": "./dist/domain/color/index.d.ts",
+      "import": "./dist/domain/color/index.js",
+      "default": "./dist/domain/color/index.js"
     },
-    "./display": {
-      "types": "./dist/display/index.d.ts",
-      "import": "./dist/display/index.js",
-      "default": "./dist/display/index.js"
+    "./presentation/actions": {
+      "types": "./dist/presentation/actions/index.d.ts",
+      "import": "./dist/presentation/actions/index.js",
+      "default": "./dist/presentation/actions/index.js"
     },
-    "./feedback": {
-      "types": "./dist/feedback/index.d.ts",
-      "import": "./dist/feedback/index.js",
-      "default": "./dist/feedback/index.js"
+    "./presentation/display": {
+      "types": "./dist/presentation/display/index.d.ts",
+      "import": "./dist/presentation/display/index.js",
+      "default": "./dist/presentation/display/index.js"
     },
-    "./forms": {
-      "types": "./dist/forms/index.d.ts",
-      "import": "./dist/forms/index.js",
-      "default": "./dist/forms/index.js"
+    "./presentation/feedback": {
+      "types": "./dist/presentation/feedback/index.d.ts",
+      "import": "./dist/presentation/feedback/index.js",
+      "default": "./dist/presentation/feedback/index.js"
     },
-    "./layout": {
-      "types": "./dist/layout/index.d.ts",
-      "import": "./dist/layout/index.js",
-      "default": "./dist/layout/index.js"
+    "./presentation/forms": {
+      "types": "./dist/presentation/forms/index.d.ts",
+      "import": "./dist/presentation/forms/index.js",
+      "default": "./dist/presentation/forms/index.js"
     },
-    "./nav": {
-      "types": "./dist/nav/index.d.ts",
-      "import": "./dist/nav/index.js",
-      "default": "./dist/nav/index.js"
+    "./presentation/layout": {
+      "types": "./dist/presentation/layout/index.d.ts",
+      "import": "./dist/presentation/layout/index.js",
+      "default": "./dist/presentation/layout/index.js"
     },
-    "./overlays": {
-      "types": "./dist/overlays/index.d.ts",
-      "import": "./dist/overlays/index.js",
-      "default": "./dist/overlays/index.js"
+    "./presentation/nav": {
+      "types": "./dist/presentation/nav/index.d.ts",
+      "import": "./dist/presentation/nav/index.js",
+      "default": "./dist/presentation/nav/index.js"
+    },
+    "./presentation/overlays": {
+      "types": "./dist/presentation/overlays/index.d.ts",
+      "import": "./dist/presentation/overlays/index.js",
+      "default": "./dist/presentation/overlays/index.js"
     },
     "./styles.css": "./dist/index.css",
     "./themes.css": "./dist/themes.css",

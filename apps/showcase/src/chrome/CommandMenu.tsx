@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@wow-two-beta/ui/actions';
-import { Kbd } from '@wow-two-beta/ui/display';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
+import { Kbd } from '@wow-two-beta/ui/presentation/display';
 import {
   CommandPalette,
   CommandPaletteContent,
@@ -11,7 +11,7 @@ import {
   CommandPaletteItem,
   CommandPaletteList,
   CommandPaletteSeparator,
-} from '@wow-two-beta/ui/nav';
+} from '@wow-two-beta/ui/presentation/nav';
 import { ROUTES, type RouteGroup } from '../routes';
 
 const GROUP_ORDER: RouteGroup[] = ['Home', 'Screens', 'Galleries', 'Meta'];

@@ -1,6 +1,6 @@
 /** Timeline view — Gantt chart over the June 2026 wrap-up plan fixtures. */
-import { Gantt, Tag } from '@wow-two-beta/ui/display';
-import { useToaster } from '@wow-two-beta/ui/feedback';
+import { Gantt, Tag } from '@wow-two-beta/ui/presentation/display';
+import { useToaster } from '@wow-two-beta/ui/presentation/feedback';
 import { ganttTasks, type GanttLane } from '../../fixtures';
 import { parseDateOnly } from './taskMeta';
 

@@ -1,6 +1,6 @@
-import { Button } from '@wow-two-beta/ui/actions';
-import { Badge } from '@wow-two-beta/ui/display';
-import { TextInput } from '@wow-two-beta/ui/forms';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
+import { Badge } from '@wow-two-beta/ui/presentation/display';
+import { TextInput } from '@wow-two-beta/ui/presentation/forms';
 
 /* Compact token swatch board shown inside each gallery card: page bg + a nested
    card + the key tones as buttons + an input + a badge. Token classes only, so

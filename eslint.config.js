@@ -25,14 +25,21 @@ export default tseslint.config(
     },
     settings: {
       'boundaries/elements': [
+        // Physical layer folders under src/. Foundation = infra (no upward deps);
+        // domain = pure types/ops (may use foundation); presentation = components
+        // (may use foundation + domain + sibling presentation).
         {
           type: 'foundation',
-          pattern: 'src/(tokens|tailwind|utils|hooks|icons|primitives|themes)/**',
+          pattern: 'src/foundation/*/**',
         },
         {
           type: 'domain',
-          pattern: 'src/(actions|display|feedback|forms|layout|nav|overlays)/*/**',
-          capture: ['domain'],
+          pattern: 'src/domain/*/**',
+        },
+        {
+          type: 'presentation',
+          pattern: 'src/presentation/*/**',
+          capture: ['group'],
         },
         { type: 'root', pattern: 'src/index.ts' },
       ],
@@ -46,11 +53,13 @@ export default tseslint.config(
           default: 'disallow',
           rules: [
             { from: ['foundation'], allow: ['foundation'] },
-            // Domain → any domain. Cross-domain composition is allowed at all layers.
-            // Convention: L3 atoms / L4 molecules should stay in-domain when natural;
-            // L5+ organisms freely compose across domains. The lint rule is permissive.
-            { from: ['domain'], allow: ['foundation', 'domain'] },
-            { from: ['root'], allow: ['foundation', 'domain'] },
+            { from: ['domain'], allow: ['foundation'] },
+            // Presentation → foundation + domain + any sibling presentation group.
+            // Cross-group composition is allowed at all layers. Convention: L3 atoms /
+            // L4 molecules stay in-group when natural; L5+ organisms compose freely.
+            // The lint rule is permissive.
+            { from: ['presentation'], allow: ['foundation', 'domain', 'presentation'] },
+            { from: ['root'], allow: ['foundation', 'domain', 'presentation'] },
           ],
         },
       ],

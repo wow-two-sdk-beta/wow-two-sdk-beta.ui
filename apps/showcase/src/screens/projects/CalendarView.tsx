@@ -1,7 +1,7 @@
 /** Calendar view — month EventCalendar + single-day ScheduleView (June 2026 fixtures). */
 import { Temporal } from '@js-temporal/polyfill';
-import { EventCalendar, ScheduleView } from '@wow-two-beta/ui/display';
-import { useToaster } from '@wow-two-beta/ui/feedback';
+import { EventCalendar, ScheduleView } from '@wow-two-beta/ui/presentation/display';
+import { useToaster } from '@wow-two-beta/ui/presentation/feedback';
 import { events, scheduleEntries, usersById } from '../../fixtures';
 import { parseDateOnly, parseDateTime } from './taskMeta';
 

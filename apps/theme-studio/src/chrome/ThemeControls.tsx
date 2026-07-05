@@ -1,6 +1,6 @@
-import { THEMES } from '@wow-two-beta/ui/themes';
-import { Select, Switch } from '@wow-two-beta/ui/forms';
-import { Text } from '@wow-two-beta/ui/display';
+import { THEMES } from '@wow-two-beta/ui/foundation/themes';
+import { Select, Switch } from '@wow-two-beta/ui/presentation/forms';
+import { Text } from '@wow-two-beta/ui/presentation/display';
 import { useThemeStudio } from '../theme/ThemeContext';
 
 /* Header controls — the global theme picker (applies app-wide via the provider)

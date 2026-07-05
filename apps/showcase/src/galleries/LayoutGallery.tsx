@@ -28,9 +28,9 @@ import {
   Surface,
   TwoColumn,
   VStack,
-} from '@wow-two-beta/ui/layout';
-import { SectionHeader } from '@wow-two-beta/ui/display';
-import { Button } from '@wow-two-beta/ui/actions';
+} from '@wow-two-beta/ui/presentation/layout';
+import { SectionHeader } from '@wow-two-beta/ui/presentation/display';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
 
 /* ------------------------------------------------------------------ */
 /* Local demo scaffolding (plain divs — not part of coverage)          */

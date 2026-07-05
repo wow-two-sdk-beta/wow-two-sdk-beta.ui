@@ -1,7 +1,7 @@
 /* Generates src/manifest.gen.json:
    - domains: every named export per lib domain barrel (the full component universe)
-   - routes:  per page module, the `@wow-two-beta/ui/{domain}` named imports it
-              (and its descendants in the same module folder) actually use.
+   - routes:  per page module, the `@wow-two-beta/ui/<layer>/{group}` named imports
+              it (and its descendants in the same module folder) actually use.
    Auto-extracted so coverage can never silently go stale. */
 import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -11,7 +11,16 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const appSrc = path.resolve(here, '../src');
 const libSrc = path.resolve(here, '../../../src');
 
-const DOMAINS = ['actions', 'display', 'feedback', 'forms', 'layout', 'nav', 'overlays', 'primitives', 'hooks', 'icons', 'utils'];
+// Component group -> physical layer folder under the lib's `src/`. Barrels now
+// live at `src/<layer>/<group>/index.ts` (mirrors the layer reorg + the layered
+// public subpaths). Keys stay flat group names so the manifest shape is stable.
+const GROUP_LAYER = {
+  actions: 'presentation', display: 'presentation', feedback: 'presentation',
+  forms: 'presentation', layout: 'presentation', nav: 'presentation',
+  overlays: 'presentation',
+  primitives: 'foundation', hooks: 'foundation', icons: 'foundation', utils: 'foundation',
+};
+const DOMAINS = Object.keys(GROUP_LAYER);
 
 /** Named value exports of a barrel, following `export * from './x'` one hop
     into component-folder barrels (aliased name wins; `export type` and
@@ -57,7 +66,7 @@ function collectExports(file, names, seen) {
 
 function barrelExports(domain) {
   const names = new Set();
-  collectExports(path.join(libSrc, domain, 'index.ts'), names, new Set());
+  collectExports(path.join(libSrc, GROUP_LAYER[domain], domain, 'index.ts'), names, new Set());
   return [...names].sort();
 }
 
@@ -80,7 +89,9 @@ function moduleKey(file) {
 
 function usedImports(text) {
   const used = [];
-  for (const match of text.matchAll(/import\s+(?:type\s+)?{([^}]*)}\s+from\s+['"]@wow-two-beta\/ui\/([a-z]+)['"]/g)) {
+  // Match layered subpaths `@wow-two-beta/ui/<layer>/<group>`; key by the trailing
+  // group so route entries stay `group/Component`.
+  for (const match of text.matchAll(/import\s+(?:type\s+)?{([^}]*)}\s+from\s+['"]@wow-two-beta\/ui\/(?:foundation|domain|presentation)\/([a-z]+)['"]/g)) {
     const domain = match[2];
     for (const raw of match[1].split(',')) {
       const entry = raw.trim();

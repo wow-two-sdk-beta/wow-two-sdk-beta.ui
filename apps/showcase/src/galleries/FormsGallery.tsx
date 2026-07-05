@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Temporal } from '@js-temporal/polyfill';
-import { SectionHeader } from '@wow-two-beta/ui/display';
+import { SectionHeader } from '@wow-two-beta/ui/presentation/display';
 import {
   AddressForm,
   Calendar,
@@ -101,7 +101,7 @@ import {
   type Gradient,
   type RecurrenceRule,
   type SelectOption,
-} from '@wow-two-beta/ui/forms';
+} from '@wow-two-beta/ui/presentation/forms';
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 

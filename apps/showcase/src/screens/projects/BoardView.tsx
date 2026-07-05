@@ -1,5 +1,5 @@
 /** Board view — card columns per status with CountBadge headers. */
-import { Badge, Card, CountBadge } from '@wow-two-beta/ui/display';
+import { Badge, Card, CountBadge } from '@wow-two-beta/ui/presentation/display';
 import { usersById, type ProjectTask } from '../../fixtures';
 import { formatDue, PRIORITY_META, STATUS_META, TASK_STATUSES } from './taskMeta';
 

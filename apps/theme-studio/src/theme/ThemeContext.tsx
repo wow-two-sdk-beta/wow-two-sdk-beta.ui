@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { THEMES, type Theme } from '@wow-two-beta/ui/themes';
+import { THEMES, type Theme } from '@wow-two-beta/ui/foundation/themes';
 
 interface ThemeStudioContextValue {
   /** Id of the active theme (drives the `theme-{id}` class). */

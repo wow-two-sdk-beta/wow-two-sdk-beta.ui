@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { NavItem } from '@wow-two-beta/ui/nav';
+import { NavItem } from '@wow-two-beta/ui/presentation/nav';
 import { ROUTES, type RouteGroup } from '../routes';
 
 const GROUP_ORDER: RouteGroup[] = ['Home', 'Screens', 'Galleries', 'Meta'];

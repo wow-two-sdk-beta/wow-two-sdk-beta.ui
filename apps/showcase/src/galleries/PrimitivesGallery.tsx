@@ -18,10 +18,10 @@ import {
   useFormControl,
   useRovingFocusItem,
   VisuallyHidden,
-} from '@wow-two-beta/ui/primitives';
-import { Button } from '@wow-two-beta/ui/actions';
-import { SectionHeader } from '@wow-two-beta/ui/display';
-import { Label } from '@wow-two-beta/ui/forms';
+} from '@wow-two-beta/ui/foundation/primitives';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
+import { SectionHeader } from '@wow-two-beta/ui/presentation/display';
+import { Label } from '@wow-two-beta/ui/presentation/forms';
 
 /* ------------------------------------------------------------------ */
 /* Page scaffolding                                                    */

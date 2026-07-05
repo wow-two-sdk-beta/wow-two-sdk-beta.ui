@@ -1,4 +1,4 @@
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@wow-two-beta/ui/display';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@wow-two-beta/ui/presentation/display';
 import type { RouteEntry } from '../routes';
 import manifest from '../manifest.gen.json';
 

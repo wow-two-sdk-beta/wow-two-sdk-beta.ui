@@ -36,8 +36,8 @@ import {
   TableOfContents,
   type BreadcrumbItem,
   type TableOfContentsItem,
-} from '@wow-two-beta/ui/nav';
-import { Badge, SectionHeader } from '@wow-two-beta/ui/display';
+} from '@wow-two-beta/ui/presentation/nav';
+import { Badge, SectionHeader } from '@wow-two-beta/ui/presentation/display';
 
 /* ---------------------------------------------------------------- fixtures */
 

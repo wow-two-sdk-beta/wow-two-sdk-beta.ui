@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { Button, Link } from '@wow-two-beta/ui/actions';
-import { Card, Confetti, Separator } from '@wow-two-beta/ui/display';
-import { Alert, Callout, InlineSpinner, ProgressSteps } from '@wow-two-beta/ui/feedback';
+import { Button, Link } from '@wow-two-beta/ui/presentation/actions';
+import { Card, Confetti, Separator } from '@wow-two-beta/ui/presentation/display';
+import { Alert, Callout, InlineSpinner, ProgressSteps } from '@wow-two-beta/ui/presentation/feedback';
 import {
   Checkbox,
   EmailInput,
@@ -9,7 +9,7 @@ import {
   PasswordInput,
   PasswordStrength,
   PinInput,
-} from '@wow-two-beta/ui/forms';
+} from '@wow-two-beta/ui/presentation/forms';
 import { users } from '../../fixtures';
 
 type Stage = 'signin' | 'signup' | 'twofa' | 'success';

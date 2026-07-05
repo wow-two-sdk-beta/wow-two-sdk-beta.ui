@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { THEMES, ThemeStatus, type Theme } from '@wow-two-beta/ui/themes';
-import { SegmentedControl, ToggleButton } from '@wow-two-beta/ui/actions';
-import { Badge, Heading, Tag, Text } from '@wow-two-beta/ui/display';
-import { cn } from '@wow-two-beta/ui/utils';
+import { THEMES, ThemeStatus, type Theme } from '@wow-two-beta/ui/foundation/themes';
+import { SegmentedControl, ToggleButton } from '@wow-two-beta/ui/presentation/actions';
+import { Badge, Heading, Tag, Text } from '@wow-two-beta/ui/presentation/display';
+import { cn } from '@wow-two-beta/ui/foundation/utils';
 import { useThemeStudio } from '../theme/ThemeContext';
 import { ThemePreviewScope } from '../theme/ThemePreviewScope';
 import { MiniBoard } from '../components/MiniBoard';

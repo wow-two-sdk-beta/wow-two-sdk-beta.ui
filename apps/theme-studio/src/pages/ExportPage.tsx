@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { themeToCss, ThemeStatus } from '@wow-two-beta/ui/themes';
-import { CopyButton } from '@wow-two-beta/ui/actions';
-import { Badge, Heading, Tabs, TabsList, TabsPanel, TabsTab, Text } from '@wow-two-beta/ui/display';
+import { themeToCss, ThemeStatus } from '@wow-two-beta/ui/foundation/themes';
+import { CopyButton } from '@wow-two-beta/ui/presentation/actions';
+import { Badge, Heading, Tabs, TabsList, TabsPanel, TabsTab, Text } from '@wow-two-beta/ui/presentation/display';
 import { useThemeStudio } from '../theme/ThemeContext';
 
 /* Export — everything needed to ship the active theme: the scoped `.theme-{id}`
@@ -32,7 +32,7 @@ export default function ExportPage() {
         `<html class="dark theme-${theme.id}"> {/* dark  */}`,
         ``,
         `// Programmatic lookup:`,
-        `import { getTheme } from '@wow-two-beta/ui/themes';`,
+        `import { getTheme } from '@wow-two-beta/ui/foundation/themes';`,
         `const theme = getTheme('${theme.id}');`,
       ].join('\n'),
     [theme],

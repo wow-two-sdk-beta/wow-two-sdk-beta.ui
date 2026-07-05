@@ -1,5 +1,5 @@
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Button, Link } from '@wow-two-beta/ui/actions';
+import { Button, Link } from '@wow-two-beta/ui/presentation/actions';
 import {
   Badge,
   Card,
@@ -11,8 +11,8 @@ import {
   Stat,
   Text,
   Typewriter,
-} from '@wow-two-beta/ui/display';
-import { Container, Surface } from '@wow-two-beta/ui/layout';
+} from '@wow-two-beta/ui/presentation/display';
+import { Container, Surface } from '@wow-two-beta/ui/presentation/layout';
 import manifestJson from '../../manifest.gen.json';
 
 /* ------------------------------------------------------------------ */

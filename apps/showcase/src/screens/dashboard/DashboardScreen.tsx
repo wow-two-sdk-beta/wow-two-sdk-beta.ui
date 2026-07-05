@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Temporal } from '@js-temporal/polyfill';
-import { Button, Toolbar, ToolbarButton, ToolbarSeparator } from '@wow-two-beta/ui/actions';
+import { Button, Toolbar, ToolbarButton, ToolbarSeparator } from '@wow-two-beta/ui/presentation/actions';
 import {
   ActivityFeed,
   ActivityItem,
@@ -22,15 +22,15 @@ import {
   type DataTableColumn,
   type DataTableSort,
   type TimelineStatus,
-} from '@wow-two-beta/ui/display';
+} from '@wow-two-beta/ui/presentation/display';
 import {
   Banner,
   LoadingState,
   Skeleton,
   TrendIndicator,
   useToaster,
-} from '@wow-two-beta/ui/feedback';
-import { Pagination } from '@wow-two-beta/ui/nav';
+} from '@wow-two-beta/ui/presentation/feedback';
+import { Pagination } from '@wow-two-beta/ui/presentation/nav';
 import {
   activityItems,
   deployFrequency,

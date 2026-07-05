@@ -1,0 +1,290 @@
+import {
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
+import { cn, composeRefs } from '../../../foundation/utils';
+import { useControlled } from '../../../foundation/hooks';
+import {
+  Menu,
+  MenuItem,
+  MenuGroup,
+  MenuLabel,
+  MenuSeparator,
+  type MenuProps,
+} from '../menu';
+import { menubarTriggerVariants, menubarVariants } from './Menubar.variants';
+
+interface MenubarContextValue {
+  activeId: string | null;
+  setActiveId: (id: string | null) => void;
+  registerTrigger: (id: string, ref: HTMLButtonElement | null) => void;
+  unregisterTrigger: (id: string) => void;
+  triggersRef: React.MutableRefObject<{ id: string; ref: HTMLButtonElement | null }[]>;
+  /** Focuses the trigger adjacent to `fromId`; switches the open menu when one is open. */
+  moveAcross: (fromId: string, direction: 1 | -1) => void;
+}
+
+const MenubarContext = createContext<MenubarContextValue | null>(null);
+
+function useMenubarContext() {
+  const ctx = useContext(MenubarContext);
+  if (!ctx) throw new Error('Menubar.* must be used inside <Menubar>');
+  return ctx;
+}
+
+interface MenubarMenuContextValue {
+  id: string;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  triggerRef: React.MutableRefObject<HTMLButtonElement | null>;
+  /** Trigger node kept in state so anchored content re-renders once the ref attaches. */
+  triggerNode: HTMLButtonElement | null;
+  setTriggerNode: (node: HTMLButtonElement | null) => void;
+}
+
+const MenubarMenuContext = createContext<MenubarMenuContextValue | null>(null);
+
+function useMenubarMenuContext() {
+  const ctx = useContext(MenubarMenuContext);
+  if (!ctx) throw new Error('Menubar.Trigger / Content must be used inside <Menubar.Menu>');
+  return ctx;
+}
+
+export interface MenubarProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange'> {
+  /** Id of the currently-open menu, or `null` if none. */
+  value?: string | null;
+  defaultValue?: string | null;
+  onValueChange?: (value: string | null) => void;
+  children: ReactNode;
+}
+
+const MenubarRoot = forwardRef<HTMLDivElement, MenubarProps>(function Menubar(
+  { value, defaultValue = null, onValueChange, className, children, ...rest },
+  ref,
+) {
+  const [activeId, setActiveId] = useControlled<string | null>({
+    controlled: value,
+    default: defaultValue,
+    onChange: onValueChange,
+  });
+
+  const triggersRef = useRef<{ id: string; ref: HTMLButtonElement | null }[]>([]);
+
+  const registerTrigger = useCallback((id: string, triggerRef: HTMLButtonElement | null) => {
+    const idx = triggersRef.current.findIndex((t) => t.id === id);
+    if (idx >= 0) triggersRef.current[idx] = { id, ref: triggerRef };
+    else triggersRef.current.push({ id, ref: triggerRef });
+  }, []);
+  const unregisterTrigger = useCallback((id: string) => {
+    triggersRef.current = triggersRef.current.filter((t) => t.id !== id);
+  }, []);
+
+  const moveAcross = useCallback(
+    (fromId: string, direction: 1 | -1) => {
+      const list = triggersRef.current;
+      const idx = list.findIndex((t) => t.id === fromId);
+      if (idx === -1) return;
+      let nextIdx = idx + direction;
+      if (nextIdx < 0) nextIdx = list.length - 1;
+      if (nextIdx >= list.length) nextIdx = 0;
+      const next = list[nextIdx];
+      if (!next) return;
+      next.ref?.focus();
+      // If a menu is already open, switch the open menu to follow focus.
+      if (activeId !== null) setActiveId(next.id);
+    },
+    [activeId, setActiveId],
+  );
+
+  const ctx = useMemo<MenubarContextValue>(
+    () => ({ activeId, setActiveId, registerTrigger, unregisterTrigger, triggersRef, moveAcross }),
+    [activeId, setActiveId, registerTrigger, unregisterTrigger, moveAcross],
+  );
+
+  return (
+    <MenubarContext.Provider value={ctx}>
+      <div
+        ref={ref}
+        role="menubar"
+        className={cn(menubarVariants(), className)}
+        {...rest}
+      >
+        {children}
+      </div>
+    </MenubarContext.Provider>
+  );
+});
+
+export interface MenubarMenuProps {
+  /** Stable id for this menu — used for active-menu tracking. */
+  value: string;
+  children: ReactNode;
+}
+
+export function MenubarMenu({ value, children }: MenubarMenuProps) {
+  const ctx = useMenubarContext();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [triggerNode, setTriggerNode] = useState<HTMLButtonElement | null>(null);
+
+  const open = ctx.activeId === value;
+  const setOpen = useCallback(
+    (next: boolean) => {
+      ctx.setActiveId(next ? value : null);
+    },
+    [ctx, value],
+  );
+
+  const menuCtx = useMemo<MenubarMenuContextValue>(
+    () => ({ id: value, open, setOpen, triggerRef, triggerNode, setTriggerNode }),
+    [value, open, setOpen, triggerNode],
+  );
+
+  return <MenubarMenuContext.Provider value={menuCtx}>{children}</MenubarMenuContext.Provider>;
+}
+
+export interface MenubarTriggerProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+  children: ReactNode;
+}
+
+export const MenubarTrigger = forwardRef<HTMLButtonElement, MenubarTriggerProps>(
+  function MenubarTrigger(
+    { className, onClick, onKeyDown, onPointerEnter, children, ...rest },
+    forwardedRef,
+  ) {
+    const bar = useMenubarContext();
+    const menu = useMenubarMenuContext();
+
+    useEffect(() => {
+      bar.registerTrigger(menu.id, menu.triggerRef.current);
+      return () => bar.unregisterTrigger(menu.id);
+    }, [bar, menu.id, menu.triggerRef]);
+
+    return (
+      <button
+        ref={composeRefs(forwardedRef, menu.triggerRef, menu.setTriggerNode)}
+        type="button"
+        role="menuitem"
+        aria-haspopup="menu"
+        aria-expanded={menu.open}
+        data-state={menu.open ? 'open' : 'closed'}
+        onClick={(e) => {
+          onClick?.(e);
+          if (e.defaultPrevented) return;
+          menu.setOpen(!menu.open);
+        }}
+        onPointerEnter={(e) => {
+          onPointerEnter?.(e);
+          // If any menu is open, switching the trigger pointer-over switches the active menu.
+          if (bar.activeId !== null && bar.activeId !== menu.id) {
+            bar.setActiveId(menu.id);
+          }
+        }}
+        onKeyDown={(e) => {
+          onKeyDown?.(e);
+          if (e.defaultPrevented) return;
+          switch (e.key) {
+            case 'ArrowRight':
+              e.preventDefault();
+              bar.moveAcross(menu.id, 1);
+              break;
+            case 'ArrowLeft':
+              e.preventDefault();
+              bar.moveAcross(menu.id, -1);
+              break;
+            case 'ArrowDown':
+            case 'Enter':
+            case ' ':
+              e.preventDefault();
+              menu.setOpen(true);
+              break;
+            case 'Home':
+              e.preventDefault();
+              bar.triggersRef.current[0]?.ref?.focus();
+              break;
+            case 'End': {
+              e.preventDefault();
+              const list = bar.triggersRef.current;
+              list[list.length - 1]?.ref?.focus();
+              break;
+            }
+          }
+        }}
+        className={cn(menubarTriggerVariants(), className)}
+        {...rest}
+      >
+        {children}
+      </button>
+    );
+  },
+);
+
+export interface MenubarContentProps {
+  className?: string;
+  placement?: MenuProps['placement'];
+  offset?: number;
+  'aria-label'?: string;
+  children: ReactNode;
+}
+
+export function MenubarContent({
+  className,
+  placement = 'bottom-start',
+  offset = 4,
+  'aria-label': ariaLabel,
+  children,
+}: MenubarContentProps) {
+  const bar = useMenubarContext();
+  const menu = useMenubarMenuContext();
+  return (
+    <Menu
+      open={menu.open}
+      anchor={menu.triggerNode}
+      onClose={() => {
+        menu.setOpen(false);
+        requestAnimationFrame(() => menu.triggerRef.current?.focus());
+      }}
+      onKeyDown={(e) => {
+        // Arrow across menus while a popup is open — close current, open adjacent.
+        switch (e.key) {
+          case 'ArrowRight':
+            e.preventDefault();
+            bar.moveAcross(menu.id, 1);
+            break;
+          case 'ArrowLeft':
+            e.preventDefault();
+            bar.moveAcross(menu.id, -1);
+            break;
+        }
+      }}
+      placement={placement}
+      offset={offset}
+      aria-label={ariaLabel}
+      className={className}
+    >
+      {children}
+    </Menu>
+  );
+}
+
+export const Menubar = Object.assign(MenubarRoot, {
+  Menu: MenubarMenu,
+  Trigger: MenubarTrigger,
+  Content: MenubarContent,
+  Item: MenuItem,
+  Group: MenuGroup,
+  Label: MenuLabel,
+  Separator: MenuSeparator,
+});
+
+export default Menubar;

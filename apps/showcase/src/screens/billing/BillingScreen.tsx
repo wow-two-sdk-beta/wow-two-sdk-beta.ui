@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Temporal } from '@js-temporal/polyfill';
-import { Button } from '@wow-two-beta/ui/actions';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
 import {
   Badge,
   Card,
@@ -15,8 +15,8 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
-} from '@wow-two-beta/ui/display';
-import { toaster } from '@wow-two-beta/ui/feedback';
+} from '@wow-two-beta/ui/presentation/display';
+import { toaster } from '@wow-two-beta/ui/presentation/feedback';
 import {
   AddressForm,
   ChoiceCard,
@@ -32,7 +32,7 @@ import {
   RadioGroup,
   TelInput,
   type Address,
-} from '@wow-two-beta/ui/forms';
+} from '@wow-two-beta/ui/presentation/forms';
 import {
   Dialog,
   DialogBody,
@@ -42,7 +42,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@wow-two-beta/ui/overlays';
+} from '@wow-two-beta/ui/presentation/overlays';
 import { orders } from '../../fixtures';
 
 /* ------------------------------------------------------------------ */

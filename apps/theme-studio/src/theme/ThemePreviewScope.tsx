@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { cn } from '@wow-two-beta/ui/utils';
+import { cn } from '@wow-two-beta/ui/foundation/utils';
 
 interface ThemePreviewScopeProps {
   /** Theme id to scope this subtree to (applies `theme-{id}`). */

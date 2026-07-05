@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button } from '@wow-two-beta/ui/actions';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
 import {
   ActivityFeed,
   ActivityItem as ActivityFeedItem,
@@ -13,7 +13,7 @@ import {
   TabsList,
   TabsPanel,
   TabsTab,
-} from '@wow-two-beta/ui/display';
+} from '@wow-two-beta/ui/presentation/display';
 import {
   LiveCursor,
   NotificationCenter,
@@ -21,10 +21,10 @@ import {
   Skeleton,
   UndoBar,
   useToaster,
-} from '@wow-two-beta/ui/feedback';
-import { SearchInput } from '@wow-two-beta/ui/forms';
-import { PullToRefresh } from '@wow-two-beta/ui/layout';
-import { Icon, type IconAdapter } from '@wow-two-beta/ui/icons';
+} from '@wow-two-beta/ui/presentation/feedback';
+import { SearchInput } from '@wow-two-beta/ui/presentation/forms';
+import { PullToRefresh } from '@wow-two-beta/ui/presentation/layout';
+import { Icon, type IconAdapter } from '@wow-two-beta/ui/foundation/icons';
 import {
   activityItems,
   usersById,

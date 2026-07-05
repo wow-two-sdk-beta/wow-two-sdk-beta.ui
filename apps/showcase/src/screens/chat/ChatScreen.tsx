@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Button } from '@wow-two-beta/ui/actions';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
 import {
   Avatar,
   AvatarGroup,
@@ -12,21 +12,21 @@ import {
   ReactionBar,
   ThreadView,
   type Reaction as UiReaction,
-} from '@wow-two-beta/ui/display';
+} from '@wow-two-beta/ui/presentation/display';
 import {
   PresenceIndicator,
   TypingIndicator,
   useToaster,
   type PresenceStatus,
-} from '@wow-two-beta/ui/feedback';
+} from '@wow-two-beta/ui/presentation/feedback';
 import {
   ChatComposer,
   EmojiPicker,
   ReactionPicker,
   SearchInput,
-} from '@wow-two-beta/ui/forms';
-import { ScrollArea } from '@wow-two-beta/ui/layout';
-import { Popover, PopoverContent, PopoverTrigger } from '@wow-two-beta/ui/overlays';
+} from '@wow-two-beta/ui/presentation/forms';
+import { ScrollArea } from '@wow-two-beta/ui/presentation/layout';
+import { Popover, PopoverContent, PopoverTrigger } from '@wow-two-beta/ui/presentation/overlays';
 import {
   channels,
   messages as messageFixtures,

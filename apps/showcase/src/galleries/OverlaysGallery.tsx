@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
-import { Button } from '@wow-two-beta/ui/actions';
-import { SectionHeader } from '@wow-two-beta/ui/display';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
+import { SectionHeader } from '@wow-two-beta/ui/presentation/display';
 import {
   ActionSheet,
   ActionSheetAction,
@@ -40,7 +40,7 @@ import {
   PopoverTrigger,
   PopoverContent,
   PopoverArrow,
-} from '@wow-two-beta/ui/overlays';
+} from '@wow-two-beta/ui/presentation/overlays';
 
 /* ---------------------------------- chrome --------------------------------- */
 

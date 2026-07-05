@@ -17,8 +17,8 @@ import {
   ToolbarButton,
   ToolbarLink,
   ToolbarSeparator,
-} from '@wow-two-beta/ui/actions';
-import { SectionHeader } from '@wow-two-beta/ui/display';
+} from '@wow-two-beta/ui/presentation/actions';
+import { SectionHeader } from '@wow-two-beta/ui/presentation/display';
 
 /* Tiny inline glyphs — keeps the gallery dependency-free. */
 function PlusGlyph() {
@@ -472,7 +472,7 @@ function FloatingSection() {
   );
 }
 
-/* Gallery for the actions domain — every '@wow-two-beta/ui/actions' component rendered live. */
+/* Gallery for the actions domain — every '@wow-two-beta/ui/presentation/actions' component rendered live. */
 export default function ActionsGallery() {
   return (
     <div className="flex flex-col gap-10">

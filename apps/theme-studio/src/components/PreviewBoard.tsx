@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '@wow-two-beta/ui/actions';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
 import {
   Badge,
   Card,
@@ -15,9 +15,9 @@ import {
   TabsPanel,
   TabsTab,
   Tag,
-} from '@wow-two-beta/ui/display';
-import { Select, TextInput } from '@wow-two-beta/ui/forms';
-import { Alert, Banner } from '@wow-two-beta/ui/feedback';
+} from '@wow-two-beta/ui/presentation/display';
+import { Select, TextInput } from '@wow-two-beta/ui/presentation/forms';
+import { Alert, Banner } from '@wow-two-beta/ui/presentation/feedback';
 
 const ROWS = [
   { id: 'INV-1024', plan: 'Pro', status: 'Paid', amount: '$120.00' },

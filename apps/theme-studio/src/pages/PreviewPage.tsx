@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Heading, Text } from '@wow-two-beta/ui/display';
-import { SegmentedControl, ToggleButton } from '@wow-two-beta/ui/actions';
+import { Heading, Text } from '@wow-two-beta/ui/presentation/display';
+import { SegmentedControl, ToggleButton } from '@wow-two-beta/ui/presentation/actions';
 import { useThemeStudio } from '../theme/ThemeContext';
 import { ThemePreviewScope } from '../theme/ThemePreviewScope';
 import { PreviewBoard } from '../components/PreviewBoard';

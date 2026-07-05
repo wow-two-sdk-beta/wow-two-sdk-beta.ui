@@ -8,10 +8,10 @@ import {
   type AccentMode,
   type NeutralTemp,
   type SurfaceStyle,
-} from '@wow-two-beta/ui/themes';
-import { SegmentedControl, ToggleButton } from '@wow-two-beta/ui/actions';
-import { Badge, Card, Heading, Text } from '@wow-two-beta/ui/display';
-import { Slider } from '@wow-two-beta/ui/forms';
+} from '@wow-two-beta/ui/foundation/themes';
+import { SegmentedControl, ToggleButton } from '@wow-two-beta/ui/presentation/actions';
+import { Badge, Card, Heading, Text } from '@wow-two-beta/ui/presentation/display';
+import { Slider } from '@wow-two-beta/ui/presentation/forms';
 import { ThemePreviewScope } from '../theme/ThemePreviewScope';
 import { PreviewBoard } from '../components/PreviewBoard';
 

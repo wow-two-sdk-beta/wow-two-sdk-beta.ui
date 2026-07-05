@@ -29,9 +29,9 @@ import {
   UndoBar,
   useToaster,
   type TourStep,
-} from '@wow-two-beta/ui/feedback';
-import { SectionHeader } from '@wow-two-beta/ui/display';
-import { Button } from '@wow-two-beta/ui/actions';
+} from '@wow-two-beta/ui/presentation/feedback';
+import { SectionHeader } from '@wow-two-beta/ui/presentation/display';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
 
 /* ---------------------------------- helpers --------------------------------- */
 

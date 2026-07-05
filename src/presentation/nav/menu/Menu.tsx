@@ -1,0 +1,293 @@
+import {
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
+import { FocusScope } from '@radix-ui/react-focus-scope';
+import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../../foundation/utils';
+import { AnchoredPositioner, DismissableLayer, Portal, Presence } from '../../../foundation/primitives';
+import {
+  menuItemVariants,
+  menuLabelVariants,
+  menuSeparatorVariants,
+  menuVariants,
+  type MenuItemVariants,
+} from './Menu.variants';
+
+interface MenuItemEntry {
+  id: string;
+  ref: HTMLButtonElement | null;
+  disabled: boolean;
+}
+
+interface MenuContextValue {
+  registerItem: (entry: MenuItemEntry) => void;
+  unregisterItem: (id: string) => void;
+  itemsRef: React.MutableRefObject<MenuItemEntry[]>;
+  onClose: () => void;
+}
+
+const MenuContext = createContext<MenuContextValue | null>(null);
+
+function useMenuContext() {
+  const ctx = useContext(MenuContext);
+  if (!ctx) throw new Error('Menu.Item / Group / Label / Separator must be used inside <Menu>');
+  return ctx;
+}
+
+/** Represents the prop surface of `Menu`. */
+export interface MenuProps extends SurfaceVariants {
+  open: boolean;
+  anchor: HTMLElement | null;
+  onClose: () => void;
+  placement?: React.ComponentProps<typeof AnchoredPositioner>['placement'];
+  offset?: number;
+  /** Keydown observed on the menu container — lets wrappers (e.g. Menubar) add navigation. */
+  onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
+  /** Labels the menu for screen readers. */
+  'aria-label'?: string;
+  className?: string;
+  children: ReactNode;
+}
+
+function MenuRoot({
+  open,
+  anchor,
+  onClose,
+  placement = 'bottom-start',
+  offset = 6,
+  onKeyDown,
+  'aria-label': ariaLabel,
+  variant,
+  tone,
+  radius,
+  padding,
+  elevation,
+  className,
+  children,
+}: MenuProps) {
+  const itemsRef = useRef<MenuItemEntry[]>([]);
+
+  const registerItem = useCallback((entry: MenuItemEntry) => {
+    const idx = itemsRef.current.findIndex((i) => i.id === entry.id);
+    if (idx >= 0) itemsRef.current[idx] = entry;
+    else itemsRef.current.push(entry);
+  }, []);
+  const unregisterItem = useCallback((id: string) => {
+    itemsRef.current = itemsRef.current.filter((i) => i.id !== id);
+  }, []);
+
+  const ctx = useMemo<MenuContextValue>(
+    () => ({ registerItem, unregisterItem, itemsRef, onClose }),
+    [registerItem, unregisterItem, onClose],
+  );
+
+  // No hard `if (!open) return null` — Presence (below) keeps the surface
+  // mounted through its pop-out exit, flipping data-state to "closed" and
+  // deferring unmount until the animation ends.
+  return (
+    <MenuContext.Provider value={ctx}>
+      <Portal>
+        <AnchoredPositioner
+          anchor={anchor}
+          placement={placement}
+          offset={offset}
+          className="z-dropdown"
+        >
+          {/* Presence drives data-state on the menu surface and defers unmount until the
+              pop-out finishes. FocusScope `asChild` + DismissableLayer (forwardRef, spreads
+              props) relay Presence's ref + data-state down onto the surface div. */}
+          <Presence isPresent={open}>
+            <FocusScope asChild trapped loop>
+              <DismissableLayer
+                role="menu"
+                aria-label={ariaLabel}
+                onEscape={onClose}
+                onOutsidePointerDown={(e) => {
+                  if (anchor?.contains(e.target as Node)) return;
+                  onClose();
+                }}
+                className={cn(
+                  surfaceVariants({
+                    variant: variant ?? 'surface',
+                    tone,
+                    radius: radius ?? 'md',
+                    padding: padding ?? 'xs',
+                    elevation,
+                  }),
+                  menuVariants(),
+                  'motion-safe:data-[state=open]:animate-(--animate-pop-in)',
+                  'motion-safe:data-[state=closed]:animate-(--animate-pop-out)',
+                  'motion-reduce:animate-none',
+                  className,
+                )}
+                onKeyDown={(e) => {
+                  onKeyDown?.(e);
+                  if (e.defaultPrevented) return;
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    onClose();
+                  }
+                }}
+              >
+                {children}
+              </DismissableLayer>
+            </FocusScope>
+          </Presence>
+        </AnchoredPositioner>
+      </Portal>
+    </MenuContext.Provider>
+  );
+}
+MenuRoot.displayName = 'Menu';
+
+export interface MenuItemProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onSelect'>,
+    MenuItemVariants {
+  /** Fired when the item is activated (Enter / Space / click). Menu closes after. */
+  onSelect?: () => void;
+  /** Disable activation. */
+  isDisabled?: boolean;
+}
+
+export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function MenuItem(
+  { onSelect, isDisabled = false, state, className, onClick, onKeyDown, children, ...rest },
+  forwardedRef,
+) {
+  const ctx = useMenuContext();
+  const id = useId();
+  const ref = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    ctx.registerItem({ id, ref: ref.current, disabled: isDisabled });
+    return () => ctx.unregisterItem(id);
+  }, [ctx, id, isDisabled]);
+
+  const moveFocus = useCallback(
+    (target: 1 | -1 | 'first' | 'last') => {
+      const list = ctx.itemsRef.current.filter((i) => !i.disabled);
+      if (list.length === 0) return;
+      if (target === 'first' || target === 'last') {
+        list[target === 'first' ? 0 : list.length - 1]?.ref?.focus();
+        return;
+      }
+      const idx = list.findIndex((i) => i.id === id);
+      let nextIdx = idx + target;
+      if (idx === -1) nextIdx = target === 1 ? 0 : list.length - 1;
+      if (nextIdx < 0) nextIdx = list.length - 1;
+      if (nextIdx >= list.length) nextIdx = 0;
+      list[nextIdx]?.ref?.focus();
+    },
+    [ctx, id],
+  );
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    onKeyDown?.(e);
+    if (e.defaultPrevented || isDisabled) return;
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        moveFocus(1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        moveFocus(-1);
+        break;
+      case 'Home':
+        e.preventDefault();
+        moveFocus('first');
+        break;
+      case 'End':
+        e.preventDefault();
+        moveFocus('last');
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        onSelect?.();
+        ctx.onClose();
+        break;
+    }
+  };
+
+  const itemState = state ?? (isDisabled ? 'disabled' : 'default');
+  return (
+    <button
+      ref={composeRefs(forwardedRef, ref)}
+      type="button"
+      role="menuitem"
+      disabled={isDisabled}
+      aria-disabled={isDisabled || undefined}
+      data-disabled={isDisabled ? '' : undefined}
+      onClick={(e) => {
+        onClick?.(e);
+        if (e.defaultPrevented || isDisabled) return;
+        onSelect?.();
+        ctx.onClose();
+      }}
+      onKeyDown={handleKeyDown}
+      className={cn(menuItemVariants({ state: itemState }), className)}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+});
+
+export interface MenuGroupProps extends HTMLAttributes<HTMLDivElement> {
+  label?: ReactNode;
+  children: ReactNode;
+}
+
+export function MenuGroup({ label, children, className, ...rest }: MenuGroupProps) {
+  const labelId = useId();
+  return (
+    <div
+      role="group"
+      aria-labelledby={label ? labelId : undefined}
+      className={className}
+      {...rest}
+    >
+      {label && (
+        <div id={labelId} className={menuLabelVariants()}>
+          {label}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+export function MenuLabel({
+  children,
+  className,
+  ...rest
+}: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn(menuLabelVariants(), className)} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+export function MenuSeparator(props: HTMLAttributes<HTMLDivElement>) {
+  return <div role="separator" className={menuSeparatorVariants()} {...props} />;
+}
+
+export const Menu = Object.assign(MenuRoot, {
+  Item: MenuItem,
+  Group: MenuGroup,
+  Label: MenuLabel,
+  Separator: MenuSeparator,
+});
+
+export default Menu;

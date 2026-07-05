@@ -6,7 +6,7 @@ import {
   SpeedDial,
   SpeedDialAction,
   SpeedDialTrigger,
-} from '@wow-two-beta/ui/actions';
+} from '@wow-two-beta/ui/presentation/actions';
 import {
   AudioPlayer,
   AudioWaveform,
@@ -28,9 +28,9 @@ import {
   Tilt,
   Tooltip,
   VideoPlayer,
-} from '@wow-two-beta/ui/display';
-import { useToaster } from '@wow-two-beta/ui/feedback';
-import { AspectRatio, Frame } from '@wow-two-beta/ui/layout';
+} from '@wow-two-beta/ui/presentation/display';
+import { useToaster } from '@wow-two-beta/ui/presentation/feedback';
+import { AspectRatio, Frame } from '@wow-two-beta/ui/presentation/layout';
 import {
   Dialog,
   DialogBody,
@@ -40,7 +40,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@wow-two-beta/ui/overlays';
+} from '@wow-two-beta/ui/presentation/overlays';
 import { files, usersById } from '../../fixtures';
 
 /* ------------------------------------------------------------------ data */

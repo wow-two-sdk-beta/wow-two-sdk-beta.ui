@@ -1,7 +1,7 @@
 /** Task detail Drawer + ActionSheet for status mutations. Fully controlled. */
 import { useState } from 'react';
-import { Button } from '@wow-two-beta/ui/actions';
-import { Badge, DescriptionList, Status, Tag } from '@wow-two-beta/ui/display';
+import { Button } from '@wow-two-beta/ui/presentation/actions';
+import { Badge, DescriptionList, Status, Tag } from '@wow-two-beta/ui/presentation/display';
 import {
   ActionSheet,
   ActionSheetAction,
@@ -14,7 +14,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from '@wow-two-beta/ui/overlays';
+} from '@wow-two-beta/ui/presentation/overlays';
 import { usersById, type ProjectTask, type TaskStatus } from '../../fixtures';
 import { formatDue, PRIORITY_META, STATUS_META, USER_STATUS_TONE } from './taskMeta';
 

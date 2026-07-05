@@ -1,0 +1,68 @@
+import { forwardRef, type InputHTMLAttributes } from 'react';
+import { cn } from '../../../foundation/utils';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
+
+export interface SwitchProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const TRACK_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
+  sm: 'h-4 w-7',
+  md: 'h-5 w-9',
+  lg: 'h-6 w-11',
+};
+const THUMB_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
+  sm: 'h-3 w-3',
+  md: 'h-4 w-4',
+  lg: 'h-5 w-5',
+};
+/* Thumb slide lives on the track (a peer sibling of the input) — child-selector targets the thumb. peer-checked: cannot reach descendants directly. */
+const TRACK_CHECKED_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
+  sm: 'peer-checked:[&>span]:translate-x-3',
+  md: 'peer-checked:[&>span]:translate-x-4',
+  lg: 'peer-checked:[&>span]:translate-x-5',
+};
+
+/**
+ * Toggle switch — native checkbox styled as an iOS-style track + thumb.
+ * Strict atom: no built-in label; pair via `FormControl` or wrap manually.
+ */
+export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
+  ({ className, size = 'md', id, disabled, required, ...props }, ref) => {
+    const ctx = useFormControl();
+    return (
+      <span className={cn('relative inline-flex shrink-0', TRACK_CLASS[size], className)}>
+        <input
+          ref={ref}
+          type="checkbox"
+          role="switch"
+          id={id ?? ctx?.id}
+          disabled={disabled ?? ctx?.isDisabled}
+          required={required ?? ctx?.isRequired}
+          aria-invalid={ctx?.isInvalid || undefined}
+          className="peer absolute inset-0 m-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+          {...props}
+        />
+        <span
+          aria-hidden="true"
+          className={cn(
+            'pointer-events-none flex h-full w-full items-center rounded-full bg-input px-0.5 transition-colors',
+            'peer-checked:bg-primary',
+            TRACK_CHECKED_CLASS[size],
+            'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1',
+            'peer-disabled:opacity-50',
+          )}
+        >
+          <span
+            className={cn(
+              'rounded-full bg-background shadow-sm transition-transform duration-150',
+              THUMB_CLASS[size],
+            )}
+          />
+        </span>
+      </span>
+    );
+  },
+);
+Switch.displayName = 'Switch';

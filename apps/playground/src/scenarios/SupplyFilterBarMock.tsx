@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Select } from '@wow-two-beta/ui/forms';
+import { Select } from '@wow-two-beta/ui/presentation/forms';
 
 /* Mimics haven's filter-bar shape so we can iterate on Select/MultiSelect/etc.
    against the same layout + tone palette without the push/pull cycle. */
