@@ -4,7 +4,7 @@
 
 The `@wow-two-beta/ui` package — beta-forever React UI library for the wow-two ecosystem. Intentionally pre-1.0. Ship as much as possible to feed real consumers (haven first); distill into a clean `@wow-two/ui` only after the platform layer below stabilizes.
 
-> **Beta-forever rules**: no CHANGELOG, no PR gates, no required tests, push directly to main, fix-forward when broken. CI builds + auto-bumps `0.0.y` on each main push.
+> **Beta-forever rules**: no CHANGELOG, no PR gates, push directly to main, fix-forward when broken. CI builds + auto-bumps `0.0.y` on each main push. Tests exist (`pnpm test`) but are not a CI gate yet — see `docs/testing.md`.
 
 ## Tech catalog & roadmap
 
@@ -58,13 +58,15 @@ Templates exist at [`docs/templates/component-standard.md`](./docs/templates/com
 
 ## Layout
 
-- `src/tokens` `src/tailwind` `src/utils` `src/hooks` `src/icons` `src/primitives` — **foundation** (no upward deps; ESLint enforces). `src/primitives` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.).
-- `src/actions` `src/display` `src/feedback` `src/forms` `src/layout` `src/nav` `src/overlays` — **domains** (may import foundation **and any sibling domain**; ESLint enforces only that domains may not reach upward into root)
+- `src/foundation/{utils,hooks,http,icons,primitives,themes}` — **foundation** (no upward deps; ESLint enforces). `primitives/` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.). Hooks/utils are 1-per-folder (`useControlled/{useControlled.ts,index.ts}`).
+- `src/domain/*` — pure types/ops (may import foundation only).
+- `src/presentation/{actions,display,feedback,forms,layout,nav,overlays}` — **components** (may import foundation + domain **and any sibling presentation group**; ESLint enforces no upward reach into root)
 - `docs/templates/component-standard.md` — template every `*.standard.md` fills
 - `docs/templates/component-spec.md` — template every `*.spec.md` fills
 - `docs/architecture.md` — full layering rule + ESLint mechanics
+- `docs/testing.md` — test-layer plan, tiers, iteration tracker, findings
 - `docs/decisions/` — cross-component ADRs
-- `.storybook/` — catalog config
+- `.storybook/` — catalog config (+ `vitest.setup.ts` for story tests)
 - `apps/playground/` — Vite sandbox for ad-hoc prototyping
 
 ## Versioning
@@ -76,8 +78,16 @@ Templates exist at [`docs/templates/component-standard.md`](./docs/templates/com
 ## Stack
 
 - React 19 · TypeScript strict · **Tailwind v4** (CSS-first via `@theme`) · `@floating-ui/react` · `@radix-ui/react-focus-scope` · `lucide-react`
-- Build: `tsup` (ESM) + `tsc --emitDeclarationOnly` (DTS) · Dev: `vite` (in playground) · Catalog: Storybook 8 + `@tailwindcss/vite` plugin · Lint: ESLint 9 flat config + `eslint-plugin-boundaries`
-- Pkg manager: `pnpm` workspace (root pkg + `apps/playground`)
+- Build: `tsup` (ESM) + `tsc --emitDeclarationOnly` (DTS) · Dev: `vite` (in playground) · Catalog: Storybook 10 + `@tailwindcss/vite` plugin · Lint: ESLint 9 flat config + `eslint-plugin-boundaries`
+- Tests: Vitest 4 — `unit` (node) · `browser` (Playwright chromium) · `storybook` (`@storybook/addon-vitest`: every story = smoke test, `play()` = interaction test)
+- Pkg manager: `pnpm` workspace (root pkg + `apps/*`)
+
+## Testing
+
+- `pnpm test` (all) · `test:unit` · `test:browser` · `test:stories` · `test:watch` · `test:ui` · `coverage` (report-only, never a gate)
+- E2E-first: interaction `play()` stories in `*.stories.tsx` are the primary tier; bespoke unit tests only for pure logic (themes engine, hooks, utils). Plan, conventions, and known harness gotchas: **`docs/testing.md`**.
+- New component → ship interaction `play()` stories with it (import from `'storybook/test'`).
+- Path filters are substring matches: `pnpm vitest run --project storybook src/presentation/nav/menu` also runs `menubar`.
 
 ## Theming
 
@@ -96,7 +106,7 @@ Templates exist at [`docs/templates/component-standard.md`](./docs/templates/com
 
 ## Out of scope (deliberately deferred)
 
-- No tests. If broken, send fix commit to `main`.
+- No CI test gate yet (suite exists, runs locally; Actions wiring later). Broken on main → fix-forward.
 - No CHANGELOG. Git log is the changelog.
 - No PR review. Push to main.
 - No graduation/distill rule yet. Beta-forever until platform layer matures.

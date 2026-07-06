@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Modal } from './Modal';
 
 const meta: Meta<typeof Modal> = {
@@ -58,4 +59,117 @@ export const Blurred: Story = {
       </Modal.Content>
     </Modal>
   ),
+};
+
+/* ------------------------------------------------------------------------- *
+ * Interaction tests (play) — oracle: Modal.spec.md "Required behaviors".
+ * Content portals to document.body, so open-state queries go through
+ * `canvasElement.ownerDocument.body`, not the canvas. Close is animation-
+ * deferred (Presence waits for the exit animation) → poll with `waitFor`.
+ * ------------------------------------------------------------------------- */
+
+const interactionRender = () => (
+  <Modal>
+    <Modal.Trigger className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground">
+      Open dialog
+    </Modal.Trigger>
+    <Modal.Content>
+      <Modal.Close />
+      <Modal.Header>
+        <Modal.Title>Interaction test</Modal.Title>
+        <Modal.Description>Covers open, dismissal, and focus behavior.</Modal.Description>
+      </Modal.Header>
+      <Modal.Body>
+        <p>Body content.</p>
+      </Modal.Body>
+    </Modal.Content>
+  </Modal>
+);
+
+export const OpensOnTriggerClick: Story = {
+  render: interactionRender,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const doc = canvasElement.ownerDocument;
+    const body = within(doc.body);
+
+    const trigger = canvas.getByRole('button', { name: 'Open dialog' });
+    await expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(trigger);
+
+    const dialog = await body.findByRole('dialog');
+    // Pop-in keyframes start at opacity 0 — poll past the enter animation.
+    await waitFor(() => expect(dialog).toBeVisible());
+    await expect(dialog).toHaveAttribute('aria-modal', 'true');
+    await expect(dialog).toHaveAccessibleName('Interaction test');
+    await expect(dialog).toHaveAccessibleDescription('Covers open, dismissal, and focus behavior.');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    // Body scroll is locked while open (note: lock is mount-scoped, not
+    // open-scoped — see the spec-gap note in ClosesOnEscape).
+    await expect(doc.body).toHaveStyle({ overflow: 'hidden' });
+
+    // Focus moves into the dialog (FocusScope autofocuses the first tabbable).
+    await waitFor(() => expect(dialog.contains(doc.activeElement)).toBe(true));
+  },
+};
+
+export const ClosesOnEscape: Story = {
+  render: interactionRender,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const doc = canvasElement.ownerDocument;
+    const body = within(doc.body);
+
+    const trigger = canvas.getByRole('button', { name: 'Open dialog' });
+    await userEvent.click(trigger);
+    await body.findByRole('dialog');
+
+    await userEvent.keyboard('{Escape}');
+
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+    // Focus returns to the trigger (FocusScope restores on unmount).
+    await waitFor(() => expect(trigger).toHaveFocus());
+    // NOTE (spec gap): "scroll lock released after close" is NOT asserted —
+    // ScrollLockProvider mounts with Modal.Content (outside the Presence gate),
+    // so the body stays locked while the closed modal remains mounted.
+  },
+};
+
+export const ClosesOnOutsideClick: Story = {
+  render: interactionRender,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Open dialog' }));
+    const dialog = await body.findByRole('dialog');
+
+    // Outside-click dismissal lives on the centering wrapper (panel's
+    // grandparent): a click landing on it — not the panel — counts as outside.
+    const wrapper = dialog.parentElement?.parentElement;
+    if (!wrapper) throw new Error('Modal centering wrapper not found');
+    await userEvent.click(wrapper);
+
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+  },
+};
+
+export const CloseButtonRestoresFocus: Story = {
+  render: interactionRender,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    const trigger = canvas.getByRole('button', { name: 'Open dialog' });
+    await userEvent.click(trigger);
+    const dialog = await body.findByRole('dialog');
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
+  },
 };

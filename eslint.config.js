@@ -65,4 +65,11 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Test files cross layers freely — they exercise, not ship.
+    files: ['src/**/*.test.{ts,tsx}'],
+    rules: {
+      'boundaries/element-types': 'off',
+    },
+  },
 );

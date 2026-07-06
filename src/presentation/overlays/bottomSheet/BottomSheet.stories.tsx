@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { BottomSheet, BottomSheetDescription, BottomSheetTitle } from './BottomSheet';
 
 const meta: Meta<typeof BottomSheet> = {
@@ -41,5 +42,152 @@ export const Default: Story = {
       );
     }
     return <Demo />;
+  },
+};
+
+/* ------------------------------------------------------------------------- *
+ * Interaction tests (play) — oracle: BottomSheet.tsx source.
+ * No Trigger subcomponent — the sheet is controlled, so the demo wires a
+ * button + useState. Content portals to document.body → query via
+ * `canvasElement.ownerDocument.body`. Unmount is deferred (open || isExiting
+ * gate, 320ms) → poll with `waitFor`. Scroll lock is open-scoped here (the
+ * whole portal subtree returns null when closed), so release IS asserted.
+ * Snap heights use px points so the inline style is deterministic.
+ * ------------------------------------------------------------------------- */
+
+function InteractionDemo() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+      >
+        Open sheet
+      </button>
+      <BottomSheet open={open} onOpenChange={setOpen} snapPoints={['200px', '400px']}>
+        <BottomSheetTitle className="mb-2">Sheet title</BottomSheetTitle>
+        <BottomSheetDescription>Sheet description.</BottomSheetDescription>
+        <p className="mt-2 text-sm">Sheet body.</p>
+      </BottomSheet>
+    </div>
+  );
+}
+
+export const OpensViaControlledState: Story = {
+  render: () => <InteractionDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const doc = canvasElement.ownerDocument;
+    const body = within(doc.body);
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Open sheet' }));
+
+    const dialog = await body.findByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toHaveAttribute('aria-modal', 'true');
+    await expect(dialog).toHaveAccessibleName('Sheet title');
+    await expect(dialog).toHaveAccessibleDescription('Sheet description.');
+    // Opens at the initial snap (index 0 → 200px).
+    await expect(dialog.style.height).toBe('200px');
+
+    // Drag handle is a keyboard-reachable separator exposing the snap state.
+    const handle = within(dialog).getByRole('separator');
+    await expect(handle).toHaveAttribute('aria-valuenow', '0');
+    await expect(handle).toHaveAttribute('aria-valuemin', '0');
+    await expect(handle).toHaveAttribute('aria-valuemax', '1');
+
+    // Body scroll is locked while open.
+    await expect(doc.body).toHaveStyle({ overflow: 'hidden' });
+  },
+};
+
+export const SnapsWithArrowKeys: Story = {
+  render: () => <InteractionDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Open sheet' }));
+    const dialog = await body.findByRole('dialog');
+    const handle = within(dialog).getByRole('separator');
+
+    // NOTE (source gap, not asserted): FocusScope's mount autofocus does NOT
+    // land on the tabindex-0 handle — it falls back to the layer container.
+    // Reported for the fix sweep; focus the handle explicitly (it stays the
+    // keyboard affordance: ArrowUp/ArrowDown drive the snap state).
+    handle.focus();
+    await expect(handle).toHaveFocus();
+
+    await userEvent.keyboard('{ArrowUp}');
+    await expect(handle).toHaveAttribute('aria-valuenow', '1');
+    await expect(dialog.style.height).toBe('400px');
+
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(handle).toHaveAttribute('aria-valuenow', '0');
+    await expect(dialog.style.height).toBe('200px');
+  },
+};
+
+export const ArrowDownAtLowestSnapDismisses: Story = {
+  render: () => <InteractionDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const doc = canvasElement.ownerDocument;
+    const body = within(doc.body);
+
+    const opener = canvas.getByRole('button', { name: 'Open sheet' });
+    await userEvent.click(opener);
+    const dialog = await body.findByRole('dialog');
+    const handle = within(dialog).getByRole('separator');
+    // Explicit focus — mount autofocus misses the handle (see SnapsWithArrowKeys).
+    handle.focus();
+    await expect(handle).toHaveFocus();
+
+    // At the lowest snap, ArrowDown dismisses (dragToDismiss default true).
+    await userEvent.keyboard('{ArrowDown}');
+
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+    // NOTE (source gap, not asserted): focus does NOT return to the opener on
+    // dismissal — the sheet panel (inner Presence) unmounts before the
+    // FocusScope teardown and focus is left on <body>. Reported for the fix
+    // sweep. The open-scoped scroll lock DOES release correctly:
+    await waitFor(() => expect(doc.body.style.overflow).not.toBe('hidden'));
+  },
+};
+
+export const ClosesOnEscape: Story = {
+  render: () => <InteractionDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const doc = canvasElement.ownerDocument;
+    const body = within(doc.body);
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Open sheet' }));
+    await body.findByRole('dialog');
+
+    await userEvent.keyboard('{Escape}');
+
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(doc.body.style.overflow).not.toBe('hidden'));
+  },
+};
+
+export const ClosesOnBackdropClick: Story = {
+  render: () => <InteractionDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Open sheet' }));
+    const dialog = await body.findByRole('dialog');
+
+    // Backdrop = the DismissableLayer wrapper's previous sibling in the portal.
+    const backdrop = dialog.parentElement?.previousElementSibling;
+    if (!(backdrop instanceof HTMLElement)) throw new Error('BottomSheet backdrop not found');
+    await userEvent.click(backdrop);
+
+    await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
   },
 };

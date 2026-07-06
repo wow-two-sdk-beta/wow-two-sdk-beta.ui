@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { useEffect, useRef, useState } from 'react';
 import { Select, type SelectOption } from './Select';
 import { Equality } from '../../../foundation/utils';
@@ -609,4 +610,108 @@ export const Playground: StoryObj<typeof PlaygroundDemo> = {
     placeholder: { control: 'text' },
   },
   render: (args) => <PlaygroundDemo {...args} />,
+};
+
+/* ────────── Interaction tests (play functions — run as browser tests via the vitest addon) ────────── */
+
+/** Fixed 3-option select used by the interaction stories — `onValueChange` arrives via args (spy). */
+function interactionSelect(args: { onValueChange?: Parameters<typeof Select>[0]['onValueChange'] }) {
+  return (
+    <div className="w-72">
+      <Select onValueChange={args.onValueChange}>
+        <Select.Trigger>
+          <Select.Value placeholder="Pick a fruit..." />
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Item itemKey="apple" label="Apple" />
+          <Select.Item itemKey="banana" label="Banana" />
+          <Select.Item itemKey="cherry" label="Cherry" />
+        </Select.Content>
+      </Select>
+    </div>
+  );
+}
+
+export const ClickOpensAndSelectsWithMouse: Story = {
+  args: { onValueChange: fn() },
+  render: (args) => interactionSelect(args),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    /* The popover portals into document.body — canvas queries can't reach it. */
+    const body = within(canvasElement.ownerDocument.body);
+    const trigger = canvas.getByRole('button');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(trigger);
+    await body.findByRole('listbox');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(body.getAllByRole('option')).toHaveLength(3);
+
+    await userEvent.click(body.getByRole('option', { name: 'Banana' }));
+    await expect(args.onValueChange).toHaveBeenCalledTimes(1);
+    await expect(args.onValueChange).toHaveBeenCalledWith(
+      expect.objectContaining({ itemKey: 'banana', value: 'banana', label: 'Banana' }),
+    );
+    /* Selection closes the popover (unmount waits for the exit animation)… */
+    await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument());
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    /* …and the trigger renders the selected label. */
+    await expect(trigger).toHaveTextContent('Banana');
+  },
+};
+
+export const ArrowKeysNavigateAndEnterSelects: Story = {
+  args: { onValueChange: fn() },
+  render: (args) => interactionSelect(args),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    const trigger = canvas.getByRole('button');
+
+    await userEvent.click(trigger);
+    const listbox = await body.findByRole('listbox');
+    /* The focus trap parks focus on the listbox; the first enabled option starts active. */
+    await waitFor(() => expect(listbox).toHaveFocus());
+    const options = body.getAllByRole('option');
+    await waitFor(() => expect(options[0]).toHaveAttribute('data-active'));
+
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(options[1]).toHaveAttribute('data-active');
+    await expect(options[0]).not.toHaveAttribute('data-active');
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(options[2]).toHaveAttribute('data-active');
+    await userEvent.keyboard('{ArrowUp}');
+    await expect(options[1]).toHaveAttribute('data-active');
+
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onValueChange).toHaveBeenCalledTimes(1);
+    await expect(args.onValueChange).toHaveBeenCalledWith(
+      expect.objectContaining({ itemKey: 'banana' }),
+    );
+    await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument());
+    await expect(trigger).toHaveTextContent('Banana');
+    /* Focus returns to the trigger once the popover unmounts. */
+    await waitFor(() => expect(trigger).toHaveFocus());
+  },
+};
+
+export const EscapeClosesWithoutSelecting: Story = {
+  args: { onValueChange: fn() },
+  render: (args) => interactionSelect(args),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    const trigger = canvas.getByRole('button');
+
+    await userEvent.click(trigger);
+    await body.findByRole('listbox');
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument());
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(args.onValueChange).not.toHaveBeenCalled();
+    /* Nothing was picked — the placeholder still shows, and focus is restored to the trigger. */
+    await expect(trigger).toHaveTextContent('Pick a fruit...');
+    await waitFor(() => expect(trigger).toHaveFocus());
+  },
 };
