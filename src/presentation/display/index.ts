@@ -40,6 +40,8 @@ export * from './swipeActions';
 export * from './diffViewer';
 export * from './sparkline';
 export * from './radiusGlyph';
+export * from './frameGlyph';
+export * from './moduleGlyphs';
 export * from './heatmapCalendar';
 export * from './dataGrid';
 export * from './nodeEditor';
