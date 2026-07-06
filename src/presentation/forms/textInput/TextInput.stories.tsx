@@ -9,6 +9,6 @@ const meta: Meta<typeof TextInput> = {
 export default meta;
 type Story = StoryObj<typeof TextInput>;
 
-export const Default: Story = { args: { placeholder: 'Type here…' } };
-export const Invalid: Story = { args: { state: 'invalid', defaultValue: 'oops' } };
-export const Disabled: Story = { args: { disabled: true, defaultValue: 'frozen' } };
+export const Default: Story = { args: { placeholder: 'Type here…', 'aria-label': 'Sample text' } };
+export const Invalid: Story = { args: { state: 'invalid', defaultValue: 'oops', 'aria-label': 'Sample text' } };
+export const Disabled: Story = { args: { disabled: true, defaultValue: 'frozen', 'aria-label': 'Sample text' } };

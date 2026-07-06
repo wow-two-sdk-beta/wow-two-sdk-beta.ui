@@ -97,7 +97,7 @@ Each iteration = a shippable chunk. Fold precedes harness so no test file moves 
 | **5** | T3 forms | `play()`: `pinInput` `combobox` `select` `multiSelect` `datePicker` `dateRangePicker` `slider` `numberInput` `tagsInput` `colorPicker` `stepper` `maskedInput` `wizard` `cronInput` `recurrenceEditor` | **done** (2026-07-06) — all 15 covered, ~59 interaction stories. Note: `forms/stepper` = wizard-step switcher (not numeric) |
 | **6** | T3 overlays + nav | `play()`: `modal` (ex-dialog) `drawer` `popover` `alertModal` (ex-alertDialog) `bottomSheet` `actionSheet` `hoverCard` `menu` `dropdownMenu` `commandPalette` `menubar` `navigationMenu` `contextMenu` `pagination` | **done** (2026-07-06) — all 14 covered, ~61 interaction stories + scroll-lock audit (only `modal`/`alertModal` carry the mount-scoped-lock bug) |
 | **7** | T3 display + primitives | `play()`: `tabs` `accordion` `collapsible` `tree` `carousel` `sortable` `swipeActions` · targeted `.test.tsx`: `focusScope` `dismissableLayer` `rovingFocusGroup` `presence` | **done** (2026-07-06) — 24 display interaction stories + 33 primitive browser tests. Deferred: `dataTable`/`dataGrid` (deep organisms — own pass later); `sortable` pointer-drag not synthesizable (native HTML5 DnD) — keyboard path covered |
-| **8** | Docs + CI | update `CLAUDE.md` (drop "No tests", fix SB8→10, add commands) · add Actions job (`unit` always, `browser` on Playwright runner) | todo |
+| **8** | Docs + CI | update `CLAUDE.md` (drop "No tests", fix SB8→10, add commands) · add Actions job (`unit` always, `browser` on Playwright runner) | **done** (2026-07-06) — `CLAUDE.md` updated; `.github/workflows/test.yml` runs the full suite on main push as a non-blocking signal (separate from `release.yml`; retry-once for the cold-cache race) |
 
 Scripts (added It2): `test` `test:watch` `test:ui` `test:unit` `test:browser` `coverage`.
 
@@ -130,6 +130,24 @@ Bugs found (assertions omitted where broken; sources untouched):
 - **`DateRangePicker` mid-selection publishes `null`** — half-picked display branch unreachable; trigger shows placeholder mid-selection.
 - **`Tree`** lacks ArrowRight/Left expand/collapse (APG); **`CommandPalette`** empty state is `role="presentation"` (should announce); **`FocusScope`** JSDoc claims `trapped` defaults true (Radix default is false).
 - **Spec drift is systemic** — prop renames unreflected (`withAlpha`→`hasAlpha`, `invalid`→`isInvalid`, `final`→`isFinal`, …); `sortable` has no spec. Standardization pass should treat specs as untrusted until rewritten.
+
+### A11y burn-down — phase 1 (2026-07-06)
+
+Baseline 260 → **114 failing story tests** (-56%) in error-mode measurement. Fixed:
+
+- `HeatmapCalendar` cells → `role="img"`, dropped illegal `aria-value*` (~1120 hits — the biggest single source)
+- `IconPicker` / `EmojiPicker` / `ScheduleView` — fake ARIA grid (`grid`>`gridcell` with no `row`/no 2D nav) → honest `role="group"` (~290 hits)
+- Label sweep — 19 story files got labels/`aria-label`; `PinInput` cells now ship built-in `Digit N of L` labels (component fix)
+- `CommentThread` replies → `role="group"`; `ChatBubble` status span → `role="img"`
+- Token nudges (light): `--muted-foreground` `#71717a`→`#6d6d76` (4.39→4.66 on muted) · `--subtle-foreground` `#a1a1aa`→`#74747d` (2.56→4.63 on white) · `--info` `#0891b2`→`#0e7490` (3.68→5.36 both directions) · dark `--subtle-foreground` `#71717a`→`#82828b` (4.12→5.2)
+
+Remaining 114 (backlog, granular):
+
+- 17× subtle-foreground on muted bg (4.21) — those usages should switch to `muted-foreground` (component-level token swap)
+- 16× unlabeled internal inputs in 4 components lacking labeling APIs: `GradientPicker` (per-stop inputs), `RecurrenceEditor` (interval/count/until), `ColorPicker` (panel hex field), `JSONEditor` (textarea + tree-edit input) — design-pass items
+- 9× "children not allowed: table" + misc contrast tail (3.29×14, 2.x on soft-on-solid pairs e.g. `#b9e3c9` on success) — per-component decisions
+- Axe only scans **light mode** (preview decorator defaults light) — dark-mode audit is a separate pass; dark `subtle` fixed by math above
+- Flip `.storybook/preview.ts` `a11y.test` `'todo'`→`'error'` once the backlog clears
 
 ### Harness learnings (what fits / limits)
 

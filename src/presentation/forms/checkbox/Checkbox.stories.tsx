@@ -63,9 +63,9 @@ export const Matrix: Story = {
             {TONES.map((t) => (
               <div key={t} className="flex flex-col items-center gap-2">
                 <div className="flex items-center gap-3">
-                  <Checkbox variant={v} tone={t} />
-                  <Checkbox variant={v} tone={t} defaultChecked />
-                  <Checkbox variant={v} tone={t} isIndeterminate />
+                  <Checkbox variant={v} tone={t} aria-label={`${v} ${t} unchecked`} />
+                  <Checkbox variant={v} tone={t} defaultChecked aria-label={`${v} ${t} checked`} />
+                  <Checkbox variant={v} tone={t} isIndeterminate aria-label={`${v} ${t} indeterminate`} />
                 </div>
                 <div className="text-xs text-muted-foreground">{t}</div>
               </div>
@@ -89,10 +89,10 @@ export const GlassOnPhoto: Story = {
       }}
     >
       <div className="absolute right-3 top-3 flex items-center gap-2">
-        <Checkbox variant="glass" />
-        <Checkbox variant="glass" defaultChecked />
-        <Checkbox variant="glass-surface" />
-        <Checkbox variant="glass-surface" defaultChecked />
+        <Checkbox variant="glass" aria-label="glass unchecked" />
+        <Checkbox variant="glass" defaultChecked aria-label="glass checked" />
+        <Checkbox variant="glass-surface" aria-label="glass-surface unchecked" />
+        <Checkbox variant="glass-surface" defaultChecked aria-label="glass-surface checked" />
       </div>
     </div>
   ),
@@ -101,9 +101,9 @@ export const GlassOnPhoto: Story = {
 export const Disabled: Story = {
   render: () => (
     <div className="flex items-center gap-4">
-      <Checkbox disabled />
-      <Checkbox disabled defaultChecked />
-      <Checkbox disabled isIndeterminate />
+      <Checkbox disabled aria-label="disabled unchecked" />
+      <Checkbox disabled defaultChecked aria-label="disabled checked" />
+      <Checkbox disabled isIndeterminate aria-label="disabled indeterminate" />
     </div>
   ),
 };
@@ -112,22 +112,23 @@ export const Disabled: Story = {
 export const SizeUnionForms: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
+      {/* Row text doubles as the accessible name via an implicit <label> wrap. */}
+      <label className="flex items-center gap-3">
         <span className="text-xs text-muted-foreground w-32">preset (lg)</span>
         <Checkbox size="lg" defaultChecked />
-      </div>
-      <div className="flex items-center gap-3">
+      </label>
+      <label className="flex items-center gap-3">
         <span className="text-xs text-muted-foreground w-32">raw px (32)</span>
         <Checkbox size={32} defaultChecked />
-      </div>
-      <div className="flex items-center gap-3">
+      </label>
+      <label className="flex items-center gap-3">
         <span className="text-xs text-muted-foreground w-32">CSS unit (1.5rem)</span>
         <Checkbox size="1.5rem" defaultChecked />
-      </div>
-      <div className="flex items-center gap-3">
+      </label>
+      <label className="flex items-center gap-3">
         <span className="text-xs text-muted-foreground w-32">explicit dims</span>
         <Checkbox size={{ width: 24, height: 24 }} defaultChecked />
-      </div>
+      </label>
     </div>
   ),
 };

@@ -76,8 +76,11 @@
   --color-background: #ffffff;
   --color-foreground: #18181b;
   --color-muted: #f4f4f5;
-  --color-muted-foreground: #71717a;
-  --color-subtle-foreground: #a1a1aa;
+  /* 4.66:1 on muted, 5.12:1 on white (was #71717a = 4.39 on muted — AA miss) */
+  --color-muted-foreground: #6d6d76;
+  /* 4.63:1 on white (was #a1a1aa = 2.56 — AA miss); still lighter than muted-fg.
+     Known gap: on muted bg this is 4.2:1 — prefer muted-foreground there. */
+  --color-subtle-foreground: #74747d;
   --color-card: #ffffff;
   --color-card-foreground: #18181b;
   --color-popover: #ffffff;
@@ -113,7 +116,8 @@
   --color-warning-soft: #fffbeb;
   --color-warning-soft-foreground: #b45309;
 
-  --color-info: #0891b2;
+  /* info-700: 5.36:1 with white fg AND as text on white (info-600 = 3.68 — AA miss) */
+  --color-info: #0e7490;
   --color-info-foreground: #ffffff;
   --color-info-soft: #ecfeff;
   --color-info-soft-foreground: #0e7490;
@@ -185,7 +189,8 @@
   --color-foreground: #fafafa;
   --color-muted: #18181b;
   --color-muted-foreground: #a1a1aa;
-  --color-subtle-foreground: #71717a;
+  /* 5.2:1 on page bg, 4.65:1 on card/muted (was #71717a = 4.12 — AA miss) */
+  --color-subtle-foreground: #82828b;
   --color-card: #18181b;
   --color-card-foreground: #fafafa;
   --color-popover: #18181b;

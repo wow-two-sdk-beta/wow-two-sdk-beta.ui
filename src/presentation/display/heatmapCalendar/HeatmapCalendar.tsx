@@ -169,10 +169,10 @@ export const HeatmapCalendar = forwardRef<HTMLDivElement, HeatmapCalendarProps>(
                     <Tag
                       key={rowIdx}
                       type={interactive ? 'button' : undefined}
+                      // Value lives in the label; aria-value* is reserved for
+                      // range widgets and is invalid on button/generic cells.
+                      role={interactive ? undefined : 'img'}
                       aria-label={`${cell.key}: ${cell.value}`}
-                      aria-valuenow={level}
-                      aria-valuemin={0}
-                      aria-valuemax={levelCount - 1}
                       onClick={interactive ? () => onCellClick?.(cell.date, cell.value) : undefined}
                       style={{ width: cellSize, height: cellSize }}
                       className={cn(

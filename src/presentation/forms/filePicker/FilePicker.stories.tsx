@@ -9,7 +9,10 @@ const meta: Meta<typeof FilePicker> = {
 export default meta;
 type Story = StoryObj<typeof FilePicker>;
 
-export const Default: Story = { args: { onFilesChange: (f) => console.log(f) } };
+/* `label` is the visible trigger-button text; `aria-label` names the sr-only native file input. */
+export const Default: Story = {
+  args: { onFilesChange: (f) => console.log(f), 'aria-label': 'Choose file' },
+};
 export const Multiple: Story = {
-  args: { multiple: true, label: 'Choose images', accept: 'image/*' },
+  args: { multiple: true, label: 'Choose images', accept: 'image/*', 'aria-label': 'Choose images' },
 };

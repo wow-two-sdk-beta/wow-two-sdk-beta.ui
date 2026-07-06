@@ -116,6 +116,8 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
             }}
             type={isMasked ? 'password' : 'text'}
             inputMode={type === 'numeric' ? 'numeric' : 'text'}
+            /* Cells are internal — consumers can't label them individually, so each carries a built-in name. */
+            aria-label={`${type === 'numeric' ? 'Digit' : 'Character'} ${i + 1} of ${length}`}
             autoComplete="one-time-code"
             maxLength={1}
             disabled={isDisabled}

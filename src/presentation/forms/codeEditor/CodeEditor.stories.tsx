@@ -18,7 +18,7 @@ console.log(greet('world'));`;
 export const Default: Story = {
   render: () => (
     <div className="w-[40rem]">
-      <CodeEditor defaultValue={SAMPLE} language="javascript" minHeight="14rem" />
+      <CodeEditor defaultValue={SAMPLE} language="javascript" minHeight="14rem" aria-label="Code" />
     </div>
   ),
 };
@@ -26,7 +26,7 @@ export const Default: Story = {
 export const Empty: Story = {
   render: () => (
     <div className="w-[40rem]">
-      <CodeEditor placeholder="// Type some code…" minHeight="10rem" />
+      <CodeEditor placeholder="// Type some code…" minHeight="10rem" aria-label="Code" />
     </div>
   ),
 };
@@ -34,7 +34,7 @@ export const Empty: Story = {
 export const Tabs: Story = {
   render: () => (
     <div className="w-[40rem]">
-      <CodeEditor defaultValue={SAMPLE} isTabIndented tabSize={4} />
+      <CodeEditor defaultValue={SAMPLE} isTabIndented tabSize={4} aria-label="Code" />
     </div>
   ),
 };
@@ -42,7 +42,7 @@ export const Tabs: Story = {
 export const ReadOnly: Story = {
   render: () => (
     <div className="w-[40rem]">
-      <CodeEditor defaultValue={SAMPLE} readOnly />
+      <CodeEditor defaultValue={SAMPLE} readOnly aria-label="Code" />
     </div>
   ),
 };
@@ -50,7 +50,7 @@ export const ReadOnly: Story = {
 export const Invalid: Story = {
   render: () => (
     <div className="w-[40rem]">
-      <CodeEditor defaultValue="syntax error here" isInvalid />
+      <CodeEditor defaultValue="syntax error here" isInvalid aria-label="Code" />
     </div>
   ),
 };

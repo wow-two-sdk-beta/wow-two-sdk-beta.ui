@@ -76,7 +76,9 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
   return (
     <div
       ref={ref}
-      role="grid"
+      // Timeline layout, no 2D keyboard nav — ARIA grid (grid > row > gridcell)
+      // would be a lie; group + labeled slot/booking buttons is honest.
+      role="group"
       aria-label="Schedule"
       className={cn(
         'overflow-auto rounded-md border border-border bg-card text-sm shadow-sm',
@@ -101,7 +103,7 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
       {resources.map((resource) => {
         const items = bookingsByResource.get(resource.id) ?? [];
         return (
-          <div key={resource.id} role="row" className="flex border-b border-border last:border-b-0">
+          <div key={resource.id} className="flex border-b border-border last:border-b-0">
             <div className="w-32 shrink-0 border-r border-border bg-muted/20 px-3 py-2 text-xs font-medium">
               {resource.label}
             </div>

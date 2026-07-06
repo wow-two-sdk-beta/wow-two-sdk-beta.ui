@@ -10,7 +10,7 @@ const meta: Meta<typeof Slider> = {
 export default meta;
 type Story = StoryObj<typeof Slider>;
 
-export const Default: Story = { args: { defaultValue: 40 } };
+export const Default: Story = { args: { defaultValue: 40, 'aria-label': 'Volume' } };
 
 /* ────────── Interaction tests (play functions — run as browser tests via the vitest addon) ────────── */
 
@@ -21,7 +21,7 @@ export const Default: Story = { args: { defaultValue: 40 } };
    is proven below via change events. */
 
 export const ChangeUpdatesValueAndFiresOnChange: Story = {
-  args: { defaultValue: 40, onChange: fn() },
+  args: { defaultValue: 40, onChange: fn(), 'aria-label': 'Volume' },
   play: async ({ canvasElement, args }) => {
     /* A native range input exposes the ARIA slider role. */
     const slider = within(canvasElement).getByRole('slider');
@@ -34,7 +34,7 @@ export const ChangeUpdatesValueAndFiresOnChange: Story = {
 };
 
 export const OutOfRangeValuesClampToMinMax: Story = {
-  args: { defaultValue: 50, min: 0, max: 100 },
+  args: { defaultValue: 50, min: 0, max: 100, 'aria-label': 'Volume' },
   play: async ({ canvasElement }) => {
     const slider = within(canvasElement).getByRole('slider');
     await expect(slider).toHaveAttribute('min', '0');
@@ -49,7 +49,7 @@ export const OutOfRangeValuesClampToMinMax: Story = {
 };
 
 export const ValuesSnapToStep: Story = {
-  args: { defaultValue: 0, min: 0, max: 100, step: 10 },
+  args: { defaultValue: 0, min: 0, max: 100, step: 10, 'aria-label': 'Volume' },
   play: async ({ canvasElement }) => {
     const slider = within(canvasElement).getByRole('slider');
 
@@ -62,7 +62,7 @@ export const ValuesSnapToStep: Story = {
 };
 
 export const DisabledSliderIsInert: Story = {
-  args: { defaultValue: 30, disabled: true },
+  args: { defaultValue: 30, disabled: true, 'aria-label': 'Volume' },
   play: async ({ canvasElement }) => {
     const slider = within(canvasElement).getByRole('slider');
     await expect(slider).toBeDisabled();

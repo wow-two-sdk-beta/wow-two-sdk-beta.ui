@@ -10,13 +10,13 @@ const meta: Meta<typeof NumberInput> = {
 export default meta;
 type Story = StoryObj<typeof NumberInput>;
 
-export const Default: Story = { args: { defaultValue: 0 } };
-export const Step: Story = { args: { defaultValue: 0.5, step: 0.5 } };
+export const Default: Story = { args: { defaultValue: 0, 'aria-label': 'Amount' } };
+export const Step: Story = { args: { defaultValue: 0.5, step: 0.5, 'aria-label': 'Amount' } };
 
 /* ────────── Interaction tests (play functions — run as browser tests via the vitest addon) ────────── */
 
 export const TypingUpdatesValue: Story = {
-  args: { onChange: fn() },
+  args: { onChange: fn(), 'aria-label': 'Amount' },
   play: async ({ canvasElement, args }) => {
     const input = within(canvasElement).getByRole('spinbutton');
     await userEvent.type(input, '42');
@@ -26,7 +26,7 @@ export const TypingUpdatesValue: Story = {
 };
 
 export const SteppersIncrementAndDecrement: Story = {
-  args: { defaultValue: 5, step: 1, onChange: fn() },
+  args: { defaultValue: 5, step: 1, onChange: fn(), 'aria-label': 'Amount' },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole('spinbutton');
@@ -45,7 +45,7 @@ export const SteppersIncrementAndDecrement: Story = {
 };
 
 export const CustomStepIsRespected: Story = {
-  args: { defaultValue: 1, step: 0.5 },
+  args: { defaultValue: 1, step: 0.5, 'aria-label': 'Amount' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole('spinbutton');
@@ -59,7 +59,7 @@ export const CustomStepIsRespected: Story = {
 };
 
 export const SteppingClampsAtMinMax: Story = {
-  args: { defaultValue: 9, min: 0, max: 10, step: 1 },
+  args: { defaultValue: 9, min: 0, max: 10, step: 1, 'aria-label': 'Amount' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole('spinbutton');

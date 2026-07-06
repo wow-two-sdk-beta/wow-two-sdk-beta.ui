@@ -1,0 +1,40 @@
+name: test
+
+# Signal, not gate (beta-forever: fix-forward, releases never blocked).
+# Full suite: unit (node) + browser + storybook (Playwright chromium).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: vitest (unit · browser · storybook)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm install
+
+      - name: Install Playwright chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Retry once: the first cold-cache run can hit the vite dep-optimization
+      # race (transient `null useState`) — documented in docs/testing.md.
+      - name: Test
+        run: pnpm test || pnpm test

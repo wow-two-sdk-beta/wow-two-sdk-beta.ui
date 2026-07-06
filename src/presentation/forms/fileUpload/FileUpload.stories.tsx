@@ -11,13 +11,18 @@ export default meta;
 type Story = StoryObj<typeof FileUpload>;
 
 export const Default: Story = {
-  render: () => <div className="w-[28rem]"><FileUpload hint="Any format · drag in or click" /></div>,
+  render: () => (
+    <div className="w-[28rem]">
+      {/* aria-label names the visually-hidden native file input. */}
+      <FileUpload hint="Any format · drag in or click" aria-label="Upload files" />
+    </div>
+  ),
 };
 
 export const ImagesOnly: Story = {
   render: () => (
     <div className="w-[28rem]">
-      <FileUpload accept="image/*" multiple hint="Images only · up to 5 MB each" maxSize={5 * 1024 * 1024} />
+      <FileUpload accept="image/*" multiple hint="Images only · up to 5 MB each" maxSize={5 * 1024 * 1024} aria-label="Upload images" />
     </div>
   ),
 };
@@ -31,6 +36,7 @@ export const WithList: Story = {
         <div className="w-[28rem]">
           <FileUpload
             multiple
+            aria-label="Upload files"
             accept=".pdf,.txt,image/*"
             maxSize={2 * 1024 * 1024}
             maxFiles={3}
@@ -68,9 +74,9 @@ export const WithList: Story = {
 };
 
 export const Disabled: Story = {
-  render: () => <div className="w-[28rem]"><FileUpload disabled hint="Upload disabled" /></div>,
+  render: () => <div className="w-[28rem]"><FileUpload disabled hint="Upload disabled" aria-label="Upload files" /></div>,
 };
 
 export const Invalid: Story = {
-  render: () => <div className="w-[28rem]"><FileUpload isInvalid hint="At least one file required" /></div>,
+  render: () => <div className="w-[28rem]"><FileUpload isInvalid hint="At least one file required" aria-label="Upload files" /></div>,
 };

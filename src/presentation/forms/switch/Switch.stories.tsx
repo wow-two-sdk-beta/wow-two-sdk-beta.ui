@@ -9,13 +9,13 @@ const meta: Meta<typeof Switch> = {
 export default meta;
 type Story = StoryObj<typeof Switch>;
 
-export const Default: Story = { args: {} };
-export const Checked: Story = { args: { defaultChecked: true } };
+export const Default: Story = { args: { 'aria-label': 'Toggle option' } };
+export const Checked: Story = { args: { defaultChecked: true, 'aria-label': 'Toggle option' } };
 export const Sizes: Story = {
   render: () => (
     <div className="flex items-center gap-3">
       {(['sm', 'md', 'lg'] as const).map((s) => (
-        <Switch key={s} size={s} defaultChecked />
+        <Switch key={s} size={s} defaultChecked aria-label={`Toggle option (${s})`} />
       ))}
     </div>
   ),

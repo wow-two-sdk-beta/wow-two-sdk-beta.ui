@@ -130,7 +130,10 @@ export const ChatBubble = forwardRef<HTMLDivElement, ChatBubbleProps>(
             >
               {timestamp && <span>{timestamp}</span>}
               {showStatus && status && (
-                <span aria-label={`Status: ${status}`}>{STATUS_ICON[status]}</span>
+                // aria-label is prohibited on a generic span — img role carries it.
+                <span role="img" aria-label={`Status: ${status}`}>
+                  {STATUS_ICON[status]}
+                </span>
               )}
             </div>
           )}

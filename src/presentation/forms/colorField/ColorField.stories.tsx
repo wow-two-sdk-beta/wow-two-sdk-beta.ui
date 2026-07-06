@@ -14,7 +14,7 @@ function Demo() {
   const [color, setColor] = useState<string | null>('#3b82f6');
   return (
     <div className="flex flex-col gap-3 w-72">
-      <ColorField value={color} onValueChange={setColor} />
+      <ColorField value={color} onValueChange={setColor} aria-label="Color" />
       <p className="text-sm text-muted-foreground">Value: {color ?? 'none'}</p>
     </div>
   );
@@ -24,7 +24,7 @@ function AlphaDemo() {
   const [color, setColor] = useState<string | null>('#3b82f680');
   return (
     <div className="flex flex-col gap-3 w-72">
-      <ColorField value={color} onValueChange={setColor} hasAlpha />
+      <ColorField value={color} onValueChange={setColor} hasAlpha aria-label="Color" />
       <p className="text-sm text-muted-foreground">Value: {color ?? 'none'}</p>
     </div>
   );
@@ -36,7 +36,7 @@ export const WithAlpha: Story = { render: () => <AlphaDemo /> };
 export const Invalid: Story = {
   render: () => (
     <div className="w-72">
-      <ColorField state="invalid" placeholder="#000000" />
+      <ColorField state="invalid" placeholder="#000000" aria-label="Color" />
     </div>
   ),
 };

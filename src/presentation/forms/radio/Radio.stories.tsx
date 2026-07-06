@@ -9,7 +9,7 @@ const meta: Meta<typeof Radio> = {
 export default meta;
 type Story = StoryObj<typeof Radio>;
 
-export const Default: Story = { args: { name: 'pick' } };
+export const Default: Story = { args: { name: 'pick', 'aria-label': 'Pick option' } };
 export const Group: Story = {
   render: () => (
     <div className="flex items-center gap-4">

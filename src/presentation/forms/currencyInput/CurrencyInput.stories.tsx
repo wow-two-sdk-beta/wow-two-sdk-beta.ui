@@ -9,5 +9,7 @@ const meta: Meta<typeof CurrencyInput> = {
 export default meta;
 type Story = StoryObj<typeof CurrencyInput>;
 
-export const Default: Story = { args: { defaultValue: 1200, step: 100 } };
-export const Euro: Story = { args: { symbol: '€', defaultValue: 99.95, step: 0.05 } };
+export const Default: Story = { args: { defaultValue: 1200, step: 100, 'aria-label': 'Price' } };
+export const Euro: Story = {
+  args: { symbol: '€', defaultValue: 99.95, step: 0.05, 'aria-label': 'Price in euros' },
+};

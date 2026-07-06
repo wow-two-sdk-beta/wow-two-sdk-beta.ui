@@ -28,7 +28,7 @@ const x = 42;
 export const Default: Story = {
   render: () => (
     <div className="w-[48rem]">
-      <MarkdownEditor defaultValue={SAMPLE} />
+      <MarkdownEditor defaultValue={SAMPLE} aria-label="Markdown" />
     </div>
   ),
 };
@@ -36,7 +36,7 @@ export const Default: Story = {
 export const EditOnly: Story = {
   render: () => (
     <div className="w-[36rem]">
-      <MarkdownEditor defaultValue={SAMPLE} defaultView="edit" />
+      <MarkdownEditor defaultValue={SAMPLE} defaultView="edit" aria-label="Markdown" />
     </div>
   ),
 };
@@ -52,7 +52,7 @@ export const PreviewOnly: Story = {
 export const Empty: Story = {
   render: () => (
     <div className="w-[48rem]">
-      <MarkdownEditor placeholder="Start typing markdown…" />
+      <MarkdownEditor placeholder="Start typing markdown…" aria-label="Markdown" />
     </div>
   ),
 };

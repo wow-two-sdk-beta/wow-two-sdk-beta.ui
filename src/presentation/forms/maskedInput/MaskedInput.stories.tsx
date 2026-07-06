@@ -10,13 +10,17 @@ const meta: Meta<typeof MaskedInput> = {
 export default meta;
 type Story = StoryObj<typeof MaskedInput>;
 
-export const Phone: Story = { args: { mask: '###-###-####', placeholder: '___-___-____' } };
-export const Date: Story = { args: { mask: '##/##/####', placeholder: 'MM/DD/YYYY' } };
+export const Phone: Story = {
+  args: { mask: '###-###-####', placeholder: '___-___-____', 'aria-label': 'Phone number' },
+};
+export const Date: Story = {
+  args: { mask: '##/##/####', placeholder: 'MM/DD/YYYY', 'aria-label': 'Date' },
+};
 
 /* ────────── Interaction tests (play functions — run as browser tests via the vitest addon) ────────── */
 
 export const TypingAppliesPhoneMask: Story = {
-  args: { mask: '###-###-####', onValueChange: fn() },
+  args: { mask: '###-###-####', onValueChange: fn(), 'aria-label': 'Phone number' },
   play: async ({ canvasElement, args }) => {
     const input = within(canvasElement).getByRole('textbox');
 
@@ -28,7 +32,7 @@ export const TypingAppliesPhoneMask: Story = {
 };
 
 export const LiteralsAutoInsert: Story = {
-  args: { mask: '##/##/####', onValueChange: fn() },
+  args: { mask: '##/##/####', onValueChange: fn(), 'aria-label': 'Date' },
   play: async ({ canvasElement, args }) => {
     const input = within(canvasElement).getByRole('textbox');
 
@@ -42,7 +46,7 @@ export const LiteralsAutoInsert: Story = {
 };
 
 export const InvalidCharactersAreRejected: Story = {
-  args: { mask: '###-###-####' },
+  args: { mask: '###-###-####', 'aria-label': 'Phone number' },
   play: async ({ canvasElement }) => {
     const input = within(canvasElement).getByRole('textbox');
 
@@ -57,7 +61,7 @@ export const InvalidCharactersAreRejected: Story = {
 };
 
 export const MaskCapsLengthAndEnforcesCharacterClasses: Story = {
-  args: { mask: 'AAA-###', onValueChange: fn() },
+  args: { mask: 'AAA-###', onValueChange: fn(), 'aria-label': 'Product code' },
   play: async ({ canvasElement, args }) => {
     const input = within(canvasElement).getByRole('textbox');
 

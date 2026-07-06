@@ -15,7 +15,7 @@ function Demo() {
   const [date, setDate] = useState<Temporal.PlainDate | null>(null);
   return (
     <div className="flex flex-col gap-3 w-72">
-      <DateField value={date} onValueChange={setDate} />
+      <DateField value={date} onValueChange={setDate} aria-label="Date" />
       <p className="text-sm text-muted-foreground">
         Value: {date ? date.toString() : 'none'}
       </p>
@@ -32,7 +32,7 @@ export const WithBounds: Story = {
     const max = today.add({ days: 14 });
     return (
       <div className="w-72">
-        <DateField defaultValue={today} min={min} max={max} />
+        <DateField defaultValue={today} min={min} max={max} aria-label="Date" />
       </div>
     );
   },
@@ -41,7 +41,7 @@ export const WithBounds: Story = {
 export const Invalid: Story = {
   render: () => (
     <div className="w-72">
-      <DateField state="invalid" />
+      <DateField state="invalid" aria-label="Date" />
     </div>
   ),
 };

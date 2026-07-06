@@ -191,7 +191,9 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
           className={cn(inputBaseVariants({ size: 'sm' }))}
         />
         <div
-          role="grid"
+          // Flat button collection, no 2D keyboard nav — ARIA grid (grid >
+          // row > gridcell) would be a lie; group + labeled buttons is honest.
+          role="group"
           aria-label="Icons"
           className="grid gap-1 overflow-y-auto"
           style={{ gridTemplateColumns: `repeat(${columns}, ${iconButtonSize}px)`, maxHeight: 240 }}
@@ -199,7 +201,7 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
           {filtered.map(([key, IconComp]) => {
             const selected = value === key;
             return (
-              <div role="gridcell" key={key}>
+              <div key={key}>
                 <button
                   type="button"
                   aria-pressed={selected}

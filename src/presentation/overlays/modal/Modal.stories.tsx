@@ -107,8 +107,7 @@ export const OpensOnTriggerClick: Story = {
     await expect(dialog).toHaveAccessibleDescription('Covers open, dismissal, and focus behavior.');
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
 
-    // Body scroll is locked while open (note: lock is mount-scoped, not
-    // open-scoped — see the spec-gap note in ClosesOnEscape).
+    // Body scroll is locked while open (open-scoped via isEnabled).
     await expect(doc.body).toHaveStyle({ overflow: 'hidden' });
 
     // Focus moves into the dialog (FocusScope autofocuses the first tabbable).
@@ -132,9 +131,8 @@ export const ClosesOnEscape: Story = {
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
     // Focus returns to the trigger (FocusScope restores on unmount).
     await waitFor(() => expect(trigger).toHaveFocus());
-    // NOTE (spec gap): "scroll lock released after close" is NOT asserted —
-    // ScrollLockProvider mounts with Modal.Content (outside the Presence gate),
-    // so the body stays locked while the closed modal remains mounted.
+    // Scroll lock releases on close (lock is open-scoped via isEnabled).
+    await waitFor(() => expect(doc.body).not.toHaveStyle({ overflow: 'hidden' }));
   },
 };
 
@@ -171,5 +169,17 @@ export const CloseButtonRestoresFocus: Story = {
 
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
     await waitFor(() => expect(trigger).toHaveFocus());
+  },
+};
+
+export const MountedClosedDoesNotLockScroll: Story = {
+  render: interactionRender,
+  play: async ({ canvasElement }) => {
+    const doc = canvasElement.ownerDocument;
+    const body = within(doc.body);
+
+    // Content is mounted (closed) — the lock must not engage until open.
+    await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+    await expect(doc.body).not.toHaveStyle({ overflow: 'hidden' });
   },
 };

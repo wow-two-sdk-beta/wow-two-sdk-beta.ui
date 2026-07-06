@@ -390,7 +390,9 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
           </div>
         )}
         <div
-          role="grid"
+          // Flat button collection, no 2D keyboard nav — ARIA grid (grid >
+          // row > gridcell) would be a lie; group + labeled buttons is honest.
+          role="group"
           aria-label="Emoji"
           className="overflow-y-auto p-2"
           style={{ maxHeight: 280 }}
@@ -434,7 +436,7 @@ interface EmojiCellProps {
 
 function EmojiCell({ entry, cellSize, isDisabled, onSelect }: EmojiCellProps) {
   return (
-    <div role="gridcell">
+    <div>
       <button
         type="button"
         aria-label={entry.name}

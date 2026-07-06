@@ -12,7 +12,7 @@ export default meta;
 type Story = StoryObj<typeof TagsInput>;
 
 export const Default: Story = {
-  render: () => <div className="w-96"><TagsInput defaultValue={['react', 'typescript']} /></div>,
+  render: () => <div className="w-96"><TagsInput defaultValue={['react', 'typescript']} aria-label="Tags" /></div>,
 };
 
 export const Controlled: Story = {
@@ -21,7 +21,7 @@ export const Controlled: Story = {
       const [tags, setTags] = useState<string[]>(['hello']);
       return (
         <div className="w-96 space-y-2">
-          <TagsInput value={tags} onValueChange={setTags} />
+          <TagsInput value={tags} onValueChange={setTags} aria-label="Tags" />
           <p className="text-xs text-muted-foreground">
             current: <code>{JSON.stringify(tags)}</code>
           </p>
@@ -35,7 +35,7 @@ export const Controlled: Story = {
 export const Brand: Story = {
   render: () => (
     <div className="w-96">
-      <TagsInput defaultValue={['frontend', 'react', 'tailwind']} tagVariant="brand" />
+      <TagsInput defaultValue={['frontend', 'react', 'tailwind']} tagVariant="brand" aria-label="Tags" />
     </div>
   ),
 };
@@ -43,7 +43,7 @@ export const Brand: Story = {
 export const Capped: Story = {
   render: () => (
     <div className="w-96">
-      <TagsInput defaultValue={['one', 'two']} max={3} placeholder="max 3" />
+      <TagsInput defaultValue={['one', 'two']} max={3} placeholder="max 3" aria-label="Tags" />
     </div>
   ),
 };
@@ -51,7 +51,7 @@ export const Capped: Story = {
 export const Disabled: Story = {
   render: () => (
     <div className="w-96">
-      <TagsInput defaultValue={['locked', 'tags']} disabled />
+      <TagsInput defaultValue={['locked', 'tags']} disabled aria-label="Tags" />
     </div>
   ),
 };
@@ -59,7 +59,7 @@ export const Disabled: Story = {
 export const Invalid: Story = {
   render: () => (
     <div className="w-96">
-      <TagsInput defaultValue={['oops']} isInvalid />
+      <TagsInput defaultValue={['oops']} isInvalid aria-label="Tags" />
     </div>
   ),
 };
@@ -67,7 +67,7 @@ export const Invalid: Story = {
 /* ────────── Interaction tests (play functions — run as browser tests via the vitest addon) ────────── */
 
 export const EnterAndDelimiterCommitTags: Story = {
-  args: { onValueChange: fn() },
+  args: { onValueChange: fn(), 'aria-label': 'Tags' },
   render: (args) => (
     <div className="w-96">
       <TagsInput {...args} />
@@ -95,7 +95,7 @@ export const EnterAndDelimiterCommitTags: Story = {
 };
 
 export const BackspaceRemovesLastTagInTwoStages: Story = {
-  args: { defaultValue: ['react', 'vue'], onValueChange: fn() },
+  args: { defaultValue: ['react', 'vue'], onValueChange: fn(), 'aria-label': 'Tags' },
   render: (args) => (
     <div className="w-96">
       <TagsInput {...args} />
@@ -120,7 +120,7 @@ export const BackspaceRemovesLastTagInTwoStages: Story = {
 };
 
 export const DuplicateTagsAreRejected: Story = {
-  args: { defaultValue: ['react'], onValueChange: fn() },
+  args: { defaultValue: ['react'], onValueChange: fn(), 'aria-label': 'Tags' },
   render: (args) => (
     <div className="w-96">
       <TagsInput {...args} />
@@ -139,7 +139,7 @@ export const DuplicateTagsAreRejected: Story = {
 };
 
 export const MaxCapBlocksFurtherTags: Story = {
-  args: { defaultValue: ['one', 'two'], max: 2, onValueChange: fn() },
+  args: { defaultValue: ['one', 'two'], max: 2, onValueChange: fn(), 'aria-label': 'Tags' },
   render: (args) => (
     <div className="w-96">
       <TagsInput {...args} />
@@ -157,7 +157,7 @@ export const MaxCapBlocksFurtherTags: Story = {
 };
 
 export const ChipCloseButtonRemovesThatTag: Story = {
-  args: { defaultValue: ['react', 'vue'], onValueChange: fn() },
+  args: { defaultValue: ['react', 'vue'], onValueChange: fn(), 'aria-label': 'Tags' },
   render: (args) => (
     <div className="w-96">
       <TagsInput {...args} />

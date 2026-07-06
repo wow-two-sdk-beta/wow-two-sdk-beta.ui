@@ -124,7 +124,8 @@ export const Comment = forwardRef<HTMLDivElement, CommentProps>(
 
           {hasReplies && (
             <div className={cn('mt-2', collapsed && 'hidden')}>
-              <div className="flex flex-col gap-3 border-l border-border pl-3">
+              {/* treeitem children must sit in a role=group per the ARIA tree pattern */}
+              <div role="group" className="flex flex-col gap-3 border-l border-border pl-3">
                 {replies}
               </div>
             </div>

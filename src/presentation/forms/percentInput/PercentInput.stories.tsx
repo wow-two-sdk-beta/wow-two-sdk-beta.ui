@@ -9,4 +9,4 @@ const meta: Meta<typeof PercentInput> = {
 export default meta;
 type Story = StoryObj<typeof PercentInput>;
 
-export const Default: Story = { args: { defaultValue: 12.5, step: 0.5 } };
+export const Default: Story = { args: { defaultValue: 12.5, step: 0.5, 'aria-label': 'Percentage' } };

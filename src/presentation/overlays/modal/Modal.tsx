@@ -161,7 +161,8 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
 
     return (
       <Portal>
-        <ScrollLockProvider>
+        {/* Lock follows open state, not mount — Content can mount closed. */}
+        <ScrollLockProvider isEnabled={ctx.open}>
           {/* Backdrop in its own Presence so its fade-out plays before unmount.
               `Presence` injects `data-state` + `ref` onto the cloned child, which is
               the animating node it watches for `animationend` — so each animated

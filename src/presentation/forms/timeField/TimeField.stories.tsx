@@ -15,7 +15,7 @@ function Demo() {
   const [time, setTime] = useState<Temporal.PlainTime | null>(null);
   return (
     <div className="flex flex-col gap-3 w-72">
-      <TimeField value={time} onValueChange={setTime} />
+      <TimeField value={time} onValueChange={setTime} aria-label="Time" />
       <p className="text-sm text-muted-foreground">
         Value: {time ? time.toString({ smallestUnit: 'minute' }) : 'none'}
       </p>
@@ -28,7 +28,7 @@ export const Default: Story = { render: () => <Demo /> };
 export const FiveMinuteSteps: Story = {
   render: () => (
     <div className="w-72">
-      <TimeField step={300} />
+      <TimeField step={300} aria-label="Time" />
     </div>
   ),
 };
@@ -36,7 +36,7 @@ export const FiveMinuteSteps: Story = {
 export const Invalid: Story = {
   render: () => (
     <div className="w-72">
-      <TimeField state="invalid" />
+      <TimeField state="invalid" aria-label="Time" />
     </div>
   ),
 };
