@@ -4,6 +4,7 @@ export * from './buttonGroup';
 export * from './toggleButton';
 export * from './toggleButtonGroup';
 export * from './optionTile';
+export * from './optionTileGroup';
 export * from './segmentedControl';
 export * from './fab';
 export * from './copyButton';

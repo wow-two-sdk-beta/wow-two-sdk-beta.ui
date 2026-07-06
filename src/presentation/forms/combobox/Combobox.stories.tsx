@@ -127,10 +127,13 @@ export const TypingFiltersOptions: Story = {
     await waitFor(() => expect(body.getAllByRole('option')).toHaveLength(1));
     await expect(body.getByRole('option', { name: 'Banana' })).toBeInTheDocument();
 
-    /* No match left → the Empty slot renders instead of options. */
+    /* No match left → the Empty slot renders instead of matches. It is itself
+       a disabled option (a listbox must own at least one option), so exactly
+       one option remains: the placeholder. */
     await userEvent.type(input, 'zzz');
-    await waitFor(() => expect(body.queryAllByRole('option')).toHaveLength(0));
-    await expect(body.getByText('No matches')).toBeInTheDocument();
+    await waitFor(() => expect(body.getAllByRole('option')).toHaveLength(1));
+    const empty = body.getByRole('option', { name: 'No matches' });
+    await expect(empty).toHaveAttribute('aria-disabled', 'true');
   },
 };
 

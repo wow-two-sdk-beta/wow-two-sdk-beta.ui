@@ -13,6 +13,7 @@ import {
 } from 'react';
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { RovingFocusGroup, useRovingFocusItem } from '../../../foundation/primitives';
 import {
   Menu,
   MenuItem,
@@ -113,14 +114,18 @@ const MenubarRoot = forwardRef<HTMLDivElement, MenubarProps>(function Menubar(
 
   return (
     <MenubarContext.Provider value={ctx}>
-      <div
+      {/* Roving tabindex (APG): the menubar is a single composite tab stop —
+          one trigger holds tabIndex 0, arrows / Home / End rove focus. */}
+      <RovingFocusGroup
         ref={ref}
+        orientation="horizontal"
+        canLoop
         role="menubar"
         className={cn(menubarVariants(), className)}
         {...rest}
       >
         {children}
-      </div>
+      </RovingFocusGroup>
     </MenubarContext.Provider>
   );
 });
@@ -159,11 +164,13 @@ export interface MenubarTriggerProps
 
 export const MenubarTrigger = forwardRef<HTMLButtonElement, MenubarTriggerProps>(
   function MenubarTrigger(
-    { className, onClick, onKeyDown, onPointerEnter, children, ...rest },
+    { className, onClick, onKeyDown, onPointerEnter, onFocus, children, ...rest },
     forwardedRef,
   ) {
     const bar = useMenubarContext();
     const menu = useMenubarMenuContext();
+    // Roving tab stop — one trigger is tabbable; the stop follows focus.
+    const roving = useRovingFocusItem();
 
     useEffect(() => {
       bar.registerTrigger(menu.id, menu.triggerRef.current);
@@ -172,12 +179,13 @@ export const MenubarTrigger = forwardRef<HTMLButtonElement, MenubarTriggerProps>
 
     return (
       <button
-        ref={composeRefs(forwardedRef, menu.triggerRef, menu.setTriggerNode)}
+        ref={composeRefs(forwardedRef, menu.triggerRef, menu.setTriggerNode, roving.ref)}
         type="button"
         role="menuitem"
         aria-haspopup="menu"
         aria-expanded={menu.open}
         data-state={menu.open ? 'open' : 'closed'}
+        tabIndex={roving.tabIndex}
         onClick={(e) => {
           onClick?.(e);
           if (e.defaultPrevented) return;
@@ -190,35 +198,36 @@ export const MenubarTrigger = forwardRef<HTMLButtonElement, MenubarTriggerProps>
             bar.setActiveId(menu.id);
           }
         }}
+        onFocus={(e) => {
+          onFocus?.(e);
+          // The roving stop follows focus — however it arrived (arrows,
+          // moveAcross from an open popup, focus return on close).
+          roving.onFocus();
+        }}
         onKeyDown={(e) => {
           onKeyDown?.(e);
           if (e.defaultPrevented) return;
           switch (e.key) {
-            case 'ArrowRight':
-              e.preventDefault();
-              bar.moveAcross(menu.id, 1);
-              break;
-            case 'ArrowLeft':
-              e.preventDefault();
-              bar.moveAcross(menu.id, -1);
-              break;
             case 'ArrowDown':
             case 'Enter':
             case ' ':
               e.preventDefault();
               menu.setOpen(true);
+              return;
+            case 'ArrowRight':
+            case 'ArrowLeft':
+              // A menu is open → switching semantics: focus AND open state
+              // move to the adjacent menu together.
+              if (bar.activeId !== null) {
+                e.preventDefault();
+                bar.moveAcross(menu.id, e.key === 'ArrowRight' ? 1 : -1);
+                return;
+              }
               break;
-            case 'Home':
-              e.preventDefault();
-              bar.triggersRef.current[0]?.ref?.focus();
-              break;
-            case 'End': {
-              e.preventDefault();
-              const list = bar.triggersRef.current;
-              list[list.length - 1]?.ref?.focus();
-              break;
-            }
           }
+          // Closed menubar: arrows / Home / End rove the single tab stop
+          // (disabled triggers skipped, RTL-aware).
+          roving.onKeyDown(e);
         }}
         className={cn(menubarTriggerVariants(), className)}
         {...rest}

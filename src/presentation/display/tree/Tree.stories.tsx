@@ -34,8 +34,9 @@ export const Default: Story = {
  * Interaction tests (play) — oracle: Tree.tsx source.
  * Group children mount/unmount through Presence — collapse asserts wait out
  * the exit transition; roving focus lands via a post-commit effect → poll
- * focus with `waitFor`. Note: ArrowRight/ArrowLeft expand/collapse (APG) is
- * not implemented — expansion is Enter/Space/click only.
+ * focus with `waitFor`. Expansion: Enter/Space/click toggle, plus the APG
+ * horizontal arrows (ArrowRight expands/descends, ArrowLeft collapses/climbs
+ * — see ArrowKeysExpandCollapseAndTraverse).
  * ------------------------------------------------------------------------- */
 
 const interactionRender = (
@@ -135,5 +136,49 @@ export const KeyboardNavigatesAndActivates: Story = {
     await userEvent.keyboard(' ');
     await expect(child).toHaveAttribute('aria-selected', 'true');
     await expect(args.onSelectionChange).toHaveBeenLastCalledWith('src/a.ts');
+  },
+};
+
+export const ArrowKeysExpandCollapseAndTraverse: Story = {
+  render: () => interactionRender({}),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const branch = canvas.getByRole('treeitem', { name: 'src' });
+
+    await userEvent.tab();
+    await expect(branch).toHaveFocus();
+
+    // ArrowRight on a collapsed branch expands it; focus stays put (APG).
+    await userEvent.keyboard('{ArrowRight}');
+    await expect(branch).toHaveAttribute('aria-expanded', 'true');
+    await expect(branch).toHaveFocus();
+
+    // ArrowRight on an expanded branch descends to its first child.
+    const child = await canvas.findByRole('treeitem', { name: 'a.ts' });
+    await userEvent.keyboard('{ArrowRight}');
+    await waitFor(() => expect(child).toHaveFocus());
+
+    // ArrowLeft on a child leaf climbs back to the parent branch…
+    await userEvent.keyboard('{ArrowLeft}');
+    await waitFor(() => expect(branch).toHaveFocus());
+
+    // …ArrowLeft on the expanded branch collapses it; focus stays put.
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect(branch).toHaveAttribute('aria-expanded', 'false');
+    await expect(branch).toHaveFocus();
+    await waitFor(() =>
+      expect(canvas.queryByRole('treeitem', { name: 'a.ts' })).not.toBeInTheDocument(),
+    );
+
+    // Edges: ArrowRight on a leaf is a no-op; ArrowLeft on a root-level leaf
+    // (no parent branch) is a no-op too.
+    const readme = canvas.getByRole('treeitem', { name: 'README.md' });
+    await userEvent.keyboard('{ArrowDown}');
+    await waitFor(() => expect(readme).toHaveFocus());
+    await userEvent.keyboard('{ArrowRight}');
+    await expect(readme).toHaveFocus();
+    await expect(readme).not.toHaveAttribute('aria-expanded');
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect(readme).toHaveFocus();
   },
 };

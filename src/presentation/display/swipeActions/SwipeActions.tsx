@@ -1,5 +1,8 @@
 import {
+  Children,
+  Fragment,
   forwardRef,
+  isValidElement,
   useRef,
   useState,
   type HTMLAttributes,
@@ -150,8 +153,17 @@ export const SwipeActions = forwardRef<HTMLDivElement, SwipeActionsProps>(
   },
 );
 
+/**
+ * Number of action slots in a side. Fragments are flattened so
+ * `<>{a}{b}</>` sizes two slots, same as `[a, b]` — the snap width is
+ * `slots × actionWidth` either way.
+ */
 function countNodes(node: ReactNode): number {
-  if (!node) return 0;
-  if (Array.isArray(node)) return node.length;
-  return 1;
+  return Children.toArray(node).reduce<number>(
+    (count, child) =>
+      isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment
+        ? count + countNodes(child.props.children)
+        : count + 1,
+    0,
+  );
 }

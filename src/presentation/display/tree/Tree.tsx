@@ -137,9 +137,31 @@ function NodeRow({
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         onActivate();
+        return;
+      }
+      /* APG tree pattern — the vertical roving group above ignores the
+         horizontal arrows, so they are free to drive expand/collapse here. */
+      if (e.key === 'ArrowRight' && hasChildren) {
+        e.preventDefault();
+        if (expanded) focusFirstChildRow(e.currentTarget);
+        else onActivate(); // Expand; focus stays on the branch.
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        if (hasChildren && expanded) {
+          e.preventDefault();
+          onActivate(); // Collapse; focus stays on the branch.
+          return;
+        }
+        // Leaf or collapsed branch: climb to the parent branch, if any.
+        const parentRow = findParentRow(e.currentTarget);
+        if (parentRow) {
+          e.preventDefault();
+          parentRow.focus();
+        }
       }
     },
-    [roving, disabled, onActivate],
+    [roving, disabled, onActivate, hasChildren, expanded],
   );
   return (
     <div
@@ -177,6 +199,26 @@ function NodeRow({
       )}
       <span className="flex-1 truncate">{label}</span>
     </div>
+  );
+}
+
+/* DOM-walking targets for the APG horizontal arrows. Anatomy per branch:
+   <li role=presentation> → [row div role=treeitem, content → <ul role=group>].
+   The tree root is role="tree", so a root-level row has no `[role="group"]`
+   ancestor and ArrowLeft is a no-op there. */
+
+/** First child row of an expanded branch — ArrowRight descends into it. */
+function focusFirstChildRow(row: HTMLElement) {
+  row.closest('li')?.querySelector<HTMLElement>('[role="group"] [role="treeitem"]')?.focus();
+}
+
+/** Row of the branch owning this row — ArrowLeft climbs to it. */
+function findParentRow(row: HTMLElement): HTMLElement | null {
+  return (
+    row
+      .closest('[role="group"]')
+      ?.closest('li')
+      ?.querySelector<HTMLElement>(':scope > [role="treeitem"]') ?? null
   );
 }
 

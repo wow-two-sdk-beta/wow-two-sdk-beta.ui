@@ -141,6 +141,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
             <li key={i} className="flex items-center gap-2">
               <input
                 type="color"
+                aria-label="Stop color"
                 value={stop.color}
                 disabled={isDisabled}
                 onChange={(e) => updateStop(i, { color: e.target.value })}
@@ -148,6 +149,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
               />
               <input
                 type="text"
+                aria-label="Stop color hex"
                 value={stop.color}
                 disabled={isDisabled}
                 onChange={(e) => updateStop(i, { color: e.target.value })}
@@ -155,6 +157,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
               />
               <input
                 type="number"
+                aria-label="Stop position"
                 min={0}
                 max={100}
                 value={stop.position}

@@ -23,12 +23,65 @@ interface ItemEntry {
   node: HTMLElement | null;
 }
 
+/**
+ * Disabled state is read from the DOM node rather than a hook option, so
+ * items keep declaring it the way they already do (native `disabled`,
+ * `aria-disabled="true"`, or a bare `data-disabled` attr) and the group sees
+ * changes without re-registration.
+ */
+function isNodeDisabled(node: HTMLElement | null): boolean {
+  if (!node) return false;
+  return (
+    node.matches(':disabled') ||
+    node.getAttribute('aria-disabled') === 'true' ||
+    node.hasAttribute('data-disabled')
+  );
+}
+
+const isEntryDisabled = (entry: ItemEntry): boolean => isNodeDisabled(entry.node);
+
+/**
+ * First enabled entry walking from `start` (inclusive) in direction `dir`.
+ * Wraps at the edges when `loop`, otherwise stops there. Returns undefined
+ * when no enabled entry is reachable.
+ */
+function findEnabled(
+  list: ItemEntry[],
+  start: number,
+  dir: 1 | -1,
+  loop: boolean,
+): ItemEntry | undefined {
+  const len = list.length;
+  if (len === 0) return undefined;
+  for (let step = 0; step < len; step++) {
+    let index = start + dir * step;
+    if (loop) index = ((index % len) + len) % len;
+    else if (index < 0 || index >= len) return undefined;
+    const entry = list[index];
+    if (entry && !isEntryDisabled(entry)) return entry;
+  }
+  return undefined;
+}
+
+/** Nearest enabled entry around `idx` (excluding it), preferring the next one on ties. */
+function findNearestEnabled(list: ItemEntry[], idx: number): ItemEntry | undefined {
+  for (let distance = 1; distance < list.length; distance++) {
+    const forward = list[idx + distance];
+    if (forward && !isEntryDisabled(forward)) return forward;
+    const backward = list[idx - distance];
+    if (backward && !isEntryDisabled(backward)) return backward;
+  }
+  return undefined;
+}
+
 interface RovingFocusContextValue {
   register: (id: string, node: HTMLElement | null) => void;
   unregister: (id: string) => void;
   focusedId: string | null;
   setFocusedId: (id: string) => void;
   onItemKeyDown: (event: KeyboardEvent, id: string) => void;
+  /** Re-validates that the tab stop sits on an enabled item (see useRovingFocusItem). */
+  ensureEnabledStop: (id: string) => void;
   /** True once the user has interacted with the group; reset when focus leaves. */
   interactedRef: RefObject<boolean>;
   groupRef: RefObject<HTMLDivElement | null>;
@@ -45,7 +98,11 @@ export interface RovingFocusGroupProps extends HTMLAttributes<HTMLDivElement> {
 /**
  * Provide arrow-key navigation for a group of focusable children. Children
  * call `useRovingFocusItem()` to register and receive `tabIndex` / event
- * handlers. Used by Tabs, ToggleGroup, RadioGroup, Menu.
+ * handlers. Disabled items (native `disabled`, `aria-disabled="true"`, or
+ * `data-disabled`) are never valid stops: arrow / Home / End navigation
+ * skips them (wrap-around keeps skipping past disabled edges) and the tab
+ * stop is always kept on an enabled item. Used by Tabs, Toolbar, Tree,
+ * Accordion, Stepper, NavigationMenu, Menubar.
  */
 export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps>(
   function RovingFocusGroup(
@@ -74,17 +131,19 @@ export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps
         if (index === -1) items.current.push(entry);
         else items.current.splice(index, 0, entry);
       }
-      setFocusedId((current) => current ?? id);
+      // A disabled item never claims the tab stop — tabIndex 0 on an
+      // unfocusable element would make the whole group untabbable.
+      if (!isNodeDisabled(node)) setFocusedId((current) => current ?? id);
     }, []);
 
     const unregister = useCallback((id: string) => {
       const idx = items.current.findIndex((item) => item.id === id);
       items.current = items.current.filter((item) => item.id !== id);
-      // If the tab stop unmounts, advance to the next remaining item (or
-      // the first) so the group keeps exactly one tabbable item.
+      // If the tab stop unmounts, advance to the next remaining enabled item
+      // (wrapping to the first) so the group keeps exactly one tabbable item.
       setFocusedId((current) => {
         if (current !== id) return current;
-        const next = items.current[idx] ?? items.current[0];
+        const next = findEnabled(items.current, idx, 1, true);
         return next ? next.id : null;
       });
     }, []);
@@ -112,27 +171,48 @@ export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps
         // Horizontal arrows mirror in RTL.
         const nextHorizKey = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
         const prevHorizKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
-        let next = idx;
+        // Disabled items are skipped (APG): the search walks past them —
+        // wrapping at the edges when canLoop — until an enabled item is
+        // found; Home / End land on the first / last *enabled* item.
+        let next: ItemEntry | undefined;
         if ((event.key === nextHorizKey && isHoriz) || (event.key === 'ArrowDown' && isVert)) {
-          next = idx + 1;
-          if (next >= list.length) next = canLoop ? 0 : list.length - 1;
+          next = findEnabled(list, idx + 1, 1, canLoop);
         } else if ((event.key === prevHorizKey && isHoriz) || (event.key === 'ArrowUp' && isVert)) {
-          next = idx - 1;
-          if (next < 0) next = canLoop ? list.length - 1 : 0;
+          next = findEnabled(list, idx - 1, -1, canLoop);
         } else if (event.key === 'Home') {
-          next = 0;
+          next = findEnabled(list, 0, 1, false);
         } else if (event.key === 'End') {
-          next = list.length - 1;
+          next = findEnabled(list, list.length - 1, -1, false);
         } else {
           return;
         }
         event.preventDefault();
         interactedRef.current = true;
-        const entry = list[next];
-        if (entry) setFocusedId(entry.id);
+        if (next) setFocusedId(next.id);
       },
       [orientation, canLoop, direction],
     );
+
+    // Items call this after every commit — keeps the tab stop off disabled
+    // items even when disabled state toggles long after registration.
+    const ensureEnabledStop = useCallback((id: string) => {
+      const list = items.current;
+      const caller = list.find((item) => item.id === id);
+      if (!caller) return;
+      setFocusedId((current) => {
+        // No stop is held (every item registered disabled) — the first
+        // enabled caller claims it.
+        if (current === null) return isEntryDisabled(caller) ? null : id;
+        // The held stop turned disabled — hand it to the nearest enabled item.
+        const heldIdx = list.findIndex((item) => item.id === current);
+        const held = heldIdx === -1 ? undefined : list[heldIdx];
+        if (held && isEntryDisabled(held)) {
+          const next = findNearestEnabled(list, heldIdx);
+          return next ? next.id : null;
+        }
+        return current;
+      });
+    }, []);
 
     const value = useMemo(
       () => ({
@@ -141,10 +221,11 @@ export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps
         focusedId,
         setFocusedId,
         onItemKeyDown,
+        ensureEnabledStop,
         interactedRef,
         groupRef,
       }),
-      [register, unregister, focusedId, onItemKeyDown],
+      [register, unregister, focusedId, onItemKeyDown, ensureEnabledStop],
     );
 
     return (
@@ -188,6 +269,15 @@ export function useRovingFocusItem(
     register?.(id, ref.current);
     return () => unregister?.(id);
   }, [register, unregister, id]);
+
+  // Disabled state lives on the DOM node (`disabled` / `aria-disabled` /
+  // `data-disabled`) and can change on any commit without re-registering —
+  // re-validate after every render so a disabled item never holds the stop
+  // (the group moves it to the nearest enabled item).
+  const ensureEnabledStop = context?.ensureEnabledStop;
+  useEffect(() => {
+    ensureEnabledStop?.(id);
+  });
 
   // Move DOM focus only after user interaction — never on initial mount.
   const focusedId = context?.focusedId;

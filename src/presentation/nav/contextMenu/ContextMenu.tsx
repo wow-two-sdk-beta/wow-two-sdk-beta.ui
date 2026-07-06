@@ -27,6 +27,8 @@ interface ContextMenuContextValue {
   anchor: HTMLElement | null;
   setAnchor: (el: HTMLElement | null) => void;
   triggerRef: React.MutableRefObject<HTMLElement | null>;
+  /** Element to hand focus back to on close — captured before the open gesture moves focus. */
+  restoreFocusRef: React.MutableRefObject<HTMLElement | null>;
 }
 
 const ContextMenuContext = createContext<ContextMenuContextValue | null>(null);
@@ -58,6 +60,8 @@ function ContextMenuRoot({ children }: ContextMenuProps) {
   const [open, setOpen] = useState(false);
   const [anchor, setAnchorState] = useState<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const restoreRafRef = useRef(0);
 
   const setAnchor = useCallback((el: HTMLElement | null) => {
     setAnchorState((prev) => {
@@ -66,12 +70,46 @@ function ContextMenuRoot({ children }: ContextMenuProps) {
     });
   }, []);
 
+  // Cancel a pending focus-restore loop if the component unmounts mid-close.
+  useEffect(() => () => cancelAnimationFrame(restoreRafRef.current), []);
+
   const handleSetOpen = useCallback(
     (next: boolean) => {
+      // The trigger is a non-focusable div, so there is no trigger to hand
+      // focus back to (APG wants focus returned on close). The trigger
+      // captures the pre-gesture active element into `restoreFocusRef` on
+      // pointerdown (the browser's mousedown focus fixup may have already
+      // blurred it by the time `contextmenu` fires); fall back to the
+      // current active element for non-pointer opens.
+      if (next && !open) {
+        cancelAnimationFrame(restoreRafRef.current);
+        restoreFocusRef.current ??=
+          document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+            ? document.activeElement
+            : null;
+      }
       setOpen(next);
-      if (!next) setAnchor(null);
+      if (!next) {
+        setAnchor(null);
+        const restoreTarget = restoreFocusRef.current;
+        restoreFocusRef.current = null;
+        // The menu stays mounted (and focus-trapped) through its exit
+        // animation, yanking focus straight back into itself — so retry each
+        // frame until the restore sticks (bounded; the exit lasts a few
+        // hundred ms at most). Reopening cancels the loop.
+        if (restoreTarget) {
+          let attempts = 0;
+          const tryRestore = () => {
+            restoreTarget.focus();
+            if (document.activeElement !== restoreTarget && attempts++ < 30) {
+              restoreRafRef.current = requestAnimationFrame(tryRestore);
+            }
+          };
+          restoreRafRef.current = requestAnimationFrame(tryRestore);
+        }
+      }
     },
-    [setAnchor],
+    [open, setAnchor],
   );
 
   // Remove the body-appended virtual anchor when it is replaced or on unmount.
@@ -83,7 +121,7 @@ function ContextMenuRoot({ children }: ContextMenuProps) {
   }, [anchor]);
 
   const ctx = useMemo<ContextMenuContextValue>(
-    () => ({ open, setOpen: handleSetOpen, anchor, setAnchor, triggerRef }),
+    () => ({ open, setOpen: handleSetOpen, anchor, setAnchor, triggerRef, restoreFocusRef }),
     [open, handleSetOpen, anchor, setAnchor],
   );
 
@@ -131,6 +169,16 @@ export const ContextMenuTrigger = forwardRef<HTMLDivElement, ContextMenuTriggerP
         onContextMenu={handleContextMenu}
         onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
           onPointerDown?.(e);
+          // Capture the focus-restore target before the browser's mousedown
+          // focus fixup blurs it (this trigger is a non-focusable div, so
+          // the press moves focus to <body> before `contextmenu` fires).
+          // Only for gestures that can open the menu: right button / touch.
+          if (!isDisabled && !ctx.open && (e.button === 2 || e.pointerType === 'touch')) {
+            ctx.restoreFocusRef.current =
+              document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+                ? document.activeElement
+                : null;
+          }
           if (e.defaultPrevented || isDisabled || e.pointerType !== 'touch') return;
           const x = e.clientX;
           const y = e.clientY;

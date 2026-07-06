@@ -25,21 +25,29 @@ function Item({ label, isDisabled = false, isActive = false }: ItemProps) {
   );
 }
 
+type Label = 'one' | 'two' | 'three';
+const labels: Label[] = ['one', 'two', 'three'];
+
 interface FixtureProps {
   orientation?: Orientation;
   canLoop?: boolean;
-  isSecondDisabled?: boolean;
-  activeLabel?: 'one' | 'two' | 'three';
+  disabledLabels?: Label[];
+  activeLabel?: Label;
 }
 
-function Fixture({ orientation, canLoop, isSecondDisabled = false, activeLabel }: FixtureProps) {
+function Fixture({ orientation, canLoop, disabledLabels = [], activeLabel }: FixtureProps) {
   return (
     <>
       <button type="button">before</button>
       <RovingFocusGroup orientation={orientation} canLoop={canLoop}>
-        <Item label="one" isActive={activeLabel === 'one'} />
-        <Item label="two" isDisabled={isSecondDisabled} isActive={activeLabel === 'two'} />
-        <Item label="three" isActive={activeLabel === 'three'} />
+        {labels.map((label) => (
+          <Item
+            key={label}
+            label={label}
+            isDisabled={disabledLabels.includes(label)}
+            isActive={activeLabel === label}
+          />
+        ))}
       </RovingFocusGroup>
       <button type="button">after</button>
     </>
@@ -160,29 +168,79 @@ describe('RovingFocusGroup', () => {
     await waitFor(() => expect(item('one')).toHaveFocus());
   });
 
-  // KNOWN APG DIVERGENCE (documented in docs/testing.md): disabled items are
-  // NOT skipped by arrow navigation. The roving tab stop (tabIndex 0) moves
-  // onto the disabled item, DOM focus cannot follow, and navigation is stuck
-  // in front of it. This test pins the CURRENT behavior — do not rewrite it to
-  // assert the "correct" APG skip without changing the source first.
-  it('does not skip disabled items — the tab stop lands on them while focus stays put (known APG divergence)', async () => {
-    render(<Fixture isSecondDisabled />);
+  // Disabled items (native `disabled`, `aria-disabled="true"`, `data-disabled`)
+  // are never valid roving stops — arrow navigation skips them per APG.
+  it('skips disabled items with arrows in both directions — the tab stop never lands on them', async () => {
+    render(<Fixture disabledLabels={['two']} />);
     await userEvent.click(item('one'));
     await waitFor(() => expect(item('one')).toHaveFocus());
 
+    // Forward: one → (two disabled, skipped) → three.
     await userEvent.keyboard('{ArrowRight}');
-    // The disabled item becomes the (unfocusable) tab stop…
+    await waitFor(() => expect(item('three')).toHaveFocus());
+    expect(item('three')).toHaveAttribute('tabindex', '0');
+    expect(item('two')).toHaveAttribute('tabindex', '-1');
+    expect(item('one')).toHaveAttribute('tabindex', '-1');
+
+    // Backward: three → (two skipped) → one.
+    await userEvent.keyboard('{ArrowLeft}');
+    await waitFor(() => expect(item('one')).toHaveFocus());
+    expect(item('one')).toHaveAttribute('tabindex', '0');
+    expect(item('two')).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('wrap-around skips disabled items at the edges', async () => {
+    render(<Fixture disabledLabels={['three']} />);
+    await userEvent.click(item('two'));
+    await waitFor(() => expect(item('two')).toHaveFocus());
+
+    // Forward from the last enabled item wraps past the disabled edge to the first.
+    await userEvent.keyboard('{ArrowRight}');
+    await waitFor(() => expect(item('one')).toHaveFocus());
+
+    // Backward from the first wraps past the disabled edge to the last enabled.
+    await userEvent.keyboard('{ArrowLeft}');
+    await waitFor(() => expect(item('two')).toHaveFocus());
+  });
+
+  it('Home lands on the first enabled item when the first is disabled', async () => {
+    render(<Fixture disabledLabels={['one']} />);
+    await userEvent.click(item('three'));
+    await waitFor(() => expect(item('three')).toHaveFocus());
+
+    await userEvent.keyboard('{Home}');
+    await waitFor(() => expect(item('two')).toHaveFocus());
+    expect(item('one')).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('End lands on the last enabled item when the last is disabled', async () => {
+    render(<Fixture disabledLabels={['three']} />);
+    await userEvent.click(item('one'));
+    await waitFor(() => expect(item('one')).toHaveFocus());
+
+    await userEvent.keyboard('{End}');
+    await waitFor(() => expect(item('two')).toHaveFocus());
+    expect(item('three')).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('never gives the initial tab stop to a disabled item', async () => {
+    render(<Fixture disabledLabels={['one']} />);
     await waitFor(() => expect(item('two')).toHaveAttribute('tabindex', '0'));
     expect(item('one')).toHaveAttribute('tabindex', '-1');
-    // …while DOM focus stays on the previous item.
-    expect(item('one')).toHaveFocus();
+    expect(item('three')).toHaveAttribute('tabindex', '-1');
+  });
 
-    // A second ArrowRight still originates from item one, so navigation can
-    // never get past the disabled item.
-    await userEvent.keyboard('{ArrowRight}');
-    await sleep(50);
-    expect(item('one')).toHaveFocus();
-    expect(item('two')).toHaveAttribute('tabindex', '0');
+  it('moves the tab stop to the nearest enabled item when the current stop becomes disabled', async () => {
+    const { rerender } = render(<Fixture />);
+    await userEvent.click(item('two'));
+    await waitFor(() => expect(item('two')).toHaveAttribute('tabindex', '0'));
+
+    rerender(<Fixture disabledLabels={['two']} />);
+    // Nearest enabled item (next preferred) takes over the stop…
+    await waitFor(() => expect(item('three')).toHaveAttribute('tabindex', '0'));
+    // …and the disabled item drops out of the tab order.
+    expect(item('two')).toHaveAttribute('tabindex', '-1');
+    expect(item('one')).toHaveAttribute('tabindex', '-1');
   });
 
   it('makes the isActive item the tab stop while focus is outside the group', async () => {

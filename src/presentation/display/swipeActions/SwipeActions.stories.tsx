@@ -99,8 +99,8 @@ const interactionRender = () => (
           onClick={pinSpy}
         />
       }
-      /* Array (not fragment) on purpose: countNodes() sizes the slot per array
-         entry — a fragment counts as a single node and halves the snap width. */
+      /* Array shape: countNodes() sizes one slot per entry. Fragment children
+         flatten to the same count — see FragmentActionsGetFullSnapWidth. */
       right={[
         <ActionButton
           key="archive"
@@ -196,6 +196,55 @@ export const TapClosesOpenRow: Story = {
     await waitFor(() =>
       expect(row.closest('div[style]')).toHaveStyle({ transform: 'matrix(1, 0, 0, 1, 0, 0)' }),
     );
+  },
+};
+
+/* Fragment fixture — the shipped Default story wraps its two right actions in
+   <>…</>; countNodes() flattens fragments so they size two slots (2 × 72px),
+   identical to the array fixture above. Before the flattening fix a fragment
+   counted as one node and squeezed both actions into a single slot. */
+export const FragmentActionsGetFullSnapWidth: Story = {
+  render: () => (
+    <div className="w-[28rem] rounded-md border border-border bg-card">
+      <SwipeActions
+        right={
+          <>
+            <ActionButton
+              bg="bg-warning"
+              icon={<Icon icon={Archive} size={16} />}
+              label="Archive"
+              onClick={archiveSpy}
+            />
+            <ActionButton
+              bg="bg-destructive"
+              icon={<Icon icon={Trash} size={16} />}
+              label="Delete"
+              onClick={deleteSpy}
+            />
+          </>
+        }
+      >
+        <div className="flex items-center gap-3 p-3">
+          <div className="text-sm font-medium">Swipe row</div>
+        </div>
+      </SwipeActions>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    archiveSpy.mockClear();
+    const canvas = within(canvasElement);
+    const row = canvas.getByText('Swipe row');
+
+    await swipeByPointer(row, -120);
+    const archiveButton = await canvas.findByRole('button', { name: 'Archive' });
+    await expect(canvas.getByRole('button', { name: 'Delete' })).toBeVisible();
+    // Two fragment children → two slots: the row snaps to -144px, not -72px.
+    await waitFor(() =>
+      expect(row.closest('div[style]')).toHaveStyle({ transform: 'matrix(1, 0, 0, 1, -144, 0)' }),
+    );
+
+    await userEvent.click(archiveButton);
+    await expect(archiveSpy).toHaveBeenCalledTimes(1);
   },
 };
 

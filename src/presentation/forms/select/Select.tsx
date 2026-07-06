@@ -592,8 +592,9 @@ export function SelectValue({ placeholder, children }: SelectValueProps) {
     (ctx.hasSelection ? ctx.getCachedLabel(ctx.selectedKey) : null) ??
     (ctx.hasSelection ? ctx.getOptionLabel?.(ctx.selectedKey) : null) ??
     (ctx.hasSelection ? ctx.serializeKey(ctx.selectedKey) : null);
+  /* `muted-foreground` (not `subtle-foreground`): the trigger surface is muted, where subtle is only 4.2:1 (see index.css). */
   return (
-    <span className={cn('truncate text-left', !label && 'text-subtle-foreground')}>
+    <span className={cn('truncate text-left', !label && 'text-muted-foreground')}>
       {label ?? placeholder}
     </span>
   );

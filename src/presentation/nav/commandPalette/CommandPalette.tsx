@@ -459,7 +459,9 @@ export const CommandPaletteEmpty = forwardRef<HTMLDivElement, CommandPaletteEmpt
     return (
       <div
         ref={forwardedRef}
-        role="presentation"
+        // Polite live region — "no results" must be announced, not hidden as
+        // presentational chrome.
+        role="status"
         className={cn(listboxEmptyVariants(), className)}
         {...rest}
       >

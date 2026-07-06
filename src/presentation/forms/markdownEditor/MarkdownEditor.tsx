@@ -253,7 +253,11 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
             />
           )}
           {showPreview && (
+            /* `group` role: aria-label is prohibited on a bare (generic) div —
+               axe aria-prohibited-attr. Non-landmark grouping keeps the pane
+               named for AT without polluting the page's region list. */
             <div
+              role="group"
               aria-live="polite"
               aria-label="Preview"
               className="prose prose-sm flex-1 overflow-auto bg-background p-3 text-sm text-foreground"

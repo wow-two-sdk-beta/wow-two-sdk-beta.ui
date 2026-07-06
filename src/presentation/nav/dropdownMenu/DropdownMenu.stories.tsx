@@ -128,6 +128,26 @@ export const ArrowDownOnTriggerOpens: Story = {
   },
 };
 
+export const ArrowUpOpensFocusingLastItem: Story = {
+  render: () => <InteractionDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    const trigger = canvas.getByRole('button', { name: 'Open menu' });
+    trigger.focus();
+    await userEvent.keyboard('{ArrowUp}');
+
+    const menu = await body.findByRole('menu');
+    await waitFor(() => expect(menu).toBeVisible());
+    // APG menu-button pattern: ArrowUp-open places focus on the LAST enabled
+    // item (Billing is disabled, so Logout).
+    await waitFor(() =>
+      expect(within(menu).getByRole('menuitem', { name: 'Logout' })).toHaveFocus(),
+    );
+  },
+};
+
 export const ArrowNavSkipsDisabledAndEnterSelects: Story = {
   render: () => <InteractionDemo />,
   play: async ({ canvasElement }) => {

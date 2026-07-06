@@ -53,6 +53,8 @@ export const Default: Story = {
  * document.body → query popups via `canvasElement.ownerDocument.body` and
  * triggers via the canvas menubar. Open/close is animation-deferred
  * (Presence) and focus hand-off is rAF-deferred → poll with `waitFor`.
+ * The bar is a RovingFocusGroup: one trigger holds tabIndex 0 (APG single
+ * composite stop) and roving updates land via a post-commit effect.
  * Module-level spies are cleared at play start (stories share the module).
  * ------------------------------------------------------------------------- */
 
@@ -95,10 +97,21 @@ export const ArrowKeysMoveAcrossTriggers: Story = {
     const body = within(canvasElement.ownerDocument.body);
     const bar = canvas.getByRole('menubar');
     const trigger = (name: string) => within(bar).getByRole('menuitem', { name });
+    const triggers = within(bar).getAllByRole('menuitem');
+
+    // Roving tabindex (APG): exactly one trigger is the tab stop.
+    await expect(triggers.filter((t) => t.tabIndex === 0)).toHaveLength(1);
+    await expect(trigger('File')).toHaveAttribute('tabindex', '0');
+    await expect(trigger('Edit')).toHaveAttribute('tabindex', '-1');
+    await expect(trigger('View')).toHaveAttribute('tabindex', '-1');
 
     trigger('File').focus();
     await userEvent.keyboard('{ArrowRight}');
     await waitFor(() => expect(trigger('Edit')).toHaveFocus());
+    // Arrow-roving moves the single tab stop with focus.
+    await expect(trigger('Edit')).toHaveAttribute('tabindex', '0');
+    await expect(trigger('File')).toHaveAttribute('tabindex', '-1');
+    await expect(triggers.filter((t) => t.tabIndex === 0)).toHaveLength(1);
 
     await userEvent.keyboard('{ArrowRight}');
     await waitFor(() => expect(trigger('View')).toHaveFocus());
@@ -114,9 +127,46 @@ export const ArrowKeysMoveAcrossTriggers: Story = {
     await waitFor(() => expect(trigger('File')).toHaveFocus());
     await userEvent.keyboard('{End}');
     await waitFor(() => expect(trigger('View')).toHaveFocus());
+    await expect(trigger('View')).toHaveAttribute('tabindex', '0');
 
     // Roving focus alone never opens a popup.
     await expect(body.queryByRole('menu')).not.toBeInTheDocument();
+  },
+};
+
+export const SingleTabStopEntersAndLeaves: Story = {
+  render: () => (
+    <div className="flex flex-col items-start gap-2">
+      <button type="button">before</button>
+      <InteractionDemo />
+      <button type="button">after</button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bar = canvas.getByRole('menubar');
+    const trigger = (name: string) => within(bar).getByRole('menuitem', { name });
+
+    // Tab enters the menubar once, at the current stop…
+    await userEvent.click(canvas.getByRole('button', { name: 'before' }));
+    await userEvent.tab();
+    await waitFor(() => expect(trigger('File')).toHaveFocus());
+    // …and Tab again leaves it past the remaining triggers (single stop).
+    await userEvent.tab();
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'after' })).toHaveFocus());
+
+    // Arrow-roving updates the stop: re-entry lands on the roved trigger.
+    await userEvent.tab({ shift: true });
+    await waitFor(() => expect(trigger('File')).toHaveFocus());
+    await userEvent.keyboard('{ArrowRight}');
+    await waitFor(() => expect(trigger('Edit')).toHaveFocus());
+    await expect(trigger('Edit')).toHaveAttribute('tabindex', '0');
+    await expect(trigger('File')).toHaveAttribute('tabindex', '-1');
+
+    await userEvent.tab();
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'after' })).toHaveFocus());
+    await userEvent.tab({ shift: true });
+    await waitFor(() => expect(trigger('Edit')).toHaveFocus());
   },
 };
 

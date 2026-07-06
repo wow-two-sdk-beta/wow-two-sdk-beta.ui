@@ -69,7 +69,8 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
           className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
           {...rest}
         >
-          <span className={cn('truncate', !date && 'text-subtle-foreground')}>
+          {/* `muted-foreground` (not `subtle-foreground`): the trigger surface is muted, where subtle is only 4.2:1 (see index.css). */}
+          <span className={cn('truncate', !date && 'text-muted-foreground')}>
             {date ? format(date) : placeholder}
           </span>
           <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />

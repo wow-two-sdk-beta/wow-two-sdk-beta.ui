@@ -62,7 +62,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
     const [active, setActive] = useState<CellPos>({ row: 0, col: 0 });
     const [editing, setEditing] = useState(false);
     const [draft, setDraft] = useState('');
-    const containerRef = useRef<HTMLDivElement | null>(null);
+    const tableRef = useRef<HTMLTableElement | null>(null);
     const editRef = useRef<HTMLInputElement | HTMLSelectElement | null>(null);
     const wasEditingRef = useRef(false);
     const gridId = useId();
@@ -77,7 +77,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
       } else if (!editing && wasEditingRef.current) {
         // The editor just unmounted — without this, focus drops to <body>
         // and the grid's keyboard navigation goes dead.
-        containerRef.current?.focus();
+        tableRef.current?.focus();
       }
       wasEditingRef.current = editing;
     }, [editing]);
@@ -119,7 +119,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
       setEditing(false);
     }, []);
 
-    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const handleKeyDown = (e: KeyboardEvent<HTMLTableElement>) => {
       if (editing) {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -169,25 +169,28 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
     const cellPad = isDense ? 'px-2 py-1' : 'px-3 py-2';
 
     return (
+      /* Scroll container only — the grid role lives on the <table> below.
+         A `grid` may own nothing but rows/rowgroups, so putting `role="grid"`
+         on a wrapper whose child is a (role `table`) <table> is an illegal
+         accessibility tree (axe: aria-required-children). */
       <div
-        ref={(el) => {
-          containerRef.current = el;
-          if (typeof ref === 'function') ref(el);
-          else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
-        }}
-        role="grid"
-        aria-rowcount={rowCount + 1}
-        aria-colcount={colCount}
-        tabIndex={0}
-        aria-activedescendant={rowCount > 0 ? cellId(active.row, active.col) : undefined}
-        onKeyDown={handleKeyDown}
+        ref={ref}
         className={cn(
-          'overflow-auto rounded-md border border-border bg-card text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'overflow-auto rounded-md border border-border bg-card text-sm',
           className,
         )}
         {...rest}
       >
-        <table className="w-full border-collapse">
+        <table
+          ref={tableRef}
+          role="grid"
+          aria-rowcount={rowCount + 1}
+          aria-colcount={colCount}
+          tabIndex={0}
+          aria-activedescendant={rowCount > 0 ? cellId(active.row, active.col) : undefined}
+          onKeyDown={handleKeyDown}
+          className="w-full border-collapse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        >
           <thead role="rowgroup">
             <tr role="row" aria-rowindex={1} className="bg-muted/40">
               {columns.map((col, ci) => (

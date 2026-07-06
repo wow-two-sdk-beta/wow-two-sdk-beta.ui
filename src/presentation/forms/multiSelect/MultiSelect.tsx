@@ -199,7 +199,8 @@ export interface MultiSelectTagsProps {
 export function MultiSelectTags({ placeholder }: MultiSelectTagsProps) {
   const ctx = useMultiSelectContext();
   if (ctx.values.length === 0) {
-    return <span className="text-subtle-foreground">{placeholder}</span>;
+    /* `muted-foreground` (not `subtle-foreground`): the trigger surface is muted, where subtle is only 4.2:1 (see index.css). */
+    return <span className="text-muted-foreground">{placeholder}</span>;
   }
   return (
     <span className="flex flex-1 flex-wrap items-center gap-1">

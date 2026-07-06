@@ -118,7 +118,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
             </button>
           ))}
       </PopoverTrigger>
-      <PopoverContent className="flex w-64 flex-col gap-3">
+      <PopoverContent aria-label="Color picker" className="flex w-64 flex-col gap-3">
         <ColorArea
           hue={hsv.h}
           saturation={hsv.s}
@@ -141,6 +141,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
           />
         )}
         <ColorField
+          aria-label="Hex color"
           value={hex}
           onValueChange={(next) => setHex(next)}
           hasAlpha={hasAlpha}

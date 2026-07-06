@@ -49,10 +49,13 @@ export const Default: Story = {
  * Interaction tests (play) — oracle: BottomSheet.tsx source.
  * No Trigger subcomponent — the sheet is controlled, so the demo wires a
  * button + useState. Content portals to document.body → query via
- * `canvasElement.ownerDocument.body`. Unmount is deferred (open || isExiting
- * gate, 320ms) → poll with `waitFor`. Scroll lock is open-scoped here (the
- * whole portal subtree returns null when closed), so release IS asserted.
- * Snap heights use px points so the inline style is deterministic.
+ * `canvasElement.ownerDocument.body`. Unmount is Presence-deferred (exit
+ * slide) → poll with `waitFor`. Scroll lock is open-scoped (the surface
+ * unmounts when closed), so release IS asserted. Focus contract: open puts
+ * initial focus on the drag handle; every dismissal (Escape / backdrop /
+ * keyboard) returns focus to the previously-focused element via FocusScope's
+ * unmount restore. Snap heights use px points so the inline style is
+ * deterministic.
  * ------------------------------------------------------------------------- */
 
 function InteractionDemo() {
@@ -97,6 +100,8 @@ export const OpensViaControlledState: Story = {
     await expect(handle).toHaveAttribute('aria-valuenow', '0');
     await expect(handle).toHaveAttribute('aria-valuemin', '0');
     await expect(handle).toHaveAttribute('aria-valuemax', '1');
+    // Mount autofocus lands on the handle — the sheet's keyboard affordance.
+    await waitFor(() => expect(handle).toHaveFocus());
 
     // Body scroll is locked while open.
     await expect(doc.body).toHaveStyle({ overflow: 'hidden' });
@@ -113,12 +118,9 @@ export const SnapsWithArrowKeys: Story = {
     const dialog = await body.findByRole('dialog');
     const handle = within(dialog).getByRole('separator');
 
-    // NOTE (source gap, not asserted): FocusScope's mount autofocus does NOT
-    // land on the tabindex-0 handle — it falls back to the layer container.
-    // Reported for the fix sweep; focus the handle explicitly (it stays the
-    // keyboard affordance: ArrowUp/ArrowDown drive the snap state).
-    handle.focus();
-    await expect(handle).toHaveFocus();
+    // Mount autofocus puts the handle in charge — ArrowUp/ArrowDown drive
+    // the snap state without an explicit focus step.
+    await waitFor(() => expect(handle).toHaveFocus());
 
     await userEvent.keyboard('{ArrowUp}');
     await expect(handle).toHaveAttribute('aria-valuenow', '1');
@@ -141,18 +143,15 @@ export const ArrowDownAtLowestSnapDismisses: Story = {
     await userEvent.click(opener);
     const dialog = await body.findByRole('dialog');
     const handle = within(dialog).getByRole('separator');
-    // Explicit focus — mount autofocus misses the handle (see SnapsWithArrowKeys).
-    handle.focus();
-    await expect(handle).toHaveFocus();
+    await waitFor(() => expect(handle).toHaveFocus());
 
     // At the lowest snap, ArrowDown dismisses (dragToDismiss default true).
     await userEvent.keyboard('{ArrowDown}');
 
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
-    // NOTE (source gap, not asserted): focus does NOT return to the opener on
-    // dismissal — the sheet panel (inner Presence) unmounts before the
-    // FocusScope teardown and focus is left on <body>. Reported for the fix
-    // sweep. The open-scoped scroll lock DOES release correctly:
+    // Keyboard dismissal hands focus back to the opener (FocusScope restores
+    // on unmount) and releases the open-scoped scroll lock.
+    await waitFor(() => expect(opener).toHaveFocus());
     await waitFor(() => expect(doc.body.style.overflow).not.toBe('hidden'));
   },
 };
@@ -164,12 +163,15 @@ export const ClosesOnEscape: Story = {
     const doc = canvasElement.ownerDocument;
     const body = within(doc.body);
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Open sheet' }));
+    const opener = canvas.getByRole('button', { name: 'Open sheet' });
+    await userEvent.click(opener);
     await body.findByRole('dialog');
 
     await userEvent.keyboard('{Escape}');
 
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+    // Focus returns to the opener (FocusScope restores on unmount).
+    await waitFor(() => expect(opener).toHaveFocus());
     await waitFor(() => expect(doc.body.style.overflow).not.toBe('hidden'));
   },
 };
@@ -180,7 +182,8 @@ export const ClosesOnBackdropClick: Story = {
     const canvas = within(canvasElement);
     const body = within(canvasElement.ownerDocument.body);
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Open sheet' }));
+    const opener = canvas.getByRole('button', { name: 'Open sheet' });
+    await userEvent.click(opener);
     const dialog = await body.findByRole('dialog');
 
     // Backdrop = the DismissableLayer wrapper's previous sibling in the portal.
@@ -189,5 +192,7 @@ export const ClosesOnBackdropClick: Story = {
     await userEvent.click(backdrop);
 
     await waitFor(() => expect(body.queryByRole('dialog')).not.toBeInTheDocument());
+    // Backdrop dismissal also hands focus back to the opener.
+    await waitFor(() => expect(opener).toHaveFocus());
   },
 };

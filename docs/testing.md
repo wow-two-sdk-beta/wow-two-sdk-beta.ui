@@ -149,6 +149,25 @@ Remaining 114 (backlog, granular):
 - Axe only scans **light mode** (preview decorator defaults light) — dark-mode audit is a separate pass; dark `subtle` fixed by math above
 - Flip `.storybook/preview.ts` `a11y.test` `'todo'`→`'error'` once the backlog clears
 
+### Wave-3 (2026-07-06 late) — bug-fix pass + a11y burn-down phase 2
+
+A11y: **114 → 72 failing** (total 260 → 72, −72%). Fixed: subtle→muted placeholder swaps in 5 pickers · labeling for `GradientPicker`/`RecurrenceEditor`/`ColorPicker`/`JSONEditor` internals · `dataGrid` grid-role moved onto the `<table>` (legal tree) · `combobox` dangling `aria-activedescendant` + empty/separator listbox children (+ `listbox` mirror) · `markdownEditor` preview pane → `group`.
+
+Bugs FIXED from the wave-2 inventory (each with regression stories):
+- `BottomSheet` — restructured to single-Presence subtree (Drawer pattern): focus restores on dismissal; handle gets mount autofocus
+- `ContextMenu` — captures `activeElement` at pointerdown, bounded rAF-retry restore on close
+- `DropdownMenu` — ArrowUp-open focuses last enabled item (APG)
+- `RovingFocusGroup` — skips disabled items, tab-stop never parks on one (DOM-read disabled detection, 3-layer reassignment); `Menubar` adopted roving (single tab stop)
+- `NavigationMenu` — opened-by-pointer one-shot guard: hover-then-click keeps the panel open
+- `SwipeActions` — fragment children counted correctly (full snap width) · `Tree` — ArrowRight/Left APG nav · `CommandPalette` — empty state `role="status"` · `FocusScope` JSDoc corrected
+
+Still open (deliberate): contrast design-tuning tail (~60: `Surface`/`Button.matrix` soft-variant combos, `success` soft-on-solid, `jsonEditor` tree colors) · `DateRangePicker` mid-selection `null` API shape · `DismissableLayer` same-commit nesting · dark-mode axe pass.
+
+New findings from this wave:
+- **`InputStyles.ts` `read-only:bg-muted` matches `<button>` triggers** (buttons are always CSS `:read-only`) — all picker triggers render on muted unintentionally; the placeholder swaps compensate, but the variant is the real fix (design pass).
+- **`Presence` drops the child's own `ref` under React 19** — cloned ref replaces it (worked around via `panelRef` props in BottomSheet; latently affects `Drawer.Content` forwarded ref). Primitive fix = compose refs in `Presence`.
+- `dataGrid` cell-editor inputs lack labels (2) · `dateRangePicker` calendar dialog unnamed (`aria-dialog-name`) · `multiSelect` chip-remove is `nested-interactive` — small backlog items.
+
 ### Harness learnings (what fits / limits)
 
 - `play()` stories = the right primary tier — caught a real bug (scroll-lock) on the first wave; readable in SB UI; zero extra files.

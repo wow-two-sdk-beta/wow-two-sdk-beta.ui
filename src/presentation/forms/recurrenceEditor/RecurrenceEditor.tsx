@@ -1,4 +1,4 @@
-import { forwardRef, useMemo, type HTMLAttributes } from 'react';
+import { forwardRef, useId, useMemo, type HTMLAttributes } from 'react';
 import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
@@ -137,6 +137,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
       default: defaultValue ?? DEFAULT_RULE,
       onChange: onValueChange,
     });
+    const id = useId();
 
     const preview = useMemo(() => buildPreview(rule, from, previewCount), [rule, from, previewCount]);
 
@@ -167,8 +168,9 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
         {...rest}
       >
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-muted-foreground">Every</span>
+          <label htmlFor={`${id}-interval`} className="text-muted-foreground">Every</label>
           <input
+            id={`${id}-interval`}
             type="number"
             min={1}
             max={999}
@@ -228,8 +230,9 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
 
         {rule.freq === 'MONTHLY' && (
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">On day</span>
+            <label htmlFor={`${id}-month-day`} className="text-muted-foreground">On day</label>
             <input
+              id={`${id}-month-day`}
               type="number"
               min={1}
               max={31}
@@ -265,6 +268,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
             After
             <input
               type="number"
+              aria-label="Occurrence count"
               min={1}
               value={rule.count ?? ''}
               disabled={isDisabled || isReadOnly || endMode !== 'count'}
@@ -284,6 +288,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
             On
             <input
               type="date"
+              aria-label="End date"
               value={formatISODate(rule.until ?? null)}
               disabled={isDisabled || isReadOnly || endMode !== 'until'}
               onChange={(e) => update({ until: parseISODate(e.target.value), count: undefined })}

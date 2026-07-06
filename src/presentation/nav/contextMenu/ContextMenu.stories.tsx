@@ -37,10 +37,11 @@ export const Default: Story = {
  * Interaction tests (play) — oracle: ContextMenu.tsx + underlying Menu.
  * Right-click = `userEvent.pointer` with `[MouseRight]` (fires contextmenu).
  * The menu portals to document.body → query via `canvasElement.ownerDocument
- * .body`; close is animation-deferred → poll with `waitFor`. No focus-return
- * assertion on close: the trigger is a non-focusable div and ContextMenu
- * restores nothing itself (see report). Module-level spies are cleared at
- * play start (stories share the module).
+ * .body`; close is animation-deferred → poll with `waitFor`. The trigger is a
+ * non-focusable div, so close restores focus to whatever had it at open
+ * (captured at pointerdown, retried past the exit animation) — asserted in
+ * the *RestoresFocusToPreviousElement stories. Module-level spies are cleared
+ * at play start (stories share the module).
  * ------------------------------------------------------------------------- */
 
 const onCopySelect = fn();
@@ -162,5 +163,80 @@ export const EscapeCloses: Story = {
     await userEvent.keyboard('{Escape}');
 
     await waitFor(() => expect(body.queryByRole('menu')).not.toBeInTheDocument());
+  },
+};
+
+function FocusRestoreDemo() {
+  return (
+    <div className="p-12">
+      <button type="button" data-testid="outside-button" className="mb-4 rounded-md border border-border px-3 py-1.5 text-sm">
+        Focus me first
+      </button>
+      <ContextMenu>
+        <ContextMenu.Trigger>
+          <div
+            data-testid="context-target"
+            className="flex h-32 w-64 items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground"
+          >
+            Right-click me
+          </div>
+        </ContextMenu.Trigger>
+        <ContextMenu.Content aria-label="Context actions">
+          <ContextMenu.Item>Cut</ContextMenu.Item>
+          <ContextMenu.Item>Copy</ContextMenu.Item>
+        </ContextMenu.Content>
+      </ContextMenu>
+    </div>
+  );
+}
+
+export const CloseRestoresFocusToPreviousElement: Story = {
+  render: () => <FocusRestoreDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    // Give something focus before opening — APG wants it back on close. The
+    // trigger itself is a non-focusable div, so "what had focus at open" is
+    // the restore target.
+    const outside = canvas.getByTestId('outside-button');
+    outside.focus();
+    await expect(outside).toHaveFocus();
+
+    await userEvent.pointer({
+      keys: '[MouseRight]',
+      target: canvas.getByTestId('context-target'),
+    });
+    const menu = await body.findByRole('menu');
+    // Focus moves into the menu while open.
+    await waitFor(() => expect(within(menu).getByRole('menuitem', { name: 'Cut' })).toHaveFocus());
+
+    // Escape-close returns focus to the previously-focused element (rAF-deferred).
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(body.queryByRole('menu')).not.toBeInTheDocument());
+    await waitFor(() => expect(outside).toHaveFocus());
+  },
+};
+
+export const ItemSelectRestoresFocusToPreviousElement: Story = {
+  render: () => <FocusRestoreDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    const outside = canvas.getByTestId('outside-button');
+    outside.focus();
+    await expect(outside).toHaveFocus();
+
+    await userEvent.pointer({
+      keys: '[MouseRight]',
+      target: canvas.getByTestId('context-target'),
+    });
+    const menu = await body.findByRole('menu');
+
+    await userEvent.click(within(menu).getByRole('menuitem', { name: 'Copy' }));
+
+    await waitFor(() => expect(body.queryByRole('menu')).not.toBeInTheDocument());
+    await waitFor(() => expect(outside).toHaveFocus());
   },
 };

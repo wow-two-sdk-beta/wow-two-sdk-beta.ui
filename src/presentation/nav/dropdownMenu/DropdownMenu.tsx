@@ -30,6 +30,8 @@ interface DropdownMenuContextValue {
   /** Trigger node kept in state so anchored content re-renders once the ref attaches. */
   triggerNode: HTMLButtonElement | null;
   setTriggerNode: (node: HTMLButtonElement | null) => void;
+  /** Which item takes focus on open — the trigger sets it per gesture (APG: ArrowUp → last). */
+  openFocusRef: React.MutableRefObject<'first' | 'last'>;
   placement: MenuProps['placement'];
   offset: number;
 }
@@ -66,9 +68,10 @@ function DropdownMenuRoot({
   });
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [triggerNode, setTriggerNode] = useState<HTMLButtonElement | null>(null);
+  const openFocusRef = useRef<'first' | 'last'>('first');
 
   const ctx = useMemo<DropdownMenuContextValue>(
-    () => ({ open, setOpen, triggerRef, triggerNode, setTriggerNode, placement, offset }),
+    () => ({ open, setOpen, triggerRef, triggerNode, setTriggerNode, openFocusRef, placement, offset }),
     [open, setOpen, triggerNode, placement, offset],
   );
 
@@ -95,6 +98,7 @@ export const DropdownMenuTrigger = forwardRef<HTMLButtonElement, DropdownMenuTri
       (e: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(e);
         if (e.defaultPrevented) return;
+        ctx.openFocusRef.current = 'first';
         ctx.setOpen(!ctx.open);
       },
       [ctx, onClick],
@@ -106,6 +110,8 @@ export const DropdownMenuTrigger = forwardRef<HTMLButtonElement, DropdownMenuTri
         if (e.defaultPrevented) return;
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          // APG menu-button pattern: ArrowUp-open focuses the last item.
+          ctx.openFocusRef.current = e.key === 'ArrowUp' ? 'last' : 'first';
           ctx.setOpen(true);
         }
       },
@@ -139,13 +145,18 @@ export interface DropdownMenuContentProps {
  * Animated panel handed to `Menu` as its child. `Presence` clones `data-state`
  * ("open" | "closed") + a `ref` onto this element, so the pop tokens below run
  * gated on that state. forwardRef + `{...props}` spread are required so the ref
- * and `data-state` actually land here.
+ * and `data-state` actually land here. Because Presence's cloned `ref` replaces
+ * the element's own `ref` prop, DropdownMenuContent reaches the panel node via
+ * the separate `panelRef` prop instead.
  */
-const DropdownMenuPanel = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  function DropdownMenuPanel({ className, children, ...props }, ref) {
+const DropdownMenuPanel = forwardRef<
+  HTMLDivElement,
+  HTMLAttributes<HTMLDivElement> & { panelRef?: React.Ref<HTMLDivElement> }
+>(
+  function DropdownMenuPanel({ className, children, panelRef, ...props }, ref) {
     return (
       <div
-        ref={ref}
+        ref={composeRefs(ref, panelRef)}
         className={cn(
           /* pop (fade + slight scale) gated on data-state; motion-safe so
              reduced-motion users get no movement. */
@@ -169,6 +180,7 @@ export function DropdownMenuContent({
 }: DropdownMenuContentProps) {
   const ctx = useDropdownMenuContext();
   const reducedMotion = useReducedMotion();
+  const panelRef = useRef<HTMLDivElement | null>(null);
   /* Keep `Menu` (positioner / focus scope / dismiss layer) mounted while the
      pop-out plays — `Menu` hard-unmounts on `!open`, which would kill the exit.
      Opening flips this true synchronously; closing defers the unmount until the
@@ -184,6 +196,39 @@ export function DropdownMenuContent({
     const raf = requestAnimationFrame(() => setMounted(false));
     return () => cancelAnimationFrame(raf);
   }, [ctx.open, reducedMotion]);
+
+  /* ArrowUp-open focuses the LAST enabled item (APG menu-button pattern);
+     the trigger arms `openFocusRef` per gesture and this consumes it. Other
+     opens leave it at 'first' and FocusScope's default first-tabbable
+     autofocus applies. */
+  const focusLastEnabledItem = useCallback(
+    (panel: HTMLElement) => {
+      if (ctx.openFocusRef.current !== 'last') return;
+      ctx.openFocusRef.current = 'first';
+      const items = panel.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])');
+      items[items.length - 1]?.focus();
+    },
+    [ctx.openFocusRef],
+  );
+
+  /* Mount path: the panel enters the DOM one commit after `mounted` flips
+     (Portal is SSR-inert), so run off the ref attach — it lands before
+     FocusScope's autofocus effect, which then skips itself because focus
+     already sits inside the scope. */
+  const handlePanelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      panelRef.current = node;
+      if (node) focusLastEnabledItem(node);
+    },
+    [focusLastEnabledItem],
+  );
+
+  /* Reopen path: an open while the exit animation still has the panel
+     mounted re-fires no ref, so consume the pending gesture here. */
+  useEffect(() => {
+    if (!ctx.open || !panelRef.current) return;
+    focusLastEnabledItem(panelRef.current);
+  }, [ctx.open, focusLastEnabledItem]);
 
   if (!mounted) return null;
 
@@ -201,6 +246,7 @@ export function DropdownMenuContent({
     >
       <Presence isPresent={ctx.open}>
         <DropdownMenuPanel
+          panelRef={handlePanelRef}
           className={className}
           onAnimationEnd={() => {
             /* Drop `Menu` once the exit animation completes. */

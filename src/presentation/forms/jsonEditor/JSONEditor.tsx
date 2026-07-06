@@ -239,6 +239,7 @@ function TreeNode({ keyName, value, path, updateAt, isDisabled, isReadOnly, dept
         ) : editing ? (
           <input
             autoFocus
+            aria-label="Edit value"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKey}
@@ -323,6 +324,7 @@ function TextView({ value, setValue, isDisabled, isReadOnly, indent }: TextViewP
   return (
     <div className="flex h-full flex-col">
       <textarea
+        aria-label="JSON source"
         value={draft}
         disabled={isDisabled}
         readOnly={isReadOnly}

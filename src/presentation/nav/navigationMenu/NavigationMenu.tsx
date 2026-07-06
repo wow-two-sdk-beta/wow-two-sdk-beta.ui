@@ -157,12 +157,18 @@ export interface NavigationMenuTriggerProps
 
 export const NavigationMenuTrigger = forwardRef<HTMLButtonElement, NavigationMenuTriggerProps>(
   function NavigationMenuTrigger(
-    { className, onClick, onPointerEnter, onKeyDown, onFocus, children, ...rest },
+    { className, onClick, onPointerEnter, onPointerLeave, onKeyDown, onFocus, children, ...rest },
     ref,
   ) {
     const nav = useNavContext();
     const item = useNavItemContext();
     const roving = useRovingFocusItem();
+    /* Set when a pointer hover-swap opened this panel. With a real pointer the
+       `pointerenter` swap always precedes the click, so without this guard the
+       click would land on an already-open trigger and toggle it straight back
+       closed (Radix guards the same way). Cleared on pointerleave: once the
+       pointer leaves, the next click is a deliberate toggle again. */
+    const wasOpenedByPointerRef = useRef(false);
     return (
       <button
         ref={(node) => {
@@ -181,13 +187,23 @@ export const NavigationMenuTrigger = forwardRef<HTMLButtonElement, NavigationMen
         onClick={(e) => {
           onClick?.(e);
           if (e.defaultPrevented) return;
+          if (wasOpenedByPointerRef.current) {
+            // The hover-swap just opened this panel — keep it open.
+            wasOpenedByPointerRef.current = false;
+            return;
+          }
           nav.setActiveId(item.open ? null : item.value);
         }}
         onPointerEnter={(e) => {
           onPointerEnter?.(e);
           if (nav.activeId !== null && nav.activeId !== item.value) {
             nav.setActiveId(item.value);
+            wasOpenedByPointerRef.current = true;
           }
+        }}
+        onPointerLeave={(e) => {
+          onPointerLeave?.(e);
+          wasOpenedByPointerRef.current = false;
         }}
         onFocus={(e) => {
           onFocus?.(e);

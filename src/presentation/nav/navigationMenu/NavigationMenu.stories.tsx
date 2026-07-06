@@ -177,9 +177,42 @@ export const MovingToNextTriggerSwapsPanel: Story = {
     await expect(resources).toHaveAttribute('aria-expanded', 'true');
     await expect(products).toHaveAttribute('aria-expanded', 'false');
 
-    // NOTE: click-to-swap is not asserted — with a real pointer the
-    // pointerenter hover-swap always precedes the click, so the click lands on
-    // an already-open trigger and toggles it closed (see report).
+    // Click-to-swap: with a real pointer the pointerenter hover-swap precedes
+    // the click, so the click lands on the just-swapped trigger — the
+    // opened-by-pointer guard keeps it open instead of toggling it closed.
+    await userEvent.click(products);
+    await body.findByText('Analytics');
+    await waitFor(() => expect(body.queryByText('Docs')).not.toBeInTheDocument());
+    await expect(products).toHaveAttribute('aria-expanded', 'true');
+    await expect(resources).toHaveAttribute('aria-expanded', 'false');
+  },
+};
+
+export const HoverThenClickKeepsPanelOpen: Story = {
+  render: () => <InteractionDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    const products = canvas.getByRole('button', { name: 'Products' });
+    const resources = canvas.getByRole('button', { name: 'Resources' });
+
+    // Open Products, hover Resources — the panel hover-swaps to Resources.
+    await userEvent.click(products);
+    await body.findByText('Analytics');
+    await userEvent.hover(resources);
+    await body.findByText('Docs');
+
+    // The click that follows the hover-swap is a no-op — the panel it just
+    // opened stays open (Radix-style opened-by-pointer guard).
+    await userEvent.click(resources);
+    await expect(resources).toHaveAttribute('aria-expanded', 'true');
+    // Pop-in starts at opacity 0 → poll visibility.
+    await waitFor(() => expect(body.getByText('Docs')).toBeVisible());
+
+    // The guard is one-shot: a second click is a deliberate toggle-close.
+    await userEvent.click(resources);
+    await waitFor(() => expect(body.queryByText('Docs')).not.toBeInTheDocument());
+    await expect(resources).toHaveAttribute('aria-expanded', 'false');
   },
 };
 

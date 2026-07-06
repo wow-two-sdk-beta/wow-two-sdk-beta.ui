@@ -280,7 +280,9 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
         role="combobox"
         aria-expanded={ctx.open}
         aria-controls={ctx.listboxId}
-        aria-activedescendant={ctx.activeId ?? undefined}
+        /* Only while open — options unmount on close but `activeId` state
+           survives, and a dangling id is an axe aria-valid-attr-value hit. */
+        aria-activedescendant={ctx.open ? (ctx.activeId ?? undefined) : undefined}
         aria-autocomplete="list"
         aria-disabled={ctx.isDisabled || undefined}
         disabled={ctx.isDisabled}
@@ -496,13 +498,25 @@ export function ComboboxGroup({ label, children, className, ...rest }: ComboboxG
   );
 }
 
+/* Decorative only — `separator` is not an allowed child role of `listbox`
+   (grid/option/group only), so the rule is hidden from the tree entirely. */
 export function ComboboxSeparator(props: HTMLAttributes<HTMLDivElement>) {
-  return <div role="separator" className={listboxSeparatorVariants()} {...props} />;
+  return <div aria-hidden="true" className={listboxSeparatorVariants()} {...props} />;
 }
 
+/* A disabled option, not `presentation`: a `listbox` must own at least one
+   `option`/`group` (axe aria-required-children), and this also makes the
+   empty message perceivable to AT instead of stray text. Never registered,
+   so keyboard nav / aria-activedescendant skip it. */
 export function ComboboxEmpty({ children, className, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div role="presentation" className={cn(listboxEmptyVariants(), className)} {...rest}>
+    <div
+      role="option"
+      aria-disabled="true"
+      aria-selected={false}
+      className={cn(listboxEmptyVariants(), className)}
+      {...rest}
+    >
       {children}
     </div>
   );

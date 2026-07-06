@@ -496,15 +496,26 @@ export function ListboxGroup({ label, children, className, ...rest }: ListboxGro
   );
 }
 
-/** Provides a thin horizontal rule between groups of items. */
+/** Provides a thin horizontal rule between groups of items. Decorative only —
+ *  `separator` is not an allowed child role of `listbox` (option/group only),
+ *  so the rule is hidden from the accessibility tree entirely. */
 export function ListboxSeparator(props: HTMLAttributes<HTMLDivElement>) {
-  return <div role="separator" className={listboxSeparatorVariants()} {...props} />;
+  return <div aria-hidden="true" className={listboxSeparatorVariants()} {...props} />;
 }
 
-/** Provides the message shown when no items match (e.g., after search filter). */
+/** Provides the message shown when no items match (e.g., after search filter).
+ *  Rendered as a disabled option, not `presentation`: a `listbox` must own at
+ *  least one `option`/`group` (axe aria-required-children), and this keeps the
+ *  message perceivable to AT. Never registered, so keyboard nav skips it. */
 export function ListboxEmpty({ children, className, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div role="presentation" className={cn(listboxEmptyVariants(), className)} {...rest}>
+    <div
+      role="option"
+      aria-disabled="true"
+      aria-selected={false}
+      className={cn(listboxEmptyVariants(), className)}
+      {...rest}
+    >
       {children}
     </div>
   );

@@ -162,7 +162,11 @@ export const EmptyStateWhenNoMatch: Story = {
     await userEvent.keyboard('zzzz');
 
     await waitFor(() => expect(within(dialog).queryAllByRole('option')).toHaveLength(0));
-    await waitFor(() => expect(within(dialog).getByText('No matches.')).toBeVisible());
+    // The "no results" message is a polite live region (role="status"), not
+    // presentational — screen readers must announce it.
+    const empty = await within(dialog).findByRole('status');
+    await expect(empty).toHaveTextContent('No matches.');
+    await waitFor(() => expect(empty).toBeVisible());
   },
 };
 
