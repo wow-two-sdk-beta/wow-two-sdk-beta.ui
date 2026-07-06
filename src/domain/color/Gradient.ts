@@ -74,9 +74,21 @@ function radial(stops: GradientStop[], radius: number): RadialGradient {
   return { type: GradientType.Radial, radius, stops };
 }
 
+/** Creates a two-stop linear gradient from a start + end color (offsets `0` and `1`). */
+function twoStop(start: string, end: string, angle: number): LinearGradient {
+  return linear(
+    [
+      { color: start, offset: 0 },
+      { color: end, offset: 1 },
+    ],
+    angle,
+  );
+}
+
 /** Operations over a `Gradient` value — the companion to the `Gradient` type. */
 export const Gradient = {
   linear,
+  twoStop,
   radial,
   withStop,
   reverseStops,
