@@ -9,6 +9,7 @@ export * from './aspectRatio';
 export * from './spacer';
 export * from './center';
 export * from './divider';
+export * from './controlGroup';
 export * from './scrollArea';
 export * from './inline';
 export * from './cluster';

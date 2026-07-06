@@ -3,6 +3,7 @@ export * from './link';
 export * from './buttonGroup';
 export * from './toggleButton';
 export * from './toggleButtonGroup';
+export * from './optionTile';
 export * from './segmentedControl';
 export * from './fab';
 export * from './copyButton';

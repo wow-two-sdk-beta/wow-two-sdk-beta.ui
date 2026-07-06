@@ -56,10 +56,31 @@ function withRadius(gradient: Gradient, radius: number): Gradient {
   return gradient.type === GradientType.Radial ? { ...gradient, radius } : gradient;
 }
 
+/** Returns the gradient switched to `type` (keeping stops; the target's own field seeds from `defaults`); a no-op if already that type. */
+function withType(gradient: Gradient, type: GradientType, defaults: { angle: number; radius: number }): Gradient {
+  if (gradient.type === type) return gradient;
+  return type === GradientType.Linear
+    ? { type: GradientType.Linear, angle: defaults.angle, stops: gradient.stops }
+    : { type: GradientType.Radial, radius: defaults.radius, stops: gradient.stops };
+}
+
+/** Creates a linear gradient from `stops` + `angle` (degrees). */
+function linear(stops: GradientStop[], angle: number): LinearGradient {
+  return { type: GradientType.Linear, angle, stops };
+}
+
+/** Creates a radial gradient from `stops` + `radius` (0..1 extent). */
+function radial(stops: GradientStop[], radius: number): RadialGradient {
+  return { type: GradientType.Radial, radius, stops };
+}
+
 /** Operations over a `Gradient` value — the companion to the `Gradient` type. */
 export const Gradient = {
+  linear,
+  radial,
   withStop,
   reverseStops,
   withAngle,
   withRadius,
+  withType,
 };
