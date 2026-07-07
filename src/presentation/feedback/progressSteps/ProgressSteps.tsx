@@ -1,15 +1,17 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { Check } from 'lucide-react';
-import { cn } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 
 export interface ProgressStepsProps extends ComponentPropsWithoutRef<'ol'> {
-  /** Step labels in order. */
-  steps: string[];
-  /** Index of the active step (0-based). Steps before are marked complete. */
+  /** The step labels in order. */
+  steps: ReadonlyArray<string>;
+
+  /** The index of the active step (0-based). Steps before are marked complete. */
   current: number;
-  /** Layout direction. Default `horizontal`. */
-  orientation?: 'horizontal' | 'vertical';
+
+  /** The layout direction. Default `horizontal`. */
+  orientation?: Orientation;
 }
 
 /**
@@ -18,12 +20,12 @@ export interface ProgressStepsProps extends ComponentPropsWithoutRef<'ol'> {
  * the L5 `Stepper` organism.
  */
 export const ProgressSteps = forwardRef<HTMLOListElement, ProgressStepsProps>(
-  ({ steps, current, orientation = 'horizontal', className, ...props }, ref) => (
+  ({ steps, current, orientation = Orientation.Horizontal, className, ...props }, ref) => (
     <ol
       ref={ref}
       className={cn(
         'flex',
-        orientation === 'horizontal' ? 'flex-row items-center gap-2' : 'flex-col gap-3',
+        orientation === Orientation.Horizontal ? 'flex-row items-center gap-2' : 'flex-col gap-3',
         className,
       )}
       {...props}
@@ -35,7 +37,7 @@ export const ProgressSteps = forwardRef<HTMLOListElement, ProgressStepsProps>(
             key={i}
             className={cn(
               'flex items-center gap-2',
-              orientation === 'horizontal' && i < steps.length - 1 && 'flex-1',
+              orientation === Orientation.Horizontal && i < steps.length - 1 && 'flex-1',
             )}
           >
             <span
@@ -57,7 +59,7 @@ export const ProgressSteps = forwardRef<HTMLOListElement, ProgressStepsProps>(
             >
               {label}
             </span>
-            {orientation === 'horizontal' && i < steps.length - 1 && (
+            {orientation === Orientation.Horizontal && i < steps.length - 1 && (
               <span
                 className={cn(
                   'h-px flex-1',

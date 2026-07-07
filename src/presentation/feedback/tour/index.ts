@@ -1,1 +1,1 @@
-export { Tour, type TourProps, type TourStep } from './Tour';
+export { Tour, Placement, type TourProps, type TourStep } from './Tour';

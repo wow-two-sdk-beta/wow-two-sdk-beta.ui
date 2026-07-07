@@ -1,1 +1,1 @@
-export { TypingIndicator, type TypingIndicatorProps } from './TypingIndicator';
+export { TypingIndicator, TypingTone, type TypingIndicatorProps } from './TypingIndicator';

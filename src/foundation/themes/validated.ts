@@ -193,4 +193,4 @@ const smartQr: Theme = {
 };
 
 /** Validated themes, merged FIRST into the curated `THEMES` array. */
-export const VALIDATED_THEMES: Theme[] = [smartQr];
+export const VALIDATED_THEMES: ReadonlyArray<Theme> = [smartQr];

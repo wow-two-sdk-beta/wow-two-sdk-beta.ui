@@ -3,9 +3,9 @@ export {
   gridVariants,
   resolveGridColumns,
   resolveGridGap,
+  GridBreakpoint,
   type GridVariants,
   type GridColumns,
   type GridGap,
-  type GridBreakpoint,
   type GridResponsive,
 } from './Grid.variants';

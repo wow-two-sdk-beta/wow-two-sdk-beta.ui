@@ -1,10 +1,21 @@
 import { forwardRef, type AnchorHTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { Slot } from '../../../foundation/primitives/slot/Slot';
-import { linkVariants, type LinkVariants } from './Link.variants';
+import {
+  linkVariants,
+  type LinkVariants,
+  type LinkVariant,
+  type LinkSize,
+} from './Link.variants';
 
-export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement>, LinkVariants {
-  /** When true, render the child element as the link instead of an `<a>`.
+export interface LinkProps
+  extends AnchorHTMLAttributes<HTMLAnchorElement>,
+    Omit<LinkVariants, 'variant' | 'size'> {
+  /** The color treatment. */
+  variant?: LinkVariant;
+  /** The text size. */
+  size?: LinkSize;
+  /** The as-child flag — when true, renders the child element as the link instead of an `<a>`.
    *  Use for router `<Link>` components from Next.js / React Router. */
   asChild?: boolean;
 }

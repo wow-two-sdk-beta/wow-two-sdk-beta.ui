@@ -18,12 +18,12 @@ export interface CodeEditorProps
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  /** Forward-compat hint; unused by this first-gen component. */
+  /** The forward-compat hint; unused by this first-gen component. */
   language?: string;
   tabSize?: number;
   isTabIndented?: boolean;
   isInvalid?: boolean;
-  /** CSS minHeight on the surface (default `12rem`). */
+  /** The CSS minHeight on the surface (default `12rem`). */
   minHeight?: string;
 }
 

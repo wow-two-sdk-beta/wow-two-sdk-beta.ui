@@ -1,17 +1,21 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, StatusTone } from '../../../foundation/utils';
 
 export interface StatusIndicatorProps extends Omit<ComponentPropsWithoutRef<'div'>, 'title'> {
-  tone?: 'success' | 'warning' | 'destructive' | 'info' | 'neutral';
-  /** Bold first-line label (e.g. "All systems normal"). */
+  /** The semantic status tone. */
+  tone?: StatusTone;
+
+  /** The bold first-line label (e.g. "All systems normal"). */
   label: ReactNode;
-  /** Smaller secondary line (e.g. "Updated 2m ago"). */
+
+  /** The smaller secondary line (e.g. "Updated 2m ago"). */
   description?: ReactNode;
-  /** Optional pulsing ring for "live" indication. */
+
+  /** The optional pulsing ring for "live" indication. */
   hasPulse?: boolean;
 }
 
-const TONE: Record<NonNullable<StatusIndicatorProps['tone']>, string> = {
+const TONE: Record<StatusTone, string> = {
   success: 'bg-success',
   warning: 'bg-warning',
   destructive: 'bg-destructive',
@@ -25,7 +29,7 @@ const TONE: Record<NonNullable<StatusIndicatorProps['tone']>, string> = {
  * `display/Status`.
  */
 export const StatusIndicator = forwardRef<HTMLDivElement, StatusIndicatorProps>(
-  ({ tone = 'success', label, description, hasPulse, className, ...props }, ref) => (
+  ({ tone = StatusTone.Success, label, description, hasPulse, className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn('flex items-start gap-3', className)}

@@ -1,9 +1,10 @@
 import { forwardRef, type SVGAttributes } from 'react';
 
 export interface OverlayArrowProps extends SVGAttributes<SVGSVGElement> {
-  /** Arrow width in px. Default 12. */
+  /** The arrow width in px. Default 12. */
   width?: number;
-  /** Arrow height in px. Default 6. */
+
+  /** The arrow height in px. Default 6. */
   height?: number;
 }
 

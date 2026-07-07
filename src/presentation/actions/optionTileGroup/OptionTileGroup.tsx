@@ -1,26 +1,26 @@
 import { forwardRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type Align } from '../../../foundation/utils';
 import { Fieldset } from '../../forms/fieldset';
-import { optionTileGroupVariants, type OptionTileGroupAlign } from './OptionTileGroup.variants';
+import { optionTileGroupVariants } from './OptionTileGroup.variants';
 
 /** Defines props for a group of option tiles. */
 export interface OptionTileGroupProps {
   /** The group's accessible name. */
   readonly label: string;
 
-  /** Disable the whole group — greys + blocks every tile via a native `<fieldset disabled>`. */
+  /** The disabled state — greys + blocks every tile via a native `<fieldset disabled>`. */
   readonly disabled?: boolean;
 
-  /** Wrap tiles onto multiple rows. Default `false` (single row). */
+  /** The wrap state — tiles flow onto multiple rows. Default `false` (single row). */
   readonly wrap?: boolean;
 
-  /** Main-axis alignment of the tiles. Default `start`. */
-  readonly align?: OptionTileGroupAlign;
+  /** The main-axis alignment of the tiles. Default `start`. */
+  readonly align?: Align;
 
   /** The `OptionTile` children. */
   readonly children: ReactNode;
 
-  /** Extra classes for the group container. */
+  /** The extra classes for the group container. */
   readonly className?: string;
 }
 

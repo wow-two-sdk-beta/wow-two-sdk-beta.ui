@@ -13,11 +13,14 @@ import { composeRefs } from '../../utils/composeRefs';
 export interface AnchoredPositionerProps extends HTMLAttributes<HTMLDivElement> {
   /** The element the floating layer should be anchored to. */
   anchor: HTMLElement | null;
-  /** Floating UI placement. Default `bottom`. */
+
+  /** The Floating UI placement. Default `bottom`. */
   placement?: Placement;
-  /** Distance between anchor and floating element in px. Default 8. */
+
+  /** The distance between anchor and floating element in px. Default 8. */
   offset?: number;
-  /** Render the floating element only when open. */
+
+  /** The open flag — renders the floating element only when open. */
   isOpen?: boolean;
   children: ReactNode;
 }

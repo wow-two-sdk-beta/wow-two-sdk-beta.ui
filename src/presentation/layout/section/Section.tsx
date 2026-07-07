@@ -9,16 +9,19 @@ import { sectionVariants, type SectionPaddingY } from './Section.variants';
 
 export interface SectionProps extends ComponentPropsWithoutRef<'section'> {
   /**
-   * Tinted background tone for the band. Applies the shadow-less `subtle`
+   * The tinted background tone for the band. Applies the shadow-less `subtle`
    * surface treatment (low-alpha tinted fill + `border-border`). Omit for a
    * transparent band (no fill, no border).
    */
   tone?: SurfaceTone;
-  /** Max-width of the inner centered `Container`. Passthrough to `Container.size`. Default `lg`. */
+
+  /** The max-width of the inner centered `Container`. Passthrough to `Container.size`. Default `lg`. */
   containerSize?: ContainerProps['size'];
-  /** Vertical padding (the band's top/bottom rhythm). Default `md`. */
+
+  /** The vertical padding (the band's top/bottom rhythm). Default `md`. */
   py?: SectionPaddingY;
-  /** Renders the band as a full-bleed `<section>` with no inner `Container` (edge-to-edge content). */
+
+  /** The full-bleed mode — renders a `<section>` with no inner `Container` (edge-to-edge content). */
   bleed?: boolean;
   children?: ReactNode;
 }

@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useState, type ComponentPropsWithoutRef, type Re
 import { cn } from '../../../foundation/utils';
 
 export interface ImageProps extends ComponentPropsWithoutRef<'img'> {
-  /** Element rendered when the image fails to load. */
+  /** The element rendered when the image fails to load. */
   fallback?: ReactNode;
 }
 

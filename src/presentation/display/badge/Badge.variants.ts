@@ -1,4 +1,24 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, Size, type VariantProps } from '../../../foundation/utils';
+
+/** Defines the Badge color treatment. */
+export const BadgeVariant = {
+  /** Refers to the neutral grey fill. */
+  Neutral: 'neutral',
+  /** Refers to the primary brand tint. */
+  Brand: 'brand',
+  /** Refers to the positive / confirmation tint. */
+  Success: 'success',
+  /** Refers to the caution tint. */
+  Warning: 'warning',
+  /** Refers to the destructive / error tint. */
+  Danger: 'danger',
+  /** Refers to the informational tint. */
+  Info: 'info',
+  /** Refers to a bordered, transparent fill. */
+  Outline: 'outline',
+} as const;
+
+export type BadgeVariant = (typeof BadgeVariant)[keyof typeof BadgeVariant];
 
 export const badgeVariants = tv({
   base: 'inline-flex items-center rounded-full font-medium',
@@ -25,3 +45,16 @@ export const badgeVariants = tv({
 });
 
 export type BadgeVariants = VariantProps<typeof badgeVariants>;
+
+/* Compile-time lock: enum values ≡ tv variant value-set (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertBadgeVariant: AssertExact<
+  BadgeVariant,
+  NonNullable<VariantProps<typeof badgeVariants>['variant']>
+> = true;
+/* `size` prop adopts the shared 5-member `Size`; the tv axis only styles sm/md/lg (widening is intentional). */
+const _assertBadgeSize: [NonNullable<VariantProps<typeof badgeVariants>['size']>] extends [Size]
+  ? true
+  : never = true;
+void _assertBadgeVariant;
+void _assertBadgeSize;

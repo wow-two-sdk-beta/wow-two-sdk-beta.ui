@@ -8,10 +8,13 @@ export interface UseClipboardOptions {
 export interface ClipboardControls {
   /** True for `resetAfter` ms after a successful copy. */
   copied: boolean;
+
   /** Last error from `navigator.clipboard.writeText`, if any. */
   error: Error | null;
+
   /** Write `text` to the system clipboard. Returns the promise. */
   copy: (text: string) => Promise<void>;
+
   /** Force-clear the `copied` flag. */
   reset: () => void;
 }

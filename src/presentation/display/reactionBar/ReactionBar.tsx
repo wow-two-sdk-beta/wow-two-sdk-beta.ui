@@ -10,27 +10,35 @@ import { cn } from '../../../foundation/utils';
 export interface Reaction {
   /** Stable id (typically the emoji or shortcode). */
   key: string;
+
   /** Emoji or icon node displayed in the chip. */
   emoji: ReactNode;
+
   /** Total count of users who reacted. */
   count: number;
+
   /** Whether the current viewer has reacted with this. */
   isReactedByMe?: boolean;
+
   /** Optional list of user names — surfaced in the chip's `title`. */
-  users?: string[];
+  users?: ReadonlyArray<string>;
 }
 
 export interface ReactionBarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
-  reactions: Reaction[];
-  /** Click handler for an existing reaction chip. Toggles user's reaction. */
+  reactions: ReadonlyArray<Reaction>;
+  /** Emits the key of the toggled reaction chip. */
   onReact?: (key: string) => void;
-  /** Click handler for the trailing "add" button. Opens a picker. */
+
+  /** Fires when the trailing "add" button is clicked (opens a picker). */
   onAdd?: () => void;
-  /** Render the trailing "add reaction" button. Default true. */
+
+  /** The trailing "add reaction" button's visibility. Default true. */
   hasAddButton?: boolean;
-  /** Compact mode — emoji only, no counts. */
+
+  /** The compact mode — emoji only, no counts. */
   isCompact?: boolean;
-  /** Render chips with `count === 0`. Default false. */
+
+  /** The empty-chip visibility — renders chips with `count === 0`. Default false. */
   hasEmpty?: boolean;
 }
 

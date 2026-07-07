@@ -1,17 +1,22 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface EmailInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
-    InputBaseVariants {}
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+}
 
 /** `<input type="email">` with sensible defaults (autocomplete, inputmode). */
 export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>(
   ({ className, size, state, id, disabled, required, readOnly, ...props }, ref) => {
     const ctx = useFormControl();
-    const finalState = state ?? (ctx?.isInvalid ? 'invalid' : 'default');
+    const finalState = state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default);
     return (
       <input
         ref={ref}

@@ -1,1 +1,1 @@
-export { Knob, type KnobProps, type KnobTone } from './Knob';
+export { Knob, KnobTone, type KnobProps } from './Knob';

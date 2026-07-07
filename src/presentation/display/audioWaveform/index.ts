@@ -1,5 +1,5 @@
 export {
   AudioWaveform,
+  AudioWaveformTone,
   type AudioWaveformProps,
-  type AudioWaveformTone,
 } from './AudioWaveform';

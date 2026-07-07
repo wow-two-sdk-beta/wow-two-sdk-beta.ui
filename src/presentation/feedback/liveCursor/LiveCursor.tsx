@@ -3,18 +3,22 @@ import { cn } from '../../../foundation/utils';
 import { useReducedMotion } from '../../../foundation/hooks';
 
 export interface LiveCursorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
-  /** Pixel offset from the parent's top-left corner. */
+  /** The pixel offset from the parent's top-left corner. */
   x: number;
   y: number;
-  /** Display name to show beside the pointer. */
+  /** The display name shown beside the pointer. */
   name?: ReactNode;
-  /** CSS color used for the pointer fill and label background. */
+
+  /** The CSS color used for the pointer fill and label background. */
   color?: string;
-  /** Smooth movement between updates. Defaults to true; auto-disables with reduced motion. */
+
+  /** The smooth-movement toggle between updates. Defaults to true; auto-disables with reduced motion. */
   isSmooth?: boolean;
-  /** Pixels offset for the label relative to the pointer. */
+
+  /** The pixel offset for the label relative to the pointer. */
   labelOffset?: { x?: number; y?: number };
-  /** Hide the label and show only the pointer. */
+
+  /** The pointer-only toggle — hides the label and shows only the pointer. */
   isPointerOnly?: boolean;
 }
 

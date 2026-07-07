@@ -1,5 +1,5 @@
 export {
   PresenceIndicator,
+  PresenceStatus,
   type PresenceIndicatorProps,
-  type PresenceStatus,
 } from './PresenceIndicator';

@@ -27,7 +27,7 @@ function SingleDemo() {
 }
 
 function MultiDemo() {
-  const [values, setValues] = useState<string[]>(['apple', 'cherry']);
+  const [values, setValues] = useState<readonly string[]>(['apple', 'cherry']);
   return (
     <div className="w-64">
       <Listbox<string> isMultiple value={values} onValueChange={setValues} aria-label="Choose fruits">

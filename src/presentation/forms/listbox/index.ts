@@ -7,6 +7,7 @@ export {
   type ListboxProps,
   type ListboxItemProps,
   type ListboxGroupProps,
+  ListboxIndicator,
   type EqualityFn,
-  type ListboxIndicator,
 } from './Listbox';
+export { ListboxItemState, type ListboxVariants, type ListboxItemVariants } from './Listbox.variants';

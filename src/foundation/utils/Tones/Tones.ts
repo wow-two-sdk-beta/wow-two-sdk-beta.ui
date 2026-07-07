@@ -3,15 +3,25 @@ import type { Tone } from '../StyleTokens';
 /* Contains the (variant-family × tone) → Tailwind class lookup shared between
    `surfaceVariants` and `buttonVariants` (and any future variant config). */
 
-/** Represents a tone-family — the variant group that picks the same bg/border/text palette. */
-export type ToneFamily =
-  | 'solid'
-  | 'soft'
-  | 'surface'
-  | 'outline'
-  | 'glass'
-  | 'glassOutline'
-  | 'subtle';
+/** Defines a tone-family — the variant group that picks the same bg/border/text palette. */
+export const ToneFamily = {
+  /** Refers to an opaque tone bg + foreground. */
+  Solid: 'solid',
+  /** Refers to a muted/tinted bg + tone-readable foreground. */
+  Soft: 'soft',
+  /** Refers to a popover bg + tone-accent border. */
+  Surface: 'surface',
+  /** Refers to a transparent bg, tone border + tone text. */
+  Outline: 'outline',
+  /** Refers to a translucent tone bg + blur. */
+  Glass: 'glass',
+  /** Refers to a glass fill + tone-accent border at 50% alpha. */
+  GlassOutline: 'glassOutline',
+  /** Refers to a low-alpha tinted fill + neutral border, no shadow. */
+  Subtle: 'subtle',
+} as const;
+
+export type ToneFamily = (typeof ToneFamily)[keyof typeof ToneFamily];
 
 /** Contains the cross-engine palette: bg / text (+ border where applicable) per tone-family × tone. */
 export const Tones: Record<ToneFamily, Record<Tone, string>> = {

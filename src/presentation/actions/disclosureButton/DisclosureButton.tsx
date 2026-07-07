@@ -1,21 +1,21 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { cn, dataAttr } from '../../../foundation/utils';
+import { cn, dataAttr, Side } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 import { useControlled } from '../../../foundation/hooks';
 
 export interface DisclosureButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'onChange'> {
-  /** Visible label (left-aligned). */
+  /** The visible label (left-aligned). */
   children?: ReactNode;
-  /** Controlled open state. */
+  /** The controlled open state. */
   isOpen?: boolean;
-  /** Uncontrolled initial state. */
+  /** The uncontrolled initial state. */
   defaultOpen?: boolean;
-  /** Fires whenever open state changes. */
+  /** Emits the open state whenever it changes. */
   onOpenChange?: (open: boolean) => void;
-  /** Side the chevron sits on. Default `right`. */
-  chevronSide?: 'left' | 'right';
+  /** The side the chevron sits on (`left` · `right`). Default `right`. */
+  chevronSide?: Side;
 }
 
 /** Button with a rotating chevron — sets `aria-expanded` + `data-state="open|closed"`. */
@@ -27,7 +27,7 @@ export const DisclosureButton = forwardRef<HTMLButtonElement, DisclosureButtonPr
       defaultOpen = false,
       onOpenChange,
       onClick,
-      chevronSide = 'right',
+      chevronSide = Side.Right,
       className,
       type = 'button',
       ...props
@@ -63,9 +63,9 @@ export const DisclosureButton = forwardRef<HTMLButtonElement, DisclosureButtonPr
         )}
         {...props}
       >
-        {chevronSide === 'left' && chevron}
+        {chevronSide === Side.Left && chevron}
         <span className="flex-1 text-left">{children}</span>
-        {chevronSide === 'right' && chevron}
+        {chevronSide === Side.Right && chevron}
       </button>
     );
   },

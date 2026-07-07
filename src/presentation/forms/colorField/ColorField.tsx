@@ -9,20 +9,35 @@ import {
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import {
+  inputBaseVariants,
+  InputSize,
+  InputState,
+  InputBorder,
+  InputRing,
+  type InputBaseVariants,
+} from '../InputStyles';
 import { formatHex, parseHex } from '../ColorExtensions';
-import { ColorSwatch } from '../colorSwatch';
+import { ColorSwatch, SwatchShape } from '../colorSwatch';
 
 export interface ColorFieldProps
   extends Omit<
       InputHTMLAttributes<HTMLInputElement>,
       'type' | 'value' | 'defaultValue' | 'onChange' | 'size'
     >,
-    InputBaseVariants {
+    Omit<InputBaseVariants, 'size' | 'state' | 'border' | 'ring'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+  /** The border weight. */
+  border?: InputBorder;
+  /** The focus-ring weight. */
+  ring?: InputRing;
   value?: string | null;
   defaultValue?: string | null;
   onValueChange?: (hex: string | null) => void;
-  swatchShape?: 'square' | 'circle';
+  swatchShape?: SwatchShape;
   hasAlpha?: boolean;
 }
 
@@ -38,7 +53,7 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function
     value,
     defaultValue,
     onValueChange,
-    swatchShape = 'square',
+    swatchShape = SwatchShape.Square,
     hasAlpha = false,
     size,
     state,
@@ -113,7 +128,7 @@ export const ColorField = forwardRef<HTMLInputElement, ColorFieldProps>(function
           }
         }}
         className={cn(
-          inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? 'invalid' : 'default'), border, ring }),
+          inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default), border, ring }),
           'pl-9 font-mono uppercase',
           className,
         )}

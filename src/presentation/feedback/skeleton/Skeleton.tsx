@@ -1,8 +1,13 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn } from '../../../foundation/utils';
-import { skeletonVariants, type SkeletonVariants } from './Skeleton.variants';
+import { skeletonVariants, type SkeletonShape, type SkeletonVariants } from './Skeleton.variants';
 
-export interface SkeletonProps extends ComponentPropsWithoutRef<'div'>, SkeletonVariants {}
+export interface SkeletonProps
+  extends ComponentPropsWithoutRef<'div'>,
+    Omit<SkeletonVariants, 'shape'> {
+  /** The placeholder shape. */
+  shape?: SkeletonShape;
+}
 
 /**
  * Loading placeholder. Use sized via `className` (e.g. `w-32 h-4`) for text

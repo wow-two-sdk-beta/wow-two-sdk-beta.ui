@@ -1,15 +1,17 @@
 import { forwardRef, type LabelHTMLAttributes } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 export interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
-  /** Show a `*` indicator. Auto-derived from `FormControl.isRequired` when present. */
+  /** The required state, showing a `*` indicator. Auto-derived from `FormControl.isRequired` when present. */
   isRequired?: boolean;
-  /** Visual size. Default `md`. */
-  size?: 'xs' | 'sm' | 'md';
+
+  /** The visual size. Default `md`. */
+  size?: Size;
 }
 
-const SIZE: Record<NonNullable<LabelProps['size']>, string> = {
+/* Sizes not listed fall back to the `md` row at the call site. */
+const SIZE: Partial<Record<Size, string>> = {
   xs: 'text-xs',
   sm: 'text-sm',
   md: 'text-sm',
@@ -20,7 +22,7 @@ const SIZE: Record<NonNullable<LabelProps['size']>, string> = {
  * it auto-fills `htmlFor` and `id`. Standalone use: pass `htmlFor` directly.
  */
 export const Label = forwardRef<HTMLLabelElement, LabelProps>(
-  ({ className, isRequired: isRequiredProp, size = 'md', htmlFor, id, children, ...props }, ref) => {
+  ({ className, isRequired: isRequiredProp, size = Size.Md, htmlFor, id, children, ...props }, ref) => {
     const ctx = useFormControl();
     const isRequired = isRequiredProp ?? ctx?.isRequired ?? false;
     return (
@@ -29,7 +31,7 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(
         htmlFor={htmlFor ?? ctx?.id}
         id={id ?? ctx?.labelId}
         className={cn(
-          SIZE[size],
+          SIZE[size] ?? SIZE.md,
           'font-medium text-foreground',
           ctx?.isDisabled && 'opacity-60',
           className,

@@ -1,1 +1,1 @@
-export { Eyebrow, type EyebrowProps } from './Eyebrow';
+export { Eyebrow, EyebrowTone, type EyebrowProps } from './Eyebrow';

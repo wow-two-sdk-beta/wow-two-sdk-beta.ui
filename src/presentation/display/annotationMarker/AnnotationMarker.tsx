@@ -5,20 +5,39 @@ import {
 } from 'react';
 import { cn } from '../../../foundation/utils';
 
-export type AnnotationTone = 'note' | 'comment' | 'suggestion' | 'issue' | 'resolved';
+/** Defines the AnnotationMarker highlight tone. */
+export const AnnotationTone = {
+  /** Refers to an informational note. */
+  Note: 'note',
+  /** Refers to a comment. */
+  Comment: 'comment',
+  /** Refers to a suggestion. */
+  Suggestion: 'suggestion',
+  /** Refers to a flagged issue. */
+  Issue: 'issue',
+  /** Refers to a resolved annotation. */
+  Resolved: 'resolved',
+} as const;
+
+export type AnnotationTone = (typeof AnnotationTone)[keyof typeof AnnotationTone];
 
 export interface AnnotationMarkerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Wrapped text or content the annotation refers to. Omit for a standalone pin. */
+  /** The wrapped text or content the annotation refers to. Omit for a standalone pin. */
   children?: ReactNode;
-  /** Numeric badge / index shown in the pin. */
+
+  /** The numeric badge / index shown in the pin. */
   index?: number | string;
-  /** Tone — drives the highlight color. */
+
+  /** The tone — drives the highlight color. */
   tone?: AnnotationTone;
-  /** Show the marker as a small floating pin without underline. */
+
+  /** The pin-only mode — a small floating pin without underline. */
   isPinOnly?: boolean;
-  /** Marks the annotation as resolved (dimmed, struck-through highlight). */
+
+  /** The resolved state (dimmed, struck-through highlight). */
   isResolved?: boolean;
-  /** Marks the annotation as the currently focused / hovered one. */
+
+  /** The active state — the currently focused / hovered annotation. */
   isActive?: boolean;
 }
 

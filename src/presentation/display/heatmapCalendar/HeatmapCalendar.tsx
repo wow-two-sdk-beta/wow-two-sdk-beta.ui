@@ -7,9 +7,23 @@ import { cn } from '../../../foundation/utils';
 // keyed by each date's ISO `.toString()` ("YYYY-MM-DD") so cell values resolve
 // in O(1); no native `Date`/raw-string leaks into the API.
 
-export type HeatmapCalendarTone = 'brand' | 'success' | 'warning' | 'danger' | 'muted';
+/** Defines the HeatmapCalendar color ramp tone. */
+export const HeatmapCalendarTone = {
+  /** Refers to the primary brand ramp. */
+  Brand: 'brand',
+  /** Refers to the positive / confirmation ramp. */
+  Success: 'success',
+  /** Refers to the caution ramp. */
+  Warning: 'warning',
+  /** Refers to the destructive / error ramp. */
+  Danger: 'danger',
+  /** Refers to the muted ramp. */
+  Muted: 'muted',
+} as const;
 
-const TONE_CLASSES: Record<HeatmapCalendarTone, string[]> = {
+export type HeatmapCalendarTone = (typeof HeatmapCalendarTone)[keyof typeof HeatmapCalendarTone];
+
+const TONE_CLASSES: Record<HeatmapCalendarTone, ReadonlyArray<string>> = {
   brand: ['bg-muted/50', 'bg-primary/20', 'bg-primary/40', 'bg-primary/70', 'bg-primary'],
   success: ['bg-muted/50', 'bg-success/20', 'bg-success/40', 'bg-success/70', 'bg-success'],
   warning: ['bg-muted/50', 'bg-warning/20', 'bg-warning/40', 'bg-warning/70', 'bg-warning'],
@@ -18,18 +32,18 @@ const TONE_CLASSES: Record<HeatmapCalendarTone, string[]> = {
 };
 
 export interface HeatmapCalendarProps extends HTMLAttributes<HTMLDivElement> {
-  /** Per-day counts, keyed by calendar date. */
+  /** The per-day counts, keyed by calendar date. */
   values: Map<Temporal.PlainDate, number>;
   year?: number;
   weekStart?: 0 | 1;
   cellSize?: number;
   gap?: number;
-  /** Intensity buckets (min 2, clamped). Buckets map proportionally onto the fixed 5-step tone palette — counts above 5 share palette classes between adjacent buckets. Default 5. */
+  /** The intensity buckets (min 2, clamped). Buckets map proportionally onto the fixed 5-step tone palette — counts above 5 share palette classes between adjacent buckets. Default 5. */
   levels?: number;
   tone?: HeatmapCalendarTone;
   onCellClick?: (date: Temporal.PlainDate, value: number) => void;
-  monthLabels?: string[];
-  weekdayLabels?: string[];
+  monthLabels?: ReadonlyArray<string>;
+  weekdayLabels?: ReadonlyArray<string>;
   hasLegend?: boolean;
 }
 

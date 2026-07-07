@@ -18,24 +18,28 @@ export interface MessageListHandle {
 }
 
 export interface MessageListProps extends HTMLAttributes<HTMLDivElement> {
-  /** Slot rendered above the message stream (e.g. "load older"). */
+  /** The slot rendered above the message stream (e.g. "load older"). */
   header?: ReactNode;
-  /** Slot rendered below the message stream (e.g. typing indicator). */
+
+  /** The slot rendered below the message stream (e.g. typing indicator). */
   footer?: ReactNode;
-  /** Auto-scroll to bottom when children change *and* the viewer is near
-   *  the bottom. Default true. */
+
+  /** The sticky auto-scroll mode — scrolls to bottom when children change *and* the viewer is near the bottom. Default true. */
   isSticky?: boolean;
-  /** Threshold (px) considered "at bottom" for stickiness. Default 32. */
+
+  /** The threshold (px) considered "at bottom" for stickiness. Default 32. */
   bottomThreshold?: number;
-  /** Show a floating "jump to bottom" button when scrolled away. Default true. */
+
+  /** The floating "jump to bottom" button's visibility when scrolled away. Default true. */
   hasJumpToBottom?: boolean;
-  /** Reverse-render messages (newest at top). v1 keeps natural top→bottom. */
+
+  /** The reversed render order (newest at top). v1 keeps natural top→bottom. */
   isReversed?: boolean;
   children: ReactNode;
 }
 
 export interface DaySeparatorProps extends HTMLAttributes<HTMLDivElement> {
-  /** Label (e.g. "Today", "Yesterday", "Mar 5"). */
+  /** The label (e.g. "Today", "Yesterday", "Mar 5"). */
   label: ReactNode;
 }
 

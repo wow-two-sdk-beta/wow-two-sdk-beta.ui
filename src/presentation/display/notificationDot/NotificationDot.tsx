@@ -1,13 +1,46 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, CornerPosition } from '../../../foundation/utils';
+
+/** Defines the NotificationDot color tone. */
+export const NotificationDotTone = {
+  /** Refers to the destructive / error color. */
+  Destructive: 'destructive',
+  /** Refers to the positive / confirmation color. */
+  Success: 'success',
+  /** Refers to the caution color. */
+  Warning: 'warning',
+  /** Refers to the informational color. */
+  Info: 'info',
+  /** Refers to the primary brand color. */
+  Primary: 'primary',
+  /** Refers to the neutral color. */
+  Neutral: 'neutral',
+} as const;
+
+export type NotificationDotTone =
+  (typeof NotificationDotTone)[keyof typeof NotificationDotTone];
+
+/** Defines the NotificationDot size step. */
+export const NotificationDotSize = {
+  /** Refers to the extra-small dot. */
+  Xs: 'xs',
+  /** Refers to the small dot. */
+  Sm: 'sm',
+  /** Refers to the medium dot. */
+  Md: 'md',
+} as const;
+
+export type NotificationDotSize =
+  (typeof NotificationDotSize)[keyof typeof NotificationDotSize];
 
 export interface NotificationDotProps extends ComponentPropsWithoutRef<'span'> {
-  tone?: 'destructive' | 'success' | 'warning' | 'info' | 'primary' | 'neutral';
-  size?: 'xs' | 'sm' | 'md';
-  /** Adds a pulsing ring around the dot. */
+  tone?: NotificationDotTone;
+  size?: NotificationDotSize;
+  /** The pulsing ring around the dot. */
   hasPulse?: boolean;
-  /** When set, the dot is positioned absolutely relative to its parent. */
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+
+  /** The corner position — when set, the dot is positioned absolutely relative to its parent. */
+  position?: CornerPosition;
 }
 
 const TONE: Record<NonNullable<NotificationDotProps['tone']>, string> = {

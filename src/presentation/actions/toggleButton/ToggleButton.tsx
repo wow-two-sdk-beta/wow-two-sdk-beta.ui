@@ -1,8 +1,13 @@
 import { forwardRef, type ReactNode } from 'react';
-import { cn, type ColorProp } from '../../../foundation/utils';
+import { cn, ColorTone, type ColorProp } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Button, type ButtonProps } from '../button/Button';
-import { toggleButtonVariants, type ToggleButtonVariants } from './ToggleButton.variants';
+import { ButtonVariant } from '../button';
+import {
+  toggleButtonVariants,
+  ToggleButtonVariant,
+  type ToggleButtonVariants,
+} from './ToggleButton.variants';
 import { Tooltip } from '../../display/tooltip';
 
 const COMPONENT_NAME = 'ToggleButton';
@@ -16,32 +21,38 @@ type ToggleButtonChildren = StateAware<ReactNode>;
 
 export interface ToggleButtonProps
   extends Omit<ButtonProps, 'variant' | 'tone' | 'children' | 'title' | 'aria-label' | 'color'>,
-    ToggleButtonVariants {
-  /* Controlled pressed state. */
+    Omit<ToggleButtonVariants, 'variant' | 'tone'> {
+  /** The press-state surface style. */
+  variant?: ToggleButtonVariant;
+
+  /** The semantic tone palette. */
+  tone?: ColorTone;
+
+  /** The controlled pressed state. */
   isPressed?: boolean;
 
-  /* Uncontrolled initial state. Ignored if `isPressed` is set. */
+  /** The uncontrolled initial state. Ignored if `isPressed` is set. */
   defaultPressed?: boolean;
 
-  /* Fires whenever pressed state changes. */
+  /** Emits the pressed state whenever it changes. */
   onPressedChange?: (pressed: boolean) => void;
 
-  /* Static content OR render-prop receiving `{ pressed }` for state-driven swap. */
+  /** The content — static OR a render-prop receiving `{ pressed }` for state-driven swap. */
   children?: ToggleButtonChildren;
 
-  /* Tooltip text — string OR fn receiving `{ pressed }`. State-aware form keeps consumer-supplied strings (i18n discipline). */
+  /** The tooltip text — string OR fn receiving `{ pressed }`. State-aware form keeps consumer-supplied strings (i18n discipline). */
   title?: StateAware<string>;
 
-  /* Accessible label — string OR fn. Use when icon-only or when `aria-pressed` alone is insufficient context for screen readers. */
+  /** The accessible label — string OR fn. Use when icon-only or when `aria-pressed` alone is insufficient context for screen readers. */
   'aria-label'?: StateAware<string>;
 
-  /* Per-instance color override — applies to the active `tone`'s theme tokens. See `ColorProp`. */
+  /** The per-instance color override — applies to the active `tone`'s theme tokens. See `ColorProp`. */
   color?: ColorProp;
 
-  /* Optional rich tooltip (SDK `Tooltip`) shown on hover/focus — use for icon-only toggles. */
+  /** The optional rich tooltip (SDK `Tooltip`) shown on hover/focus — use for icon-only toggles. */
   tooltip?: ReactNode;
 
-  /* Render element. `'div'` (role=button + Space/Enter keyboard) lets you nest INTERACTIVE children (a color picker, a link) inside a segment without invalid button-in-button markup. Default `'button'`. */
+  /** The render element. `'div'` (role=button + Space/Enter keyboard) lets you nest INTERACTIVE children (a color picker, a link) inside a segment without invalid button-in-button markup. Default `'button'`. */
   as?: 'button' | 'div';
 }
 
@@ -53,8 +64,8 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
       defaultPressed,
       onPressedChange,
       onClick,
-      variant = 'ghost',
-      tone = 'primary',
+      variant = ToggleButtonVariant.Ghost,
+      tone = ColorTone.Primary,
       color,
       className,
       children,
@@ -87,7 +98,7 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
       <Button
         ref={ref}
         /* Ghost baseline — ToggleButton's compound classes paint over Button's defaults via class order. tone is forwarded so per-instance `color` overrides hit the right `--color-{tone}` slot. */
-        variant="ghost"
+        variant={ButtonVariant.Ghost}
         tone={tone ?? undefined}
         color={color}
         /* `as="div"` → render through Slot onto a real <div> so consumers may nest interactive children (button-in-button is invalid markup). Keyboard parity added on the div below. */

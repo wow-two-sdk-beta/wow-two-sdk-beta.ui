@@ -3,9 +3,10 @@ import { cn } from '../../../foundation/utils';
 import { Kbd } from '../kbd/Kbd';
 
 export interface KeyboardShortcutProps extends ComponentPropsWithoutRef<'span'> {
-  /** Keys in order — e.g. `['⌘', 'K']` or `['Ctrl', 'Shift', 'P']`. */
-  keys: string[];
-  /** Connector between keys. Default `'+'`; pass `' '` for spaced keys. */
+  /** The keys in order — e.g. `['⌘', 'K']` or `['Ctrl', 'Shift', 'P']`. */
+  keys: ReadonlyArray<string>;
+
+  /** The connector between keys. Default `'+'`; pass `' '` for spaced keys. */
   separator?: string;
 }
 

@@ -3,6 +3,7 @@ export {
   StepperList,
   StepperStep,
   StepperPanel,
+  StepStatus,
   type StepperProps,
   type StepperListProps,
   type StepperStepProps,

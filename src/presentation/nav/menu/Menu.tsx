@@ -20,6 +20,7 @@ import {
   menuLabelVariants,
   menuSeparatorVariants,
   menuVariants,
+  MenuItemState,
   type MenuItemVariants,
 } from './Menu.variants';
 
@@ -32,7 +33,7 @@ interface MenuItemEntry {
 interface MenuContextValue {
   registerItem: (entry: MenuItemEntry) => void;
   unregisterItem: (id: string) => void;
-  itemsRef: React.MutableRefObject<MenuItemEntry[]>;
+  itemsRef: React.MutableRefObject<Array<MenuItemEntry>>;
   onClose: () => void;
 }
 
@@ -51,9 +52,10 @@ export interface MenuProps extends SurfaceVariants {
   onClose: () => void;
   placement?: React.ComponentProps<typeof AnchoredPositioner>['placement'];
   offset?: number;
-  /** Keydown observed on the menu container — lets wrappers (e.g. Menubar) add navigation. */
+  /** Fires when a keydown is observed on the menu container — lets wrappers (e.g. Menubar) add navigation. */
   onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
-  /** Labels the menu for screen readers. */
+
+  /** The accessible label for the menu, read by screen readers. */
   'aria-label'?: string;
   className?: string;
   children: ReactNode;
@@ -75,7 +77,7 @@ function MenuRoot({
   className,
   children,
 }: MenuProps) {
-  const itemsRef = useRef<MenuItemEntry[]>([]);
+  const itemsRef = useRef<Array<MenuItemEntry>>([]);
 
   const registerItem = useCallback((entry: MenuItemEntry) => {
     const idx = itemsRef.current.findIndex((i) => i.id === entry.id);
@@ -152,10 +154,12 @@ MenuRoot.displayName = 'Menu';
 
 export interface MenuItemProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onSelect'>,
-    MenuItemVariants {
-  /** Fired when the item is activated (Enter / Space / click). Menu closes after. */
+    Omit<MenuItemVariants, 'state'> {
+  /** The visual state of the item. */
+  state?: MenuItemState;
+  /** Fires when the item is activated (Enter / Space / click). Menu closes after. */
   onSelect?: () => void;
-  /** Disable activation. */
+  /** The disabled state — blocks activation. */
   isDisabled?: boolean;
 }
 

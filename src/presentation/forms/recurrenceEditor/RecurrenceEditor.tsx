@@ -3,15 +3,58 @@ import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { addDays, addMonths, daysInMonth, formatISODate, parseISODate, sundayIndex, today } from '../DateExtensions';
-import { inputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize } from '../InputStyles';
 
-export type RecurrenceFreq = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
-export type RecurrenceWeekday = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
+/** Defines an RFC-5545 recurrence frequency (the `FREQ=` value). */
+export const RecurrenceFreq = {
+  /** Refers to a daily recurrence. */
+  Daily: 'DAILY',
+  /** Refers to a weekly recurrence. */
+  Weekly: 'WEEKLY',
+  /** Refers to a monthly recurrence. */
+  Monthly: 'MONTHLY',
+  /** Refers to a yearly recurrence. */
+  Yearly: 'YEARLY',
+} as const;
+
+export type RecurrenceFreq = (typeof RecurrenceFreq)[keyof typeof RecurrenceFreq];
+
+/** Defines an RFC-5545 weekday token (the `BYDAY=` value). */
+export const RecurrenceWeekday = {
+  /** Refers to Monday. */
+  Monday: 'MO',
+  /** Refers to Tuesday. */
+  Tuesday: 'TU',
+  /** Refers to Wednesday. */
+  Wednesday: 'WE',
+  /** Refers to Thursday. */
+  Thursday: 'TH',
+  /** Refers to Friday. */
+  Friday: 'FR',
+  /** Refers to Saturday. */
+  Saturday: 'SA',
+  /** Refers to Sunday. */
+  Sunday: 'SU',
+} as const;
+
+export type RecurrenceWeekday = (typeof RecurrenceWeekday)[keyof typeof RecurrenceWeekday];
+
+/** Defines how a recurrence terminates. */
+export const RecurrenceEndMode = {
+  /** Refers to an open-ended recurrence (no end). */
+  Never: 'never',
+  /** Refers to ending after a fixed occurrence count. */
+  Count: 'count',
+  /** Refers to ending on a fixed until-date. */
+  Until: 'until',
+} as const;
+
+export type RecurrenceEndMode = (typeof RecurrenceEndMode)[keyof typeof RecurrenceEndMode];
 
 export interface RecurrenceRule {
   freq: RecurrenceFreq;
   interval: number;
-  byDay?: RecurrenceWeekday[];
+  byDay?: ReadonlyArray<RecurrenceWeekday>;
   byMonthDay?: number;
   count?: number;
   until?: Temporal.PlainDate | null;
@@ -25,24 +68,41 @@ export interface RecurrenceEditorProps extends Omit<HTMLAttributes<HTMLDivElemen
   previewCount?: number;
   isDisabled?: boolean;
   isReadOnly?: boolean;
-  /** When set, emits a hidden input with the serialized `RRULE:` string. */
+  /** The hidden input name; when set, emits a hidden input with the serialized `RRULE:` string. */
   name?: string;
 }
 
-const ALL_WEEKDAYS: RecurrenceWeekday[] = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+const ALL_WEEKDAYS: ReadonlyArray<RecurrenceWeekday> = [
+  RecurrenceWeekday.Sunday,
+  RecurrenceWeekday.Monday,
+  RecurrenceWeekday.Tuesday,
+  RecurrenceWeekday.Wednesday,
+  RecurrenceWeekday.Thursday,
+  RecurrenceWeekday.Friday,
+  RecurrenceWeekday.Saturday,
+];
 const WEEKDAY_LABEL: Record<RecurrenceWeekday, string> = {
-  SU: 'Su',
-  MO: 'Mo',
-  TU: 'Tu',
-  WE: 'We',
-  TH: 'Th',
-  FR: 'Fr',
-  SA: 'Sa',
+  [RecurrenceWeekday.Sunday]: 'Su',
+  [RecurrenceWeekday.Monday]: 'Mo',
+  [RecurrenceWeekday.Tuesday]: 'Tu',
+  [RecurrenceWeekday.Wednesday]: 'We',
+  [RecurrenceWeekday.Thursday]: 'Th',
+  [RecurrenceWeekday.Friday]: 'Fr',
+  [RecurrenceWeekday.Saturday]: 'Sa',
 };
-const JS_TO_RRULE: RecurrenceWeekday[] = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+/* Maps a Sunday-indexed JS weekday (0=Sun … 6=Sat) to its RRULE token. */
+const JS_TO_RRULE: ReadonlyArray<RecurrenceWeekday> = [
+  RecurrenceWeekday.Sunday,
+  RecurrenceWeekday.Monday,
+  RecurrenceWeekday.Tuesday,
+  RecurrenceWeekday.Wednesday,
+  RecurrenceWeekday.Thursday,
+  RecurrenceWeekday.Friday,
+  RecurrenceWeekday.Saturday,
+];
 
 function serializeRule(r: RecurrenceRule): string {
-  const parts: string[] = [`FREQ=${r.freq}`];
+  const parts: Array<string> = [`FREQ=${r.freq}`];
   if (r.interval > 1) parts.push(`INTERVAL=${r.interval}`);
   if (r.byDay && r.byDay.length > 0) parts.push(`BYDAY=${r.byDay.join(',')}`);
   if (r.byMonthDay) parts.push(`BYMONTHDAY=${r.byMonthDay}`);
@@ -56,9 +116,9 @@ function nextOccurrence(
   prev: Temporal.PlainDate,
 ): Temporal.PlainDate | null {
   switch (rule.freq) {
-    case 'DAILY':
+    case RecurrenceFreq.Daily:
       return addDays(prev, rule.interval);
-    case 'WEEKLY': {
+    case RecurrenceFreq.Weekly: {
       if (!rule.byDay || rule.byDay.length === 0) return addDays(prev, 7 * rule.interval);
       // Find the next allowed weekday in `prev`'s week (weeks start Sunday);
       // exhausted → jump to the week `interval` weeks later and scan it.
@@ -76,7 +136,7 @@ function nextOccurrence(
       }
       return null;
     }
-    case 'MONTHLY': {
+    case RecurrenceFreq.Monthly: {
       const next = addMonths(prev, rule.interval);
       if (rule.byMonthDay) {
         // Clamp to the month's length so day 31 in a 30-day month lands on the last day.
@@ -85,7 +145,7 @@ function nextOccurrence(
       }
       return next;
     }
-    case 'YEARLY':
+    case RecurrenceFreq.Yearly:
       return prev.add({ years: rule.interval });
   }
 }
@@ -94,8 +154,8 @@ function buildPreview(
   rule: RecurrenceRule,
   from: Temporal.PlainDate,
   count: number,
-): Temporal.PlainDate[] {
-  const out: Temporal.PlainDate[] = [];
+): ReadonlyArray<Temporal.PlainDate> {
+  const out: Array<Temporal.PlainDate> = [];
   let cursor = from;
   // Include `from` if it satisfies the rule (simplification: always include for visual hint).
   out.push(cursor);
@@ -110,7 +170,7 @@ function buildPreview(
   return out;
 }
 
-const DEFAULT_RULE: RecurrenceRule = { freq: 'WEEKLY', interval: 1, byDay: ['MO'] };
+const DEFAULT_RULE: RecurrenceRule = { freq: RecurrenceFreq.Weekly, interval: 1, byDay: [RecurrenceWeekday.Monday] };
 
 /**
  * Visual RRULE editor. Output is a JS `RecurrenceRule` object via `onValueChange`;
@@ -145,17 +205,17 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
       const next = { ...rule, ...patch };
       // Reset incompatible fields when freq changes.
       if (patch.freq && patch.freq !== rule.freq) {
-        if (patch.freq !== 'WEEKLY') next.byDay = undefined;
-        if (patch.freq !== 'MONTHLY') next.byMonthDay = undefined;
+        if (patch.freq !== RecurrenceFreq.Weekly) next.byDay = undefined;
+        if (patch.freq !== RecurrenceFreq.Monthly) next.byMonthDay = undefined;
       }
       setRule(next);
     };
 
-    const endMode: 'never' | 'count' | 'until' = rule.count
-      ? 'count'
+    const endMode: RecurrenceEndMode = rule.count
+      ? RecurrenceEndMode.Count
       : rule.until
-        ? 'until'
-        : 'never';
+        ? RecurrenceEndMode.Until
+        : RecurrenceEndMode.Never;
 
     return (
       <div
@@ -178,14 +238,14 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
             disabled={isDisabled}
             readOnly={isReadOnly}
             onChange={(e) => update({ interval: Math.max(1, Number(e.target.value) || 1) })}
-            className={cn(inputBaseVariants({ size: 'sm' }), 'w-16')}
+            className={cn(inputBaseVariants({ size: InputSize.Sm }), 'w-16')}
           />
           <select
             aria-label="Frequency"
             value={rule.freq}
             disabled={isDisabled}
             onChange={(e) => update({ freq: e.target.value as RecurrenceFreq })}
-            className={cn(inputBaseVariants({ size: 'sm' }), 'w-32')}
+            className={cn(inputBaseVariants({ size: InputSize.Sm }), 'w-32')}
           >
             <option value="DAILY">{rule.interval > 1 ? 'days' : 'day'}</option>
             <option value="WEEKLY">{rule.interval > 1 ? 'weeks' : 'week'}</option>
@@ -194,7 +254,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
           </select>
         </div>
 
-        {rule.freq === 'WEEKLY' && (
+        {rule.freq === RecurrenceFreq.Weekly && (
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">On</span>
             <div role="group" aria-label="Days of week" className="flex flex-wrap gap-1">
@@ -228,7 +288,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
           </div>
         )}
 
-        {rule.freq === 'MONTHLY' && (
+        {rule.freq === RecurrenceFreq.Monthly && (
           <div className="flex items-center gap-2 text-sm">
             <label htmlFor={`${id}-month-day`} className="text-muted-foreground">On day</label>
             <input
@@ -240,7 +300,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               disabled={isDisabled}
               readOnly={isReadOnly}
               onChange={(e) => update({ byMonthDay: Math.min(31, Math.max(1, Number(e.target.value) || 1)) })}
-              className={cn(inputBaseVariants({ size: 'sm' }), 'w-20')}
+              className={cn(inputBaseVariants({ size: InputSize.Sm }), 'w-20')}
             />
             <span className="text-muted-foreground">of the month</span>
           </div>
@@ -251,7 +311,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
             <input
               type="radio"
               name={`${name ?? 'rule'}-end`}
-              checked={endMode === 'never'}
+              checked={endMode === RecurrenceEndMode.Never}
               disabled={isDisabled || isReadOnly}
               onChange={() => update({ count: undefined, until: null })}
             />
@@ -261,7 +321,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
             <input
               type="radio"
               name={`${name ?? 'rule'}-end`}
-              checked={endMode === 'count'}
+              checked={endMode === RecurrenceEndMode.Count}
               disabled={isDisabled || isReadOnly}
               onChange={() => update({ count: rule.count ?? 10, until: null })}
             />
@@ -271,9 +331,9 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               aria-label="Occurrence count"
               min={1}
               value={rule.count ?? ''}
-              disabled={isDisabled || isReadOnly || endMode !== 'count'}
+              disabled={isDisabled || isReadOnly || endMode !== RecurrenceEndMode.Count}
               onChange={(e) => update({ count: Math.max(1, Number(e.target.value) || 1), until: null })}
-              className={cn(inputBaseVariants({ size: 'sm' }), 'w-20')}
+              className={cn(inputBaseVariants({ size: InputSize.Sm }), 'w-20')}
             />
             occurrences
           </label>
@@ -281,7 +341,7 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
             <input
               type="radio"
               name={`${name ?? 'rule'}-end`}
-              checked={endMode === 'until'}
+              checked={endMode === RecurrenceEndMode.Until}
               disabled={isDisabled || isReadOnly}
               onChange={() => update({ until: addMonths(from, 6), count: undefined })}
             />
@@ -290,9 +350,9 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
               type="date"
               aria-label="End date"
               value={formatISODate(rule.until ?? null)}
-              disabled={isDisabled || isReadOnly || endMode !== 'until'}
+              disabled={isDisabled || isReadOnly || endMode !== RecurrenceEndMode.Until}
               onChange={(e) => update({ until: parseISODate(e.target.value), count: undefined })}
-              className={cn(inputBaseVariants({ size: 'sm' }), 'w-44')}
+              className={cn(inputBaseVariants({ size: InputSize.Sm }), 'w-44')}
             />
           </label>
         </div>

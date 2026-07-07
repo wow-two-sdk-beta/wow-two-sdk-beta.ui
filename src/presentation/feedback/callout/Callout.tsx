@@ -1,14 +1,15 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Severity } from '../../../foundation/utils';
 
 export interface CalloutProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-  severity?: 'info' | 'success' | 'warning' | 'danger' | 'neutral';
+  /** The semantic severity palette. */
+  severity?: Severity;
   icon?: ReactNode;
   title?: ReactNode;
   children?: ReactNode;
 }
 
-const SEVERITY: Record<NonNullable<CalloutProps['severity']>, string> = {
+const SEVERITY: Record<Severity, string> = {
   info: 'border-l-info text-foreground',
   success: 'border-l-success text-foreground',
   warning: 'border-l-warning text-foreground',
@@ -21,7 +22,7 @@ const SEVERITY: Record<NonNullable<CalloutProps['severity']>, string> = {
  * doc-style notes, supplementary content (think MDX callouts).
  */
 export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
-  ({ severity = 'info', icon, title, children, className, ...props }, ref) => (
+  ({ severity = Severity.Info, icon, title, children, className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(

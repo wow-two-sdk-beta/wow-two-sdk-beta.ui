@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from 'react';
 import { FocusScope } from '@radix-ui/react-focus-scope';
-import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../../foundation/utils';
+import { cn, composeRefs, Side, surfaceVariants, type SurfaceVariants } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { DismissableLayer, Portal, Presence, ScrollLockProvider, Slot } from '../../../foundation/primitives';
 import { Backdrop } from '../backdrop';
@@ -26,15 +26,13 @@ import {
   type OverlayChromeContextValue,
 } from '../OverlayChrome';
 
-export type DrawerSide = 'top' | 'right' | 'bottom' | 'left';
-
 interface DrawerContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
   triggerRef: React.MutableRefObject<HTMLElement | null>;
   titleId: string;
   descriptionId: string;
-  side: DrawerSide;
+  side: Side;
   dismissOnOutsideClick: boolean;
   dismissOnEscape: boolean;
 }
@@ -51,7 +49,7 @@ export interface DrawerProps {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  side?: DrawerSide;
+  side?: Side;
   dismissOnOutsideClick?: boolean;
   dismissOnEscape?: boolean;
   children: ReactNode;
@@ -123,12 +121,26 @@ export const DrawerTrigger = forwardRef<HTMLButtonElement, DrawerTriggerProps>(
   },
 );
 
-export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+/** Defines the max-size token for a `Drawer.Content` panel. */
+export const DrawerSize = {
+  /** Refers to the small panel size. */
+  Sm: 'sm',
+  /** Refers to the medium panel size. */
+  Md: 'md',
+  /** Refers to the large panel size. */
+  Lg: 'lg',
+  /** Refers to the extra-large panel size. */
+  Xl: 'xl',
+  /** Refers to a panel that fills its cross-axis. */
+  Full: 'full',
+} as const;
+
+export type DrawerSize = (typeof DrawerSize)[keyof typeof DrawerSize];
 
 // Full-edge slide: the panel rests at translate-0 when open and is pushed
 // fully off its own edge when closed. `transition-transform` (gated on
 // `motion-safe:`) animates both enter and exit via Presence's data-state flip.
-const SIDE_BASE: Record<DrawerSide, string> = {
+const SIDE_BASE: Record<Side, string> = {
   right:
     'inset-y-0 right-0 h-full w-full border-l ' +
     'motion-safe:transition-transform motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out) ' +
@@ -167,7 +179,7 @@ const VERTICAL_SIZE: Record<DrawerSize, string> = {
 export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement>, SurfaceVariants {
   hideBackdrop?: boolean;
   isBlurred?: boolean;
-  /** Per-side max-size token. Default `md` (preserves prior behavior for right/left at `sm`-ish width via `sm:max-w-md`). */
+  /** The per-side max-size token. Default `md` (preserves prior behavior for right/left at `sm`-ish width via `sm:max-w-md`). */
   size?: DrawerSize;
   children: ReactNode;
 }

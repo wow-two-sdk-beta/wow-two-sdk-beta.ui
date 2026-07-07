@@ -32,7 +32,7 @@ import type { ThemeSeed } from './Theme';
  * Ids are kebab-case and unique vs the curated 24 + smart-qr.
  * ========================================================================= */
 
-const NAMED_SEEDS: ThemeSeed[] = [
+const NAMED_SEEDS: ReadonlyArray<ThemeSeed> = [
   {
     id: 'catppuccin-latte',
     name: 'Catppuccin Latte',
@@ -730,12 +730,13 @@ interface HueStop {
   hue: number;
   /** Color-family word used to name the spectrum presets at this hue. */
   family: string;
+
   /** Mood/lightness word that pairs with the family for the display name. */
   word: string;
 }
 
 /** Evenly-spaced stops around the wheel (~24° apart), each with a real name. */
-const HUE_STOPS: HueStop[] = [
+const HUE_STOPS: ReadonlyArray<HueStop> = [
   { hue: 0, family: 'Scarlet', word: 'Ember' },
   { hue: 24, family: 'Coral', word: 'Flare' },
   { hue: 48, family: 'Marigold', word: 'Glow' },
@@ -770,8 +771,8 @@ const TEMP_VARIANTS: { temp: ThemeSeed['neutralTemp']; init: string }[] = [
  * Build the spectrum sweep: for each hue stop, cross (3 accent modes × 2 temps),
  * alternating surface so the pool isn't monotonous. 15 hues × 6 = 90 seeds.
  */
-function buildSpectrumSeeds(): ThemeSeed[] {
-  const seeds: ThemeSeed[] = [];
+function buildSpectrumSeeds(): ReadonlyArray<ThemeSeed> {
+  const seeds: Array<ThemeSeed> = [];
   for (const stop of HUE_STOPS) {
     let i = 0;
     for (const accent of ACCENT_VARIANTS) {
@@ -796,7 +797,7 @@ function buildSpectrumSeeds(): ThemeSeed[] {
   return seeds;
 }
 
-const SPECTRUM_SEEDS: ThemeSeed[] = buildSpectrumSeeds();
+const SPECTRUM_SEEDS: ReadonlyArray<ThemeSeed> = buildSpectrumSeeds();
 
 /* ===========================================================================
  * Exported pool — named cohort first, then the spectrum sweep.
@@ -805,4 +806,4 @@ const SPECTRUM_SEEDS: ThemeSeed[] = buildSpectrumSeeds();
  * ========================================================================= */
 
 /** The full candidate pool seeds (named editor/brand palettes + hue sweep). */
-export const POOL_SEEDS: ThemeSeed[] = [...NAMED_SEEDS, ...SPECTRUM_SEEDS];
+export const POOL_SEEDS: ReadonlyArray<ThemeSeed> = [...NAMED_SEEDS, ...SPECTRUM_SEEDS];

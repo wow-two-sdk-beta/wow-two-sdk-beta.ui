@@ -1,8 +1,15 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
-import { badgeVariants, type BadgeVariants } from './Badge.variants';
+import { cn, type Size } from '../../../foundation/utils';
+import { badgeVariants, type BadgeVariant, type BadgeVariants } from './Badge.variants';
 
-export interface BadgeProps extends ComponentPropsWithoutRef<'span'>, BadgeVariants {}
+export interface BadgeProps
+  extends ComponentPropsWithoutRef<'span'>,
+    Omit<BadgeVariants, 'variant' | 'size'> {
+  /** The color treatment. */
+  variant?: BadgeVariant;
+  /** The size step. */
+  size?: Size;
+}
 
 /**
  * Pill-shaped status / category indicator. Non-interactive — for clickable
@@ -10,7 +17,14 @@ export interface BadgeProps extends ComponentPropsWithoutRef<'span'>, BadgeVaria
  */
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant, size, ...props }, ref) => (
-    <span ref={ref} className={cn(badgeVariants({ variant, size }), className)} {...props} />
+    <span
+      ref={ref}
+      className={cn(
+        badgeVariants({ variant, size: size as BadgeVariants['size'] }),
+        className,
+      )}
+      {...props}
+    />
   ),
 );
 Badge.displayName = 'Badge';

@@ -1,8 +1,9 @@
 export {
   Overlay,
+  OverlayAppearOn,
+  OverlayTransition,
   type OverlayProps,
   type OverlayPosition,
-  type OverlayAppearOn,
-  type OverlayTransition,
   type OverlayDuration,
 } from './Overlay';
+export { OverlayVisibilityMode } from './Overlay.variants';

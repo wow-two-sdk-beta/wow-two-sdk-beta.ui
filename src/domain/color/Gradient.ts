@@ -4,6 +4,7 @@ import { GradientType } from './GradientType';
 export interface GradientStop {
   /** The stop color, `#RRGGBB`. */
   color: string;
+
   /** The stop's position along the gradient, `0..1`. */
   offset: number;
 }
@@ -11,13 +12,14 @@ export interface GradientStop {
 /** Defines the shared gradient data — the color stops, independent of projection. */
 interface GradientBase {
   /** The ordered color stops (two: start, end). */
-  stops: GradientStop[];
+  stops: ReadonlyArray<GradientStop>;
 }
 
 /** Defines a linear (directional) gradient. */
 export interface LinearGradient extends GradientBase {
   /** Discriminant — a linear projection. */
   type: typeof GradientType.Linear;
+
   /** Direction in degrees; `0` = left→right, `90` = top→bottom. */
   angle: number;
 }
@@ -26,6 +28,7 @@ export interface LinearGradient extends GradientBase {
 export interface RadialGradient extends GradientBase {
   /** Discriminant — a radial projection. */
   type: typeof GradientType.Radial;
+
   /** Extent as a fraction (`0..1`) of the canvas half-size — smaller is tighter. */
   radius: number;
 }
@@ -65,12 +68,12 @@ function withType(gradient: Gradient, type: GradientType, defaults: { angle: num
 }
 
 /** Creates a linear gradient from `stops` + `angle` (degrees). */
-function linear(stops: GradientStop[], angle: number): LinearGradient {
+function linear(stops: ReadonlyArray<GradientStop>, angle: number): LinearGradient {
   return { type: GradientType.Linear, angle, stops };
 }
 
 /** Creates a radial gradient from `stops` + `radius` (0..1 extent). */
-function radial(stops: GradientStop[], radius: number): RadialGradient {
+function radial(stops: ReadonlyArray<GradientStop>, radius: number): RadialGradient {
   return { type: GradientType.Radial, radius, stops };
 }
 

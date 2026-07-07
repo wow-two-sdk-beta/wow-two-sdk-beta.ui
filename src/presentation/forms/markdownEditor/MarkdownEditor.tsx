@@ -12,8 +12,19 @@ import { Bold, Code, Heading1, Heading2, Italic, Link2, List, Quote } from 'luci
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
+import { InputState } from '../InputStyles';
 
-export type MarkdownEditorView = 'split' | 'edit' | 'preview';
+/** Defines the pane layout of a markdown editor. */
+export const MarkdownEditorView = {
+  /** Refers to editor + preview shown side by side. */
+  Split: 'split',
+  /** Refers to the editor pane only. */
+  Edit: 'edit',
+  /** Refers to the rendered-preview pane only. */
+  Preview: 'preview',
+} as const;
+
+export type MarkdownEditorView = (typeof MarkdownEditorView)[keyof typeof MarkdownEditorView];
 
 export interface MarkdownEditorProps
   extends Omit<
@@ -104,7 +115,7 @@ const previewMarked = new Marked({
   },
 });
 
-const ACTIONS: ToolbarAction[] = [
+const ACTIONS: ReadonlyArray<ToolbarAction> = [
   { key: 'h1', label: 'Heading 1', icon: <Icon icon={Heading1} size={14} />, apply: linePrefix('# ') },
   { key: 'h2', label: 'Heading 2', icon: <Icon icon={Heading2} size={14} />, apply: linePrefix('## ') },
   { key: 'bold', label: 'Bold', icon: <Icon icon={Bold} size={14} />, apply: wrap('**', '**') },
@@ -149,7 +160,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
     });
     const [view, setView] = useControlled({
       controlled: viewProp,
-      default: defaultView ?? 'split',
+      default: defaultView ?? MarkdownEditorView.Split,
       onChange: onViewChange,
     });
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -182,17 +193,17 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
       });
     };
 
-    const showEdit = view === 'split' || view === 'edit';
-    const showPreview = view === 'split' || view === 'preview';
+    const showEdit = view === MarkdownEditorView.Split || view === MarkdownEditorView.Edit;
+    const showPreview = view === MarkdownEditorView.Split || view === MarkdownEditorView.Preview;
 
-    const state = isInvalid ? 'invalid' : 'default';
+    const state = isInvalid ? InputState.Invalid : InputState.Default;
 
     return (
       <div
         data-state={state}
         className={cn(
           'flex flex-col overflow-hidden rounded-md border border-input bg-card text-card-foreground shadow-sm',
-          state === 'invalid' && 'border-destructive',
+          state === InputState.Invalid && 'border-destructive',
           disabled && 'opacity-60',
           className,
         )}
@@ -214,7 +225,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
             ))}
           </div>
           <div role="radiogroup" aria-label="View mode" className="ml-auto flex items-center gap-0.5 rounded-md bg-card p-0.5 ring-1 ring-border">
-            {(['edit', 'split', 'preview'] as MarkdownEditorView[]).map((v) => (
+            {[MarkdownEditorView.Edit, MarkdownEditorView.Split, MarkdownEditorView.Preview].map((v) => (
               <button
                 key={v}
                 type="button"

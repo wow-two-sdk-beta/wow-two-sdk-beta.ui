@@ -137,7 +137,7 @@ export const PopoverTrigger = forwardRef<HTMLButtonElement, PopoverTriggerProps>
 export interface PopoverContentProps
   extends HTMLAttributes<HTMLDivElement>,
     SurfaceVariants {
-  /** Skips the surface chrome (bg/border/shadow); keeps only z-index + animation. */
+  /** The bare toggle — skips the surface chrome (bg/border/shadow); keeps only z-index + animation. */
   isBare?: boolean;
   children: ReactNode;
 }

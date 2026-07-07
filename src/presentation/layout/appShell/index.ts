@@ -7,6 +7,7 @@ export {
   AppShellMain,
   AppShellSidebar,
   useAppShell,
+  Breakpoint,
   type AppShellAsideProps,
   type AppShellContentProps,
   type AppShellFooterProps,

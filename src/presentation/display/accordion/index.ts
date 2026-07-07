@@ -3,6 +3,7 @@ export {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
+  AccordionType,
   type AccordionProps,
   type AccordionItemProps,
   type AccordionTriggerProps,

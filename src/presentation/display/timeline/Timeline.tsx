@@ -10,23 +10,43 @@ import {
 } from 'react';
 import { cn } from '../../../foundation/utils';
 
-export type TimelineStatus =
-  | 'default'
-  | 'primary'
-  | 'success'
-  | 'warning'
-  | 'destructive'
-  | 'info';
+/** Defines the semantic status tone of a Timeline node. */
+export const TimelineStatus = {
+  /** Refers to the neutral / default node. */
+  Default: 'default',
+  /** Refers to the primary brand node. */
+  Primary: 'primary',
+  /** Refers to the positive / confirmation node. */
+  Success: 'success',
+  /** Refers to the caution node. */
+  Warning: 'warning',
+  /** Refers to the destructive / error node. */
+  Destructive: 'destructive',
+  /** Refers to the informational node. */
+  Info: 'info',
+} as const;
+
+export type TimelineStatus = (typeof TimelineStatus)[keyof typeof TimelineStatus];
+
+/** Defines which side the Timeline rail sits on. */
+export const TimelineAlign = {
+  /** Refers to a left-anchored rail. */
+  Left: 'left',
+  /** Refers to a right-anchored rail. */
+  Right: 'right',
+} as const;
+
+export type TimelineAlign = (typeof TimelineAlign)[keyof typeof TimelineAlign];
 
 interface TimelineContextValue {
-  align: 'left' | 'right';
+  align: TimelineAlign;
   total: number;
 }
 
 const TimelineContext = createContext<TimelineContextValue | null>(null);
 
 export interface TimelineProps extends HTMLAttributes<HTMLOListElement> {
-  align?: 'left' | 'right';
+  align?: TimelineAlign;
   children: ReactNode;
 }
 

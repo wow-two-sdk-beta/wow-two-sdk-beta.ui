@@ -25,8 +25,8 @@ export interface ScheduleBooking {
 }
 
 export interface ScheduleViewProps extends HTMLAttributes<HTMLDivElement> {
-  resources: ScheduleResource[];
-  bookings: ScheduleBooking[];
+  resources: ReadonlyArray<ScheduleResource>;
+  bookings: ReadonlyArray<ScheduleBooking>;
   /** The day to render; its calendar date + time zone anchor the grid. */
   date?: Temporal.ZonedDateTime;
   hourRange?: [number, number];
@@ -64,7 +64,7 @@ export const ScheduleView = forwardRef<HTMLDivElement, ScheduleViewProps>(functi
   );
 
   const bookingsByResource = useMemo(() => {
-    const map = new Map<string, ScheduleBooking[]>();
+    const map = new Map<string, Array<ScheduleBooking>>();
     for (const b of bookings) {
       const list = map.get(b.resourceId);
       if (list) list.push(b);

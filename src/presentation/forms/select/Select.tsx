@@ -31,7 +31,8 @@ import {
   ListboxEmpty,
 } from '../listbox';
 import { SearchInput } from '../searchInput';
-import { selectTriggerVariants, type SelectTriggerVariants } from './Select.variants';
+import { selectTriggerVariants, SelectSize, type SelectTriggerVariants } from './Select.variants';
+import { InputState } from '../InputStyles';
 
 /* ────────── Option model ────────── */
 
@@ -83,11 +84,13 @@ interface SelectContextValue {
   isInvalid: boolean;
   /** Stable id of the inner Listbox — wired to the trigger's `aria-controls`. */
   listboxId: string;
+
   /** Reflects the listbox's active option id for `aria-activedescendant`. */
   activeDescendant: string | null;
   setActiveDescendant: (id: string | null) => void;
   /** Holds the DOM node of the inner Listbox — keyboard bridge re-dispatches onto it. */
   listboxRef: React.MutableRefObject<HTMLDivElement | null>;
+
   /** Form-control wiring inherited from a surrounding `<Field>` (null when standalone). */
   fieldId?: string;
   labelId?: string;
@@ -106,40 +109,56 @@ function useSelectContext() {
 
 /** Represents the prop surface of the `Select` root. */
 export interface SelectProps<K, V = K> {
-  /** Holds the selected key; `null` = explicit clear, `undefined` = uncontrolled. */
+  /** The selected key; `null` = explicit clear, `undefined` = uncontrolled. */
   value?: K | null;
-  /** Holds the initial selected key for uncontrolled use. */
+
+  /** The initial selected key for uncontrolled use. */
   defaultValue?: K | null;
+
   /** Fires when an item is picked or cleared (`null` on clear). */
   onValueChange?: (selected: SelectOption<K, V> | null) => void;
-  /** Compares keys for equality; defaults to `Equality.strictEquals`. */
+
+  /** The equality comparer for keys; defaults to `Equality.strictEquals`. */
   keyEquals?: EqualityComparer<K>;
-  /** Disables interaction when true. */
+
+  /** The disabled state, blocking interaction when true. */
   isDisabled?: boolean;
-  /** Shows a spinner in the trigger and blocks interaction. */
+
+  /** The loading state, showing a spinner in the trigger and blocking interaction. */
   isLoading?: boolean;
-  /** Labels the loading state for the polite live region + in-list row; defaults to `'Loading options…'`. */
+
+  /** The label for the loading state on the polite live region + in-list row; defaults to `'Loading options…'`. */
   loadingLabel?: string;
-  /** Renders a clear (×) button in the trigger when a value is set. */
+
+  /** The clearable state, rendering a clear (×) button in the trigger when a value is set. */
   isClearable?: boolean;
-  /** Labels the clear (×) button for assistive tech; defaults to `'Clear selection'`. */
+
+  /** The label for the clear (×) button for assistive tech; defaults to `'Clear selection'`. */
   clearLabel?: string;
-  /** Names the hidden form input that ships the serialized key. */
+
+  /** The name of the hidden form input that ships the serialized key. */
   name?: string;
-  /** Serializes the key for the hidden form input; defaults to `String(key)`. */
+
+  /** The key serializer for the hidden form input; defaults to `String(key)`. */
   serializeKey?: (key: K) => string;
-  /** Resolves a human label for a `value`/`defaultValue` before items register
+
+  /** The label resolver for a `value`/`defaultValue` before items register
    *  (the trigger otherwise shows the raw serialized key until the first open). */
   getOptionLabel?: (key: K) => ReactNode;
-  /** Styles the trigger as invalid (red border, error ring). */
+
+  /** The invalid state, styling the trigger as invalid (red border, error ring). */
   isInvalid?: boolean;
-  /** Opens the dropdown initially when uncontrolled. */
+
+  /** The initial open state of the dropdown when uncontrolled. */
   defaultOpen?: boolean;
-  /** Controls the dropdown open state. */
+
+  /** The controlled dropdown open state. */
   open?: boolean;
+
   /** Fires when the open state changes. */
   onOpenChange?: (open: boolean) => void;
-  /** Sets the floating placement of the dropdown. */
+
+  /** The floating placement of the dropdown. */
   placement?: React.ComponentProps<typeof Popover>['placement'];
   children: ReactNode;
 }
@@ -451,7 +470,11 @@ function triggerDataState(
 /** Represents the prop surface of the `Select.Trigger`. */
 export interface SelectTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
-    SelectTriggerVariants {
+    Omit<SelectTriggerVariants, 'size' | 'state'> {
+  /** The trigger size. */
+  size?: SelectSize;
+  /** The validity surface. */
+  state?: InputState;
   children?: ReactNode;
 }
 
@@ -461,7 +484,7 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
     ref,
   ) {
     const ctx = useSelectContext();
-    const triggerState = state ?? (ctx.isInvalid ? 'invalid' : 'default');
+    const triggerState = state ?? (ctx.isInvalid ? InputState.Invalid : InputState.Default);
 
     /* Closed-only type-to-select (native `<select>`): typing picks the matching option without
        opening; while OPEN the inner Listbox owns typeahead. Matches each item's `entry.text`,
@@ -571,9 +594,10 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, SelectTriggerProps>(
 
 /** Represents the prop surface of the `Select.Value`. */
 export interface SelectValueProps {
-  /** Shows when no item is selected. */
+  /** The content shown when no item is selected. */
   placeholder?: ReactNode;
-  /** Overrides the auto-resolved label (rendered as-is, no item lookup). */
+
+  /** The override for the auto-resolved label (rendered as-is, no item lookup). */
   children?: ReactNode;
 }
 
@@ -608,13 +632,16 @@ const FORWARDED_NAV_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Home', 'End', 'Page
 /** Represents the prop surface of the `Select.Content`. */
 export interface SelectContentProps extends SurfaceVariants {
   className?: string;
-  /** Renders a search input above the items and filters by label substring. */
+  /** The searchable state, rendering a search input above the items and filtering by label substring. */
   isSearchable?: boolean;
-  /** Sets the placeholder of the search input. */
+
+  /** The placeholder of the search input. */
   searchPlaceholder?: string;
-  /** Renders this label when the search yields no matches. */
+
+  /** The label rendered when the search yields no matches. */
   noResultsLabel?: ReactNode;
-  /** Locks the surface width to the trigger's width and truncates long items. */
+
+  /** The match-width behavior, locking the surface width to the trigger's and truncating long items. */
   matchWidth?: boolean;
   children: ReactNode;
 }
@@ -752,17 +779,22 @@ function extractText(node: ReactNode): string {
 
 /** Represents the prop surface of the `Select.Item`. */
 export interface SelectItemProps<K = unknown, V = K> {
-  /** Identifies the item; drives equality, ARIA, and search. */
+  /** The item key; drives equality, ARIA, and search. */
   itemKey: K;
-  /** Holds the rich payload returned via `onValueChange`; defaults to `itemKey`. */
+
+  /** The rich payload returned via `onValueChange`; defaults to `itemKey`. */
   value?: V;
-  /** Shows in the trigger when this item is selected. */
+
+  /** The label shown in the trigger when this item is selected. */
   label: ReactNode;
-  /** Overrides in-list rendering; falls back to `label` when omitted. */
+
+  /** The in-list rendering override; falls back to `label` when omitted. */
   children?: ReactNode;
-  /** Overrides the searchable text; defaults to the text content of `label`. */
+
+  /** The searchable-text override; defaults to the text content of `label`. */
   text?: string;
-  /** Disables this item when true. */
+
+  /** The disabled state for this item. */
   isDisabled?: boolean;
   className?: string;
 }

@@ -27,7 +27,7 @@ const INITIAL_EDGES: NodeEditorEdge[] = [
 export const Default: Story = {
   render: () => {
     function Demo() {
-      const [nodes, setNodes] = useState<NodeEditorNode[]>(INITIAL_NODES);
+      const [nodes, setNodes] = useState<readonly NodeEditorNode[]>(INITIAL_NODES);
       return (
         <div className="p-4">
           <NodeEditor
@@ -49,7 +49,7 @@ export const Default: Story = {
 export const CustomRender: Story = {
   render: () => {
     function Demo() {
-      const [nodes, setNodes] = useState<NodeEditorNode[]>(
+      const [nodes, setNodes] = useState<readonly NodeEditorNode[]>(
         INITIAL_NODES.map((n, i) => ({ ...n, data: { kind: ['source', 'op', 'op', 'sink'][i] } })),
       );
       return (

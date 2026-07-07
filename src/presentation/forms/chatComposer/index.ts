@@ -1,1 +1,1 @@
-export { ChatComposer, type ChatComposerProps } from './ChatComposer';
+export { ChatComposer, SubmitTrigger, type ChatComposerProps } from './ChatComposer';

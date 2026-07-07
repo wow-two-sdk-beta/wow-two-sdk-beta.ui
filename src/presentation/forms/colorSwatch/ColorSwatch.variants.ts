@@ -1,5 +1,29 @@
 import { tv, type VariantProps } from '../../../foundation/utils';
 
+/** Defines the outline shape of a color swatch. */
+export const SwatchShape = {
+  /** Refers to a rounded-square swatch. */
+  Square: 'square',
+  /** Refers to a circular swatch. */
+  Circle: 'circle',
+} as const;
+
+export type SwatchShape = (typeof SwatchShape)[keyof typeof SwatchShape];
+
+/** Defines the size step of a color swatch. */
+export const ColorSwatchSize = {
+  /** Refers to the extra-small step (h-4). */
+  Xs: 'xs',
+  /** Refers to the small step (h-5). */
+  Sm: 'sm',
+  /** Refers to the medium (default) step (h-6). */
+  Md: 'md',
+  /** Refers to the large step (h-9). */
+  Lg: 'lg',
+} as const;
+
+export type ColorSwatchSize = (typeof ColorSwatchSize)[keyof typeof ColorSwatchSize];
+
 export const colorSwatchVariants = tv({
   base: 'inline-block shrink-0 border border-border bg-[image:linear-gradient(45deg,_#ddd_25%,_transparent_25%),_linear-gradient(-45deg,_#ddd_25%,_transparent_25%),_linear-gradient(45deg,_transparent_75%,_#ddd_75%),_linear-gradient(-45deg,_transparent_75%,_#ddd_75%)] bg-[length:8px_8px] bg-[position:0_0,_0_4px,_4px_-4px,_-4px_0px]',
   variants: {
@@ -36,3 +60,14 @@ export const colorSwatchVariants = tv({
 });
 
 export type ColorSwatchVariants = VariantProps<typeof colorSwatchVariants>;
+
+/* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertColorSwatchSize: AssertExact<
+  ColorSwatchSize, NonNullable<VariantProps<typeof colorSwatchVariants>['size']>
+> = true;
+const _assertSwatchShape: AssertExact<
+  SwatchShape, NonNullable<VariantProps<typeof colorSwatchVariants>['shape']>
+> = true;
+void _assertColorSwatchSize;
+void _assertSwatchShape;

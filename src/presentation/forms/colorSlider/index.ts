@@ -1,1 +1,1 @@
-export { ColorSlider, type ColorSliderProps, type ColorChannel } from './ColorSlider';
+export { ColorSlider, ColorChannel, type ColorSliderProps } from './ColorSlider';

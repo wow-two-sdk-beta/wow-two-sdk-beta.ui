@@ -81,7 +81,7 @@ DropdownMenuRoot.displayName = 'DropdownMenu';
 
 export interface DropdownMenuTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-  /** Render the trigger as the single child (e.g., `<Button>`). */
+  /** The as-child toggle — renders the trigger as its single child (e.g. `<Button>`). */
   asChild?: boolean;
   children: ReactNode;
 }

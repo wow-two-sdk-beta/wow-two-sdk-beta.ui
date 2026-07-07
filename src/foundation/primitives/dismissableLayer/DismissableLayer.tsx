@@ -12,16 +12,19 @@ interface LayerEntry {
   onOutsidePointerDown?: (event: PointerEvent) => void;
 }
 
-const layerStack: LayerEntry[] = [];
+const layerStack: Array<LayerEntry> = [];
 
 export interface DismissableLayerProps extends HTMLAttributes<HTMLDivElement> {
-  /** Called when Escape is pressed and this is the topmost layer. */
+  /** Fires when Escape is pressed and this is the topmost layer. */
   onEscape?: (event: KeyboardEvent) => void;
-  /** Called when a pointerdown lands outside this layer's DOM and this is topmost. */
+
+  /** Fires when a pointerdown lands outside this layer's DOM and this is topmost. */
   onOutsidePointerDown?: (event: PointerEvent) => void;
-  /** Disable the Escape listener for this layer. */
+
+  /** The Escape-listener disable flag for this layer. */
   isEscapeDisabled?: boolean;
-  /** Disable the outside-pointer-down listener for this layer. */
+
+  /** The outside-pointer-down-listener disable flag for this layer. */
   isOutsideClickDisabled?: boolean;
 }
 

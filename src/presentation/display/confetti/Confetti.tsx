@@ -15,7 +15,7 @@ export interface ConfettiOrigin {
 
 export interface ConfettiFireOptions {
   particleCount?: number;
-  colors?: string[];
+  colors?: ReadonlyArray<string>;
   spread?: number;
   velocity?: number;
   origin?: ConfettiOrigin;
@@ -23,19 +23,29 @@ export interface ConfettiFireOptions {
 
 export interface ConfettiProps {
   particleCount?: number;
-  colors?: string[];
+  colors?: ReadonlyArray<string>;
   gravity?: number;
   spread?: number;
   velocity?: number;
   lifetime?: number;
   origin?: ConfettiOrigin;
-  /** Auto-fire on mount. Useful for one-shot confetti on a route landing. */
+  /** The auto-fire-on-mount mode. Useful for one-shot confetti on a route landing. */
   canAutoFire?: boolean;
 }
 
 export interface ConfettiHandle {
   fire: (opts?: ConfettiFireOptions) => void;
 }
+
+/** Defines a confetti particle's silhouette. */
+const ConfettiShape = {
+  /** Refers to a rectangular particle. */
+  Rect: 'rect',
+  /** Refers to a circular particle. */
+  Circle: 'circle',
+} as const;
+
+type ConfettiShape = (typeof ConfettiShape)[keyof typeof ConfettiShape];
 
 interface Particle {
   id: number;
@@ -47,7 +57,7 @@ interface Particle {
   rotationSpeed: number;
   size: number;
   color: string;
-  shape: 'rect' | 'circle';
+  shape: ConfettiShape;
   bornAt: number;
 }
 
@@ -72,7 +82,7 @@ export const Confetti = forwardRef<ConfettiHandle, ConfettiProps>(function Confe
   },
   forwardedRef,
 ) {
-  const [particles, setParticles] = useState<Particle[]>([]);
+  const [particles, setParticles] = useState<ReadonlyArray<Particle>>([]);
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const reducedRef = useRef(
@@ -90,7 +100,7 @@ export const Confetti = forwardRef<ConfettiHandle, ConfettiProps>(function Confe
       const o = opts?.origin ?? origin;
       const x = o?.x ?? (typeof window !== 'undefined' ? window.innerWidth / 2 : 200);
       const y = o?.y ?? (typeof window !== 'undefined' ? window.innerHeight / 2 : 200);
-      const burst: Particle[] = [];
+      const burst: Array<Particle> = [];
       const now = performance.now();
       for (let i = 0; i < count; i++) {
         // Angle: upward (-90deg) ± spread/2.

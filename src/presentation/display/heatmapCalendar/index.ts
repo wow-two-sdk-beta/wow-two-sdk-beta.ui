@@ -1,5 +1,5 @@
 export {
   HeatmapCalendar,
+  HeatmapCalendarTone,
   type HeatmapCalendarProps,
-  type HeatmapCalendarTone,
 } from './HeatmapCalendar';

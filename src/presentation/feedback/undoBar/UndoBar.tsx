@@ -6,16 +6,8 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { cn, surfaceVariants } from '../../../foundation/utils';
+import { cn, OverlayPosition, surfaceVariants } from '../../../foundation/utils';
 import { Portal, Presence } from '../../../foundation/primitives';
-
-export type UndoBarPosition =
-  | 'top-right'
-  | 'top-left'
-  | 'top-center'
-  | 'bottom-right'
-  | 'bottom-left'
-  | 'bottom-center';
 
 export interface UndoBarProps {
   isOpen: boolean;
@@ -23,15 +15,15 @@ export interface UndoBarProps {
   message: ReactNode;
   onUndo?: () => void;
   undoLabel?: string;
-  /** ms until auto-dismiss; `Infinity` = sticky. Default 5000. */
+  /** The auto-dismiss delay in ms; `Infinity` = sticky. Default 5000. */
   duration?: number;
   canPauseOnHover?: boolean;
-  position?: UndoBarPosition;
+  position?: OverlayPosition;
   hasCountdown?: boolean;
   className?: string;
 }
 
-const POSITION: Record<UndoBarPosition, string> = {
+const POSITION: Record<OverlayPosition, string> = {
   'top-right': 'top-4 right-4',
   'top-left': 'top-4 left-4',
   'top-center': 'top-4 left-1/2 -translate-x-1/2',
@@ -53,7 +45,7 @@ export function UndoBar({
   undoLabel = 'Undo',
   duration = 5000,
   canPauseOnHover = true,
-  position = 'bottom-center',
+  position = OverlayPosition.BottomCenter,
   hasCountdown = false,
   className,
 }: UndoBarProps) {

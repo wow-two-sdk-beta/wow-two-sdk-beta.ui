@@ -1,21 +1,21 @@
 import { forwardRef, useMemo, useRef, useState, type HTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
-import { inputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize } from '../InputStyles';
 
 export interface EmojiEntry {
   emoji: string;
   name: string;
-  keywords?: string[];
+  keywords?: ReadonlyArray<string>;
 }
 
 export interface EmojiCategory {
   id: string;
   label: string;
   icon: string;
-  emojis: EmojiEntry[];
+  emojis: ReadonlyArray<EmojiEntry>;
 }
 
-const EMOJI: EmojiCategory[] = [
+const EMOJI: ReadonlyArray<EmojiCategory> = [
   {
     id: 'smileys',
     label: 'Smileys',
@@ -298,7 +298,7 @@ export interface EmojiPickerProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   placeholder?: string;
   columns?: number;
   cellSize?: number;
-  categories?: EmojiCategory[];
+  categories?: ReadonlyArray<EmojiCategory>;
   isDisabled?: boolean;
 }
 
@@ -326,7 +326,7 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
     const matches = useMemo(() => {
       if (!query) return null;
       const q = query.toLowerCase();
-      const found: EmojiEntry[] = [];
+      const found: Array<EmojiEntry> = [];
       for (const cat of categories) {
         for (const e of cat.emojis) {
           if (e.name.includes(q) || (e.keywords?.some((k) => k.includes(q)) ?? false)) {
@@ -368,7 +368,7 @@ export const EmojiPicker = forwardRef<HTMLDivElement, EmojiPickerProps>(
             placeholder={placeholder}
             disabled={isDisabled}
             onChange={(e) => setQuery(e.target.value)}
-            className={cn(inputBaseVariants({ size: 'sm' }))}
+            className={cn(inputBaseVariants({ size: InputSize.Sm }))}
           />
         </div>
         {!matches && (

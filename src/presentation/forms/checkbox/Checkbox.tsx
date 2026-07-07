@@ -1,8 +1,8 @@
 import { forwardRef, useEffect, useRef, type InputHTMLAttributes } from 'react';
 import { Check, Minus } from 'lucide-react';
-import { cn, composeRefs, ColorExtensions, CssExtensions, type ColorProp, type ColorTone, type SizePreset, type SizeUnion } from '../../../foundation/utils';
+import { cn, composeRefs, ColorExtensions, CssExtensions, ColorTone, type ColorProp, type SizePreset, type SizeUnion } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { checkboxVariants, type CheckboxVariants } from './Checkbox.variants';
+import { checkboxVariants, CheckboxVariant, type CheckboxVariants } from './Checkbox.variants';
 
 const COMPONENT_NAME = 'Checkbox';
 
@@ -35,14 +35,20 @@ const DEFAULT_ICON_CLASS = 'h-3 w-3';
 
 export interface CheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size' | 'color'>,
-    CheckboxVariants {
-  /* Size: preset (`xs|sm|md|lg|xl`) → box + icon scale · raw number/string → square inline · object → explicit dims. See `SizeUnion`. */
+    Omit<CheckboxVariants, 'variant' | 'tone'> {
+  /** The size — preset (`xs|sm|md|lg|xl`) → box + icon scale · raw number/string → square inline · object → explicit dims. See `SizeUnion`. */
   size?: SizeUnion<CheckboxSizePreset>;
 
-  /* Tristate visual — input stays `checked={false}` but renders as a dash with the same checked-state styling. */
+  /** The visual surface style. */
+  variant?: CheckboxVariant;
+
+  /** The semantic tone palette. */
+  tone?: ColorTone;
+
+  /** The tristate visual state — input stays `checked={false}` but renders as a dash with the same checked-state styling. */
   isIndeterminate?: boolean;
 
-  /* Per-instance color override (string seed or slot object). Overrides the active `tone`'s theme tokens locally. */
+  /** The per-instance color override (string seed or slot object) — overrides the active `tone`'s theme tokens locally. */
   color?: ColorProp;
 }
 
@@ -103,8 +109,8 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       className,
       size = 'md',
       isIndeterminate,
-      variant = 'solid',
-      tone = 'primary',
+      variant = CheckboxVariant.Solid,
+      tone = ColorTone.Primary,
       color,
       id,
       disabled,
@@ -132,7 +138,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     const iconClass = sizePreset ? ICON_SIZE_CLASS[sizePreset] : DEFAULT_ICON_CLASS;
     const boxStyle = sizeBox ? CssExtensions.resolveBoxSize(sizeBox) : undefined;
     /* Per-instance color override → sets CSS vars on wrapper; the visual span inherits via cascade. */
-    const colorStyle = ColorExtensions.toneColorOverride(color, tone as ColorTone | undefined);
+    const colorStyle = ColorExtensions.toneColorOverride(color, tone);
     const composedStyle =
       colorStyle || boxStyle ? { ...colorStyle, ...boxStyle } : undefined;
 

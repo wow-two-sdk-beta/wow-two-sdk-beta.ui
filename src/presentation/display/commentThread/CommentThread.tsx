@@ -14,23 +14,31 @@ export interface CommentThreadProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export interface CommentProps extends HTMLAttributes<HTMLDivElement> {
-  /** Avatar / author photo node. */
+  /** The avatar / author photo node. */
   avatar?: ReactNode;
-  /** Author name. */
+
+  /** The author name. */
   author: ReactNode;
-  /** Timestamp / metadata node. */
+
+  /** The timestamp / metadata node. */
   timestamp?: ReactNode;
-  /** Trailing chip for badges (e.g. "OP", "Author"). */
+
+  /** The trailing chip for badges (e.g. "OP", "Author"). */
   badge?: ReactNode;
-  /** Body / content. */
+
+  /** The body / content. */
   children: ReactNode;
-  /** Footer actions (e.g. Reply / Vote / Report). */
+
+  /** The footer actions (e.g. Reply / Vote / Report). */
   actions?: ReactNode;
-  /** Nested replies — pass `<CommentThread.Comment>` items. */
+
+  /** The nested replies — pass `<CommentThread.Comment>` items. */
   replies?: ReactNode;
-  /** Initial collapsed state for replies. */
+
+  /** The initial collapsed state for replies. */
   defaultCollapsed?: boolean;
-  /** Mark as the OP / highlighted comment. */
+
+  /** The highlighted state — marks as the OP / highlighted comment. */
   isHighlighted?: boolean;
 }
 

@@ -12,15 +12,29 @@ import {
   type ReactNode,
 } from 'react';
 import { Plus, X } from 'lucide-react';
-import { cn, composeRefs } from '../../../foundation/utils';
+import { cn, composeRefs, OverlayPosition, Side } from '../../../foundation/utils';
 import { useControlled, useEscape, useOutsideClick } from '../../../foundation/hooks';
 import { Presence } from '../../../foundation/primitives';
 import { Icon } from '../../../foundation/icons';
 import { FAB } from '../fab';
-import type { FABVariants } from '../fab/FAB.variants';
+import type { FabVariant, FabSize } from '../fab/FAB.variants';
 
-export type SpeedDialPosition = NonNullable<FABVariants['position']>;
-export type SpeedDialDirection = 'up' | 'down' | 'left' | 'right';
+/** The overlay anchor position of a SpeedDial (shared overlay vocabulary). */
+export type SpeedDialPosition = OverlayPosition;
+
+/** Defines the axis a SpeedDial's action items fan out along. */
+export const SpeedDialDirection = {
+  /** Refers to items stacking upward from the trigger. */
+  Up: 'up',
+  /** Refers to items stacking downward from the trigger. */
+  Down: 'down',
+  /** Refers to items stacking to the left of the trigger. */
+  Left: 'left',
+  /** Refers to items stacking to the right of the trigger. */
+  Right: 'right',
+} as const;
+
+export type SpeedDialDirection = (typeof SpeedDialDirection)[keyof typeof SpeedDialDirection];
 
 interface SpeedDialContextValue {
   open: boolean;
@@ -77,11 +91,12 @@ const SpeedDialList = forwardRef<HTMLUListElement, HTMLAttributes<HTMLUListEleme
 );
 
 const POSITION_TO_DIRECTION: Record<SpeedDialPosition, SpeedDialDirection> = {
-  'bottom-right': 'up',
-  'bottom-left': 'up',
-  'bottom-center': 'up',
-  'top-right': 'down',
-  'top-left': 'down',
+  'bottom-right': SpeedDialDirection.Up,
+  'bottom-left': SpeedDialDirection.Up,
+  'bottom-center': SpeedDialDirection.Up,
+  'top-right': SpeedDialDirection.Down,
+  'top-left': SpeedDialDirection.Down,
+  'top-center': SpeedDialDirection.Down,
 };
 
 const POSITION_OFFSETS: Record<SpeedDialPosition, string> = {
@@ -90,20 +105,21 @@ const POSITION_OFFSETS: Record<SpeedDialPosition, string> = {
   'bottom-center': 'bottom-6 left-1/2 -translate-x-1/2',
   'top-right': 'top-6 right-6',
   'top-left': 'top-6 left-6',
+  'top-center': 'top-6 left-1/2 -translate-x-1/2',
 };
 
 const DIRECTION_TO_STACK: Record<SpeedDialDirection, string> = {
-  up: 'flex-col-reverse bottom-full mb-3',
-  down: 'flex-col top-full mt-3',
-  left: 'flex-row-reverse right-full mr-3',
-  right: 'flex-row top-1/2 -translate-y-1/2 left-full ml-3',
+  [SpeedDialDirection.Up]: 'flex-col-reverse bottom-full mb-3',
+  [SpeedDialDirection.Down]: 'flex-col top-full mt-3',
+  [SpeedDialDirection.Left]: 'flex-row-reverse right-full mr-3',
+  [SpeedDialDirection.Right]: 'flex-row top-1/2 -translate-y-1/2 left-full ml-3',
 };
 
-const DIRECTION_LABEL_SIDE: Record<SpeedDialDirection, 'left' | 'right'> = {
-  up: 'right',
-  down: 'right',
-  left: 'right',
-  right: 'left',
+const DIRECTION_LABEL_SIDE: Record<SpeedDialDirection, Side> = {
+  [SpeedDialDirection.Up]: Side.Right,
+  [SpeedDialDirection.Down]: Side.Right,
+  [SpeedDialDirection.Left]: Side.Right,
+  [SpeedDialDirection.Right]: Side.Left,
 };
 
 export interface SpeedDialProps {
@@ -118,7 +134,7 @@ export interface SpeedDialProps {
 }
 
 function SpeedDialRoot({
-  position = 'bottom-right',
+  position = OverlayPosition.BottomRight,
   direction,
   isOpen: openProp,
   defaultOpen = false,
@@ -212,12 +228,12 @@ SpeedDialRoot.displayName = 'SpeedDial';
 
 export interface SpeedDialTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-  /** Required accessible label. Default `"Toggle actions"`. */
+  /** The required accessible label. Default `"Toggle actions"`. */
   'aria-label'?: string;
   closedIcon?: ReactNode;
   openIcon?: ReactNode;
-  variant?: FABVariants['variant'];
-  size?: FABVariants['size'];
+  variant?: FabVariant;
+  size?: FabSize;
 }
 
 export const SpeedDialTrigger = forwardRef<HTMLButtonElement, SpeedDialTriggerProps>(
@@ -286,7 +302,7 @@ export const SpeedDialAction = forwardRef<HTMLButtonElement, SpeedDialActionProp
           'motion-reduce:animate-none',
         )}
       >
-        {tooltip && labelSide === 'left' && (
+        {tooltip && labelSide === Side.Left && (
           <span className="rounded-md bg-popover px-2 py-1 text-xs text-popover-foreground shadow">
             {tooltip}
           </span>
@@ -311,7 +327,7 @@ export const SpeedDialAction = forwardRef<HTMLButtonElement, SpeedDialActionProp
         >
           {icon}
         </button>
-        {tooltip && labelSide === 'right' && (
+        {tooltip && labelSide === Side.Right && (
           <span className="rounded-md bg-popover px-2 py-1 text-xs text-popover-foreground shadow">
             {tooltip}
           </span>

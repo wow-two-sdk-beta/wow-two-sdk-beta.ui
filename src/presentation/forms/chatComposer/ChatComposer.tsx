@@ -13,33 +13,41 @@ import { Send } from 'lucide-react';
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 
-type SubmitTrigger = 'enter' | 'mod-enter';
+/** Defines which keypress submits a chat composer. */
+export const SubmitTrigger = {
+  /** Refers to plain Enter (Shift+Enter inserts a newline). */
+  Enter: 'enter',
+  /** Refers to Cmd/Ctrl+Enter (plain Enter inserts a newline). */
+  ModEnter: 'mod-enter',
+} as const;
+
+export type SubmitTrigger = (typeof SubmitTrigger)[keyof typeof SubmitTrigger];
 
 export interface ChatComposerProps
   extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit' | 'children'> {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  /** Fires on send (Enter / Mod+Enter / button click). Receives the text value. */
+  /** Emits the text value on send (Enter / Mod+Enter / button click). */
   onSubmit?: (value: string) => void;
-  /** Placeholder text. */
+  /** The placeholder text. */
   placeholder?: string;
-  /** Disable the input + send button. */
+  /** The disabled state for the input + send button. */
   isDisabled?: boolean;
-  /** Slot rendered on the leading edge of the toolbar (e.g. attach button). */
+  /** The slot rendered on the leading edge of the toolbar (e.g. attach button). */
   leading?: ReactNode;
-  /** Slot rendered between the leading slot and the send button. */
+  /** The slot rendered between the leading slot and the send button. */
   trailing?: ReactNode;
-  /** Replace or hide the default send button. */
+  /** The custom send button, replacing or hiding the default. */
   sendButton?: ReactNode;
-  /** Hide the send button entirely (e.g. when consumer renders a custom CTA). */
+  /** The hidden state for the send button (e.g. when consumer renders a custom CTA). */
   isSendButtonHidden?: boolean;
-  /** When the textarea should submit. `enter` = Enter alone (default).
+  /** The submit trigger for the textarea. `enter` = Enter alone (default).
    *  `mod-enter` = Cmd/Ctrl+Enter (Enter inserts a newline). */
   submitOn?: SubmitTrigger;
-  /** Maximum textarea pixel height before scroll kicks in. Default `200`. */
+  /** The maximum textarea pixel height before scroll kicks in. Default `200`. */
   maxHeight?: number;
-  /** Pass-through textarea props (rows is overridden). */
+  /** The pass-through textarea props (rows is overridden). */
   textareaProps?: Omit<
     TextareaHTMLAttributes<HTMLTextAreaElement>,
     'value' | 'defaultValue' | 'onChange'
@@ -65,7 +73,7 @@ export const ChatComposer = forwardRef<HTMLTextAreaElement, ChatComposerProps>(
       trailing,
       sendButton,
       isSendButtonHidden,
-      submitOn = 'enter',
+      submitOn = SubmitTrigger.Enter,
       maxHeight = 200,
       textareaProps,
       className,
@@ -106,7 +114,7 @@ export const ChatComposer = forwardRef<HTMLTextAreaElement, ChatComposerProps>(
       textareaProps?.onKeyDown?.(e);
       if (e.defaultPrevented) return;
       const isEnter = e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing;
-      const wantsMod = submitOn === 'mod-enter';
+      const wantsMod = submitOn === SubmitTrigger.ModEnter;
       const modPressed = e.metaKey || e.ctrlKey;
       if (isEnter && (wantsMod ? modPressed : !modPressed)) {
         e.preventDefault();

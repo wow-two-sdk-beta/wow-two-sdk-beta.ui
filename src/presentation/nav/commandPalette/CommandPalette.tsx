@@ -41,7 +41,7 @@ interface CommandPaletteContextValue {
   setInputValue: (input: string) => void;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
-  itemsRef: React.MutableRefObject<CommandItemEntry[]>;
+  itemsRef: React.MutableRefObject<Array<CommandItemEntry>>;
   registerItem: (entry: CommandItemEntry) => void;
   unregisterItem: (id: string) => void;
   /** Bumped on every register/unregister — lets consumers observe the mutable registry. */
@@ -97,7 +97,7 @@ function CommandPaletteRoot({
     onChange: onInputChange,
   });
 
-  const itemsRef = useRef<CommandItemEntry[]>([]);
+  const itemsRef = useRef<Array<CommandItemEntry>>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   // Items register via effects post-render; bump a version so registry readers recompute once items exist (fresh-open flow).
@@ -366,7 +366,7 @@ export function CommandPaletteSeparator(props: HTMLAttributes<HTMLDivElement>) {
 
 export interface CommandPaletteItemProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
-  /** Text used by the filter; defaults to `value`. Pass when children include icons. */
+  /** The text used by the filter; defaults to `value`. Pass when children include icons. */
   searchText?: string;
   isDisabled?: boolean;
   onSelect?: () => void;

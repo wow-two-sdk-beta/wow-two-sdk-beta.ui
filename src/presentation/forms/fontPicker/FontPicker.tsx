@@ -11,7 +11,7 @@ export interface FontOption {
   sample?: string;
 }
 
-export const BUILT_IN_FONTS: FontOption[] = [
+export const BUILT_IN_FONTS: ReadonlyArray<FontOption> = [
   { name: 'System Sans', family: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' },
   { name: 'System Serif', family: 'ui-serif, Cambria, Georgia, "Times New Roman", serif' },
   { name: 'System Mono', family: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace' },
@@ -31,7 +31,7 @@ export interface FontPickerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'd
   value?: string;
   defaultValue?: string;
   onValueChange?: (family: string) => void;
-  fonts?: FontOption[];
+  fonts?: ReadonlyArray<FontOption>;
   placeholder?: string;
   previewText?: string;
   isDisabled?: boolean;

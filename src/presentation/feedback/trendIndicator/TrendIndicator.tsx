@@ -1,26 +1,33 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 
 export interface TrendIndicatorProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
-  /** Numeric delta — sign drives direction. */
+  /** The numeric delta — sign drives direction. */
   value: number;
-  /** Optional formatter (default: `${sign}${value}%`). */
+
+  /** The optional value formatter (default: `${sign}${value}%`). */
   format?: (value: number) => ReactNode;
-  /** When `true`, an increase reads as bad (e.g. error rate, churn). */
+
+  /** The inverse-direction flag — when `true`, an increase reads as bad (e.g. error rate, churn). */
   isInverse?: boolean;
-  /** Small trailing label, e.g. "vs last week". */
+
+  /** The small trailing label, e.g. "vs last week". */
   label?: ReactNode;
-  size?: 'xs' | 'sm' | 'md';
+
+  /** The text + icon scale. */
+  size?: Size;
 }
 
-const SIZE_TEXT: Record<NonNullable<TrendIndicatorProps['size']>, string> = {
+/* Only xs/sm/md carry a scale; other `Size` members fall through to `md` at
+   the lookup below. */
+const SIZE_TEXT: Partial<Record<Size, string>> = {
   xs: 'text-xs',
   sm: 'text-sm',
   md: 'text-base',
 };
-const SIZE_ICON: Record<NonNullable<TrendIndicatorProps['size']>, number> = {
+const SIZE_ICON: Partial<Record<Size, number>> = {
   xs: 12,
   sm: 14,
   md: 16,
@@ -31,7 +38,7 @@ const SIZE_ICON: Record<NonNullable<TrendIndicatorProps['size']>, number> = {
  * dashboard tiles. Pass `isInverse` for metrics where higher is worse.
  */
 export const TrendIndicator = forwardRef<HTMLSpanElement, TrendIndicatorProps>(
-  ({ value, format, isInverse, label, size = 'sm', className, ...props }, ref) => {
+  ({ value, format, isInverse, label, size = Size.Sm, className, ...props }, ref) => {
     const direction = value > 0 ? 'up' : value < 0 ? 'down' : 'flat';
     const positive =
       direction === 'flat' ? false : (direction === 'up') !== Boolean(isInverse);
@@ -42,10 +49,10 @@ export const TrendIndicator = forwardRef<HTMLSpanElement, TrendIndicatorProps>(
     return (
       <span
         ref={ref}
-        className={cn('inline-flex items-center gap-1 font-medium', SIZE_TEXT[size], tone, className)}
+        className={cn('inline-flex items-center gap-1 font-medium', SIZE_TEXT[size] ?? SIZE_TEXT.md, tone, className)}
         {...props}
       >
-        <Icon icon={arrow} size={SIZE_ICON[size]} />
+        <Icon icon={arrow} size={SIZE_ICON[size] ?? SIZE_ICON.md} />
         {display}
         {label && <span className="text-muted-foreground"> {label}</span>}
       </span>

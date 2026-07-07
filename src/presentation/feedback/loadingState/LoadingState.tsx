@@ -1,14 +1,16 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 import { Spinner } from '../spinner/Spinner';
 
 export interface LoadingStateProps extends Omit<ComponentPropsWithoutRef<'div'>, 'title'> {
-  /** Heading copy. Default `"Loading…"`. */
+  /** The heading copy. Default `"Loading…"`. */
   title?: ReactNode;
-  /** Body text below the title. */
+
+  /** The body text below the title. */
   description?: ReactNode;
-  /** Size of the spinner. Default `lg`. */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+
+  /** The size of the spinner. Default `lg`. */
+  size?: Size;
 }
 
 /**
@@ -16,7 +18,7 @@ export interface LoadingStateProps extends Omit<ComponentPropsWithoutRef<'div'>,
  * description stacked. Use inline `InlineSpinner` for in-row loading.
  */
 export const LoadingState = forwardRef<HTMLDivElement, LoadingStateProps>(
-  ({ title = 'Loading…', description, size = 'lg', className, ...props }, ref) => (
+  ({ title = 'Loading…', description, size = Size.Lg, className, ...props }, ref) => (
     <div
       ref={ref}
       role="status"

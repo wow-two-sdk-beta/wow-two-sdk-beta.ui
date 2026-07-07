@@ -8,16 +8,22 @@ type ItemSource<T> = readonly T[] | (() => readonly T[]);
 export interface UseTypeaheadOptions<T> {
   /** Supplies the items to match against; a function is re-read on every keystroke (live lists). */
   items: ItemSource<T>;
+
   /** Extracts the comparable label from an item. Matching is case-insensitive on this string. */
   getLabel: (item: T) => string;
+
   /** Reports whether an item is disabled; disabled items are skipped during matching. */
   isDisabled?: (item: T) => boolean;
+
   /** Fires with the matched item and its index in the (live) item array when a keystroke resolves. */
   onMatch: (item: T, index: number) => void;
+
   /** Returns the index of the currently-active item — same-letter cycling starts after it. */
   getActiveIndex?: () => number;
+
   /** Disables the matcher when `false`; every key falls through unhandled. Defaults to `true`. */
   enabled?: boolean;
+
   /** Idle time (ms) after which the typed buffer resets. Defaults to `500`. */
   timeout?: number;
 }
@@ -26,6 +32,7 @@ export interface UseTypeaheadOptions<T> {
 export interface UseTypeaheadReturn {
   /** Feeds a keydown into the matcher. Returns `true` when consumed (caller should stop), else `false`. */
   onKeyDown: (event: KeyboardEvent) => boolean;
+
   /** Clears the typed buffer immediately (e.g. on blur / close). */
   reset: () => void;
 }

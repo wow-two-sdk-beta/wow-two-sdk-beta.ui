@@ -1,24 +1,40 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
+
+/** Defines the TypingIndicator dot tone. */
+export const TypingTone = {
+  /** Refers to the muted-foreground tone. */
+  Muted: 'muted',
+  /** Refers to the primary / brand tone. */
+  Primary: 'primary',
+  /** Refers to the full-emphasis foreground tone. */
+  Foreground: 'foreground',
+} as const;
+
+export type TypingTone = (typeof TypingTone)[keyof typeof TypingTone];
 
 export interface TypingIndicatorProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
-  /** Optional name(s) of who is typing — rendered as a leading label. */
+  /** The optional name(s) of who is typing — rendered as a leading label. */
   who?: ReactNode;
-  /** Visual size of the bouncing dots. */
-  size?: 'sm' | 'md' | 'lg';
-  /** Color of the dots; defaults to muted. */
-  tone?: 'muted' | 'primary' | 'foreground';
-  /** Tone-down dot opacity at rest (between bounces). */
+
+  /** The visual size of the bouncing dots. */
+  size?: Size;
+
+  /** The color of the dots; defaults to muted. */
+  tone?: TypingTone;
+
+  /** The subtle-mode flag — tones down dot opacity at rest (between bounces). */
   isSubtle?: boolean;
 }
 
-const SIZE: Record<NonNullable<TypingIndicatorProps['size']>, string> = {
+/* Only sm/md/lg carry a dot size; other `Size` members fall through to `md`. */
+const SIZE: Partial<Record<Size, string>> = {
   sm: 'h-1 w-1',
   md: 'h-1.5 w-1.5',
   lg: 'h-2 w-2',
 };
 
-const TONE: Record<NonNullable<TypingIndicatorProps['tone']>, string> = {
+const TONE: Record<TypingTone, string> = {
   muted: 'bg-muted-foreground',
   primary: 'bg-primary',
   foreground: 'bg-foreground',
@@ -30,10 +46,10 @@ const TONE: Record<NonNullable<TypingIndicatorProps['tone']>, string> = {
  * visible at full opacity when motion is reduced.
  */
 export const TypingIndicator = forwardRef<HTMLSpanElement, TypingIndicatorProps>(
-  ({ who, size = 'md', tone = 'muted', isSubtle, className, ...props }, ref) => {
+  ({ who, size = Size.Md, tone = TypingTone.Muted, isSubtle, className, ...props }, ref) => {
     const dot = cn(
       'inline-block rounded-full motion-safe:animate-bounce',
-      SIZE[size],
+      SIZE[size] ?? SIZE.md,
       TONE[tone],
       isSubtle && 'motion-safe:opacity-60',
     );

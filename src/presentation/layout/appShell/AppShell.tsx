@@ -10,7 +10,21 @@ import { cn } from '../../../foundation/utils';
 import { useControlled, useMediaQuery } from '../../../foundation/hooks';
 import { Drawer, DrawerContent } from '../../overlays/drawer';
 
-type Breakpoint = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+/** Defines the responsive breakpoint at which `AppShell` collapses its sidebar / aside. */
+export const Breakpoint = {
+  /** Refers to the `sm` (640px) breakpoint. */
+  Sm: 'sm',
+  /** Refers to the `md` (768px) breakpoint. */
+  Md: 'md',
+  /** Refers to the `lg` (1024px) breakpoint. */
+  Lg: 'lg',
+  /** Refers to the `xl` (1280px) breakpoint. */
+  Xl: 'xl',
+  /** Refers to the `2xl` (1536px) breakpoint. */
+  Xxl: '2xl',
+} as const;
+
+export type Breakpoint = (typeof Breakpoint)[keyof typeof Breakpoint];
 
 const BREAKPOINT_PX: Record<Breakpoint, number> = {
   sm: 640,
@@ -67,8 +81,8 @@ const AppShellRoot = forwardRef<HTMLDivElement, AppShellProps>(function AppShell
   {
     sidebarWidth = '240px',
     asideWidth = '280px',
-    sidebarBreakpoint = 'lg',
-    asideBreakpoint = 'xl',
+    sidebarBreakpoint = Breakpoint.Lg,
+    asideBreakpoint = Breakpoint.Xl,
     isSidebarOpen: sidebarOpenProp,
     defaultSidebarOpen = false,
     onSidebarOpenChange,

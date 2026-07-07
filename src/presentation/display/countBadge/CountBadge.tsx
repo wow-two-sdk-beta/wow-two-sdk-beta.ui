@@ -5,9 +5,11 @@ import { Badge, type BadgeProps } from '../badge/Badge';
 export interface CountBadgeProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
   /** The numeric count. */
   value: number;
-  /** Cap value — shows "max+" when exceeded. Default 99. */
+
+  /** The cap value — shows "max+" when exceeded. Default 99. */
   max?: number;
-  /** Hide entirely when count is 0. Default true. */
+
+  /** The hide-when-zero mode — hides entirely when count is 0. Default true. */
   canHideZero?: boolean;
   variant?: BadgeProps['variant'];
 }

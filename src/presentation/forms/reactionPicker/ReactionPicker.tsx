@@ -1,25 +1,31 @@
 import { forwardRef, type HTMLAttributes } from 'react';
 import { Plus } from 'lucide-react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 
 export interface ReactionPickerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
-  /** List of emoji shortcuts shown as quick-pick buttons. */
-  emojis?: string[];
-  /** Currently active emoji keys (highlighted). */
-  selected?: string[];
+  /** The list of emoji shortcuts shown as quick-pick buttons. */
+  emojis?: ReadonlyArray<string>;
+
+  /** The currently active emoji keys (highlighted). */
+  selected?: ReadonlyArray<string>;
+
   /** Fires when an emoji is picked. */
   onSelect?: (emoji: string) => void;
+
   /** Fires when the trailing "more" button is clicked (open full picker). */
   onMore?: () => void;
-  /** Hide the trailing "more" button. */
+
+  /** The hidden state for the trailing "more" button. */
   isMoreHidden?: boolean;
-  /** Compact button size. */
-  size?: 'sm' | 'md';
+
+  /** The compact button size. */
+  size?: Size;
 }
 
 const DEFAULT_REACTIONS = ['👍', '❤️', '😂', '🎉', '😮', '😢', '🚀'];
 
-const SIZE: Record<NonNullable<ReactionPickerProps['size']>, string> = {
+/* Sizes not listed fall back to the `md` row at the call site. */
+const SIZE: Partial<Record<Size, string>> = {
   sm: 'h-7 w-7 text-base',
   md: 'h-8 w-8 text-lg',
 };
@@ -37,7 +43,7 @@ export const ReactionPicker = forwardRef<HTMLDivElement, ReactionPickerProps>(
       onSelect,
       onMore,
       isMoreHidden,
-      size = 'md',
+      size = Size.Md,
       className,
       ...props
     },
@@ -67,7 +73,7 @@ export const ReactionPicker = forwardRef<HTMLDivElement, ReactionPickerProps>(
               'inline-flex items-center justify-center rounded-full leading-none transition-transform',
               'hover:scale-125 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               active && 'bg-primary-soft',
-              SIZE[size],
+              SIZE[size] ?? SIZE.md,
             )}
           >
             <span aria-hidden="true">{emoji}</span>

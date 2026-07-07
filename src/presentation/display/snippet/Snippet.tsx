@@ -5,11 +5,22 @@ import { Icon } from '../../../foundation/icons';
 import { useClipboard } from '../../../foundation/hooks';
 import { Code } from '../code/Code';
 
+/** Defines the Snippet layout variant. */
+export const SnippetVariant = {
+  /** Refers to a single-line inline snippet. */
+  Inline: 'inline',
+  /** Refers to a multi-line block snippet. */
+  Block: 'block',
+} as const;
+
+export type SnippetVariant = (typeof SnippetVariant)[keyof typeof SnippetVariant];
+
 export interface SnippetProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
-  /** Code text to display + copy. */
+  /** The code text to display + copy. */
   text: string;
-  /** Visual variant — `inline` (single line) or `block` (multi-line). Default `inline`. */
-  variant?: 'inline' | 'block';
+
+  /** The visual variant — `inline` (single line) or `block` (multi-line). Default `inline`. */
+  variant?: SnippetVariant;
 }
 
 /**

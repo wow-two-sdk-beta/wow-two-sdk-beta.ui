@@ -4,9 +4,11 @@ import { cn } from '../../../foundation/utils';
 export interface PasswordStrengthProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
   /** The password to measure. */
   value: string;
-  /** Override the score (0–4). When set, internal scoring is bypassed. */
+
+  /** The override score (0–4). When set, internal scoring is bypassed. */
   score?: 0 | 1 | 2 | 3 | 4;
-  /** Hide the textual label under the bar. */
+
+  /** The hidden state for the textual label under the bar. */
   isLabelHidden?: boolean;
 }
 

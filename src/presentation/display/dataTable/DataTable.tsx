@@ -13,7 +13,28 @@ import {
   type TableDensity,
 } from '../table';
 
-export type SortDirection = 'asc' | 'desc';
+/** Defines the sort order of a DataTable column. */
+export const SortDirection = {
+  /** Refers to ascending order. */
+  Asc: 'asc',
+  /** Refers to descending order. */
+  Desc: 'desc',
+} as const;
+
+export type SortDirection = (typeof SortDirection)[keyof typeof SortDirection];
+
+/** Defines the horizontal text alignment of a DataTable column. */
+export const DataTableColumnAlign = {
+  /** Refers to left alignment. */
+  Left: 'left',
+  /** Refers to centered alignment. */
+  Center: 'center',
+  /** Refers to right alignment. */
+  Right: 'right',
+} as const;
+
+export type DataTableColumnAlign =
+  (typeof DataTableColumnAlign)[keyof typeof DataTableColumnAlign];
 
 export interface DataTableSort {
   columnKey: string;
@@ -26,13 +47,13 @@ export interface DataTableColumn<T> {
   accessor?: (row: T) => unknown;
   cell?: (row: T, index: number) => ReactNode;
   isSortable?: boolean;
-  align?: 'left' | 'center' | 'right';
+  align?: DataTableColumnAlign;
   width?: string;
 }
 
 export interface DataTableProps<T> {
-  columns: DataTableColumn<T>[];
-  data: T[];
+  columns: ReadonlyArray<DataTableColumn<T>>;
+  data: ReadonlyArray<T>;
   rowKey?: (row: T, index: number) => string | number;
   onRowClick?: (row: T, index: number) => void;
   sortBy?: DataTableSort | null;

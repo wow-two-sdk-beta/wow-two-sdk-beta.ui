@@ -8,12 +8,14 @@ export interface IconAdapterProps extends SVGProps<SVGSVGElement> {
 export type IconAdapter = ComponentType<IconAdapterProps>;
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'aria-hidden'> {
-  /** Icon component — pass a `lucide-react` icon, custom SVG component, or any matching shape. */
+  /** The icon component — pass a `lucide-react` icon, custom SVG component, or any matching shape. */
   icon: IconAdapter;
-  /** Pixel size of the rendered SVG. Default 20. */
+
+  /** The pixel size of the rendered SVG. Default 20. */
   size?: number | string;
+
   /**
-   * Provide an aria-label when the icon stands alone (decorative siblings
+   * The aria-label for when the icon stands alone (decorative siblings
    * should pass it via parent). Sets `role="img"` and unhides from AT.
    * Without it, the icon is `aria-hidden` and decorative.
    */

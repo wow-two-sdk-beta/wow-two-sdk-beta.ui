@@ -1,8 +1,8 @@
 export {
   RovingFocusGroup,
   useRovingFocusItem,
+  Orientation,
   type RovingFocusGroupProps,
   type UseRovingFocusItemOptions,
   type UseRovingFocusItemReturn,
-  type Orientation,
 } from './RovingFocusGroup';

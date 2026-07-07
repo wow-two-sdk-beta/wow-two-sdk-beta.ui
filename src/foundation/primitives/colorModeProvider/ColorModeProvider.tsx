@@ -8,7 +8,15 @@ import {
   type ReactNode,
 } from 'react';
 
-export type ColorMode = 'light' | 'dark';
+/** Defines the light/dark colour mode of the app. */
+export const ColorMode = {
+  /** Refers to light mode. */
+  Light: 'light',
+  /** Refers to dark mode. */
+  Dark: 'dark',
+} as const;
+
+export type ColorMode = (typeof ColorMode)[keyof typeof ColorMode];
 
 interface ColorModeContextValue {
   mode: ColorMode;
@@ -20,14 +28,15 @@ const ColorModeContext = createContext<ColorModeContextValue | null>(null);
 
 const systemMode = (): ColorMode =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+    ? ColorMode.Dark
+    : ColorMode.Light;
 
 export interface ColorModeProviderProps {
   children: ReactNode;
-  /** Mode used when nothing is persisted. `'system'` follows the OS preference. Default `'system'`. */
+  /** The mode used when nothing is persisted. `'system'` follows the OS preference. Default `'system'`. */
   defaultMode?: ColorMode | 'system';
-  /** `localStorage` key for persistence; pass `null` to disable. Default `'wow-color-mode'`. */
+
+  /** The `localStorage` key for persistence; pass `null` to disable. Default `'wow-color-mode'`. */
   storageKey?: string | null;
 }
 
@@ -42,15 +51,15 @@ export function ColorModeProvider({
   storageKey = 'wow-color-mode',
 }: ColorModeProviderProps) {
   const [mode, setModeState] = useState<ColorMode>(() => {
-    if (typeof window === 'undefined') return 'light';
+    if (typeof window === 'undefined') return ColorMode.Light;
     const stored = storageKey ? (localStorage.getItem(storageKey) as ColorMode | null) : null;
-    if (stored === 'light' || stored === 'dark') return stored;
+    if (stored === ColorMode.Light || stored === ColorMode.Dark) return stored;
     return defaultMode === 'system' ? systemMode() : defaultMode;
   });
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.toggle('dark', mode === 'dark');
+    root.classList.toggle('dark', mode === ColorMode.Dark);
     root.style.colorScheme = mode;
   }, [mode]);
 
@@ -63,7 +72,11 @@ export function ColorModeProvider({
   );
 
   const value = useMemo<ColorModeContextValue>(
-    () => ({ mode, setMode, toggle: () => setMode(mode === 'dark' ? 'light' : 'dark') }),
+    () => ({
+      mode,
+      setMode,
+      toggle: () => setMode(mode === ColorMode.Dark ? ColorMode.Light : ColorMode.Dark),
+    }),
     [mode, setMode],
   );
 

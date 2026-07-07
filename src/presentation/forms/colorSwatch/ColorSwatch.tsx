@@ -1,10 +1,14 @@
 import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
-import { colorSwatchVariants, type ColorSwatchVariants } from './ColorSwatch.variants';
+import { colorSwatchVariants, ColorSwatchSize, SwatchShape, type ColorSwatchVariants } from './ColorSwatch.variants';
 
-type CommonProps = Omit<ColorSwatchVariants, 'interactive'> & {
+type CommonProps = Omit<ColorSwatchVariants, 'interactive' | 'size' | 'shape'> & {
   /** Any CSS color string. Default `#000000`. */
   color?: string;
+  /** The swatch size step. */
+  size?: ColorSwatchSize;
+  /** The swatch outline shape. */
+  shape?: SwatchShape;
   className?: string;
 };
 

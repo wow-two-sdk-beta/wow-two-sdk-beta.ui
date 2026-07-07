@@ -1,1 +1,1 @@
-export { DiffViewer, type DiffView, type DiffViewerProps } from './DiffViewer';
+export { DiffViewer, DiffView, type DiffViewerProps } from './DiffViewer';

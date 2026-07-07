@@ -17,7 +17,7 @@ import { VALIDATED_THEMES } from './validated';
 import { POOL_SEEDS } from './pool';
 
 /** The authoring seeds. Order here = order in `THEMES` and the emitted stylesheet. */
-export const THEME_SEEDS: ThemeSeed[] = [
+export const THEME_SEEDS: ReadonlyArray<ThemeSeed> = [
   {
     id: 'wow',
     name: 'WoW',
@@ -266,19 +266,19 @@ export const THEME_SEEDS: ThemeSeed[] = [
  * `pool.ts`. Kept as a single list so `THEME_IDS`/`THEME_SEEDS` consumers and
  * the studio see the whole candidate catalog.
  */
-const CANDIDATE_SEEDS: ThemeSeed[] = [...THEME_SEEDS, ...POOL_SEEDS];
+const CANDIDATE_SEEDS: ReadonlyArray<ThemeSeed> = [...THEME_SEEDS, ...POOL_SEEDS];
 
 /**
  * The generator-built presets. AA-proven by the engine but not yet validated
  * against a real app surface → `generateTheme` stamps them `status: "candidate"`.
  */
-const CANDIDATE_THEMES: Theme[] = CANDIDATE_SEEDS.map(generateTheme);
+const CANDIDATE_THEMES: ReadonlyArray<Theme> = CANDIDATE_SEEDS.map(generateTheme);
 
 /**
  * The full registry: validated (real-app-proven) themes FIRST, then the curated
  * candidate presets. Order here = order in the emitted stylesheet / manifest.
  */
-export const THEMES: Theme[] = [...VALIDATED_THEMES, ...CANDIDATE_THEMES];
+export const THEMES: ReadonlyArray<Theme> = [...VALIDATED_THEMES, ...CANDIDATE_THEMES];
 
 /** Look up a theme by id. Returns `undefined` when absent. */
 export function getTheme(id: string): Theme | undefined {
@@ -286,14 +286,14 @@ export function getTheme(id: string): Theme | undefined {
 }
 
 /** Themes proven against a real app surface (`status === "validated"`). */
-export function validatedThemes(): Theme[] {
+export function validatedThemes(): ReadonlyArray<Theme> {
   return THEMES.filter((t) => t.status === ThemeStatus.Validated);
 }
 
 /** Engine-proven curated presets not yet app-validated (`status === "candidate"`). */
-export function candidateThemes(): Theme[] {
+export function candidateThemes(): ReadonlyArray<Theme> {
   return THEMES.filter((t) => t.status === ThemeStatus.Candidate);
 }
 
 /** Ids of all curated themes, in registry order. */
-export const THEME_IDS: string[] = THEMES.map((t) => t.id);
+export const THEME_IDS: ReadonlyArray<string> = THEMES.map((t) => t.id);

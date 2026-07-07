@@ -3,11 +3,13 @@ import { cn } from '../../../foundation/utils';
 import { Mark } from '../mark/Mark';
 
 export interface HighlightProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
-  /** Source text to render. */
+  /** The source text to render. */
   children: string;
-  /** Substring(s) to highlight. Match is case-insensitive. */
-  query: string | string[];
-  /** When `true`, only highlights whole-word matches. Default `false`. */
+
+  /** The substring(s) to highlight. Match is case-insensitive. */
+  query: string | ReadonlyArray<string>;
+
+  /** The whole-word-only matching mode. Default `false`. */
   isWholeWord?: boolean;
 }
 
@@ -28,7 +30,7 @@ export const Highlight = forwardRef<HTMLSpanElement, HighlightProps>(
     const regex = new RegExp(isWholeWord ? `\\b(${pattern})\\b` : `(${pattern})`, 'gi');
     const parts = children.split(regex);
 
-    const nodes: ReactNode[] = [];
+    const nodes: Array<ReactNode> = [];
     parts.forEach((part, i) => {
       if (queries.some((q) => part.toLowerCase() === q.toLowerCase())) {
         nodes.push(<Mark key={i}>{part}</Mark>);

@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { Severity, tv, type VariantProps } from '../../../foundation/utils';
 
 export const bannerSimpleVariants = tv({
   base: 'w-full px-6 py-3 text-sm',
@@ -17,3 +17,11 @@ export const bannerSimpleVariants = tv({
 });
 
 export type BannerSimpleVariants = VariantProps<typeof bannerSimpleVariants>;
+
+/* Compile-time lock: Severity values ≡ tv severity keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertSeverity: AssertExact<
+  Severity,
+  NonNullable<VariantProps<typeof bannerSimpleVariants>['severity']>
+> = true;
+void _assertSeverity;

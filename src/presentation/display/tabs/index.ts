@@ -3,6 +3,7 @@ export {
   TabsList,
   TabsTab,
   TabsPanel,
+  TabsActivationMode,
   type TabsProps,
   type TabsListProps,
   type TabsTabProps,

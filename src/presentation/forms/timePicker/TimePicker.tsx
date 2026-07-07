@@ -4,20 +4,25 @@ import { Clock } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
-import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
+import { selectTriggerVariants, SelectSize, type SelectTriggerVariants } from '../select/Select.variants';
+import { InputState } from '../InputStyles';
 
 export interface TimePickerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'defaultValue'>,
-    SelectTriggerVariants {
+    Omit<SelectTriggerVariants, 'size' | 'state'> {
   value?: Temporal.PlainTime | null;
   defaultValue?: Temporal.PlainTime | null;
   onValueChange?: (time: Temporal.PlainTime | null) => void;
-  /** Minute interval. Default 5. */
+  /** The minute interval. Default 5. */
   minuteStep?: number;
   placeholder?: string;
   format?: (time: Temporal.PlainTime) => string;
   isInvalid?: boolean;
   name?: string;
+  /** The trigger size. */
+  size?: SelectSize;
+  /** The validity surface. */
+  state?: InputState;
 }
 
 const defaultFormat = (t: Temporal.PlainTime) => t.toString({ smallestUnit: 'minute' });
@@ -55,7 +60,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
   const minutesRef = useRef<HTMLDivElement | null>(null);
 
   const minutes = useMemo(() => {
-    const list: number[] = [];
+    const list: Array<number> = [];
     for (let m = 0; m < 60; m += minuteStep) list.push(m);
     return list;
   }, [minuteStep]);
@@ -73,7 +78,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
     });
   }, [open]);
 
-  const triggerState = state ?? (isInvalid ? 'invalid' : 'default');
+  const triggerState = state ?? (isInvalid ? InputState.Invalid : InputState.Default);
 
   const update = (next: { hour?: number; minute?: number }) => {
     const merged = Temporal.PlainTime.from({

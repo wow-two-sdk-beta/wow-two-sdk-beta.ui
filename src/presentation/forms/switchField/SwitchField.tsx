@@ -1,13 +1,13 @@
 import { forwardRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Side } from '../../../foundation/utils';
 import { useId } from '../../../foundation/hooks';
 import { Switch, type SwitchProps } from '../switch/Switch';
 
 export interface SwitchFieldProps extends Omit<SwitchProps, 'children'> {
   label: ReactNode;
   description?: ReactNode;
-  /** Place the switch on the left (default) or right of the label. */
-  side?: 'left' | 'right';
+  /** The switch placement — on the left (default) or right of the label. */
+  side?: Side;
   wrapperClassName?: string;
 }
 
@@ -16,7 +16,7 @@ export interface SwitchFieldProps extends Omit<SwitchProps, 'children'> {
  * `side="right"` is the common settings-row pattern (label left, switch right).
  */
 export const SwitchField = forwardRef<HTMLInputElement, SwitchFieldProps>(
-  ({ label, description, side = 'left', id, wrapperClassName, className, ...props }, ref) => {
+  ({ label, description, side = Side.Left, id, wrapperClassName, className, ...props }, ref) => {
     const generated = useId();
     const inputId = id ?? generated;
     const text = (
@@ -30,7 +30,7 @@ export const SwitchField = forwardRef<HTMLInputElement, SwitchFieldProps>(
         htmlFor={inputId}
         className={cn(
           'flex cursor-pointer items-start gap-3',
-          side === 'right' && 'flex-row-reverse justify-between',
+          side === Side.Right && 'flex-row-reverse justify-between',
           wrapperClassName,
         )}
       >

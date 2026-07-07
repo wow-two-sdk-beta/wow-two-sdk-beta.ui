@@ -1,1 +1,1 @@
-export { Inline, type InlineProps } from './Inline';
+export { Inline, InlineAlign, type InlineProps } from './Inline';

@@ -11,7 +11,19 @@ import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { clamp01, clampHue, hsvToHex, type HSV } from '../ColorExtensions';
 
-export type ColorChannel = 'hue' | 'saturation' | 'value' | 'alpha';
+/** Defines which HSV/alpha channel a color slider drives. */
+export const ColorChannel = {
+  /** Refers to the hue channel (0–360°). */
+  Hue: 'hue',
+  /** Refers to the saturation channel (0–1). */
+  Saturation: 'saturation',
+  /** Refers to the value/brightness channel (0–1). */
+  Value: 'value',
+  /** Refers to the alpha/opacity channel (0–1). */
+  Alpha: 'alpha',
+} as const;
+
+export type ColorChannel = (typeof ColorChannel)[keyof typeof ColorChannel];
 
 export interface ColorSliderProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue' | 'color'> {
@@ -26,24 +38,24 @@ export interface ColorSliderProps
 }
 
 function channelMax(channel: ColorChannel): number {
-  return channel === 'hue' ? 360 : 1;
+  return channel === ColorChannel.Hue ? 360 : 1;
 }
 
 function defaultStep(channel: ColorChannel): number {
-  return channel === 'hue' ? 1 : 0.01;
+  return channel === ColorChannel.Hue ? 1 : 0.01;
 }
 
 function buildGradient(channel: ColorChannel, color: HSV | undefined): string {
-  if (channel === 'hue') {
+  if (channel === ColorChannel.Hue) {
     return 'linear-gradient(to right, hsl(0,100%,50%), hsl(60,100%,50%), hsl(120,100%,50%), hsl(180,100%,50%), hsl(240,100%,50%), hsl(300,100%,50%), hsl(360,100%,50%))';
   }
   const ctx: HSV = color ?? { h: 0, s: 1, v: 1 };
-  if (channel === 'saturation') {
+  if (channel === ColorChannel.Saturation) {
     const start = hsvToHex({ h: ctx.h, s: 0, v: ctx.v });
     const end = hsvToHex({ h: ctx.h, s: 1, v: ctx.v });
     return `linear-gradient(to right, ${start}, ${end})`;
   }
-  if (channel === 'value') {
+  if (channel === ColorChannel.Value) {
     const end = hsvToHex({ h: ctx.h, s: ctx.s, v: 1 });
     return `linear-gradient(to right, #000000, ${end})`;
   }
@@ -61,7 +73,7 @@ const CHECKERBOARD: CSSProperties = {
 
 export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function ColorSlider(
   {
-    channel = 'hue',
+    channel = ColorChannel.Hue,
     value,
     defaultValue,
     onValueChange,
@@ -92,7 +104,7 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
       const ratio = clamp01((clientX - rect.left) / rect.width);
       const next = ratio * max;
       /* next is already within [0, max] — clampHue would wrap a full-right drag (360) back to 0. */
-      setVal(channel === 'hue' ? next : clamp01(next));
+      setVal(channel === ColorChannel.Hue ? next : clamp01(next));
     },
     [channel, max, setVal],
   );
@@ -145,17 +157,17 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
           return;
       }
       e.preventDefault();
-      setVal(channel === 'hue' ? clampHue(next) : clamp01(next));
+      setVal(channel === ColorChannel.Hue ? clampHue(next) : clamp01(next));
     },
     [channel, isDisabled, max, setVal, stepValue, val],
   );
 
   /* val >= 360 pins the thumb to the right edge — clampHue would wrap the committed max back to 0. */
-  const ratio = channel === 'hue' ? (val >= 360 ? 1 : clampHue(val) / 360) : clamp01(val);
+  const ratio = channel === ColorChannel.Hue ? (val >= 360 ? 1 : clampHue(val) / 360) : clamp01(val);
   const gradient = buildGradient(channel, color);
   const trackStyle: CSSProperties = {
     backgroundImage: gradient,
-    ...(channel === 'alpha' ? { backgroundColor: 'transparent' } : null),
+    ...(channel === ColorChannel.Alpha ? { backgroundColor: 'transparent' } : null),
   };
 
   return (
@@ -164,7 +176,7 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
       className={cn('relative inline-flex w-full select-none items-center', className)}
       {...rest}
     >
-      {channel === 'alpha' && (
+      {channel === ColorChannel.Alpha && (
         <div
           aria-hidden="true"
           className="absolute inset-0 rounded-full"

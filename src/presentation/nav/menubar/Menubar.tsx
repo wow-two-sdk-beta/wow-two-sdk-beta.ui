@@ -62,7 +62,7 @@ function useMenubarMenuContext() {
 
 export interface MenubarProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange'> {
-  /** Id of the currently-open menu, or `null` if none. */
+  /** The id of the currently-open menu, or `null` if none. */
   value?: string | null;
   defaultValue?: string | null;
   onValueChange?: (value: string | null) => void;
@@ -131,7 +131,7 @@ const MenubarRoot = forwardRef<HTMLDivElement, MenubarProps>(function Menubar(
 });
 
 export interface MenubarMenuProps {
-  /** Stable id for this menu — used for active-menu tracking. */
+  /** The stable id for this menu — used for active-menu tracking. */
   value: string;
   children: ReactNode;
 }

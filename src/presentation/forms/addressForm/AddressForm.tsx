@@ -1,7 +1,7 @@
 import { forwardRef, useId, type HTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
-import { inputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize } from '../InputStyles';
 
 export interface Address {
   country: string;
@@ -20,7 +20,7 @@ interface CountryConfig {
   regionOptions?: Array<{ value: string; label: string }>;
 }
 
-const COUNTRIES: CountryConfig[] = [
+const COUNTRIES: ReadonlyArray<CountryConfig> = [
   {
     iso: 'US',
     name: 'United States',
@@ -67,7 +67,7 @@ export interface AddressFormProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   isDisabled?: boolean;
   isReadOnly?: boolean;
   isCompact?: boolean;
-  /** Prefix for hidden inputs (`{name}.line1`, etc.). */
+  /** The prefix for hidden inputs (`{name}.line1`, etc.). */
   name?: string;
 }
 
@@ -113,7 +113,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
             value={address.country}
             disabled={isDisabled || isReadOnly}
             onChange={(e) => update({ country: e.target.value, region: '' })}
-            className={cn(inputBaseVariants({ size: 'md' }))}
+            className={cn(inputBaseVariants({ size: InputSize.Md }))}
           >
             {COUNTRIES.map((c) => (
               <option key={c.iso} value={c.iso}>
@@ -136,7 +136,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
             disabled={isDisabled}
             readOnly={isReadOnly}
             onChange={(e) => update({ line1: e.target.value })}
-            className={cn(inputBaseVariants({ size: 'md' }))}
+            className={cn(inputBaseVariants({ size: InputSize.Md }))}
           />
         </div>
         {/* Line 2 */}
@@ -152,7 +152,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
             disabled={isDisabled}
             readOnly={isReadOnly}
             onChange={(e) => update({ line2: e.target.value })}
-            className={cn(inputBaseVariants({ size: 'md' }))}
+            className={cn(inputBaseVariants({ size: InputSize.Md }))}
           />
         </div>
         {/* City + Region + Postal */}
@@ -169,7 +169,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
               disabled={isDisabled}
               readOnly={isReadOnly}
               onChange={(e) => update({ city: e.target.value })}
-              className={cn(inputBaseVariants({ size: 'md' }))}
+              className={cn(inputBaseVariants({ size: InputSize.Md }))}
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -182,7 +182,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
                 value={address.region}
                 disabled={isDisabled || isReadOnly}
                 onChange={(e) => update({ region: e.target.value })}
-                className={cn(inputBaseVariants({ size: 'md' }))}
+                className={cn(inputBaseVariants({ size: InputSize.Md }))}
               >
                 <option value="">—</option>
                 {config.regionOptions.map((o) => (
@@ -200,7 +200,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
                 disabled={isDisabled}
                 readOnly={isReadOnly}
                 onChange={(e) => update({ region: e.target.value })}
-                className={cn(inputBaseVariants({ size: 'md' }))}
+                className={cn(inputBaseVariants({ size: InputSize.Md }))}
               />
             )}
           </div>
@@ -216,7 +216,7 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
               disabled={isDisabled}
               readOnly={isReadOnly}
               onChange={(e) => update({ postalCode: e.target.value })}
-              className={cn(inputBaseVariants({ size: 'md' }))}
+              className={cn(inputBaseVariants({ size: InputSize.Md }))}
             />
           </div>
         </div>

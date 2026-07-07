@@ -7,11 +7,24 @@ import { cn } from '../../../foundation/utils';
 
 type EyebrowLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
+/** Defines the Eyebrow color tone. */
+export const EyebrowTone = {
+  /** Refers to the muted foreground. */
+  Muted: 'muted',
+  /** Refers to the subtle foreground. */
+  Subtle: 'subtle',
+  /** Refers to the default foreground. */
+  Default: 'default',
+} as const;
+
+export type EyebrowTone = (typeof EyebrowTone)[keyof typeof EyebrowTone];
+
 export interface EyebrowProps extends ComponentPropsWithoutRef<'h2'> {
-  /** Semantic heading level (1–6). Default 3. */
+  /** The semantic heading level (1–6). Default 3. */
   level?: EyebrowLevel;
-  /** Color tone. Default `muted`. */
-  tone?: 'muted' | 'subtle' | 'default';
+
+  /** The color tone. Default `muted`. */
+  tone?: EyebrowTone;
 }
 
 const TONE: Record<NonNullable<EyebrowProps['tone']>, string> = {

@@ -45,7 +45,7 @@ const useSortableItem = (): ItemContextValue => {
 };
 
 export interface SortableProps extends ComponentPropsWithoutRef<'div'> {
-  /** Fired when a drag or keyboard move completes — move the item at `from` to `to`. Indices are raw; clamp in the handler. */
+  /** Emits the `from`/`to` indices when a drag or keyboard move completes — move the item at `from` to `to`. Indices are raw; clamp in the handler. */
   onReorder: (from: number, to: number) => void;
 }
 
@@ -95,7 +95,7 @@ const SortableRoot = forwardRef<HTMLDivElement, SortableProps>(
 SortableRoot.displayName = 'Sortable';
 
 export interface SortableItemProps extends ComponentPropsWithoutRef<'div'> {
-  /** Zero-based position of this item in the list. */
+  /** The zero-based position of this item in the list. */
   index: number;
 }
 

@@ -5,15 +5,19 @@ import { Heading } from '../heading/Heading';
 import { Text } from '../text/Text';
 
 export interface StepCardProps extends Omit<ComponentPropsWithoutRef<'div'>, 'title'> {
-  /** Step number — rendered as a large faint overlay top-right. */
+  /** The step number — rendered as a large faint overlay top-right. */
   step: number;
-  /** Icon node rendered inside a tinted badge (`bg-primary-soft text-primary`). Size it yourself. */
+
+  /** The icon node rendered inside a tinted badge (`bg-primary-soft text-primary`). Size it yourself. */
   icon?: ReactNode;
-  /** Step title. */
+
+  /** The step title. */
   title: ReactNode;
-  /** Optional supporting copy below the title. Falls back to `children` when omitted. */
+
+  /** The optional supporting copy below the title. Falls back to `children` when omitted. */
   description?: ReactNode;
-  /** Body content — used when `description` is not provided. */
+
+  /** The body content — used when `description` is not provided. */
   children?: ReactNode;
 }
 

@@ -1,5 +1,5 @@
 export {
   AnnotationMarker,
+  AnnotationTone,
   type AnnotationMarkerProps,
-  type AnnotationTone,
 } from './AnnotationMarker';

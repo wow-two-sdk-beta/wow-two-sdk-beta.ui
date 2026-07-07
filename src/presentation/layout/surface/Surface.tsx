@@ -13,9 +13,9 @@ const COMPONENT_NAME = 'Surface';
 export interface SurfaceProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'children'>,
     SurfaceVariants {
-  /** Names the HTML element to render; defaults to `div`. */
+  /** The HTML element to render; defaults to `div`. */
   as?: ElementType;
-  /** Merges styles onto the immediate child instead of rendering a wrapper. */
+  /** The merge of styles onto the immediate child instead of rendering a wrapper. */
   asChild?: boolean;
   children?: React.ReactNode;
 }

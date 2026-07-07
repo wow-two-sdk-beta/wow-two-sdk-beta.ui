@@ -29,9 +29,9 @@ export interface GanttMilestone {
 }
 
 export interface GanttProps extends HTMLAttributes<HTMLDivElement> {
-  tasks: GanttTask[];
-  dependencies?: GanttDependency[];
-  milestones?: GanttMilestone[];
+  tasks: ReadonlyArray<GanttTask>;
+  dependencies?: ReadonlyArray<GanttDependency>;
+  milestones?: ReadonlyArray<GanttMilestone>;
   from?: Temporal.PlainDate;
   to?: Temporal.PlainDate;
   cellWidth?: number;

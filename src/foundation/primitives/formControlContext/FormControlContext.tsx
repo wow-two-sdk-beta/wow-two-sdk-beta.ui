@@ -15,7 +15,7 @@ export interface FormControlContextValue {
 const Context = createContext<FormControlContextValue | null>(null);
 
 export interface FormControlProviderProps {
-  /** Override the auto-generated id (also used as control's `id`). */
+  /** The id override for the auto-generated id (also used as control's `id`). */
   id?: string;
   isInvalid?: boolean;
   isDisabled?: boolean;

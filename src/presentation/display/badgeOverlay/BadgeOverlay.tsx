@@ -1,14 +1,17 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type CornerPosition } from '../../../foundation/utils';
 
 export interface BadgeOverlayProps extends ComponentPropsWithoutRef<'div'> {
-  /** Element to overlay on (avatar, button, image). */
+  /** The element to overlay on (avatar, button, image). */
   children: ReactNode;
-  /** Badge content (count, dot, icon). */
+
+  /** The badge content (count, dot, icon). */
   badge: ReactNode;
-  /** Position of the badge relative to the wrapper. Default `top-right`. */
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-  /** Hide badge when truthy (e.g. when count is 0). */
+
+  /** The position of the badge relative to the wrapper. Default `top-right`. */
+  position?: CornerPosition;
+
+  /** The hidden state — hides the badge when truthy (e.g. when count is 0). */
   isHidden?: boolean;
 }
 

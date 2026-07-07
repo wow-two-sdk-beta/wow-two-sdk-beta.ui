@@ -1,6 +1,7 @@
 import { forwardRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
-import { ToggleButton, type ToggleButtonProps } from '../toggleButton';
+import { cn, ColorTone } from '../../../foundation/utils';
+import { ToggleButton, type ToggleButtonProps, ToggleButtonVariant } from '../toggleButton';
+import { ButtonShape } from '../button';
 import { optionTileVariants } from './OptionTile.variants';
 
 /** Defines props for a single-select preset tile. */
@@ -9,11 +10,11 @@ export interface OptionTileProps
     ToggleButtonProps,
     'isPressed' | 'defaultPressed' | 'onPressedChange' | 'children' | 'aria-label' | 'title' | 'variant' | 'shape'
   > {
-  /** Whether this tile is the active selection. */
+  /** The active-selection state of this tile. */
   selected: boolean;
-  /** Selects this tile. Single-select — the parent owns the value, so re-selecting the active tile is a harmless no-op. */
+  /** Fires when this tile is selected. Single-select — the parent owns the value, so re-selecting the active tile is a harmless no-op. */
   onSelect: () => void;
-  /** Accessible label + native tooltip — the tile is icon-only, so this is its name. */
+  /** The accessible label + native tooltip — the tile is icon-only, so this is its name. */
   label: string;
   /** The tile's icon, glyph, or swatch. */
   children: ReactNode;
@@ -26,11 +27,11 @@ export interface OptionTileProps
  * value. Disable a whole grid by wrapping it in a native `<fieldset disabled>`.
  */
 export const OptionTile = forwardRef<HTMLButtonElement, OptionTileProps>(
-  ({ selected, onSelect, label, size = 'sm', tone = 'primary', className, children, ...props }, ref) => (
+  ({ selected, onSelect, label, size = 'sm', tone = ColorTone.Primary, className, children, ...props }, ref) => (
     <ToggleButton
       ref={ref}
-      shape="square"
-      variant="outline"
+      shape={ButtonShape.Square}
+      variant={ToggleButtonVariant.Outline}
       tone={tone}
       size={size}
       isPressed={selected}

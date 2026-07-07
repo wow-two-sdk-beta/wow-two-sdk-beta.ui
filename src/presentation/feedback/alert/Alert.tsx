@@ -1,24 +1,26 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { cn } from '../../../foundation/utils';
+import { cn, type Severity } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 import { AlertSimple } from '../alertSimple/AlertSimple';
 import type { AlertSimpleVariants } from '../alertSimple/AlertSimple.variants';
 
 export interface AlertProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'title'>,
-    AlertSimpleVariants {
-  /** Optional leading icon. */
+    Omit<AlertSimpleVariants, 'severity'> {
+  /** The semantic severity palette. */
+  severity?: Severity;
+  /** The optional leading icon. */
   icon?: ReactNode;
-  /** Bold heading line. */
+  /** The bold heading line. */
   title?: ReactNode;
-  /** Body text below the title. */
+  /** The body text below the title. */
   description?: ReactNode;
-  /** Right-side action slot (typically Button(s)). */
+  /** The right-side action slot (typically Button(s)). */
   actions?: ReactNode;
-  /** When provided, renders a close button that calls this. */
+  /** Fires when the close button is activated; when omitted, no close button renders. */
   onClose?: () => void;
-  /** Accessible label for the close button. Default `"Dismiss"`. */
+  /** The accessible label for the close button. Default `"Dismiss"`. */
   closeLabel?: string;
 }
 

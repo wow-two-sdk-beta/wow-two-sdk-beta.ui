@@ -13,7 +13,17 @@ import { UploadCloud } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 
-export type FileRejectionReason = 'type' | 'size' | 'count';
+/** Defines why a picked file was rejected by the uploader. */
+export const FileRejectionReason = {
+  /** Refers to a file whose MIME type / extension is not accepted. */
+  Type: 'type',
+  /** Refers to a file exceeding the max size. */
+  Size: 'size',
+  /** Refers to a file beyond the max file count. */
+  Count: 'count',
+} as const;
+
+export type FileRejectionReason = (typeof FileRejectionReason)[keyof typeof FileRejectionReason];
 
 export interface FileRejection {
   file: File;
@@ -25,11 +35,11 @@ export interface FileUploadProps
     InputHTMLAttributes<HTMLInputElement>,
     'type' | 'value' | 'onChange' | 'children' | 'size'
   > {
-  /** Per-file byte cap. Files exceeding this drop into `rejected`. */
+  /** The per-file byte cap. Files exceeding this drop into `rejected`. */
   maxSize?: number;
-  /** Cap total accepted files (multiple mode). Excess go to `rejected`. */
+  /** The cap on total accepted files (multiple mode). Excess go to `rejected`. */
   maxFiles?: number;
-  onFilesChange?: (accepted: File[], rejected: FileRejection[]) => void;
+  onFilesChange?: (accepted: ReadonlyArray<File>, rejected: ReadonlyArray<FileRejection>) => void;
   isInvalid?: boolean;
   label?: ReactNode;
   hint?: ReactNode;
@@ -79,24 +89,24 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
   const [dragState, setDragState] = useState<'idle' | 'over' | 'reject'>('idle');
 
   const partition = useCallback(
-    (files: FileList | File[]): [File[], FileRejection[]] => {
-      const accepted: File[] = [];
-      const rejected: FileRejection[] = [];
+    (files: FileList | ReadonlyArray<File>): [File[], ReadonlyArray<FileRejection>] => {
+      const accepted: Array<File> = [];
+      const rejected: Array<FileRejection> = [];
       const arr = Array.from(files);
       for (const f of arr) {
         if (!matchesAccept(f, accept)) {
-          rejected.push({ file: f, reason: 'type' });
+          rejected.push({ file: f, reason: FileRejectionReason.Type });
           continue;
         }
         if (maxSize != null && f.size > maxSize) {
-          rejected.push({ file: f, reason: 'size' });
+          rejected.push({ file: f, reason: FileRejectionReason.Size });
           continue;
         }
         accepted.push(f);
       }
       if (maxFiles != null && accepted.length > maxFiles) {
         const overflow = accepted.splice(maxFiles);
-        for (const f of overflow) rejected.push({ file: f, reason: 'count' });
+        for (const f of overflow) rejected.push({ file: f, reason: FileRejectionReason.Count });
       }
       return [accepted, rejected];
     },

@@ -13,18 +13,32 @@ import { cn } from '../../../foundation/utils';
 import { useControlled, useReducedMotion } from '../../../foundation/hooks';
 import { Announce, Portal, Presence } from '../../../foundation/primitives';
 
+/** Defines the side a Tour tooltip is placed on, relative to its target. */
+export const Placement = {
+  /** Refers to placement above the target. */
+  Top: 'top',
+  /** Refers to placement to the right of the target. */
+  Right: 'right',
+  /** Refers to placement below the target. */
+  Bottom: 'bottom',
+  /** Refers to placement to the left of the target. */
+  Left: 'left',
+} as const;
+
+export type Placement = (typeof Placement)[keyof typeof Placement];
+
 export interface TourStep {
   target: string | RefObject<HTMLElement>;
   title?: ReactNode;
   body?: ReactNode;
-  placement?: 'top' | 'right' | 'bottom' | 'left';
+  placement?: Placement;
 }
 
 export interface TourProps {
   isOpen?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  steps: TourStep[];
+  steps: ReadonlyArray<TourStep>;
   currentStep?: number;
   defaultCurrentStep?: number;
   onStepChange?: (i: number) => void;
@@ -54,13 +68,13 @@ function rectFromTarget(target: TourStep['target']): Rect | null {
 
 function placementCoords(rect: Rect, placement: NonNullable<TourStep['placement']>, gap = 12) {
   switch (placement) {
-    case 'top':
+    case Placement.Top:
       return { top: rect.top - gap, left: rect.left + rect.width / 2, transform: 'translate(-50%, -100%)' };
-    case 'right':
+    case Placement.Right:
       return { top: rect.top + rect.height / 2, left: rect.left + rect.width + gap, transform: 'translate(0, -50%)' };
-    case 'bottom':
+    case Placement.Bottom:
       return { top: rect.top + rect.height + gap, left: rect.left + rect.width / 2, transform: 'translate(-50%, 0)' };
-    case 'left':
+    case Placement.Left:
       return { top: rect.top + rect.height / 2, left: rect.left - gap, transform: 'translate(-100%, -50%)' };
   }
 }
@@ -170,7 +184,7 @@ export function Tour({
 
   if (!mounted || !step) return null;
 
-  const placement = step.placement ?? 'bottom';
+  const placement = step.placement ?? Placement.Bottom;
   const tooltipCoords = rect ? placementCoords(rect, placement) : null;
   const cutoutPadding = padding;
 

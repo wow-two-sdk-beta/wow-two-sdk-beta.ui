@@ -1,5 +1,39 @@
 import { tv, type VariantProps } from '../../../foundation/utils';
 
+/** Defines the internal visibility-gating mode of an `Overlay`. */
+export const OverlayVisibilityMode = {
+  /** Refers to an always-visible overlay. */
+  Always: 'always',
+  /** Refers to reveal-on-hover (or focus-within) gating. */
+  Hover: 'hover',
+  /** Refers to reveal-on-focus-within gating. */
+  FocusWithin: 'focus-within',
+  /** Refers to mount/unmount gating driven by presence data-state. */
+  Presence: 'presence',
+} as const;
+
+export type OverlayVisibilityMode = (typeof OverlayVisibilityMode)[keyof typeof OverlayVisibilityMode];
+
+/** Defines the show/hide animation effect of an `Overlay`. */
+export const OverlayTransition = {
+  /** Refers to no transition. */
+  None: 'none',
+  /** Refers to an opacity fade. */
+  Fade: 'fade',
+  /** Refers to a fade combined with a scale. */
+  FadeScale: 'fade-scale',
+  /** Refers to a fade combined with an upward slide. */
+  FadeSlideUp: 'fade-slide-up',
+  /** Refers to a fade combined with a downward slide. */
+  FadeSlideDown: 'fade-slide-down',
+  /** Refers to a fade combined with a leftward slide. */
+  FadeSlideLeft: 'fade-slide-left',
+  /** Refers to a fade combined with a rightward slide. */
+  FadeSlideRight: 'fade-slide-right',
+} as const;
+
+export type OverlayTransition = (typeof OverlayTransition)[keyof typeof OverlayTransition];
+
 /* Overlay positioning + visibility + transition surface — see Overlay.standard.md + Overlay.spec.md. */
 export const overlayVariants = tv({
   base: 'absolute',
@@ -117,3 +151,16 @@ export const overlayVariants = tv({
 });
 
 export type OverlayVariants = VariantProps<typeof overlayVariants>;
+
+/* Compile-time lock: enum values ≡ tv variant keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertOverlayVisibilityMode: AssertExact<
+  OverlayVisibilityMode,
+  NonNullable<VariantProps<typeof overlayVariants>['visibilityMode']>
+> = true;
+const _assertOverlayTransition: AssertExact<
+  OverlayTransition,
+  NonNullable<VariantProps<typeof overlayVariants>['transition']>
+> = true;
+void _assertOverlayVisibilityMode;
+void _assertOverlayTransition;

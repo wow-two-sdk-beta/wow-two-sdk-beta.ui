@@ -1,12 +1,15 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn, surfaceVariants } from '../../../foundation/utils';
-import type { Tone } from '../../../foundation/utils';
+import type { Severity, Tone } from '../../../foundation/utils';
 import type { ToastSimpleVariants } from './ToastSimple.variants';
 
 /** Represents the prop surface of `ToastSimple`. */
 export interface ToastSimpleProps
   extends ComponentPropsWithoutRef<'div'>,
-    ToastSimpleVariants {}
+    Omit<ToastSimpleVariants, 'severity'> {
+  /** The semantic severity palette. */
+  severity?: Severity;
+}
 
 /** Maps the toast `severity` keyword to a SurfaceStyles `tone`. */
 const SEVERITY_TO_TONE: Record<NonNullable<ToastSimpleVariants['severity']>, Tone> = {

@@ -1,1 +1,1 @@
-export { InfoRow, type InfoRowProps } from './InfoRow';
+export { InfoRow, InfoRowLayout, type InfoRowProps } from './InfoRow';

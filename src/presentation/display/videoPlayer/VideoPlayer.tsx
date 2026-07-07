@@ -22,11 +22,27 @@ import {
 import { cn, composeEventHandlers } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 
+/** Defines the kind of a video text track. */
+export const VideoTrackKind = {
+  /** Refers to translation subtitles. */
+  Subtitles: 'subtitles',
+  /** Refers to closed captions. */
+  Captions: 'captions',
+  /** Refers to audio descriptions. */
+  Descriptions: 'descriptions',
+  /** Refers to chapter markers. */
+  Chapters: 'chapters',
+  /** Refers to script-only metadata. */
+  Metadata: 'metadata',
+} as const;
+
+export type VideoTrackKind = (typeof VideoTrackKind)[keyof typeof VideoTrackKind];
+
 export interface VideoTrack {
   src: string;
   srcLang: string;
   label: string;
-  kind?: 'subtitles' | 'captions' | 'descriptions' | 'chapters' | 'metadata';
+  kind?: VideoTrackKind;
   default?: boolean;
 }
 
@@ -34,7 +50,7 @@ export interface VideoPlayerProps
   extends Omit<VideoHTMLAttributes<HTMLVideoElement>, 'controls'> {
   src: string;
   poster?: string;
-  tracks?: VideoTrack[];
+  tracks?: ReadonlyArray<VideoTrack>;
   aspectRatio?: string | number;
   defaultVolume?: number;
   defaultPlaybackRate?: number;

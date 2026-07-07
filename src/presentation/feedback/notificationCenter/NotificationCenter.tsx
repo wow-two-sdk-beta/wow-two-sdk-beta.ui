@@ -9,35 +9,46 @@ import { Bell, X } from 'lucide-react';
 import { cn, surfaceVariants } from '../../../foundation/utils';
 
 export interface NotificationCenterProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-  /** Header title. Default `"Notifications"`. */
+  /** The header title. Default `"Notifications"`. */
   title?: ReactNode;
-  /** Badge / count rendered next to the title. */
+
+  /** The badge / count rendered next to the title. */
   count?: ReactNode;
-  /** Action slot in the header (e.g. "Mark all as read"). */
+
+  /** The action slot in the header (e.g. "Mark all as read"). */
   headerActions?: ReactNode;
-  /** Empty-state node, rendered when no children are provided. */
+
+  /** The empty-state node, rendered when no children are provided. */
   emptyState?: ReactNode;
-  /** Footer slot (e.g. "View all"). */
+
+  /** The footer slot (e.g. "View all"). */
   footer?: ReactNode;
   children?: ReactNode;
 }
 
 export interface NotificationItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-  /** Leading icon / avatar. */
+  /** The leading icon / avatar. */
   icon?: ReactNode;
-  /** Primary title. */
+
+  /** The primary title. */
   title: ReactNode;
-  /** Body / description. */
+
+  /** The body / description. */
   description?: ReactNode;
-  /** Timestamp / relative time label. */
+
+  /** The timestamp / relative time label. */
   timestamp?: ReactNode;
-  /** Marks this row as unread (bold + leading dot). */
+
+  /** The unread flag (bold + leading dot). */
   isUnread?: boolean;
-  /** Trailing actions slot. */
+
+  /** The trailing actions slot. */
   actions?: ReactNode;
+
   /** Fires when the row is clicked / activated. */
   onSelect?: () => void;
-  /** Renders a dismiss button on hover. */
+
+  /** Fires when the row is dismissed; when provided, a dismiss button renders on hover. */
   onDismiss?: () => void;
 }
 

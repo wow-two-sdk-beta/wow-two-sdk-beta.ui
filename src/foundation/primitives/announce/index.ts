@@ -1,1 +1,1 @@
-export { Announce, type AnnounceProps } from './Announce';
+export { Announce, Politeness, type AnnounceProps } from './Announce';

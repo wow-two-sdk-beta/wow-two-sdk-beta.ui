@@ -1,1 +1,6 @@
-export { NotificationDot, type NotificationDotProps } from './NotificationDot';
+export {
+  NotificationDot,
+  NotificationDotTone,
+  NotificationDotSize,
+  type NotificationDotProps,
+} from './NotificationDot';

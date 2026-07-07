@@ -1,6 +1,6 @@
 export {
   DirectionProvider,
   useDirection,
-  type Direction,
+  Direction,
   type DirectionProviderProps,
 } from './DirectionProvider';

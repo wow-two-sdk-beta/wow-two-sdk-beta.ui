@@ -1,11 +1,15 @@
 import { forwardRef, useMemo, type InputHTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface CronInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue' | 'onChange' | 'size'>,
-    InputBaseVariants {
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
@@ -29,57 +33,75 @@ const MONTH_NAMES = [
   'December',
 ];
 
+/** Defines the parsed form of a single cron field (one of the five positions). */
+export const CronFieldKind = {
+  /** Refers to `*` — every value. */
+  Every: 'every',
+  /** Refers to a single specific value (`N`). */
+  Specific: 'specific',
+  /** Refers to an inclusive range (`N-M`). */
+  Range: 'range',
+  /** Refers to a comma list (`N,M,O`). */
+  List: 'list',
+  /** Refers to a step expression such as `* / N`. */
+  Step: 'step',
+  /** Refers to an unparseable / out-of-bounds field. */
+  Invalid: 'invalid',
+} as const;
+
+export type CronFieldKind = (typeof CronFieldKind)[keyof typeof CronFieldKind];
+
 interface CronField {
   raw: string;
-  kind: 'every' | 'specific' | 'range' | 'list' | 'step' | 'invalid';
-  value?: number | number[];
+  kind: CronFieldKind;
+  value?: number | ReadonlyArray<number>;
   step?: number;
   range?: [number, number];
 }
 
 function parseField(raw: string, min: number, max: number): CronField {
-  if (raw === '*') return { raw, kind: 'every' };
+  if (raw === '*') return { raw, kind: CronFieldKind.Every };
   // Step: "*/N" or "from-to/N" — only support "*/N" first-gen.
   if (/^\*\/(\d+)$/.test(raw)) {
     const step = Number(raw.slice(2));
-    if (step < 1 || step > max) return { raw, kind: 'invalid' };
-    return { raw, kind: 'step', step };
+    if (step < 1 || step > max) return { raw, kind: CronFieldKind.Invalid };
+    return { raw, kind: CronFieldKind.Step, step };
   }
   // Range: "N-M".
   if (/^(\d+)-(\d+)$/.test(raw)) {
     const [a, b] = raw.split('-').map(Number);
-    if (a == null || b == null || a < min || b > max || a > b) return { raw, kind: 'invalid' };
-    return { raw, kind: 'range', range: [a, b] };
+    if (a == null || b == null || a < min || b > max || a > b) return { raw, kind: CronFieldKind.Invalid };
+    return { raw, kind: CronFieldKind.Range, range: [a, b] };
   }
   // List: "N,M,O".
   if (/^\d+(,\d+)+$/.test(raw)) {
     const parts = raw.split(',').map(Number);
-    if (parts.some((p) => p < min || p > max)) return { raw, kind: 'invalid' };
-    return { raw, kind: 'list', value: parts };
+    if (parts.some((p) => p < min || p > max)) return { raw, kind: CronFieldKind.Invalid };
+    return { raw, kind: CronFieldKind.List, value: parts };
   }
   // Specific number.
   if (/^\d+$/.test(raw)) {
     const n = Number(raw);
-    if (n < min || n > max) return { raw, kind: 'invalid' };
-    return { raw, kind: 'specific', value: n };
+    if (n < min || n > max) return { raw, kind: CronFieldKind.Invalid };
+    return { raw, kind: CronFieldKind.Specific, value: n };
   }
-  return { raw, kind: 'invalid' };
+  return { raw, kind: CronFieldKind.Invalid };
 }
 
-function describeField(field: CronField, names?: string[], unit = '', plural = ''): string {
-  if (field.kind === 'every') return '*';
-  if (field.kind === 'invalid') return '?';
-  if (field.kind === 'step' && field.step != null) return `every ${field.step} ${plural || unit + 's'}`;
-  if (field.kind === 'range' && field.range) {
+function describeField(field: CronField, names?: ReadonlyArray<string>, unit = '', plural = ''): string {
+  if (field.kind === CronFieldKind.Every) return '*';
+  if (field.kind === CronFieldKind.Invalid) return '?';
+  if (field.kind === CronFieldKind.Step && field.step != null) return `every ${field.step} ${plural || unit + 's'}`;
+  if (field.kind === CronFieldKind.Range && field.range) {
     const [a, b] = field.range;
     const aLabel = names?.[a] ?? a;
     const bLabel = names?.[b] ?? b;
     return `${aLabel} through ${bLabel}`;
   }
-  if (field.kind === 'list' && Array.isArray(field.value)) {
+  if (field.kind === CronFieldKind.List && Array.isArray(field.value)) {
     return field.value.map((v) => names?.[v] ?? v).join(', ');
   }
-  if (field.kind === 'specific' && typeof field.value === 'number') {
+  if (field.kind === CronFieldKind.Specific && typeof field.value === 'number') {
     return String(names?.[field.value] ?? field.value);
   }
   return field.raw;
@@ -95,45 +117,45 @@ function parseCron(value: string): string {
   const month = parseField(monRaw, 1, 12);
   const dow = parseField(dowRaw, 0, 6);
 
-  if ([minute, hour, dom, month, dow].some((f) => f.kind === 'invalid')) {
+  if ([minute, hour, dom, month, dow].some((f) => f.kind === CronFieldKind.Invalid)) {
     return 'Invalid cron expression.';
   }
 
   // Common-case readouts.
-  if (minute.kind === 'step' && hour.kind === 'every' && dom.kind === 'every' && month.kind === 'every' && dow.kind === 'every') {
+  if (minute.kind === CronFieldKind.Step && hour.kind === CronFieldKind.Every && dom.kind === CronFieldKind.Every && month.kind === CronFieldKind.Every && dow.kind === CronFieldKind.Every) {
     return `Every ${minute.step} minutes`;
   }
-  if (minute.kind === 'every' && hour.kind === 'step' && dom.kind === 'every' && month.kind === 'every' && dow.kind === 'every') {
+  if (minute.kind === CronFieldKind.Every && hour.kind === CronFieldKind.Step && dom.kind === CronFieldKind.Every && month.kind === CronFieldKind.Every && dow.kind === CronFieldKind.Every) {
     return `Every ${hour.step} hours`;
   }
   if (
-    minute.kind === 'specific' &&
-    hour.kind === 'specific' &&
-    dom.kind === 'every' &&
-    month.kind === 'every' &&
-    dow.kind === 'every'
+    minute.kind === CronFieldKind.Specific &&
+    hour.kind === CronFieldKind.Specific &&
+    dom.kind === CronFieldKind.Every &&
+    month.kind === CronFieldKind.Every &&
+    dow.kind === CronFieldKind.Every
   ) {
     return `Every day at ${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')}`;
   }
   if (
-    minute.kind === 'specific' &&
-    hour.kind === 'specific' &&
-    dom.kind === 'every' &&
-    month.kind === 'every' &&
-    (dow.kind === 'list' || dow.kind === 'specific')
+    minute.kind === CronFieldKind.Specific &&
+    hour.kind === CronFieldKind.Specific &&
+    dom.kind === CronFieldKind.Every &&
+    month.kind === CronFieldKind.Every &&
+    (dow.kind === CronFieldKind.List || dow.kind === CronFieldKind.Specific)
   ) {
     return `At ${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')} on ${describeField(dow, WEEKDAY_NAMES)}`;
   }
-  if (minute.kind === 'every' && hour.kind === 'every' && dom.kind === 'every' && month.kind === 'every' && dow.kind === 'every') {
+  if (minute.kind === CronFieldKind.Every && hour.kind === CronFieldKind.Every && dom.kind === CronFieldKind.Every && month.kind === CronFieldKind.Every && dow.kind === CronFieldKind.Every) {
     return 'Every minute';
   }
   // Fallback — describe each field.
   const parts2 = [];
-  if (minute.kind !== 'every') parts2.push(`minute: ${describeField(minute, undefined, 'minute')}`);
-  if (hour.kind !== 'every') parts2.push(`hour: ${describeField(hour, undefined, 'hour')}`);
-  if (dom.kind !== 'every') parts2.push(`day: ${describeField(dom)}`);
-  if (month.kind !== 'every') parts2.push(`month: ${describeField(month, ['', ...MONTH_NAMES])}`);
-  if (dow.kind !== 'every') parts2.push(`weekday: ${describeField(dow, WEEKDAY_NAMES)}`);
+  if (minute.kind !== CronFieldKind.Every) parts2.push(`minute: ${describeField(minute, undefined, 'minute')}`);
+  if (hour.kind !== CronFieldKind.Every) parts2.push(`hour: ${describeField(hour, undefined, 'hour')}`);
+  if (dom.kind !== CronFieldKind.Every) parts2.push(`day: ${describeField(dom)}`);
+  if (month.kind !== CronFieldKind.Every) parts2.push(`month: ${describeField(month, ['', ...MONTH_NAMES])}`);
+  if (dow.kind !== CronFieldKind.Every) parts2.push(`weekday: ${describeField(dow, WEEKDAY_NAMES)}`);
   return parts2.length === 0 ? 'Every minute' : parts2.join(' · ');
 }
 
@@ -168,7 +190,7 @@ export const CronInput = forwardRef<HTMLInputElement, CronInputProps>(
     });
     const preview = useMemo(() => parseCron(value), [value]);
     const isError = isInvalid || preview.startsWith('Invalid') || preview.startsWith('Cron');
-    const inputState = isError ? 'invalid' : (state ?? 'default');
+    const inputState = isError ? InputState.Invalid : (state ?? InputState.Default);
 
     return (
       <div className={cn('flex flex-col gap-1', className)}>

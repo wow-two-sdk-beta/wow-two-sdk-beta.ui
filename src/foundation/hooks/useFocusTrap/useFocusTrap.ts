@@ -17,7 +17,7 @@ function isVisible(el: HTMLElement): boolean {
   return el.checkVisibility?.() ?? el.getClientRects().length > 0;
 }
 
-function getFocusable(container: HTMLElement): HTMLElement[] {
+function getFocusable(container: HTMLElement): ReadonlyArray<HTMLElement> {
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
     (el) => el.getAttribute('aria-hidden') !== 'true' && isVisible(el),
   );

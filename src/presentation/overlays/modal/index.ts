@@ -8,6 +8,7 @@ export {
   ModalBody,
   ModalFooter,
   ModalClose,
+  ModalRole,
   type ModalProps,
   type ModalTriggerProps,
   type ModalContentProps,

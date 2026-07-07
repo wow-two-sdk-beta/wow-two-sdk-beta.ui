@@ -1,2 +1,2 @@
 export { ColorSwatch, type ColorSwatchProps } from './ColorSwatch';
-export { colorSwatchVariants, type ColorSwatchVariants } from './ColorSwatch.variants';
+export { colorSwatchVariants, ColorSwatchSize, SwatchShape, type ColorSwatchVariants } from './ColorSwatch.variants';

@@ -1,13 +1,24 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import { cn } from '../../../foundation/utils';
 
+/** Defines the InfoRow layout. */
+export const InfoRowLayout = {
+  /** Refers to label-value on one line. */
+  Inline: 'inline',
+  /** Refers to value stacked below its label. */
+  Stacked: 'stacked',
+} as const;
+
+export type InfoRowLayout = (typeof InfoRowLayout)[keyof typeof InfoRowLayout];
+
 export interface InfoRowProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
   label: ReactNode;
   value: ReactNode;
-  /** Optional icon rendered before the label. */
+  /** The optional icon rendered before the label. */
   icon?: ReactNode;
-  /** Layout: `inline` puts label-value on one line; `stacked` puts value below. Default `inline`. */
-  layout?: 'inline' | 'stacked';
+
+  /** The layout: `inline` puts label-value on one line; `stacked` puts value below. Default `inline`. */
+  layout?: InfoRowLayout;
 }
 
 /**

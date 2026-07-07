@@ -8,7 +8,8 @@ export interface LabeledInputProps extends Omit<ComponentPropsWithoutRef<'div'>,
   label: ReactNode;
   /** The input element. Receives a generated `id` linked to the label. */
   children: React.ReactElement<{ id?: string }>;
-  /** Optional inline-end label (e.g. "Optional"). */
+
+  /** The optional inline-end label (e.g. "Optional"). */
   trailing?: ReactNode;
 }
 

@@ -9,6 +9,7 @@
 import type { Theme, ThemeMeta } from './Theme';
 import { TONE_FAMILIES, type SemanticToken, type TokenSet } from './Tokens';
 import { contrastRatioCss } from './Oklch';
+import { ColorMode } from '../primitives/colorModeProvider';
 
 /** WCAG AA thresholds. Text = normal-size body text; UI = non-text affordances. */
 export const AA_TEXT = 4.5;
@@ -18,8 +19,10 @@ export const AA_UI = 3.0;
 interface ContrastPair {
   /** Foreground token (text/icon/affordance color). */
   fg: SemanticToken;
+
   /** Background token the fg sits on. */
   bg: SemanticToken;
+
   /** Required minimum ratio (AA_TEXT or AA_UI). */
   min: number;
 }
@@ -28,8 +31,8 @@ interface ContrastPair {
  * The canonical set of pairs every theme must satisfy.
  * Surface text pairs + each tone family's solid/soft foreground pairs + ring.
  */
-export function contrastPairs(): ContrastPair[] {
-  const pairs: ContrastPair[] = [
+export function contrastPairs(): ReadonlyArray<ContrastPair> {
+  const pairs: Array<ContrastPair> = [
     { fg: 'foreground', bg: 'background', min: AA_TEXT },
     { fg: 'card-foreground', bg: 'card', min: AA_TEXT },
     { fg: 'popover-foreground', bg: 'popover', min: AA_TEXT },
@@ -51,8 +54,8 @@ export function contrastPairs(): ContrastPair[] {
 }
 
 /** Check one token set (one mode) against the pair list. Returns failure strings. */
-function checkMode(set: TokenSet, mode: 'light' | 'dark'): string[] {
-  const failures: string[] = [];
+function checkMode(set: TokenSet, mode: ColorMode): ReadonlyArray<string> {
+  const failures: Array<string> = [];
   for (const { fg, bg, min } of contrastPairs()) {
     const ratio = contrastRatioCss(set[fg], set[bg]);
     if (ratio + 1e-3 < min) {
@@ -70,8 +73,8 @@ function checkMode(set: TokenSet, mode: 'light' | 'dark'): string[] {
  */
 export function validateTheme(theme: Pick<Theme, 'light' | 'dark'>): ThemeMeta {
   const failures = [
-    ...checkMode(theme.light, 'light'),
-    ...checkMode(theme.dark, 'dark'),
+    ...checkMode(theme.light, ColorMode.Light),
+    ...checkMode(theme.dark, ColorMode.Dark),
   ];
   return failures.length === 0
     ? { contrastAA: true }

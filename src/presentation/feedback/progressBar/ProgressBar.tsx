@@ -1,5 +1,5 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type ProgressTone, type Size } from '../../../foundation/utils';
 import {
   progressFillVariants,
   progressTrackVariants,
@@ -8,11 +8,15 @@ import {
 
 export interface ProgressBarProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'children'>,
-    ProgressBarVariants {
-  /** Current value 0–100. Pass `undefined` for indeterminate. */
+    Omit<ProgressBarVariants, 'size' | 'tone'> {
+  /** The track thickness. */
+  size?: Size;
+  /** The fill tone palette. */
+  tone?: ProgressTone;
+  /** The current value 0–100. Pass `undefined` for indeterminate. */
   value?: number;
   max?: number;
-  /** Accessible label for the progress. */
+  /** The accessible label for the progress. */
   label?: string;
 }
 
@@ -32,7 +36,15 @@ export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(
         aria-valuemin={0}
         aria-valuemax={max}
         aria-valuenow={determinate ? value : undefined}
-        className={cn(progressTrackVariants({ size }), className)}
+        className={cn(
+          progressTrackVariants({
+            /* `size` is the 5-member `Size`; the track defines only sm/md/lg.
+               Cast to the tv key type — an out-of-range value falls through to
+               the tv default. */
+            size: size as ProgressBarVariants['size'],
+          }),
+          className,
+        )}
         {...props}
       >
         <div

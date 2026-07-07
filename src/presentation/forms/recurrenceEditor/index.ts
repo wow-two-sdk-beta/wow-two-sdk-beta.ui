@@ -1,7 +1,8 @@
 export {
   RecurrenceEditor,
+  RecurrenceFreq,
+  RecurrenceWeekday,
+  RecurrenceEndMode,
   type RecurrenceEditorProps,
-  type RecurrenceFreq,
   type RecurrenceRule,
-  type RecurrenceWeekday,
 } from './RecurrenceEditor';

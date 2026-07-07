@@ -12,7 +12,15 @@ import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
 
-export type JSONEditorMode = 'tree' | 'text';
+/** Defines how a JSON editor renders its document. */
+export const JSONEditorMode = {
+  /** Refers to the collapsible tree/structured view. */
+  Tree: 'tree',
+  /** Refers to the raw-text view. */
+  Text: 'text',
+} as const;
+
+export type JSONEditorMode = (typeof JSONEditorMode)[keyof typeof JSONEditorMode];
 
 export interface JSONEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
   value?: unknown;
@@ -69,7 +77,7 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
     defaultValue,
     onValueChange,
     mode: modeProp,
-    defaultMode = 'tree',
+    defaultMode = JSONEditorMode.Tree,
     onModeChange,
     isDisabled,
     isReadOnly,
@@ -111,7 +119,7 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
     >
       <div className="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1">
         <div role="radiogroup" aria-label="JSON mode" className="flex items-center gap-0.5 rounded-md bg-card p-0.5 ring-1 ring-border">
-          {(['tree', 'text'] as JSONEditorMode[]).map((m) => (
+          {Object.values(JSONEditorMode).map((m) => (
             <button
               key={m}
               type="button"
@@ -131,7 +139,7 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
         </div>
       </div>
       <div className="flex-1 overflow-auto" style={{ minHeight: 0 }}>
-        {mode === 'tree' ? (
+        {mode === JSONEditorMode.Tree ? (
           <TreeView value={value} updateAt={updateAt} isDisabled={isDisabled} isReadOnly={isReadOnly} />
         ) : (
           <TextView value={value} setValue={setValue} isDisabled={isDisabled} isReadOnly={isReadOnly} indent={indent} />

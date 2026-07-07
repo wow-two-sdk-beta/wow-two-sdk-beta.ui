@@ -1,11 +1,13 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/utils';
 
 export interface SpacerProps extends ComponentPropsWithoutRef<'div'> {
-  /** Optional explicit size (CSS length). When inside a flex/grid parent,
+  /** The explicit size (CSS length). When inside a flex/grid parent,
    *  the default `flex: 1` already pushes siblings apart. */
   size?: number | string;
-  axis?: 'horizontal' | 'vertical';
+
+  /** The axis the fixed `size` applies to. Default `horizontal`. */
+  axis?: Orientation;
 }
 
 /**
@@ -13,10 +15,10 @@ export interface SpacerProps extends ComponentPropsWithoutRef<'div'> {
  * siblings to opposite ends. Pass `size` for a fixed gap.
  */
 export const Spacer = forwardRef<HTMLDivElement, SpacerProps>(
-  ({ size, axis = 'horizontal', className, style, ...props }, ref) => {
+  ({ size, axis = Orientation.Horizontal, className, style, ...props }, ref) => {
     const fixed: React.CSSProperties | undefined =
       size !== undefined
-        ? axis === 'horizontal'
+        ? axis === Orientation.Horizontal
           ? { width: typeof size === 'number' ? `${size}px` : size, flexShrink: 0 }
           : { height: typeof size === 'number' ? `${size}px` : size, flexShrink: 0 }
         : undefined;

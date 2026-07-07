@@ -3,9 +3,10 @@ export {
   TimelineItem,
   TimelineTitle,
   TimelineDescription,
+  TimelineStatus,
+  TimelineAlign,
   type TimelineProps,
   type TimelineItemProps,
   type TimelineTitleProps,
   type TimelineDescriptionProps,
-  type TimelineStatus,
 } from './Timeline';

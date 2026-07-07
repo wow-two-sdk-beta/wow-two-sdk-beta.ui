@@ -8,11 +8,15 @@ import { Minus, Plus } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface NumberInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
-    InputBaseVariants {
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
   step?: number;
 }
 
@@ -27,7 +31,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
     forwardedRef,
   ) => {
     const ctx = useFormControl();
-    const finalState = state ?? (ctx?.isInvalid ? 'invalid' : 'default');
+    const finalState = state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default);
     const inputRef = useRef<HTMLInputElement | null>(null);
     useImperativeHandle(forwardedRef, () => inputRef.current as HTMLInputElement);
 

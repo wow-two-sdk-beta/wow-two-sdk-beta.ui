@@ -11,3 +11,4 @@ export {
   type SelectItemProps,
   type SelectOption,
 } from './Select';
+export { SelectSize, type SelectTriggerVariants } from './Select.variants';

@@ -1,11 +1,15 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
-import { spinnerVariants, type SpinnerVariants } from './Spinner.variants';
+import { cn, type Size } from '../../../foundation/utils';
+import { spinnerVariants, type SpinnerTone, type SpinnerVariants } from './Spinner.variants';
 
 export interface SpinnerProps
   extends Omit<ComponentPropsWithoutRef<'span'>, 'children'>,
-    SpinnerVariants {
-  /** Accessible label. Default `"Loading"`. */
+    Omit<SpinnerVariants, 'size' | 'tone'> {
+  /** The diameter step. */
+  size?: Size;
+  /** The color tone. */
+  tone?: SpinnerTone;
+  /** The accessible label. Default `"Loading"`. */
   label?: string;
 }
 

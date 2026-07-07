@@ -1,6 +1,20 @@
 import { tv, type VariantProps } from '../../../foundation/utils';
 import { inputBaseVariants } from '../InputStyles';
 
+/** Defines the size step of a select trigger. */
+export const SelectSize = {
+  /** Refers to the extra-small step. */
+  Xs: 'xs',
+  /** Refers to the small step. */
+  Sm: 'sm',
+  /** Refers to the medium (default) step. */
+  Md: 'md',
+  /** Refers to the large step. */
+  Lg: 'lg',
+} as const;
+
+export type SelectSize = (typeof SelectSize)[keyof typeof SelectSize];
+
 /**
  * Extends the shared `inputBaseVariants` so the trigger's height, border,
  * focus-ring, disabled, and per-size paddings stay in lockstep with `TextInput`.
@@ -22,3 +36,10 @@ export const selectTriggerVariants = tv({
 });
 
 export type SelectTriggerVariants = VariantProps<typeof selectTriggerVariants>;
+
+/* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertSelectSize: AssertExact<
+  SelectSize, NonNullable<VariantProps<typeof selectTriggerVariants>['size']>
+> = true;
+void _assertSelectSize;

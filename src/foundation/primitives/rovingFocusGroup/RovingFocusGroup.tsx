@@ -14,9 +14,25 @@ import {
   type RefObject,
 } from 'react';
 import { useComposedRefs } from '../../utils/composeRefs';
-import { useDirection } from '../directionProvider';
+import { Direction, useDirection } from '../directionProvider';
 
-export type Orientation = 'horizontal' | 'vertical' | 'both';
+/**
+ * Defines the arrow-key navigation axis of a roving-focus group.
+ *
+ * Diverges from the shared `Orientation` (foundation/utils) by adding `Both`
+ * (2-D grids like ColorSwatchPicker) — stays local per the enum-alignment
+ * divergence rule.
+ */
+export const Orientation = {
+  /** Refers to left/right arrow navigation only. */
+  Horizontal: 'horizontal',
+  /** Refers to up/down arrow navigation only. */
+  Vertical: 'vertical',
+  /** Refers to both-axis (grid) arrow navigation. */
+  Both: 'both',
+} as const;
+
+export type Orientation = (typeof Orientation)[keyof typeof Orientation];
 
 interface ItemEntry {
   id: string;
@@ -46,7 +62,7 @@ const isEntryDisabled = (entry: ItemEntry): boolean => isNodeDisabled(entry.node
  * when no enabled entry is reachable.
  */
 function findEnabled(
-  list: ItemEntry[],
+  list: ReadonlyArray<ItemEntry>,
   start: number,
   dir: 1 | -1,
   loop: boolean,
@@ -64,7 +80,7 @@ function findEnabled(
 }
 
 /** Nearest enabled entry around `idx` (excluding it), preferring the next one on ties. */
-function findNearestEnabled(list: ItemEntry[], idx: number): ItemEntry | undefined {
+function findNearestEnabled(list: ReadonlyArray<ItemEntry>, idx: number): ItemEntry | undefined {
   for (let distance = 1; distance < list.length; distance++) {
     const forward = list[idx + distance];
     if (forward && !isEntryDisabled(forward)) return forward;
@@ -82,6 +98,7 @@ interface RovingFocusContextValue {
   onItemKeyDown: (event: KeyboardEvent, id: string) => void;
   /** Re-validates that the tab stop sits on an enabled item (see useRovingFocusItem). */
   ensureEnabledStop: (id: string) => void;
+
   /** True once the user has interacted with the group; reset when focus leaves. */
   interactedRef: RefObject<boolean>;
   groupRef: RefObject<HTMLDivElement | null>;
@@ -106,10 +123,10 @@ export interface RovingFocusGroupProps extends HTMLAttributes<HTMLDivElement> {
  */
 export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps>(
   function RovingFocusGroup(
-    { orientation = 'horizontal', canLoop = true, children, ...props },
+    { orientation = Orientation.Horizontal, canLoop = true, children, ...props },
     ref,
   ) {
-    const items = useRef<ItemEntry[]>([]);
+    const items = useRef<Array<ItemEntry>>([]);
     const [focusedId, setFocusedId] = useState<string | null>(null);
     const interactedRef = useRef(false);
     const groupRef = useRef<HTMLDivElement | null>(null);
@@ -166,11 +183,11 @@ export const RovingFocusGroup = forwardRef<HTMLDivElement, RovingFocusGroupProps
         const list = items.current;
         const idx = list.findIndex((item) => item.id === id);
         if (idx === -1) return;
-        const isVert = orientation === 'vertical' || orientation === 'both';
-        const isHoriz = orientation === 'horizontal' || orientation === 'both';
+        const isVert = orientation === Orientation.Vertical || orientation === Orientation.Both;
+        const isHoriz = orientation === Orientation.Horizontal || orientation === Orientation.Both;
         // Horizontal arrows mirror in RTL.
-        const nextHorizKey = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
-        const prevHorizKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+        const nextHorizKey = direction === Direction.Rtl ? 'ArrowLeft' : 'ArrowRight';
+        const prevHorizKey = direction === Direction.Rtl ? 'ArrowRight' : 'ArrowLeft';
         // Disabled items are skipped (APG): the search walks past them —
         // wrapping at the edges when canLoop — until an enabled item is
         // found; Home / End land on the first / last *enabled* item.

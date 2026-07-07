@@ -1,5 +1,5 @@
 export {
   MarkdownEditor,
+  MarkdownEditorView,
   type MarkdownEditorProps,
-  type MarkdownEditorView,
 } from './MarkdownEditor';

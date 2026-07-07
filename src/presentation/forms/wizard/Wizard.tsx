@@ -22,7 +22,7 @@ interface StepInfo {
 }
 
 interface WizardContextValue {
-  steps: StepInfo[];
+  steps: ReadonlyArray<StepInfo>;
   currentIndex: number;
   currentStep: StepInfo | undefined;
   goTo: (idOrIndex: string | number) => void;
@@ -69,7 +69,7 @@ const WizardRoot = forwardRef<HTMLDivElement, WizardProps>(function Wizard(
 ) {
   // Pre-walk children to discover step ids (so context can default to first id).
   const childArray = Children.toArray(children).filter(isValidElement);
-  const stepFromChildren: StepInfo[] = childArray
+  const stepFromChildren: ReadonlyArray<StepInfo> = childArray
     .filter(
       (c) =>
         (c.type as { displayName?: string }).displayName === 'WizardStep',
@@ -84,7 +84,7 @@ const WizardRoot = forwardRef<HTMLDivElement, WizardProps>(function Wizard(
       };
     });
 
-  const [steps, setSteps] = useState<StepInfo[]>(stepFromChildren);
+  const [steps, setSteps] = useState<ReadonlyArray<StepInfo>>(stepFromChildren);
   const validatorsRef = useState(() => new Map<string, () => boolean | Promise<boolean>>())[0];
 
   const initialStep = stepFromChildren[0]?.id ?? '';
@@ -309,7 +309,7 @@ export interface WizardFooterProps extends HTMLAttributes<HTMLDivElement> {
   prevLabel?: ReactNode;
   nextLabel?: ReactNode;
   submitLabel?: ReactNode;
-  /** Render the Prev button when not on first step. Default true. */
+  /** The visibility of the Prev button when not on first step. Default true. */
   hasPrev?: boolean;
 }
 

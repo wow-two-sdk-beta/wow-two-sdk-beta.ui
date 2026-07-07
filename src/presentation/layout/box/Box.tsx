@@ -2,7 +2,7 @@ import { forwardRef, type ComponentPropsWithoutRef, type ElementType, type Ref }
 import { cn } from '../../../foundation/utils';
 
 export interface BoxProps extends Omit<ComponentPropsWithoutRef<'div'>, 'as'> {
-  /** HTML element to render. Default `div`. */
+  /** The HTML element to render. Default `div`. */
   as?: ElementType;
 }
 

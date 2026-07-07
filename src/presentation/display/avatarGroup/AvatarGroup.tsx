@@ -3,11 +3,13 @@ import { cn } from '../../../foundation/utils';
 import { Avatar, type AvatarProps } from '../avatar/Avatar';
 
 export interface AvatarGroupProps extends ComponentPropsWithoutRef<'div'> {
-  /** Maximum avatars to render. Excess is shown as a "+N" tile. */
+  /** The maximum avatars to render. Excess is shown as a "+N" tile. */
   max?: number;
-  /** Avatar size applied to all children. Default `md`. */
+
+  /** The avatar size applied to all children. Default `md`. */
   size?: AvatarProps['size'];
-  /** Negative-margin overlap class applied between avatars. Default `-ml-2`. */
+
+  /** The negative-margin overlap class applied between avatars. Default `-ml-2`. */
   overlap?: string;
 }
 

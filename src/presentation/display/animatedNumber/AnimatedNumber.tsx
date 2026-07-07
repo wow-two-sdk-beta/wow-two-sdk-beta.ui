@@ -7,14 +7,14 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type ElementTag } from '../../../foundation/utils';
 
 export interface AnimatedNumberProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
   value: number;
   duration?: number;
   easing?: (t: number) => number;
   format?: (value: number) => ReactNode;
-  as?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  as?: ElementTag;
 }
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);

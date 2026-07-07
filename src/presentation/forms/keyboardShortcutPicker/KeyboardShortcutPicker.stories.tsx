@@ -13,7 +13,7 @@ type Story = StoryObj<typeof KeyboardShortcutPicker>;
 export const Default: Story = {
   render: () => {
     function Demo() {
-      const [keys, setKeys] = useState<string[]>(['Meta', 'K']);
+      const [keys, setKeys] = useState<readonly string[]>(['Meta', 'K']);
       return (
         <div className="space-y-3">
           <KeyboardShortcutPicker value={keys} onValueChange={setKeys} />

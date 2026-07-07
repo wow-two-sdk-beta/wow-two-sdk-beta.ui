@@ -8,22 +8,19 @@ export type {
   PolymorphicPropsWithoutRef,
   PolymorphicRef,
 } from './polymorphic';
-export { CssExtensions } from './CssExtensions';
+export { CssExtensions, RadiusToken, SizePreset, AbsolutePositionPreset } from './CssExtensions';
 export type {
   PaddingToken,
-  RadiusToken,
   SizeValue,
   PaddingProp,
   RadiusProp,
   BoxSizeOverrides,
   SizeUnion,
-  SizePreset,
-  AbsolutePositionPreset,
   AbsoluteInsetOverrides,
   AbsolutePosition,
 } from './CssExtensions';
-export { ColorExtensions } from './ColorExtensions';
-export type { ColorTone, ColorOverride, ColorProp } from './ColorExtensions';
+export { ColorExtensions, ColorTone } from './ColorExtensions';
+export type { ColorOverride, ColorProp } from './ColorExtensions';
 export { OptionalExtensions } from './OptionalExtensions';
 export { PressExtensions, type PressEvent } from './PressExtensions';
 export { HtmlElement, ButtonType } from './HtmlExtensions';
@@ -34,10 +31,9 @@ export type {
   PresenceAnimationDurationProp,
   PresenceAnimationDuration,
 } from './TransitionExtensions';
-export { surfaceVariants } from './SurfaceStyles';
+export { surfaceVariants, SurfaceVariant } from './SurfaceStyles';
 export type {
   SurfaceVariants,
-  SurfaceVariant,
   SurfaceTone,
   SurfaceRadius,
   SurfacePadding,
@@ -45,5 +41,17 @@ export type {
 } from './SurfaceStyles';
 export { Layer, layerStyle, type LayerName } from './Layers';
 export { Equality, type EqualityComparer } from './Equality';
-export type { Tone, Size, Radius, Padding, Elevation } from './StyleTokens';
-export { Tones, type ToneFamily } from './Tones';
+export { Tone, Size, Radius, Padding } from './StyleTokens';
+export type { Elevation } from './StyleTokens';
+export { Tones, ToneFamily } from './Tones';
+
+// Shared registry enums (G1) — value + type.
+export { Severity } from './Severity';
+export { Orientation } from './Orientation';
+export { Align } from './Align';
+export { Side } from './Side';
+export { CornerPosition } from './CornerPosition';
+export { OverlayPosition } from './OverlayPosition';
+export { ProgressTone } from './ProgressTone';
+export { ElementTag } from './ElementTag';
+export { StatusTone } from './StatusTone';

@@ -3,7 +3,7 @@ import { cn } from '../../../foundation/utils';
 import { NumberInput, type NumberInputProps } from '../numberInput/NumberInput';
 
 export interface CurrencyInputProps extends Omit<NumberInputProps, 'children'> {
-  /** Currency symbol or 3-letter code displayed as a prefix. Default `"$"`. */
+  /** The currency symbol or 3-letter code displayed as a prefix. Default `"$"`. */
   symbol?: string;
 }
 

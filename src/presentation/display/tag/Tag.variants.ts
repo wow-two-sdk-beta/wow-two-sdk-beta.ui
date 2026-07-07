@@ -1,5 +1,23 @@
 import { tv, type VariantProps } from '../../../foundation/utils';
 
+/** Defines the Tag color treatment. */
+export const TagVariant = {
+  /** Refers to the neutral bordered chip. */
+  Neutral: 'neutral',
+  /** Refers to the primary brand tint. */
+  Brand: 'brand',
+  /** Refers to the positive / confirmation tint. */
+  Success: 'success',
+  /** Refers to the caution tint. */
+  Warning: 'warning',
+  /** Refers to the destructive / error tint. */
+  Danger: 'danger',
+  /** Refers to the informational tint. */
+  Info: 'info',
+} as const;
+
+export type TagVariant = (typeof TagVariant)[keyof typeof TagVariant];
+
 export const tagVariants = tv({
   base: 'inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-0.5 text-xs font-medium text-card-foreground',
   variants: {
@@ -18,3 +36,11 @@ export const tagVariants = tv({
 });
 
 export type TagVariants = VariantProps<typeof tagVariants>;
+
+/* Compile-time lock: enum values ≡ tv variant value-set (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertTagVariant: AssertExact<
+  TagVariant,
+  NonNullable<VariantProps<typeof tagVariants>['variant']>
+> = true;
+void _assertTagVariant;

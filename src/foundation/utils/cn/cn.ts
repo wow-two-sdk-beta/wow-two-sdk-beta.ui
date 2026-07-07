@@ -5,6 +5,6 @@ import { twMerge } from 'tailwind-merge';
  * Conditional class composer with Tailwind conflict-resolution.
  * Use anywhere you'd otherwise concatenate class strings.
  */
-export function cn(...inputs: ClassValue[]): string {
+export function cn(...inputs: ReadonlyArray<ClassValue>): string {
   return twMerge(clsx(inputs));
 }

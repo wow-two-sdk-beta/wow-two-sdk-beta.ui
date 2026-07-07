@@ -8,8 +8,8 @@ export {
   DrawerBody,
   DrawerFooter,
   DrawerClose,
+  DrawerSize,
   type DrawerProps,
   type DrawerTriggerProps,
   type DrawerContentProps,
-  type DrawerSide,
 } from './Drawer';

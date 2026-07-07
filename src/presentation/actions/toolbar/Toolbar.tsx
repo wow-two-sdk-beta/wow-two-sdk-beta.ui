@@ -7,11 +7,11 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/utils';
 import { RovingFocusGroup, Slot, useRovingFocusItem } from '../../../foundation/primitives';
 
 interface ToolbarContextValue {
-  orientation: 'horizontal' | 'vertical';
+  orientation: Orientation;
 }
 
 const ToolbarContext = createContext<ToolbarContextValue | null>(null);
@@ -23,11 +23,11 @@ function useToolbarContext() {
 }
 
 export interface ToolbarProps extends HTMLAttributes<HTMLDivElement> {
-  orientation?: 'horizontal' | 'vertical';
+  orientation?: Orientation;
 }
 
 const ToolbarRoot = forwardRef<HTMLDivElement, ToolbarProps>(function Toolbar(
-  { orientation = 'horizontal', className, children, ...rest },
+  { orientation = Orientation.Horizontal, className, children, ...rest },
   ref,
 ) {
   return (
@@ -41,7 +41,7 @@ const ToolbarRoot = forwardRef<HTMLDivElement, ToolbarProps>(function Toolbar(
         data-orientation={orientation}
         className={cn(
           'inline-flex items-center gap-1 rounded-md border border-border bg-background p-1',
-          orientation === 'vertical' && 'flex-col items-stretch',
+          orientation === Orientation.Vertical && 'flex-col items-stretch',
           className,
         )}
         {...rest}
@@ -139,10 +139,10 @@ export function ToolbarSeparator(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       role="separator"
-      aria-orientation={ctx.orientation === 'vertical' ? 'horizontal' : 'vertical'}
+      aria-orientation={ctx.orientation === Orientation.Vertical ? 'horizontal' : 'vertical'}
       className={cn(
         'shrink-0 bg-border',
-        ctx.orientation === 'vertical' ? 'mx-1 h-px' : 'my-1 w-px self-stretch',
+        ctx.orientation === Orientation.Vertical ? 'mx-1 h-px' : 'my-1 w-px self-stretch',
       )}
       {...props}
     />

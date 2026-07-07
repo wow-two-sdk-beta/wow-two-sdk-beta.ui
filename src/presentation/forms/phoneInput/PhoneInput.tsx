@@ -1,7 +1,7 @@
 import { forwardRef, useMemo, useState, type HTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
-import { inputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize } from '../InputStyles';
 
 export interface PhoneCountry {
   iso: string;
@@ -10,7 +10,7 @@ export interface PhoneCountry {
   flag: string; // emoji
 }
 
-export const PHONE_COUNTRIES: PhoneCountry[] = [
+export const PHONE_COUNTRIES: ReadonlyArray<PhoneCountry> = [
   { iso: 'US', name: 'United States', dial: '+1', flag: '🇺🇸' },
   { iso: 'CA', name: 'Canada', dial: '+1', flag: '🇨🇦' },
   { iso: 'GB', name: 'United Kingdom', dial: '+44', flag: '🇬🇧' },
@@ -174,7 +174,7 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
           aria-invalid={isInvalid || undefined}
           onChange={(e) => setNational(e.target.value)}
           className={cn(
-            inputBaseVariants({ size: 'md' }),
+            inputBaseVariants({ size: InputSize.Md }),
             'rounded-none border-0 focus-visible:ring-0',
           )}
         />

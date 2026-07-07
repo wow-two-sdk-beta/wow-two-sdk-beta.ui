@@ -1,13 +1,32 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn } from '../../../foundation/utils';
 
+/**
+ * Defines the cross-axis alignment of `Inline` children. Diverges from the shared
+ * `Align` (adds `Baseline`), so it stays a local enum.
+ */
+export const InlineAlign = {
+  /** Refers to alignment at the cross-axis start. */
+  Start: 'start',
+  /** Refers to centered cross-axis alignment. */
+  Center: 'center',
+  /** Refers to alignment at the cross-axis end. */
+  End: 'end',
+  /** Refers to baseline alignment of children. */
+  Baseline: 'baseline',
+} as const;
+
+export type InlineAlign = (typeof InlineAlign)[keyof typeof InlineAlign];
+
 export interface InlineProps extends ComponentPropsWithoutRef<'div'> {
-  /** Gap between children (Tailwind spacing). Default `2`. */
+  /** The gap between children (Tailwind spacing). Default `2`. */
   gap?: '0' | '1' | '2' | '3' | '4' | '6' | '8';
-  /** Vertical alignment. Default `center`. */
-  align?: 'start' | 'center' | 'end' | 'baseline';
+
+  /** The vertical alignment. Default `center`. */
+  align?: InlineAlign;
+
   /**
-   * Whether children wrap onto multiple lines. Default `true` (`flex-wrap`).
+   * The child wrapping onto multiple lines. Default `true` (`flex-wrap`).
    * Set `false` (`flex-nowrap`) for tight single-line rows that should truncate.
    */
   wrap?: boolean;
@@ -28,7 +47,7 @@ const ALIGN: Record<NonNullable<InlineProps['align']>, string> = {
  * inline button groups, breadcrumb-like sequences.
  */
 export const Inline = forwardRef<HTMLDivElement, InlineProps>(
-  ({ gap = '2', align = 'center', wrap = true, className, ...props }, ref) => (
+  ({ gap = '2', align = InlineAlign.Center, wrap = true, className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(

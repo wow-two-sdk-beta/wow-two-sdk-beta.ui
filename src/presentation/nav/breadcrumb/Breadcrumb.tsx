@@ -10,8 +10,8 @@ export interface BreadcrumbItem {
 }
 
 export interface BreadcrumbProps extends ComponentPropsWithoutRef<'nav'> {
-  items: BreadcrumbItem[];
-  /** Custom separator element. Default chevron-right icon. */
+  items: ReadonlyArray<BreadcrumbItem>;
+  /** The custom separator element. Default chevron-right icon. */
   separator?: ReactNode;
 }
 

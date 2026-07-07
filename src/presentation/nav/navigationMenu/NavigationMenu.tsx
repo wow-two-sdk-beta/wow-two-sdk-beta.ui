@@ -122,7 +122,7 @@ export const NavigationMenuList = forwardRef<HTMLDivElement, NavigationMenuListP
 );
 
 export interface NavigationMenuItemProps extends HTMLAttributes<HTMLLIElement> {
-  /** Stable id for active-state tracking. Required when item has a Trigger + Content. */
+  /** The stable id for active-state tracking. Required when item has a Trigger + Content. */
   value: string;
   children: ReactNode;
 }

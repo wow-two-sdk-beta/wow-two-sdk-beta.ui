@@ -1,7 +1,20 @@
 import type { CSSProperties } from 'react';
 
-/* Tone vocabulary shared by tone-aware components (Button, Checkbox, ToggleButton, Tag, Alert, etc.). */
-export type ColorTone = 'primary' | 'neutral' | 'danger' | 'success' | 'warning';
+/** Defines the tone vocabulary shared by tone-aware components (Button, Checkbox, ToggleButton, Tag, Alert, etc.). */
+export const ColorTone = {
+  /** Refers to the primary brand palette. */
+  Primary: 'primary',
+  /** Refers to the neutral / default grey palette. */
+  Neutral: 'neutral',
+  /** Refers to the destructive / error palette. */
+  Danger: 'danger',
+  /** Refers to the positive / confirmation palette. */
+  Success: 'success',
+  /** Refers to the caution palette. */
+  Warning: 'warning',
+} as const;
+
+export type ColorTone = (typeof ColorTone)[keyof typeof ColorTone];
 
 /* Explicit color overrides for the active tone's slot set. Pair with a base `tone` prop on the component. */
 export interface ColorOverride {

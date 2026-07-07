@@ -1,2 +1,2 @@
 export { Skeleton, type SkeletonProps } from './Skeleton';
-export { skeletonVariants, type SkeletonVariants } from './Skeleton.variants';
+export { skeletonVariants, SkeletonShape, type SkeletonVariants } from './Skeleton.variants';

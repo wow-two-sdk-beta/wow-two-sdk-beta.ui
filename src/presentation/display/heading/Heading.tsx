@@ -1,14 +1,26 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn } from '../../../foundation/utils';
-import { headingVariants, type HeadingVariants } from './Heading.variants';
+import {
+  headingVariants,
+  type HeadingAlign,
+  type HeadingSize,
+  type HeadingVariants,
+  type HeadingWeight,
+} from './Heading.variants';
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface HeadingProps
   extends Omit<ComponentPropsWithoutRef<'h2'>, 'size'>,
-    HeadingVariants {
-  /** Semantic heading level (1–6). Default 2. Visual size is independent — set via `size`. */
+    Omit<HeadingVariants, 'size' | 'weight' | 'align'> {
+  /** The semantic heading level (1–6). Default 2. Visual size is independent — set via `size`. */
   level?: HeadingLevel;
+  /** The visual size step. */
+  size?: HeadingSize;
+  /** The font weight. */
+  weight?: HeadingWeight;
+  /** The text alignment. */
+  align?: HeadingAlign;
 }
 
 /**

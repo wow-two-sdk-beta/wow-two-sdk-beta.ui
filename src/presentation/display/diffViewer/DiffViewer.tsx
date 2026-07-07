@@ -1,9 +1,37 @@
 import { forwardRef, useMemo, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../../../foundation/utils';
 
-export type DiffView = 'split' | 'unified';
+/** Defines the DiffViewer layout mode. */
+export const DiffView = {
+  /** Refers to side-by-side columns. */
+  Split: 'split',
+  /** Refers to a single interleaved column. */
+  Unified: 'unified',
+} as const;
 
-type DiffOp = 'unchanged' | 'added' | 'removed';
+export type DiffView = (typeof DiffView)[keyof typeof DiffView];
+
+/** Defines a diff row's change operation. */
+const DiffOp = {
+  /** Refers to an unchanged line. */
+  Unchanged: 'unchanged',
+  /** Refers to an added line. */
+  Added: 'added',
+  /** Refers to a removed line. */
+  Removed: 'removed',
+} as const;
+
+type DiffOp = (typeof DiffOp)[keyof typeof DiffOp];
+
+/** Defines which side of a split diff a column renders. */
+const DiffSide = {
+  /** Refers to the left (old) column. */
+  Left: 'left',
+  /** Refers to the right (new) column. */
+  Right: 'right',
+} as const;
+
+type DiffSide = (typeof DiffSide)[keyof typeof DiffSide];
 
 interface DiffRow {
   op: DiffOp;
@@ -64,7 +92,7 @@ export const DiffViewer = forwardRef<HTMLDivElement, DiffViewerProps>(function D
   );
 });
 
-function SplitView({ rows }: { rows: DiffRow[] }) {
+function SplitView({ rows }: { rows: ReadonlyArray<DiffRow> }) {
   // Pair removed/added rows row-by-row when possible to align them.
   // Simple alignment: walk, when we hit "removed" followed by "added", pair them.
   const pairs: Array<{ left?: DiffRow; right?: DiffRow }> = [];
@@ -93,7 +121,7 @@ function SplitView({ rows }: { rows: DiffRow[] }) {
   );
 }
 
-function DiffColumn({ rows, side = 'left' }: { rows: Array<DiffRow | undefined>; side?: 'left' | 'right' }) {
+function DiffColumn({ rows, side = 'left' }: { rows: Array<DiffRow | undefined>; side?: DiffSide }) {
   return (
     <div className="overflow-x-auto">
       {rows.map((r, i) => {
@@ -129,7 +157,7 @@ function DiffColumn({ rows, side = 'left' }: { rows: Array<DiffRow | undefined>;
   );
 }
 
-function UnifiedView({ rows }: { rows: DiffRow[] }) {
+function UnifiedView({ rows }: { rows: ReadonlyArray<DiffRow> }) {
   return (
     <div className="overflow-x-auto">
       {rows.map((r, i) => (
@@ -162,14 +190,14 @@ function UnifiedView({ rows }: { rows: DiffRow[] }) {
  * LCS-based line diff. Returns ordered rows with `unchanged` / `added` /
  * `removed` operations. O(n×m) time + space.
  */
-function computeDiff(left: string, right: string): DiffRow[] {
+function computeDiff(left: string, right: string): ReadonlyArray<DiffRow> {
   const a = left.split('\n');
   const b = right.split('\n');
   const n = a.length;
   const m = b.length;
 
   // LCS table: dp[i][j] = LCS length of a[0..i] and b[0..j].
-  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  const dp: Array<Array<number>> = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
   for (let i = 1; i <= n; i++) {
     for (let j = 1; j <= m; j++) {
       if (a[i - 1] === b[j - 1]) dp[i]![j] = dp[i - 1]![j - 1]! + 1;
@@ -178,7 +206,7 @@ function computeDiff(left: string, right: string): DiffRow[] {
   }
 
   // Backtrack.
-  const rows: DiffRow[] = [];
+  const rows: Array<DiffRow> = [];
   let i = n;
   let j = m;
   while (i > 0 || j > 0) {

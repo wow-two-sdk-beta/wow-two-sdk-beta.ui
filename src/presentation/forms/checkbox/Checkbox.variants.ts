@@ -1,4 +1,22 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, type VariantProps, ColorTone } from '../../../foundation/utils';
+
+/** Defines the checkbox visual surface style. */
+export const CheckboxVariant = {
+  /** Refers to an opaque, filled surface. */
+  Solid: 'solid',
+  /** Refers to a soft tinted surface. */
+  Soft: 'soft',
+  /** Refers to a bordered, transparent surface. */
+  Outline: 'outline',
+  /** Refers to a borderless, transparent surface. */
+  Ghost: 'ghost',
+  /** Refers to a glass surface. */
+  Glass: 'glass',
+  /** Refers to a glass surface with a hairline border. */
+  GlassSurface: 'glass-surface',
+} as const;
+
+export type CheckboxVariant = (typeof CheckboxVariant)[keyof typeof CheckboxVariant];
 
 export const checkboxVariants = tv({
   base: 'pointer-events-none grid h-full w-full place-items-center rounded-sm border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1 peer-disabled:opacity-50',
@@ -69,3 +87,14 @@ export const checkboxVariants = tv({
 });
 
 export type CheckboxVariants = VariantProps<typeof checkboxVariants>;
+
+/* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertCheckboxVariant: AssertExact<
+  CheckboxVariant, NonNullable<VariantProps<typeof checkboxVariants>['variant']>
+> = true;
+const _assertCheckboxTone: AssertExact<
+  ColorTone, NonNullable<VariantProps<typeof checkboxVariants>['tone']>
+> = true;
+void _assertCheckboxVariant;
+void _assertCheckboxTone;

@@ -1,2 +1,7 @@
 export { Link, type LinkProps } from './Link';
-export { linkVariants, type LinkVariants } from './Link.variants';
+export {
+  linkVariants,
+  LinkVariant,
+  LinkSize,
+  type LinkVariants,
+} from './Link.variants';

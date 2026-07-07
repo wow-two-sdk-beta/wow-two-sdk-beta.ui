@@ -7,21 +7,28 @@ import { X } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 
 export interface ThreadViewProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-  /** Title for the thread panel header. */
+  /** The title for the thread panel header. */
   title?: ReactNode;
-  /** Subtitle shown under the title (e.g. "in #engineering"). */
+
+  /** The subtitle shown under the title (e.g. "in #engineering"). */
   subtitle?: ReactNode;
-  /** Parent message — typically a `<ChatBubble />`. */
+
+  /** The parent message — typically a `<ChatBubble />`. */
   parent: ReactNode;
-  /** Reply count label. Pass `null` to hide entirely. */
+
+  /** The reply count label. Pass `null` to hide entirely. */
   replyCount?: ReactNode;
-  /** Reply nodes (typically `<ChatBubble />` items). */
+
+  /** The reply nodes (typically `<ChatBubble />` items). */
   children?: ReactNode;
-  /** Composer rendered at the bottom of the panel. */
+
+  /** The composer rendered at the bottom of the panel. */
   composer?: ReactNode;
+
   /** Fires when the close button is clicked. */
   onClose?: () => void;
-  /** Render the close button. Default true. */
+
+  /** The close button's visibility. Default true. */
   hasCloseButton?: boolean;
 }
 

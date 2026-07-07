@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, userEvent, within } from 'storybook/test';
+import { LayoutGrid, List, Image as ImageIcon, Smile } from 'lucide-react';
 import { ToggleButton } from '../toggleButton/ToggleButton';
 import { ToggleButtonGroup } from './ToggleButtonGroup';
+import { ToggleButtonGroupVariant, ToggleItemRole, ToggleMode } from './ToggleButtonGroup.variants';
 
 const meta: Meta<typeof ToggleButtonGroup> = {
   title: 'Actions/ToggleButtonGroup',
@@ -12,7 +15,7 @@ type Story = StoryObj<typeof ToggleButtonGroup>;
 
 export const Single: Story = {
   render: () => (
-    <ToggleButtonGroup type="single" defaultValue="day">
+    <ToggleButtonGroup type={ToggleMode.Single} defaultValue="day">
       <ToggleButton value="day">Day</ToggleButton>
       <ToggleButton value="week">Week</ToggleButton>
       <ToggleButton value="month">Month</ToggleButton>
@@ -22,7 +25,7 @@ export const Single: Story = {
 
 export const Multi: Story = {
   render: () => (
-    <ToggleButtonGroup type="multi" defaultValue={['bold', 'italic']}>
+    <ToggleButtonGroup type={ToggleMode.Multi} defaultValue={['bold', 'italic']}>
       <ToggleButton value="bold">B</ToggleButton>
       <ToggleButton value="italic">I</ToggleButton>
       <ToggleButton value="underline">U</ToggleButton>
@@ -42,7 +45,7 @@ export const Typed: Story = {
     // `View | null` purely from the `<View>` type param; `satisfies` fails to
     // compile if inference ever regresses to `string | null`.
     <ToggleButtonGroup<View>
-      type="single"
+      type={ToggleMode.Single}
       defaultValue="week"
       onValueChange={(v) => {
         if (v) console.log(v satisfies View);
@@ -58,10 +61,169 @@ export const Typed: Story = {
 /** iOS-style pill row on a muted track — supersedes the deprecated `SegmentedControl`. */
 export const Segmented: Story = {
   render: () => (
-    <ToggleButtonGroup variant="segmented" type="single" defaultValue="week">
+    <ToggleButtonGroup
+      variant={ToggleButtonGroupVariant.Segmented}
+      type={ToggleMode.Single}
+      defaultValue="week"
+    >
       <ToggleButton value="day">Day</ToggleButton>
       <ToggleButton value="week">Week</ToggleButton>
       <ToggleButton value="month">Month</ToggleButton>
     </ToggleButtonGroup>
   ),
+};
+
+/** Individually-separated rounded pills — detached chips, distinct from the connected `segmented` track. */
+export const Pill: Story = {
+  render: () => (
+    <ToggleButtonGroup
+      variant={ToggleButtonGroupVariant.Pill}
+      type={ToggleMode.Single}
+      defaultValue="week"
+    >
+      <ToggleButton value="day" variant="soft">
+        Day
+      </ToggleButton>
+      <ToggleButton value="week" variant="soft">
+        Week
+      </ToggleButton>
+      <ToggleButton value="month" variant="soft">
+        Month
+      </ToggleButton>
+    </ToggleButtonGroup>
+  ),
+};
+
+/** Equal-width icon tiles filling a fixed-width strip — a category nav row. */
+export const EqualWidthTiles: Story = {
+  render: () => (
+    <ToggleButtonGroup
+      type={ToggleMode.Single}
+      itemRole={ToggleItemRole.Tab}
+      equalWidth
+      defaultValue="grid"
+      className="w-72"
+    >
+      <ToggleButton value="grid" aria-label="Grid">
+        <LayoutGrid className="size-4" />
+      </ToggleButton>
+      <ToggleButton value="list" aria-label="List">
+        <List className="size-4" />
+      </ToggleButton>
+      <ToggleButton value="images" aria-label="Images">
+        <ImageIcon className="size-4" />
+      </ToggleButton>
+      <ToggleButton value="emoji" aria-label="Emoji">
+        <Smile className="size-4" />
+      </ToggleButton>
+    </ToggleButtonGroup>
+  ),
+};
+
+/* ────────── Interaction tests (play functions — run as browser tests via the vitest addon) ────────── */
+
+/** Single-select tab semantics — tablist role, `role="tab"` items, and `aria-selected` tracking the active tab. */
+export const TabSemantics: Story = {
+  render: () => (
+    <ToggleButtonGroup
+      type={ToggleMode.Single}
+      itemRole={ToggleItemRole.Tab}
+      defaultValue="day"
+      aria-label="View range"
+    >
+      <ToggleButton value="day">Day</ToggleButton>
+      <ToggleButton value="week">Week</ToggleButton>
+      <ToggleButton value="month">Month</ToggleButton>
+    </ToggleButtonGroup>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    /* Root is a tablist; items are tabs. */
+    const tablist = canvas.getByRole('tablist');
+    await expect(tablist).toHaveAttribute('aria-orientation', 'horizontal');
+    const tabs = canvas.getAllByRole('tab');
+    await expect(tabs).toHaveLength(3);
+
+    /* Default active tab is selected; others are not. */
+    await expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    await expect(tabs[1]).toHaveAttribute('aria-selected', 'false');
+
+    /* Selecting another tab moves the selection (single-select — only one active). */
+    await userEvent.click(tabs[1]!);
+    await expect(tabs[0]).toHaveAttribute('aria-selected', 'false');
+    await expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
+  },
+};
+
+/** Equal-width tiles — every item shares the row width (equal client widths within a fixed container). */
+export const EqualWidthLayout: Story = {
+  render: () => (
+    <ToggleButtonGroup
+      type={ToggleMode.Single}
+      equalWidth
+      defaultValue="grid"
+      className="w-72"
+      aria-label="Category"
+    >
+      <ToggleButton value="grid" aria-label="Grid">
+        <LayoutGrid className="size-4" />
+      </ToggleButton>
+      <ToggleButton value="list" aria-label="A much longer list label">
+        <List className="size-4" />
+      </ToggleButton>
+      <ToggleButton value="images" aria-label="Images">
+        <ImageIcon className="size-4" />
+      </ToggleButton>
+    </ToggleButtonGroup>
+  ),
+  play: async ({ canvasElement }) => {
+    const buttons = within(canvasElement).getAllByRole('button');
+    await expect(buttons).toHaveLength(3);
+
+    /* Despite differing label lengths, equal-width tiles render at the same width. */
+    const widths = buttons.map((b) => Math.round(b.getBoundingClientRect().width));
+    await expect(widths[0]).toBe(widths[1]);
+    await expect(widths[1]).toBe(widths[2]);
+    await expect(widths[0]).toBeGreaterThan(0);
+  },
+};
+
+/** Pill variant — detached rounded chips (fully-rounded, gap-separated, not attached). */
+export const PillVariant: Story = {
+  render: () => (
+    <ToggleButtonGroup
+      variant={ToggleButtonGroupVariant.Pill}
+      type={ToggleMode.Single}
+      defaultValue="week"
+      aria-label="Range"
+    >
+      <ToggleButton value="day" variant="soft">
+        Day
+      </ToggleButton>
+      <ToggleButton value="week" variant="soft">
+        Week
+      </ToggleButton>
+      <ToggleButton value="month" variant="soft">
+        Month
+      </ToggleButton>
+    </ToggleButtonGroup>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const group = canvas.getByRole('group');
+    const buttons = canvas.getAllByRole('button');
+
+    /* Pills are fully rounded (rounded-full → a large border radius). */
+    const radius = parseFloat(getComputedStyle(buttons[0]!).borderTopLeftRadius);
+    await expect(radius).toBeGreaterThan(100);
+
+    /* Detached — the group uses a positive gap rather than negative-margin attachment. */
+    const gap = parseFloat(getComputedStyle(group).columnGap || getComputedStyle(group).gap || '0');
+    await expect(gap).toBeGreaterThan(0);
+
+    /* Selection still works. */
+    await userEvent.click(buttons[0]!);
+    await expect(buttons[0]).toHaveAttribute('aria-pressed', 'true');
+  },
 };

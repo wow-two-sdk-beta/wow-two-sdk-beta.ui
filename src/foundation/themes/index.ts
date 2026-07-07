@@ -43,16 +43,9 @@ export {
 } from './Tokens';
 
 // Theme + seed shapes
-export type {
-  Theme,
-  ThemeMeta,
-  ThemeSeed,
-  NeutralTemp,
-  AccentMode,
-  SurfaceStyle,
-} from './Theme';
-// ThemeStatus is a const-object enum + a type of the same name (value + type export).
-export { ThemeStatus } from './Theme';
+export type { Theme, ThemeMeta, ThemeSeed } from './Theme';
+// Const-object enums + a type of the same name (value + type export).
+export { ThemeStatus, ThemeRadius, NeutralTemp, AccentMode, SurfaceStyle } from './Theme';
 
 // Generator
 export { generateTheme } from './generate';

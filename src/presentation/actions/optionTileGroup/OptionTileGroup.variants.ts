@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, Align, type VariantProps } from '../../../foundation/utils';
 
 /** Provides the tile-row layout for `OptionTileGroup` on top of the reset `Fieldset` — flex row, gap, optional wrap + main-axis alignment. */
 export const optionTileGroupVariants = tv({
@@ -10,6 +10,7 @@ export const optionTileGroupVariants = tv({
     },
     align: {
       start: 'justify-start',
+      center: 'justify-center',
       end: 'justify-end',
     },
   },
@@ -21,5 +22,10 @@ export const optionTileGroupVariants = tv({
 
 export type OptionTileGroupVariants = VariantProps<typeof optionTileGroupVariants>;
 
-/** Represents the main-axis alignment of an `OptionTileGroup` (`start` · `end`). */
-export type OptionTileGroupAlign = NonNullable<OptionTileGroupVariants['align']>;
+/* Compile-time lock: shared `Align` values ≡ tv `align` keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertOptionTileGroupAlign: AssertExact<
+  Align,
+  NonNullable<OptionTileGroupVariants['align']>
+> = true;
+void _assertOptionTileGroupAlign;

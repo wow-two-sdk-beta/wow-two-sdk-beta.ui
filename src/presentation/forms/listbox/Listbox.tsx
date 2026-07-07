@@ -24,6 +24,7 @@ import {
   listboxItemVariants,
   listboxSeparatorVariants,
   listboxVariants,
+  ListboxItemState,
 } from './Listbox.variants';
 
 /** Represents a function that matches items against the current selection. */
@@ -32,8 +33,21 @@ export type EqualityFn<T> = (a: T, b: T) => boolean;
 /** Provides the default equality (Object.is) — primitives + reference equality. */
 const defaultEquals: EqualityFn<unknown> = (a, b) => Object.is(a, b);
 
-/** Represents the selection-indicator style applied to every item under this listbox. */
-export type ListboxIndicator = 'check' | 'checkbox' | 'radio' | 'dot' | 'none';
+/** Defines the selection-indicator style applied to every item under this listbox. */
+export const ListboxIndicator = {
+  /** Refers to a trailing check icon on the selected item. */
+  Check: 'check',
+  /** Refers to a leading checkbox box per item. */
+  Checkbox: 'checkbox',
+  /** Refers to a leading radio dot per item. */
+  Radio: 'radio',
+  /** Refers to a leading filled dot per item. */
+  Dot: 'dot',
+  /** Refers to no indicator. */
+  None: 'none',
+} as const;
+
+export type ListboxIndicator = (typeof ListboxIndicator)[keyof typeof ListboxIndicator];
 
 /** Represents the per-item registry entry maintained by the listbox. */
 interface ItemEntry {
@@ -45,7 +59,7 @@ interface ItemEntry {
 /** Represents the shape of the listbox context shared with descendants. */
 interface ListboxContextValue {
   isMultiple: boolean;
-  values: unknown[];
+  values: ReadonlyArray<unknown>;
   isEqual: EqualityFn<unknown>;
   activeId: string | null;
   onItemSelect: (value: unknown) => void;
@@ -73,9 +87,9 @@ type SingleProps<T> = {
 
 type MultiProps<T> = {
   isMultiple: true;
-  value?: T[];
-  defaultValue?: T[];
-  onValueChange?: (value: T[]) => void;
+  value?: ReadonlyArray<T>;
+  defaultValue?: ReadonlyArray<T>;
+  onValueChange?: (value: ReadonlyArray<T>) => void;
 };
 
 /** Represents the props shared between single-select and multi-select modes. */
@@ -125,28 +139,28 @@ function ListboxImpl<T>(
     ...rest
   } = props as ListboxProps<T> & {
     isMultiple?: boolean;
-    value?: T | T[];
-    defaultValue?: T | T[];
-    onValueChange?: ((v: T | undefined) => void) | ((v: T[]) => void);
+    value?: T | ReadonlyArray<T>;
+    defaultValue?: T | ReadonlyArray<T>;
+    onValueChange?: ((v: T | undefined) => void) | ((v: ReadonlyArray<T>) => void);
     onActiveChange?: (id: string | null) => void;
   };
 
   const equals = (isEqual as EqualityFn<unknown> | undefined) ?? defaultEquals;
-  const resolvedIndicator: ListboxIndicator = indicator ?? (isMultiple ? 'checkbox' : 'check');
+  const resolvedIndicator: ListboxIndicator = indicator ?? (isMultiple ? ListboxIndicator.Checkbox : ListboxIndicator.Check);
 
-  const initial: T | T[] | undefined = defaultValue ?? (isMultiple ? ([] as T[]) : undefined);
-  const [current, setCurrent] = useControlled<T | T[] | undefined>({
+  const initial: T | ReadonlyArray<T> | undefined = defaultValue ?? (isMultiple ? ([] as T[]) : undefined);
+  const [current, setCurrent] = useControlled<T | ReadonlyArray<T> | undefined>({
     controlled: value,
     default: initial,
-    onChange: onValueChange as (v: T | T[] | undefined) => void,
+    onChange: onValueChange as (v: T | ReadonlyArray<T> | undefined) => void,
   });
 
-  const values: unknown[] = useMemo(() => {
+  const values: ReadonlyArray<unknown> = useMemo(() => {
     if (Array.isArray(current)) return current as unknown[];
     return current === undefined ? [] : [current];
   }, [current]);
 
-  const items = useRef<ItemEntry[]>([]);
+  const items = useRef<Array<ItemEntry>>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const registerItem = useCallback((entry: ItemEntry) => {
@@ -165,7 +179,7 @@ function ListboxImpl<T>(
         const cur = (Array.isArray(current) ? current : []) as unknown[];
         const has = cur.some((v) => equals(v, next));
         const out = has ? cur.filter((v) => !equals(v, next)) : [...cur, next];
-        (setCurrent as (v: unknown[]) => void)(out);
+        (setCurrent as (v: ReadonlyArray<unknown>) => void)(out);
       } else {
         (setCurrent as (v: unknown) => void)(next);
       }
@@ -338,7 +352,7 @@ function LeadingIndicator({
   indicator: ListboxIndicator;
   isSelected: boolean;
 }) {
-  if (indicator === 'checkbox') {
+  if (indicator === ListboxIndicator.Checkbox) {
     return (
       <span
         aria-hidden
@@ -353,7 +367,7 @@ function LeadingIndicator({
       </span>
     );
   }
-  if (indicator === 'radio') {
+  if (indicator === ListboxIndicator.Radio) {
     return (
       <span
         aria-hidden
@@ -366,7 +380,7 @@ function LeadingIndicator({
       </span>
     );
   }
-  if (indicator === 'dot') {
+  if (indicator === ListboxIndicator.Dot) {
     return (
       <span
         aria-hidden
@@ -390,7 +404,7 @@ function TrailingIndicator({
   isSelected: boolean;
   isMultiple: boolean;
 }) {
-  if (indicator === 'check' && isSelected) {
+  if (indicator === ListboxIndicator.Check && isSelected) {
     return <Check className={cn('h-4 w-4 shrink-0', !isMultiple && 'opacity-80')} />;
   }
   return null;
@@ -400,11 +414,13 @@ function TrailingIndicator({
 
 /** Represents the prop surface of `Listbox.Item`. */
 export interface ListboxItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
-  /** Holds the item value; compared via the parent listbox's `isEqual`. */
+  /** The item value; compared via the parent listbox's `isEqual`. */
   value: unknown;
-  /** Disables this item when true. */
+
+  /** The disabled state for this item. */
   isDisabled?: boolean;
-  /** Overrides the listbox-level indicator for this single item. */
+
+  /** The per-item indicator, overriding the listbox-level indicator. */
   indicator?: ListboxIndicator;
   children: ReactNode;
 }
@@ -425,13 +441,13 @@ export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function
 
   const isSelected = ctx.values.some((v) => ctx.isEqual(v, value));
   const isActive = ctx.activeId === id;
-  const state = isDisabled
-    ? 'disabled'
+  const state: ListboxItemState = isDisabled
+    ? ListboxItemState.Disabled
     : isSelected
-      ? 'selected'
+      ? ListboxItemState.Selected
       : isActive
-        ? 'active'
-        : 'default';
+        ? ListboxItemState.Active
+        : ListboxItemState.Default;
 
   const setRefs = (node: HTMLDivElement | null) => {
     ref.current = node;
@@ -476,7 +492,7 @@ export const ListboxItem = forwardRef<HTMLDivElement, ListboxItemProps>(function
 
 /** Represents the prop surface of `Listbox.Group`. */
 export interface ListboxGroupProps extends HTMLAttributes<HTMLDivElement> {
-  /** Renders an optional group heading above the contained items. */
+  /** The optional group heading rendered above the contained items. */
   label?: ReactNode;
   children: ReactNode;
 }

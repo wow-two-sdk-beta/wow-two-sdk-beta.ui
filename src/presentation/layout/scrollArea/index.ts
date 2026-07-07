@@ -1,1 +1,1 @@
-export { ScrollArea, type ScrollAreaProps } from './ScrollArea';
+export { ScrollArea, ScrollAxis, type ScrollAreaProps } from './ScrollArea';

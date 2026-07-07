@@ -12,7 +12,7 @@ export default meta;
 type Story = StoryObj<typeof MultiSelect>;
 
 function DefaultDemo() {
-  const [values, setValues] = useState<string[]>([]);
+  const [values, setValues] = useState<readonly string[]>([]);
   return (
     <div className="w-80">
       <MultiSelect value={values} onValueChange={setValues}>
@@ -32,7 +32,7 @@ function DefaultDemo() {
 }
 
 function PreSelectedDemo() {
-  const [values, setValues] = useState<string[]>(['apple', 'cherry']);
+  const [values, setValues] = useState<readonly string[]>(['apple', 'cherry']);
   return (
     <div className="w-80">
       <MultiSelect value={values} onValueChange={setValues}>
@@ -56,8 +56,8 @@ export const PreSelected: Story = { render: () => <PreSelectedDemo /> };
 
 /** Fixed 3-option multi-select — `onValueChange` arrives via args (spy); uncontrolled value. */
 function interactionMultiSelect(args: {
-  onValueChange?: (value: string[]) => void;
-  defaultValue?: string[];
+  onValueChange?: (value: readonly string[]) => void;
+  defaultValue?: readonly string[];
 }) {
   return (
     <div className="w-80">

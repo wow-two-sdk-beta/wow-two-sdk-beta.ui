@@ -25,7 +25,19 @@ import {
 // intra-day time-slot geometry does its math on `ZonedDateTime` (`.hour`,
 // `.add`, `until`). Both come from the shared, Temporal-based `DateExtensions`.
 
-export type EventCalendarView = 'month' | 'week' | 'day' | 'agenda';
+/** Defines the EventCalendar visible range mode. */
+export const EventCalendarView = {
+  /** Refers to the month grid. */
+  Month: 'month',
+  /** Refers to the week columns. */
+  Week: 'week',
+  /** Refers to the single-day view. */
+  Day: 'day',
+  /** Refers to the chronological agenda list. */
+  Agenda: 'agenda',
+} as const;
+
+export type EventCalendarView = (typeof EventCalendarView)[keyof typeof EventCalendarView];
 
 export interface EventCalendarEvent {
   id: string;
@@ -37,7 +49,7 @@ export interface EventCalendarEvent {
 }
 
 export interface EventCalendarProps extends HTMLAttributes<HTMLDivElement> {
-  events: EventCalendarEvent[];
+  events: ReadonlyArray<EventCalendarEvent>;
   view?: EventCalendarView;
   defaultView?: EventCalendarView;
   onViewChange?: (view: EventCalendarView) => void;
@@ -48,7 +60,7 @@ export interface EventCalendarProps extends HTMLAttributes<HTMLDivElement> {
   weekStart?: 0 | 1;
   hourRange?: [number, number];
   onEventClick?: (event: EventCalendarEvent) => void;
-  /** Fired on an empty slot: `day` is the clicked calendar day, `hour` the grid hour (time views). */
+  /** Emits the clicked empty slot — `day` is the calendar day, `hour` the grid hour (time views). */
   onSlotClick?: (day: Temporal.PlainDate, hour?: number) => void;
 }
 
@@ -250,7 +262,7 @@ export const EventCalendar = forwardRef<HTMLDivElement, EventCalendarProps>(
 interface MonthViewProps {
   focusDay: Temporal.PlainDate;
   timeZone: string;
-  events: EventCalendarEvent[];
+  events: ReadonlyArray<EventCalendarEvent>;
   weekStart: 0 | 1;
   onEventClick?: (event: EventCalendarEvent) => void;
   onSlotClick?: (day: Temporal.PlainDate, hour?: number) => void;
@@ -344,7 +356,7 @@ function startOfCellInstant(day: Temporal.PlainDate, timeZone: string): Temporal
 
 interface TimeGridViewProps {
   timeZone: string;
-  events: EventCalendarEvent[];
+  events: ReadonlyArray<EventCalendarEvent>;
   days: number;
   firstDay: Temporal.PlainDate;
   hourRange: [number, number];
@@ -504,7 +516,7 @@ function TimeGridView({ timeZone, events, days, firstDay, hourRange, onEventClic
 
 interface AgendaViewProps {
   focusDay: Temporal.PlainDate;
-  events: EventCalendarEvent[];
+  events: ReadonlyArray<EventCalendarEvent>;
   onEventClick?: (event: EventCalendarEvent) => void;
 }
 
@@ -519,7 +531,7 @@ function AgendaView({ focusDay, events, onEventClick }: AgendaViewProps) {
     );
   });
   // Group by calendar day of the event start.
-  const groups = new Map<string, EventCalendarEvent[]>();
+  const groups = new Map<string, Array<EventCalendarEvent>>();
   for (const e of upcoming) {
     const key = e.start.toPlainDate().toString();
     const list = groups.get(key);

@@ -1,9 +1,19 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 
+/** Defines the urgency of an ARIA live-region announcement. */
+export const Politeness = {
+  /** Refers to a non-urgent announcement — `role="status"`, waits for idle. */
+  Polite: 'polite',
+  /** Refers to an urgent announcement — `role="alert"`, interrupts. */
+  Assertive: 'assertive',
+} as const;
+
+export type Politeness = (typeof Politeness)[keyof typeof Politeness];
+
 export interface AnnounceProps extends HTMLAttributes<HTMLDivElement> {
-  /** `polite` → `role="status"`, `assertive` → `role="alert"`. Default `polite`. */
-  politeness?: 'polite' | 'assertive';
+  /** The live-region urgency — `polite` → `role="status"`, `assertive` → `role="alert"`. Default `polite`. */
+  politeness?: Politeness;
   children?: ReactNode;
 }
 
@@ -13,10 +23,10 @@ export interface AnnounceProps extends HTMLAttributes<HTMLDivElement> {
  * lightweight transient announcements (status updates, toast messages, etc.).
  */
 export const Announce = forwardRef<HTMLDivElement, AnnounceProps>(
-  ({ politeness = 'polite', className, children, ...rest }, ref) => (
+  ({ politeness = Politeness.Polite, className, children, ...rest }, ref) => (
     <div
       ref={ref}
-      role={politeness === 'assertive' ? 'alert' : 'status'}
+      role={politeness === Politeness.Assertive ? 'alert' : 'status'}
       aria-live={politeness}
       aria-atomic="true"
       className={cn(

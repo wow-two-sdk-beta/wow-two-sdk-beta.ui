@@ -11,25 +11,61 @@ import {
 } from 'react';
 import { cn } from '../../../foundation/utils';
 
-export type DataGridCellType = 'text' | 'number' | 'select' | 'boolean';
+/** Defines the editable data type of a DataGrid cell. */
+export const DataGridCellType = {
+  /** Refers to a free-text cell. */
+  Text: 'text',
+  /** Refers to a numeric cell. */
+  Number: 'number',
+  /** Refers to a single-select cell. */
+  Select: 'select',
+  /** Refers to a boolean (checkbox) cell. */
+  Boolean: 'boolean',
+} as const;
+
+export type DataGridCellType = (typeof DataGridCellType)[keyof typeof DataGridCellType];
+
+/** Defines the horizontal text alignment of a DataGrid column. */
+export const DataGridColumnAlign = {
+  /** Refers to left alignment. */
+  Left: 'left',
+  /** Refers to right alignment. */
+  Right: 'right',
+  /** Refers to centered alignment. */
+  Center: 'center',
+} as const;
+
+export type DataGridColumnAlign =
+  (typeof DataGridColumnAlign)[keyof typeof DataGridColumnAlign];
+
+/** Defines the cursor advance after a DataGrid cell edit commits. */
+const DataGridMove = {
+  /** Refers to advancing to the cell on the right. */
+  Right: 'right',
+  /** Refers to advancing to the cell below. */
+  Down: 'down',
+} as const;
+
+type DataGridMove = (typeof DataGridMove)[keyof typeof DataGridMove];
 
 export interface DataGridColumn<T> {
   key: string;
   header: ReactNode;
   /** Returns the cell's underlying value. */
   accessor: (row: T) => unknown;
+
   /** Optional custom cell renderer for read mode. */
   cell?: (row: T) => ReactNode;
   type?: DataGridCellType;
   options?: Array<{ value: string | number; label: ReactNode }>;
   isEditable?: boolean;
   width?: string;
-  align?: 'left' | 'right' | 'center';
+  align?: DataGridColumnAlign;
 }
 
 export interface DataGridProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
-  columns: DataGridColumn<T>[];
-  rows: T[];
+  columns: ReadonlyArray<DataGridColumn<T>>;
+  rows: ReadonlyArray<T>;
   rowKey: (row: T) => string;
   onRowChange?: (row: T, colKey: string, value: unknown) => void;
   isDense?: boolean;
@@ -96,7 +132,7 @@ export const DataGrid = forwardRef<HTMLDivElement, DataGridProps<unknown>>(
     }, [columns, rows, active]);
 
     const commitEdit = useCallback(
-      (move?: 'right' | 'down', rawValue?: string) => {
+      (move?: DataGridMove, rawValue?: string) => {
         const col = columns[active.col];
         const row = rows[active.row];
         if (!col || row === undefined) {
@@ -282,7 +318,7 @@ interface CellEditorProps {
   col: DataGridColumn<unknown>;
   value: string;
   onChange: (v: string) => void;
-  onCommit: (move?: 'right' | 'down', rawValue?: string) => void;
+  onCommit: (move?: DataGridMove, rawValue?: string) => void;
   onCancel: () => void;
 }
 

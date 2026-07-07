@@ -5,12 +5,27 @@ import {
   type Ref,
 } from 'react';
 import { cn } from '../../../foundation/utils';
-import { stackVariants, type StackVariants } from './Stack.variants';
+import {
+  stackVariants,
+  type StackVariants,
+  type StackDirection,
+  type StackAlign,
+  type StackJustify,
+  type StackWrap,
+} from './Stack.variants';
 
 export interface StackProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'as'>,
-    StackVariants {
+    Omit<StackVariants, 'direction' | 'align' | 'justify' | 'wrap'> {
   as?: ElementType;
+  /** The flex main-axis direction. Default `column`. */
+  direction?: StackDirection;
+  /** The cross-axis alignment of children. */
+  align?: StackAlign;
+  /** The main-axis distribution of children. */
+  justify?: StackJustify;
+  /** The child wrapping onto multiple lines. */
+  wrap?: StackWrap;
 }
 
 /**

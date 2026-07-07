@@ -18,7 +18,7 @@ export const Default: Story = {
 export const Controlled: Story = {
   render: () => {
     function Demo() {
-      const [tags, setTags] = useState<string[]>(['hello']);
+      const [tags, setTags] = useState<readonly string[]>(['hello']);
       return (
         <div className="w-96 space-y-2">
           <TagsInput value={tags} onValueChange={setTags} aria-label="Tags" />

@@ -29,7 +29,7 @@ export const AlertModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
 
 export interface AlertModalActionProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-  /** Runs before the dialog closes. */
+  /** Fires when the action is confirmed, before the dialog closes. */
   onAction?: () => void;
   children: ReactNode;
 }

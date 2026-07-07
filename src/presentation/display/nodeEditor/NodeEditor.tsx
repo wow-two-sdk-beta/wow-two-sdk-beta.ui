@@ -28,9 +28,9 @@ export interface NodeEditorEdge {
 }
 
 export interface NodeEditorProps extends HTMLAttributes<HTMLDivElement> {
-  nodes: NodeEditorNode[];
-  edges?: NodeEditorEdge[];
-  onNodesChange?: (nodes: NodeEditorNode[]) => void;
+  nodes: ReadonlyArray<NodeEditorNode>;
+  edges?: ReadonlyArray<NodeEditorEdge>;
+  onNodesChange?: (nodes: ReadonlyArray<NodeEditorNode>) => void;
   onEdgeClick?: (edge: NodeEditorEdge) => void;
   renderNode?: (node: NodeEditorNode) => ReactNode;
   nodeWidth?: number;

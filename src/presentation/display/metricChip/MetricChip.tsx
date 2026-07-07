@@ -1,17 +1,49 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import { cn } from '../../../foundation/utils';
 
+/** Defines the MetricChip icon tint tone. */
+export const MetricChipTone = {
+  /** Refers to the neutral tint. */
+  Neutral: 'neutral',
+  /** Refers to the positive / confirmation tint. */
+  Success: 'success',
+  /** Refers to the caution tint. */
+  Warning: 'warning',
+  /** Refers to the destructive / error tint. */
+  Danger: 'danger',
+  /** Refers to the informational tint. */
+  Info: 'info',
+} as const;
+
+export type MetricChipTone = (typeof MetricChipTone)[keyof typeof MetricChipTone];
+
+/** Defines the MetricChip visual size. */
+export const MetricChipSize = {
+  /** Refers to the extra-small chip. */
+  Xs: 'xs',
+  /** Refers to the small chip. */
+  Sm: 'sm',
+  /** Refers to the medium chip. */
+  Md: 'md',
+} as const;
+
+export type MetricChipSize = (typeof MetricChipSize)[keyof typeof MetricChipSize];
+
 export interface MetricChipProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
-  /** Optional leading icon (tone-tinted via the `tone` prop). */
+  /** The optional leading icon (tone-tinted via the `tone` prop). */
   icon?: ReactNode;
-  /** Uppercase mini-LABEL rendered after the icon. */
+
+  /** The uppercase mini-LABEL rendered after the icon. */
   label: ReactNode;
-  /** Value rendered after the label, tabular-nums. */
+
+  /** The value rendered after the label, tabular-nums. */
   value: ReactNode;
-  /** Tone tinting for the icon. Default `neutral`. */
-  tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info';
-  /** Visual size — drives gap + text-size token. Default `sm`. */
-  size?: 'xs' | 'sm' | 'md';
+
+  /** The tone tinting for the icon. Default `neutral`. */
+  tone?: MetricChipTone;
+
+  /** The visual size — drives gap + text-size token. Default `sm`. */
+  size?: MetricChipSize;
 }
 
 const TONE: Record<NonNullable<MetricChipProps['tone']>, string> = {

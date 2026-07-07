@@ -6,7 +6,7 @@ export interface FrameGlyphProps {
   /** The pupil's roundness as a fraction of its size (`0` = square, `0.5` = circle). */
   readonly pupilRoundness: number;
 
-  /** Render only the enlarged inner pupil instead of the full frame + pupil. */
+  /** The dot-only mode — renders only the enlarged inner pupil instead of the full frame + pupil. */
   readonly isDot?: boolean;
 
   /** The glyph's pixel size. */

@@ -1,13 +1,15 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { cn } from '../../../foundation/utils';
+import { cn, type Severity } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 import { BannerSimple } from '../bannerSimple/BannerSimple';
 import type { BannerSimpleVariants } from '../bannerSimple/BannerSimple.variants';
 
 export interface BannerProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'title'>,
-    BannerSimpleVariants {
+    Omit<BannerSimpleVariants, 'severity'> {
+  /** The semantic severity palette. */
+  severity?: Severity;
   icon?: ReactNode;
   title?: ReactNode;
   description?: ReactNode;

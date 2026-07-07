@@ -1,17 +1,18 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, ProgressTone } from '../../../foundation/utils';
 
 export interface ProgressCircleProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
-  /** 0–100. Omit for indeterminate. */
+  /** The current value 0–100. Omit for indeterminate. */
   value?: number;
   max?: number;
   size?: number;
   thickness?: number;
-  tone?: 'brand' | 'success' | 'warning' | 'danger' | 'neutral';
+  /** The ring tone palette. */
+  tone?: ProgressTone;
   label?: string;
 }
 
-const TONE_CLASS: Record<NonNullable<ProgressCircleProps['tone']>, string> = {
+const TONE_CLASS: Record<ProgressTone, string> = {
   brand: 'text-primary',
   success: 'text-success',
   warning: 'text-warning',
@@ -25,7 +26,7 @@ const TONE_CLASS: Record<NonNullable<ProgressCircleProps['tone']>, string> = {
  */
 export const ProgressCircle = forwardRef<HTMLDivElement, ProgressCircleProps>(
   (
-    { value, max = 100, size = 40, thickness = 4, tone = 'brand', label, className, ...props },
+    { value, max = 100, size = 40, thickness = 4, tone = ProgressTone.Brand, label, className, ...props },
     ref,
   ) => {
     const determinate = typeof value === 'number';

@@ -1,8 +1,16 @@
 import { createContext, useContext, type ReactNode } from 'react';
 
-export type Direction = 'ltr' | 'rtl';
+/** Defines the reading direction of a subtree. */
+export const Direction = {
+  /** Refers to left-to-right reading order. */
+  Ltr: 'ltr',
+  /** Refers to right-to-left reading order. */
+  Rtl: 'rtl',
+} as const;
 
-const DirectionContext = createContext<Direction>('ltr');
+export type Direction = (typeof Direction)[keyof typeof Direction];
+
+const DirectionContext = createContext<Direction>(Direction.Ltr);
 
 export interface DirectionProviderProps {
   dir: Direction;

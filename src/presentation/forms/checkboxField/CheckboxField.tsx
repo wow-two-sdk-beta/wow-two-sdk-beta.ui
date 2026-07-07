@@ -4,11 +4,13 @@ import { useId } from '../../../foundation/hooks';
 import { Checkbox, type CheckboxProps } from '../checkbox/Checkbox';
 
 export interface CheckboxFieldProps extends Omit<CheckboxProps, 'children'> {
-  /** Right-side label. */
+  /** The right-side label. */
   label: ReactNode;
-  /** Smaller helper / description below. */
+
+  /** The smaller helper / description below. */
   description?: ReactNode;
-  /** Wrap-element className (the `<label>`). */
+
+  /** The wrap-element className (the `<label>`). */
   wrapperClassName?: string;
 }
 

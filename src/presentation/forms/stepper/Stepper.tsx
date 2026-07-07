@@ -12,18 +12,30 @@ import {
   type ReactNode,
 } from 'react';
 import { Check } from 'lucide-react';
-import { cn, dataAttr } from '../../../foundation/utils';
+import { cn, dataAttr, Orientation } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { RovingFocusGroup, useRovingFocusItem } from '../../../foundation/primitives';
+
+/** Defines a step's position relative to the active step. */
+export const StepStatus = {
+  /** Refers to a step ahead of the active one (not yet reached). */
+  Pending: 'pending',
+  /** Refers to the currently active step. */
+  Active: 'active',
+  /** Refers to a step behind the active one (already passed). */
+  Complete: 'complete',
+} as const;
+
+export type StepStatus = (typeof StepStatus)[keyof typeof StepStatus];
 
 interface StepperContextValue {
   value: string;
   setValue: (value: string) => void;
-  orientation: 'horizontal' | 'vertical';
+  orientation: Orientation;
   baseId: string;
   registerStep: (value: string) => void;
   unregisterStep: (value: string) => void;
-  stepsRef: React.MutableRefObject<string[]>;
+  stepsRef: React.MutableRefObject<ReadonlyArray<string>>;
 }
 
 const StepperContext = createContext<StepperContextValue | null>(null);
@@ -38,7 +50,8 @@ export interface StepperProps extends Omit<HTMLAttributes<HTMLDivElement>, 'defa
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  orientation?: 'horizontal' | 'vertical';
+  /** The layout axis. Default `horizontal`. */
+  orientation?: Orientation;
 }
 
 const StepperRoot = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
@@ -46,7 +59,7 @@ const StepperRoot = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
     value,
     defaultValue,
     onValueChange,
-    orientation = 'horizontal',
+    orientation = Orientation.Horizontal,
     className,
     children,
     ...rest
@@ -59,7 +72,7 @@ const StepperRoot = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
     onChange: onValueChange,
   });
   const baseId = useId();
-  const stepsRef = useRef<string[]>([]);
+  const stepsRef = useRef<Array<string>>([]);
 
   const registerStep = useCallback((v: string) => {
     if (!stepsRef.current.includes(v)) stepsRef.current.push(v);
@@ -87,7 +100,7 @@ const StepperRoot = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
         ref={ref}
         data-orientation={orientation}
         className={cn(
-          orientation === 'vertical' ? 'flex gap-4' : 'flex flex-col gap-4',
+          orientation === Orientation.Vertical ? 'flex gap-4' : 'flex flex-col gap-4',
           className,
         )}
         {...rest}
@@ -116,7 +129,7 @@ export const StepperList = forwardRef<HTMLDivElement, StepperListProps>(function
       data-orientation={ctx.orientation}
       className={cn(
         'flex',
-        ctx.orientation === 'vertical' ? 'flex-col gap-4' : 'flex-row items-center gap-2',
+        ctx.orientation === Orientation.Vertical ? 'flex-col gap-4' : 'flex-row items-center gap-2',
         className,
       )}
       {...rest}
@@ -149,8 +162,8 @@ export const StepperStep = forwardRef<HTMLButtonElement, StepperStepProps>(funct
   const ordered = ctx.stepsRef.current;
   const idx = ordered.indexOf(value);
   const activeIdx = ordered.indexOf(ctx.value);
-  const status: 'pending' | 'active' | 'complete' =
-    idx < activeIdx ? 'complete' : idx === activeIdx ? 'active' : 'pending';
+  const status: StepStatus =
+    idx < activeIdx ? StepStatus.Complete : idx === activeIdx ? StepStatus.Active : StepStatus.Pending;
 
   const stepId = `${ctx.baseId}-step-${value}`;
   const panelId = `${ctx.baseId}-panel-${value}`;
@@ -167,9 +180,9 @@ export const StepperStep = forwardRef<HTMLButtonElement, StepperStepProps>(funct
         id={stepId}
         type="button"
         role="tab"
-        aria-selected={status === 'active'}
+        aria-selected={status === StepStatus.Active}
         aria-controls={panelId}
-        aria-current={status === 'active' ? 'step' : undefined}
+        aria-current={status === StepStatus.Active ? 'step' : undefined}
         data-status={status}
         data-disabled={dataAttr(isDisabled)}
         tabIndex={roving.tabIndex}
@@ -192,18 +205,18 @@ export const StepperStep = forwardRef<HTMLButtonElement, StepperStepProps>(funct
           aria-hidden="true"
           className={cn(
             'grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 text-xs font-semibold transition-colors',
-            status === 'pending' && 'border-border text-muted-foreground',
-            status === 'active' && 'border-primary bg-primary text-primary-foreground',
-            status === 'complete' && 'border-primary bg-primary text-primary-foreground',
+            status === StepStatus.Pending && 'border-border text-muted-foreground',
+            status === StepStatus.Active && 'border-primary bg-primary text-primary-foreground',
+            status === StepStatus.Complete && 'border-primary bg-primary text-primary-foreground',
           )}
         >
-          {status === 'complete' ? <Check className="h-4 w-4" /> : stepNumber}
+          {status === StepStatus.Complete ? <Check className="h-4 w-4" /> : stepNumber}
         </span>
         <span className="flex flex-col">
           <span
             className={cn(
               'font-medium',
-              status === 'pending' ? 'text-muted-foreground' : 'text-foreground',
+              status === StepStatus.Pending ? 'text-muted-foreground' : 'text-foreground',
             )}
           >
             {children}
@@ -213,12 +226,12 @@ export const StepperStep = forwardRef<HTMLButtonElement, StepperStepProps>(funct
           )}
         </span>
       </button>
-      {ctx.orientation === 'horizontal' && idx < ordered.length - 1 && (
+      {ctx.orientation === Orientation.Horizontal && idx < ordered.length - 1 && (
         <span
           aria-hidden="true"
           className={cn(
             'h-px flex-1 transition-colors',
-            status === 'pending' ? 'bg-border' : 'bg-primary',
+            status === StepStatus.Pending ? 'bg-border' : 'bg-primary',
           )}
         />
       )}

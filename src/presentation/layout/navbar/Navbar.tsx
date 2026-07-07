@@ -12,29 +12,29 @@ import {
 
 export interface NavbarProps
   extends Omit<ComponentPropsWithoutRef<'header'>, 'children'> {
-  /** Leading slot — laid out at the start of the row (brand / logo / nav links). */
+  /** The leading slot — laid out at the start of the row (brand / logo / nav links). */
   start?: ReactNode;
-  /** Centre slot — laid out in the middle of the row (search / primary nav). */
+  /** The centre slot — laid out in the middle of the row (search / primary nav). */
   center?: ReactNode;
-  /** Trailing slot — laid out at the end of the row (actions / avatar / CTA). */
+  /** The trailing slot — laid out at the end of the row (actions / avatar / CTA). */
   end?: ReactNode;
   /**
-   * Raw row content — replaces the `start` / `center` / `end` slot layout when
+   * The raw row content — replaces the `start` / `center` / `end` slot layout when
    * provided. Use for fully custom bars.
    */
   children?: ReactNode;
-  /** Max-width of the inner centered `Container`. Passthrough to `Container.size`. Default `lg`. */
+  /** The max-width of the inner centered `Container`. Passthrough to `Container.size`. Default `lg`. */
   containerSize?: ContainerProps['size'];
-  /** Band height. Default `md`. */
+  /** The band height. Default `md`. */
   height?: NavbarHeight;
-  /** Sticks the bar to the top of the scroll container. Default `false` (non-sticky). */
+  /** The sticky pinning of the bar to the top of the scroll container. Default `false` (non-sticky). */
   sticky?: boolean;
   /**
-   * Tinted background tone for the band — applies the shadow-less `subtle`
+   * The tinted background tone for the band — applies the shadow-less `subtle`
    * surface treatment. Omit for a transparent bar (relies on `bordered` / page bg).
    */
   tone?: SurfaceTone;
-  /** Renders a bottom border under the bar. Default `true`. */
+  /** The bottom border under the bar. Default `true`. */
   bordered?: boolean;
 }
 

@@ -16,13 +16,14 @@ import {
 export interface GridProps extends Omit<ComponentPropsWithoutRef<'div'>, 'as'> {
   as?: ElementType;
   /**
-   * Equal-column track count. Scalar (`'3'`) emits `grid-cols-3`; a responsive
+   * The equal-column track count. Scalar (`'3'`) emits `grid-cols-3`; a responsive
    * map (`{ base: '1', md: '2', lg: '3' }`) emits per-breakpoint prefixed
    * classes. Default `'2'`.
    */
   columns?: GridColumns | GridResponsive<GridColumns>;
+
   /**
-   * Gap between tracks. Scalar (`'4'`) emits `gap-4`; a responsive map
+   * The gap between tracks. Scalar (`'4'`) emits `gap-4`; a responsive map
    * (`{ base: '2', lg: '6' }`) emits per-breakpoint prefixed classes. Default `'4'`.
    */
   gap?: GridGap | GridResponsive<GridGap>;

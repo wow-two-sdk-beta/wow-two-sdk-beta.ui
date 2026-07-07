@@ -1,5 +1,19 @@
 import { tv, type VariantProps } from '../../../foundation/utils';
 
+/** Defines the visual state of a listbox item. */
+export const ListboxItemState = {
+  /** Refers to the resting item. */
+  Default: 'default',
+  /** Refers to the active (roving-focused) item. */
+  Active: 'active',
+  /** Refers to a selected item. */
+  Selected: 'selected',
+  /** Refers to a disabled item. */
+  Disabled: 'disabled',
+} as const;
+
+export type ListboxItemState = (typeof ListboxItemState)[keyof typeof ListboxItemState];
+
 /* Listbox container — STRUCTURAL only. Surface chrome (bg, border, shadow,
    rounded, padding) is composed from `surfaceVariants` in `Listbox.tsx`. */
 export const listboxVariants = tv({
@@ -33,3 +47,10 @@ export const listboxEmptyVariants = tv({
 
 export type ListboxVariants = VariantProps<typeof listboxVariants>;
 export type ListboxItemVariants = VariantProps<typeof listboxItemVariants>;
+
+/* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertListboxItemState: AssertExact<
+  ListboxItemState, NonNullable<VariantProps<typeof listboxItemVariants>['state']>
+> = true;
+void _assertListboxItemState;

@@ -1,7 +1,23 @@
 import { forwardRef, useMemo, useRef, type KeyboardEvent, type SVGAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 
-export type AudioWaveformTone = 'brand' | 'success' | 'warning' | 'danger' | 'muted' | 'current';
+/** Defines the AudioWaveform color tone. */
+export const AudioWaveformTone = {
+  /** Refers to the primary brand color. */
+  Brand: 'brand',
+  /** Refers to the positive / confirmation color. */
+  Success: 'success',
+  /** Refers to the caution color. */
+  Warning: 'warning',
+  /** Refers to the destructive / error color. */
+  Danger: 'danger',
+  /** Refers to the muted color. */
+  Muted: 'muted',
+  /** Refers to the inherited `currentColor`. */
+  Current: 'current',
+} as const;
+
+export type AudioWaveformTone = (typeof AudioWaveformTone)[keyof typeof AudioWaveformTone];
 
 const TONE_CLASS: Record<AudioWaveformTone, string> = {
   brand: 'text-primary',
@@ -13,7 +29,7 @@ const TONE_CLASS: Record<AudioWaveformTone, string> = {
 };
 
 export interface AudioWaveformProps extends Omit<SVGAttributes<SVGSVGElement>, 'width' | 'height' | 'onSeek'> {
-  peaks: number[];
+  peaks: ReadonlyArray<number>;
   progress?: number;
   width?: number;
   height?: number;
@@ -130,10 +146,10 @@ export const AudioWaveform = forwardRef<SVGSVGElement, AudioWaveformProps>(
 );
 
 /** Resample `peaks` to exactly `n` bars by max-pooling consecutive runs. */
-function sampleTo(peaks: number[], n: number): number[] {
+function sampleTo(peaks: ReadonlyArray<number>, n: number): ReadonlyArray<number> {
   if (peaks.length === 0) return new Array(n).fill(0);
   if (peaks.length === n) return peaks;
-  const out: number[] = new Array(n);
+  const out: Array<number> = new Array(n);
   const ratio = peaks.length / n;
   for (let i = 0; i < n; i++) {
     const start = Math.floor(i * ratio);

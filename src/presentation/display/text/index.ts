@@ -1,2 +1,8 @@
 export { Text, type TextProps } from './Text';
-export { textVariants, type TextVariants } from './Text.variants';
+export {
+  textVariants,
+  TextWeight,
+  TextColor,
+  TextAlign,
+  type TextVariants,
+} from './Text.variants';

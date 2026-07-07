@@ -26,10 +26,10 @@ function mergeProps(slotProps: AnyProps, childProps: AnyProps): AnyProps {
     } else if (key === 'style') {
       merged.style = { ...(slotVal as CSSProperties), ...(childVal as CSSProperties) };
     } else if (/^on[A-Z]/.test(key)) {
-      const slotFn = slotVal as ((...args: unknown[]) => void) | undefined;
-      const childFn = childVal as ((...args: unknown[]) => void) | undefined;
+      const slotFn = slotVal as ((...args: ReadonlyArray<unknown>) => void) | undefined;
+      const childFn = childVal as ((...args: ReadonlyArray<unknown>) => void) | undefined;
       if (slotFn && childFn) {
-        merged[key] = (...args: unknown[]) => {
+        merged[key] = (...args: ReadonlyArray<unknown>) => {
           childFn(...args);
           slotFn(...args);
         };

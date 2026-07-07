@@ -1,13 +1,35 @@
 import type { CSSProperties } from 'react';
+import { Padding } from '../StyleTokens';
 
 /** CSS-value extensions — types, token maps, resolvers. Call as `CssExtensions.x(...)`. */
 
 // =============================================================================
-// Tokens (types — individually exported; types are erased, no shaking concern)
+// Tokens (enums + types — individually exported)
 // =============================================================================
 
-export type PaddingToken = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type RadiusToken = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+/* Padding token vocabulary — reuses the shared `Padding` enum (superset: adds `2xl`). */
+export type PaddingToken = Padding;
+
+/** Defines the corner-radius token vocabulary local to CSS resolvers — diverges from the shared `Radius` (carries `xs`, omits `2xl`). */
+export const RadiusToken = {
+  /** Refers to no rounding (square corners). */
+  None: 'none',
+  /** Refers to an extra-small radius. */
+  Xs: 'xs',
+  /** Refers to a small radius. */
+  Sm: 'sm',
+  /** Refers to a medium radius. */
+  Md: 'md',
+  /** Refers to a large radius. */
+  Lg: 'lg',
+  /** Refers to an extra-large radius. */
+  Xl: 'xl',
+  /** Refers to a fully-rounded (pill) radius. */
+  Full: 'full',
+} as const;
+
+export type RadiusToken = (typeof RadiusToken)[keyof typeof RadiusToken];
+
 export type SizeValue = string | number;
 export type PaddingProp = PaddingToken | { x?: SizeValue; y?: SizeValue };
 export type RadiusProp = RadiusToken | SizeValue;
@@ -20,25 +42,53 @@ export interface BoxSizeOverrides {
   maxHeight?: SizeValue;
   /** Shorthand for square boxes — applied as fallback for both `width` and `height`. Explicit `width`/`height` win when both are set. */
   boxSize?: SizeValue;
+
   /** CSS `aspect-ratio`. String like `'16/9'` or number like `1.5`. Pairs naturally with a single width/height. */
   aspectRatio?: string | number;
 }
 
-/** Canonical size preset vocabulary — shared across components. Each component picks the subset it supports via `Extract<SizePreset, ...>` and owns its internal dimension mapping. */
-export type SizePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+/** Defines the canonical size preset vocabulary — shared across components. Each component picks the subset it supports via `Extract<SizePreset, ...>` and owns its internal dimension mapping. */
+export const SizePreset = {
+  /** Refers to the extra-small step. */
+  Xs: 'xs',
+  /** Refers to the small step. */
+  Sm: 'sm',
+  /** Refers to the medium (default) step. */
+  Md: 'md',
+  /** Refers to the large step. */
+  Lg: 'lg',
+  /** Refers to the extra-large step. */
+  Xl: 'xl',
+  /** Refers to the 2x extra-large step. */
+  Xxl: '2xl',
+} as const;
 
-/* Absolute-positioning tokens — preset 9-anchor enum + raw inset overrides. */
+export type SizePreset = (typeof SizePreset)[keyof typeof SizePreset];
+
+/** Defines the absolute-positioning preset — a 9-anchor value-set; pair with raw inset overrides. */
+export const AbsolutePositionPreset = {
+  /** Refers to the top-right corner. */
+  TopRight: 'top-right',
+  /** Refers to the top-left corner. */
+  TopLeft: 'top-left',
+  /** Refers to the bottom-right corner. */
+  BottomRight: 'bottom-right',
+  /** Refers to the bottom-left corner. */
+  BottomLeft: 'bottom-left',
+  /** Refers to the top edge, horizontally centered. */
+  Top: 'top',
+  /** Refers to the bottom edge, horizontally centered. */
+  Bottom: 'bottom',
+  /** Refers to the left edge, vertically centered. */
+  Left: 'left',
+  /** Refers to the right edge, vertically centered. */
+  Right: 'right',
+  /** Refers to the dead center. */
+  Center: 'center',
+} as const;
 
 export type AbsolutePositionPreset =
-  | 'top-right'
-  | 'top-left'
-  | 'bottom-right'
-  | 'bottom-left'
-  | 'top'
-  | 'bottom'
-  | 'left'
-  | 'right'
-  | 'center';
+  (typeof AbsolutePositionPreset)[keyof typeof AbsolutePositionPreset];
 
 export interface AbsoluteInsetOverrides {
   top?: SizeValue;
@@ -53,7 +103,7 @@ export type AbsolutePosition = AbsolutePositionPreset | AbsoluteInsetOverrides;
 // Token → CSS maps
 // =============================================================================
 
-const PADDING_TOKEN_TO_CSS: Record<Exclude<PaddingToken, 'none'>, string> = {
+const PADDING_TOKEN_TO_CSS: Record<Exclude<PaddingToken, 'none' | '2xl'>, string> = {
   xs: '0.5rem',
   sm: '0.75rem',
   md: '1rem',
@@ -83,7 +133,8 @@ function resolvePadding(padding: PaddingProp | undefined): CSSProperties | undef
     if (padding === 'none') {
       return { paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0 };
     }
-    const v = PADDING_TOKEN_TO_CSS[padding];
+    // `2xl` is carried by the shared `Padding` enum but sits outside the inline rem map.
+    const v = padding === '2xl' ? '3rem' : PADDING_TOKEN_TO_CSS[padding];
     return { paddingLeft: v, paddingRight: v, paddingTop: v, paddingBottom: v };
   }
   const style: CSSProperties = {};

@@ -1,6 +1,6 @@
 export { Section, type SectionProps } from './Section';
 export {
   sectionVariants,
+  SectionPaddingY,
   type SectionVariants,
-  type SectionPaddingY,
 } from './Section.variants';

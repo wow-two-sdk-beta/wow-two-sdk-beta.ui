@@ -2,15 +2,17 @@ import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react
 import { X } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
-import { tagVariants, type TagVariants } from './Tag.variants';
+import { tagVariants, type TagVariant, type TagVariants } from './Tag.variants';
 
 export interface TagProps
   extends Omit<ComponentPropsWithoutRef<'span'>, 'children'>,
-    TagVariants {
+    Omit<TagVariants, 'variant'> {
   children?: ReactNode;
-  /** Show a close (×) button. Pass a handler to receive the click. */
+  /** The color treatment. */
+  variant?: TagVariant;
+  /** Fires when the close (×) button is clicked; pass a handler to show the button. */
   onClose?: () => void;
-  /** Accessible label for the close button. Default `"Remove"`. */
+  /** The accessible label for the close button. Default `"Remove"`. */
   closeLabel?: string;
 }
 

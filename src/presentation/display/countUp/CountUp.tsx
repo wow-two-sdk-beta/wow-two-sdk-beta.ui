@@ -7,7 +7,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type ElementTag } from '../../../foundation/utils';
 
 export interface CountUpProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
   to: number;
@@ -16,7 +16,7 @@ export interface CountUpProps extends Omit<HTMLAttributes<HTMLElement>, 'childre
   easing?: (t: number) => number;
   format?: (value: number) => ReactNode;
   canTriggerOnView?: boolean;
-  as?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  as?: ElementTag;
 }
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);

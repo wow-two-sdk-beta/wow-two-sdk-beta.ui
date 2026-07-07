@@ -1,1 +1,1 @@
-export { Frame, type FrameProps } from './Frame';
+export { Frame, FrameSurface, type FrameProps } from './Frame';

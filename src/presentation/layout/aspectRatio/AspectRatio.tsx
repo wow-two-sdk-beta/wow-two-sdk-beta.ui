@@ -2,7 +2,7 @@ import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn } from '../../../foundation/utils';
 
 export interface AspectRatioProps extends ComponentPropsWithoutRef<'div'> {
-  /** Numeric ratio (width/height). Default 1 (square). */
+  /** The aspect ratio (width/height). Default 1 (square). */
   ratio?: number;
 }
 

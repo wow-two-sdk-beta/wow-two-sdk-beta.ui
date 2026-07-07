@@ -1,18 +1,20 @@
 import { forwardRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 import { useId } from '../../../foundation/hooks';
 import { Radio, type RadioProps } from '../radio/Radio';
 
 export interface ChoiceCardProps extends Omit<RadioProps, 'children' | 'size'> {
   label: ReactNode;
   description?: ReactNode;
-  /** Optional icon rendered above the label. */
+  /** The optional icon rendered above the label. */
   icon?: ReactNode;
-  /** Card size. Default `md`. */
-  size?: 'sm' | 'md' | 'lg';
+
+  /** The card size. Default `md`. */
+  size?: Size;
 }
 
-const SIZE: Record<NonNullable<ChoiceCardProps['size']>, string> = {
+/* Sizes not listed fall back to the `md` row at the call site. */
+const SIZE: Partial<Record<Size, string>> = {
   sm: 'p-3 text-xs',
   md: 'p-4 text-sm',
   lg: 'p-5 text-base',
@@ -24,7 +26,7 @@ const SIZE: Record<NonNullable<ChoiceCardProps['size']>, string> = {
  * mutex selection.
  */
 export const ChoiceCard = forwardRef<HTMLInputElement, ChoiceCardProps>(
-  ({ label, description, icon, size = 'md', id, className, ...props }, ref) => {
+  ({ label, description, icon, size = Size.Md, id, className, ...props }, ref) => {
     const generated = useId();
     const inputId = id ?? generated;
     return (
@@ -34,7 +36,7 @@ export const ChoiceCard = forwardRef<HTMLInputElement, ChoiceCardProps>(
           'group relative block cursor-pointer rounded-lg border border-input bg-card text-card-foreground transition-colors',
           'hover:border-border-strong has-[:checked]:border-primary has-[:checked]:bg-primary-soft/30',
           'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
-          SIZE[size],
+          SIZE[size] ?? SIZE.md,
           className,
         )}
       >

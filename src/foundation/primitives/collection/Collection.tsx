@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 export interface CollectionContextValue<T> {
-  items: T[];
+  items: ReadonlyArray<T>;
   register: (item: T) => void;
   unregister: (item: T) => void;
 }
@@ -27,7 +27,7 @@ export function createCollection<T>(): {
   const CollectionContext = createContext<CollectionContextValue<T> | null>(null);
 
   function Provider({ children }: { children: ReactNode }) {
-    const [items, setItems] = useState<T[]>([]);
+    const [items, setItems] = useState<ReadonlyArray<T>>([]);
     const register = useCallback((item: T) => {
       setItems((prev) => (prev.includes(item) ? prev : [...prev, item]));
     }, []);

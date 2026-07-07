@@ -2,10 +2,12 @@ import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react
 import { cn } from '../../../foundation/utils';
 
 export interface InputAddonProps extends ComponentPropsWithoutRef<'div'> {
-  /** Element rendered to the left of the input (e.g. "https://"). */
+  /** The element rendered to the left of the input (e.g. "https://"). */
   leading?: ReactNode;
-  /** Element rendered to the right of the input (e.g. ".com"). */
+
+  /** The element rendered to the right of the input (e.g. ".com"). */
   trailing?: ReactNode;
+
   /** The input element (TextInput, EmailInput, etc.). */
   children: ReactNode;
 }

@@ -1,8 +1,9 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/utils';
 
 export interface InputGroupProps extends ComponentPropsWithoutRef<'div'> {
-  orientation?: 'horizontal' | 'vertical';
+  /** The layout axis. Default `horizontal`. */
+  orientation?: Orientation;
 }
 
 /**
@@ -11,13 +12,13 @@ export interface InputGroupProps extends ComponentPropsWithoutRef<'div'> {
  * of `actions/ButtonGroup`.
  */
 export const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>(
-  ({ orientation = 'horizontal', className, ...props }, ref) => (
+  ({ orientation = Orientation.Horizontal, className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
         'inline-flex w-full',
-        orientation === 'horizontal' ? 'flex-row' : 'flex-col',
-        orientation === 'horizontal'
+        orientation === Orientation.Horizontal ? 'flex-row' : 'flex-col',
+        orientation === Orientation.Horizontal
           ? '[&>*]:rounded-none [&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md [&>*:not(:first-child)]:-ml-px'
           : '[&>*]:rounded-none [&>*:first-child]:rounded-t-md [&>*:last-child]:rounded-b-md [&>*:not(:first-child)]:-mt-px',
         className,

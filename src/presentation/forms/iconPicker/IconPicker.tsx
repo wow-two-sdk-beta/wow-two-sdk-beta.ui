@@ -64,7 +64,7 @@ import {
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
-import { inputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize } from '../InputStyles';
 
 type IconComponent = ComponentType<SVGAttributes<SVGSVGElement>>;
 
@@ -188,7 +188,7 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
           placeholder={placeholder}
           disabled={isDisabled}
           onChange={(e) => setQuery(e.target.value)}
-          className={cn(inputBaseVariants({ size: 'sm' }))}
+          className={cn(inputBaseVariants({ size: InputSize.Sm }))}
         />
         <div
           // Flat button collection, no 2D keyboard nav — ARIA grid (grid >

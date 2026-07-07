@@ -1,14 +1,16 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 export interface SliderProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
-  size?: 'sm' | 'md' | 'lg';
+  /** The control size. */
+  size?: Size;
 }
 
-/* Complete literal class strings — interpolating into the arbitrary variant would hide them from Tailwind's scanner. */
-const TRACK_CLASS: Record<NonNullable<SliderProps['size']>, string> = {
+/* Complete literal class strings — interpolating into the arbitrary variant would hide them from Tailwind's scanner.
+   Sizes not listed fall back to the `md` row at the call site. */
+const TRACK_CLASS: Partial<Record<Size, string>> = {
   sm: '[&::-webkit-slider-runnable-track]:h-1 [&::-moz-range-track]:h-1',
   md: '[&::-webkit-slider-runnable-track]:h-1.5 [&::-moz-range-track]:h-1.5',
   lg: '[&::-webkit-slider-runnable-track]:h-2 [&::-moz-range-track]:h-2',
@@ -20,7 +22,7 @@ const TRACK_CLASS: Record<NonNullable<SliderProps['size']>, string> = {
  */
 export const Slider = forwardRef<HTMLInputElement, SliderProps>(
   (
-    { className, size = 'md', id, disabled, required, min = 0, max = 100, ...props },
+    { className, size = Size.Md, id, disabled, required, min = 0, max = 100, ...props },
     ref,
   ) => {
     const ctx = useFormControl();
@@ -36,7 +38,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(
         aria-invalid={ctx?.isInvalid || undefined}
         className={cn(
           'w-full appearance-none bg-transparent disabled:cursor-not-allowed disabled:opacity-50',
-          TRACK_CLASS[size],
+          TRACK_CLASS[size] ?? TRACK_CLASS.md,
           // WebKit
           '[&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-muted',
           '[&::-webkit-slider-thumb]:mt-[-6px] [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background',

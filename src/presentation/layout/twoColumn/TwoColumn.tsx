@@ -1,16 +1,20 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Side } from '../../../foundation/utils';
 
 export interface TwoColumnProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
-  /** Sidebar / aside content. */
+  /** The sidebar / aside content. */
   aside: ReactNode;
-  /** Main content. */
+
+  /** The main content. */
   children: ReactNode;
-  /** Aside width — Tailwind class string (e.g. `w-64`). Default `w-64`. */
+
+  /** The aside width — Tailwind class string (e.g. `w-64`). Default `w-64`. */
   asideWidth?: string;
-  /** Side the aside sits on. Default `left`. */
-  asideSide?: 'left' | 'right';
-  /** Gap between aside and main. Default `6`. */
+
+  /** The side the aside sits on — `left` or `right`. Default `left`. */
+  asideSide?: Side;
+
+  /** The gap between aside and main. Default `6`. */
   gap?: '0' | '4' | '6' | '8' | '10';
 }
 
@@ -24,14 +28,14 @@ const GAP: Record<NonNullable<TwoColumnProps['gap']>, string> = {
  */
 export const TwoColumn = forwardRef<HTMLDivElement, TwoColumnProps>(
   (
-    { aside, children, asideWidth = 'w-64', asideSide = 'left', gap = '6', className, ...props },
+    { aside, children, asideWidth = 'w-64', asideSide = Side.Left, gap = '6', className, ...props },
     ref,
   ) => (
     <div
       ref={ref}
       className={cn(
         'flex w-full',
-        asideSide === 'right' && 'flex-row-reverse',
+        asideSide === Side.Right && 'flex-row-reverse',
         GAP[gap],
         className,
       )}

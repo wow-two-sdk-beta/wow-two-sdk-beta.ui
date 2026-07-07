@@ -7,11 +7,14 @@ import {
   type ReactElement,
   type Ref,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import type { ToggleButtonProps } from '../toggleButton/ToggleButton';
-
-type Mode = 'single' | 'multi';
+import {
+  ToggleButtonGroupVariant,
+  ToggleItemRole,
+  ToggleMode,
+} from './ToggleButtonGroup.variants';
 
 /**
  * Single-select props, generic over the value type `T`.
@@ -22,32 +25,52 @@ type Mode = 'single' | 'multi';
  * emit that narrowed type instead — no cast needed at the call site.
  */
 interface SingleProps<T extends string = string> {
-  type?: 'single';
+  /** The selection cardinality — omit or `ToggleMode.Single` for at-most-one. */
+  type?: typeof ToggleMode.Single;
   value?: T | null;
   defaultValue?: T | null;
   onValueChange?: (value: T | null) => void;
 }
 
 interface MultiProps {
-  type: 'multi';
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (value: string[]) => void;
+  /** The selection cardinality — `ToggleMode.Multi` for any-number-active. */
+  type: typeof ToggleMode.Multi;
+  value?: ReadonlyArray<string>;
+  defaultValue?: ReadonlyArray<string>;
+  onValueChange?: (value: ReadonlyArray<string>) => void;
 }
 
 type ToggleButtonGroupProps<T extends string = string> = Omit<
   ComponentPropsWithoutRef<'div'>,
   'defaultValue' | 'onChange'
 > & {
-  orientation?: 'horizontal' | 'vertical';
+  /** The layout axis of the button row/column. @default Orientation.Horizontal */
+  orientation?: Orientation;
   isAttached?: boolean;
   /**
-   * Visual style.
+   * The visual style.
    * - `default` — standard button row/column (borders + attached radii).
    * - `segmented` — iOS-style connected pill row on a muted track; the active
    *   segment lifts to a `background` surface. Forces `isAttached`.
+   * - `pill` — individually-separated rounded pills (each item its own detached
+   *   chip). Forces detached (never attaches).
    */
-  variant?: 'default' | 'segmented';
+  variant?: ToggleButtonGroupVariant;
+  /**
+   * The ARIA role wiring.
+   * - `group` (default) — `role="group"` of independent toggle buttons.
+   * - `tab` — opt into tablist semantics: root renders `role="tablist"` and each
+   *   item `role="tab"` + `aria-selected`. Pairs naturally with single-select.
+   * @default ToggleItemRole.Group
+   */
+  itemRole?: ToggleItemRole;
+  /**
+   * The equal-width state — lays items out as equal-width tiles (each `flex-1 basis-0`)
+   * for an icon category strip where every cell should share the row width. Additive;
+   * the default keeps intrinsic item widths.
+   * @default false
+   */
+  equalWidth?: boolean;
 } & (SingleProps<T> | MultiProps);
 
 interface ChildLike extends ToggleButtonProps {
@@ -70,9 +93,11 @@ interface ToggleButtonGroupComponent {
 const ToggleButtonGroupImpl = forwardRef<HTMLDivElement, ToggleButtonGroupProps>(
   (props, ref) => {
     const {
-      orientation = 'horizontal',
+      orientation = Orientation.Horizontal,
       isAttached = true,
-      variant = 'default',
+      variant = ToggleButtonGroupVariant.Default,
+      itemRole = ToggleItemRole.Group,
+      equalWidth = false,
       className,
       children,
       type,
@@ -81,31 +106,42 @@ const ToggleButtonGroupImpl = forwardRef<HTMLDivElement, ToggleButtonGroupProps>
       onValueChange,
       ...rest
     } = props;
-    const mode: Mode = type === 'multi' ? 'multi' : 'single';
-    const isSegmented = variant === 'segmented';
-    // Segmented is inherently an attached pill row — the muted track only reads as one control when its segments touch.
-    const attached = isSegmented || isAttached;
+    const mode: ToggleMode = type === ToggleMode.Multi ? ToggleMode.Multi : ToggleMode.Single;
+    const isSegmented = variant === ToggleButtonGroupVariant.Segmented;
+    const isPill = variant === ToggleButtonGroupVariant.Pill;
+    const isTablist = itemRole === ToggleItemRole.Tab;
+    const isHorizontal = orientation === Orientation.Horizontal;
+    // Segmented is inherently an attached pill row — the muted track only reads as one control when its
+    // segments touch. Pill is the inverse — always detached chips, never attached.
+    const attached = isPill ? false : isSegmented || isAttached;
 
     const [singleValue, setSingleValue] = useControlled<string | null>({
-      controlled: mode === 'single' ? (value as string | null | undefined) : undefined,
-      default: mode === 'single' ? (defaultValue as string | null | undefined) ?? null : null,
+      controlled: mode === ToggleMode.Single ? (value as string | null | undefined) : undefined,
+      default:
+        mode === ToggleMode.Single ? ((defaultValue as string | null | undefined) ?? null) : null,
       onChange:
-        mode === 'single' ? (onValueChange as ((value: string | null) => void) | undefined) : undefined,
+        mode === ToggleMode.Single
+          ? (onValueChange as ((value: string | null) => void) | undefined)
+          : undefined,
     });
-    const [multiValue, setMultiValue] = useControlled<string[]>({
-      controlled: mode === 'multi' ? (value as string[] | undefined) : undefined,
-      default: mode === 'multi' ? (defaultValue as string[] | undefined) ?? [] : [],
+    const [multiValue, setMultiValue] = useControlled<ReadonlyArray<string>>({
+      controlled: mode === ToggleMode.Multi ? (value as string[] | undefined) : undefined,
+      default: mode === ToggleMode.Multi ? ((defaultValue as string[] | undefined) ?? []) : [],
       onChange:
-        mode === 'multi' ? (onValueChange as ((value: string[]) => void) | undefined) : undefined,
+        mode === ToggleMode.Multi
+          ? (onValueChange as ((value: ReadonlyArray<string>) => void) | undefined)
+          : undefined,
     });
 
     const isPressed = (childValue: string | undefined): boolean => {
       if (childValue === undefined) return false;
-      return mode === 'single' ? singleValue === childValue : multiValue.includes(childValue);
+      return mode === ToggleMode.Single
+        ? singleValue === childValue
+        : multiValue.includes(childValue);
     };
     const togglePressed = (childValue: string | undefined) => {
       if (childValue === undefined) return;
-      if (mode === 'single') {
+      if (mode === ToggleMode.Single) {
         setSingleValue(singleValue === childValue ? null : childValue);
       } else {
         setMultiValue(
@@ -119,13 +155,14 @@ const ToggleButtonGroupImpl = forwardRef<HTMLDivElement, ToggleButtonGroupProps>
     return (
       <div
         ref={ref}
-        role="group"
+        role={isTablist ? 'tablist' : 'group'}
+        aria-orientation={isTablist ? orientation : undefined}
         data-orientation={orientation}
         className={cn(
           'inline-flex',
-          orientation === 'horizontal' ? 'flex-row' : 'flex-col',
+          isHorizontal ? 'flex-row' : 'flex-col',
           attached
-            ? orientation === 'horizontal'
+            ? isHorizontal
               ? '[&>*]:rounded-none [&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md [&>*:not(:first-child)]:-ml-px'
               : '[&>*]:rounded-none [&>*:first-child]:rounded-t-md [&>*:last-child]:rounded-b-md [&>*:not(:first-child)]:-mt-px'
             : 'gap-2',
@@ -135,6 +172,10 @@ const ToggleButtonGroupImpl = forwardRef<HTMLDivElement, ToggleButtonGroupProps>
             '[&>*]:!rounded-md [&>*]:!ml-0 [&>*]:!border-transparent [&>*]:!bg-transparent',
             '[&>*[data-pressed=true]]:!bg-background [&>*[data-pressed=true]]:!text-foreground [&>*[data-pressed=true]]:shadow-sm',
           ],
+          // Pill: fully-rounded detached chips (gap already applied via the non-attached branch above).
+          isPill && '[&>*]:!rounded-full',
+          // Equal-width tiles: every item shares the row/column extent (icon category strip).
+          equalWidth && '[&>*]:flex-1 [&>*]:basis-0',
           className,
         )}
         {...rest}
@@ -143,13 +184,16 @@ const ToggleButtonGroupImpl = forwardRef<HTMLDivElement, ToggleButtonGroupProps>
           if (!isValidElement(child)) return child;
           const c = child as ReactElement<ChildLike>;
           const childValue = c.props.value;
-          // Compose with the child's own props — explicit `isPressed` wins; child's `onPressedChange` fires before the group toggle.
+          const pressed = c.props.isPressed ?? isPressed(childValue);
+          // Compose with the child's own props — explicit `isPressed` wins; child's `onPressedChange`
+          // fires before the group toggle. Tablist mode layers `role="tab"` + `aria-selected` on each item.
           return cloneElement(c, {
-            isPressed: c.props.isPressed ?? isPressed(childValue),
-            onPressedChange: (pressed: boolean) => {
-              c.props.onPressedChange?.(pressed);
+            isPressed: pressed,
+            onPressedChange: (isPressedNext: boolean) => {
+              c.props.onPressedChange?.(isPressedNext);
               togglePressed(childValue);
             },
+            ...(isTablist ? { role: 'tab', 'aria-selected': pressed } : {}),
           } as Partial<ChildLike>);
         })}
       </div>

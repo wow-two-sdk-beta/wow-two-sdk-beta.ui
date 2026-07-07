@@ -1,6 +1,6 @@
 export {
   EventCalendar,
+  EventCalendarView,
   type EventCalendarEvent,
   type EventCalendarProps,
-  type EventCalendarView,
 } from './EventCalendar';

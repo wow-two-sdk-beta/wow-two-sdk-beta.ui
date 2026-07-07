@@ -31,7 +31,7 @@ interface BottomSheetContextValue {
   setOpen: (open: boolean) => void;
   currentSnap: number;
   setCurrentSnap: (i: number) => void;
-  snapPoints: SnapPoint[];
+  snapPoints: ReadonlyArray<SnapPoint>;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextValue | null>(null);
@@ -58,7 +58,7 @@ export interface BottomSheetProps extends HTMLAttributes<HTMLDivElement>, Surfac
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  snapPoints?: SnapPoint[];
+  snapPoints?: ReadonlyArray<SnapPoint>;
   initialSnap?: number;
   dismissOnOutsideClick?: boolean;
   dismissOnEscape?: boolean;
@@ -77,7 +77,7 @@ export interface BottomSheetProps extends HTMLAttributes<HTMLDivElement>, Surfac
  * previously-focused element (the opener).
  */
 interface BottomSheetSurfaceProps extends HTMLAttributes<HTMLDivElement> {
-  /** Consumer ref for the panel — passed as a prop because Presence's cloned `ref` replaces the element's own. */
+  /** The consumer ref for the panel — passed as a prop because Presence's cloned `ref` replaces the element's own. */
   panelRef?: React.Ref<HTMLDivElement>;
   dismissOnOutsideClick: boolean;
   dismissOnEscape: boolean;

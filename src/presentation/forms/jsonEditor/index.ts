@@ -1,1 +1,1 @@
-export { JSONEditor, type JSONEditorMode, type JSONEditorProps } from './JSONEditor';
+export { JSONEditor, JSONEditorMode, type JSONEditorProps } from './JSONEditor';

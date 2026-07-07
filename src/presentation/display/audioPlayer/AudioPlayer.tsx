@@ -16,7 +16,7 @@ import { AudioWaveform } from '../audioWaveform';
 export interface AudioPlayerProps
   extends Omit<AudioHTMLAttributes<HTMLAudioElement>, 'controls' | 'onPlay' | 'onPause' | 'onTimeUpdate' | 'onEnded'> {
   src: string;
-  peaks?: number[];
+  peaks?: ReadonlyArray<number>;
   defaultVolume?: number;
   defaultPlaybackRate?: number;
   isCompact?: boolean;

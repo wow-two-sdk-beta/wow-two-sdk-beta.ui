@@ -14,6 +14,16 @@ import { cn, dataAttr } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Presence, RovingFocusGroup, useRovingFocusItem } from '../../../foundation/primitives';
 
+/** Defines the Accordion selection mode. */
+export const AccordionType = {
+  /** Refers to allowing one open panel at a time. */
+  Single: 'single',
+  /** Refers to allowing multiple open panels. */
+  Multiple: 'multiple',
+} as const;
+
+export type AccordionType = (typeof AccordionType)[keyof typeof AccordionType];
+
 interface AccordionContextValue {
   isOpen: (value: string) => boolean;
   toggle: (value: string) => void;
@@ -54,9 +64,9 @@ type SingleProps = {
 
 type MultipleProps = {
   type: 'multiple';
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (value: string[]) => void;
+  value?: ReadonlyArray<string>;
+  defaultValue?: ReadonlyArray<string>;
+  onValueChange?: (value: ReadonlyArray<string>) => void;
   isCollapsible?: never;
 };
 
@@ -80,18 +90,18 @@ const AccordionRoot = forwardRef<HTMLDivElement, AccordionProps>(function Accord
     children,
     ...rest
   } = props as AccordionProps & {
-    type?: 'single' | 'multiple';
-    value?: string | string[];
-    defaultValue?: string | string[];
-    onValueChange?: ((v: string) => void) | ((v: string[]) => void);
+    type?: AccordionType;
+    value?: string | ReadonlyArray<string>;
+    defaultValue?: string | ReadonlyArray<string>;
+    onValueChange?: ((v: string) => void) | ((v: ReadonlyArray<string>) => void);
     isCollapsible?: boolean;
   };
 
   const initial = defaultValue ?? (type === 'multiple' ? [] : '');
-  const [current, setCurrent] = useControlled<string | string[]>({
+  const [current, setCurrent] = useControlled<string | ReadonlyArray<string>>({
     controlled: value,
     default: initial,
-    onChange: onValueChange as (v: string | string[]) => void,
+    onChange: onValueChange as (v: string | ReadonlyArray<string>) => void,
   });
 
   const isOpen = useCallback(

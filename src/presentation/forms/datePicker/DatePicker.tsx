@@ -4,13 +4,14 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
-import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
+import { selectTriggerVariants, SelectSize, type SelectTriggerVariants } from '../select/Select.variants';
+import { InputState } from '../InputStyles';
 import { formatISODate, today } from '../DateExtensions';
 import { Calendar } from '../calendar';
 
 export interface DatePickerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'defaultValue'>,
-    SelectTriggerVariants {
+    Omit<SelectTriggerVariants, 'size' | 'state'> {
   value?: Temporal.PlainDate | null;
   defaultValue?: Temporal.PlainDate | null;
   onValueChange?: (date: Temporal.PlainDate | null) => void;
@@ -20,8 +21,12 @@ export interface DatePickerProps
   max?: Temporal.PlainDate | null;
   isDisabled?: (date: Temporal.PlainDate) => boolean;
   isInvalid?: boolean;
-  /** When `name` is set, a hidden input ships the ISO value with form submission. */
+  /** The hidden input name; when set, a hidden input ships the ISO value with form submission. */
   name?: string;
+  /** The trigger size. */
+  size?: SelectSize;
+  /** The validity surface. */
+  state?: InputState;
 }
 
 const defaultFormat = (d: Temporal.PlainDate) =>
@@ -57,7 +62,7 @@ export const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(functio
     default: false,
   });
 
-  const triggerState = state ?? (isInvalid ? 'invalid' : 'default');
+  const triggerState = state ?? (isInvalid ? InputState.Invalid : InputState.Default);
 
   return (
     <Popover open={open} onOpenChange={setOpen} placement="bottom-start" offset={6}>

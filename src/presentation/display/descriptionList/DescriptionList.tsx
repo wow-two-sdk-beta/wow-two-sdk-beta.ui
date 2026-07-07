@@ -6,12 +6,37 @@ export interface DescriptionListItem {
   value: ReactNode;
 }
 
+/** Defines the DescriptionList row layout. */
+export const DescriptionListLayout = {
+  /** Refers to label/value on the same line. */
+  Inline: 'inline',
+  /** Refers to label stacked above its value. */
+  Stacked: 'stacked',
+} as const;
+
+export type DescriptionListLayout =
+  (typeof DescriptionListLayout)[keyof typeof DescriptionListLayout];
+
+/** Defines the DescriptionList inter-row density. */
+export const DescriptionListDensity = {
+  /** Refers to tight row spacing. */
+  Sm: 'sm',
+  /** Refers to medium row spacing. */
+  Md: 'md',
+  /** Refers to loose row spacing. */
+  Lg: 'lg',
+} as const;
+
+export type DescriptionListDensity =
+  (typeof DescriptionListDensity)[keyof typeof DescriptionListDensity];
+
 export interface DescriptionListProps extends Omit<ComponentPropsWithoutRef<'dl'>, 'children'> {
-  items: DescriptionListItem[];
-  /** Layout direction. `inline` renders label/value on the same line; `stacked` puts label above. */
-  layout?: 'inline' | 'stacked';
-  /** Density between rows. Default `md`. */
-  density?: 'sm' | 'md' | 'lg';
+  items: ReadonlyArray<DescriptionListItem>;
+  /** The layout direction. `inline` renders label/value on the same line; `stacked` puts label above. */
+  layout?: DescriptionListLayout;
+
+  /** The density between rows. Default `md`. */
+  density?: DescriptionListDensity;
 }
 
 const ROW_GAP: Record<NonNullable<DescriptionListProps['density']>, string> = {

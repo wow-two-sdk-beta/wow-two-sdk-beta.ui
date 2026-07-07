@@ -1,6 +1,6 @@
 export {
   Sparkline,
+  SparklineTone,
+  SparklineVariant,
   type SparklineProps,
-  type SparklineTone,
-  type SparklineVariant,
 } from './Sparkline';

@@ -8,21 +8,28 @@ import { Heading } from '../heading/Heading';
 import { Text } from '../text/Text';
 
 export interface PricingCardProps extends ComponentPropsWithoutRef<'div'> {
-  /** Tier name (e.g. "Pro"). */
+  /** The tier name (e.g. "Pro"). */
   name: ReactNode;
-  /** Headline price (e.g. "$9"). */
+
+  /** The headline price (e.g. "$9"). */
   price: ReactNode;
-  /** Billing cadence beside the price (e.g. "/mo"). */
+
+  /** The billing cadence beside the price (e.g. "/mo"). */
   cadence?: ReactNode;
-  /** Short positioning line below the price. */
+
+  /** The short positioning line below the price. */
   tagline?: ReactNode;
-  /** Feature bullets — each rendered with a leading `Check`. */
+
+  /** The feature bullets — each rendered with a leading `Check`. */
   features: ReadonlyArray<ReactNode>;
-  /** Highlight this tier — primary border + shadow + a badge. */
+
+  /** The featured state — highlights this tier with a primary border + shadow + a badge. */
   featured?: boolean;
-  /** Badge label shown when `featured`. Default "Most popular". */
+
+  /** The badge label shown when `featured`. Default "Most popular". */
   badgeLabel?: ReactNode;
-  /** CTA slot pinned to the bottom — pass a `Button` (e.g. `<Button asChild><Link/></Button>`). */
+
+  /** The CTA slot pinned to the bottom — pass a `Button` (e.g. `<Button asChild><Link/></Button>`). */
   children?: ReactNode;
 }
 

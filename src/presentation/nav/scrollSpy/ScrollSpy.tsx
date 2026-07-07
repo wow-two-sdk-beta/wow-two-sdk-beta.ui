@@ -12,7 +12,7 @@ export interface UseScrollSpyOptions {
  * Uses `IntersectionObserver` — returns `null` until the first intersection.
  */
 export function useScrollSpy(
-  ids: string[],
+  ids: ReadonlyArray<string>,
   { rootMargin = '0px 0px -60% 0px', threshold = 0, root = null }: UseScrollSpyOptions = {},
 ): string | null {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export function useScrollSpy(
 }
 
 export interface ScrollSpyProps extends UseScrollSpyOptions {
-  ids: string[];
+  ids: ReadonlyArray<string>;
   onActiveChange?: (id: string | null) => void;
   children?: (ctx: { activeId: string | null }) => ReactNode;
 }

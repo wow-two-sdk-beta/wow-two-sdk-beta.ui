@@ -11,7 +11,21 @@ import {
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 
-export type KnobTone = 'brand' | 'success' | 'warning' | 'danger' | 'muted';
+/** Defines the accent palette of a knob's value arc. */
+export const KnobTone = {
+  /** Refers to the primary brand accent. */
+  Brand: 'brand',
+  /** Refers to the positive/confirmation accent. */
+  Success: 'success',
+  /** Refers to the caution accent. */
+  Warning: 'warning',
+  /** Refers to the destructive/error accent. */
+  Danger: 'danger',
+  /** Refers to the muted/neutral accent. */
+  Muted: 'muted',
+} as const;
+
+export type KnobTone = (typeof KnobTone)[keyof typeof KnobTone];
 
 const TONE_CLASS: Record<KnobTone, string> = {
   brand: 'text-primary',
@@ -58,7 +72,7 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
     largeStep = 0.1,
     size = 64,
     arcDegrees = 270,
-    tone = 'brand',
+    tone = KnobTone.Brand,
     format = (v) => v.toFixed(2),
     isValueShown = true,
     isDisabled,

@@ -4,13 +4,27 @@ import {
   type ElementType,
   type Ref,
 } from 'react';
-import { cn } from '../../../foundation/utils';
-import { textVariants, type TextVariants } from './Text.variants';
+import { cn, type Size } from '../../../foundation/utils';
+import {
+  textVariants,
+  type TextAlign,
+  type TextColor,
+  type TextVariants,
+  type TextWeight,
+} from './Text.variants';
 
 export interface TextProps
   extends Omit<ComponentPropsWithoutRef<'p'>, 'as' | 'color'>,
-    TextVariants {
+    Omit<TextVariants, 'size' | 'weight' | 'color' | 'align'> {
   as?: ElementType;
+  /** The font size step. */
+  size?: Size;
+  /** The font weight. */
+  weight?: TextWeight;
+  /** The color role. */
+  color?: TextColor;
+  /** The text alignment. */
+  align?: TextAlign;
 }
 
 /**

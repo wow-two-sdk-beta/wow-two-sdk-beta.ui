@@ -1,11 +1,40 @@
 import { forwardRef, useId, useMemo, type SVGAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 
-export type SparklineVariant = 'line' | 'area' | 'bar' | 'dot';
-export type SparklineTone = 'brand' | 'success' | 'warning' | 'danger' | 'muted' | 'current';
+/** Defines the Sparkline render style. */
+export const SparklineVariant = {
+  /** Refers to a connected line. */
+  Line: 'line',
+  /** Refers to a filled area under the line. */
+  Area: 'area',
+  /** Refers to vertical bars. */
+  Bar: 'bar',
+  /** Refers to discrete dots. */
+  Dot: 'dot',
+} as const;
+
+export type SparklineVariant = (typeof SparklineVariant)[keyof typeof SparklineVariant];
+
+/** Defines the Sparkline color tone. */
+export const SparklineTone = {
+  /** Refers to the primary brand color. */
+  Brand: 'brand',
+  /** Refers to the positive / confirmation color. */
+  Success: 'success',
+  /** Refers to the caution color. */
+  Warning: 'warning',
+  /** Refers to the destructive / error color. */
+  Danger: 'danger',
+  /** Refers to the muted color. */
+  Muted: 'muted',
+  /** Refers to the inherited `currentColor`. */
+  Current: 'current',
+} as const;
+
+export type SparklineTone = (typeof SparklineTone)[keyof typeof SparklineTone];
 
 export interface SparklineProps extends Omit<SVGAttributes<SVGSVGElement>, 'width' | 'height'> {
-  data: number[];
+  data: ReadonlyArray<number>;
   variant?: SparklineVariant;
   width?: number;
   height?: number;
@@ -13,7 +42,7 @@ export interface SparklineProps extends Omit<SVGAttributes<SVGSVGElement>, 'widt
   min?: number;
   max?: number;
   hasLast?: boolean;
-  /** Accessible label summarizing the trend. */
+  /** The accessible label summarizing the trend. */
   ariaLabel?: string;
 }
 

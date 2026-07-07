@@ -3,9 +3,10 @@ import { cn } from '../../../foundation/utils';
 import { Inline } from '../../layout/inline';
 
 export interface MetaInlineProps extends ComponentPropsWithoutRef<'div'> {
-  /** Right-aligned slot — typically small action buttons. */
+  /** The right-aligned slot — typically small action buttons. */
   actions?: ReactNode;
-  /** Gap between left-side meta items. Default `2`. */
+
+  /** The gap between left-side meta items. Default `2`. */
   gap?: '1' | '2' | '3';
 }
 

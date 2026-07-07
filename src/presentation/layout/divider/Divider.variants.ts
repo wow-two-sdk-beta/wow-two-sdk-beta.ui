@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, type VariantProps, Orientation } from '../../../foundation/utils';
 
 /**
  * Provides the rule geometry for `Divider`. A horizontal divider is a full-width
@@ -20,5 +20,13 @@ export const dividerVariants = tv({
 
 export type DividerVariants = VariantProps<typeof dividerVariants>;
 
-/** Represents the axis of a `Divider` (`horizontal` · `vertical`). */
-export type DividerOrientation = NonNullable<DividerVariants['orientation']>;
+/* Compile-time lock: shared `Orientation` values ≡ tv `orientation` keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertDividerOrientation: AssertExact<
+  Orientation,
+  NonNullable<VariantProps<typeof dividerVariants>['orientation']>
+> = true;
+void _assertDividerOrientation;
+
+/** Represents the axis of a `Divider` — the shared {@link Orientation} vocabulary. */
+export type DividerOrientation = Orientation;

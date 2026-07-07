@@ -2,11 +2,13 @@ import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn } from '../../../foundation/utils';
 
 export interface CharacterCountProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
-  /** Current length. */
+  /** The current length. */
   value: number;
-  /** Maximum allowed length (also flips text to destructive when exceeded). */
+
+  /** The maximum allowed length (also flips text to destructive when exceeded). */
   max: number;
-  /** Show as `current / max` (default) or just `current`. */
+
+  /** The display mode — `current / max` (default) or just `current`. */
   isMaxShown?: boolean;
 }
 

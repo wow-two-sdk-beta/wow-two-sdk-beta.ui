@@ -2,6 +2,31 @@
 
 import { tv, type VariantProps } from '../tv';
 import { Tones } from '../Tones';
+import { Tone } from '../StyleTokens';
+
+/** Defines the visual-recipe axis of a surface (solid · soft · surface · outline · glass · etc.). */
+export const SurfaceVariant = {
+  /** Refers to an opaque fill, no border, light shadow. */
+  Solid: 'solid',
+  /** Refers to a muted/tinted fill, no border, light shadow. */
+  Soft: 'soft',
+  /** Refers to an opaque fill + visible border + medium shadow. */
+  Surface: 'surface',
+  /** Refers to a transparent fill + visible border. */
+  Outline: 'outline',
+  /** Refers to a translucent + blur fill, no border, medium shadow. */
+  Glass: 'glass',
+  /** Refers to a translucent + blur fill + subtle border. */
+  GlassOutline: 'glass-outline',
+  /** Refers to an opaque fill, no border, heavy shadow. */
+  Elevated: 'elevated',
+  /** Refers to an opaque fill, no border, no shadow. */
+  Flat: 'flat',
+  /** Refers to a low-alpha tinted fill + neutral border, no shadow. */
+  Subtle: 'subtle',
+} as const;
+
+export type SurfaceVariant = (typeof SurfaceVariant)[keyof typeof SurfaceVariant];
 
 /** Provides the tailwind-variants config for every "block with a visual treatment" surface. */
 export const surfaceVariants = tv({
@@ -137,11 +162,21 @@ export const surfaceVariants = tv({
 /** Represents the union of every surface variant prop. */
 export type SurfaceVariants = VariantProps<typeof surfaceVariants>;
 
-/** Represents the visual-recipe axis (solid · soft · surface · outline · glass · etc.). */
-export type SurfaceVariant = NonNullable<SurfaceVariants['variant']>;
+/* Compile-time lock: enum values ≡ tv variant/tone value-sets (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertSurfaceVariant: AssertExact<
+  SurfaceVariant,
+  NonNullable<VariantProps<typeof surfaceVariants>['variant']>
+> = true;
+const _assertSurfaceTone: AssertExact<
+  SurfaceTone,
+  NonNullable<VariantProps<typeof surfaceVariants>['tone']>
+> = true;
+void _assertSurfaceVariant;
+void _assertSurfaceTone;
 
-/** Represents the semantic colour axis (neutral · primary · danger · success · warning · info). */
-export type SurfaceTone = NonNullable<SurfaceVariants['tone']>;
+/** Represents the semantic colour axis — identical to the shared `Tone` (neutral · primary · danger · success · warning · info). */
+export type SurfaceTone = Tone;
 
 /** Represents the corner-roundness axis (none · sm · md · lg · xl · 2xl · full). */
 export type SurfaceRadius = NonNullable<SurfaceVariants['radius']>;

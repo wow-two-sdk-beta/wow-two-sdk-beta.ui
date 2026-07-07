@@ -1,1 +1,6 @@
-export { MetricChip, type MetricChipProps } from './MetricChip';
+export {
+  MetricChip,
+  MetricChipTone,
+  MetricChipSize,
+  type MetricChipProps,
+} from './MetricChip';

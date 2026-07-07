@@ -2,12 +2,16 @@ import { forwardRef, type InputHTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface MaskedInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'value' | 'defaultValue' | 'onChange'>,
-    InputBaseVariants {
-  /** Mask pattern. `#` = digit, `A` = alpha, `*` = alphanumeric, anything else = literal. */
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+  /** The mask pattern. `#` = digit, `A` = alpha, `*` = alphanumeric, anything else = literal. */
   mask: string;
   value?: string;
   defaultValue?: string;
@@ -66,7 +70,7 @@ export const MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
     ref,
   ) => {
     const ctx = useFormControl();
-    const finalState = state ?? (ctx?.isInvalid ? 'invalid' : 'default');
+    const finalState = state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default);
     const [val, setVal] = useControlled({
       controlled: value,
       default: defaultValue ?? '',

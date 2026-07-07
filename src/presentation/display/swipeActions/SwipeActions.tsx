@@ -14,9 +14,10 @@ import { cn } from '../../../foundation/utils';
 export interface SwipeActionsProps extends HTMLAttributes<HTMLDivElement> {
   left?: ReactNode;
   right?: ReactNode;
-  /** px the user must drag before the row snaps open. */
+  /** The drag distance (px) the user must exceed before the row snaps open. */
   threshold?: number;
-  /** Used to compute snap distance. Width per action button (px). */
+
+  /** The width per action button (px) — used to compute snap distance. */
   actionWidth?: number;
   isDisabled?: boolean;
   children: ReactNode;

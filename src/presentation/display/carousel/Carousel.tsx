@@ -45,7 +45,7 @@ export interface CarouselProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onC
   onIndexChange?: (index: number) => void;
   canLoop?: boolean;
   autoPlay?: number;
-  /** When set, overrides the automatic count (use for virtualised slides). */
+  /** The explicit slide count — overrides the automatic count (use for virtualised slides). */
   slidesCount?: number;
   children: ReactNode;
 }
@@ -129,7 +129,7 @@ const CarouselRoot = forwardRef<HTMLDivElement, CarouselProps>(function Carousel
 });
 
 export interface CarouselViewportProps extends HTMLAttributes<HTMLDivElement> {
-  /** Default `'Carousel'`. */
+  /** The accessible label for the viewport. Default `'Carousel'`. */
   'aria-label'?: string;
 }
 
@@ -217,7 +217,7 @@ export const CarouselSlide = forwardRef<HTMLDivElement, CarouselSlideProps>(
 );
 
 export interface CarouselNavButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Default `'Previous slide'` / `'Next slide'`. */
+  /** The accessible label for the nav button. Default `'Previous slide'` / `'Next slide'`. */
   'aria-label'?: string;
 }
 

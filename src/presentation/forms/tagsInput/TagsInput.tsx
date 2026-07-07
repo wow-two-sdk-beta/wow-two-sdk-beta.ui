@@ -10,27 +10,31 @@ import {
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Tag, type TagVariants } from '../../display/tag';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface TagsInputProps
   extends Omit<
       InputHTMLAttributes<HTMLInputElement>,
       'value' | 'defaultValue' | 'onChange' | 'size'
     >,
-    InputBaseVariants {
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (tags: string[]) => void;
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+  value?: ReadonlyArray<string>;
+  defaultValue?: ReadonlyArray<string>;
+  onValueChange?: (tags: ReadonlyArray<string>) => void;
   inputValue?: string;
   onInputChange?: (input: string) => void;
-  /** Characters that commit the current input. Enter and Tab always do. */
-  delimiters?: string[];
-  /** Predicate gating committed tags. Default: non-empty after trim. */
+  /** The characters that commit the current input. Enter and Tab always do. */
+  delimiters?: ReadonlyArray<string>;
+  /** The predicate gating committed tags. Default: non-empty after trim. */
   validate?: (tag: string) => boolean;
   allowsDuplicates?: boolean;
   max?: number;
   isInvalid?: boolean;
-  /** Hidden input emits comma-joined value. */
+  /** The hidden input name; the hidden input emits the comma-joined value. */
   name?: string;
   tagVariant?: TagVariants['variant'];
 }
@@ -77,7 +81,7 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [pendingDelete, setPendingDelete] = useState(false);
-  const state = isInvalid ? 'invalid' : 'default';
+  const state = isInvalid ? InputState.Invalid : InputState.Default;
 
   const commit = useCallback(
     (raw: string) => {

@@ -3,18 +3,34 @@ import { cn } from '../../../foundation/utils';
 import { Heading } from '../heading/Heading';
 import { Text } from '../text/Text';
 
+/** Defines the SectionHeader title size step. */
+export const SectionHeaderSize = {
+  /** Refers to the medium step. */
+  Md: 'md',
+  /** Refers to the large step. */
+  Lg: 'lg',
+  /** Refers to the extra-large step. */
+  Xl: 'xl',
+  /** Refers to the 2x-large step. */
+  Xxl: '2xl',
+} as const;
+
+export type SectionHeaderSize = (typeof SectionHeaderSize)[keyof typeof SectionHeaderSize];
+
 export interface SectionHeaderProps extends Omit<ComponentPropsWithoutRef<'header'>, 'title'> {
-  /** Heading copy. */
+  /** The heading copy. */
   title: ReactNode;
-  /** Optional description below the title. */
+
+  /** The optional description below the title. */
   description?: ReactNode;
-  /** Right-aligned actions slot — typically Button(s). Cross-domain by design,
-   *  passed as content. */
+
+  /** The right-aligned actions slot — typically Button(s). Cross-domain by design, passed as content. */
   actions?: ReactNode;
-  /** Heading element / size. Default level 2, size lg. */
+
+  /** The heading element / size. Default level 2, size lg. */
   level?: 1 | 2 | 3 | 4 | 5 | 6;
-  size?: 'md' | 'lg' | 'xl' | '2xl';
-  /** Add a bottom border. Default true. */
+  size?: SectionHeaderSize;
+  /** The bottom border's visibility. Default true. */
   isBordered?: boolean;
 }
 

@@ -42,9 +42,9 @@ export interface TreeProps extends Omit<HTMLAttributes<HTMLUListElement>, 'defau
   selectedValue?: string | null;
   defaultSelectedValue?: string | null;
   onSelectionChange?: (value: string) => void;
-  expanded?: string[];
-  defaultExpanded?: string[];
-  onExpandedChange?: (values: string[]) => void;
+  expanded?: ReadonlyArray<string>;
+  defaultExpanded?: ReadonlyArray<string>;
+  onExpandedChange?: (values: ReadonlyArray<string>) => void;
 }
 
 const TreeRoot = forwardRef<HTMLUListElement, TreeProps>(function Tree(
@@ -66,7 +66,7 @@ const TreeRoot = forwardRef<HTMLUListElement, TreeProps>(function Tree(
     default: defaultSelectedValue ?? null,
     onChange: onSelectionChange as ((v: string | null) => void) | undefined,
   });
-  const [expandedList, setExpandedList] = useControlled<string[]>({
+  const [expandedList, setExpandedList] = useControlled<ReadonlyArray<string>>({
     controlled: expanded,
     default: defaultExpanded ?? [],
     onChange: onExpandedChange,

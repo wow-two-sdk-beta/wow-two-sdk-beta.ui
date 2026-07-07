@@ -9,12 +9,16 @@ import { Search, X } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface SearchInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
-    InputBaseVariants {
-  /** Show a clear (×) button when the input has a value. Default true. */
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+  /** The clearable state, showing a clear (×) button when the input has a value. Default true. */
   isClearable?: boolean;
   onClear?: () => void;
 }
@@ -43,7 +47,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     forwardedRef,
   ) => {
     const ctx = useFormControl();
-    const finalState = state ?? (ctx?.isInvalid ? 'invalid' : 'default');
+    const finalState = state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default);
     const isDisabled = disabled ?? ctx?.isDisabled ?? false;
     const inputRef = useRef<HTMLInputElement | null>(null);
     useImperativeHandle(forwardedRef, () => inputRef.current as HTMLInputElement);

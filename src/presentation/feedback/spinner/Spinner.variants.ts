@@ -1,4 +1,18 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { Size, tv, type VariantProps } from '../../../foundation/utils';
+
+/** Defines the Spinner color tone. */
+export const SpinnerTone = {
+  /** Refers to the default muted-foreground tone. */
+  Default: 'default',
+  /** Refers to the brand / primary tone. */
+  Brand: 'brand',
+  /** Refers to the low-emphasis border tone. */
+  Muted: 'muted',
+  /** Refers to inheriting the current text color. */
+  Current: 'current',
+} as const;
+
+export type SpinnerTone = (typeof SpinnerTone)[keyof typeof SpinnerTone];
 
 export const spinnerVariants = tv({
   base: 'inline-block animate-spin rounded-full border-current border-b-transparent',
@@ -24,3 +38,16 @@ export const spinnerVariants = tv({
 });
 
 export type SpinnerVariants = VariantProps<typeof spinnerVariants>;
+
+/* Compile-time lock: adopted/local enum values ≡ tv axis keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertSpinnerSize: AssertExact<
+  Size,
+  NonNullable<VariantProps<typeof spinnerVariants>['size']>
+> = true;
+void _assertSpinnerSize;
+const _assertSpinnerTone: AssertExact<
+  SpinnerTone,
+  NonNullable<VariantProps<typeof spinnerVariants>['tone']>
+> = true;
+void _assertSpinnerTone;

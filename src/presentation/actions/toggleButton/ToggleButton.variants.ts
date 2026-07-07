@@ -1,4 +1,22 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, ColorTone, type VariantProps } from '../../../foundation/utils';
+
+/** Defines the ToggleButton's press-state surface style. */
+export const ToggleButtonVariant = {
+  /** Refers to a borderless, transparent surface (text-color only). */
+  Ghost: 'ghost',
+  /** Refers to a muted/tinted fill on press. */
+  Soft: 'soft',
+  /** Refers to a bordered surface that swaps to a tone border on press. */
+  Outline: 'outline',
+  /** Refers to a bordered surface that fills with the tone on press. */
+  Solid: 'solid',
+  /** Refers to a translucent glass wash + blur. */
+  Glass: 'glass',
+  /** Refers to a glass surface with a hairline border. */
+  GlassSurface: 'glass-surface',
+} as const;
+
+export type ToggleButtonVariant = (typeof ToggleButtonVariant)[keyof typeof ToggleButtonVariant];
 
 /* Variant × tone matrix for ToggleButton's press-state appearance. Applied on top of Button (variant='ghost' tone='neutral' baseline). Press state is keyed off `data-pressed="true"` — distinct from Button's `data-state` (loading/skeleton/disabled). */
 export const toggleButtonVariants = tv({
@@ -70,3 +88,14 @@ export const toggleButtonVariants = tv({
 });
 
 export type ToggleButtonVariants = VariantProps<typeof toggleButtonVariants>;
+
+/* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertToggleButtonVariant: AssertExact<
+  ToggleButtonVariant,
+  NonNullable<ToggleButtonVariants['variant']>
+> = true;
+const _assertToggleButtonTone: AssertExact<ColorTone, NonNullable<ToggleButtonVariants['tone']>> =
+  true;
+void _assertToggleButtonVariant;
+void _assertToggleButtonTone;

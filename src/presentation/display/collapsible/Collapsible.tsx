@@ -101,7 +101,7 @@ export const CollapsibleTrigger = forwardRef<HTMLButtonElement, CollapsibleTrigg
 );
 
 export interface CollapsibleContentProps extends HTMLAttributes<HTMLDivElement> {
-  /** Render hidden content but keep it in the DOM (for animations). */
+  /** The force-mounted mode — renders hidden content but keeps it in the DOM (for animations). */
   isForceMounted?: boolean;
   children: ReactNode;
 }

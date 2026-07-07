@@ -10,10 +10,37 @@ import {
 } from 'react';
 import { cn } from '../../../foundation/utils';
 
-export type TableDensity = 'compact' | 'cozy' | 'comfortable' | 'roomy';
+/** Defines the Table row density. */
+export const TableDensity = {
+  /** Refers to the tightest padding. */
+  Compact: 'compact',
+  /** Refers to the default padding. */
+  Cozy: 'cozy',
+  /** Refers to relaxed padding. */
+  Comfortable: 'comfortable',
+  /** Refers to the roomiest padding. */
+  Roomy: 'roomy',
+} as const;
 
-/** Radius applied to the scroll wrapper. Mirrors the shared surface radius scale. */
-export type TableRadius = 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+export type TableDensity = (typeof TableDensity)[keyof typeof TableDensity];
+
+/** Defines the corner radius applied to the Table scroll wrapper. */
+export const TableRadius = {
+  /** Refers to square corners. */
+  None: 'none',
+  /** Refers to a small radius. */
+  Sm: 'sm',
+  /** Refers to a medium radius. */
+  Md: 'md',
+  /** Refers to a large radius. */
+  Lg: 'lg',
+  /** Refers to an extra-large radius. */
+  Xl: 'xl',
+  /** Refers to a 2x-large radius. */
+  Xxl: '2xl',
+} as const;
+
+export type TableRadius = (typeof TableRadius)[keyof typeof TableRadius];
 
 interface TableContextValue {
   isStriped: boolean;
@@ -48,9 +75,10 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   isHoverable?: boolean;
   density?: TableDensity;
   isBare?: boolean;
-  /** Corner radius of the scroll wrapper (ignored when `isBare`). */
+  /** The corner radius of the scroll wrapper (ignored when `isBare`). */
   radius?: TableRadius;
-  /** Classes applied to the scroll wrapper (ignored when `isBare`). `className` still lands on the inner `<table>`. */
+
+  /** The classes applied to the scroll wrapper (ignored when `isBare`). `className` still lands on the inner `<table>`. */
   containerClassName?: string;
   children: ReactNode;
 }
@@ -96,8 +124,15 @@ const TableRoot = forwardRef<HTMLTableElement, TableProps>(function Table(
   );
 });
 
-/** Header typography treatment. `uppercase` is the default look; `plain` keeps normal-case `text-sm` heads. */
-export type TableHeadVariant = 'uppercase' | 'plain';
+/** Defines the Table header typography treatment. */
+export const TableHeadVariant = {
+  /** Refers to the uppercase, tracked default. */
+  Uppercase: 'uppercase',
+  /** Refers to normal-case `text-sm` heads. */
+  Plain: 'plain',
+} as const;
+
+export type TableHeadVariant = (typeof TableHeadVariant)[keyof typeof TableHeadVariant];
 
 const HEAD_VARIANT: Record<TableHeadVariant, string> = {
   uppercase: 'text-xs font-semibold uppercase tracking-wide text-muted-foreground',
@@ -105,7 +140,7 @@ const HEAD_VARIANT: Record<TableHeadVariant, string> = {
 };
 
 export interface TableHeadProps extends HTMLAttributes<HTMLTableSectionElement> {
-  /** Typography treatment for the header row. Defaults to `uppercase` (current look). */
+  /** The typography treatment for the header row. Defaults to `uppercase` (current look). */
   headVariant?: TableHeadVariant;
 }
 

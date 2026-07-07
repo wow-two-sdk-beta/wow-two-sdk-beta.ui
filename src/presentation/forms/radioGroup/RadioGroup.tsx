@@ -1,5 +1,5 @@
 import { Children, cloneElement, forwardRef, isValidElement, useId, type HTMLAttributes, type ReactElement, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Fieldset } from '../fieldset/Fieldset';
 import { Legend } from '../legend/Legend';
@@ -7,13 +7,14 @@ import type { RadioFieldProps } from '../radioField/RadioField';
 
 interface RadioGroupProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, 'onChange' | 'defaultValue'> {
   legend?: ReactNode;
-  /** Shared `name` (required for native radio behavior). Auto-generated if omitted. */
+  /** The shared `name` (required for native radio behavior). Auto-generated if omitted. */
   name?: string;
   value?: string | null;
   defaultValue?: string | null;
   onValueChange?: (next: string | null) => void;
   isDisabled?: boolean;
-  orientation?: 'horizontal' | 'vertical';
+  /** The layout direction. Default `vertical`. */
+  orientation?: Orientation;
   children: ReactNode;
 }
 
@@ -34,7 +35,7 @@ export const RadioGroup = forwardRef<HTMLFieldSetElement, RadioGroupProps>(
       defaultValue,
       onValueChange,
       isDisabled,
-      orientation = 'vertical',
+      orientation = Orientation.Vertical,
       className,
       children,
       ...props
@@ -52,7 +53,7 @@ export const RadioGroup = forwardRef<HTMLFieldSetElement, RadioGroupProps>(
     return (
       <Fieldset ref={ref} disabled={isDisabled} className={cn(className)} {...props}>
         {legend && <Legend>{legend}</Legend>}
-        <div className={cn('flex gap-3', orientation === 'vertical' ? 'flex-col' : 'flex-row flex-wrap')}>
+        <div className={cn('flex gap-3', orientation === Orientation.Vertical ? 'flex-col' : 'flex-row flex-wrap')}>
           {Children.map(children, (child) => {
             if (!isValidElement(child)) return child;
             const c = child as ReactElement<ChildLike>;

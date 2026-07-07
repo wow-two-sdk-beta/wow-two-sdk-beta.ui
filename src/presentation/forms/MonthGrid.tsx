@@ -38,24 +38,30 @@ export interface MonthGridDayProps
     ButtonHTMLAttributes<HTMLButtonElement>,
     'className' | 'onPointerEnter' | 'onPointerLeave' | 'aria-selected'
   > {
-  /** Extra `data-*` attributes (data-selected, data-range-start, etc.). */
+  /** The extra `data-*` attributes (data-selected, data-range-start, etc.). */
   [key: `data-${string}`]: string | boolean | undefined;
 }
 
 export interface MonthGridProps {
-  /** First day of the visible month (use `startOfMonth(date)`). */
+  /** The first day of the visible month (use `startOfMonth(date)`). */
   viewMonth: Temporal.PlainDate;
-  /** Called when prev/next steps the visible month. */
+
+  /** Emits the new visible month when prev/next steps it. */
   onViewMonthChange: (date: Temporal.PlainDate) => void;
+
   /** The currently focused day (cell tabIndex=0). */
   focusedDate: Temporal.PlainDate;
-  /** Called by keyboard navigation. */
+
+  /** Emits the newly focused day from keyboard navigation. */
   onFocusedDateChange: (date: Temporal.PlainDate) => void;
-  /** Predicate marking a day as disabled. */
+
+  /** The predicate marking a day as disabled. */
   isDayDisabled?: (date: Temporal.PlainDate) => boolean;
-  /** Click / Enter / Space activation. */
+
+  /** Emits the activated day on click / Enter / Space. */
   onDayActivate?: (date: Temporal.PlainDate, meta: { outOfMonth: boolean }) => void;
-  /** Extra per-day attributes for selection styling and hover handlers. */
+
+  /** The extra per-day attributes for selection styling and hover handlers. */
   dayProps?: (
     date: Temporal.PlainDate,
     meta: { outOfMonth: boolean },

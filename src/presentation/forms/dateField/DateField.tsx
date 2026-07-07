@@ -3,7 +3,7 @@ import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 import { formatISODate, parseISODate } from '../DateExtensions';
 
 export interface DateFieldProps
@@ -11,7 +11,11 @@ export interface DateFieldProps
       InputHTMLAttributes<HTMLInputElement>,
       'type' | 'value' | 'defaultValue' | 'onChange' | 'min' | 'max' | 'size'
     >,
-    InputBaseVariants {
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
   value?: Temporal.PlainDate | null;
   defaultValue?: Temporal.PlainDate | null;
   onValueChange?: (date: Temporal.PlainDate | null) => void;
@@ -42,7 +46,7 @@ export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(function D
       min={formatISODate(min)}
       max={formatISODate(max)}
       onChange={(e) => setCurrent(parseISODate(e.target.value))}
-      className={cn(inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? 'invalid' : 'default') }), className)}
+      className={cn(inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default) }), className)}
       {...rest}
     />
   );

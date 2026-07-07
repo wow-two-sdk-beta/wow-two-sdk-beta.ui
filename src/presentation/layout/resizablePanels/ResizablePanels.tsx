@@ -14,7 +14,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 
 interface PanelInfo {
@@ -25,9 +25,9 @@ interface PanelInfo {
 }
 
 interface ResizableContextValue {
-  orientation: 'horizontal' | 'vertical';
-  sizes: number[];
-  panels: React.MutableRefObject<PanelInfo[]>;
+  orientation: Orientation;
+  sizes: ReadonlyArray<number>;
+  panels: React.MutableRefObject<Array<PanelInfo>>;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   beginDrag: (separatorIndex: number, event: ReactMouseEvent) => void;
   nudge: (separatorIndex: number, deltaPct: number) => void;
@@ -43,10 +43,11 @@ function useResizableContext() {
 }
 
 export interface ResizablePanelsProps extends HTMLAttributes<HTMLDivElement> {
-  orientation?: 'horizontal' | 'vertical';
-  defaultSizes?: number[];
-  sizes?: number[];
-  onSizesChange?: (sizes: number[]) => void;
+  /** The split axis — `horizontal` (side-by-side panels) or `vertical` (stacked). Default `horizontal`. */
+  orientation?: Orientation;
+  defaultSizes?: ReadonlyArray<number>;
+  sizes?: ReadonlyArray<number>;
+  onSizesChange?: (sizes: ReadonlyArray<number>) => void;
   children: ReactNode;
 }
 
@@ -62,10 +63,10 @@ function countPanels(children: ReactNode): number {
 
 const ResizablePanelsRoot = forwardRef<HTMLDivElement, ResizablePanelsProps>(
   function ResizablePanels(
-    { orientation = 'horizontal', defaultSizes, sizes: sizesProp, onSizesChange, className, children, ...rest },
+    { orientation = Orientation.Horizontal, defaultSizes, sizes: sizesProp, onSizesChange, className, children, ...rest },
     forwardedRef,
   ) {
-    const panels = useRef<PanelInfo[]>([]);
+    const panels = useRef<Array<PanelInfo>>([]);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const dragCleanupRef = useRef<(() => void) | null>(null);
     const panelCount = countPanels(children);
@@ -78,7 +79,7 @@ const ResizablePanelsRoot = forwardRef<HTMLDivElement, ResizablePanelsProps>(
         ? defaultSizes
         : Array(panelCount).fill(100 / Math.max(panelCount, 1));
 
-    const [sizes, setSizes] = useControlled<number[]>({
+    const [sizes, setSizes] = useControlled<ReadonlyArray<number>>({
       controlled: sizesProp,
       default: initialSizes,
       onChange: onSizesChange,
@@ -138,14 +139,14 @@ const ResizablePanelsRoot = forwardRef<HTMLDivElement, ResizablePanelsProps>(
         const startX = event.clientX;
         const startY = event.clientY;
         const rect = container.getBoundingClientRect();
-        const total = orientation === 'horizontal' ? rect.width : rect.height;
+        const total = orientation === Orientation.Horizontal ? rect.width : rect.height;
         if (total === 0) return;
 
         const startSizes = sizes.slice();
 
         const onMove = (e: MouseEvent) => {
           const deltaPx =
-            orientation === 'horizontal' ? e.clientX - startX : e.clientY - startY;
+            orientation === Orientation.Horizontal ? e.clientX - startX : e.clientY - startY;
           const deltaPct = (deltaPx / total) * 100;
           // Recompute against the start state, not the live state, to prevent drift.
           const a = separatorIndex;
@@ -183,7 +184,7 @@ const ResizablePanelsRoot = forwardRef<HTMLDivElement, ResizablePanelsProps>(
           dragCleanupRef.current = null;
         };
 
-        document.body.style.cursor = orientation === 'horizontal' ? 'col-resize' : 'row-resize';
+        document.body.style.cursor = orientation === Orientation.Horizontal ? 'col-resize' : 'row-resize';
         document.body.style.userSelect = 'none';
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup', onUp);
@@ -263,7 +264,7 @@ const ResizablePanelsRoot = forwardRef<HTMLDivElement, ResizablePanelsProps>(
           data-orientation={orientation}
           className={cn(
             'flex h-full w-full',
-            orientation === 'horizontal' ? 'flex-row' : 'flex-col',
+            orientation === Orientation.Horizontal ? 'flex-row' : 'flex-col',
             className,
           )}
           {...rest}
@@ -311,7 +312,7 @@ function ResizablePanelInner({
       data-panel-index={index}
       className={cn('overflow-auto', className)}
       style={
-        ctx.orientation === 'horizontal'
+        ctx.orientation === Orientation.Horizontal
           ? { width: `${size}%`, height: '100%' }
           : { height: `${size}%`, width: '100%' }
       }
@@ -367,7 +368,7 @@ function ResizableSeparatorInner({
     onKeyDown?.(e);
     if (e.defaultPrevented || isDisabled) return;
     const step = e.shiftKey ? 10 : 1;
-    if (ctx.orientation === 'horizontal') {
+    if (ctx.orientation === Orientation.Horizontal) {
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
         ctx.nudge(index, -step);
@@ -393,7 +394,7 @@ function ResizableSeparatorInner({
   return (
     <div
       role="separator"
-      aria-orientation={ctx.orientation === 'horizontal' ? 'vertical' : 'horizontal'}
+      aria-orientation={ctx.orientation === Orientation.Horizontal ? 'vertical' : 'horizontal'}
       aria-valuenow={Math.round(ariaValueNow)}
       aria-valuemin={panelBefore?.minSize ?? 0}
       aria-valuemax={panelBefore?.maxSize ?? 100}
@@ -409,7 +410,7 @@ function ResizableSeparatorInner({
       }}
       className={cn(
         'flex shrink-0 items-center justify-center bg-border transition-colors',
-        ctx.orientation === 'horizontal'
+        ctx.orientation === Orientation.Horizontal
           ? 'w-1 cursor-col-resize hover:bg-border-strong data-[dragging]:bg-primary'
           : 'h-1 cursor-row-resize hover:bg-border-strong data-[dragging]:bg-primary',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',

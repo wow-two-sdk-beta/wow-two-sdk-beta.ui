@@ -3,9 +3,10 @@ import { createPortal } from 'react-dom';
 
 export interface PortalProps {
   children: ReactNode;
-  /** Container to render into. Default: `document.body`. */
+  /** The container to render into. Default: `document.body`. */
   container?: HTMLElement | null;
-  /** Optional named layer — sets `data-portal-name` on the wrapper. */
+
+  /** The optional named layer — sets `data-portal-name` on the wrapper. */
   name?: string;
 }
 

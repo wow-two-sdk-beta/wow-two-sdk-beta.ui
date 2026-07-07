@@ -1,4 +1,40 @@
-import { tv, Tones, type VariantProps } from '../../../foundation/utils';
+import { tv, Tones, ColorTone, type VariantProps } from '../../../foundation/utils';
+
+/** Defines the Button visual surface style. */
+export const ButtonVariant = {
+  /** Refers to an opaque, filled surface. */
+  Solid: 'solid',
+  /** Refers to a muted/tinted fill. */
+  Soft: 'soft',
+  /** Refers to a subtle tinted fill + tone-colored border. */
+  Surface: 'surface',
+  /** Refers to a transparent fill + tone border. */
+  Outline: 'outline',
+  /** Refers to a borderless, transparent-at-rest button. */
+  Ghost: 'ghost',
+  /** Refers to a borderless button that reveals a bordered chip on hover/focus. */
+  Reveal: 'reveal',
+  /** Refers to an inline text link. */
+  Link: 'link',
+  /** Refers to a translucent glass wash + blur. */
+  Glass: 'glass',
+  /** Refers to a glass surface with a hairline border. */
+  GlassSurface: 'glass-surface',
+} as const;
+
+export type ButtonVariant = (typeof ButtonVariant)[keyof typeof ButtonVariant];
+
+/** Defines the Button silhouette. */
+export const ButtonShape = {
+  /** Refers to the default (text-width) shape. */
+  Default: 'default',
+  /** Refers to a square (1:1) icon shape. */
+  Square: 'square',
+  /** Refers to a circular icon shape. */
+  Circle: 'circle',
+} as const;
+
+export type ButtonShape = (typeof ButtonShape)[keyof typeof ButtonShape];
 
 /** Button visual surface — see Button.standard.md + Button.spec.md. */
 export const buttonVariants = tv({
@@ -150,3 +186,21 @@ export const buttonVariants = tv({
 });
 
 export type ButtonVariants = VariantProps<typeof buttonVariants>;
+
+/* Compile-time lock: enum values ≡ tv variant/tone/shape value-sets (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertButtonVariant: AssertExact<
+  ButtonVariant,
+  NonNullable<VariantProps<typeof buttonVariants>['variant']>
+> = true;
+const _assertButtonTone: AssertExact<
+  ColorTone,
+  NonNullable<VariantProps<typeof buttonVariants>['tone']>
+> = true;
+const _assertButtonShape: AssertExact<
+  ButtonShape,
+  NonNullable<VariantProps<typeof buttonVariants>['shape']>
+> = true;
+void _assertButtonVariant;
+void _assertButtonTone;
+void _assertButtonShape;

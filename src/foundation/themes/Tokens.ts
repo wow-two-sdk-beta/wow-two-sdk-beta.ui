@@ -82,7 +82,7 @@ export interface ToneSlots {
  * constants the type is built from, so it can never drift from `SemanticToken`.
  * Used by the validator/emitter to iterate exhaustively.
  */
-export const SEMANTIC_TOKENS: readonly SemanticToken[] = [
+export const SEMANTIC_TOKENS: ReadonlyArray<SemanticToken> = [
   ...SURFACE_TOKENS,
   ...TONE_FAMILIES.flatMap(
     (f) =>

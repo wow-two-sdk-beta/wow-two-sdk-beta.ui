@@ -3,12 +3,16 @@ import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface PasswordInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'>,
-    InputBaseVariants {
-  /** Whether to render the visibility-toggle button. Default true. */
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+  /** The visibility-toggle button's presence. Default true. */
   hasToggle?: boolean;
 }
 
@@ -34,7 +38,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   ) => {
     const [visible, setVisible] = useState(false);
     const ctx = useFormControl();
-    const finalState = state ?? (ctx?.isInvalid ? 'invalid' : 'default');
+    const finalState = state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default);
     const isDisabled = disabled ?? ctx?.isDisabled ?? false;
 
     return (

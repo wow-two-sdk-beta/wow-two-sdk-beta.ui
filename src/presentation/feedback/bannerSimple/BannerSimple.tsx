@@ -1,10 +1,13 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type Severity } from '../../../foundation/utils';
 import { bannerSimpleVariants, type BannerSimpleVariants } from './BannerSimple.variants';
 
 export interface BannerSimpleProps
   extends ComponentPropsWithoutRef<'div'>,
-    BannerSimpleVariants {}
+    Omit<BannerSimpleVariants, 'severity'> {
+  /** The semantic severity palette. */
+  severity?: Severity;
+}
 
 /**
  * Full-width banner — typically pinned to the top of the app to broadcast

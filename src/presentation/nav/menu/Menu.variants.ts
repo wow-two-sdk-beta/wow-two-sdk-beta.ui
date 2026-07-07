@@ -26,3 +26,23 @@ export const menuSeparatorVariants = tv({
 
 export type MenuVariants = VariantProps<typeof menuVariants>;
 export type MenuItemVariants = VariantProps<typeof menuItemVariants>;
+
+/** Defines the visual state of a menu item. */
+export const MenuItemState = {
+  /** Refers to the default, neutral item. */
+  Default: 'default',
+  /** Refers to a destructive item (e.g. delete). */
+  Destructive: 'destructive',
+  /** Refers to a non-interactive, dimmed item. */
+  Disabled: 'disabled',
+} as const;
+
+export type MenuItemState = (typeof MenuItemState)[keyof typeof MenuItemState];
+
+/* Compile-time lock: enum values ≡ tv `state` keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertMenuItemState: AssertExact<
+  MenuItemState,
+  NonNullable<VariantProps<typeof menuItemVariants>['state']>
+> = true;
+void _assertMenuItemState;

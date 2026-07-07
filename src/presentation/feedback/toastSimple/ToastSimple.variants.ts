@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { Severity, tv, type VariantProps } from '../../../foundation/utils';
 
 export const toastSimpleVariants = tv({
   base: 'pointer-events-auto rounded-md border bg-popover text-popover-foreground shadow-lg px-4 py-3 text-sm',
@@ -17,3 +17,11 @@ export const toastSimpleVariants = tv({
 });
 
 export type ToastSimpleVariants = VariantProps<typeof toastSimpleVariants>;
+
+/* Compile-time lock: Severity values ≡ tv severity keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertSeverity: AssertExact<
+  Severity,
+  NonNullable<VariantProps<typeof toastSimpleVariants>['severity']>
+> = true;
+void _assertSeverity;

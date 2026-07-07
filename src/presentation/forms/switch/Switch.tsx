@@ -1,24 +1,26 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 export interface SwitchProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
-  size?: 'sm' | 'md' | 'lg';
+  /** The control size. */
+  size?: Size;
 }
 
-const TRACK_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
+/* Sizes not listed fall back to the `md` row at the call site. */
+const TRACK_CLASS: Partial<Record<Size, string>> = {
   sm: 'h-4 w-7',
   md: 'h-5 w-9',
   lg: 'h-6 w-11',
 };
-const THUMB_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
+const THUMB_CLASS: Partial<Record<Size, string>> = {
   sm: 'h-3 w-3',
   md: 'h-4 w-4',
   lg: 'h-5 w-5',
 };
 /* Thumb slide lives on the track (a peer sibling of the input) — child-selector targets the thumb. peer-checked: cannot reach descendants directly. */
-const TRACK_CHECKED_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
+const TRACK_CHECKED_CLASS: Partial<Record<Size, string>> = {
   sm: 'peer-checked:[&>span]:translate-x-3',
   md: 'peer-checked:[&>span]:translate-x-4',
   lg: 'peer-checked:[&>span]:translate-x-5',
@@ -29,10 +31,10 @@ const TRACK_CHECKED_CLASS: Record<NonNullable<SwitchProps['size']>, string> = {
  * Strict atom: no built-in label; pair via `FormControl` or wrap manually.
  */
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
-  ({ className, size = 'md', id, disabled, required, ...props }, ref) => {
+  ({ className, size = Size.Md, id, disabled, required, ...props }, ref) => {
     const ctx = useFormControl();
     return (
-      <span className={cn('relative inline-flex shrink-0', TRACK_CLASS[size], className)}>
+      <span className={cn('relative inline-flex shrink-0', TRACK_CLASS[size] ?? TRACK_CLASS.md, className)}>
         <input
           ref={ref}
           type="checkbox"
@@ -49,7 +51,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
           className={cn(
             'pointer-events-none flex h-full w-full items-center rounded-full bg-input px-0.5 transition-colors',
             'peer-checked:bg-primary',
-            TRACK_CHECKED_CLASS[size],
+            TRACK_CHECKED_CLASS[size] ?? TRACK_CHECKED_CLASS.md,
             'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1',
             'peer-disabled:opacity-50',
           )}
@@ -57,7 +59,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
           <span
             className={cn(
               'rounded-full bg-background shadow-sm transition-transform duration-150',
-              THUMB_CLASS[size],
+              THUMB_CLASS[size] ?? THUMB_CLASS.md,
             )}
           />
         </span>

@@ -1,6 +1,7 @@
 export {
   DataGrid,
-  type DataGridCellType,
+  DataGridCellType,
+  DataGridColumnAlign,
   type DataGridColumn,
   type DataGridProps,
 } from './DataGrid';

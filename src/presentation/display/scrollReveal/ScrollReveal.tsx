@@ -6,15 +6,25 @@ import {
   type ElementType,
   type HTMLAttributes,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, ElementTag } from '../../../foundation/utils';
 
-export type ScrollRevealEffect =
-  | 'fade'
-  | 'slide-up'
-  | 'slide-down'
-  | 'slide-left'
-  | 'slide-right'
-  | 'zoom';
+/** Defines the ScrollReveal enter-viewport animation. */
+export const ScrollRevealEffect = {
+  /** Refers to a plain opacity fade. */
+  Fade: 'fade',
+  /** Refers to a fade + upward slide. */
+  SlideUp: 'slide-up',
+  /** Refers to a fade + downward slide. */
+  SlideDown: 'slide-down',
+  /** Refers to a fade + leftward slide. */
+  SlideLeft: 'slide-left',
+  /** Refers to a fade + rightward slide. */
+  SlideRight: 'slide-right',
+  /** Refers to a fade + scale-in zoom. */
+  Zoom: 'zoom',
+} as const;
+
+export type ScrollRevealEffect = (typeof ScrollRevealEffect)[keyof typeof ScrollRevealEffect];
 
 export interface ScrollRevealProps extends HTMLAttributes<HTMLElement> {
   effect?: ScrollRevealEffect;
@@ -22,7 +32,7 @@ export interface ScrollRevealProps extends HTMLAttributes<HTMLElement> {
   delay?: number;
   threshold?: number;
   isOnce?: boolean;
-  as?: 'div' | 'section' | 'article' | 'span' | 'li';
+  as?: ElementTag;
 }
 
 const HIDDEN_TRANSFORMS: Record<ScrollRevealEffect, string> = {

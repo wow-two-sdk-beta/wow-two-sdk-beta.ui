@@ -1,11 +1,13 @@
-/* Build-environment value set + derived flags. Follows the library's const-object
-   enum pattern (cf. HtmlElement, ButtonType, Key) — not a domain enum. */
-
+/** Defines the build environment. */
 export const Environment = {
+  /** Refers to a local development build. */
   Development: 'development',
+  /** Refers to a production build. */
   Production: 'production',
+  /** Refers to a test build. */
   Test: 'test',
 } as const;
+
 export type Environment = (typeof Environment)[keyof typeof Environment];
 
 /* Gate dev-only warnings/affordances on these. The literal `'production'` is kept

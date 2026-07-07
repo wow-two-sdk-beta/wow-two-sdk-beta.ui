@@ -7,20 +7,12 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, OverlayPosition } from '../../../foundation/utils';
 import { Announce, Portal, Presence } from '../../../foundation/primitives';
 import { Toast } from '../toast';
 import type { ToastSimpleVariants } from '../toastSimple/ToastSimple.variants';
 
 export type ToastSeverity = NonNullable<ToastSimpleVariants['severity']>;
-
-export type ToasterPosition =
-  | 'top-right'
-  | 'top-left'
-  | 'top-center'
-  | 'bottom-right'
-  | 'bottom-left'
-  | 'bottom-center';
 
 export interface ToastOptions {
   title?: ReactNode;
@@ -36,10 +28,10 @@ interface ToastEntry extends ToastOptions {
   id: string;
 }
 
-type Listener = (toasts: ToastEntry[]) => void;
+type Listener = (toasts: ReadonlyArray<ToastEntry>) => void;
 
 class ToasterStore {
-  private items: ToastEntry[] = [];
+  private items: ReadonlyArray<ToastEntry> = [];
   private listeners = new Set<Listener>();
   private idSeq = 0;
 
@@ -86,7 +78,7 @@ export function useToaster() {
   );
 }
 
-const POSITION_CLASSES: Record<ToasterPosition, string> = {
+const POSITION_CLASSES: Record<OverlayPosition, string> = {
   'top-right': 'top-4 right-4 items-end',
   'top-left': 'top-4 left-4 items-start',
   'top-center': 'top-4 left-1/2 -translate-x-1/2 items-center',
@@ -101,7 +93,7 @@ const POSITION_CLASSES: Record<ToasterPosition, string> = {
  * toasts slide along their horizontal edge; centered toasts slide along the
  * vertical axis they're anchored to. Exit anims are shorter (`--duration-fast`).
  */
-const MOTION_CLASSES: Record<ToasterPosition, string> = {
+const MOTION_CLASSES: Record<OverlayPosition, string> = {
   'top-right':
     'motion-safe:data-[state=open]:animate-(--animate-slide-in-right) motion-safe:data-[state=closed]:animate-(--animate-slide-out-right) motion-reduce:animate-none',
   'top-left':
@@ -117,9 +109,9 @@ const MOTION_CLASSES: Record<ToasterPosition, string> = {
 };
 
 export interface ToasterProps {
-  position?: ToasterPosition;
+  position?: OverlayPosition;
   max?: number;
-  /** ms; per-toast `duration` overrides. Default 5000. `Infinity` to disable. */
+  /** The default auto-dismiss delay in ms; per-toast `duration` overrides. Default 5000. `Infinity` to disable. */
   defaultDuration?: number;
   canPauseOnHover?: boolean;
   gap?: number;
@@ -167,14 +159,14 @@ ToastItem.displayName = 'ToastItem';
  * via the L4 `Toast` molecule. Mount once, per app.
  */
 export function Toaster({
-  position = 'bottom-right',
+  position = OverlayPosition.BottomRight,
   max = 5,
   defaultDuration = 5000,
   canPauseOnHover = true,
   gap = 8,
   className,
 }: ToasterProps) {
-  const [items, setItems] = useState<ToastEntry[]>([]);
+  const [items, setItems] = useState<ReadonlyArray<ToastEntry>>([]);
   const [paused, setPaused] = useState(false);
   const timersRef = useRef(new Map<string, number>());
   const remainingRef = useRef(new Map<string, number>());
@@ -185,7 +177,7 @@ export function Toaster({
   }, []);
 
   // Visible window (FIFO).
-  const visible: VisibleToast[] = items.slice(0, max).map((t) => ({
+  const visible: ReadonlyArray<VisibleToast> = items.slice(0, max).map((t) => ({
     ...t,
     resolvedDuration: t.duration ?? defaultDuration,
   }));
@@ -195,8 +187,8 @@ export function Toaster({
   // window) but must still play their exit animation. Kept mounted with
   // `data-state="closed"` until `Presence` unmounts the child — `ToastItem`
   // then fires `onRemoved`, pruning the entry here.
-  const [exiting, setExiting] = useState<VisibleToast[]>([]);
-  const prevVisibleRef = useRef<VisibleToast[]>([]);
+  const [exiting, setExiting] = useState<ReadonlyArray<VisibleToast>>([]);
+  const prevVisibleRef = useRef<ReadonlyArray<VisibleToast>>([]);
 
   useEffect(() => {
     const gone = prevVisibleRef.current.filter((p) => !visibleIds.has(p.id));

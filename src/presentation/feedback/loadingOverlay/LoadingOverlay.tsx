@@ -8,7 +8,7 @@ import type { SpinnerVariants } from '../spinner/Spinner.variants';
 export interface LoadingOverlayProps extends HTMLAttributes<HTMLDivElement> {
   isOpen?: boolean;
   label?: ReactNode;
-  /** Position the scrim absolutely inside the parent (parent must be `position: relative`). */
+  /** The inline-positioning toggle — positions the scrim absolutely inside the parent (parent must be `position: relative`). */
   isInline?: boolean;
   hasBlur?: boolean;
   spinnerSize?: SpinnerVariants['size'];

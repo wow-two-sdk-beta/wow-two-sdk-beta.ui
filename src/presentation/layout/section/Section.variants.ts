@@ -1,5 +1,21 @@
 import { tv, type VariantProps } from '../../../foundation/utils';
 
+/** Defines the vertical-padding scale of the `Section` band. */
+export const SectionPaddingY = {
+  /** Refers to no vertical padding. */
+  None: 'none',
+  /** Refers to a small vertical rhythm. */
+  Sm: 'sm',
+  /** Refers to a medium vertical rhythm. */
+  Md: 'md',
+  /** Refers to a large vertical rhythm. */
+  Lg: 'lg',
+  /** Refers to an extra-large vertical rhythm. */
+  Xl: 'xl',
+} as const;
+
+export type SectionPaddingY = (typeof SectionPaddingY)[keyof typeof SectionPaddingY];
+
 /** Provides the vertical-rhythm (top/bottom padding) scale for the `Section` band. */
 export const sectionVariants = tv({
   base: 'w-full',
@@ -20,5 +36,10 @@ export const sectionVariants = tv({
 
 export type SectionVariants = VariantProps<typeof sectionVariants>;
 
-/** Represents the vertical-padding axis of the `Section` band (`none`–`xl`). */
-export type SectionPaddingY = NonNullable<SectionVariants['py']>;
+/* Compile-time lock: enum values ≡ tv `py` keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertSectionPaddingY: AssertExact<
+  SectionPaddingY,
+  NonNullable<VariantProps<typeof sectionVariants>['py']>
+> = true;
+void _assertSectionPaddingY;

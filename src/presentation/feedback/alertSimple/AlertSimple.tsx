@@ -1,10 +1,13 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type Severity } from '../../../foundation/utils';
 import { alertSimpleVariants, type AlertSimpleVariants } from './AlertSimple.variants';
 
 export interface AlertSimpleProps
   extends ComponentPropsWithoutRef<'div'>,
-    AlertSimpleVariants {}
+    Omit<AlertSimpleVariants, 'severity'> {
+  /** The semantic severity palette. */
+  severity?: Severity;
+}
 
 /**
  * Atomic alert — a styled colored container that takes free-form `children`.

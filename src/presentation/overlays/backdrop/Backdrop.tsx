@@ -2,14 +2,27 @@ import { forwardRef, type HTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { Portal, Presence } from '../../../foundation/primitives';
 
+/** Defines the pointer-event behavior of a `Backdrop` scrim. */
+export const BackdropPointerEvents = {
+  /** Refers to a scrim that intercepts pointer events. */
+  Auto: 'auto',
+  /** Refers to a scrim that lets clicks pass through. */
+  None: 'none',
+} as const;
+
+export type BackdropPointerEvents = (typeof BackdropPointerEvents)[keyof typeof BackdropPointerEvents];
+
 export interface BackdropProps extends HTMLAttributes<HTMLDivElement> {
-  /** Mount state. Default `true`. */
+  /** The mount state. Default `true`. */
   open?: boolean;
-  /** Apply backdrop-blur. */
+
+  /** The backdrop-blur toggle. */
   isBlurred?: boolean;
-  /** When `'none'`, clicks pass through. Default `'auto'`. */
-  pointerEvents?: 'auto' | 'none';
-  /** Skip the Portal wrap — render in place. */
+
+  /** The pointer-event behavior; `'none'` lets clicks pass through. Default `'auto'`. */
+  pointerEvents?: BackdropPointerEvents;
+
+  /** The in-place render toggle — skips the Portal wrap. */
   isInline?: boolean;
 }
 

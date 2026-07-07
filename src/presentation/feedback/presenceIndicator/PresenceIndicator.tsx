@@ -1,16 +1,34 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, CornerPosition, Size } from '../../../foundation/utils';
 
-export type PresenceStatus = 'online' | 'idle' | 'busy' | 'offline' | 'invisible';
+/** Defines a person's presence state. */
+export const PresenceStatus = {
+  /** Refers to actively available. */
+  Online: 'online',
+  /** Refers to present but inactive. */
+  Idle: 'idle',
+  /** Refers to present but do-not-disturb. */
+  Busy: 'busy',
+  /** Refers to not connected. */
+  Offline: 'offline',
+  /** Refers to connected but appearing offline. */
+  Invisible: 'invisible',
+} as const;
+
+export type PresenceStatus = (typeof PresenceStatus)[keyof typeof PresenceStatus];
 
 export interface PresenceIndicatorProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
   status?: PresenceStatus;
-  size?: 'xs' | 'sm' | 'md' | 'lg';
-  /** Pulsing ring (only meaningful for `online`). */
+  /** The dot diameter. */
+  size?: Size;
+
+  /** The pulsing-ring toggle (only meaningful for `online`). */
   hasPulse?: boolean;
-  /** Position absolutely on a parent (use inside an Avatar wrapper). */
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-  /** Override the accessible label. Defaults to status name. */
+
+  /** The corner position on a parent (use inside an Avatar wrapper). */
+  position?: CornerPosition;
+
+  /** The accessible-label override. Defaults to status name. */
   label?: string;
 }
 
@@ -22,14 +40,15 @@ const STATUS_BG: Record<PresenceStatus, string> = {
   invisible: 'bg-transparent border border-muted-foreground',
 };
 
-const SIZE: Record<NonNullable<PresenceIndicatorProps['size']>, string> = {
+/* Only xs/sm/md/lg carry a dot size; other `Size` members fall through to `sm`. */
+const SIZE: Partial<Record<Size, string>> = {
   xs: 'h-1.5 w-1.5',
   sm: 'h-2 w-2',
   md: 'h-2.5 w-2.5',
   lg: 'h-3 w-3',
 };
 
-const POS: Record<NonNullable<PresenceIndicatorProps['position']>, string> = {
+const POS: Record<CornerPosition, string> = {
   'top-right': 'absolute top-0 right-0',
   'top-left': 'absolute top-0 left-0',
   'bottom-right': 'absolute bottom-0 right-0',
@@ -50,7 +69,7 @@ const STATUS_LABEL: Record<PresenceStatus, string> = {
  * on an `Avatar`. Pass `position` to absolutely place on a positioned parent.
  */
 export const PresenceIndicator = forwardRef<HTMLSpanElement, PresenceIndicatorProps>(
-  ({ status = 'online', size = 'sm', hasPulse, position, label, className, ...props }, ref) => (
+  ({ status = PresenceStatus.Online, size = Size.Sm, hasPulse, position, label, className, ...props }, ref) => (
     <span
       ref={ref}
       role="status"
@@ -59,14 +78,14 @@ export const PresenceIndicator = forwardRef<HTMLSpanElement, PresenceIndicatorPr
       className={cn(
         'inline-flex rounded-full ring-2 ring-background',
         STATUS_BG[status],
-        SIZE[size],
+        SIZE[size] ?? SIZE.sm,
         position && POS[position],
         'relative',
         className,
       )}
       {...props}
     >
-      {hasPulse && status === 'online' && (
+      {hasPulse && status === PresenceStatus.Online && (
         <span
           aria-hidden="true"
           className={cn(

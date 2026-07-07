@@ -8,15 +8,25 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { cn, dataAttr } from '../../../foundation/utils';
+import { cn, dataAttr, Orientation } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { RovingFocusGroup, useRovingFocusItem } from '../../../foundation/primitives';
+
+/** Defines when a Tabs tab activates on keyboard navigation. */
+export const TabsActivationMode = {
+  /** Refers to activating a tab as soon as it is focused. */
+  Automatic: 'automatic',
+  /** Refers to requiring Enter/Space to activate a focused tab. */
+  Manual: 'manual',
+} as const;
+
+export type TabsActivationMode = (typeof TabsActivationMode)[keyof typeof TabsActivationMode];
 
 interface TabsContextValue {
   value: string;
   setValue: (value: string) => void;
-  orientation: 'horizontal' | 'vertical';
-  activationMode: 'automatic' | 'manual';
+  orientation: Orientation;
+  activationMode: TabsActivationMode;
   baseId: string;
 }
 
@@ -32,8 +42,8 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'default
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  orientation?: 'horizontal' | 'vertical';
-  activationMode?: 'automatic' | 'manual';
+  orientation?: Orientation;
+  activationMode?: TabsActivationMode;
 }
 
 const TabsRoot = forwardRef<HTMLDivElement, TabsProps>(function Tabs(

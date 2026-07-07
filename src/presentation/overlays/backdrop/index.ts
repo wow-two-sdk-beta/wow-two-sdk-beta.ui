@@ -1,1 +1,1 @@
-export { Backdrop, type BackdropProps } from './Backdrop';
+export { Backdrop, BackdropPointerEvents, type BackdropProps } from './Backdrop';

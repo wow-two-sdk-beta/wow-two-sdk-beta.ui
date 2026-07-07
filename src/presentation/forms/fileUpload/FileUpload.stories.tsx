@@ -30,8 +30,8 @@ export const ImagesOnly: Story = {
 export const WithList: Story = {
   render: () => {
     function Demo() {
-      const [files, setFiles] = useState<File[]>([]);
-      const [rejected, setRejected] = useState<FileRejection[]>([]);
+      const [files, setFiles] = useState<readonly File[]>([]);
+      const [rejected, setRejected] = useState<readonly FileRejection[]>([]);
       return (
         <div className="w-[28rem]">
           <FileUpload

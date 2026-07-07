@@ -1,13 +1,15 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { cn } from '../../../foundation/utils';
+import { cn, type Severity } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 import { ToastSimple } from '../toastSimple/ToastSimple';
 import type { ToastSimpleVariants } from '../toastSimple/ToastSimple.variants';
 
 export interface ToastProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'title'>,
-    ToastSimpleVariants {
+    Omit<ToastSimpleVariants, 'severity'> {
+  /** The semantic severity palette. */
+  severity?: Severity;
   icon?: ReactNode;
   title?: ReactNode;
   description?: ReactNode;

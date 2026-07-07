@@ -19,7 +19,7 @@ function setRef<T>(ref: PossibleRef<T>, value: T | null): (() => void) | void {
  * (and null-calls refs that returned none).
  */
 export function composeRefs<T>(
-  ...refs: PossibleRef<T>[]
+  ...refs: ReadonlyArray<PossibleRef<T>>
 ): (node: T | null) => (() => void) | void {
   return (node) => {
     let hasCleanup = false;
@@ -45,7 +45,7 @@ export function composeRefs<T>(
  * detach/reattach the composed ref on every commit.
  */
 export function useComposedRefs<T>(
-  ...refs: PossibleRef<T>[]
+  ...refs: ReadonlyArray<PossibleRef<T>>
 ): (node: T | null) => (() => void) | void {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return useCallback(composeRefs(...refs), refs);

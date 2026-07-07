@@ -13,6 +13,7 @@ export {
   menuItemVariants,
   menuLabelVariants,
   menuSeparatorVariants,
+  MenuItemState,
   type MenuVariants,
   type MenuItemVariants,
 } from './Menu.variants';

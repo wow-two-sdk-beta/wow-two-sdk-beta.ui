@@ -1,1 +1,1 @@
-export { CronInput, type CronInputProps } from './CronInput';
+export { CronInput, CronFieldKind, type CronInputProps } from './CronInput';

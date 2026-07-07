@@ -2,11 +2,23 @@ import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useReducedMotion } from '../../../foundation/hooks';
 
-export type MarqueeDirection = 'left' | 'right' | 'up' | 'down';
+/** Defines the Marquee scroll direction. */
+export const MarqueeDirection = {
+  /** Refers to leftward horizontal scroll. */
+  Left: 'left',
+  /** Refers to rightward horizontal scroll. */
+  Right: 'right',
+  /** Refers to upward vertical scroll. */
+  Up: 'up',
+  /** Refers to downward vertical scroll. */
+  Down: 'down',
+} as const;
+
+export type MarqueeDirection = (typeof MarqueeDirection)[keyof typeof MarqueeDirection];
 
 export interface MarqueeProps extends HTMLAttributes<HTMLDivElement> {
   direction?: MarqueeDirection;
-  /** Seconds for one full traversal of the inner content. */
+  /** The seconds for one full traversal of the inner content. */
   speed?: number;
   canPauseOnHover?: boolean;
   gap?: number;

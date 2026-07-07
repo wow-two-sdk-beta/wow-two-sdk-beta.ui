@@ -7,31 +7,43 @@ import {
   parseColorToHsv,
   type HSV,
 } from '../ColorExtensions';
-import { ColorSwatch, type ColorSwatchVariants } from '../colorSwatch';
+import { ColorSwatch, ColorSwatchSize } from '../colorSwatch';
 import { ColorArea } from '../colorArea';
 import { ColorSlider } from '../colorSlider';
 import { ColorField } from '../colorField';
 import { ColorSwatchPicker } from '../colorSwatchPicker';
+
+/** Defines which built-in trigger a color picker renders. */
+export const ColorPickerTriggerVariant = {
+  /** Refers to a swatch plus hex-value text in a framed button. */
+  Full: 'full',
+  /** Refers to a bare interactive swatch, no text. */
+  Swatch: 'swatch',
+  /** Refers to hex-value text only, no swatch. */
+  Value: 'value',
+} as const;
+
+export type ColorPickerTriggerVariant = (typeof ColorPickerTriggerVariant)[keyof typeof ColorPickerTriggerVariant];
 
 export interface ColorPickerProps {
   value?: string | null;
   defaultValue?: string | null;
   onValueChange?: (hex: string) => void;
   hasAlpha?: boolean;
-  presets?: string[];
-  triggerSize?: ColorSwatchVariants['size'];
+  presets?: ReadonlyArray<string>;
+  triggerSize?: ColorSwatchSize;
   /**
-   * Which built-in trigger to render (ignored when `trigger` is set):
+   * The built-in trigger to render (ignored when `trigger` is set):
    * - `full` *(default)* — swatch + hex-value text, framed button.
    * - `swatch` — a bare interactive swatch, no text (compact toolbars, tiles).
    * - `value` — hex-value text only, no swatch (dense / code contexts).
    */
-  triggerVariant?: 'full' | 'swatch' | 'value';
+  triggerVariant?: ColorPickerTriggerVariant;
   isDisabled?: boolean;
   name?: string;
   className?: string;
   'aria-label'?: string;
-  /** Custom trigger element; when set, replaces the default swatch + hex-value button. Must be a single focusable element (it becomes the popover trigger via `asChild`). */
+  /** The custom trigger element; when set, replaces the default swatch + hex-value button. Must be a single focusable element (it becomes the popover trigger via `asChild`). */
   trigger?: ReactNode;
 }
 
@@ -48,8 +60,8 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
     onValueChange,
     hasAlpha = false,
     presets,
-    triggerSize = 'md',
-    triggerVariant = 'full',
+    triggerSize = ColorSwatchSize.Md,
+    triggerVariant = ColorPickerTriggerVariant.Full,
     isDisabled = false,
     name,
     className,
@@ -90,7 +102,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
     <Popover>
       <PopoverTrigger asChild>
         {trigger ??
-          (triggerVariant === 'swatch' ? (
+          (triggerVariant === ColorPickerTriggerVariant.Swatch ? (
             // Bare interactive swatch — ColorSwatch is a real <button> here (given onClick),
             // so it becomes the popover trigger via Slot with no wrapper chrome.
             <ColorSwatch
@@ -113,7 +125,7 @@ export const ColorPicker = forwardRef<HTMLButtonElement, ColorPickerProps>(funct
                 className,
               )}
             >
-              {triggerVariant === 'full' && <ColorSwatch color={hex ?? '#00000000'} size={triggerSize} />}
+              {triggerVariant === ColorPickerTriggerVariant.Full && <ColorSwatch color={hex ?? '#00000000'} size={triggerSize} />}
               <span className="font-mono uppercase">{hex ?? '—'}</span>
             </button>
           ))}

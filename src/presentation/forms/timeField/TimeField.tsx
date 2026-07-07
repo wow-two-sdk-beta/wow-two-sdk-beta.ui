@@ -3,7 +3,7 @@ import { Temporal } from '@js-temporal/polyfill';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 import { formatISOTime, parseISOTime } from '../DateExtensions';
 
 export interface TimeFieldProps
@@ -11,7 +11,11 @@ export interface TimeFieldProps
       InputHTMLAttributes<HTMLInputElement>,
       'type' | 'value' | 'defaultValue' | 'onChange' | 'size'
     >,
-    InputBaseVariants {
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
   value?: Temporal.PlainTime | null;
   defaultValue?: Temporal.PlainTime | null;
   onValueChange?: (value: Temporal.PlainTime | null) => void;
@@ -38,7 +42,7 @@ export const TimeField = forwardRef<HTMLInputElement, TimeFieldProps>(function T
       aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
       value={formatISOTime(current)}
       onChange={(e) => setCurrent(parseISOTime(e.target.value))}
-      className={cn(inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? 'invalid' : 'default') }), className)}
+      className={cn(inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default) }), className)}
       {...rest}
     />
   );

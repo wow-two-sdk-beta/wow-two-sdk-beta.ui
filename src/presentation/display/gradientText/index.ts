@@ -1,6 +1,5 @@
 export {
   GradientText,
-  type GradientTextDirection,
+  GradientTextDirection,
   type GradientTextProps,
-  type GradientTextTag,
 } from './GradientText';

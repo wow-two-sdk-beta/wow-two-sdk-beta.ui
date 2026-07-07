@@ -10,13 +10,14 @@ import {
 import { useComposedRefs } from '../../utils/composeRefs';
 
 export interface PresenceProps {
-  /** Whether the content should be present. Toggle false to trigger exit. */
+  /** The presence flag — toggle false to trigger exit. */
   isPresent: boolean;
-  /** Single React element child — receives `ref` and `data-state` ("open" | "closed"). */
+
+  /** The single React element child — receives `ref` and `data-state` ("open" | "closed"). */
   children: ReactElement;
 }
 
-function parseTimes(value: string): number[] {
+function parseTimes(value: string): ReadonlyArray<number> {
   return value.split(',').map((part) => {
     const trimmed = part.trim();
     const ms = trimmed.endsWith('ms') ? parseFloat(trimmed) : parseFloat(trimmed) * 1000;
@@ -27,7 +28,7 @@ function parseTimes(value: string): number[] {
 /** Longest computed transition/animation (duration + delay) in ms. */
 function getTotalDurationMs(node: HTMLElement): number {
   const cs = getComputedStyle(node);
-  const maxOf = (durations: number[], delays: number[]) =>
+  const maxOf = (durations: ReadonlyArray<number>, delays: ReadonlyArray<number>) =>
     durations.reduce(
       (max, duration, i) => Math.max(max, duration + (delays[i % delays.length] ?? 0)),
       0,

@@ -5,13 +5,16 @@ import { Heading } from '../heading/Heading';
 import { Text } from '../text/Text';
 
 export interface FeatureCardProps extends Omit<ComponentPropsWithoutRef<'div'>, 'title'> {
-  /** Icon node rendered inside a tinted badge (`bg-primary-soft text-primary`). Size it yourself. */
+  /** The icon node rendered inside a tinted badge (`bg-primary-soft text-primary`). Size it yourself. */
   icon?: ReactNode;
-  /** Feature title. */
+
+  /** The feature title. */
   title: ReactNode;
-  /** Optional supporting copy below the title. Falls back to `children` when omitted. */
+
+  /** The optional supporting copy below the title. Falls back to `children` when omitted. */
   description?: ReactNode;
-  /** Body content — used when `description` is not provided. */
+
+  /** The body content — used when `description` is not provided. */
   children?: ReactNode;
 }
 

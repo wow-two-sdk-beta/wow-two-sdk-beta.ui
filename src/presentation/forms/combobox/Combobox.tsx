@@ -17,7 +17,7 @@ import { Check } from 'lucide-react';
 import { cn, composeRefs, surfaceVariants, type SurfaceVariants } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { AnchoredPositioner, DismissableLayer, Portal, Presence } from '../../../foundation/primitives';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 import {
   listboxVariants,
   listboxItemVariants,
@@ -44,7 +44,7 @@ interface ComboboxContextValue {
   setActiveId: (id: string | null) => void;
   registerItem: (entry: ComboboxItemEntry) => void;
   unregisterItem: (id: string) => void;
-  itemsRef: React.MutableRefObject<ComboboxItemEntry[]>;
+  itemsRef: React.MutableRefObject<Array<ComboboxItemEntry>>;
   inputRef: React.MutableRefObject<HTMLInputElement | null>;
   contentRef: React.MutableRefObject<HTMLDivElement | null>;
   listboxId: string;
@@ -74,7 +74,7 @@ export interface ComboboxProps {
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** When the user picks an item, set the input value to its label. Default true. */
+  /** The fill-on-select behavior — when the user picks an item, set the input value to its label. Default true. */
   fillInputOnSelect?: boolean;
   children: ReactNode;
 }
@@ -111,7 +111,7 @@ function ComboboxRoot({
     onChange: onInputChange,
   });
 
-  const itemsRef = useRef<ComboboxItemEntry[]>([]);
+  const itemsRef = useRef<Array<ComboboxItemEntry>>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -186,7 +186,12 @@ ComboboxRoot.displayName = 'Combobox';
 
 export interface ComboboxInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'size'>,
-    InputBaseVariants {}
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+}
 
 export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
   function ComboboxInput(
@@ -194,7 +199,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
     forwardedRef,
   ) {
     const ctx = useComboboxContext();
-    const inputState = state ?? (ctx.isInvalid ? 'invalid' : 'default');
+    const inputState = state ?? (ctx.isInvalid ? InputState.Invalid : InputState.Default);
 
     const setActiveAndScroll = useCallback(
       (id: string) => {

@@ -1,2 +1,7 @@
 export { FAB, type FABProps } from './FAB';
-export { fabVariants, type FABVariants } from './FAB.variants';
+export {
+  fabVariants,
+  FabVariant,
+  FabSize,
+  type FABVariants,
+} from './FAB.variants';

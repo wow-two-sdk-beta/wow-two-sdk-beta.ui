@@ -6,14 +6,14 @@ import {
   type HTMLAttributes,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type ElementTag } from '../../../foundation/utils';
 
 export interface TiltProps extends HTMLAttributes<HTMLElement> {
   maxAngle?: number;
   perspective?: number;
   hasGlare?: boolean;
   scale?: number;
-  as?: 'div' | 'section' | 'article' | 'span';
+  as?: ElementTag;
 }
 
 interface TiltState {

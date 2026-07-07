@@ -40,8 +40,21 @@ export type GridColumns = NonNullable<GridVariants['columns']>;
 /** Represents the scalar gap step accepted by `Grid` (also the per-breakpoint value). */
 export type GridGap = NonNullable<GridVariants['gap']>;
 
-/** Represents the responsive breakpoints `Grid` understands (`base` = unprefixed). */
-export type GridBreakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl';
+/** Defines the responsive breakpoints `Grid` understands (`base` = unprefixed). */
+export const GridBreakpoint = {
+  /** Refers to the unprefixed (mobile-first) breakpoint. */
+  Base: 'base',
+  /** Refers to the `sm:` breakpoint. */
+  Sm: 'sm',
+  /** Refers to the `md:` breakpoint. */
+  Md: 'md',
+  /** Refers to the `lg:` breakpoint. */
+  Lg: 'lg',
+  /** Refers to the `xl:` breakpoint. */
+  Xl: 'xl',
+} as const;
+
+export type GridBreakpoint = (typeof GridBreakpoint)[keyof typeof GridBreakpoint];
 
 /**
  * Represents a responsive value for `columns` / `gap` — a per-breakpoint map.
@@ -167,7 +180,7 @@ const GAP_CLASSES: Record<GridBreakpoint, Record<GridGap, string>> = {
   },
 };
 
-const BREAKPOINT_ORDER: readonly GridBreakpoint[] = ['base', 'sm', 'md', 'lg', 'xl'];
+const BREAKPOINT_ORDER: ReadonlyArray<GridBreakpoint> = ['base', 'sm', 'md', 'lg', 'xl'];
 
 /** Resolves a scalar-or-responsive `columns` value to its complete Tailwind class string. */
 export function resolveGridColumns(

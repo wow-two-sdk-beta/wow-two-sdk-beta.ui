@@ -25,7 +25,7 @@ export interface OnboardingChecklistProps extends Omit<HTMLAttributes<HTMLDivEle
   title?: ReactNode;
   defaultOpen?: boolean;
   canDismissOnComplete?: boolean;
-  /** ms after 100% before unmounting. */
+  /** The delay in ms after 100% before unmounting. */
   dismissDelay?: number;
   onDismiss?: () => void;
   children: ReactNode;

@@ -37,7 +37,12 @@ import { Slot } from '../../../foundation/primitives';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Spinner } from '../../../foundation/icons';
 import { useDebounceHandler } from '../../../foundation/hooks';
-import { buttonVariants, type ButtonVariants } from './Button.variants';
+import {
+  buttonVariants,
+  type ButtonVariant,
+  type ButtonShape,
+  type ButtonVariants,
+} from './Button.variants';
 
 const COMPONENT_NAME = 'Button';
 
@@ -59,85 +64,94 @@ type ButtonDataState = (typeof ButtonDataState)[keyof typeof ButtonDataState];
 
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'disabled' | 'color'>,
-    Omit<ButtonVariants, 'size'> {
-  /* Preset name OR raw value OR explicit dim object — see `ButtonSize` for details. */
+    Omit<ButtonVariants, 'size' | 'variant' | 'tone' | 'shape'> {
+  /** The visual surface style. */
+  variant?: ButtonVariant;
+
+  /** The semantic tone palette. */
+  tone?: ColorTone;
+
+  /** The button silhouette (default · square · circle). */
+  shape?: ButtonShape;
+
+  /** The size — preset name OR raw value OR explicit dim object; see `ButtonSize` for details. */
   size?: ButtonSize;
 
-  /* Per-instance color override for the active `tone`. String → all slots derived; object → per-slot (bg/text/soft/softText/ring). Sets local CSS vars that `bg-{tone}` etc. pick up. */
+  /** The per-instance color override for the active `tone`. String → all slots derived; object → per-slot (bg/text/soft/softText/ring). Sets local CSS vars that `bg-{tone}` etc. pick up. */
   color?: ColorProp;
 
-  /* Slot before children (logical start). */
+  /** The slot before children (logical start). */
   leadingSlot?: ReactNode;
 
-  /* Slot after children (logical end). */
+  /** The slot after children (logical end). */
   trailingSlot?: ReactNode;
 
-  /* Content shown in place of `children` on hover / focus-visible (CSS-only swap — no JS hover state).
+  /** The content shown in place of `children` on hover / focus-visible (CSS-only swap — no JS hover state).
      Idle → `children` visible; hover/focus-visible → `hoverSlot` visible. Pairs with `variant="reveal"`
      for a reveal-on-hover icon swap. When undefined, `children` renders normally. */
   hoverSlot?: ReactNode;
 
-  /* Custom indicator shown in place of the built-in `<Spinner/>` when `isLoading` is true. */
+  /** The indicator shown in place of the built-in `<Spinner/>` when `isLoading` is true. */
   loadingSlot?: ReactNode;
 
-  /* Action-loading: replaces leading w/ spinner, sets aria-busy, blocks clicks. */
+  /** The action-loading state — replaces leading w/ spinner, sets aria-busy, blocks clicks. */
   isLoading?: boolean;
 
-  /* Replaces children when loading. No default — consumer supplies (i18n). */
+  /** The text that replaces children when loading. No default — consumer supplies (i18n). */
   loadingText?: string;
 
-  /* Content-loading: hides content (preserves dimensions) + shimmer. Mutually exclusive with `isLoading`. */
+  /** The content-loading state — hides content (preserves dimensions) + shimmer. Mutually exclusive with `isLoading`. */
   isSkeleton?: boolean;
 
-  /* Removes from focus order, blocks clicks. Forwards to native `disabled`. Inherited from an enclosing `Field` when omitted. */
+  /** The disabled state — removes from focus order, blocks clicks. Forwards to native `disabled`. Inherited from an enclosing `Field` when omitted. */
   isDisabled?: boolean;
 
-  /* Stretches to fill container width. */
+  /** The full-width state — stretches to fill container width. */
   isFullWidth?: boolean;
 
-  /* Allows multi-line label wrap; default truncates to single line. */
+  /** The multi-line state — allows label wrap; default truncates to single line. */
   isMultiline?: boolean;
 
-  /* Render as the single child element via Slot. */
+  /** The as-child flag — renders as the single child element via Slot. */
   asChild?: boolean;
 
-  /* Independent padding override (preset token or `{x, y}` object). */
+  /** The independent padding override (preset token or `{x, y}` object). */
   padding?: PaddingProp;
 
-  /* Independent radius override (preset token or raw value). */
+  /** The independent radius override (preset token or raw value). */
   radius?: RadiusProp;
 
-  /* Explicit width override. Number = px; string = any CSS unit. */
+  /** The explicit width override. Number = px; string = any CSS unit. */
   width?: SizeValue;
 
-  /* Explicit height override. Number = px; string = any CSS unit. */
+  /** The explicit height override. Number = px; string = any CSS unit. */
   height?: SizeValue;
 
-  /* Reserve a min width so the button doesn't reflow when its label morphs. */
+  /** The min width reserved so the button doesn't reflow when its label morphs. */
   minWidth?: SizeValue;
 
-  /* Reserve a min height — symmetric with `minWidth`. */
+  /** The min height reserved — symmetric with `minWidth`. */
   minHeight?: SizeValue;
 
-  /* Square shorthand — applied as fallback for both `width` and `height`. Explicit `width`/`height` win when both are set. Pairs with `shape="square"` / `shape="circle"` for icon buttons. */
+  /** The square-size shorthand — applied as fallback for both `width` and `height`. Explicit `width`/`height` win when both are set. Pairs with `shape="square"` / `shape="circle"` for icon buttons. */
   boxSize?: SizeValue;
 
-  /* Default `ButtonType.Button` — NOT browser-default `'submit'`. */
+  /** The button type. Default `ButtonType.Button` — NOT browser-default `'submit'`. */
   type?: ButtonType;
 
-  /* Fires on pointer-down OR Space/Enter keydown (first event in a gesture). */
+  /** Fires when the press begins — pointer-down OR Space/Enter keydown (first event in a gesture). */
   onPressStart?: (event: PressEvent<HTMLButtonElement>) => void;
 
-  /* Fires on pointer-up/cancel OR Space/Enter keyup. */
+  /** Fires when the press ends — pointer-up/cancel OR Space/Enter keyup. */
   onPressEnd?: (event: PressEvent<HTMLButtonElement>) => void;
 
-  /* Fires when the pointer is held for `longPressDelay` ms. Suppresses the next click. */
+  /** Fires when the pointer is held for `longPressDelay` ms. Suppresses the next click. */
   onLongPress?: (event: PointerEvent<HTMLButtonElement>) => void;
 
-  /* Long-press duration (ms). Default 500. Out-of-range values trigger a dev warning. */
+  /** The long-press duration (ms). Default 500. Out-of-range values trigger a dev warning. */
   longPressDelay?: number;
 
-  /* Throttle clicks within window — first wins; subsequent swallowed via `preventDefault()`. */
+  /** The click-throttle window (ms) — first wins; subsequent swallowed via `preventDefault()`. */
   debounceMs?: number;
 }
 

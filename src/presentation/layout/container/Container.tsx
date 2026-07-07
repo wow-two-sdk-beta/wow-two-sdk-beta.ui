@@ -5,12 +5,18 @@ import {
   type Ref,
 } from 'react';
 import { cn } from '../../../foundation/utils';
-import { containerVariants, type ContainerVariants } from './Container.variants';
+import {
+  containerVariants,
+  type ContainerVariants,
+  type ContainerSize,
+} from './Container.variants';
 
 export interface ContainerProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'as'>,
-    ContainerVariants {
+    Omit<ContainerVariants, 'size'> {
   as?: ElementType;
+  /** The max-width preset. Default `lg`. */
+  size?: ContainerSize;
 }
 
 /**

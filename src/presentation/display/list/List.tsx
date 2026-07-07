@@ -1,12 +1,22 @@
 import { forwardRef, type HTMLAttributes, type LiHTMLAttributes, type ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
-import { listItemVariants, listVariants, type ListVariants } from './List.variants';
+import {
+  listItemVariants,
+  listVariants,
+  type ListMarker,
+  type ListSpacing,
+  type ListVariants,
+} from './List.variants';
 
 export interface ListProps
   extends Omit<HTMLAttributes<HTMLUListElement | HTMLOListElement>, 'type'>,
-    ListVariants {
+    Omit<ListVariants, 'marker' | 'spacing'> {
   isOrdered?: boolean;
+  /** The item marker style. */
+  marker?: ListMarker;
+  /** The vertical spacing between items. */
+  spacing?: ListSpacing;
   children: ReactNode;
 }
 
@@ -27,11 +37,13 @@ const ListRoot = forwardRef<HTMLUListElement | HTMLOListElement, ListProps>(func
 });
 
 export interface ListItemProps extends LiHTMLAttributes<HTMLLIElement> {
-  /** Leading slot — icon, avatar, marker. */
+  /** The leading slot — icon, avatar, marker. */
   leading?: ReactNode;
-  /** Trailing slot — badge, chevron, status. */
+
+  /** The trailing slot — badge, chevron, status. */
   trailing?: ReactNode;
-  /** Auto-render a check marker if the parent List uses `marker="check"`. */
+
+  /** The auto-check-marker mode — renders a check marker if the parent List uses `marker="check"`. */
   hasCheckMarker?: boolean;
   children: ReactNode;
 }

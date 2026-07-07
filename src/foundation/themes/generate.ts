@@ -128,18 +128,25 @@ function resolveSolidPair(
 interface ModeConfig {
   /** Background lightness. */
   bgL: number;
+
   /** Step between stacked surfaces (card/popover/muted), signed toward foreground. */
   surfStep: number;
+
   /** Foreground (body text) lightness. */
   fgL: number;
+
   /** Base lightness for saturated tone bases (primary/status). */
   toneL: number;
+
   /** Chroma for saturated tone bases. */
   toneC: number;
+
   /** Soft-surface lightness. */
   softL: number;
+
   /** Soft-surface chroma. */
   softC: number;
+
   /** Is this the dark mode build? */
   isDark: boolean;
 }

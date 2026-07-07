@@ -1,11 +1,16 @@
 import { forwardRef, type TextareaHTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface TextareaInputProps
   extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
-    InputBaseVariants {}
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+}
 
 /**
  * Multi-line text input. Inherits the input visual base. For autosize, pair
@@ -17,7 +22,7 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>
     ref,
   ) => {
     const ctx = useFormControl();
-    const finalState = state ?? (ctx?.isInvalid ? 'invalid' : 'default');
+    const finalState = state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default);
     return (
       <textarea
         ref={ref}

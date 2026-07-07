@@ -1,9 +1,17 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
-import { fabVariants, type FABVariants } from './FAB.variants';
+import { cn, type OverlayPosition } from '../../../foundation/utils';
+import { fabVariants, type FABVariants, type FabVariant, type FabSize } from './FAB.variants';
 
-export interface FABProps extends ButtonHTMLAttributes<HTMLButtonElement>, FABVariants {
-  /** Required accessible label — FAB content is typically icon-only. */
+export interface FABProps
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
+    Omit<FABVariants, 'variant' | 'size' | 'position'> {
+  /** The visual surface style. */
+  variant?: FabVariant;
+  /** The button diameter. */
+  size?: FabSize;
+  /** The anchor position on the viewport. */
+  position?: OverlayPosition;
+  /** The required accessible label — FAB content is typically icon-only. */
   'aria-label': string;
   children: ReactNode;
 }

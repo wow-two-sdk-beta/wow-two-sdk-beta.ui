@@ -6,24 +6,28 @@ import {
 import { cn } from '../../../foundation/utils';
 
 export interface ActivityFeedProps extends HTMLAttributes<HTMLOListElement> {
-  /** Compact spacing variant. */
+  /** The compact spacing variant. */
   isDense?: boolean;
   children: ReactNode;
 }
 
 export interface ActivityItemProps extends HTMLAttributes<HTMLLIElement> {
-  /** Avatar / icon node rendered in the leading column. */
+  /** The avatar / icon node rendered in the leading column. */
   avatar?: ReactNode;
+
   /** The activity sentence (actor + verb + target). */
   children: ReactNode;
-  /** Timestamp (relative or absolute). */
+
+  /** The timestamp (relative or absolute). */
   timestamp?: ReactNode;
-  /** Optional content preview rendered under the sentence
-   *  (e.g. quoted comment, file name, image). */
+
+  /** The optional content preview rendered under the sentence (e.g. quoted comment, file name, image). */
   preview?: ReactNode;
-  /** Trailing actions slot (e.g. Reply / Like). */
+
+  /** The trailing actions slot (e.g. Reply / Like). */
   actions?: ReactNode;
-  /** Suppress the connector line under the leading column. */
+
+  /** The connector-line suppression under the leading column. */
   isLast?: boolean;
 }
 

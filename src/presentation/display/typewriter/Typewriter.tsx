@@ -6,7 +6,7 @@ import {
   type ElementType,
   type HTMLAttributes,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type ElementTag } from '../../../foundation/utils';
 
 export interface TypewriterProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
   text: string | string[];
@@ -16,7 +16,7 @@ export interface TypewriterProps extends Omit<HTMLAttributes<HTMLElement>, 'chil
   canLoop?: boolean;
   hasCursor?: boolean;
   cursorChar?: string;
-  as?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  as?: ElementTag;
 }
 
 /**

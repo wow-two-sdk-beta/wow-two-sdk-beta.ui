@@ -17,58 +17,67 @@ import {
   type PresenceAnimationDurationProp,
 } from '../../../foundation/utils';
 import { Slot, Presence } from '../../../foundation/primitives';
-import { overlayVariants } from './Overlay.variants';
+import {
+  overlayVariants,
+  OverlayVisibilityMode,
+  OverlayTransition,
+} from './Overlay.variants';
 
 const COMPONENT_NAME = 'Overlay';
 
 /* Re-exported for ergonomic consumer imports — same shape as the shared types. */
 export type OverlayPosition = AbsolutePosition;
-export type OverlayAppearOn = 'always' | 'hover' | 'focus-within';
-export type OverlayTransition =
-  | 'none'
-  | 'fade'
-  | 'fade-scale'
-  | 'fade-slide-up'
-  | 'fade-slide-down'
-  | 'fade-slide-left'
-  | 'fade-slide-right';
+
+/** Defines the visibility trigger of an `Overlay` while mounted. */
+export const OverlayAppearOn = {
+  /** Refers to an always-visible overlay. */
+  Always: 'always',
+  /** Refers to reveal-on-hover (and focus-within). */
+  Hover: 'hover',
+  /** Refers to reveal-on-focus-within. */
+  FocusWithin: 'focus-within',
+} as const;
+
+export type OverlayAppearOn = (typeof OverlayAppearOn)[keyof typeof OverlayAppearOn];
+
+export { OverlayTransition };
 export type OverlayDuration = PresenceAnimationDurationProp;
 
 export interface OverlayProps {
-  /* Anchor location — preset corner/edge/center, or raw inset object. Default 'top-right'. */
+  /** The anchor location — preset corner/edge/center, or raw inset object. Default 'top-right'. */
   position?: OverlayPosition;
 
-  /* Spacing from edge for preset positions. Default '0.5rem'. Ignored for custom inset object. */
+  /** The spacing from edge for preset positions. Default '0.5rem'. Ignored for custom inset object. */
   inset?: SizeValue;
 
-  /* z-index. Default 10. */
+  /** The z-index. Default 10. */
   zIndex?: number | string;
 
-  /* Visibility trigger while mounted. Default 'always'. Hover / focus-within modes require parent `className="group"`. */
+  /** The visibility trigger while mounted. Default 'always'. Hover / focus-within modes require parent `className="group"`. */
   appearOn?: OverlayAppearOn;
 
-  /* Optional presence — when provided, controls mount/unmount with exit transition (defers unmount until transitionend). */
+  /** The presence — when provided, controls mount/unmount with exit transition (defers unmount until transitionend). */
   isOpen?: boolean;
 
-  /* Animation effect for show/hide. Defaults to 'fade' if any visibility gating is active, else 'none'. */
+  /** The animation effect for show/hide. Defaults to 'fade' if any visibility gating is active, else 'none'. */
   transition?: OverlayTransition;
 
-  /* Duration in ms. Number = symmetric; object = asymmetric enter/exit. Default 200. */
+  /** The duration in ms. Number = symmetric; object = asymmetric enter/exit. Default 200. */
   transitionDuration?: OverlayDuration;
 
-  /* CSS timing function. Default 'ease-out'. */
+  /** The CSS timing function. Default 'ease-out'. */
   transitionEasing?: string;
 
-  /* Render as the single child element via Slot (no extra wrapper div). Default true. */
+  /** The single-child render via Slot (no extra wrapper div). Default true. */
   asChild?: boolean;
 
-  /* Extra classes merged onto the rendered element (or wrapper when asChild=false). */
+  /** The extra classes merged onto the rendered element (or wrapper when asChild=false). */
   className?: string;
 
-  /* Extra inline styles merged onto the rendered element. */
+  /** The extra inline styles merged onto the rendered element. */
   style?: CSSProperties;
 
-  /* Single React element when asChild=true (default), or arbitrary content when asChild=false. */
+  /** The content — a single React element when asChild=true (default), or arbitrary content when asChild=false. */
   children: ReactNode;
 }
 
@@ -79,7 +88,7 @@ export const Overlay = forwardRef<HTMLElement, OverlayProps>(
       position = 'top-right',
       inset,
       zIndex = 10,
-      appearOn = 'always',
+      appearOn = OverlayAppearOn.Always,
       isOpen,
       transition,
       transitionDuration,
@@ -96,16 +105,17 @@ export const Overlay = forwardRef<HTMLElement, OverlayProps>(
 
     const effectiveTransition: OverlayTransition =
       transition ??
-      (isPresenceMode || appearOn !== 'always' ? 'fade' : 'none');
+      (isPresenceMode || appearOn !== OverlayAppearOn.Always
+        ? OverlayTransition.Fade
+        : OverlayTransition.None);
 
-    const visibilityMode: 'always' | 'hover' | 'focus-within' | 'presence' =
-      isPresenceMode
-        ? 'presence'
-        : appearOn === 'hover'
-          ? 'hover'
-          : appearOn === 'focus-within'
-            ? 'focus-within'
-            : 'always';
+    const visibilityMode: OverlayVisibilityMode = isPresenceMode
+      ? OverlayVisibilityMode.Presence
+      : appearOn === OverlayAppearOn.Hover
+        ? OverlayVisibilityMode.Hover
+        : appearOn === OverlayAppearOn.FocusWithin
+          ? OverlayVisibilityMode.FocusWithin
+          : OverlayVisibilityMode.Always;
 
     const { enter, exit } = TransitionExtensions.resolveDuration(transitionDuration);
 

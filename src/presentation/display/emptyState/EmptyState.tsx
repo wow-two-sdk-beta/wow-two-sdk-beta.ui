@@ -3,17 +3,33 @@ import { cn } from '../../../foundation/utils';
 import { Heading } from '../heading/Heading';
 import { Text } from '../text/Text';
 
+/** Defines the EmptyState visual size. */
+export const EmptyStateSize = {
+  /** Refers to the small layout. */
+  Sm: 'sm',
+  /** Refers to the medium layout. */
+  Md: 'md',
+  /** Refers to the large layout. */
+  Lg: 'lg',
+} as const;
+
+export type EmptyStateSize = (typeof EmptyStateSize)[keyof typeof EmptyStateSize];
+
 export interface EmptyStateProps extends Omit<ComponentPropsWithoutRef<'div'>, 'title'> {
-  /** Optional icon (lucide or custom). */
+  /** The optional icon (lucide or custom). */
   icon?: ReactNode;
-  /** Heading copy. */
+
+  /** The heading copy. */
   title: ReactNode;
-  /** Body copy below the title. */
+
+  /** The body copy below the title. */
   description?: ReactNode;
-  /** Action(s) — usually one or two `<Button>` elements. */
+
+  /** The action(s) — usually one or two `<Button>` elements. */
   actions?: ReactNode;
-  /** Visual size. Default `md`. */
-  size?: 'sm' | 'md' | 'lg';
+
+  /** The visual size. Default `md`. */
+  size?: EmptyStateSize;
 }
 
 const SIZE: Record<NonNullable<EmptyStateProps['size']>, { wrap: string; iconBox: string }> = {

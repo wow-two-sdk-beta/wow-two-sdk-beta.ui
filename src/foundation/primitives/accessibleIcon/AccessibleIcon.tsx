@@ -2,9 +2,10 @@ import { cloneElement, isValidElement, type ReactElement } from 'react';
 import { VisuallyHidden } from '../visuallyHidden/VisuallyHidden';
 
 export interface AccessibleIconProps {
-  /** Required accessible label for the icon. */
+  /** The accessible label for the icon. */
   label: string;
-  /** Single icon element — will receive `aria-hidden` so SR reads only the label. */
+
+  /** The single icon element — receives `aria-hidden` so SR reads only the label. */
   children: ReactElement;
 }
 

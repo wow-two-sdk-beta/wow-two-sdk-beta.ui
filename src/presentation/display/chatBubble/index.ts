@@ -1,7 +1,7 @@
 export {
   ChatBubble,
+  ChatSide,
+  ChatStatus,
+  ChatTone,
   type ChatBubbleProps,
-  type ChatSide,
-  type ChatStatus,
-  type ChatTone,
 } from './ChatBubble';

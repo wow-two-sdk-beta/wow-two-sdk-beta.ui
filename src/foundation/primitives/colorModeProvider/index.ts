@@ -1,6 +1,6 @@
 export {
   ColorModeProvider,
   useColorMode,
-  type ColorMode,
+  ColorMode,
   type ColorModeProviderProps,
 } from './ColorModeProvider';

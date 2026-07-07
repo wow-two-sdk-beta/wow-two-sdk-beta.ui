@@ -6,7 +6,14 @@ import {
   type ReactNode,
 } from 'react';
 import { cn, CssExtensions, type SizePreset, type SizeUnion } from '../../../foundation/utils';
-import { avatarVariants, type AvatarVariants } from './Avatar.variants';
+import {
+  avatarVariants,
+  type AvatarBackground,
+  type AvatarRing,
+  type AvatarShape,
+  type AvatarTone,
+  type AvatarVariants,
+} from './Avatar.variants';
 
 const COMPONENT_NAME = 'Avatar';
 
@@ -59,23 +66,31 @@ function getInitials(name: string): string {
 
 export interface AvatarProps
   extends Omit<ComponentPropsWithoutRef<'span'>, 'children'>,
-    Omit<AvatarVariants, 'size'> {
-  /* Image source. Falls back to `name` initials or `fallback` on error. */
+    Omit<AvatarVariants, 'size' | 'shape' | 'tone' | 'bgStyle' | 'ring'> {
+  /** The silhouette. */
+  shape?: AvatarShape;
+  /** The tone palette (`none` cedes color to autoColor). */
+  tone?: AvatarTone;
+  /** The background fill style. */
+  bgStyle?: AvatarBackground;
+  /** The focus/emphasis ring tone. */
+  ring?: AvatarRing;
+  /** The image source; falls back to `name` initials or `fallback` on error. */
   src?: string;
 
-  /* Person/entity name — used to derive initials when no image. */
+  /** The person/entity name — used to derive initials when no image. */
   name?: string;
 
-  /* Custom fallback (overrides initials). */
+  /** The custom fallback (overrides initials). */
   fallback?: ReactNode;
 
-  /* Alt text for the underlying `<img>`. Defaults to `name`. */
+  /** The alt text for the underlying `<img>` (defaults to `name`). */
   alt?: string;
 
-  /* When true (and no explicit non-neutral `tone` / non-solid `bgStyle`), derive a deterministic soft-color tint from `name` hash → 17-color palette. */
+  /** The auto-color flag — when true (and no explicit non-neutral `tone` / non-solid `bgStyle`), derives a deterministic soft-color tint from `name` hash → 17-color palette. */
   canAutoColor?: boolean;
 
-  /* Size: preset (`xs|sm|md|lg|xl|2xl`) → variant class · raw number/string → square inline · object → explicit dims. See `SizeUnion`. */
+  /** The size — preset (`xs|sm|md|lg|xl|2xl`) → variant class · raw number/string → square inline · object → explicit dims. See `SizeUnion`. */
   size?: SizeUnion<AvatarSizePreset>;
 }
 

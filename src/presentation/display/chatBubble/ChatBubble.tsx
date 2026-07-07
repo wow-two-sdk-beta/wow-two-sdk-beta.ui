@@ -6,30 +6,75 @@ import {
 import { Check, CheckCheck, Clock, AlertTriangle } from 'lucide-react';
 import { cn, Tones } from '../../../foundation/utils';
 
-export type ChatSide = 'start' | 'end';
-export type ChatStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
-export type ChatTone = 'default' | 'primary' | 'system' | 'subtle';
+/** Defines which side of the conversation a bubble sits on. */
+export const ChatSide = {
+  /** Refers to the inbound side (them). */
+  Start: 'start',
+  /** Refers to the outbound side (me). */
+  End: 'end',
+} as const;
+
+export type ChatSide = (typeof ChatSide)[keyof typeof ChatSide];
+
+/** Defines the delivery state of a chat message. */
+export const ChatStatus = {
+  /** Refers to a message in flight. */
+  Sending: 'sending',
+  /** Refers to a message sent to the server. */
+  Sent: 'sent',
+  /** Refers to a message delivered to the recipient. */
+  Delivered: 'delivered',
+  /** Refers to a message read by the recipient. */
+  Read: 'read',
+  /** Refers to a message that failed to send. */
+  Failed: 'failed',
+} as const;
+
+export type ChatStatus = (typeof ChatStatus)[keyof typeof ChatStatus];
+
+/** Defines the chat bubble color tone. */
+export const ChatTone = {
+  /** Refers to the neutral inbound bubble. */
+  Default: 'default',
+  /** Refers to the primary outbound bubble. */
+  Primary: 'primary',
+  /** Refers to a centered, muted system row. */
+  System: 'system',
+  /** Refers to a subtle bordered bubble. */
+  Subtle: 'subtle',
+} as const;
+
+export type ChatTone = (typeof ChatTone)[keyof typeof ChatTone];
 
 export interface ChatBubbleProps extends HTMLAttributes<HTMLDivElement> {
-  /** Which side of the conversation. `start` = them, `end` = me. */
+  /** The side of the conversation. `start` = them, `end` = me. */
   side?: ChatSide;
-  /** Bubble color tone. `system` is centered + muted (e.g. "Alex joined"). */
+
+  /** The bubble color tone. `system` is centered + muted (e.g. "Alex joined"). */
   tone?: ChatTone;
-  /** Avatar slot (rendered next to the bubble on the same side). */
+
+  /** The avatar slot (rendered next to the bubble on the same side). */
   avatar?: ReactNode;
-  /** Author label (rendered above the bubble). */
+
+  /** The author label (rendered above the bubble). */
   author?: ReactNode;
-  /** Timestamp (rendered next to the status row). */
+
+  /** The timestamp (rendered next to the status row). */
   timestamp?: ReactNode;
-  /** Delivery state. Hidden when `side === 'start'` by default. */
+
+  /** The delivery state. Hidden when `side === 'start'` by default. */
   status?: ChatStatus;
-  /** Force-show status even on the inbound side. */
+
+  /** The status-on-inbound override — force-shows status even on the inbound side. */
   canShowStatusOnStart?: boolean;
-  /** Hide the bubble's tail (for stacked / grouped messages). */
+
+  /** The tailless mode — hides the bubble's tail (for stacked / grouped messages). */
   isTailless?: boolean;
-  /** Reactions / footer slot (e.g. `<ReactionBar />`). */
+
+  /** The reactions / footer slot (e.g. `<ReactionBar />`). */
   footer?: ReactNode;
-  /** Bubble body. */
+
+  /** The bubble body. */
   children: ReactNode;
 }
 

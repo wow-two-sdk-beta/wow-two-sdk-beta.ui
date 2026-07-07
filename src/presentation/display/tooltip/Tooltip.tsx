@@ -45,23 +45,31 @@ const TooltipContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>
 TooltipContent.displayName = 'TooltipContent';
 
 export interface TooltipProps {
-  /** Tooltip body. */
+  /** The tooltip body. */
   content: ReactNode;
-  /** Single child element — the trigger. Receives event handlers + ref. */
+
+  /** The single child element — the trigger. Receives event handlers + ref. */
   children: ReactElement;
-  /** Floating UI placement. Default `top`. */
+
+  /** The Floating UI placement. Default `top`. */
   placement?: AnchoredPositionerProps['placement'];
-  /** Delay before opening on hover, in ms. Default 700. */
+
+  /** The delay before opening on hover, in ms. Default 700. */
   openDelay?: number;
-  /** Delay before closing on leave, in ms. Default 0. */
+
+  /** The delay before closing on leave, in ms. Default 0. */
   closeDelay?: number;
-  /** Controlled open state. */
+
+  /** The controlled open state. */
   open?: boolean;
-  /** Initial open state when uncontrolled. Default `false`. */
+
+  /** The initial open state when uncontrolled. Default `false`. */
   defaultOpen?: boolean;
-  /** Fires on every open-state change (hover, focus, Escape). */
+
+  /** Emits the open state on every change (hover, focus, Escape). */
   onOpenChange?: (open: boolean) => void;
-  /** Disable rendering even on hover (e.g. when content is empty). */
+
+  /** The disabled mode — suppresses rendering even on hover (e.g. when content is empty). */
   isDisabled?: boolean;
 }
 

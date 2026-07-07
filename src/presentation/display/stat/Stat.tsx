@@ -5,17 +5,33 @@ import { Icon } from '../../../foundation/icons';
 import { Heading } from '../heading/Heading';
 import { Text } from '../text/Text';
 
+/** Defines the Stat tile visual size. */
+export const StatSize = {
+  /** Refers to the small tile. */
+  Sm: 'sm',
+  /** Refers to the medium tile. */
+  Md: 'md',
+  /** Refers to the large tile. */
+  Lg: 'lg',
+} as const;
+
+export type StatSize = (typeof StatSize)[keyof typeof StatSize];
+
 export interface StatProps extends ComponentPropsWithoutRef<'div'> {
-  /** Label above the value. */
+  /** The label above the value. */
   label: ReactNode;
-  /** Primary value (large). */
+
+  /** The primary value (large). */
   value: ReactNode;
-  /** Optional trend — positive = up/green, negative = down/red. */
+
+  /** The optional trend — positive = up/green, negative = down/red. */
   trend?: { value: number; label?: ReactNode };
-  /** Optional helper / supporting text below. */
+
+  /** The optional helper / supporting text below. */
   helper?: ReactNode;
-  /** Visual size. Default `md`. */
-  size?: 'sm' | 'md' | 'lg';
+
+  /** The visual size. Default `md`. */
+  size?: StatSize;
 }
 
 const VALUE_SIZE: Record<NonNullable<StatProps['size']>, '2xl' | '3xl' | '4xl'> = {

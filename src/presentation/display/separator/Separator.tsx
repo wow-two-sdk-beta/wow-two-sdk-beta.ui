@@ -1,9 +1,9 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, type Orientation } from '../../../foundation/utils';
 
 export interface SeparatorProps extends ComponentPropsWithoutRef<'div'> {
-  orientation?: 'horizontal' | 'vertical';
-  /** Purely decorative — `role="none"`, unannounced. Default `true`; set `false` when meaningful in context. */
+  orientation?: Orientation;
+  /** The decorative mode — `role="none"`, unannounced. Default `true`; set `false` when meaningful in context. */
   isDecorative?: boolean;
 }
 

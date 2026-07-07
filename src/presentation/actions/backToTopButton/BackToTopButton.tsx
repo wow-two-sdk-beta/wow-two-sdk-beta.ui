@@ -6,33 +6,31 @@ import {
   type ReactNode,
 } from 'react';
 import { ArrowUp } from 'lucide-react';
-import { cn } from '../../../foundation/utils';
+import { cn, OverlayPosition } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 
-export type BackToTopPosition =
-  | 'bottom-right'
-  | 'bottom-left'
-  | 'bottom-center'
-  | 'top-right'
-  | 'top-left';
-
 export interface BackToTopButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Scroll distance (px) before the button appears. Default 400. */
+  /** The scroll distance (px) before the button appears. Default 400. */
   threshold?: number;
-  /** Scope to a specific scrollable element. Defaults to the window. */
+
+  /** The scrollable element to scope to. Defaults to the window. */
   scrollContainer?: HTMLElement | null;
-  position?: BackToTopPosition;
-  /** Visible label. Omit for icon-only. */
+
+  /** The anchor position on the viewport. Default `bottom-right`. */
+  position?: OverlayPosition;
+
+  /** The visible label. Omit for icon-only. */
   label?: ReactNode;
   'aria-label'?: string;
 }
 
-const POSITION: Record<BackToTopPosition, string> = {
+const POSITION: Record<OverlayPosition, string> = {
   'bottom-right': 'bottom-6 right-6',
   'bottom-left': 'bottom-6 left-6',
   'bottom-center': 'bottom-6 left-1/2 -translate-x-1/2',
   'top-right': 'top-6 right-6',
   'top-left': 'top-6 left-6',
+  'top-center': 'top-6 left-1/2 -translate-x-1/2',
 };
 
 /** Floating button revealed past `threshold` scroll — smooth-scrolls to top. */
@@ -41,7 +39,7 @@ export const BackToTopButton = forwardRef<HTMLButtonElement, BackToTopButtonProp
     {
       threshold = 400,
       scrollContainer,
-      position = 'bottom-right',
+      position = OverlayPosition.BottomRight,
       label,
       'aria-label': ariaLabel = 'Back to top',
       className,

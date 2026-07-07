@@ -1,13 +1,15 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 export interface RadioProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
-  size?: 'sm' | 'md' | 'lg';
+  /** The control size. */
+  size?: Size;
 }
 
-const SIZE_CLASS: Record<NonNullable<RadioProps['size']>, string> = {
+/* Sizes not listed fall back to the `md` row at the call site. */
+const SIZE_CLASS: Partial<Record<Size, string>> = {
   sm: 'h-4 w-4',
   md: 'h-5 w-5',
   lg: 'h-6 w-6',
@@ -19,10 +21,10 @@ const SIZE_CLASS: Record<NonNullable<RadioProps['size']>, string> = {
  * `RadioGroup` (L4).
  */
 export const Radio = forwardRef<HTMLInputElement, RadioProps>(
-  ({ className, size = 'md', id, disabled, required, ...props }, ref) => {
+  ({ className, size = Size.Md, id, disabled, required, ...props }, ref) => {
     const ctx = useFormControl();
     return (
-      <span className={cn('relative inline-flex shrink-0', SIZE_CLASS[size], className)}>
+      <span className={cn('relative inline-flex shrink-0', SIZE_CLASS[size] ?? SIZE_CLASS.md, className)}>
         <input
           ref={ref}
           type="radio"

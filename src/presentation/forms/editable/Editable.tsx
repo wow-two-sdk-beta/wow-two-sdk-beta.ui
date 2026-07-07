@@ -17,7 +17,7 @@ import { Check, X } from 'lucide-react';
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
-import { inputBaseVariants, type InputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 interface EditableContextValue {
   value: string;
@@ -194,7 +194,12 @@ export const EditablePreview = forwardRef<HTMLSpanElement, EditablePreviewProps>
 
 export interface EditableInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'size'>,
-    InputBaseVariants {}
+    Omit<InputBaseVariants, 'size' | 'state'> {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+}
 
 export const EditableInput = forwardRef<HTMLInputElement, EditableInputProps>(
   function EditableInput(

@@ -1,1 +1,1 @@
-export { ColorPicker, type ColorPickerProps } from './ColorPicker';
+export { ColorPicker, ColorPickerTriggerVariant, type ColorPickerProps } from './ColorPicker';

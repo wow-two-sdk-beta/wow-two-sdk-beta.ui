@@ -1,26 +1,33 @@
 import { forwardRef, type AnchorHTMLAttributes, type ReactNode } from 'react';
-import { cn, dataAttr } from '../../../foundation/utils';
+import { cn, dataAttr, Size } from '../../../foundation/utils';
 import { Slot } from '../../../foundation/primitives';
 
 export interface NavItemProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  /** When true, render the child element instead of an `<a>` (router Link). */
+  /** The escape hatch to render the child element instead of an `<a>` (router Link). */
   asChild?: boolean;
-  /** Optional leading icon. */
+
+  /** The leading icon. */
   icon?: ReactNode;
-  /** Visual label. */
+
+  /** The visual label. */
   children: ReactNode;
-  /** Trailing slot — typically a count badge or status dot. */
+
+  /** The trailing slot — typically a count badge or status dot. */
   trailing?: ReactNode;
-  /** Mark active (visual + `aria-current="page"`). */
+
+  /** The active state (visual + `aria-current="page"`). */
   isActive?: boolean;
-  /** Visual size. Default `md`. */
-  size?: 'sm' | 'md' | 'lg';
+
+  /** The visual size. Default `md`. */
+  size?: Size;
 }
 
-const SIZE: Record<NonNullable<NavItemProps['size']>, string> = {
-  sm: 'h-8 px-2 text-sm gap-2',
-  md: 'h-9 px-2.5 text-sm gap-2.5',
-  lg: 'h-11 px-3 text-base gap-3',
+const SIZE: Record<Size, string> = {
+  [Size.Xs]: 'h-7 px-1.5 text-xs gap-1.5',
+  [Size.Sm]: 'h-8 px-2 text-sm gap-2',
+  [Size.Md]: 'h-9 px-2.5 text-sm gap-2.5',
+  [Size.Lg]: 'h-11 px-3 text-base gap-3',
+  [Size.Xl]: 'h-12 px-3.5 text-base gap-3.5',
 };
 
 /**
@@ -28,7 +35,7 @@ const SIZE: Record<NonNullable<NavItemProps['size']>, string> = {
  * pass `asChild` to forward to a router Link. Sets `aria-current="page"` when `isActive`.
  */
 export const NavItem = forwardRef<HTMLAnchorElement, NavItemProps>(
-  ({ asChild, icon, children, trailing, isActive, size = 'md', className, ...props }, ref) => {
+  ({ asChild, icon, children, trailing, isActive, size = Size.Md, className, ...props }, ref) => {
     const Comp = asChild ? Slot : 'a';
     return (
       <Comp

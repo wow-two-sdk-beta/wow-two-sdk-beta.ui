@@ -7,21 +7,21 @@ import { MonthGrid } from '../MonthGrid';
 
 export interface CalendarProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
-  /** Controlled selected date. */
+  /** The controlled selected date. */
   value?: Temporal.PlainDate | null;
-  /** Uncontrolled initial selection. */
+  /** The uncontrolled initial selection. */
   defaultValue?: Temporal.PlainDate | null;
-  /** Selection callback. */
+  /** Emits the selected date. */
   onValueChange?: (date: Temporal.PlainDate) => void;
-  /** Initial visible month (uncontrolled). */
+  /** The initial visible month (uncontrolled). */
   defaultMonth?: Temporal.PlainDate;
-  /** Minimum selectable date. */
+  /** The minimum selectable date. */
   min?: Temporal.PlainDate | null;
-  /** Maximum selectable date. */
+  /** The maximum selectable date. */
   max?: Temporal.PlainDate | null;
-  /** Custom disable predicate. */
+  /** The custom disable predicate. */
   isDisabled?: (date: Temporal.PlainDate) => boolean;
-  /** A11y label. */
+  /** The a11y label. */
   'aria-label'?: string;
 }
 

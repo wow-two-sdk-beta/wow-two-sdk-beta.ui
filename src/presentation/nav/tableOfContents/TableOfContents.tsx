@@ -18,14 +18,17 @@ export interface TableOfContentsItem {
 }
 
 export interface TableOfContentsProps extends HTMLAttributes<HTMLElement> {
-  items?: TableOfContentsItem[];
-  /** Auto-extract from this element's headings. */
+  items?: ReadonlyArray<TableOfContentsItem>;
+  /** The element whose headings are auto-extracted. */
   source?: RefObject<HTMLElement>;
-  /** CSS selector used with `source`. Default `h2, h3`. */
+
+  /** The CSS selector used with `source`. Default `h2, h3`. */
   headingSelector?: string;
-  /** Override the auto-derived active id. */
+
+  /** The override for the auto-derived active id. */
   activeId?: string | null;
-  /** Apply `sticky top-4 self-start` helper classes. */
+
+  /** The sticky toggle — applies `sticky top-4 self-start` helper classes. */
   isSticky?: boolean;
 }
 
@@ -51,7 +54,7 @@ export const TableOfContents = forwardRef<HTMLElement, TableOfContentsProps>(
     },
     ref,
   ) {
-    const [extracted, setExtracted] = useState<TableOfContentsItem[]>([]);
+    const [extracted, setExtracted] = useState<ReadonlyArray<TableOfContentsItem>>([]);
 
     useEffect(() => {
       if (itemsProp || !source?.current) return;

@@ -1,24 +1,30 @@
 import { Children, cloneElement, forwardRef, isValidElement, type HTMLAttributes, type ReactElement, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Fieldset } from '../fieldset/Fieldset';
 import { Legend } from '../legend/Legend';
 import type { CheckboxFieldProps } from '../checkboxField/CheckboxField';
 
 interface CheckboxGroupProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, 'onChange'> {
-  /** Group legend (label-equivalent for fieldset). */
+  /** The group legend (label-equivalent for fieldset). */
   legend?: ReactNode;
-  /** Selected values (controlled). */
-  value?: string[];
-  /** Initial values (uncontrolled). */
-  defaultValue?: string[];
-  /** Fires whenever selection changes. */
-  onValueChange?: (next: string[]) => void;
-  /** Disable the whole group. */
+
+  /** The selected values (controlled). */
+  value?: ReadonlyArray<string>;
+
+  /** The initial values (uncontrolled). */
+  defaultValue?: ReadonlyArray<string>;
+
+  /** Emits the selected values whenever selection changes. */
+  onValueChange?: (next: ReadonlyArray<string>) => void;
+
+  /** The disabled state for the whole group. */
   isDisabled?: boolean;
-  /** Layout direction. Default `vertical`. */
-  orientation?: 'horizontal' | 'vertical';
-  /** `<CheckboxField>` children with `value="…"` attached. */
+
+  /** The layout direction. Default `vertical`. */
+  orientation?: Orientation;
+
+  /** The `<CheckboxField>` children with `value="…"` attached. */
   children: ReactNode;
 }
 
@@ -38,14 +44,14 @@ export const CheckboxGroup = forwardRef<HTMLFieldSetElement, CheckboxGroupProps>
       defaultValue,
       onValueChange,
       isDisabled,
-      orientation = 'vertical',
+      orientation = Orientation.Vertical,
       className,
       children,
       ...props
     },
     ref,
   ) => {
-    const [selected, setSelected] = useControlled<string[]>({
+    const [selected, setSelected] = useControlled<ReadonlyArray<string>>({
       controlled: value,
       default: defaultValue ?? [],
       onChange: onValueChange,
@@ -59,7 +65,7 @@ export const CheckboxGroup = forwardRef<HTMLFieldSetElement, CheckboxGroupProps>
     return (
       <Fieldset ref={ref} disabled={isDisabled} className={cn(className)} {...props}>
         {legend && <Legend>{legend}</Legend>}
-        <div className={cn('flex gap-3', orientation === 'vertical' ? 'flex-col' : 'flex-row flex-wrap')}>
+        <div className={cn('flex gap-3', orientation === Orientation.Vertical ? 'flex-col' : 'flex-row flex-wrap')}>
           {Children.map(children, (child) => {
             if (!isValidElement(child)) return child;
             const c = child as ReactElement<ChildLike>;

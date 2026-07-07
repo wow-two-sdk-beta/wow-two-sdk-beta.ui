@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, type VariantProps, Orientation } from '../../../foundation/utils';
 
 /**
  * Provides the layout for `ControlGroup` across three slots — the `root`
@@ -37,5 +37,13 @@ export const controlGroupVariants = tv({
 
 export type ControlGroupVariants = VariantProps<typeof controlGroupVariants>;
 
-/** Represents the label-to-control arrangement of a `ControlGroup` (`horizontal` · `vertical`). */
-export type ControlGroupOrientation = NonNullable<ControlGroupVariants['orientation']>;
+/* Compile-time lock: shared `Orientation` values ≡ tv `orientation` keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertControlGroupOrientation: AssertExact<
+  Orientation,
+  NonNullable<VariantProps<typeof controlGroupVariants>['orientation']>
+> = true;
+void _assertControlGroupOrientation;
+
+/** Represents the label-to-control arrangement of a `ControlGroup` — the shared {@link Orientation} vocabulary. */
+export type ControlGroupOrientation = Orientation;

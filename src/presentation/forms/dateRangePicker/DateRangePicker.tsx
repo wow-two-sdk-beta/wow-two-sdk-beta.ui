@@ -4,13 +4,14 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
-import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
+import { selectTriggerVariants, SelectSize, type SelectTriggerVariants } from '../select/Select.variants';
+import { InputState } from '../InputStyles';
 import { formatISODate, today } from '../DateExtensions';
 import { RangeCalendar, type DateRange } from '../rangeCalendar';
 
 export interface DateRangePickerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange' | 'value' | 'defaultValue'>,
-    SelectTriggerVariants {
+    Omit<SelectTriggerVariants, 'size' | 'state'> {
   value?: DateRange | null;
   defaultValue?: DateRange | null;
   onValueChange?: (range: DateRange | null) => void;
@@ -20,8 +21,12 @@ export interface DateRangePickerProps
   max?: Temporal.PlainDate | null;
   isDisabled?: (date: Temporal.PlainDate) => boolean;
   isInvalid?: boolean;
-  /** When `name` is set, two hidden inputs (`{name}_start`, `{name}_end`) ship the ISO values. */
+  /** The hidden input name; when set, two hidden inputs (`{name}_start`, `{name}_end`) ship the ISO values. */
   name?: string;
+  /** The trigger size. */
+  size?: SelectSize;
+  /** The validity surface. */
+  state?: InputState;
 }
 
 const defaultFormat = (d: Temporal.PlainDate) =>
@@ -57,7 +62,7 @@ export const DateRangePicker = forwardRef<HTMLButtonElement, DateRangePickerProp
       controlled: undefined,
       default: false,
     });
-    const triggerState = state ?? (isInvalid ? 'invalid' : 'default');
+    const triggerState = state ?? (isInvalid ? InputState.Invalid : InputState.Default);
 
     // Auto-close when both ends are picked.
     const wasComplete = useRef(false);

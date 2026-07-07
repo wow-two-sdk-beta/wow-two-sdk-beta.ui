@@ -1,12 +1,13 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
-import { dividerVariants, type DividerOrientation } from './Divider.variants';
+import { cn, Orientation } from '../../../foundation/utils';
+import { dividerVariants } from './Divider.variants';
 
 export interface DividerProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
-  /** Axis of the rule. Default `horizontal`. */
-  orientation?: DividerOrientation;
+  /** The axis of the rule. Default `horizontal`. */
+  orientation?: Orientation;
+
   /**
-   * Optional centered content overlaid on the rule — the classic "or" separator.
+   * The centered content overlaid on the rule — the classic "or" separator.
    * Horizontal only (ignored when `orientation="vertical"`). When present the rule
    * is split either side of the label and the divider is exposed as a labelled
    * (non-decorative) separator.
@@ -20,8 +21,8 @@ export interface DividerProps extends Omit<ComponentPropsWithoutRef<'div'>, 'chi
  * (e.g. `<Divider label="or" />`) sitting on the surface background.
  */
 export const Divider = forwardRef<HTMLDivElement, DividerProps>(
-  ({ orientation = 'horizontal', label, className, ...props }, ref) => {
-    if (label != null && orientation === 'horizontal') {
+  ({ orientation = Orientation.Horizontal, label, className, ...props }, ref) => {
+    if (label != null && orientation === Orientation.Horizontal) {
       return (
         <div
           ref={ref}

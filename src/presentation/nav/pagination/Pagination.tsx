@@ -4,27 +4,31 @@ import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 
 export interface PaginationProps extends Omit<ComponentPropsWithoutRef<'nav'>, 'onChange'> {
-  /** Total page count (1-based). */
+  /** The total page count (1-based). */
   total: number;
-  /** Current page (1-based). */
+
+  /** The current page (1-based). */
   page: number;
-  /** Fires with the new page on click. */
+
+  /** Emits the new page on click. */
   onPageChange: (page: number) => void;
-  /** Number of page buttons surrounding the current. Default `1` (so 1 + current + 1 = 3). */
+
+  /** The number of page buttons surrounding the current. Default `1` (so 1 + current + 1 = 3). */
   siblings?: number;
-  /** Hide first/last buttons (just show prev/next + numbers). */
+
+  /** The hide-first/last toggle (just show prev/next + numbers). */
   hideFirstLast?: boolean;
 }
 
-function range(start: number, end: number): number[] {
+function range(start: number, end: number): ReadonlyArray<number> {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
 
-function buildPages(total: number, page: number, siblings: number): (number | 'ellipsis')[] {
+function buildPages(total: number, page: number, siblings: number): ReadonlyArray<number | 'ellipsis'> {
   if (total <= 1) return [1];
   const left = Math.max(2, page - siblings);
   const right = Math.min(total - 1, page + siblings);
-  const pages: (number | 'ellipsis')[] = [1];
+  const pages: Array<number | 'ellipsis'> = [1];
   if (left > 2) pages.push('ellipsis');
   pages.push(...range(left, right));
   if (right < total - 1) pages.push('ellipsis');

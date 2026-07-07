@@ -6,7 +6,7 @@ import { ColorSwatch, type ColorSwatchVariants } from '../colorSwatch';
 
 export interface ColorSwatchPickerProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
-  colors: string[];
+  colors: ReadonlyArray<string>;
   value?: string | null;
   defaultValue?: string | null;
   onValueChange?: (color: string) => void;

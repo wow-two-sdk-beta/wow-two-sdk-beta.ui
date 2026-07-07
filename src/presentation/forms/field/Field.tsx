@@ -6,18 +6,24 @@ import { FormHelperText } from '../formHelperText/FormHelperText';
 import { FormErrorMessage } from '../formErrorMessage/FormErrorMessage';
 
 export interface FieldProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
-  /** Label text. Pass a node for richer content (e.g. label + tooltip). */
+  /** The label text. Pass a node for richer content (e.g. label + tooltip). */
   label?: ReactNode;
-  /** Helper / hint shown beneath the control. Hidden when `error` is set. */
+
+  /** The helper / hint shown beneath the control. Hidden when `error` is set. */
   helper?: ReactNode;
-  /** Error text — renders only when truthy. Sets `isInvalid` on the form context. */
+
+  /** The error text — renders only when truthy. Sets `isInvalid` on the form context. */
   error?: ReactNode;
-  /** Mark required (also exposes `isRequired` to the control via context). */
+
+  /** The required state (also exposes `isRequired` to the control via context). */
   isRequired?: boolean;
-  /** Mark disabled (also exposes `isDisabled` to the control). */
+
+  /** The disabled state (also exposes `isDisabled` to the control). */
   isDisabled?: boolean;
-  /** Mark read-only (also exposes `isReadOnly` to the control). */
+
+  /** The read-only state (also exposes `isReadOnly` to the control). */
   isReadOnly?: boolean;
+
   /** The single form control (Input, Select, etc.) — receives wired id/aria via context. */
   children: ReactNode;
 }

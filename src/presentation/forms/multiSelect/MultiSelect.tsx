@@ -21,13 +21,14 @@ import {
   ListboxSeparator,
   ListboxEmpty,
 } from '../listbox';
-import { selectTriggerVariants, type SelectTriggerVariants } from '../select/Select.variants';
+import { selectTriggerVariants, SelectSize, type SelectTriggerVariants } from '../select/Select.variants';
+import { InputState } from '../InputStyles';
 
 interface MultiSelectContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
-  values: string[];
-  setValues: (values: string[]) => void;
+  values: ReadonlyArray<string>;
+  setValues: (values: ReadonlyArray<string>) => void;
   labels: Record<string, ReactNode>;
   registerLabel: (value: string, label: ReactNode) => void;
   unregisterLabel: (value: string) => void;
@@ -45,9 +46,9 @@ function useMultiSelectContext() {
 }
 
 export interface MultiSelectProps {
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (value: string[]) => void;
+  value?: ReadonlyArray<string>;
+  defaultValue?: ReadonlyArray<string>;
+  onValueChange?: (value: ReadonlyArray<string>) => void;
   isDisabled?: boolean;
   name?: string;
   isInvalid?: boolean;
@@ -76,7 +77,7 @@ function MultiSelectRoot({
     default: defaultOpen,
     onChange: onOpenChange,
   });
-  const [valuesState, setValuesState] = useControlled<string[]>({
+  const [valuesState, setValuesState] = useControlled<ReadonlyArray<string>>({
     controlled: value,
     default: defaultValue ?? [],
     onChange: onValueChange,
@@ -144,7 +145,11 @@ MultiSelectRoot.displayName = 'MultiSelect';
 
 export interface MultiSelectTriggerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
-    SelectTriggerVariants {
+    Omit<SelectTriggerVariants, 'size' | 'state'> {
+  /** The trigger size. */
+  size?: SelectSize;
+  /** The validity surface. */
+  state?: InputState;
   children?: ReactNode;
 }
 
@@ -154,7 +159,7 @@ export const MultiSelectTrigger = forwardRef<HTMLButtonElement, MultiSelectTrigg
     ref,
   ) {
     const ctx = useMultiSelectContext();
-    const triggerState = state ?? (ctx.isInvalid ? 'invalid' : 'default');
+    const triggerState = state ?? (ctx.isInvalid ? InputState.Invalid : InputState.Default);
     return (
       <PopoverTrigger asChild>
         <button
@@ -192,7 +197,7 @@ export const MultiSelectTrigger = forwardRef<HTMLButtonElement, MultiSelectTrigg
 );
 
 export interface MultiSelectTagsProps {
-  /** Shown when no values selected. */
+  /** The content shown when no values selected. */
   placeholder?: ReactNode;
 }
 

@@ -26,13 +26,23 @@ import {
   type OverlayChromeContextValue,
 } from '../OverlayChrome';
 
+/** Defines the ARIA dialog role a `Modal` exposes. */
+export const ModalRole = {
+  /** Refers to a standard dialog. */
+  Dialog: 'dialog',
+  /** Refers to an alert dialog that interrupts to convey an urgent message. */
+  AlertDialog: 'alertdialog',
+} as const;
+
+export type ModalRole = (typeof ModalRole)[keyof typeof ModalRole];
+
 interface ModalContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
   triggerRef: React.MutableRefObject<HTMLElement | null>;
   titleId: string;
   descriptionId: string;
-  role: 'dialog' | 'alertdialog';
+  role: ModalRole;
   dismissOnOutsideClick: boolean;
   dismissOnEscape: boolean;
 }
@@ -51,8 +61,8 @@ export interface ModalProps {
   onOpenChange?: (open: boolean) => void;
   dismissOnOutsideClick?: boolean;
   dismissOnEscape?: boolean;
-  /** Internal — `AlertModal` overrides this. */
-  role?: 'dialog' | 'alertdialog';
+  /** The ARIA dialog role. Internal — `AlertModal` overrides this. */
+  role?: ModalRole;
   children: ReactNode;
 }
 
@@ -124,9 +134,10 @@ export const ModalTrigger = forwardRef<HTMLButtonElement, ModalTriggerProps>(
 
 /** Represents the prop surface of `Modal.Content`. */
 export interface ModalContentProps extends HTMLAttributes<HTMLDivElement>, SurfaceVariants {
-  /** Disables the default backdrop when true. */
+  /** The backdrop-hide toggle — disables the default backdrop when true. */
   hideBackdrop?: boolean;
-  /** Applies a backdrop blur. */
+
+  /** The backdrop-blur toggle. */
   isBlurred?: boolean;
   children: ReactNode;
 }

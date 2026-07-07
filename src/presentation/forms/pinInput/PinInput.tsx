@@ -4,31 +4,49 @@ import {
   useRef,
   type ComponentPropsWithoutRef,
 } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
-import { inputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputState } from '../InputStyles';
+
+/** Defines the character set a pin-input cell accepts. */
+export const PinInputType = {
+  /** Refers to digits only (`0-9`). */
+  Numeric: 'numeric',
+  /** Refers to any single alphanumeric character. */
+  Alphanumeric: 'alphanumeric',
+} as const;
+
+export type PinInputType = (typeof PinInputType)[keyof typeof PinInputType];
 
 export interface PinInputProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'onChange'> {
-  /** Number of digit cells. Default 6. */
+  /** The number of digit cells. Default 6. */
   length?: number;
-  /** Controlled value (full string). */
+
+  /** The controlled value (full string). */
   value?: string;
-  /** Uncontrolled initial value. */
+
+  /** The uncontrolled initial value. */
   defaultValue?: string;
-  /** Fires whenever the value changes. */
+
+  /** Emits the value whenever it changes. */
   onValueChange?: (value: string) => void;
-  /** Fires when the user fills the final cell. */
+
+  /** Emits the value when the user fills the final cell. */
   onComplete?: (value: string) => void;
-  /** Restrict to digits (`numeric`) or any single char (`alphanumeric`). Default `numeric`. */
-  type?: 'numeric' | 'alphanumeric';
-  /** Cell visual size. Default `md`. */
-  size?: 'sm' | 'md' | 'lg';
-  /** Render each cell as `*` (good for verification codes). */
+
+  /** The allowed characters — digits (`numeric`) or any single char (`alphanumeric`). Default `numeric`. */
+  type?: PinInputType;
+
+  /** The cell visual size. Default `md`. */
+  size?: Size;
+
+  /** The masked mode — renders each cell as `*` (good for verification codes). */
   isMasked?: boolean;
   isDisabled?: boolean;
 }
 
-const SIZE: Record<NonNullable<PinInputProps['size']>, string> = {
+/* Sizes not listed fall back to the `md` row at the call site. */
+const SIZE: Partial<Record<Size, string>> = {
   sm: 'h-9 w-9 text-base',
   md: 'h-11 w-11 text-lg',
   lg: 'h-14 w-14 text-xl',
@@ -46,8 +64,8 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
       defaultValue,
       onValueChange,
       onComplete,
-      type = 'numeric',
-      size = 'md',
+      type = PinInputType.Numeric,
+      size = Size.Md,
       isMasked,
       isDisabled,
       className,
@@ -57,19 +75,19 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
   ) => {
     /* Per-cell array state — a joined string compacts empties, remapping cell i to char 0. */
     const toCells = (s: string) => Array.from({ length }, (_, i) => s[i] ?? '');
-    const [cells, setCells] = useControlled<string[]>({
+    const [cells, setCells] = useControlled<ReadonlyArray<string>>({
       controlled: value === undefined ? undefined : toCells(value),
       default: toCells(defaultValue ?? ''),
       onChange: (next) => onValueChange?.(next.join('')),
     });
-    const inputs = useRef<(HTMLInputElement | null)[]>([]);
+    const inputs = useRef<Array<HTMLInputElement | null>>([]);
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     useImperativeHandle(ref, () => wrapperRef.current as HTMLDivElement);
 
     const isAllowed = (ch: string) =>
-      type === 'numeric' ? /^[0-9]$/.test(ch) : /^[A-Za-z0-9]$/.test(ch);
+      type === PinInputType.Numeric ? /^[0-9]$/.test(ch) : /^[A-Za-z0-9]$/.test(ch);
 
-    const update = (next: string[]) => {
+    const update = (next: ReadonlyArray<string>) => {
       setCells(next);
       if (next.every(Boolean)) onComplete?.(next.join(''));
     };
@@ -115,9 +133,9 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
               inputs.current[i] = el;
             }}
             type={isMasked ? 'password' : 'text'}
-            inputMode={type === 'numeric' ? 'numeric' : 'text'}
+            inputMode={type === PinInputType.Numeric ? 'numeric' : 'text'}
             /* Cells are internal — consumers can't label them individually, so each carries a built-in name. */
-            aria-label={`${type === 'numeric' ? 'Digit' : 'Character'} ${i + 1} of ${length}`}
+            aria-label={`${type === PinInputType.Numeric ? 'Digit' : 'Character'} ${i + 1} of ${length}`}
             autoComplete="one-time-code"
             maxLength={1}
             disabled={isDisabled}
@@ -126,9 +144,9 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
             onKeyDown={(e) => handleKeyDown(i, e)}
             onPaste={handlePaste}
             className={cn(
-              inputBaseVariants({ state: 'default' }),
+              inputBaseVariants({ state: InputState.Default }),
               'text-center font-medium',
-              SIZE[size],
+              SIZE[size] ?? SIZE.md,
             )}
           />
         ))}

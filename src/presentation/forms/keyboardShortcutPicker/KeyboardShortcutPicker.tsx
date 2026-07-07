@@ -14,12 +14,12 @@ import { Kbd } from '../../display/kbd';
 
 export interface KeyboardShortcutPickerProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'value' | 'defaultValue' | 'onChange'> {
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (keys: string[]) => void;
+  value?: ReadonlyArray<string>;
+  defaultValue?: ReadonlyArray<string>;
+  onValueChange?: (keys: ReadonlyArray<string>) => void;
   placeholder?: ReactNode;
   recordLabel?: ReactNode;
-  /** Hidden input emits `+`-joined chord. */
+  /** The hidden input name; the hidden input emits the `+`-joined chord. */
   name?: string;
 }
 
@@ -65,7 +65,7 @@ export const KeyboardShortcutPicker = forwardRef<HTMLButtonElement, KeyboardShor
     },
     ref,
   ) {
-    const [keys, setKeys] = useControlled<string[]>({
+    const [keys, setKeys] = useControlled<ReadonlyArray<string>>({
       controlled: valueProp,
       default: defaultValue ?? [],
       onChange: onValueChange,
@@ -88,7 +88,7 @@ export const KeyboardShortcutPicker = forwardRef<HTMLButtonElement, KeyboardShor
           return;
         }
         if (isModifier(e.key)) return;
-        const captured: string[] = [];
+        const captured: Array<string> = [];
         if (e.metaKey) captured.push('Meta');
         if (e.ctrlKey) captured.push('Control');
         if (e.altKey) captured.push('Alt');

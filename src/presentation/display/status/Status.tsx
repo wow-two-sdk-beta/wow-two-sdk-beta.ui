@@ -1,12 +1,25 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, StatusTone } from '../../../foundation/utils';
+
+/** Defines the Status visual size. */
+export const StatusSize = {
+  /** Refers to the extra-small indicator. */
+  Xs: 'xs',
+  /** Refers to the small indicator. */
+  Sm: 'sm',
+  /** Refers to the medium indicator. */
+  Md: 'md',
+} as const;
+
+export type StatusSize = (typeof StatusSize)[keyof typeof StatusSize];
 
 export interface StatusProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
-  tone?: 'success' | 'warning' | 'destructive' | 'info' | 'neutral';
-  /** Optional pulsing ring around the dot. */
+  tone?: StatusTone;
+  /** The optional pulsing ring around the dot. */
   hasPulse?: boolean;
-  /** Visual size — drives dot dimensions, text size, and gap. Default `md`. */
-  size?: 'xs' | 'sm' | 'md';
+
+  /** The visual size — drives dot dimensions, text size, and gap. Default `md`. */
+  size?: StatusSize;
   children?: ReactNode;
 }
 

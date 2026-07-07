@@ -1,8 +1,28 @@
 import { forwardRef, type ElementType, type HTMLAttributes } from 'react';
-import { cn } from '../../../foundation/utils';
+import { cn, ElementTag } from '../../../foundation/utils';
 
-export type GradientTextDirection = 'r' | 'l' | 't' | 'b' | 'tr' | 'br' | 'tl' | 'bl';
-export type GradientTextTag = 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+/** Defines the gradient sweep direction (compass shorthand). */
+export const GradientTextDirection = {
+  /** Refers to a left-to-right sweep. */
+  Right: 'r',
+  /** Refers to a right-to-left sweep. */
+  Left: 'l',
+  /** Refers to a bottom-to-top sweep. */
+  Top: 't',
+  /** Refers to a top-to-bottom sweep. */
+  Bottom: 'b',
+  /** Refers to a bottom-left-to-top-right sweep. */
+  TopRight: 'tr',
+  /** Refers to a top-left-to-bottom-right sweep. */
+  BottomRight: 'br',
+  /** Refers to a top-right-to-bottom-left sweep. */
+  TopLeft: 'tl',
+  /** Refers to a bottom-right-to-top-left sweep. */
+  BottomLeft: 'bl',
+} as const;
+
+export type GradientTextDirection =
+  (typeof GradientTextDirection)[keyof typeof GradientTextDirection];
 
 export interface GradientTextProps extends HTMLAttributes<HTMLElement> {
   from?: string;
@@ -10,7 +30,7 @@ export interface GradientTextProps extends HTMLAttributes<HTMLElement> {
   to?: string;
   direction?: GradientTextDirection;
   isAnimated?: boolean;
-  as?: GradientTextTag;
+  as?: ElementTag;
 }
 
 const DIR_TO_DEG: Record<GradientTextDirection, number> = {

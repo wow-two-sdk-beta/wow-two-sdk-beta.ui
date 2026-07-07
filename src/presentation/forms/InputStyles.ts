@@ -42,3 +42,78 @@ export const inputBaseVariants = tv({
 });
 
 export type InputBaseVariants = VariantProps<typeof inputBaseVariants>;
+
+/** Defines the size step of a form input control. */
+export const InputSize = {
+  /** Refers to the extra-small step (h-7). */
+  Xs: 'xs',
+  /** Refers to the small step (h-8). */
+  Sm: 'sm',
+  /** Refers to the medium (default) step (h-10). */
+  Md: 'md',
+  /** Refers to the large step (h-12). */
+  Lg: 'lg',
+} as const;
+
+export type InputSize = (typeof InputSize)[keyof typeof InputSize];
+
+/** Defines the validity surface of a form input control. */
+export const InputState = {
+  /** Refers to the default (valid / untouched) surface. */
+  Default: 'default',
+  /** Refers to the invalid surface (destructive border + ring). */
+  Invalid: 'invalid',
+} as const;
+
+export type InputState = (typeof InputState)[keyof typeof InputState];
+
+/** Defines the border-weight step of a form input control. */
+export const InputBorder = {
+  /** Refers to no border. */
+  None: 'none',
+  /** Refers to a 0.5px hairline border. */
+  Xs: 'xs',
+  /** Refers to a 1px border (default). */
+  Sm: 'sm',
+  /** Refers to a 2px border. */
+  Md: 'md',
+  /** Refers to a 4px border. */
+  Lg: 'lg',
+  /** Refers to an 8px border. */
+  Xl: 'xl',
+} as const;
+
+export type InputBorder = (typeof InputBorder)[keyof typeof InputBorder];
+
+/** Defines the focus-ring-weight step of a form input control. */
+export const InputRing = {
+  /** Refers to no focus ring. */
+  None: 'none',
+  /** Refers to a 1px focus ring. */
+  Sm: 'sm',
+  /** Refers to a 2px focus ring (default). */
+  Md: 'md',
+  /** Refers to a 4px focus ring. */
+  Lg: 'lg',
+} as const;
+
+export type InputRing = (typeof InputRing)[keyof typeof InputRing];
+
+/* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertInputSize: AssertExact<
+  InputSize, NonNullable<VariantProps<typeof inputBaseVariants>['size']>
+> = true;
+const _assertInputState: AssertExact<
+  InputState, NonNullable<VariantProps<typeof inputBaseVariants>['state']>
+> = true;
+const _assertInputBorder: AssertExact<
+  InputBorder, NonNullable<VariantProps<typeof inputBaseVariants>['border']>
+> = true;
+const _assertInputRing: AssertExact<
+  InputRing, NonNullable<VariantProps<typeof inputBaseVariants>['ring']>
+> = true;
+void _assertInputSize;
+void _assertInputState;
+void _assertInputBorder;
+void _assertInputRing;

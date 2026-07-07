@@ -3,9 +3,19 @@ import { Plus, Trash } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
-import { inputBaseVariants } from '../InputStyles';
+import { inputBaseVariants, InputSize } from '../InputStyles';
 
-export type GradientKind = 'linear' | 'radial' | 'conic';
+/** Defines the geometry of a CSS gradient. */
+export const GradientKind = {
+  /** Refers to a linear gradient. */
+  Linear: 'linear',
+  /** Refers to a radial gradient. */
+  Radial: 'radial',
+  /** Refers to a conic gradient. */
+  Conic: 'conic',
+} as const;
+
+export type GradientKind = (typeof GradientKind)[keyof typeof GradientKind];
 
 export interface GradientStop {
   color: string;
@@ -15,7 +25,7 @@ export interface GradientStop {
 export interface Gradient {
   kind: GradientKind;
   angle: number;
-  stops: GradientStop[];
+  stops: ReadonlyArray<GradientStop>;
 }
 
 export interface GradientPickerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange'> {
@@ -27,7 +37,7 @@ export interface GradientPickerProps extends Omit<HTMLAttributes<HTMLDivElement>
 }
 
 const DEFAULT_GRADIENT: Gradient = {
-  kind: 'linear',
+  kind: GradientKind.Linear,
   angle: 90,
   stops: [
     { color: '#3b82f6', position: 0 },
@@ -38,8 +48,8 @@ const DEFAULT_GRADIENT: Gradient = {
 export function gradientToCss(g: Gradient): string {
   const stops = [...g.stops].sort((a, b) => a.position - b.position);
   const stopsStr = stops.map((s) => `${s.color} ${s.position}%`).join(', ');
-  if (g.kind === 'linear') return `linear-gradient(${g.angle}deg, ${stopsStr})`;
-  if (g.kind === 'radial') return `radial-gradient(circle, ${stopsStr})`;
+  if (g.kind === GradientKind.Linear) return `linear-gradient(${g.angle}deg, ${stopsStr})`;
+  if (g.kind === GradientKind.Radial) return `radial-gradient(circle, ${stopsStr})`;
   return `conic-gradient(from ${g.angle}deg, ${stopsStr})`;
 }
 
@@ -92,7 +102,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
         {/* Kind + angle */}
         <div className="flex items-center gap-2 text-sm">
           <div role="radiogroup" aria-label="Gradient kind" className="flex items-center gap-0.5 rounded-md bg-muted/40 p-0.5 ring-1 ring-border">
-            {(['linear', 'radial', 'conic'] as GradientKind[]).map((k) => (
+            {Object.values(GradientKind).map((k) => (
               <button
                 key={k}
                 type="button"
@@ -111,7 +121,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
               </button>
             ))}
           </div>
-          {gradient.kind !== 'radial' && (
+          {gradient.kind !== GradientKind.Radial && (
             <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
               Angle
               <input
@@ -121,7 +131,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
                 value={gradient.angle}
                 disabled={isDisabled}
                 onChange={(e) => update({ angle: Math.max(0, Math.min(360, Number(e.target.value) || 0)) })}
-                className={cn(inputBaseVariants({ size: 'sm' }), 'w-20')}
+                className={cn(inputBaseVariants({ size: InputSize.Sm }), 'w-20')}
               />
               °
             </label>
@@ -153,7 +163,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
                 value={stop.color}
                 disabled={isDisabled}
                 onChange={(e) => updateStop(i, { color: e.target.value })}
-                className={cn(inputBaseVariants({ size: 'sm' }), 'flex-1 font-mono')}
+                className={cn(inputBaseVariants({ size: InputSize.Sm }), 'flex-1 font-mono')}
               />
               <input
                 type="number"
@@ -163,7 +173,7 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
                 value={stop.position}
                 disabled={isDisabled}
                 onChange={(e) => updateStop(i, { position: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
-                className={cn(inputBaseVariants({ size: 'sm' }), 'w-16')}
+                className={cn(inputBaseVariants({ size: InputSize.Sm }), 'w-16')}
               />
               <span className="text-xs text-muted-foreground">%</span>
               <button

@@ -3,7 +3,7 @@ import { cn } from '../../../foundation/utils';
 import { Spinner, type SpinnerProps } from '../spinner/Spinner';
 
 export interface InlineSpinnerProps extends Omit<ComponentPropsWithoutRef<'span'>, 'children'> {
-  /** Label rendered next to the spinner. Default `"Loading…"`. */
+  /** The label rendered next to the spinner. Default `"Loading…"`. */
   children?: ReactNode;
   size?: SpinnerProps['size'];
   tone?: SpinnerProps['tone'];
