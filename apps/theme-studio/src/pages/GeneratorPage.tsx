@@ -109,7 +109,7 @@ export default function GeneratorPage() {
               <SegmentedControl
                 type="single"
                 value={neutralTemp}
-                onValueChange={(v) => v && setNeutralTemp(v as NeutralTemp)}
+                onValueChange={(v: string | null) => v && setNeutralTemp(v as NeutralTemp)}
                 aria-label="Neutral temperature"
               >
                 {NEUTRAL_TEMPS.map((t) => (
@@ -124,7 +124,7 @@ export default function GeneratorPage() {
               <SegmentedControl
                 type="single"
                 value={accentMode}
-                onValueChange={(v) => v && setAccentMode(v as AccentMode)}
+                onValueChange={(v: string | null) => v && setAccentMode(v as AccentMode)}
                 aria-label="Accent mode"
                 className="flex-wrap"
               >
@@ -140,7 +140,7 @@ export default function GeneratorPage() {
               <SegmentedControl
                 type="single"
                 value={surface}
-                onValueChange={(v) => v && setSurface(v as SurfaceStyle)}
+                onValueChange={(v: string | null) => v && setSurface(v as SurfaceStyle)}
                 aria-label="Surface"
               >
                 {SURFACES.map((s) => (
@@ -155,7 +155,7 @@ export default function GeneratorPage() {
               <SegmentedControl
                 type="single"
                 value={dark ? 'dark' : 'light'}
-                onValueChange={(v) => v && setDark(v === 'dark')}
+                onValueChange={(v: string | null) => v && setDark(v === 'dark')}
                 aria-label="Preview mode"
               >
                 <ToggleButton value="light">Light</ToggleButton>

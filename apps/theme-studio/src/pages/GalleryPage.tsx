@@ -73,7 +73,7 @@ export default function GalleryPage() {
         <SegmentedControl
           type="single"
           value={filter}
-          onValueChange={(v) => setFilter((v as Filter) ?? 'all')}
+          onValueChange={(v: string | null) => setFilter((v as Filter) ?? 'all')}
           aria-label="Filter themes by status"
         >
           {FILTERS.map(({ value, label }) => (

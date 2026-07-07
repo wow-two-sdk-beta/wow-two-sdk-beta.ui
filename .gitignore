@@ -2,6 +2,8 @@ node_modules/
 dist/
 storybook-static/
 coverage/
+# `coverage/` above is test-report output; showcase has a real source route folder named coverage — keep it tracked.
+!apps/showcase/src/coverage/
 .turbo/
 .cache/
 .DS_Store

@@ -219,7 +219,7 @@ export default function ProjectsScreen() {
         <SegmentedControl
           type="single"
           value={view}
-          onValueChange={(v) => {
+          onValueChange={(v: string | null) => {
             if (v) setView(v as ProjectView);
           }}
           aria-label="Project view"

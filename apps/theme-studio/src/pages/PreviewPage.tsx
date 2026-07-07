@@ -29,7 +29,7 @@ export default function PreviewPage() {
           type="single"
           aria-label="Preview mode"
           value={mode}
-          onValueChange={(next) => next && setMode(next as Mode)}
+          onValueChange={(next: string | null) => next && setMode(next as Mode)}
         >
           <ToggleButton value="active">Active mode</ToggleButton>
           <ToggleButton value="split">Light + dark</ToggleButton>
