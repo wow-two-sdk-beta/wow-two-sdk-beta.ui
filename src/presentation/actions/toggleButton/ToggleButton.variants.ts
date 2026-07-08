@@ -18,6 +18,16 @@ export const ToggleButtonVariant = {
 
 export type ToggleButtonVariant = (typeof ToggleButtonVariant)[keyof typeof ToggleButtonVariant];
 
+/** Defines the element ToggleButton renders as. Diverges from the shared `ElementTag` (which omits `button`), so it stays a local enum. */
+export const ToggleButtonElement = {
+  /** Refers to a native `<button>`. */
+  Button: 'button',
+  /** Refers to a `<div>` with `role="button"` + Space/Enter keyboard — lets you nest interactive children without invalid button-in-button markup. */
+  Div: 'div',
+} as const;
+
+export type ToggleButtonElement = (typeof ToggleButtonElement)[keyof typeof ToggleButtonElement];
+
 /* Variant × tone matrix for ToggleButton's press-state appearance. Applied on top of Button (variant='ghost' tone='neutral' baseline). Press state is keyed off `data-pressed="true"` — distinct from Button's `data-state` (loading/skeleton/disabled). */
 export const toggleButtonVariants = tv({
   base: '',

@@ -54,6 +54,9 @@ export interface EmojiPickerProps {
 
   /** The scrollbar thumb color for the tile viewport — any CSS color. Default `var(--color-border-strong)`. */
   readonly scrollThumbColor?: string;
+
+  /** The category-nav icon size in px (strip variant). Default derives from the nav scale (`round(nav * 0.8)`). */
+  readonly categoryIconSize?: number;
 }
 
 /**
@@ -74,6 +77,7 @@ export function EmojiPicker({
   label = 'Emoji',
   showFirstCategoryWhenRecentsEmpty = false,
   scrollThumbColor,
+  categoryIconSize,
 }: EmojiPickerProps) {
   const picker = useEmojiPicker({ value, onChange, storage, showFirstCategoryWhenRecentsEmpty });
 
@@ -112,6 +116,7 @@ export function EmojiPicker({
             active={picker.activeCategory}
             onSelect={picker.setActiveCategory}
             size={navSize}
+            iconSize={categoryIconSize}
           />
         )}
         <EmojiGrid

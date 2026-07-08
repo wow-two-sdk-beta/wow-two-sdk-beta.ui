@@ -5,6 +5,7 @@ import { Button, type ButtonProps } from '../button/Button';
 import { ButtonVariant } from '../button';
 import {
   toggleButtonVariants,
+  ToggleButtonElement,
   ToggleButtonVariant,
   type ToggleButtonVariants,
 } from './ToggleButton.variants';
@@ -53,7 +54,7 @@ export interface ToggleButtonProps
   tooltip?: ReactNode;
 
   /** The render element. `'div'` (role=button + Space/Enter keyboard) lets you nest INTERACTIVE children (a color picker, a link) inside a segment without invalid button-in-button markup. Default `'button'`. */
-  as?: 'button' | 'div';
+  as?: ToggleButtonElement;
 }
 
 /* Two-state action button (on/off) — sets `aria-pressed` + `data-pressed="true|false"`. Wraps Button to inherit size union, shape, asChild, loading, padding/radius. Press appearance lives in `toggleButtonVariants` (variant × tone matrix); ToggleButton's own appearance overrides Button's neutral-ghost baseline via class order. */
@@ -72,7 +73,7 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
       title,
       tooltip,
       'aria-label': ariaLabel,
-      as = 'button',
+      as = ToggleButtonElement.Button,
       ...buttonProps
     },
     ref,
@@ -92,7 +93,7 @@ export const ToggleButton = forwardRef<HTMLButtonElement, ToggleButtonProps>(
     const resolvedAriaLabel =
       typeof ariaLabel === 'function' ? ariaLabel({ pressed: value }) : ariaLabel;
 
-    const isDiv = as === 'div';
+    const isDiv = as === ToggleButtonElement.Div;
 
     const button = (
       <Button

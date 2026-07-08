@@ -10,7 +10,7 @@ export const dividerVariants = tv({
   variants: {
     orientation: {
       horizontal: 'w-full border-t',
-      vertical: 'h-full self-stretch border-l',
+      vertical: 'self-stretch border-l',
     },
   },
   defaultVariants: {

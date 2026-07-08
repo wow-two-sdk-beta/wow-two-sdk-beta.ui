@@ -28,10 +28,13 @@ export interface CategoryNavProps {
 
   /** The nav scale. */
   readonly size: EmojiPickerSize;
+
+  /** The strip icon size in px. Default `round(nav * 0.8)` derived from the scale. */
+  readonly iconSize?: number;
 }
 
 /** Renders the category picker as a single-select `ToggleButtonGroup` — a segmented icon strip or a labelled pill row. */
-export function CategoryNav({ variant, active, onSelect, size }: CategoryNavProps) {
+export function CategoryNav({ variant, active, onSelect, size, iconSize }: CategoryNavProps) {
   // A category is always selected: the group emits `null` when the active button is re-clicked — ignore it.
   const selectCategory = (key: CategoryKey | null): void => {
     if (key) onSelect(key);
@@ -72,7 +75,7 @@ export function CategoryNav({ variant, active, onSelect, size }: CategoryNavProp
 
         return (
           <ToggleButton key={key} value={key} title={label} aria-label={label} className="flex-1" style={{ height: nav }}>
-            <Icon size={Math.round(nav * 0.8)} aria-hidden />
+            <Icon size={iconSize ?? Math.round(nav * 0.8)} aria-hidden />
           </ToggleButton>
         );
       })}
