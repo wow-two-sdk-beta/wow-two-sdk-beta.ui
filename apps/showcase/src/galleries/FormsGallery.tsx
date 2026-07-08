@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Temporal } from '@js-temporal/polyfill';
+import { type EmojiCatalogEntry } from '@wow-two-beta/ui/domain/emoji';
+import { localStorageStorageBroker } from '@wow-two-beta/ui/foundation/storage';
 import { SectionHeader } from '@wow-two-beta/ui/presentation/display';
 import {
   AddressForm,
@@ -35,6 +37,8 @@ import {
   EditableSubmit,
   EmailInput,
   EmojiPicker,
+  EmojiPickerPopover,
+  EmojiSizeControl,
   Fieldset,
   FilePicker,
   FileUpload,
@@ -287,7 +291,7 @@ function TextInputsSection() {
         </Demo>
         <Demo label="TagsInput — Enter or comma commits">
           <div className="max-w-sm">
-            <TagsInput value={tags} onValueChange={setTags} placeholder="Add a tag…" max={6} />
+            <TagsInput value={tags} onValueChange={(v) => setTags([...v])} placeholder="Add a tag…" max={6} />
           </div>
         </Demo>
         <Demo label="PhoneInput — E.164 output">
@@ -336,7 +340,7 @@ function ChoiceSection() {
           </div>
         </Demo>
         <Demo label="CheckboxField + CheckboxGroup">
-          <CheckboxGroup legend="Build features" value={features} onValueChange={setFeatures}>
+          <CheckboxGroup legend="Build features" value={features} onValueChange={(v) => setFeatures([...v])}>
             <CheckboxField value="ssr" label="SSR" description="Server-side rendering" />
             <CheckboxField value="islands" label="Islands" description="Partial hydration" />
             <CheckboxField value="rsc" label="RSC" description="React Server Components" />
@@ -548,7 +552,7 @@ function SelectionSection() {
         </Demo>
         <Demo label="MultiSelect — tag chips in trigger">
           <div className="max-w-sm">
-            <MultiSelect value={stack} onValueChange={setStack}>
+            <MultiSelect value={stack} onValueChange={(v) => setStack([...v])}>
               <MultiSelectTrigger>
                 <MultiSelectTags placeholder="Pick your stack…" />
               </MultiSelectTrigger>
@@ -724,7 +728,8 @@ function PickersSection() {
   const [uploaded, setUploaded] = useState({ accepted: 0, rejected: 0 });
   const [icon, setIcon] = useState('');
   const [font, setFont] = useState('');
-  const [emoji, setEmoji] = useState('🙂');
+  const [emoji, setEmoji] = useState<EmojiCatalogEntry | null>(null);
+  const [emojiSize, setEmojiSize] = useState(0.25);
   const [reactions, setReactions] = useState<string[]>(['👍']);
   const [chord, setChord] = useState<string[]>(['Ctrl', 'K']);
   return (
@@ -759,7 +764,7 @@ function PickersSection() {
           </div>
         </Demo>
         <Demo label="KeyboardShortcutPicker — click, then press a chord">
-          <KeyboardShortcutPicker value={chord} onValueChange={setChord} />
+          <KeyboardShortcutPicker value={chord} onValueChange={(v) => setChord([...v])} />
         </Demo>
         <Demo label="IconPicker — searchable lucide grid">
           <div className="flex max-w-sm flex-col gap-1.5">
@@ -772,7 +777,7 @@ function PickersSection() {
             <FontPicker value={font} onValueChange={setFont} />
           </div>
         </Demo>
-        <Demo label="EmojiPicker + ReactionPicker">
+        <Demo label="EmojiPicker + EmojiSizeControl + EmojiPickerPopover">
           <div className="flex flex-col gap-3">
             <ReactionPicker
               selected={reactions}
@@ -782,10 +787,19 @@ function PickersSection() {
                 )
               }
             />
-            <div className="max-w-xs rounded-md border border-border">
-              <EmojiPicker onSelect={setEmoji} cellSize={26} />
+            <div className="max-w-xs rounded-md border border-border p-3">
+              <EmojiPicker value={emoji} onChange={setEmoji} storage={localStorageStorageBroker} />
             </div>
-            <p className="text-xs text-subtle-foreground">last emoji: {emoji}</p>
+            {emoji && (
+              <EmojiSizeControl glyph={emoji.glyph} sizeRatio={emojiSize} onChange={setEmojiSize} />
+            )}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-subtle-foreground">Popover:</span>
+              <EmojiPickerPopover value={emoji} onChange={setEmoji} storage={localStorageStorageBroker} />
+            </div>
+            <p className="text-xs text-subtle-foreground">
+              last emoji: {emoji?.glyph ?? '—'} @ {emojiSize}
+            </p>
           </div>
         </Demo>
       </Grid>

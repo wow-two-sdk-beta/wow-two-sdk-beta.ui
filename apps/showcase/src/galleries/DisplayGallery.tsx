@@ -1223,7 +1223,7 @@ ESM ⚡ build success in 412ms`}</Code>
             />
           </Demo>
           <Demo label="NodeEditor (drag nodes, wheel zooms)" wide>
-            <NodeEditor nodes={nodes} edges={NODE_EDITOR_EDGES} onNodesChange={setNodes} />
+            <NodeEditor nodes={nodes} edges={NODE_EDITOR_EDGES} onNodesChange={(v) => setNodes([...v])} />
           </Demo>
         </DemoGrid>
       </section>

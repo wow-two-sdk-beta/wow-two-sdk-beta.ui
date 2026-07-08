@@ -67,10 +67,20 @@
       "import": "./dist/foundation/http/index.js",
       "default": "./dist/foundation/http/index.js"
     },
+    "./foundation/storage": {
+      "types": "./dist/foundation/storage/index.d.ts",
+      "import": "./dist/foundation/storage/index.js",
+      "default": "./dist/foundation/storage/index.js"
+    },
     "./domain/color": {
       "types": "./dist/domain/color/index.d.ts",
       "import": "./dist/domain/color/index.js",
       "default": "./dist/domain/color/index.js"
+    },
+    "./domain/emoji": {
+      "types": "./dist/domain/emoji/index.d.ts",
+      "import": "./dist/domain/emoji/index.js",
+      "default": "./dist/domain/emoji/index.js"
     },
     "./presentation/actions": {
       "types": "./dist/presentation/actions/index.d.ts",

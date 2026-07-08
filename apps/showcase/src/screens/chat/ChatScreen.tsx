@@ -21,12 +21,12 @@ import {
 } from '@wow-two-beta/ui/presentation/feedback';
 import {
   ChatComposer,
-  EmojiPicker,
+  EmojiPickerPopover,
   ReactionPicker,
   SearchInput,
 } from '@wow-two-beta/ui/presentation/forms';
 import { ScrollArea } from '@wow-two-beta/ui/presentation/layout';
-import { Popover, PopoverContent, PopoverTrigger } from '@wow-two-beta/ui/presentation/overlays';
+import { localStorageStorageBroker } from '@wow-two-beta/ui/foundation/storage';
 import {
   channels,
   messages as messageFixtures,
@@ -117,7 +117,6 @@ export default function ChatScreen() {
   const [allMessages, setAllMessages] = useState<Message[]>(messageFixtures);
   const [search, setSearch] = useState('');
   const [draft, setDraft] = useState('');
-  const [emojiOpen, setEmojiOpen] = useState(false);
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const [threadOpen, setThreadOpen] = useState(false);
   const [threadReplies, setThreadReplies] = useState<ThreadReply[]>(thread.replies);
@@ -405,27 +404,14 @@ export default function ChatScreen() {
                 onSubmit={sendMessage}
                 placeholder={`Message #${activeChannel?.name ?? 'channel'}`}
                 leading={
-                  <Popover open={emojiOpen} onOpenChange={setEmojiOpen} placement="top">
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        tone="neutral"
-                        size="sm"
-                        shape="square"
-                        aria-label="Insert emoji"
-                      >
-                        🙂
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto" padding="sm">
-                      <EmojiPicker
-                        onSelect={(emoji) => {
-                          setDraft((d) => d + emoji);
-                          setEmojiOpen(false);
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <EmojiPickerPopover
+                    value={null}
+                    onChange={(entry) => {
+                      if (entry) setDraft((d) => d + entry.glyph);
+                    }}
+                    storage={localStorageStorageBroker}
+                    placement="top"
+                  />
                 }
               />
             </div>

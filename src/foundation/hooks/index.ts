@@ -16,3 +16,14 @@ export {
   type UseTypeaheadOptions,
   type UseTypeaheadReturn,
 } from './useTypeahead';
+export {
+  usePersistentState,
+  type PersistentStateOptions,
+  type SetPersistentState,
+} from './usePersistentState';
+export {
+  useRecentItems,
+  prependRecent,
+  type RecentItemsOptions,
+  type RecentItems,
+} from './useRecentItems';

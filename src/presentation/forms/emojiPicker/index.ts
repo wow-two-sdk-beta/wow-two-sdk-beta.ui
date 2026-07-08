@@ -1,7 +1,9 @@
+export { EmojiPicker, type EmojiPickerProps } from './EmojiPicker';
+export { EmojiPickerPopover, type EmojiPickerPopoverProps } from './EmojiPickerPopover';
 export {
-  EmojiPicker,
-  BUILT_IN_EMOJI,
-  type EmojiCategory,
-  type EmojiEntry,
-  type EmojiPickerProps,
-} from './EmojiPicker';
+  useEmojiPicker,
+  type UseEmojiPickerOptions,
+  type EmojiPickerModel,
+} from './useEmojiPicker';
+// Axis enums, per-element size tokens, category metadata, and `resolveElementSize`.
+export * from './EmojiPicker.variants';

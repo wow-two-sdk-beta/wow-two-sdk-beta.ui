@@ -256,7 +256,7 @@ function PreferencesTab() {
         <CheckboxGroup
           legend="Topics to include"
           value={digestTopics}
-          onValueChange={setDigestTopics}
+          onValueChange={(v) => setDigestTopics([...v])}
         >
           <CheckboxField value="deploys" label="Deploy summaries" description="Frequency, failures, rollbacks." />
           <CheckboxField value="billing" label="Billing events" description="Invoices, payment issues." />
@@ -336,7 +336,7 @@ function PreferencesTab() {
           <div>
             <KeyboardShortcutPicker
               value={paletteShortcut}
-              onValueChange={setPaletteShortcut}
+              onValueChange={(v) => setPaletteShortcut([...v])}
               placeholder="Click to record a chord"
             />
           </div>
@@ -416,7 +416,7 @@ function WorkspaceTab() {
           <span className="text-sm font-medium text-foreground">Workspace topics</span>
           <TagsInput
             value={topics}
-            onValueChange={setTopics}
+            onValueChange={(v) => setTopics([...v])}
             placeholder="Add a topic and press Enter…"
             max={8}
           />

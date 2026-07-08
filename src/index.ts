@@ -5,6 +5,7 @@ export * as icons from './foundation/icons';
 export * as primitives from './foundation/primitives';
 export * as themes from './foundation/themes';
 export * as color from './domain/color';
+export * as emoji from './domain/emoji';
 
 // Domains — flat re-export for convenience
 export * from './presentation/actions';

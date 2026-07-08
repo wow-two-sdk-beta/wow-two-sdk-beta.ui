@@ -16,7 +16,7 @@ export default defineConfig({
           name: 'unit',
           environment: 'node',
           include: [
-            'src/foundation/{utils,themes,http}/**/*.test.ts',
+            'src/foundation/{utils,themes,http,storage}/**/*.test.ts',
             'src/domain/**/*.test.ts',
           ],
         },
