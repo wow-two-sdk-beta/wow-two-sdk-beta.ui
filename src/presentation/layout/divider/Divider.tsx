@@ -2,27 +2,37 @@ import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react
 import { cn, Orientation } from '../../../foundation/utils';
 import { dividerVariants } from './Divider.variants';
 
-export interface DividerProps extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
-  /** The axis of the rule. Default `horizontal`. */
-  orientation?: Orientation;
+type DividerBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'>;
 
+/** A plain rule — `orientation` is required (no silent default; a rule's axis should always be stated). */
+export interface PlainDividerProps extends DividerBaseProps {
   /**
-   * The centered content overlaid on the rule — the classic "or" separator.
-   * Horizontal only (ignored when `orientation="vertical"`). When present the rule
-   * is split either side of the label and the divider is exposed as a labelled
-   * (non-decorative) separator.
+   * The axis of the rule — the line's OWN direction: `vertical` draws a `│` between side-by-side content;
+   * `horizontal` draws a `─` between stacked content.
    */
-  label?: ReactNode;
+  orientation: Orientation;
+
+  label?: never;
+}
+
+/** A labelled rule — the classic "or" separator; always horizontal, so `orientation` does not apply. */
+export interface LabelledDividerProps extends DividerBaseProps {
+  /** The centered content overlaid on the (always-horizontal) rule, e.g. `<Divider label="or" />`. */
+  label: ReactNode;
+
+  orientation?: never;
 }
 
 /**
- * A thin rule that separates content, using the semantic `border` token.
- * Plain by default; pass `label` for a horizontal rule with centered content
- * (e.g. `<Divider label="or" />`) sitting on the surface background.
+ * A thin rule that separates content, using the semantic `border` token. Either a plain rule — pass the
+ * required `orientation` (`<Divider orientation={Orientation.Vertical} />`) — or a labelled horizontal rule —
+ * pass `label` (`<Divider label="or" />`), which sits on the surface background.
  */
+export type DividerProps = PlainDividerProps | LabelledDividerProps;
+
 export const Divider = forwardRef<HTMLDivElement, DividerProps>(
-  ({ orientation = Orientation.Horizontal, label, className, ...props }, ref) => {
-    if (label != null && orientation === Orientation.Horizontal) {
+  ({ orientation, label, className, ...props }, ref) => {
+    if (label != null) {
       return (
         <div
           ref={ref}
