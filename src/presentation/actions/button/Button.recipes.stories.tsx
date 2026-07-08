@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { expect, within } from 'storybook/test';
 import { Heart, Plus, Trash2, Pencil, ArrowRight, ArrowLeftRight, Save } from 'lucide-react';
 import { Icon } from '../../../foundation/icons';
 import { Overlay } from '../../layout/overlay';
@@ -165,6 +166,22 @@ export const AsChildLink: Story = {
       </a>
     </Button>
   ),
+  /*
+   * Regression guard for the Slot Slottable change: Button's `asChild` flows
+   * through Slot's single-child (no-Slottable) path. The child <a> must BE the
+   * rendered control — merged with the button's classes, not wrapped in a <button>.
+   */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole('link', { name: 'Storybook' });
+    await expect(canvas.getAllByRole('link')).toHaveLength(1);
+    await expect(canvas.queryByRole('button')).toBe(null);
+    await expect(link.getAttribute('href')).toBe(
+      'https://wow-two-sdk-beta.github.io/wow-two-sdk-beta.ui/',
+    );
+    // Button's own variant classes merged onto the consumer's element.
+    await expect(link.className.length).toBeGreaterThan(0);
+  },
 };
 
 /* isFullWidth in a form footer — submit + cancel pair. */

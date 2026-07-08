@@ -1,1 +1,1 @@
-export { Slot, type SlotProps } from './Slot';
+export { Slot, Slottable, type SlotProps, type SlottableProps } from './Slot';

@@ -1,6 +1,12 @@
-import { forwardRef, type AnchorHTMLAttributes, type ReactNode } from 'react';
+import {
+  cloneElement,
+  forwardRef,
+  isValidElement,
+  type AnchorHTMLAttributes,
+  type ReactNode,
+} from 'react';
 import { cn, dataAttr, Size } from '../../../foundation/utils';
-import { Slot } from '../../../foundation/primitives';
+import { Slot, Slottable } from '../../../foundation/primitives';
 
 export interface NavItemProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   /** The escape hatch to render the child element instead of an `<a>` (router Link). */
@@ -37,6 +43,28 @@ const SIZE: Record<Size, string> = {
 export const NavItem = forwardRef<HTMLAnchorElement, NavItemProps>(
   ({ asChild, icon, children, trailing, isActive, size = Size.Md, className, ...props }, ref) => {
     const Comp = asChild ? Slot : 'a';
+
+    /*
+     * Under `asChild` the consumer's element (e.g. a router Link) becomes the
+     * rendered row via `Slot`. Wrap its own content in the label span so it keeps
+     * the flex-1/truncate treatment, mark it as the merge target with `Slottable`,
+     * and let the icon/trailing spans compose around it inside the cloned element.
+     * The `<a>` path renders the label span directly, unchanged.
+     */
+    const label = asChild ? (
+      <Slottable>
+        {isValidElement<{ children?: ReactNode }>(children)
+          ? cloneElement(
+              children,
+              undefined,
+              <span className="flex-1 truncate text-left">{children.props.children}</span>,
+            )
+          : children}
+      </Slottable>
+    ) : (
+      <span className="flex-1 truncate text-left">{children}</span>
+    );
+
     return (
       <Comp
         ref={ref}
@@ -52,7 +80,7 @@ export const NavItem = forwardRef<HTMLAnchorElement, NavItemProps>(
         {...(props as AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
         {icon && <span className="text-muted-foreground group-data-[active]:text-current">{icon}</span>}
-        <span className="flex-1 truncate text-left">{children}</span>
+        {label}
         {trailing && <span className="shrink-0">{trailing}</span>}
       </Comp>
     );
