@@ -45,6 +45,15 @@ export interface EmojiPickerProps {
 
   /** The scrollable tile viewport's height, in tile rows. Default `6`. */
   readonly rowsCount?: number;
+
+  /** The heading rendered above the picker. Default `Emoji`. */
+  readonly label?: string;
+
+  /** When `true` and no emoji has been used yet, opens on the first real category instead of the empty recents bucket. Default `false`. */
+  readonly showFirstCategoryWhenRecentsEmpty?: boolean;
+
+  /** The scrollbar thumb color for the tile viewport — any CSS color. Default `var(--color-border-strong)`. */
+  readonly scrollThumbColor?: string;
 }
 
 /**
@@ -62,8 +71,11 @@ export function EmojiPicker({
   size,
   tileShape = EmojiTileShape.Rounded,
   rowsCount = 6,
+  label = 'Emoji',
+  showFirstCategoryWhenRecentsEmpty = false,
+  scrollThumbColor,
 }: EmojiPickerProps) {
-  const picker = useEmojiPicker({ value, onChange, storage });
+  const picker = useEmojiPicker({ value, onChange, storage, showFirstCategoryWhenRecentsEmpty });
 
   const searchSize = resolveElementSize(size, PickerElement.Search, DefaultPickerSize);
   const navSize = resolveElementSize(size, PickerElement.Nav, DefaultPickerSize);
@@ -73,7 +85,7 @@ export function EmojiPicker({
   return (
     <Stack gap="3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">Emoji</span>
+        <span className="text-sm font-medium">{label}</span>
         <Button
           variant={value === null ? undefined : ButtonVariant.Outline}
           tone={value === null ? ColorTone.Primary : ColorTone.Neutral}
@@ -109,6 +121,7 @@ export function EmojiPicker({
           shape={tileShape}
           onSelect={picker.selectEmoji}
           viewportRows={rowsCount}
+          scrollThumbColor={scrollThumbColor}
           emptyLabel={
             picker.showSearch
               ? EmojiEmptyLabels.search

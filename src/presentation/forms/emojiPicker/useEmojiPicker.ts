@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { EmojiCatalog, type EmojiCatalogEntry } from '../../../domain/emoji';
+import { EmojiCatalog, EmojiCategory, type EmojiCatalogEntry } from '../../../domain/emoji';
 import { useRecentItems } from '../../../foundation/hooks';
 import { type StorageBroker } from '../../../foundation/storage';
 
@@ -19,6 +19,9 @@ export interface UseEmojiPickerOptions {
 
   /** The persistence contract backing recents — injected so the picker stays storage-agnostic (localStorage, Redux, …). */
   readonly storage: StorageBroker;
+
+  /** When `true` and recents is empty at mount, the initial category is the first real category, not the recents bucket. Default `false`. */
+  readonly showFirstCategoryWhenRecentsEmpty?: boolean;
 }
 
 /** Represents the headless picker state — layout-agnostic, shared by every nav variant. */
@@ -58,14 +61,22 @@ export interface EmojiPickerModel {
  * Manages the emoji picker independent of layout: owns the keyword, the active category, the derived
  * visible list, and the recents MRU — and folds a pick back into the selection entry + the recents list.
  */
-export function useEmojiPicker({ value, onChange, storage }: UseEmojiPickerOptions): EmojiPickerModel {
+export function useEmojiPicker({
+  value,
+  onChange,
+  storage,
+  showFirstCategoryWhenRecentsEmpty = false,
+}: UseEmojiPickerOptions): EmojiPickerModel {
   const { recents, push } = useRecentItems<EmojiCatalogEntry>(EmojiRecentsKey, {
     identify: emojiGlyphIdentity,
     broker: storage,
   });
 
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [activeCategory, setActiveCategory] = useState<CategoryKey>(RecentCategory);
+  // Default to the recents bucket; when asked and there are no recents yet, open on the first real category instead.
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>(() =>
+    showFirstCategoryWhenRecentsEmpty && recents.length === 0 ? EmojiCategory.SmileysPeople : RecentCategory,
+  );
 
   const trimmedKeyword = searchKeyword.trim();
   const showSearch = trimmedKeyword.length > 0;

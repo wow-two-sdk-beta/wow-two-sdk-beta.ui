@@ -72,7 +72,7 @@ export function CategoryNav({ variant, active, onSelect, size }: CategoryNavProp
 
         return (
           <ToggleButton key={key} value={key} title={label} aria-label={label} className="flex-1" style={{ height: nav }}>
-            <Icon size={Math.round(nav * 0.66)} aria-hidden />
+            <Icon size={Math.round(nav * 0.8)} aria-hidden />
           </ToggleButton>
         );
       })}

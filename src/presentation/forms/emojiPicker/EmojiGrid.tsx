@@ -34,13 +34,16 @@ export interface EmojiGridProps {
 
   /** The fixed viewport height, in tile rows; when set, the grid scrolls inside a constant-height box. */
   readonly viewportRows?: number;
+
+  /** The scrollbar thumb color — any CSS color. Default `var(--color-border-strong)`. */
+  readonly scrollThumbColor?: string;
 }
 
 /**
  * Renders emoji as an auto-filling `listbox`, or a muted hint when the set is empty. A single roving `tabindex`
  * keeps the ~1870-tile grid to one tab stop; arrow keys (plus Home / End) move focus between options.
  */
-export function EmojiGrid({ emojis, selectedGlyph, size, shape, onSelect, emptyLabel, viewportRows }: EmojiGridProps) {
+export function EmojiGrid({ emojis, selectedGlyph, size, shape, onSelect, emptyLabel, viewportRows, scrollThumbColor }: EmojiGridProps) {
   const { tile, gap } = EmojiPickerSizes[size];
 
   const gridRef = useRef<HTMLDivElement>(null);
@@ -122,19 +125,24 @@ export function EmojiGrid({ emojis, selectedGlyph, size, shape, onSelect, emptyL
 
   if (viewportRows === undefined) return grid;
 
-  const viewportStyle: CSSProperties = {
+  // Default to a slightly darker neutral than the hairline border so the bar reads clearly; any CSS color plugs in.
+  // Falls back to `--color-border` for themes that don't define the stronger token — never worse than the old bar.
+  const thumbColor = scrollThumbColor ?? 'var(--color-border-strong, var(--color-border))';
+  const viewportStyle = {
     height: viewportRows * (tile + gap),
     overflowY: 'auto',
     scrollbarGutter: 'stable',
-    // Firefox: a slim bar with the app's border token as the thumb over a transparent track.
+    // Firefox: a slim bar with the resolved thumb color over a transparent track.
     scrollbarWidth: 'thin',
-    scrollbarColor: 'var(--color-border) transparent',
-  };
+    scrollbarColor: `${thumbColor} transparent`,
+    // Drives the WebKit thumb below — arbitrary-variant classes can't read a prop, so route it through a CSS var.
+    '--emoji-scroll-thumb': thumbColor,
+  } as CSSProperties;
   // WebKit/Blink: same treatment via the shadow-DOM scrollbar pseudo-elements (not inline-styleable),
-  // expressed as Tailwind arbitrary variants — ~8px, transparent track, rounded thumb on `--color-border`.
+  // expressed as Tailwind arbitrary variants — ~8px, transparent track, rounded thumb on the resolved color.
   const scrollbarClass =
     '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent ' +
-    '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--color-border)]';
+    '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--emoji-scroll-thumb)]';
   return (
     <div className={scrollbarClass} style={viewportStyle}>
       {grid}
