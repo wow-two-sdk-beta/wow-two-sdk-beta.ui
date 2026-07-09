@@ -26,6 +26,9 @@ const subpathLayer: Record<string, 'foundation' | 'domain' | 'presentation'> = {
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
+    // `router` is a standalone top-level subpath (`@wow-two-beta/ui/router`), not layer-prefixed like
+    // the component groups below — this keeps its react-router-dom peer dep out of every other entry.
+    'router/index': 'src/router/index.ts',
     // Entry KEY = dist path (`dist/<layer>/<group>/index.js`) — mirrors the
     // layered source folder so the emitted subpath matches the public export.
     ...Object.fromEntries(
@@ -41,5 +44,5 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   treeshake: true,
-  external: ['react', 'react-dom'],
+  external: ['react', 'react-dom', 'react-router-dom'],
 });

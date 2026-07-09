@@ -18,13 +18,21 @@ export default defineConfig({
           include: [
             'src/foundation/{utils,themes,http,storage}/**/*.test.ts',
             'src/domain/**/*.test.ts',
+            // Router pure-logic tests (no DOM): typed-path builder + chunk-retry / reload logic.
+            'src/router/{Paths,LazyRoute}.test.ts',
           ],
         },
       },
       {
         test: {
           name: 'browser',
-          include: ['src/**/*.test.tsx', 'src/foundation/hooks/**/*.test.ts'],
+          include: [
+            'src/**/*.test.tsx',
+            'src/foundation/hooks/**/*.test.ts',
+            // Router hook tests need a real DOM (renderHook); the pure ones run in `unit`.
+            'src/router/UseNavigationBlocker.test.ts',
+            'src/router/UsePrefetch.test.ts',
+          ],
           browser: {
             enabled: true,
             headless: true,

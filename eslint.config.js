@@ -41,6 +41,9 @@ export default tseslint.config(
           pattern: 'src/presentation/*/**',
           capture: ['group'],
         },
+        // Router = standalone top-level subpath layer above presentation; composes
+        // presentation (AppNavLink → NavItem) + foundation, never imported by them.
+        { type: 'router', pattern: 'src/router/**' },
         { type: 'root', pattern: 'src/index.ts' },
       ],
     },
@@ -59,6 +62,7 @@ export default tseslint.config(
             // L4 molecules stay in-group when natural; L5+ organisms compose freely.
             // The lint rule is permissive.
             { from: ['presentation'], allow: ['foundation', 'domain', 'presentation'] },
+            { from: ['router'], allow: ['foundation', 'domain', 'presentation', 'router'] },
             { from: ['root'], allow: ['foundation', 'domain', 'presentation'] },
           ],
         },

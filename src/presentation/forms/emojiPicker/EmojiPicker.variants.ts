@@ -21,8 +21,10 @@ export const PickerElement = {
 
 export type PickerElement = (typeof PickerElement)[keyof typeof PickerElement];
 
-/** A single scale for the whole picker, or a per-element override map keyed by `PickerElement`. */
-export type EmojiPickerSizeInput = EmojiPickerSize | Partial<Record<PickerElement, EmojiPickerSize>>;
+/** A single scale for the whole picker, or a per-element override map — `search`/`nav`/`tile` as t-shirt scales plus `icon` as the strip icon size in px (a single dimension, so px rather than a scale). */
+export type EmojiPickerSizeInput =
+  | EmojiPickerSize
+  | (Partial<Record<PickerElement, EmojiPickerSize>> & { icon?: number });
 
 /** Resolves the scale for one picker element — a uniform size applies to every element; a map falls back to `fallback` per element. Expandable to any element in `PickerElement`. */
 export function resolveElementSize(

@@ -117,6 +117,11 @@
       "import": "./dist/presentation/overlays/index.js",
       "default": "./dist/presentation/overlays/index.js"
     },
+    "./router": {
+      "types": "./dist/router/index.d.ts",
+      "import": "./dist/router/index.js",
+      "default": "./dist/router/index.js"
+    },
     "./styles.css": "./dist/index.css",
     "./themes.css": "./dist/themes.css",
     "./themes.json": "./dist/themes.json",
@@ -141,7 +146,13 @@
   },
   "peerDependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.1"
+  },
+  "peerDependenciesMeta": {
+    "react-router-dom": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.0",
@@ -178,6 +189,7 @@
     "playwright": "^1.61.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.1",
     "storybook": "^10.3.6",
     "storybook-addon-pseudo-states": "10.3.6",
     "tailwindcss": "^4.1.0",
