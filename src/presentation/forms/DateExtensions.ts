@@ -6,7 +6,7 @@
 // these helpers are inherently local/wall-clock, which is what calendar UIs want.
 // `Temporal.PlainTime` carries hour/minute for the time components.
 
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 
 export const WEEKDAYS_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 export const MONTHS_LONG = [

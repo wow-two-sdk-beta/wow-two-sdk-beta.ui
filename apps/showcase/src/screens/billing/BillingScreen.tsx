@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { Button } from '@wow-two-beta/ui/presentation/actions';
 import {
   Badge,

@@ -1,22 +1,27 @@
 /* ---------------------------------------------------------------------------
  * createApiClient tests.
  *
- * Contract: typed fetch client — JSON by default, `{ data }` envelope unwrap
- * (opt-out via `unwrap: false`), query serialization (arrays repeat the key,
- * null/undefined skipped), FormData passthrough, bearer delegate, RFC 7807 →
- * ApiError on non-2xx (network failure → status 0), native AbortError rethrow,
- * 401 hook, opt-in Temporal revive, and transport retry OFF by default (a
- * RetryPolicy turns it on via shouldRetry/computeRetryDelay, respecting the
- * abort signal during backoff waits).
+ * Contract: typed fetch client — JSON by default, body-driven parsing (empty
+ * body → undefined and literal `null` body → null, whatever the status — no
+ * 204 sniffing), a swappable ResponseEnvelope (default wowTwoEnvelope: `{ data }`
+ * unwrap + RFC 7807 → ApiError; `unwrap: false` bypasses any strategy), query
+ * serialization (arrays repeat the key, null/undefined skipped), FormData
+ * passthrough, bearer delegate, network failure → ApiError status 0, native
+ * AbortError rethrow, 401 hook, opt-in Temporal revive, and transport retry
+ * OFF by default (a RetryPolicy turns it on via shouldRetry/computeRetryDelay,
+ * respecting the abort signal during backoff waits). Retry/401 key off the
+ * thrown error's `status` — foreign error types from a custom envelope's
+ * toError never trigger them.
  * ------------------------------------------------------------------------- */
 
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { BackoffStrategy, type RetryContext, type RetryPolicy } from '../resilience';
 
 import { ApiError } from './ApiError';
 import { createApiClient } from './CreateApiClient';
+import { rawEnvelope, type ResponseEnvelope } from './Envelope';
 import { fieldErrors } from './FieldErrors';
 
 type FetchMock = Mock<typeof fetch>;
@@ -51,19 +56,51 @@ describe('createApiClient success handling', () => {
     await expect(client.get('/items/1', { unwrap: false })).resolves.toEqual({ data: { id: 1 }, meta: { page: 2 } });
   });
 
-  it('resolves undefined on 204', async () => {
-    const fetchMock = vi.fn<typeof fetch>(async () => new Response(null, { status: 204 }));
-    await expect(createApiClient({ fetch: fetchMock }).delete('/items/1')).resolves.toBeUndefined();
-  });
-
-  it('resolves undefined on an empty 200 body', async () => {
-    const fetchMock = vi.fn<typeof fetch>(async () => new Response('', { status: 200 }));
-    await expect(createApiClient({ fetch: fetchMock }).get('/items/1')).resolves.toBeUndefined();
+  it('passes a non-{ data } object body through unchanged (shape-checked unwrap)', async () => {
+    const client = createApiClient({ fetch: fetchOk({ id: 1 }) });
+    await expect(client.get('/items/1')).resolves.toEqual({ id: 1 });
   });
 
   it('uses the global fetch when none is injected', async () => {
     vi.stubGlobal('fetch', fetchOk({ data: 'global' }));
     await expect(createApiClient().get('/items')).resolves.toBe('global');
+  });
+});
+
+describe('createApiClient body-driven parsing', () => {
+  /** Builds a Response-like stub — the constructor rejects bodies on null-body statuses (204), which real proxies still send. */
+  const stubResponse = (body: string, status: number): Response =>
+    ({ ok: status >= 200 && status < 300, status, statusText: '', text: async () => body }) as unknown as Response;
+
+  const empties: ReadonlyArray<[desc: string, status: number]> = [
+    ['an empty 200 body resolves undefined', 200],
+    ['an empty 204 body resolves undefined', 204],
+  ];
+
+  it.each(empties)('%s', async (_desc, status) => {
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response(null, { status }));
+    await expect(createApiClient({ fetch: fetchMock }).get('/items/1')).resolves.toBeUndefined();
+  });
+
+  it('a literal null body resolves null — the caller sees what the wire said', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response('null', { status: 200 }));
+    await expect(createApiClient({ fetch: fetchMock }).get('/items/1')).resolves.toBeNull();
+  });
+
+  it('a literal null body resolves null with unwrap: false too', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response('null', { status: 200 }));
+    await expect(createApiClient({ fetch: fetchMock }).get('/items/1', { unwrap: false })).resolves.toBeNull();
+  });
+
+  it('a 204 WITH a body parses per the envelope — body-driven, not status-driven', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => stubResponse('{"data":"v"}', 204));
+    await expect(createApiClient({ fetch: fetchMock }).delete<string>('/items/1')).resolves.toBe('v');
+  });
+
+  it('revives Temporal fields on a bodied 204 like any other body', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => stubResponse('{"data":{"at":"2026-07-04T12:00:00Z"}}', 204));
+    const result = await createApiClient({ fetch: fetchMock, reviveTemporal: true }).delete<{ at: unknown }>('/x');
+    expect(result.at).toBeInstanceOf(Temporal.Instant);
   });
 });
 
@@ -272,6 +309,83 @@ describe('createApiClient error handling', () => {
       .get('/x')
       .catch(() => undefined);
     expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+});
+
+describe('createApiClient envelope strategy', () => {
+  const policy: RetryPolicy = { maxRetries: 2, backoff: BackoffStrategy.Constant, baseDelayMs: 100 };
+
+  /** A foreign contract: `{ result }` success bodies; non-2xx throws a plain (non-ApiError) Error. */
+  const resultEnvelope: ResponseEnvelope = {
+    unwrap: (parsed) => (parsed as { result: unknown }).result,
+    toError: (parsed, response) =>
+      new Error(`upstream ${response.status}: ${(parsed as { reason?: string } | undefined)?.reason ?? 'unknown'}`),
+  };
+
+  it('a custom envelope unwraps 2xx bodies end-to-end', async () => {
+    const client = createApiClient({ fetch: fetchOk({ result: { id: 7 } }), envelope: resultEnvelope });
+    await expect(client.get('/items/7')).resolves.toEqual({ id: 7 });
+  });
+
+  it('a custom envelope shapes the thrown non-2xx error from the parsed body', async () => {
+    const client = createApiClient({ fetch: fetchOk({ reason: 'quota' }, 429), envelope: resultEnvelope });
+    const error = (await client.get('/x').catch((e: unknown) => e)) as Error;
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toBeInstanceOf(ApiError);
+    expect(error.message).toBe('upstream 429: quota');
+  });
+
+  it('unwrap: false bypasses the strategy — the request flag wins over the envelope', async () => {
+    const unwrap = vi.fn(() => 'unwrapped');
+    const client = createApiClient({ fetch: fetchOk({ result: 1 }), envelope: { ...resultEnvelope, unwrap } });
+    await expect(client.get('/x', { unwrap: false })).resolves.toEqual({ result: 1 });
+    expect(unwrap).not.toHaveBeenCalled();
+  });
+
+  it('a foreign toError type never retries, even with a policy', async () => {
+    const fetchMock = fetchOk({ reason: 'down' }, 503);
+    const client = createApiClient({ fetch: fetchMock, envelope: resultEnvelope, retry: policy });
+    const error = (await client.get('/x').catch((e: unknown) => e)) as Error;
+    expect(error).not.toBeInstanceOf(ApiError);
+    expect(fetchMock).toHaveBeenCalledTimes(1); // no status to key retry off
+  });
+
+  it('a foreign toError type never fires onUnauthorized on 401', async () => {
+    const onUnauthorized = vi.fn();
+    const client = createApiClient({ fetch: fetchOk({ reason: 'expired' }, 401), envelope: resultEnvelope, onUnauthorized });
+    await client.get('/me').catch(() => undefined);
+    expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+
+  it('rawEnvelope passes the whole parsed body through', async () => {
+    const client = createApiClient({ fetch: fetchOk({ data: { id: 1 }, meta: { page: 2 } }), envelope: rawEnvelope });
+    await expect(client.get('/items')).resolves.toEqual({ data: { id: 1 }, meta: { page: 2 } });
+  });
+
+  it('rawEnvelope throws ApiError(status, null, statusText), keeping the 401 hook wired', async () => {
+    const onUnauthorized = vi.fn<(error: ApiError) => void>();
+    const fetchMock = vi.fn<typeof fetch>(
+      async () => new Response('{"title":"ignored"}', { status: 401, statusText: 'Unauthorized' }),
+    );
+    const client = createApiClient({ fetch: fetchMock, envelope: rawEnvelope, onUnauthorized });
+    const error = (await client.get('/me').catch((e: unknown) => e)) as ApiError;
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.status).toBe(401);
+    expect(error.problem).toBeNull(); // rawEnvelope ignores the body
+    expect(error.message).toBe('Unauthorized');
+    expect(onUnauthorized).toHaveBeenCalledWith(error);
+  });
+
+  it('rawEnvelope failures still drive retry — any ApiError-returning envelope keeps status keying', async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(json({ id: 1 }));
+    const pending = createApiClient({ fetch: fetchMock, envelope: rawEnvelope, retry: policy }).get('/x');
+    await vi.runAllTimersAsync();
+    await expect(pending).resolves.toEqual({ id: 1 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
 

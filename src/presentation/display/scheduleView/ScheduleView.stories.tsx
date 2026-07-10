@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { ScheduleView, type ScheduleBooking, type ScheduleResource } from './ScheduleView';
 
 const meta: Meta<typeof ScheduleView> = {

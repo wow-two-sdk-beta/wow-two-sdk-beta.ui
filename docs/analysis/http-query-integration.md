@@ -72,6 +72,17 @@ D is rejected *as the integration pattern* but not forever — see phase 3. Full
 
 ## Phased path
 
-1. **Now (with the Wave-1 api-client build):** ship `createApiClient` RQ-free; add `defineEndpoint` to `/query`; update `state-and-data.md`; stamp the pattern into arcade (greenfield proof) and transcript-forge (already on house hooks — co-locate its `queryKeys` + `Api.ts` into factories while deleting the vendored layer).
+1. **Now (with the Wave-1 api-client build):** ship `createApiClient` RQ-free; add `defineEndpoint` to `/query` (shipped — see below); update `state-and-data.md`; stamp the pattern into arcade (greenfield proof) and transcript-forge (already on house hooks — co-locate its `queryKeys` + `Api.ts` into factories while deleting the vendored layer).
 2. **With scheduled `/query` adoption (drydock · secrets-vault · smart-qr):** migrate their endpoint objects/fns into factories as each product moves onto house hooks — one mechanical pass per product, no separate migration. Wave-1 optimistic-mutation and feedback-bus modules consume the same defs/keys untouched.
 3. **After codegen exists (trigger: DTO drift actually bites, or product count makes hand-typed DTOs the bottleneck):** adopt **types-only** generation (`openapi-typescript` shape) against the backend SDK's `/openapi/v1.json` — generated `.d.ts` checked in, regenerated on demand, no runtime artifact. Factories keep their shape; only type imports swap. Re-evaluate full-client generation only if types-only proves insufficient — it is not on the current path.
+
+## Shipped — `defineEndpoint` (phase 1, SDK side · 2026-07-10)
+
+`src/query/Endpoints.ts`, barrel-exported: `defineEndpoint({ key, queryFn })` → `Endpoint<TRaw>` (identity at runtime — 3 LOC) plus `Endpoint<TRaw>` / `EndpointFn<TArgs, TRaw>` for registry annotations. Zero hook-signature changes. Spread guarantee by test (`Endpoints.test.ts` node · `Endpoints.browser.test.ts` chromium): a def spreads into `useAppQuery` / `useAppSuspenseQuery` / `useAppLazyQuery` options, feeds `usePrefetchQuery` / `prefetchProps` / `useQueryCache().prefetch` whole, and pairs with a bare `QueryClient` (`fetchQuery({ queryKey: def.key, queryFn: def.queryFn })`).
+
+Usage is exactly the sketch above; two notes:
+
+- **Parameterized endpoints are factories** — `detail: (id: string) => defineEndpoint({ key: keys.detail(id), queryFn: … })`; `EndpointFn<[id: string], CodeDto>` names that shape when a registry wants the explicit annotation.
+- **Identity reads state `TData`.** `useAppQuery({ ...def })` with no `map` infers `data: unknown` — `TData` only infers from `map` and the hooks were deliberately untouched. Write `useAppQuery<CodeDto[]>({ ...def })` or pass a `map`; prefetch/cache surfaces take defs whole, no generics needed.
+
+Rest of phase 1 still open: `createApiClient`, `state-and-data.md` update (§Client shape factory-file convention + capability-matrix row), arcade / transcript-forge stampings.

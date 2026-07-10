@@ -1,5 +1,5 @@
 import { forwardRef, useState, type HTMLAttributes } from 'react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { isDateDisabled, isInRange, isSameDay, isToday, startOfMonth, today } from '../DateExtensions';

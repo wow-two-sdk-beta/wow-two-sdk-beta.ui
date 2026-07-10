@@ -1,8 +1,7 @@
 import { computeRetryDelay, shouldRetry, type RetryPolicy } from '../resilience';
 
 import { ApiError } from './ApiError';
-import type { ApiResponse } from './ApiResponse';
-import type { ProblemDetails } from './ProblemDetails';
+import { wowTwoEnvelope, type ResponseEnvelope } from './Envelope';
 import { parseJson } from './temporalReviver';
 
 const JsonMime = 'application/json';
@@ -24,7 +23,7 @@ export interface ApiRequestInit {
   /** Extra headers merged last — they win over the computed JSON headers, the client defaults, and the bearer token. */
   readonly headers?: HeadersInit;
 
-  /** Whether to unwrap the wow-two `{ data: T }` success envelope. Default `true`; pass `false` for raw (un-enveloped) bodies. */
+  /** Whether to run the envelope's unwrap on the parsed body. Default `true`; `false` returns the body exactly as parsed — the request flag wins over {@link ApiClientOptions.envelope}. */
   readonly unwrap?: boolean;
 
   /** The HTTP method for the `request` escape hatch. Default `GET`. The verb helpers force their own method. */
@@ -50,6 +49,9 @@ export interface ApiClientOptions {
 
   /** Whether to parse response bodies through the Temporal reviver so ISO date fields arrive as `Temporal.*`. Default `false`. */
   readonly reviveTemporal?: boolean;
+
+  /** The wire-contract strategy — how 2xx bodies unwrap and how non-2xx bodies become thrown errors. Default {@link wowTwoEnvelope} (zero-config for wow-two APIs); use `rawEnvelope` for un-enveloped APIs, or supply your own. */
+  readonly envelope?: ResponseEnvelope;
 
   /** The transport-level retry policy for transient failures. Default `false` (off) — leave off under `/query`, which owns retries, or requests double-retry. */
   readonly retry?: RetryPolicy | false;
@@ -115,26 +117,35 @@ function wait(ms: number, signal?: AbortSignal | null): Promise<void> {
   });
 }
 
-/** Parses a non-2xx body into `ProblemDetails` when it is a JSON object; returns `null` for empty / non-JSON / non-object bodies. */
-async function readProblem(response: Response): Promise<ProblemDetails | null> {
+/** Reads a non-2xx body as plain JSON for the envelope's `toError` — empty, unreadable, or malformed bodies yield `undefined`. */
+async function readErrorBody(response: Response): Promise<unknown> {
   try {
     const text = await response.text();
-    if (!text) return null;
-    const parsed: unknown = JSON.parse(text);
-    return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as ProblemDetails) : null;
+    return text === '' ? undefined : (JSON.parse(text) as unknown);
   } catch {
-    return null;
+    return undefined;
   }
 }
 
 /**
- * Creates the typed fetch client every wow-two frontend talks through — JSON by default, `{ data }`
- * envelope unwrap, ProblemDetails → {@link ApiError} on non-2xx (network failure → status `0`),
- * bearer/cookie auth, optional Temporal revive, and opt-in transport retry. Aborts rethrow the
- * native `AbortError` so `/query` cancellation semantics stay intact.
+ * Creates the typed fetch client every wow-two frontend talks through — JSON by default, a swappable
+ * wire contract ({@link ApiClientOptions.envelope}, default {@link wowTwoEnvelope}: `{ data }` unwrap +
+ * ProblemDetails → {@link ApiError}), body-driven empties (an empty body resolves `undefined` and a
+ * literal `null` body resolves `null`, whatever the status), bearer/cookie auth, optional Temporal
+ * revive, and opt-in transport retry (network failure → {@link ApiError} status `0`, envelope-independent).
+ * Aborts rethrow the native `AbortError` so `/query` cancellation semantics stay intact.
  */
 export function createApiClient(options: ApiClientOptions = {}): ApiClient {
-  const { baseUrl = '', getAuthToken, credentials, onUnauthorized, defaultHeaders, reviveTemporal = false, retry = false } = options;
+  const {
+    baseUrl = '',
+    getAuthToken,
+    credentials,
+    onUnauthorized,
+    defaultHeaders,
+    reviveTemporal = false,
+    envelope = wowTwoEnvelope,
+    retry = false,
+  } = options;
 
   /** Builds the attempt's headers — JSON base → client defaults → bearer token → per-request (last wins). */
   const buildHeaders = async (init: ApiRequestInit, hasJsonBody: boolean): Promise<Headers> => {
@@ -168,15 +179,16 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
       throw new ApiError(0, null, error instanceof Error ? error.message : 'Network request failed');
     }
 
-    if (!response.ok) throw new ApiError(response.status, await readProblem(response));
+    if (!response.ok) throw envelope.toError(await readErrorBody(response), response);
 
-    if (response.status === 204) return undefined as T;
+    // Body-driven, not status-driven: no 204 / Content-Length sniffing. An empty body (any
+    // status) resolves `undefined`; a literal `null` JSON body parses — and returns — as `null`.
     const text = await response.text();
-    if (!text) return undefined as T;
+    if (text === '') return undefined as T;
 
     const parsed: unknown = reviveTemporal ? parseJson<unknown>(text) : (JSON.parse(text) as unknown);
     if (init.unwrap === false) return parsed as T;
-    return (parsed as ApiResponse<T> | null)?.data as T;
+    return envelope.unwrap(parsed, response) as T;
   };
 
   const request = async <T = unknown>(path: string, init: ApiRequestInit = {}): Promise<T> => {
@@ -192,8 +204,9 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
       try {
         return await attempt<T>(url, init, body, init.body !== undefined && !isFormData);
       } catch (error) {
-        // Only transport ApiErrors drive retry/401 — aborts, token-delegate crashes, and malformed-JSON
-        // parse errors pass through natively (the `/query` layer coerces whatever it catches).
+        // Only ApiErrors drive retry/401 — aborts, token-delegate crashes, malformed-JSON parse
+        // errors, and foreign error types from a custom envelope's `toError` all pass through
+        // natively (the `/query` layer coerces whatever it catches).
         if (!(error instanceof ApiError)) throw error;
         if (retry !== false && shouldRetry(retry, retries, error.status)) {
           const attemptNumber = retries + 1;

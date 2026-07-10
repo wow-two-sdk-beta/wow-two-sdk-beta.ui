@@ -7,7 +7,7 @@
  * the raw string instead of throwing; everything else passes through.
  * ------------------------------------------------------------------------- */
 
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { describe, expect, it } from 'vitest';
 
 import { parseJson, temporalReviver } from './temporalReviver';

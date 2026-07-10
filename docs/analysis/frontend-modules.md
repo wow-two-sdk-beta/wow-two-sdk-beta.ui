@@ -30,7 +30,8 @@ Deferred from both: `errors` extraction (E#6, promote when touched) · `AppDevto
 - **`createApiClient` SHIPPED** — `foundation/http` (54 tests; envelope unwrap default-on, transport retry default-off, bearer delegate, 401 hook, `fieldErrors`, Temporal opt-in, abort-native). §9 lock revised in practice: backend-contract client, not a generic wrapper.
 - **Integration direction decided** — [`http-query-integration.md`](./http-query-integration.md): app-local endpoint factories `{key, queryFn}` + a tiny `defineEndpoint` typing core in `/query` (build next); OpenAPI = phase-3 types-only feed.
 - **Lib adoption verdicts** — [`lib-adoption.md`](./lib-adoption.md): TanStack Form → `/forms-engine` (Wave 2) · react-virtual internal · pragmatic-drag-and-drop over dnd-kit (§10.2 flip) · TanStack Table + Recharts as §8 companions · swap `@js-temporal/polyfill` → `temporal-polyfill` 1.0 (drop-in, shipped-dep health).
-- Next: `defineEndpoint` core → `auth` module (client's `getAuthToken`/`onUnauthorized` seams ready) → optimistic mutation → feedback bus.
+- **2026-07-10 (later):** client hardened per owner review — body-driven empties (empty→`undefined`, literal `null`→`null`, bodied 204 parses) + swappable `ResponseEnvelope` (`wowTwoEnvelope` default · `rawEnvelope` · custom); `defineEndpoint` shipped in `/query` (3-LOC core, spreads into all hooks); **`/auth` module shipped** (`AuthProvider`/`useAuth` machine, cookie/bearer/redirect strategies matching drydock·secrets-vault·smart-qr, `createAuthBridge` wiring `onUnauthorized`+`requireAuth`); `temporal-polyfill` swap done; `targets.md` doc-debt synced. Suite 1423 green.
+- Next: optimistic mutation (`/query`) → feedback bus → then Wave 2 (forms engine, config, storage v2).
 
 ## The §9 lock decision (user call required)
 

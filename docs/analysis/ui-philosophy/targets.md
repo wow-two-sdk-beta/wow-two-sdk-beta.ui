@@ -287,7 +287,7 @@ See §4 below for the canonized list — that's the verdict per delegate.
 | Live-region announce | **LATER** |
 | Drag preview / drop indicators | **LATER** |
 | Auto-scroll | **LATER** |
-| **Library**: roll own vs wrap | **DECIDE-LATER** — leaning toward `dnd-kit` wrap; pragmatic-d&d as alt |
+| **Library**: roll own vs wrap | **DECIDED 2026-07-10** — wrap `pragmatic-drag-and-drop` (dnd-kit stale; see `lib-adoption.md`) |
 
 ### 2.16 Async data states — PARTIAL (extend NEXT)
 
@@ -617,7 +617,7 @@ All **SKIP** — specialty.
 |---|---|
 | URL / URLSearchParams | **DONE** | direct usage |
 | URL Pattern | **MAYBE** | command palette routing? |
-| History | **SKIP** | consumer's router |
+| History | **SKIP** | via `/router` (SDK wraps react-router-dom as optional peer since 0.0.9x) |
 | Navigation API | **SKIP** | |
 | Location | **DONE** | direct usage |
 
@@ -768,6 +768,8 @@ Locked direction:
 
 ## 8. Companion package roadmap (out of core)
 
+> *2026-07-10:* a third vehicle now exists besides core-and-companion: **subpath with optional peer** (`/router` wraps react-router-dom, `/query` wraps TanStack Query via `peerDependenciesMeta`) — the default for app-infra modules; companions below stay for heavy component packages. Module wave plan: `docs/analysis/frontend-modules.md`.
+
 | Package | Scope | Trigger to start |
 |---|---|---|
 | `@wow-two-beta/ui-charts` | Recharts/Visx-based charts | When haven needs a dashboard |
@@ -790,7 +792,7 @@ To avoid re-litigation:
 - **Print stylesheet** — until a consumer asks.
 - **PWA APIs** — Service Worker, Push, Background Sync, Periodic Sync, Web App Manifest, Launch Handler, Window Controls Overlay.
 - **Hardware peripherals** — Web Bluetooth, WebUSB, WebHID, Web NFC, Web Serial, Web MIDI.
-- **Networking** — Fetch wrappers (consumer's data lib), WebSocket, WebTransport, WebRTC.
+- **Networking** — generic fetch wrappers, WebSocket, WebTransport, WebRTC stay out. *Revised 2026-07-10:* a **backend-contract client** (`foundation/http` `createApiClient` — wow-two envelope/ProblemDetails, swappable strategy) is IN — it's the client half of the backend SDK contract, not a generic wrapper.
 - **Workers** — Web Workers, Shared Workers, Worklets, Web Locks.
 - **Heavy media** — Web Audio, MediaSource Extensions, Encrypted Media, WebCodecs, MediaStream Recording.
 - **Web Crypto** (consumer's crypto lib).
@@ -805,13 +807,13 @@ To avoid re-litigation:
 Top items needing the user's call before P6 starts:
 
 1. **Form root verdict** — ship `<Form>` lightweight (no validation engine) or stay fully agnostic? *Recommendation: agnostic for v1.*
-2. **Drag & drop** — own primitive or wrap `dnd-kit` / `pragmatic-drag-and-drop`? *Recommendation: wrap `dnd-kit`.*
-3. **Virtualization** — wrap `@tanstack/react-virtual` or own primitive? *Recommendation: wrap.*
+2. **Drag & drop** — own primitive or wrap? *Updated 2026-07-10: wrap `pragmatic-drag-and-drop`* — dnd-kit core stale (last publish 2024-12, successor 0.5.x), pragmatic 2.x active/Apache-2.0. See `docs/analysis/lib-adoption.md`.
+3. **Virtualization** — wrap `@tanstack/react-virtual` or own primitive? *Recommendation: wrap, as an INTERNAL dep (core components consume it), not an optional peer.*
 4. **Animation lib dep** — stay CSS-only or adopt Framer Motion / Motion? *Recommendation: CSS-only; revisit if a real component genuinely needs spring.*
 5. **i18n provider scope** — ship dictionary-only, or also a pluralization helper? *Recommendation: dictionary-only; consumer brings ICU.*
 6. **`axe-core` CI** — ship the gate or stay manual? *Recommendation: ship the gate (low cost, high signal).*
 7. **CSS Anchor Positioning migration** — track and switch off Floating UI when stable? *Recommendation: yes, track but don't migrate yet.*
-8. **`Toaster` queue model** — stack vs replace vs FIFO? *Recommendation: stack with max-visible cap; replace by id when needed.*
+8. **`Toaster` queue model** — *ANSWERED 2026-07-10 (pinned by interaction tests):* strict FIFO `slice(0,max)` window, queued toasts don't age, per-toast duration override, `Infinity` sticky; no replace-by-id API (add when a consumer needs it).
 9. **Telemetry event naming** — canonize a uniform shape (`onOpen`/`onClose`/`onSelect`) so analytics ingestion is plug-and-play? *Recommendation: yes.*
 10. **WCAG target** — 2.1 AA (current) vs 2.2 AA (focus + drag) commitment? *Recommendation: 2.2 AA goal once focus-visible audit + drag-a11y land.*
 

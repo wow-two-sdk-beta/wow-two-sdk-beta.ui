@@ -137,6 +137,11 @@
       "import": "./dist/query/testing.js",
       "default": "./dist/query/testing.js"
     },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "import": "./dist/auth/index.js",
+      "default": "./dist/auth/index.js"
+    },
     "./styles.css": "./dist/index.css",
     "./themes.css": "./dist/themes.css",
     "./themes.json": "./dist/themes.json",
@@ -160,13 +165,13 @@
     "prepublishOnly": "pnpm typecheck && pnpm build"
   },
   "peerDependencies": {
+    "@tanstack/query-sync-storage-persister": "^5.101.2",
+    "@tanstack/react-query": "^5.101.2",
+    "@tanstack/react-query-devtools": "^5.101.2",
+    "@tanstack/react-query-persist-client": "^5.101.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.18.1",
-    "@tanstack/react-query": "^5.101.2",
-    "@tanstack/react-query-persist-client": "^5.101.2",
-    "@tanstack/query-sync-storage-persister": "^5.101.2",
-    "@tanstack/react-query-devtools": "^5.101.2"
+    "react-router-dom": "^7.18.1"
   },
   "peerDependenciesMeta": {
     "react-router-dom": {
@@ -187,13 +192,13 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.0",
-    "@js-temporal/polyfill": "^0.5.0",
     "@radix-ui/react-focus-scope": "^1.1.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.460.0",
     "marked": "^18.0.3",
     "tailwind-merge": "^3.0.0",
-    "tailwind-variants": "^0.3.0"
+    "tailwind-variants": "^0.3.0",
+    "temporal-polyfill": "^1.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { Button, Toolbar, ToolbarButton, ToolbarSeparator } from '@wow-two-beta/ui/presentation/actions';
 import {
   ActivityFeed,

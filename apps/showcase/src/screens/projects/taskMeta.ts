@@ -1,5 +1,5 @@
 /** Shared meta maps + date helpers for the Projects screen. Deterministic. */
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import type { TaskPriority, TaskStatus, UserStatus } from '../../fixtures';
 
 const LOCAL_TZ = Temporal.Now.timeZoneId();

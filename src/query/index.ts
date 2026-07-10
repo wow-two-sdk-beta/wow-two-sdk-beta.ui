@@ -6,14 +6,17 @@
 // while requests are in flight. Passive mutations only (no optimistic).
 //
 // `@tanstack/react-query` is an OPTIONAL peer — this subpath carries it so every other entry stays
-// RQ-free (mirrors how `/router` isolates react-router-dom). Apps declare their own typed `queryKeys`
-// registry (the data-layer parallel to the router's `paths`) — it stays app-local and is NOT exported
-// here. Test helpers live at `@wow-two-beta/ui/query/testing` (kept out of this runtime barrel).
+// RQ-free (mirrors how `/router` isolates react-router-dom). Apps declare their own per-resource
+// endpoint factories over `defineEndpoint` (key + fetcher typed once — the data-layer parallel to the
+// router's `paths`/`definePath`); the factories and their `queryKeys` hierarchies stay app-local and
+// are NOT exported here. Test helpers live at `@wow-two-beta/ui/query/testing` (kept out of this
+// runtime barrel).
 
 // Foundation
 export { createQueryClient, type CreateQueryClientOptions } from './CreateQueryClient';
 export { QueryProvider } from './QueryProvider';
 export { toApiError } from './ToApiError';
+export { defineEndpoint, type Endpoint, type EndpointFn } from './Endpoints';
 
 // Core hooks
 export { useAppQuery, type UseAppQueryOptions } from './UseAppQuery';

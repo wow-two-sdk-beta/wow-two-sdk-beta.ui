@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import {
   Accordion,
   AccordionContent,

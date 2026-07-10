@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useMemo, useRef, type ButtonHTMLAttributes } from 'react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { Clock } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';

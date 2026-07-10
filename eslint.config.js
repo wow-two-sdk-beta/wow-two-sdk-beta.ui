@@ -47,6 +47,9 @@ export default tseslint.config(
         // Query = standalone top-level subpath data layer; composes foundation (ApiError coercion)
         // + router (QueryProgressBridge → useNavigationProgress), never imported by them.
         { type: 'query', pattern: 'src/query/**' },
+        // Auth = standalone top-level subpath session layer; peer-free, composes
+        // foundation only (http client seams), never imported by other layers.
+        { type: 'auth', pattern: 'src/auth/**' },
         { type: 'root', pattern: 'src/index.ts' },
       ],
     },
@@ -67,6 +70,7 @@ export default tseslint.config(
             { from: ['presentation'], allow: ['foundation', 'domain', 'presentation'] },
             { from: ['router'], allow: ['foundation', 'domain', 'presentation', 'router'] },
             { from: ['query'], allow: ['foundation', 'router', 'query'] },
+            { from: ['auth'], allow: ['foundation', 'auth'] },
             { from: ['root'], allow: ['foundation', 'domain', 'presentation'] },
           ],
         },

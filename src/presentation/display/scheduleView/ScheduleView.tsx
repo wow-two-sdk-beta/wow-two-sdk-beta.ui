@@ -1,5 +1,5 @@
 import { forwardRef, useMemo, type HTMLAttributes, type ReactNode } from 'react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { cn } from '../../../foundation/utils';
 import { formatZonedTime, minutesBetween, nowZoned, zonedAtHour } from '../../forms/DateExtensions';
 

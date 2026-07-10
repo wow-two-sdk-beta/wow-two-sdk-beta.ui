@@ -1,5 +1,5 @@
 import { forwardRef, useMemo, type HTMLAttributes } from 'react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { cn } from '../../../foundation/utils';
 
 // HeatmapCalendar is a date-only surface → its public API is keyed by

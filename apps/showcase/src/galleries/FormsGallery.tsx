@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { type EmojiCatalogEntry } from '@wow-two-beta/ui/domain/emoji';
 import { localStorageStorageBroker } from '@wow-two-beta/ui/foundation/storage';
 import { SectionHeader } from '@wow-two-beta/ui/presentation/display';

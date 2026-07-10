@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { Gantt, type GanttTask } from './Gantt';
 
 const meta: Meta<typeof Gantt> = {

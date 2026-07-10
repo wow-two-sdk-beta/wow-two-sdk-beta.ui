@@ -20,7 +20,7 @@ export default defineConfig({
           include: [
             'src/foundation/{utils,themes,http,storage,resilience}/**/*.test.ts',
             'src/domain/**/*.test.ts',
-            'src/{router,query}/**/*.test.ts',
+            'src/{router,query,auth}/**/*.test.ts',
           ],
           exclude: ['**/*.browser.test.ts'],
         },

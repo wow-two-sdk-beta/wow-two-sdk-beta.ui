@@ -1,4 +1,4 @@
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 
 // Strict ISO-8601 shapes. Anchored (^…$) so partial / lenient strings never match — only a
 // wire value that is unambiguously one Temporal kind is upgraded; everything else stays a string.

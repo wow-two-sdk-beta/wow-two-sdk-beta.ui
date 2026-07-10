@@ -35,6 +35,10 @@ export default defineConfig({
     // second entry for the test-only helpers (`@wow-two-beta/ui/query/testing`).
     'query/index': 'src/query/index.ts',
     'query/testing': 'src/query/testing.ts',
+    // `auth` mirrors `router`/`query` — a standalone top-level subpath (`@wow-two-beta/ui/auth`).
+    // It carries no peer of its own (plain React + foundation/http types); kept standalone so the
+    // headless session client is importable without any presentation entry.
+    'auth/index': 'src/auth/index.ts',
     // Entry KEY = dist path (`dist/<layer>/<group>/index.js`) — mirrors the
     // layered source folder so the emitted subpath matches the public export.
     ...Object.fromEntries(
