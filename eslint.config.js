@@ -74,8 +74,8 @@ export default tseslint.config(
     },
   },
   {
-    // Test files cross layers freely — they exercise, not ship.
-    files: ['src/**/*.test.{ts,tsx}'],
+    // Test files + the local test kit cross layers freely — they exercise, not ship.
+    files: ['src/**/*.test.{ts,tsx}', 'src/testing/**'],
     rules: {
       'boundaries/element-types': 'off',
     },

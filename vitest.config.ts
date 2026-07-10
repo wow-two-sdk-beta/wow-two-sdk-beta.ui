@@ -15,12 +15,14 @@ export default defineConfig({
         test: {
           name: 'unit',
           environment: 'node',
+          // Suffix convention: `*.browser.test.ts` = needs a real DOM → browser
+          // project; plain `*.test.ts` in these layers = pure logic → here.
           include: [
             'src/foundation/{utils,themes,http,storage,resilience}/**/*.test.ts',
             'src/domain/**/*.test.ts',
-            // Router pure-logic tests (no DOM): typed-path builder + chunk-retry / reload logic.
-            'src/router/{Paths,LazyRoute}.test.ts',
+            'src/{router,query}/**/*.test.ts',
           ],
+          exclude: ['**/*.browser.test.ts'],
         },
       },
       {
@@ -29,14 +31,7 @@ export default defineConfig({
           include: [
             'src/**/*.test.tsx',
             'src/foundation/hooks/**/*.test.ts',
-            // Router hook tests need a real DOM (renderHook); the pure ones run in `unit`.
-            'src/router/UseNavigationBlocker.test.ts',
-            'src/router/UsePrefetch.test.ts',
-            // Query non-tsx tests need a real DOM: `renderHook` (prefetch/lazy/cache) + `window`/localStorage (persistence).
-            'src/query/Persistence.test.ts',
-            'src/query/UsePrefetchQuery.test.ts',
-            'src/query/UseAppLazyQuery.test.ts',
-            'src/query/UseQueryCache.test.ts',
+            'src/**/*.browser.test.ts',
           ],
           browser: {
             enabled: true,

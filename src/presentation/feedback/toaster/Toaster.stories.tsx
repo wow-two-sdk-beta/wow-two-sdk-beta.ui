@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { expectDismissed, expectVisible } from '../../../testing';
 import { toaster, useToaster, Toaster } from './Toaster';
 
 const meta: Meta = {
@@ -118,7 +119,7 @@ export const PushesToastImperatively: Story = {
     const viewport = within(toastViewport(doc));
     const card = await viewport.findByRole('status');
     // Slide-in starts off-canvas — poll past the enter animation.
-    await waitFor(() => expect(card).toBeVisible());
+    await expectVisible(card);
     await expect(card).toHaveAttribute('aria-live', 'polite');
     await expect(card).toHaveTextContent('Saved');
     await expect(card).toHaveTextContent('Your changes are live.');
@@ -126,7 +127,7 @@ export const PushesToastImperatively: Story = {
     // dismissAll drains the queue (the empty viewport div itself lingers — see
     // the exiting-ghost bug in the header comment).
     toaster.dismissAll();
-    await waitFor(() => expect(viewport.queryByText('Saved')).not.toBeInTheDocument());
+    await expectDismissed(() => viewport.queryByText('Saved'));
   },
 };
 
@@ -145,14 +146,11 @@ export const AutoDismissesAfterDuration: Story = {
     await viewport.findByText('Pinned');
 
     // The default duration dismisses the first; the per-toast Infinity overrides it.
-    await waitFor(
-      () => expect(viewport.queryByText('Ephemeral')).not.toBeInTheDocument(),
-      { timeout: 1500 },
-    );
+    await expectDismissed(() => viewport.queryByText('Ephemeral'), { timeout: 1500 });
     await expect(viewport.getByText('Pinned')).toBeInTheDocument();
 
     toaster.dismissAll();
-    await waitFor(() => expect(viewport.queryByText('Pinned')).not.toBeInTheDocument());
+    await expectDismissed(() => viewport.queryByText('Pinned'));
   },
 };
 
@@ -180,11 +178,11 @@ export const CapsVisibleToastsAtMax: Story = {
     // Dismissing a visible toast promotes the queued one.
     toaster.dismiss(first);
     await viewport.findByText('Toast 4');
-    await waitFor(() => expect(viewport.queryByText('Toast 1')).not.toBeInTheDocument());
+    await expectDismissed(() => viewport.queryByText('Toast 1'));
     await waitFor(() => expect(viewport.getAllByRole('status')).toHaveLength(3));
 
     toaster.dismissAll();
-    await waitFor(() => expect(viewport.queryByRole('status')).not.toBeInTheDocument());
+    await expectDismissed(() => viewport.queryByRole('status'));
   },
 };
 
@@ -199,11 +197,11 @@ export const DismissButtonRemovesToast: Story = {
     await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
     const viewport = within(toastViewport(doc));
     const card = await viewport.findByRole('status');
-    await waitFor(() => expect(card).toBeVisible());
+    await expectVisible(card);
 
     await userEvent.click(within(card).getByRole('button', { name: 'Dismiss' }));
 
-    await waitFor(() => expect(viewport.queryByText('Sticky note')).not.toBeInTheDocument());
+    await expectDismissed(() => viewport.queryByText('Sticky note'));
   },
 };
 
@@ -237,6 +235,6 @@ export const ActionButtonFiresCallback: Story = {
     // Actions don't auto-dismiss — the consumer closes via the returned id.
     await expect(viewport.getByText('File archived')).toBeInTheDocument();
     toaster.dismiss(id);
-    await waitFor(() => expect(viewport.queryByText('File archived')).not.toBeInTheDocument());
+    await expectDismissed(() => viewport.queryByText('File archived'));
   },
 };

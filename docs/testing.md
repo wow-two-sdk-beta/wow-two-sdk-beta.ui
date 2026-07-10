@@ -100,6 +100,7 @@ Each iteration = a shippable chunk. Fold precedes harness so no test file moves 
 | **8** | Docs + CI | update `CLAUDE.md` (drop "No tests", fix SB8→10, add commands) · add Actions job (`unit` always, `browser` on Playwright runner) | **done** (2026-07-06) — `CLAUDE.md` updated; `.github/workflows/test.yml` runs the full suite on main push as a non-blocking signal (separate from `release.yml`; retry-once for the cold-cache race) |
 
 | **9** | T3 actions + feedback + layout | `play()`: actions (`button` `toggleButton(Group)` `segmentedControl` `speedDial` `fab` `copyButton` `disclosureButton` `backToTopButton` `optionTile(Group)` `toolbar`) · feedback (`toaster` `undoBar` `tour` `notificationCenter` `onboardingChecklist` `banner` `alert` `progressSteps` `meterBar`) · layout interactive (`resizablePanels` `scrollArea` `pullToRefresh` `appShell` `overlay` `controlGroup`; `navbar` = pure slots, smoke-only) | **done** (2026-07-10) — 78 interaction stories; suite 1278 green. Every presentation group now has interaction coverage |
+| **10** | Test kit + config polish | local `src/testing/` helpers (8) · 4 exemplar migrations · `*.browser.test.ts` suffix convention (killed per-file vitest globs) · build-tsconfig/eslint wiring | **done** (2026-07-10) — 1278 green; consumer-facing `/testing` subpath deferred |
 
 ### It9 findings (2026-07-10)
 
@@ -113,6 +114,16 @@ Each iteration = a shippable chunk. Fold precedes harness so no test file moves 
 New layers since the original plan — `src/router` (20 src / 13 tests) · `src/query` (17/13) · `foundation/{storage,resilience}` · arrived WITH tests from a parallel lane (vitest globs extended accordingly); baseline before It9: 280 files / 1199 tests green.
 
 Scripts (added It2): `test` `test:watch` `test:ui` `test:unit` `test:browser` `coverage`.
+
+## Test kit — `src/testing/` (It10, 2026-07-10)
+
+Local helpers (NOT exported from the package — consumer-facing `/testing` subpath deferred until the API settles). Each encodes a documented gotcha; imports only `'storybook/test'` so stories stay catalog-safe.
+
+`portal(canvasElement)` · `expectVisible(el)` · `expectDismissed(query, {timeout?})` · `expectFocusReturns(el)` · `expectScrollLocked/Released(doc)` · `stubClipboard(mode?)` (restore-in-`finally`) · `dragPointer(el, {from,to,steps?})`
+
+- **New tests use the kit; existing tests migrate on-touch only** (exemplars migrated: `Modal`, `Menu`, `Toaster`, `CopyButton`).
+- No flow-level DSLs — helpers stay mechanical; play() bodies read as user flows.
+- Suffix convention: DOM-dependent non-tsx tests are `*.browser.test.ts` (browser project picks them up globally); plain `*.test.ts` in logic layers = `unit`. No per-file vitest globs.
 
 ## First-pass findings (2026-07-06 — harness + exemplar wave)
 

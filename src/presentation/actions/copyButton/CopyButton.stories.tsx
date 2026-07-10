@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { stubClipboard } from '../../../testing';
 import { CopyButton } from './CopyButton';
 
 const meta: Meta<typeof CopyButton> = {
@@ -60,25 +61,10 @@ export const WithErrorHandler: Story = {
 /* ------------------------------------------------------------------------- *
  * Interaction tests (play) — oracle: CopyButton.tsx + useClipboard.
  * The headless harness grants no clipboard permission (`writeText` rejects),
- * so plays stub `navigator.clipboard.writeText` for a deterministic path in
- * BOTH the vitest run and the catalog — asserting the component's callback /
- * state, never real clipboard contents. Instance-level defineProperty shadows
- * the prototype getter; `restore` deletes the shadow.
+ * so plays stub the clipboard via the local kit (`src/testing/stubClipboard`)
+ * for a deterministic path in BOTH the vitest run and the catalog — asserting
+ * the component's callback / state, never real clipboard contents.
  * ------------------------------------------------------------------------- */
-
-function stubClipboard(impl: (text: string) => Promise<void>) {
-  const writeText = fn(impl);
-  Object.defineProperty(navigator, 'clipboard', {
-    value: { writeText },
-    configurable: true,
-  });
-  return {
-    writeText,
-    restore: () => {
-      delete (navigator as { clipboard?: unknown }).clipboard;
-    },
-  };
-}
 
 /** Click hands `text` to the clipboard API, flips to the copied state (content + aria-label swap), and auto-reverts after `resetAfter`. */
 export const CopyFlipsToCopiedAndReverts: Story = {
@@ -91,7 +77,7 @@ export const CopyFlipsToCopiedAndReverts: Story = {
     onError: fn(),
   },
   play: async ({ canvasElement, args }) => {
-    const clipboard = stubClipboard(async () => {});
+    const clipboard = stubClipboard();
     try {
       const canvas = within(canvasElement);
       const button = canvas.getByRole('button', { name: 'Copy value' });
@@ -99,7 +85,7 @@ export const CopyFlipsToCopiedAndReverts: Story = {
       await expect(button).not.toHaveAttribute('data-copied');
 
       await userEvent.click(button);
-      await waitFor(() => expect(clipboard.writeText).toHaveBeenCalledWith('copy-me'));
+      await waitFor(() => expect(clipboard.writes).toContain('copy-me'));
 
       /* Copied state — data attr + render-prop content + copiedAriaLabel. */
       await waitFor(() => expect(button).toHaveAttribute('data-copied', 'true'));
@@ -126,7 +112,7 @@ export const StickyCopiedState: Story = {
     onError: fn(),
   },
   play: async ({ canvasElement, args }) => {
-    const clipboard = stubClipboard(async () => {});
+    const clipboard = stubClipboard();
     try {
       const button = within(canvasElement).getByRole('button', { name: 'Copy id' });
       /* Default content is the icon-only Copy glyph. */
@@ -156,9 +142,7 @@ export const RejectedCopyReportsError: Story = {
       error ? 'Failed' : copied ? 'Copied!' : 'Copy',
   },
   play: async ({ canvasElement, args }) => {
-    const clipboard = stubClipboard(async () => {
-      throw new Error('clipboard denied');
-    });
+    const clipboard = stubClipboard('reject');
     try {
       const button = within(canvasElement).getByRole('button', { name: 'Copy value' });
       await userEvent.click(button);

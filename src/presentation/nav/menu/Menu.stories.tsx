@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { useRef, useState } from 'react';
+import { expectDismissed, expectFocusReturns, expectVisible, portal } from '../../../testing';
 import { Menu } from './Menu';
 
 const meta: Meta<typeof Menu> = {
@@ -76,8 +77,8 @@ export const Grouped: Story = { render: () => <GroupedDemo /> };
 
 /* ------------------------------------------------------------------------- *
  * Interaction tests (play) — oracle: Menu.spec.md "Required behaviors".
- * The menu portals to document.body → query via `canvasElement.ownerDocument
- * .body`. Close is animation-deferred (Presence) → poll with `waitFor`.
+ * Portal queries + animation-deferred close/focus assertions go through the
+ * local kit (`src/testing`) — gotchas in docs/testing.md.
  * Module-level spies are cleared at play start (stories share the module).
  * ------------------------------------------------------------------------- */
 
@@ -116,20 +117,17 @@ export const OpensOnTriggerClick: Story = {
   render: () => <InteractionDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const body = within(canvasElement.ownerDocument.body);
+    const body = portal(canvasElement);
 
     await userEvent.click(canvas.getByRole('button', { name: 'Open menu' }));
 
     const menu = await body.findByRole('menu');
-    // Pop-in keyframes start at opacity 0 — poll past the enter animation.
-    await waitFor(() => expect(menu).toBeVisible());
+    await expectVisible(menu);
     await expect(menu).toHaveAccessibleName('Interaction menu');
     await expect(within(menu).getAllByRole('menuitem')).toHaveLength(4);
 
     // Focus moves into the menu — first enabled item.
-    await waitFor(() =>
-      expect(within(menu).getByRole('menuitem', { name: 'Profile' })).toHaveFocus(),
-    );
+    await expectFocusReturns(within(menu).getByRole('menuitem', { name: 'Profile' }));
   },
 };
 
@@ -139,28 +137,28 @@ export const ArrowKeysNavigateAndEnterSelects: Story = {
     onProfileSelect.mockClear();
     onSettingsSelect.mockClear();
     const canvas = within(canvasElement);
-    const body = within(canvasElement.ownerDocument.body);
+    const body = portal(canvasElement);
 
     await userEvent.click(canvas.getByRole('button', { name: 'Open menu' }));
     const menu = await body.findByRole('menu');
     const item = (name: string) => within(menu).getByRole('menuitem', { name });
 
-    await waitFor(() => expect(item('Profile')).toHaveFocus());
+    await expectFocusReturns(item('Profile'));
 
     await userEvent.keyboard('{ArrowDown}');
-    await waitFor(() => expect(item('Settings')).toHaveFocus());
+    await expectFocusReturns(item('Settings'));
 
     // Disabled item (Billing) is skipped in both directions.
     await userEvent.keyboard('{ArrowDown}');
-    await waitFor(() => expect(item('Logout')).toHaveFocus());
+    await expectFocusReturns(item('Logout'));
     await userEvent.keyboard('{ArrowUp}');
-    await waitFor(() => expect(item('Settings')).toHaveFocus());
+    await expectFocusReturns(item('Settings'));
 
     // Enter invokes onSelect exactly once and closes the menu.
     await userEvent.keyboard('{Enter}');
     await expect(onSettingsSelect).toHaveBeenCalledTimes(1);
     await expect(onProfileSelect).not.toHaveBeenCalled();
-    await waitFor(() => expect(body.queryByRole('menu')).not.toBeInTheDocument());
+    await expectDismissed(() => body.queryByRole('menu'));
   },
 };
 
@@ -168,7 +166,7 @@ export const EscapeClosesAndRestoresFocus: Story = {
   render: () => <InteractionDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const body = within(canvasElement.ownerDocument.body);
+    const body = portal(canvasElement);
 
     const trigger = canvas.getByRole('button', { name: 'Open menu' });
     await userEvent.click(trigger);
@@ -176,8 +174,8 @@ export const EscapeClosesAndRestoresFocus: Story = {
 
     await userEvent.keyboard('{Escape}');
 
-    await waitFor(() => expect(body.queryByRole('menu')).not.toBeInTheDocument());
+    await expectDismissed(() => body.queryByRole('menu'));
     // Focus returns to the trigger (FocusScope restores on unmount).
-    await waitFor(() => expect(trigger).toHaveFocus());
+    await expectFocusReturns(trigger);
   },
 };

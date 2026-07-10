@@ -26,6 +26,7 @@
     "storybook-static",
     "**/*.stories.tsx",
     "**/*.test.ts",
-    "**/*.test.tsx"
+    "**/*.test.tsx",
+    "src/testing"
   ]
 }
