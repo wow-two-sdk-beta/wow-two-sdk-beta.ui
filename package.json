@@ -142,6 +142,26 @@
       "import": "./dist/auth/index.js",
       "default": "./dist/auth/index.js"
     },
+    "./feedback": {
+      "types": "./dist/feedback/index.d.ts",
+      "import": "./dist/feedback/index.js",
+      "default": "./dist/feedback/index.js"
+    },
+    "./forms-engine": {
+      "types": "./dist/forms-engine/index.d.ts",
+      "import": "./dist/forms-engine/index.js",
+      "default": "./dist/forms-engine/index.js"
+    },
+    "./forms-engine/house": {
+      "types": "./dist/forms-engine/house/index.d.ts",
+      "import": "./dist/forms-engine/house/index.js",
+      "default": "./dist/forms-engine/house/index.js"
+    },
+    "./forms-engine/tanstack": {
+      "types": "./dist/forms-engine/tanstack/index.d.ts",
+      "import": "./dist/forms-engine/tanstack/index.js",
+      "default": "./dist/forms-engine/tanstack/index.js"
+    },
     "./styles.css": "./dist/index.css",
     "./themes.css": "./dist/themes.css",
     "./themes.json": "./dist/themes.json",
@@ -166,6 +186,7 @@
   },
   "peerDependencies": {
     "@tanstack/query-sync-storage-persister": "^5.101.2",
+    "@tanstack/react-form": "^1.33.1",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.101.2",
     "@tanstack/react-query-persist-client": "^5.101.2",
@@ -175,6 +196,9 @@
   },
   "peerDependenciesMeta": {
     "react-router-dom": {
+      "optional": true
+    },
+    "@tanstack/react-form": {
       "optional": true
     },
     "@tanstack/react-query": {
@@ -209,6 +233,7 @@
     "@storybook/react-vite": "^10.3.6",
     "@tailwindcss/vite": "^4.1.0",
     "@tanstack/query-sync-storage-persister": "^5.101.2",
+    "@tanstack/react-form": "^1.33.1",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.101.2",
     "@tanstack/react-query-persist-client": "^5.101.2",
@@ -224,6 +249,7 @@
     "@vitest/ui": "^4.1.10",
     "axe-core": "^4.12.1",
     "eslint": "^9.14.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-boundaries": "^5.0.1",
     "eslint-plugin-react-hooks": "^5.0.0",
     "playwright": "^1.61.1",

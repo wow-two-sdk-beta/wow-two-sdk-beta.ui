@@ -5,7 +5,8 @@
 // A def is a plain `{ key, queryFn }`: it spreads into `useAppQuery` / `useAppSuspenseQuery` /
 // `useAppLazyQuery`, feeds `usePrefetchQuery` / `prefetchProps` / `useQueryCache().prefetch` whole,
 // and pairs with a bare `QueryClient` (`fetchQuery({ queryKey: def.key, queryFn: def.queryFn })`).
-// Mutations stay plain client calls into `useAppMutation` — no def shape for writes.
+// Mutations stay plain client calls into `useAppMutation` — no def shape for writes (an
+// `useOptimisticMutation` target may reuse a def's `key` to locate the cached read it patches).
 // See docs/analysis/http-query-integration.md.
 
 import type { QueryKey } from '@tanstack/react-query';

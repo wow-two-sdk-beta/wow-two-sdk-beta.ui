@@ -16,6 +16,7 @@ export * from './statusIndicator';
 export * from './meterBar';
 export * from './trendIndicator';
 export * from './toaster';
+export * from './feedbackToasts';
 export * from './loadingOverlay';
 export * from './undoBar';
 export * from './onboardingChecklist';

@@ -27,6 +27,7 @@
     "**/*.stories.tsx",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "src/testing"
+    "src/testing",
+    "src/forms-engine/conformance"
   ]
 }

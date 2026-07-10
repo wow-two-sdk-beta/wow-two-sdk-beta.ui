@@ -39,6 +39,18 @@ export default defineConfig({
     // It carries no peer of its own (plain React + foundation/http types); kept standalone so the
     // headless session client is importable without any presentation entry.
     'auth/index': 'src/auth/index.ts',
+    // `feedback` mirrors `auth` — standalone top-level subpath (`@wow-two-beta/ui/feedback`), no
+    // peer of its own; the headless notice bus stays importable without any presentation entry
+    // (the `<FeedbackToasts/>` adapter ships in `presentation/feedback`).
+    'feedback/index': 'src/feedback/index.ts',
+    // `forms-engine` — the engine-free forms facade contract (types + glue + server-error
+    // pipeline, zero peer). Each engine adapter is its own sibling entry so an adapter's
+    // peer never rides along: `forms-engine/house` is the zero-dependency micro-engine;
+    // `forms-engine/tanstack` is the default adapter (optional @tanstack/react-form peer
+    // → external below) — importing `/forms-engine` or `/house` must never pull it.
+    'forms-engine/index': 'src/forms-engine/index.ts',
+    'forms-engine/house/index': 'src/forms-engine/house/index.ts',
+    'forms-engine/tanstack/index': 'src/forms-engine/tanstack/index.ts',
     // Entry KEY = dist path (`dist/<layer>/<group>/index.js`) — mirrors the
     // layered source folder so the emitted subpath matches the public export.
     ...Object.fromEntries(
@@ -65,6 +77,9 @@ export default defineConfig({
     '@tanstack/react-query-persist-client',
     '@tanstack/query-sync-storage-persister',
     '@tanstack/react-query-devtools',
+    // Forms-engine tanstack adapter peer — external so `forms-engine/tanstack` references
+    // it and the contract entry + house adapter chunks stay @tanstack/react-form-free.
+    '@tanstack/react-form',
     '@testing-library/react',
   ],
 });

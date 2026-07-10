@@ -3,7 +3,9 @@
 // query / mutation / batch / paginated / lazy / infinite / suspense hooks that coerce failures to the
 // SDK `ApiError`, an imperative cache accessor, intent-based prefetch, opt-in localStorage persistence,
 // a dev-only devtools mount, and a `QueryProgressBridge` that drives the router's manual heartbeat
-// while requests are in flight. Passive mutations only (no optimistic).
+// while requests are in flight. Mutations are passive by default (`useAppMutation` — server-confirmed
+// reconcile only); `useOptimisticMutation` opts into the canonical cancel → snapshot → patch →
+// rollback-on-error → invalidate-on-settle flow, patching one or more cached targets per mutation.
 //
 // `@tanstack/react-query` is an OPTIONAL peer — this subpath carries it so every other entry stays
 // RQ-free (mirrors how `/router` isolates react-router-dom). Apps declare their own per-resource
@@ -22,6 +24,11 @@ export { defineEndpoint, type Endpoint, type EndpointFn } from './Endpoints';
 export { useAppQuery, type UseAppQueryOptions } from './UseAppQuery';
 export { useAppInfiniteQuery, type UseAppInfiniteQueryOptions } from './UseAppInfiniteQuery';
 export { useAppMutation, type UseAppMutationOptions } from './UseAppMutation';
+export {
+  useOptimisticMutation,
+  type UseOptimisticMutationOptions,
+  type OptimisticTarget,
+} from './UseOptimisticMutation';
 export { useAppQueries, type UseAppQueriesOptions, type AppQueriesEntry, type AppQueryResult } from './UseAppQueries';
 export { useAppPaginatedQuery, type UseAppPaginatedQueryOptions } from './UseAppPaginatedQuery';
 export { useAppLazyQuery, type UseAppLazyQueryOptions } from './UseAppLazyQuery';
