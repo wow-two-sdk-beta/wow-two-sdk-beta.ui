@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { LayoutGrid, List, Image as ImageIcon, Smile } from 'lucide-react';
 import { ToggleButton } from '../toggleButton/ToggleButton';
 import { ToggleButtonGroup } from './ToggleButtonGroup';
@@ -225,5 +225,79 @@ export const PillVariant: Story = {
     /* Selection still works. */
     await userEvent.click(buttons[0]!);
     await expect(buttons[0]).toHaveAttribute('aria-pressed', 'true');
+  },
+};
+
+/** Single mode is exclusive — at most one pressed; re-clicking the active item clears to `null`. */
+export const SingleModeIsExclusive: Story = {
+  args: { onValueChange: fn() },
+  render: (args) => (
+    <ToggleButtonGroup
+      type={ToggleMode.Single}
+      defaultValue="day"
+      onValueChange={args.onValueChange as (value: string | null) => void}
+      aria-label="View range"
+    >
+      <ToggleButton value="day">Day</ToggleButton>
+      <ToggleButton value="week">Week</ToggleButton>
+      <ToggleButton value="month">Month</ToggleButton>
+    </ToggleButtonGroup>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const day = canvas.getByRole('button', { name: 'Day' });
+    const week = canvas.getByRole('button', { name: 'Week' });
+    const month = canvas.getByRole('button', { name: 'Month' });
+
+    await expect(day).toHaveAttribute('aria-pressed', 'true');
+
+    /* Selecting another item moves the selection — never two pressed. */
+    await userEvent.click(week);
+    await expect(week).toHaveAttribute('aria-pressed', 'true');
+    await expect(day).toHaveAttribute('aria-pressed', 'false');
+    await expect(month).toHaveAttribute('aria-pressed', 'false');
+    await expect(args.onValueChange).toHaveBeenLastCalledWith('week');
+
+    /* Re-clicking the active item clears the selection (single-select allows empty). */
+    await userEvent.click(week);
+    await expect(week).toHaveAttribute('aria-pressed', 'false');
+    await expect(args.onValueChange).toHaveBeenLastCalledWith(null);
+  },
+};
+
+/** Multi mode toggles items independently — selections accumulate and remove one-by-one. */
+export const MultiModeTogglesIndependently: Story = {
+  args: { onValueChange: fn() },
+  render: (args) => (
+    <ToggleButtonGroup
+      type={ToggleMode.Multi}
+      defaultValue={['bold']}
+      onValueChange={args.onValueChange as (value: ReadonlyArray<string>) => void}
+      aria-label="Formatting"
+    >
+      <ToggleButton value="bold">Bold</ToggleButton>
+      <ToggleButton value="italic">Italic</ToggleButton>
+      <ToggleButton value="underline">Underline</ToggleButton>
+    </ToggleButtonGroup>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const bold = canvas.getByRole('button', { name: 'Bold' });
+    const italic = canvas.getByRole('button', { name: 'Italic' });
+
+    await expect(bold).toHaveAttribute('aria-pressed', 'true');
+    await expect(italic).toHaveAttribute('aria-pressed', 'false');
+
+    /* Adding keeps existing selections — both active. */
+    await userEvent.click(italic);
+    await expect(bold).toHaveAttribute('aria-pressed', 'true');
+    await expect(italic).toHaveAttribute('aria-pressed', 'true');
+    await expect(args.onValueChange).toHaveBeenLastCalledWith(['bold', 'italic']);
+
+    /* Unpressing removes only that item. */
+    await userEvent.click(bold);
+    await expect(bold).toHaveAttribute('aria-pressed', 'false');
+    await expect(italic).toHaveAttribute('aria-pressed', 'true');
+    await expect(args.onValueChange).toHaveBeenLastCalledWith(['italic']);
   },
 };

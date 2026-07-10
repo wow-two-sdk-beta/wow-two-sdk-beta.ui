@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Bold, Eye, EyeOff, Trash2, Pin, PinOff, Star } from 'lucide-react';
 import { Icon } from '../../../foundation/icons';
 import { ToggleButton } from './ToggleButton';
@@ -122,4 +123,80 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
+};
+
+/* ------------------------------------------------------------------------- *
+ * Interaction tests (play) — oracle: ToggleButton.tsx behavior surface.
+ * ------------------------------------------------------------------------- */
+
+/** Uncontrolled toggling — click flips `aria-pressed`/`data-pressed` and reports each change. */
+export const TogglesAriaPressed: Story = {
+  args: { children: 'Bookmark', onPressedChange: fn() },
+  play: async ({ canvasElement, args }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Bookmark' });
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+    await expect(button).toHaveAttribute('data-pressed', 'false');
+
+    await userEvent.click(button);
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    await expect(button).toHaveAttribute('data-pressed', 'true');
+    await expect(args.onPressedChange).toHaveBeenLastCalledWith(true);
+
+    await userEvent.click(button);
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+    await expect(args.onPressedChange).toHaveBeenLastCalledWith(false);
+    await expect(args.onPressedChange).toHaveBeenCalledTimes(2);
+  },
+};
+
+/** Controlled — the toggle reports intent via `onPressedChange` but never flips itself. */
+export const ControlledPressedState: Story = {
+  args: { isPressed: false, children: 'Muted', onPressedChange: fn() },
+  play: async ({ canvasElement, args }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Muted' });
+
+    await userEvent.click(button);
+    await expect(args.onPressedChange).toHaveBeenCalledWith(true);
+    /* Parent didn't update `isPressed` → the DOM state stays unpressed. */
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+  },
+};
+
+/** Render-prop children swap with the pressed state (Eye ↔ EyeOff pattern, text form here). */
+export const RenderPropSwapsContent: Story = {
+  render: () => (
+    <ToggleButton aria-label="Visibility">
+      {({ pressed }) => <span>{pressed ? 'Visible' : 'Hidden'}</span>}
+    </ToggleButton>
+  ),
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Visibility' });
+    await expect(button).toHaveTextContent('Hidden');
+
+    await userEvent.click(button);
+    await expect(button).toHaveTextContent('Visible');
+  },
+};
+
+/** State-aware `title` + `aria-label` fns re-resolve on every toggle (i18n stays consumer-side). */
+export const StateAwareLabels: Story = {
+  render: () => (
+    <ToggleButton
+      title={({ pressed }) => (pressed ? 'Unpin' : 'Pin')}
+      aria-label={({ pressed }) => (pressed ? 'Unpin note' : 'Pin note')}
+    >
+      Pin
+    </ToggleButton>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Pin note' });
+    await expect(button).toHaveAttribute('title', 'Pin');
+
+    await userEvent.click(button);
+    await expect(canvas.getByRole('button', { name: 'Unpin note' })).toHaveAttribute(
+      'title',
+      'Unpin',
+    );
+  },
 };

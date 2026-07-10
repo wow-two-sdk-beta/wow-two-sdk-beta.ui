@@ -715,3 +715,57 @@ export const EscapeClosesWithoutSelecting: Story = {
     await waitFor(() => expect(trigger).toHaveFocus());
   },
 };
+
+/* Seeds the registry eagerly from `options` (no `getOptionLabel`): the controlled value's label
+   resolves in the trigger before the popover's first open, and compound `<Select.Item>` children
+   still render the list — deduped so each key appears once. */
+function OptionsSeededDemo() {
+  const [k, setK] = useState<string | null>('cherry');
+  const options: Array<SelectOption<string>> = FRUITS.map((f) => ({
+    itemKey: f,
+    value: f,
+    label: FRUIT_LABELS[f],
+  }));
+  return (
+    <div className="w-72">
+      <Select<string>
+        value={k}
+        onValueChange={(opt) => setK(opt?.itemKey ?? null)}
+        options={options}
+      >
+        <Select.Trigger>
+          <Select.Value placeholder="Pick one..." />
+        </Select.Trigger>
+        <Select.Content>
+          {FRUITS.map((f) => (
+            <Select.Item key={f} itemKey={f} label={FRUIT_LABELS[f]} />
+          ))}
+        </Select.Content>
+      </Select>
+    </div>
+  );
+}
+
+export const OptionsSeeded: Story = {
+  render: () => <OptionsSeededDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    const trigger = canvas.getByRole('button');
+
+    /* The core win: the controlled `value` ('cherry') shows its human label BEFORE the popover is
+       ever opened — resolved from `options`, with no `getOptionLabel`. */
+    await expect(trigger).toHaveTextContent('Cherry');
+
+    /* Compound children still render the list, and `options` don't double-register:
+       exactly one option per key (4, not 8). */
+    await userEvent.click(trigger);
+    const opts = await body.findAllByRole('option');
+    await expect(opts).toHaveLength(FRUITS.length);
+
+    /* Selecting from the list still works end-to-end. */
+    await userEvent.click(body.getByRole('option', { name: 'Apple' }));
+    await waitFor(() => expect(body.queryByRole('listbox')).not.toBeInTheDocument());
+    await expect(trigger).toHaveTextContent('Apple');
+  },
+};

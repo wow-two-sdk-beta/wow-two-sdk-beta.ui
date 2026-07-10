@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useToaster, Toaster } from './Toaster';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { toaster, useToaster, Toaster } from './Toaster';
 
 const meta: Meta = {
   title: 'Feedback/Toaster',
@@ -78,5 +79,164 @@ export const Sticky: Story = {
         <Toaster />
       </div>
     );
+  },
+};
+
+/* ------------------------------------------------------------------------- *
+ * Interaction tests (play) — drive the imperative `toaster` store directly
+ * (it's the public API; the singleton is shared with the story's render).
+ * Every play starts with `dismissAll()` because the module store persists
+ * across stories in this file. The viewport portals to document.body; the
+ * hidden Announce region also carries role="status", so toast queries scope
+ * to the viewport (`aria-label="Notifications"`). Auto-dismiss uses SHORT
+ * real durations (no fake timers in stories — docs/testing.md).
+ *
+ * KNOWN BUG (sources untouched; assertions omitted): a dismissed toast leaves
+ * `visible` one render before the `exiting` state syncs (effect lag), so its
+ * Presence unmounts instantly — the exit slide never plays — and the ghost
+ * entry remounted with `isPresent=false` renders null forever, never fires
+ * `onRemoved`, and leaks in `exiting`. Consequence: after the first dismissal
+ * the empty viewport div never unmounts back to the Announce-only state, so
+ * "viewport unmounts when drained" is NOT asserted here.
+ * ------------------------------------------------------------------------- */
+
+const toastViewport = (doc: Document) => {
+  const el = doc.querySelector<HTMLElement>('div[aria-label="Notifications"]');
+  if (!el) throw new Error('Toaster viewport not mounted');
+  return el;
+};
+
+export const PushesToastImperatively: Story = {
+  render: () => <Toaster defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+
+    toaster.toast({ title: 'Saved', description: 'Your changes are live.' });
+
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    const card = await viewport.findByRole('status');
+    // Slide-in starts off-canvas — poll past the enter animation.
+    await waitFor(() => expect(card).toBeVisible());
+    await expect(card).toHaveAttribute('aria-live', 'polite');
+    await expect(card).toHaveTextContent('Saved');
+    await expect(card).toHaveTextContent('Your changes are live.');
+
+    // dismissAll drains the queue (the empty viewport div itself lingers — see
+    // the exiting-ghost bug in the header comment).
+    toaster.dismissAll();
+    await waitFor(() => expect(viewport.queryByText('Saved')).not.toBeInTheDocument());
+  },
+};
+
+export const AutoDismissesAfterDuration: Story = {
+  render: () => <Toaster defaultDuration={600} canPauseOnHover={false} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+
+    toaster.toast({ title: 'Ephemeral' });
+    toaster.toast({ title: 'Pinned', duration: Infinity });
+
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    await viewport.findByText('Ephemeral');
+    await viewport.findByText('Pinned');
+
+    // The default duration dismisses the first; the per-toast Infinity overrides it.
+    await waitFor(
+      () => expect(viewport.queryByText('Ephemeral')).not.toBeInTheDocument(),
+      { timeout: 1500 },
+    );
+    await expect(viewport.getByText('Pinned')).toBeInTheDocument();
+
+    toaster.dismissAll();
+    await waitFor(() => expect(viewport.queryByText('Pinned')).not.toBeInTheDocument());
+  },
+};
+
+export const CapsVisibleToastsAtMax: Story = {
+  render: () => <Toaster max={3} defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+
+    const first = toaster.toast({ title: 'Toast 1' });
+    toaster.toast({ title: 'Toast 2' });
+    toaster.toast({ title: 'Toast 3' });
+    toaster.toast({ title: 'Toast 4' });
+
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+
+    // FIFO window: the first three render, the overflow waits in the queue.
+    await viewport.findByText('Toast 3');
+    await expect(viewport.getByText('Toast 1')).toBeInTheDocument();
+    await expect(viewport.getByText('Toast 2')).toBeInTheDocument();
+    await expect(viewport.queryByText('Toast 4')).not.toBeInTheDocument();
+    await expect(viewport.getAllByRole('status')).toHaveLength(3);
+
+    // Dismissing a visible toast promotes the queued one.
+    toaster.dismiss(first);
+    await viewport.findByText('Toast 4');
+    await waitFor(() => expect(viewport.queryByText('Toast 1')).not.toBeInTheDocument());
+    await waitFor(() => expect(viewport.getAllByRole('status')).toHaveLength(3));
+
+    toaster.dismissAll();
+    await waitFor(() => expect(viewport.queryByRole('status')).not.toBeInTheDocument());
+  },
+};
+
+export const DismissButtonRemovesToast: Story = {
+  render: () => <Toaster defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+
+    toaster.toast({ title: 'Sticky note' });
+
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    const card = await viewport.findByRole('status');
+    await waitFor(() => expect(card).toBeVisible());
+
+    await userEvent.click(within(card).getByRole('button', { name: 'Dismiss' }));
+
+    await waitFor(() => expect(viewport.queryByText('Sticky note')).not.toBeInTheDocument());
+  },
+};
+
+export const ActionButtonFiresCallback: Story = {
+  render: () => <Toaster defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+    const onAction = fn();
+
+    const id = toaster.toast({
+      title: 'File archived',
+      action: (
+        <button
+          type="button"
+          onClick={onAction}
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          Undo
+        </button>
+      ),
+    });
+
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    await viewport.findByText('File archived');
+
+    await userEvent.click(viewport.getByRole('button', { name: 'Undo' }));
+    await expect(onAction).toHaveBeenCalledTimes(1);
+
+    // Actions don't auto-dismiss — the consumer closes via the returned id.
+    await expect(viewport.getByText('File archived')).toBeInTheDocument();
+    toaster.dismiss(id);
+    await waitFor(() => expect(viewport.queryByText('File archived')).not.toBeInTheDocument());
   },
 };

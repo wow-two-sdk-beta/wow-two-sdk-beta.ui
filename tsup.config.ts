@@ -12,6 +12,7 @@ const subpathLayer: Record<string, 'foundation' | 'domain' | 'presentation'> = {
   themes: 'foundation',
   http: 'foundation',
   storage: 'foundation',
+  resilience: 'foundation',
   color: 'domain',
   emoji: 'domain',
   actions: 'presentation',
@@ -29,6 +30,11 @@ export default defineConfig({
     // `router` is a standalone top-level subpath (`@wow-two-beta/ui/router`), not layer-prefixed like
     // the component groups below — this keeps its react-router-dom peer dep out of every other entry.
     'router/index': 'src/router/index.ts',
+    // `query` mirrors `router` — a standalone top-level subpath (`@wow-two-beta/ui/query`) whose
+    // optional `@tanstack/react-query` peer stays out of every other entry. `query/testing` is a
+    // second entry for the test-only helpers (`@wow-two-beta/ui/query/testing`).
+    'query/index': 'src/query/index.ts',
+    'query/testing': 'src/query/testing.ts',
     // Entry KEY = dist path (`dist/<layer>/<group>/index.js`) — mirrors the
     // layered source folder so the emitted subpath matches the public export.
     ...Object.fromEntries(
@@ -44,5 +50,17 @@ export default defineConfig({
   clean: true,
   sourcemap: true,
   treeshake: true,
-  external: ['react', 'react-dom', 'react-router-dom'],
+  external: [
+    'react',
+    'react-dom',
+    'react-router-dom',
+    // Query subpath peers — kept external so `@wow-two-beta/ui/query` carries no bundled RQ and the
+    // root/other entries stay RQ-free. `@testing-library/react` (a devDep) is external only so the
+    // `query/testing` entry references it rather than inlining it.
+    '@tanstack/react-query',
+    '@tanstack/react-query-persist-client',
+    '@tanstack/query-sync-storage-persister',
+    '@tanstack/react-query-devtools',
+    '@testing-library/react',
+  ],
 });

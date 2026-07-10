@@ -99,6 +99,19 @@ Each iteration = a shippable chunk. Fold precedes harness so no test file moves 
 | **7** | T3 display + primitives | `play()`: `tabs` `accordion` `collapsible` `tree` `carousel` `sortable` `swipeActions` · targeted `.test.tsx`: `focusScope` `dismissableLayer` `rovingFocusGroup` `presence` | **done** (2026-07-06) — 24 display interaction stories + 33 primitive browser tests. Deferred: `dataTable`/`dataGrid` (deep organisms — own pass later); `sortable` pointer-drag not synthesizable (native HTML5 DnD) — keyboard path covered |
 | **8** | Docs + CI | update `CLAUDE.md` (drop "No tests", fix SB8→10, add commands) · add Actions job (`unit` always, `browser` on Playwright runner) | **done** (2026-07-06) — `CLAUDE.md` updated; `.github/workflows/test.yml` runs the full suite on main push as a non-blocking signal (separate from `release.yml`; retry-once for the cold-cache race) |
 
+| **9** | T3 actions + feedback + layout | `play()`: actions (`button` `toggleButton(Group)` `segmentedControl` `speedDial` `fab` `copyButton` `disclosureButton` `backToTopButton` `optionTile(Group)` `toolbar`) · feedback (`toaster` `undoBar` `tour` `notificationCenter` `onboardingChecklist` `banner` `alert` `progressSteps` `meterBar`) · layout interactive (`resizablePanels` `scrollArea` `pullToRefresh` `appShell` `overlay` `controlGroup`; `navbar` = pure slots, smoke-only) | **done** (2026-07-10) — 78 interaction stories; suite 1278 green. Every presentation group now has interaction coverage |
+
+### It9 findings (2026-07-10)
+
+- **`Toaster` exit-ghost leak (real bug, chip filed):** dismissed toast's `Presence` unmounts instantly (visible→exiting effect lag) — exit animation never plays, ghost leaks in `exiting` forever, viewport div never returns to empty state.
+- **`UndoBar` pause leak (same chip):** hover→dismiss strands `paused=true`; reopened bar never auto-expires.
+- Toaster queue model pinned: strict FIFO `slice(0,max)` window, queued toasts don't age, per-toast `duration` override, `Infinity` sticky, NO replace-by-id — empirically settles `targets.md` §10 decision 8.
+- `MeterBar` emits unclamped `aria-valuenow` (value>max = invalid ARIA) · `ControlGroup` label↔control binding is visual-only · `AppShell` link-only drawer autofocus parks on the scope wrapper (Radix `removeLinks`) — design-pass items.
+- Harness fact: vitest browser viewport = **414×896** → viewport-dependent components (AppShell) always render collapsed; stories pin breakpoints + matchMedia guards.
+- Clipboard headless: `navigator.clipboard.writeText` rejects — stub per-story with restore-in-`finally`.
+
+New layers since the original plan — `src/router` (20 src / 13 tests) · `src/query` (17/13) · `foundation/{storage,resilience}` · arrived WITH tests from a parallel lane (vitest globs extended accordingly); baseline before It9: 280 files / 1199 tests green.
+
 Scripts (added It2): `test` `test:watch` `test:ui` `test:unit` `test:browser` `coverage`.
 
 ## First-pass findings (2026-07-06 — harness + exemplar wave)

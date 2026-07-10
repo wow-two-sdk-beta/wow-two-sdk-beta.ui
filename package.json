@@ -72,6 +72,11 @@
       "import": "./dist/foundation/storage/index.js",
       "default": "./dist/foundation/storage/index.js"
     },
+    "./foundation/resilience": {
+      "types": "./dist/foundation/resilience/index.d.ts",
+      "import": "./dist/foundation/resilience/index.js",
+      "default": "./dist/foundation/resilience/index.js"
+    },
     "./domain/color": {
       "types": "./dist/domain/color/index.d.ts",
       "import": "./dist/domain/color/index.js",
@@ -122,6 +127,16 @@
       "import": "./dist/router/index.js",
       "default": "./dist/router/index.js"
     },
+    "./query": {
+      "types": "./dist/query/index.d.ts",
+      "import": "./dist/query/index.js",
+      "default": "./dist/query/index.js"
+    },
+    "./query/testing": {
+      "types": "./dist/query/testing.d.ts",
+      "import": "./dist/query/testing.js",
+      "default": "./dist/query/testing.js"
+    },
     "./styles.css": "./dist/index.css",
     "./themes.css": "./dist/themes.css",
     "./themes.json": "./dist/themes.json",
@@ -147,10 +162,26 @@
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.18.1"
+    "react-router-dom": "^7.18.1",
+    "@tanstack/react-query": "^5.101.2",
+    "@tanstack/react-query-persist-client": "^5.101.2",
+    "@tanstack/query-sync-storage-persister": "^5.101.2",
+    "@tanstack/react-query-devtools": "^5.101.2"
   },
   "peerDependenciesMeta": {
     "react-router-dom": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "@tanstack/react-query-persist-client": {
+      "optional": true
+    },
+    "@tanstack/query-sync-storage-persister": {
+      "optional": true
+    },
+    "@tanstack/react-query-devtools": {
       "optional": true
     }
   },
@@ -172,6 +203,10 @@
     "@storybook/react": "^10.3.6",
     "@storybook/react-vite": "^10.3.6",
     "@tailwindcss/vite": "^4.1.0",
+    "@tanstack/query-sync-storage-persister": "^5.101.2",
+    "@tanstack/react-query": "^5.101.2",
+    "@tanstack/react-query-devtools": "^5.101.2",
+    "@tanstack/react-query-persist-client": "^5.101.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

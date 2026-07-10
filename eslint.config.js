@@ -44,6 +44,9 @@ export default tseslint.config(
         // Router = standalone top-level subpath layer above presentation; composes
         // presentation (AppNavLink → NavItem) + foundation, never imported by them.
         { type: 'router', pattern: 'src/router/**' },
+        // Query = standalone top-level subpath data layer; composes foundation (ApiError coercion)
+        // + router (QueryProgressBridge → useNavigationProgress), never imported by them.
+        { type: 'query', pattern: 'src/query/**' },
         { type: 'root', pattern: 'src/index.ts' },
       ],
     },
@@ -63,6 +66,7 @@ export default tseslint.config(
             // The lint rule is permissive.
             { from: ['presentation'], allow: ['foundation', 'domain', 'presentation'] },
             { from: ['router'], allow: ['foundation', 'domain', 'presentation', 'router'] },
+            { from: ['query'], allow: ['foundation', 'router', 'query'] },
             { from: ['root'], allow: ['foundation', 'domain', 'presentation'] },
           ],
         },

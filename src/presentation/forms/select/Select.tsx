@@ -146,6 +146,14 @@ export interface SelectProps<K, V = K> {
    *  (the trigger otherwise shows the raw serialized key until the first open). */
   getOptionLabel?: (key: K) => ReactNode;
 
+  /** The option set seeded eagerly into the item registry + label cache on mount — before the
+   *  popover ever opens. Lets `Select.Value` resolve the selected label and closed-trigger
+   *  typeahead work without a first open, so `getOptionLabel` is unnecessary. Compound
+   *  `<Select.Item>` children still render the list and remain fully supported; `options` is an
+   *  alternative/supplement. When both supply the same key, the mounted child wins (deduped via
+   *  `keyEquals`). Each entry mirrors what a `SelectItem` registers. */
+  options?: ReadonlyArray<SelectOption<K, V>>;
+
   /** The invalid state, styling the trigger as invalid (red border, error ring). */
   isInvalid?: boolean;
 
@@ -176,6 +184,7 @@ function SelectImpl<K, V = K>({
   name,
   serializeKey,
   getOptionLabel,
+  options,
   isInvalid,
   defaultOpen = false,
   open: openProp,
@@ -285,6 +294,48 @@ function SelectImpl<K, V = K>({
     [serializeKeyFn],
   );
 
+  /* Maps the eager `options` prop to registry entries, mirroring what a `SelectItem` registers.
+     Seeding these lets `SelectValue` + closed-trigger typeahead resolve before the popover's
+     first open, so `getOptionLabel` is unnecessary when `options` is supplied. */
+  const seedItems = useMemo<Array<ItemRegistryEntry<unknown, unknown>>>(() => {
+    if (!options) return [];
+    return options.map((o) => ({
+      itemKey: o.itemKey,
+      value: (o.value ?? o.itemKey) as unknown,
+      label: o.label,
+      text: extractText(o.label),
+      isDisabled: o.isDisabled ?? false,
+    }));
+  }, [options]);
+
+  /* Merges seeded options with the live (compound-child) registrations, deduped by `keyEquals`.
+     A mounted `<Select.Item>` wins on key collision — its value/label/text supersede the seed —
+     while compound-only items append. Seed order is preserved so closed-trigger typeahead follows
+     `options`. When no options are given this is exactly the live `items` set (no behavior change). */
+  const mergedItems = useMemo<Array<ItemRegistryEntry<unknown, unknown>>>(() => {
+    if (seedItems.length === 0) return items;
+    if (items.length === 0) return seedItems;
+    const merged = seedItems.map(
+      (s) => items.find((i) => keyEqualsFn(i.itemKey, s.itemKey)) ?? s,
+    );
+    const extras = items.filter(
+      (i) => !seedItems.some((s) => keyEqualsFn(s.itemKey, i.itemKey)),
+    );
+    return extras.length > 0 ? [...merged, ...extras] : merged;
+  }, [seedItems, items, keyEqualsFn]);
+
+  /* Seeds the persistent label cache from `options` so a controlled `value` resolves its label
+     before any item mounts. Only fills gaps — a mounted `SelectItem` (via registerItem) writes the
+     cache unconditionally and therefore always wins. */
+  useEffect(() => {
+    if (seedItems.length === 0) return;
+    const cache = labelCacheRef.current;
+    for (const seed of seedItems) {
+      const serialized = serializeKeyFn(seed.itemKey);
+      if (!cache.has(serialized)) cache.set(serialized, seed.label);
+    }
+  }, [seedItems, serializeKeyFn]);
+
   const emitChange = useCallback(
     (next: SelectOption<K, V> | null) => {
       onValueChangeRef.current?.(next);
@@ -331,7 +382,7 @@ function SelectImpl<K, V = K>({
       onSelect,
       onClear,
       keyEquals: keyEqualsFn,
-      items,
+      items: mergedItems,
       registerItem,
       unregisterItem,
       getCachedLabel,
@@ -363,7 +414,7 @@ function SelectImpl<K, V = K>({
       onSelect,
       onClear,
       keyEqualsFn,
-      items,
+      mergedItems,
       registerItem,
       unregisterItem,
       getCachedLabel,

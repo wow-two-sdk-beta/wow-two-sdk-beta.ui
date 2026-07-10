@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button } from './Button';
 
 /* Button — controls-driven playground (every prop wired). */
@@ -53,3 +54,78 @@ export default meta;
 type Story = StoryObj<typeof Button>;
 
 export const Default: Story = {};
+
+/* ------------------------------------------------------------------------- *
+ * Interaction tests (play) — oracle: Button.tsx behavior surface.
+ * `asChild` substitution is covered by Recipes → AsChildLink.
+ * ------------------------------------------------------------------------- */
+
+/** Click fires `onClick`; the default `type` is `button` (not browser-default `submit`). */
+export const ClickFiresOnClick: Story = {
+  args: { children: 'Save', onClick: fn() },
+  play: async ({ canvasElement, args }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Save' });
+    await expect(button).toHaveAttribute('type', 'button');
+
+    await userEvent.click(button);
+    await expect(args.onClick).toHaveBeenCalledTimes(1);
+  },
+};
+
+/** Enter/Space activate via native button semantics — `onClick` fires from the keyboard. */
+export const KeyboardActivates: Story = {
+  args: { children: 'Confirm', onClick: fn() },
+  play: async ({ canvasElement, args }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Confirm' });
+    button.focus();
+    await expect(button).toHaveFocus();
+
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onClick).toHaveBeenCalledTimes(1);
+  },
+};
+
+/** `isLoading` swaps children for spinner + `loadingText`, sets `aria-busy`, and swallows clicks (without native `disabled`). */
+export const LoadingBlocksActivation: Story = {
+  args: { children: 'Save changes', isLoading: true, loadingText: 'Saving…', onClick: fn() },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button');
+
+    /* Busy semantics — perceivable + focusable, but announced busy (not native-disabled). */
+    await expect(button).toHaveAttribute('aria-busy', 'true');
+    await expect(button).toHaveAttribute('aria-disabled', 'true');
+    await expect(button).not.toBeDisabled();
+    await expect(button).toHaveAttribute('data-state', 'loading');
+
+    /* `loadingText` replaces the children; the built-in spinner (aria-hidden svg) leads. */
+    await expect(button).toHaveTextContent('Saving…');
+    await expect(canvas.queryByText('Save changes')).toBe(null);
+    await expect(button.querySelector('svg.animate-spin')).not.toBe(null);
+
+    /* Activation is swallowed while loading. */
+    await userEvent.click(button);
+    await expect(args.onClick).not.toHaveBeenCalled();
+  },
+};
+
+/** Loading without `loadingText` keeps the children as sr-only so the accessible name survives. */
+export const LoadingKeepsAccessibleName: Story = {
+  args: { children: 'Upload', isLoading: true },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Upload' });
+    await expect(button).toHaveAttribute('aria-busy', 'true');
+    /* The visible label is gone — only the spinner shows; the name lives in sr-only text. */
+    await expect(button.querySelector('.sr-only')).toHaveTextContent('Upload');
+  },
+};
+
+/** `isDisabled` forwards to native `disabled` — removed from focus order, refuses clicks. */
+export const DisabledIsInert: Story = {
+  args: { children: 'Delete', isDisabled: true, onClick: fn() },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Delete' });
+    await expect(button).toBeDisabled();
+    await expect(button).toHaveAttribute('data-state', 'disabled');
+  },
+};

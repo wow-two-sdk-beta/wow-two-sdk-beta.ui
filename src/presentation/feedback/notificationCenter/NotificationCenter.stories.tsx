@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { GitPullRequest, MessageSquare, ShieldAlert } from 'lucide-react';
 import { NotificationCenter } from './NotificationCenter';
 import { Avatar } from '../../display/avatar/Avatar';
@@ -99,4 +101,111 @@ export const SingleUnread: Story = {
       />
     </NotificationCenter>
   ),
+};
+
+/* ------------------------------------------------------------------------- *
+ * Interaction tests (play) — the component is presentational (items are
+ * children, count is a prop), so state flows are wired through a demo the
+ * way an app would: dismiss removes the item and recomputes the unread badge.
+ * No built-in clear-all / mark-all — `headerActions` is a free slot.
+ * ------------------------------------------------------------------------- */
+
+type PlayArgs = {
+  onSelect: ReturnType<typeof fn>;
+  onDismiss: ReturnType<typeof fn>;
+};
+type PlayStory = StoryObj<PlayArgs>;
+
+export const SelectsItemByClickAndKeyboard: PlayStory = {
+  args: { onSelect: fn(), onDismiss: fn() },
+  render: (args) => (
+    <NotificationCenter count={1}>
+      <NotificationCenter.Item
+        isUnread
+        title="Alex commented on your PR"
+        description="Left two notes inline."
+        timestamp="2m ago"
+        onSelect={args.onSelect}
+      />
+    </NotificationCenter>
+  ),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Panel semantics: a labelled region.
+    await expect(canvas.getByRole('region', { name: 'Notifications' })).toBeInTheDocument();
+
+    // Interactive rows become buttons; unread rows carry the data flag.
+    const item = canvas.getByRole('button', { name: /Alex commented on your PR/ });
+    await expect(item).toHaveAttribute('data-unread');
+
+    await userEvent.click(item);
+    await expect(args.onSelect).toHaveBeenCalledTimes(1);
+
+    // Keyboard activation: Enter and Space on the focused row.
+    item.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onSelect).toHaveBeenCalledTimes(2);
+    await userEvent.keyboard(' ');
+    await expect(args.onSelect).toHaveBeenCalledTimes(3);
+  },
+};
+
+export const DismissRemovesItemsAndUpdatesUnreadCount: PlayStory = {
+  args: { onSelect: fn(), onDismiss: fn() },
+  render: (args) => {
+    function Demo() {
+      const [items, setItems] = useState([
+        { id: 'a', title: 'Build failed on main', isUnread: true },
+        { id: 'b', title: 'PR #842 was merged', isUnread: true },
+        { id: 'c', title: 'Jordan mentioned you', isUnread: false },
+      ]);
+      const unread = items.filter((i) => i.isUnread).length;
+      const dismiss = (id: string) => {
+        args.onDismiss(id);
+        setItems((cur) => cur.filter((i) => i.id !== id));
+      };
+      return (
+        <NotificationCenter count={unread > 0 ? unread : undefined}>
+          {items.map((i) => (
+            <NotificationCenter.Item
+              key={i.id}
+              title={i.title}
+              isUnread={i.isUnread}
+              onSelect={args.onSelect}
+              onDismiss={() => dismiss(i.id)}
+            />
+          ))}
+        </NotificationCenter>
+      );
+    }
+    return <Demo />;
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    const region = canvas.getByRole('region', { name: 'Notifications' });
+
+    await expect(within(region).getByText('2')).toBeInTheDocument();
+
+    const dismissItem = async (name: RegExp) => {
+      const item = canvas.getByRole('button', { name });
+      // The dismiss affordance reveals on hover.
+      await userEvent.hover(item);
+      await userEvent.click(within(item).getByRole('button', { name: 'Dismiss notification' }));
+    };
+
+    await dismissItem(/Build failed on main/);
+    await expect(args.onDismiss).toHaveBeenCalledWith('a');
+    await expect(canvas.queryByText('Build failed on main')).not.toBeInTheDocument();
+    await expect(within(region).getByText('1')).toBeInTheDocument();
+
+    // Dismissing the last unread item drops the badge entirely.
+    await dismissItem(/PR #842 was merged/);
+    await expect(within(region).queryByText('1')).not.toBeInTheDocument();
+
+    // Dismissing the final item lands on the built-in empty state.
+    await dismissItem(/Jordan mentioned you/);
+    await expect(args.onDismiss).toHaveBeenCalledTimes(3);
+    await expect(within(region).getByText("You're all caught up.")).toBeInTheDocument();
+  },
 };
