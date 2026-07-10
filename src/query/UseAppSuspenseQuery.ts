@@ -1,7 +1,9 @@
 import { useSuspenseQuery, type QueryKey } from '@tanstack/react-query';
 
-/** Defines a suspenseful query — a key, a fetcher, and an optional raw→view mapper. */
-export interface AppSuspenseQueryOptions<TData, TRaw = TData> {
+import type { AppQueryMeta } from './CreateQueryClient';
+
+/** Defines a suspenseful query — a key, a fetcher, and an optional raw→view mapper. `TRaw` first so it infers from `queryFn` (a spread def); `TData` defaults to it when `map` is absent. */
+export interface AppSuspenseQueryOptions<TRaw, TData = TRaw> {
   /** The query key that identifies and caches this query. */
   readonly key: QueryKey;
 
@@ -10,6 +12,9 @@ export interface AppSuspenseQueryOptions<TData, TRaw = TData> {
 
   /** Maps the raw fetched shape to the view shape; identity when omitted. */
   readonly map?: (raw: TRaw) => TData;
+
+  /** Metadata surfaced to the global `onError` seam — `suppressGlobalError: true` keeps this query's failures out of it (boundary-handled errors would otherwise double-surface). */
+  readonly meta?: AppQueryMeta;
 }
 
 /**
@@ -17,15 +22,17 @@ export interface AppSuspenseQueryOptions<TData, TRaw = TData> {
  * The caller must wrap it in a `<Suspense>` boundary (loading) and an error boundary (failure);
  * errors bubble straight past this hook. Pairs with the router's lazy routes.
  */
-export function useAppSuspenseQuery<TData, TRaw = TData>({
+export function useAppSuspenseQuery<TRaw, TData = TRaw>({
   key,
   queryFn,
   map,
-}: AppSuspenseQueryOptions<TData, TRaw>) {
+  meta,
+}: AppSuspenseQueryOptions<TRaw, TData>) {
   const { data, refetch } = useSuspenseQuery<TRaw, Error, TData, QueryKey>({
     queryKey: key,
     queryFn,
     select: map,
+    meta,
   });
 
   return { data, refetch };

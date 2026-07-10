@@ -2,6 +2,7 @@ import { useMutation, useQueryClient, type QueryClient, type QueryKey } from '@t
 
 import type { ApiError } from '../foundation/http';
 
+import type { AppQueryMeta } from './CreateQueryClient';
 import { toApiError } from './ToApiError';
 
 /** Defines options for `useAppMutation`. */
@@ -14,6 +15,9 @@ export interface UseAppMutationOptions<TData, TVars> {
 
   /** Reconciles the cache from the server's confirmed result (e.g. `setQueryData`) after invalidation. */
   readonly onConfirmed?: (data: TData, vars: TVars, queryClient: QueryClient) => void;
+
+  /** Metadata surfaced to the global `onError` seam — `suppressGlobalError: true` keeps this mutation's failures out of it. */
+  readonly meta?: AppQueryMeta;
 }
 
 /** Manages a passive mutation — reconciles the cache only from the backend-confirmed result; no optimistic update, no rollback. */
@@ -21,11 +25,13 @@ export function useAppMutation<TData, TVars>({
   mutationFn,
   invalidates,
   onConfirmed,
+  meta,
 }: UseAppMutationOptions<TData, TVars>) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<TData, Error, TVars>({
     mutationFn,
+    meta,
     onSuccess: async (data, vars) => {
       const keys = invalidates?.(vars, data) ?? [];
       await Promise.all(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));

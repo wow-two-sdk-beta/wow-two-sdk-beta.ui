@@ -2,7 +2,8 @@ import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
-import { useNavigationProgress, type NavigationProgressState } from '../router';
+// Deep path — must match the component's rrd-free deep import so the mock intercepts it.
+import { useNavigationProgress, type NavigationProgressState } from '../router/UseNavigationProgress';
 
 import { QueryProgressBridge } from './QueryProgressBridge';
 
@@ -11,7 +12,7 @@ vi.mock('@tanstack/react-query', () => ({
   useIsMutating: vi.fn(() => 0),
 }));
 
-vi.mock('../router', () => ({
+vi.mock('../router/UseNavigationProgress', () => ({
   useNavigationProgress: vi.fn(),
 }));
 

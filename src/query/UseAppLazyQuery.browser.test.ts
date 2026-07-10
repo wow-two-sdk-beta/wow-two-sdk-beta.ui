@@ -22,7 +22,7 @@ describe('useAppLazyQuery', () => {
     const d = deferred<{ n: number }>();
     const queryFn = vi.fn(() => d.promise);
     const { result } = renderHook(
-      () => useAppLazyQuery<number, { n: number }>({ key: ['lazy', 'ok'], queryFn, map: (raw) => raw.n * 10 }),
+      () => useAppLazyQuery<{ n: number }, number>({ key: ['lazy', 'ok'], queryFn, map: (raw) => raw.n * 10 }),
       { wrapper: createQueryWrapper() },
     );
 
@@ -99,6 +99,70 @@ describe('useAppLazyQuery', () => {
 
     await waitFor(() => expect(result.current.error).toBeInstanceOf(ApiError));
     expect(result.current.error?.status).toBe(0);
+  });
+
+  it('discards a late settle after reset — the orphaned fetch cannot resurrect state', async () => {
+    const d = deferred<{ id: string }>();
+    const { result } = renderHook(
+      () => useAppLazyQuery<{ id: string }>({ key: ['lazy', 'reset-race'], queryFn: () => d.promise }),
+      { wrapper: createQueryWrapper() },
+    );
+
+    let pending!: Promise<{ id: string }>;
+    act(() => {
+      pending = result.current.fetch();
+    });
+    await waitFor(() => expect(result.current.loading).toBe(true));
+
+    act(() => {
+      result.current.reset();
+    });
+    expect(result.current.loading).toBe(false);
+
+    // The in-flight fetch settles late — its promise resolves for the caller, but state stays idle.
+    let resolved: { id: string } | undefined;
+    await act(async () => {
+      d.resolve({ id: 'late' });
+      resolved = await pending;
+    });
+
+    expect(resolved).toEqual({ id: 'late' });
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('latest call wins — a slower earlier fetch (old key) cannot clobber newer data with a stale error', async () => {
+    const slow = deferred<{ id: string }>();
+    const { result, rerender } = renderHook(
+      ({ which }: { which: 'a' | 'b' }) =>
+        useAppLazyQuery<{ id: string }>({
+          key: ['lazy', 'race', which],
+          queryFn: which === 'a' ? () => slow.promise : async () => ({ id: 'b' }),
+        }),
+      { wrapper: createQueryWrapper(), initialProps: { which: 'a' as 'a' | 'b' } },
+    );
+
+    // First fetch on key A stays pending; the hook then re-points at key B and fetches again.
+    let first!: Promise<{ id: string }>;
+    act(() => {
+      first = result.current.fetch();
+    });
+    rerender({ which: 'b' });
+    await act(async () => {
+      await result.current.fetch();
+    });
+    await waitFor(() => expect(result.current.data).toEqual({ id: 'b' }));
+
+    // The stale key-A fetch fails late — its rejection reaches ITS caller, not the hook state.
+    await act(async () => {
+      slow.reject(new ApiError(500, null, 'stale failure'));
+      await expect(first).rejects.toBeInstanceOf(ApiError);
+    });
+
+    expect(result.current.data).toEqual({ id: 'b' });
+    expect(result.current.error).toBeNull();
+    expect(result.current.loading).toBe(false);
   });
 
   it('reset clears data, error and loading', async () => {

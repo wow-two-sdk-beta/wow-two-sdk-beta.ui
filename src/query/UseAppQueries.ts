@@ -5,8 +5,8 @@ import type { ApiError } from '../foundation/http';
 
 import { toApiError } from './ToApiError';
 
-/** Defines one entry in a parallel `useAppQueries` batch. */
-export interface AppQueriesEntry<TData, TRaw = TData> {
+/** Defines one entry in a parallel `useAppQueries` batch — `TRaw` first so it infers from `queryFn` (a spread def) and `TData` defaults to it when `map` is absent. */
+export interface AppQueriesEntry<TRaw, TData = TRaw> {
   /** The React Query cache key (from `queryKeys`). */
   readonly key: QueryKey;
 
@@ -30,19 +30,19 @@ export interface AppQueryResult<TData> {
 }
 
 /** Defines options for `useAppQueries`. */
-export interface UseAppQueriesOptions<TData, TRaw = TData> {
+export interface UseAppQueriesOptions<TRaw, TData = TRaw> {
   /** The queries to run in parallel — the count may vary between renders. */
-  readonly queries: readonly AppQueriesEntry<TData, TRaw>[];
+  readonly queries: readonly AppQueriesEntry<TRaw, TData>[];
 
   /** Gates the whole batch — skips fetching every entry while `false`. */
   readonly enabled?: boolean;
 }
 
 /** Manages a dynamic batch of parallel queries — wraps RQ `useQueries`, maps each raw→domain, and aggregates loading/errors. */
-export function useAppQueries<TData, TRaw = TData>({
+export function useAppQueries<TRaw, TData = TRaw>({
   queries,
   enabled,
-}: UseAppQueriesOptions<TData, TRaw>) {
+}: UseAppQueriesOptions<TRaw, TData>) {
   const results = useQueries({
     queries: queries.map((entry) => ({
       queryKey: entry.key,

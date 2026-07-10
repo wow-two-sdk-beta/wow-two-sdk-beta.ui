@@ -3,6 +3,7 @@ import { useInfiniteQuery, type InfiniteData, type QueryKey } from '@tanstack/re
 
 import type { ApiError } from '../foundation/http';
 
+import type { AppQueryMeta } from './CreateQueryClient';
 import { toApiError } from './ToApiError';
 
 /** Defines options for `useAppInfiniteQuery`. */
@@ -27,6 +28,9 @@ export interface UseAppInfiniteQueryOptions<TItem, TPage> {
 
   /** Gates the query — skips fetching while `false`. */
   readonly enabled?: boolean;
+
+  /** Metadata surfaced to the global `onError` seam — `suppressGlobalError: true` keeps this query's failures out of it (e.g. polls that would otherwise toast per failed refetch). */
+  readonly meta?: AppQueryMeta;
 }
 
 /** Manages a paginated resource — wraps RQ `useInfiniteQuery`, flattens pages to items, and supports poll-while-running. */
@@ -38,6 +42,7 @@ export function useAppInfiniteQuery<TItem, TPage>({
   mapPage,
   refetchInterval,
   enabled,
+  meta,
 }: UseAppInfiniteQueryOptions<TItem, TPage>) {
   const extract = useCallback(
     (page: TPage): readonly TItem[] => (mapPage ? mapPage(page) : (page as unknown as readonly TItem[])),
@@ -50,6 +55,7 @@ export function useAppInfiniteQuery<TItem, TPage>({
     getNextPageParam,
     initialPageParam,
     enabled,
+    meta,
     refetchInterval:
       refetchInterval === undefined
         ? undefined

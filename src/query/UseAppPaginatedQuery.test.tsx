@@ -79,6 +79,29 @@ describe('useAppPaginatedQuery', () => {
     expect(result.current.isPlaceholder).toBe(false);
   });
 
+  it('exposes the raw page alongside items — totals stay reachable', async () => {
+    interface CountedPage {
+      readonly rows: string[];
+      readonly total: number;
+    }
+    const { result } = renderHook(
+      () =>
+        useAppPaginatedQuery<string, CountedPage>({
+          key: ['paged', 'raw'],
+          page: 0,
+          queryFn: async () => ({ rows: ['a'], total: 42 }),
+          mapPage: (page) => page.rows,
+        }),
+      { wrapper: createQueryWrapper() },
+    );
+
+    expect(result.current.page).toBeUndefined(); // nothing fetched yet
+
+    await waitFor(() => expect(result.current.items).toEqual(['a']));
+    expect(result.current.page?.total).toBe(42); // the raw page carries what `items` drops
+    expect(result.current.page?.rows).toEqual(['a']);
+  });
+
   it('coerces a page failure to ApiError', async () => {
     const { result } = renderHook(
       () =>

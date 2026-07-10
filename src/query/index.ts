@@ -15,7 +15,12 @@
 // runtime barrel).
 
 // Foundation
-export { createQueryClient, type CreateQueryClientOptions } from './CreateQueryClient';
+export {
+  createQueryClient,
+  type CreateQueryClientOptions,
+  type AppQueryMeta,
+  type QueryErrorContext,
+} from './CreateQueryClient';
 export { QueryProvider } from './QueryProvider';
 export { toApiError } from './ToApiError';
 export { defineEndpoint, type Endpoint, type EndpointFn } from './Endpoints';

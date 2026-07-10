@@ -22,7 +22,7 @@ describe('useAppQueries', () => {
     const gate = [deferred<{ id: number }>(), deferred<{ id: number }>(), deferred<{ id: number }>()];
     const { result } = renderHook(
       () =>
-        useAppQueries<string, { id: number }>({
+        useAppQueries<{ id: number }, string>({
           queries: gate.map((d, i) => ({
             key: ['batch', i],
             queryFn: () => d.promise,
@@ -60,7 +60,7 @@ describe('useAppQueries', () => {
   it('coerces a per-query rejection to ApiError while siblings still resolve', async () => {
     const { result } = renderHook(
       () =>
-        useAppQueries<string, { id: number }>({
+        useAppQueries<{ id: number }, string>({
           queries: [
             { key: ['batch', 'ok'], queryFn: async () => ({ id: 1 }), map: (raw) => `#${raw.id}` },
             {

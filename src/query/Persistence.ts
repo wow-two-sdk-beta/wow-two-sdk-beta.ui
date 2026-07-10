@@ -23,7 +23,22 @@ export interface QueryPersistenceHandle {
   readonly restored: Promise<void>;
 }
 
-/** Wires `localStorage` persistence for the query cache (opt-in — call from `main.tsx`); returns null when there is no `window` (SSR-safe). */
+/**
+ * Wires `localStorage` persistence for the query cache (opt-in — call from `main.tsx`); returns
+ * null when there is no `window` (SSR-safe).
+ *
+ * Caveats to weigh before opting in:
+ * - **Sensitive data** — every successful query dehydrates into `localStorage` in plain text,
+ *   including authenticated user data; any script on the origin can read it. Do not enable on
+ *   apps whose cache holds secrets/PII, or scope what queries cache to begin with.
+ * - **Version busting** — pass `buster` (e.g. the app version) whenever a release changes cached
+ *   shapes; a restored stale shape otherwise flows into typed hooks unchecked.
+ * - **Quota** — a full `localStorage` makes the persister silently stop writing that snapshot
+ *   (no retry strategy is wired); the app keeps working, persistence just lags.
+ * - **Temporal revive** — payloads parsed via `reviveTemporal` serialize to ISO strings and are
+ *   restored WITHOUT re-reviving: restored entries hold plain strings where live fetches hold
+ *   `Temporal.*` objects. Don't combine persistence with `reviveTemporal` yet.
+ */
 export function setupQueryPersistence(
   client: QueryClient,
   options: SetupQueryPersistenceOptions = {},

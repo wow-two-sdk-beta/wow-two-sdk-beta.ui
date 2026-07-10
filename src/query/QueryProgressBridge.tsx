@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 
-import { useNavigationProgress } from '../router';
+// Deep import (not the `../router` barrel): the barrel statically imports react-router-dom, and a
+// barrel import here would merge the whole router graph into the shared chunk `/query` loads —
+// breaking `/query`'s isolation from the OPTIONAL rrd peer. `UseNavigationProgress` is plain React.
+import { useNavigationProgress } from '../router/UseNavigationProgress';
 
 // Mount inside BOTH a `QueryProvider` (for the React Query hooks) and a `ProgressProvider`
 // (for `useNavigationProgress`, which THROWS when rendered outside one). Renders nothing — it

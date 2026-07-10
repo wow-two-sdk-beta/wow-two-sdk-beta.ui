@@ -36,7 +36,7 @@ export function resolveReturnTo(search: URLSearchParams | string, fallback = '/'
   const params = typeof search === 'string' ? new URLSearchParams(search) : search;
   const target = params.get('returnTo');
   if (target === null) return fallback;
-  return isSafeReturnTo(target) ? target : fallback;
+  return isSafeInternalPath(target) ? target : fallback;
 }
 
 /** Provides access to the safe post-login return path read from the current URL's `returnTo` param. */
@@ -51,8 +51,8 @@ function toPathAndSearch(fromUrl: string): string {
   return url.pathname + url.search;
 }
 
-/** @internal Reports whether a decoded `returnTo` is a same-origin relative path (open-redirect guard). */
-function isSafeReturnTo(target: string): boolean {
+/** @internal Reports whether a target is a same-origin root-relative path (open-redirect guard) — shared by `returnTo` resolution and route restore; not part of the public surface. */
+export function isSafeInternalPath(target: string): boolean {
   if (!target.startsWith('/')) return false; // must be root-relative (rejects http:, https:, bare paths)
   if (target.startsWith('//')) return false; // protocol-relative → external host
   if (target.includes('\\')) return false; // '\' → browsers may normalize to '/' (e.g. '/\evil' → '//evil')

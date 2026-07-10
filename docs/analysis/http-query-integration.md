@@ -83,6 +83,6 @@ D is rejected *as the integration pattern* but not forever — see phase 3. Full
 Usage is exactly the sketch above; two notes:
 
 - **Parameterized endpoints are factories** — `detail: (id: string) => defineEndpoint({ key: keys.detail(id), queryFn: … })`; `EndpointFn<[id: string], CodeDto>` names that shape when a registry wants the explicit annotation.
-- **Identity reads state `TData`.** `useAppQuery({ ...def })` with no `map` infers `data: unknown` — `TData` only infers from `map` and the hooks were deliberately untouched. Write `useAppQuery<CodeDto[]>({ ...def })` or pass a `map`; prefetch/cache surfaces take defs whole, no generics needed.
+- **Identity reads infer (since 2026-07-11).** Hooks are `<TRaw, TData = TRaw>` — `useAppQuery({ ...def })` with no `map` infers `data` from the def's `TRaw`; `map` still narrows `TData`; single-generic annotations keep the identity meaning. Prefetch/cache surfaces take defs whole, no generics needed.
 
 Rest of phase 1 still open: `createApiClient`, `state-and-data.md` update (§Client shape factory-file convention + capability-matrix row), arcade / transcript-forge stampings.

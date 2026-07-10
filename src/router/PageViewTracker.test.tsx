@@ -1,3 +1,4 @@
+import { StrictMode } from 'react';
 import { act, cleanup, render } from '@testing-library/react';
 import { createMemoryRouter, Outlet, RouterProvider } from 'react-router-dom';
 import { afterEach, describe, it, expect, vi } from 'vitest';
@@ -60,5 +61,33 @@ describe('PageViewTracker', () => {
 
     expect(onPageView).toHaveBeenCalledTimes(1);
     expect(onPageView).toHaveBeenLastCalledWith({ pathname: '/transcript/42', title: undefined });
+  });
+
+  it('emits exactly once per entry under StrictMode (double-invoked mount effect)', () => {
+    const onPageView = vi.fn();
+    const router = createMemoryRouter(
+      [{ path: '/', handle: { title: 'Projects' }, element: <PageViewTracker onPageView={onPageView} /> }],
+      { initialEntries: ['/'] },
+    );
+
+    render(
+      <StrictMode>
+        <RouterProvider router={router} />
+      </StrictMode>,
+    );
+
+    expect(onPageView).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires again for a search-param navigation (new entry, same pathname)', async () => {
+    const onPageView = vi.fn();
+    const router = renderTracker(onPageView, '/library');
+
+    await act(async () => {
+      await router.navigate('/library?page=2');
+    });
+
+    expect(onPageView).toHaveBeenCalledTimes(2);
+    expect(onPageView).toHaveBeenLastCalledWith({ pathname: '/library', title: 'Library' });
   });
 });

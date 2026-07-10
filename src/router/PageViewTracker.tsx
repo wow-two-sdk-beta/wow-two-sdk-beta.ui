@@ -28,7 +28,14 @@ export function PageViewTracker({ onPageView }: PageViewTrackerProps) {
   const onPageViewRef = useRef(onPageView);
   onPageViewRef.current = onPageView;
 
+  // Emit once per history entry. `location.key` uniquely tags each entry, so revalidations
+  // (which refresh `matches` identity without navigating) and StrictMode's double-invoked
+  // mount effect can't double-report the same view.
+  const lastKeyRef = useRef<string | null>(null);
   useEffect(() => {
+    if (lastKeyRef.current === location.key) return;
+    lastKeyRef.current = location.key;
+
     const titled = [...matches].reverse().find((match) => (match.handle as RouteHandle | undefined)?.title);
     const title = (titled?.handle as RouteHandle | undefined)?.title;
     onPageViewRef.current({ pathname: location.pathname, title });

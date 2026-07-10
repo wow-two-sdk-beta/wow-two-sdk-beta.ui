@@ -21,21 +21,23 @@ export function RouteAnnouncer({ skipInitial = true }: RouteAnnouncerProps) {
   const titled = [...matches].reverse().find((match) => (match.handle as RouteHandle | undefined)?.title);
   titleRef.current = (titled?.handle as RouteHandle | undefined)?.title ?? '';
 
-  // Announce + focus once per navigation entry. `location.key` uniquely tags each entry, so the
-  // guard also absorbs StrictMode's double-invoked mount effect (same key → no-op).
-  const lastKeyRef = useRef<string | null>(null);
+  // Announce + focus once per page change. Keyed on `pathname` — not `location.key` — so
+  // search/hash-only updates (e.g. a filter input syncing through `setSearchParams`) never yank
+  // focus back to main mid-interaction. The guard also absorbs StrictMode's double-invoked
+  // mount effect (same pathname → no-op).
+  const lastPathnameRef = useRef<string | null>(null);
   useEffect(() => {
-    const isFirstRun = lastKeyRef.current === null;
+    const isFirstRun = lastPathnameRef.current === null;
     if (isFirstRun && skipInitial) {
-      lastKeyRef.current = location.key;
+      lastPathnameRef.current = location.pathname;
       return;
     }
-    if (lastKeyRef.current === location.key) return;
-    lastKeyRef.current = location.key;
+    if (lastPathnameRef.current === location.pathname) return;
+    lastPathnameRef.current = location.pathname;
 
     focusMainContent();
     setMessage(titleRef.current || document.title);
-  }, [location.key, skipInitial]);
+  }, [location.pathname, skipInitial]);
 
   return (
     <div aria-live="polite" aria-atomic="true" className="sr-only">

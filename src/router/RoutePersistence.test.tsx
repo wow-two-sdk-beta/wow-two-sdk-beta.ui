@@ -101,4 +101,16 @@ describe('RoutePersistence', () => {
     await act(async () => {});
     expect(getByTestId('path').textContent).toBe('/');
   });
+
+  it.each(['//evil.com', 'https://evil.com/x', '/\\evil', 'library'])(
+    'does not restore a tampered saved value (%s) — localStorage is origin-writable',
+    async (saved) => {
+      localStorage.setItem(Key, saved);
+      const router = makeRouter('/', { restore: true });
+      const { getByTestId } = render(<RouterProvider router={router} />);
+
+      await act(async () => {});
+      expect(getByTestId('path').textContent).toBe('/');
+    },
+  );
 });

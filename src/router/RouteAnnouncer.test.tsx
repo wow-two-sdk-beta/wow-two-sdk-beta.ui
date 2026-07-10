@@ -6,11 +6,12 @@ import { RouteAnnouncer } from './RouteAnnouncer';
 
 afterEach(cleanup);
 
-/** Renders the shell `<main>` (the focus target) with the announcer and the routed outlet. */
+/** Renders the shell `<main>` (the focus target) with the announcer, a focusable control, and the routed outlet. */
 function Shell({ skipInitial }: { readonly skipInitial?: boolean }) {
   return (
     <main id="app-shell-main">
       <RouteAnnouncer skipInitial={skipInitial} />
+      <button data-testid="filter">filter</button>
       <Outlet />
     </main>
   );
@@ -64,6 +65,32 @@ describe('RouteAnnouncer', () => {
     const router = makeRouter('/', false);
     const { container } = render(<RouterProvider router={router} />);
 
+    expect(liveRegion(container)?.textContent).toBe('Home');
+    expect(document.activeElement).toBe(mainEl());
+  });
+
+  it('does not announce or steal focus on a search-param-only navigation (same pathname)', async () => {
+    const router = makeRouter('/');
+    const { container, getByTestId } = render(<RouterProvider router={router} />);
+
+    await act(async () => {
+      await router.navigate('/library');
+    });
+    expect(document.activeElement).toBe(mainEl());
+
+    // A filter input syncing state through the URL (e.g. `setSearchParams`) keeps its focus.
+    getByTestId('filter').focus();
+    await act(async () => {
+      await router.navigate('/library?q=1', { replace: true });
+    });
+
+    expect(document.activeElement).toBe(getByTestId('filter'));
+    expect(liveRegion(container)?.textContent).toBe('Library'); // unchanged — no re-announce
+
+    // A real page change afterwards still announces + resets focus.
+    await act(async () => {
+      await router.navigate('/');
+    });
     expect(liveRegion(container)?.textContent).toBe('Home');
     expect(document.activeElement).toBe(mainEl());
   });

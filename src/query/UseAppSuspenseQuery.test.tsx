@@ -41,7 +41,7 @@ describe('useAppSuspenseQuery', () => {
 
   it('applies map to project the raw result into the view shape', async () => {
     function MapProbe() {
-      const { data } = useAppSuspenseQuery<number, string>({
+      const { data } = useAppSuspenseQuery<string, number>({
         key: ['probe-map'],
         queryFn: async () => 'abcd',
         map: (raw) => raw.length,

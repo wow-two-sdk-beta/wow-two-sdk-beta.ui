@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { isSafeInternalPath } from './Guards';
+
 /** The default localStorage key the last visited route is stored under. */
 const DefaultStorageKey = 'app:lastRoute';
 
@@ -29,8 +31,10 @@ export function RoutePersistence({ storageKey = DefaultStorageKey, restore = fal
 
     const saved = readRoute(storageKey);
     // Only restore when genuinely sitting at the app root — never fight an index redirect that has
-    // already moved the app off `/`.
-    if (saved && location.pathname === '/' && isNonRootPath(saved)) {
+    // already moved the app off `/`. The saved value is re-validated as a same-origin root-relative
+    // path: localStorage is writable by anything on the origin, so a tampered value (e.g.
+    // `//evil.com`, which pushState rejects with a SecurityError) must never reach `navigate`.
+    if (saved && location.pathname === '/' && isNonRootPath(saved) && isSafeInternalPath(saved)) {
       navigate(saved, { replace: true });
     }
     // Mount-only: deps intentionally empty so a later navigation can never re-trigger a restore.

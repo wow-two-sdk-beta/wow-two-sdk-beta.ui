@@ -5,6 +5,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 import { ApiError } from '../foundation/http';
 
+import { createQueryClient } from './CreateQueryClient';
 import { useAppQuery } from './UseAppQuery';
 
 // Local, isolated client per test tree — no retries (fail fast) and no gc (state survives assertions).
@@ -78,6 +79,25 @@ describe('useAppQuery', () => {
     expect(received).toBeInstanceOf(AbortSignal);
   });
 
+  it('enabled: false gates the fetch — no call, not loading', async () => {
+    const queryFn = vi.fn(async () => 'never');
+    const { wrapper } = createWrapper();
+    const { result, rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) => useAppQuery({ key: ['q', 'gated'], queryFn, enabled }),
+      { wrapper, initialProps: { enabled: false } },
+    );
+
+    // Gated: pending but not fetching → loading stays false, nothing fires.
+    expect(queryFn).not.toHaveBeenCalled();
+    expect(result.current.loading).toBe(false);
+    expect(result.current.data).toBeUndefined();
+
+    rerender({ enabled: true });
+
+    await waitFor(() => expect(result.current.data).toBe('never'));
+    expect(queryFn).toHaveBeenCalledTimes(1);
+  });
+
   it('coerces an ApiError rejection, preserving status', async () => {
     const { wrapper } = createWrapper();
     const { result } = renderHook(
@@ -93,6 +113,28 @@ describe('useAppQuery', () => {
     expect(result.current.error).toBeInstanceOf(ApiError);
     expect(result.current.error?.status).toBe(503);
     expect(result.current.data).toBeUndefined();
+  });
+
+  it('forwards meta to the client seam — suppressGlobalError keeps this query out of the global onError', async () => {
+    const onError = vi.fn();
+    const client = createQueryClient({ onError });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+
+    const { result } = renderHook(
+      () =>
+        useAppQuery({
+          key: ['q', 'meta-suppress'],
+          queryFn: () => Promise.reject(new ApiError(404, null, 'missing')),
+          meta: { suppressGlobalError: true },
+        }),
+      { wrapper },
+    );
+
+    // The hook still surfaces the coerced error locally — only the global seam stays quiet.
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(ApiError));
+    expect(onError).not.toHaveBeenCalled();
   });
 
   it('wraps a non-ApiError rejection as status 0', async () => {
