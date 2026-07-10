@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 export interface CodeEditorProps
   extends Omit<
@@ -41,14 +42,17 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
       language,
       tabSize = 2,
       isTabIndented = false,
+      id,
       disabled,
       readOnly,
+      required,
       isInvalid,
       minHeight = '12rem',
       placeholder,
       className,
       onKeyDown,
       onScroll,
+      'aria-describedby': ariaDescribedBy,
       ...rest
     },
     forwardedRef,
@@ -58,6 +62,11 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
       default: defaultValue ?? '',
       onChange: onValueChange,
     });
+    /* Inherits id/flags/describedby from a surrounding <Field>; explicit props win. */
+    const ctx = useFormControl();
+    const finalDisabled = disabled ?? ctx?.isDisabled;
+    const finalReadOnly = readOnly ?? ctx?.isReadOnly;
+    const finalInvalid = isInvalid ?? ctx?.isInvalid;
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const gutterRef = useRef<HTMLDivElement | null>(null);
     const [scrollTop, setScrollTop] = useState(0);
@@ -76,7 +85,7 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
 
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
       onKeyDown?.(e);
-      if (e.defaultPrevented || disabled || readOnly) return;
+      if (e.defaultPrevented || finalDisabled || finalReadOnly) return;
       const ta = e.currentTarget;
       const start = ta.selectionStart;
       const end = ta.selectionEnd;
@@ -153,7 +162,7 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
       }
     };
 
-    const state = isInvalid ? 'invalid' : 'default';
+    const state = finalInvalid ? 'invalid' : 'default';
 
     // Generate line-number string once per line count.
     const gutterText = useMemo(
@@ -166,13 +175,13 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
       <div
         data-state={state}
         data-language={language || undefined}
-        data-disabled={disabled || undefined}
-        data-readonly={readOnly || undefined}
+        data-disabled={finalDisabled || undefined}
+        data-readonly={finalReadOnly || undefined}
         className={cn(
           'relative flex overflow-hidden rounded-md border border-input bg-card text-card-foreground font-mono text-sm shadow-sm',
           'focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/40',
           state === 'invalid' && 'border-destructive focus-within:border-destructive focus-within:ring-destructive/40',
-          disabled && 'cursor-not-allowed opacity-60',
+          finalDisabled && 'cursor-not-allowed opacity-60',
           className,
         )}
         style={{ minHeight }}
@@ -199,11 +208,14 @@ export const CodeEditor = forwardRef<HTMLTextAreaElement, CodeEditorProps>(
             setScrollTop(e.currentTarget.scrollTop);
             onScroll?.(e);
           }}
-          disabled={disabled}
-          readOnly={readOnly}
+          id={id ?? ctx?.id}
+          disabled={finalDisabled}
+          readOnly={finalReadOnly}
+          required={required ?? ctx?.isRequired}
           spellCheck={false}
           placeholder={placeholder}
-          aria-invalid={isInvalid || undefined}
+          aria-invalid={finalInvalid || undefined}
+          aria-describedby={ariaDescribedBy ?? ctx?.describedBy}
           className="block flex-1 resize-none whitespace-pre overflow-auto bg-transparent px-3 py-2 outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed"
         />
       </div>

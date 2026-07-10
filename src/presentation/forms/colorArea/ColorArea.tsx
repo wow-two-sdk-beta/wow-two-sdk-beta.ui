@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { clamp01, hsvToHex } from '../ColorExtensions';
 
 export interface ColorAreaChange {
@@ -38,9 +39,10 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
     defaultValue,
     onValueChange,
     step = 0.01,
-    isDisabled = false,
+    isDisabled,
+    id,
     className,
-    'aria-label': ariaLabel = 'Saturation and value',
+    'aria-label': ariaLabel,
     ...rest
   },
   forwardedRef,
@@ -53,6 +55,11 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
     controlled: value,
     default: defaultValue ?? 1,
   });
+  /* Inherits id/disabled/invalid/labelling from a surrounding <Field>; explicit props win. */
+  const ctx = useFormControl();
+  const disabled = isDisabled ?? ctx?.isDisabled ?? false;
+  /* Names the area from the Field label when present; an explicit aria-label always wins. */
+  const labelledBy = !ariaLabel ? ctx?.labelledBy : undefined;
 
   const trackRef = useRef<HTMLDivElement | null>(null);
 
@@ -81,25 +88,25 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
 
   const handlePointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (isDisabled) return;
+      if (disabled) return;
       e.preventDefault();
       (e.target as Element).setPointerCapture?.(e.pointerId);
       updateFromClient(e.clientX, e.clientY);
     },
-    [isDisabled, updateFromClient],
+    [disabled, updateFromClient],
   );
 
   const handlePointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (isDisabled || e.buttons !== 1) return;
+      if (disabled || e.buttons !== 1) return;
       updateFromClient(e.clientX, e.clientY);
     },
-    [isDisabled, updateFromClient],
+    [disabled, updateFromClient],
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      if (isDisabled) return;
+      if (disabled) return;
       const big = step * 10;
       let nextS = s;
       let nextV = v;
@@ -136,7 +143,7 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
       e.preventDefault();
       emit(nextS, nextV);
     },
-    [isDisabled, emit, s, step, v],
+    [disabled, emit, s, step, v],
   );
 
   const baseColor = `hsl(${hue}, 100%, 50%)`;
@@ -156,18 +163,22 @@ export const ColorArea = forwardRef<HTMLDivElement, ColorAreaProps>(function Col
     <div
       ref={composeRefs(forwardedRef, trackRef)}
       role="slider"
-      tabIndex={isDisabled ? -1 : 0}
-      aria-label={ariaLabel}
+      id={id ?? ctx?.id}
+      tabIndex={disabled ? -1 : 0}
+      aria-label={ariaLabel ?? (labelledBy ? undefined : 'Saturation and value')}
+      aria-labelledby={labelledBy}
       aria-valuetext={`saturation ${(s * 100).toFixed(0)}%, value ${(v * 100).toFixed(0)}%`}
-      aria-disabled={isDisabled || undefined}
-      data-disabled={isDisabled ? '' : undefined}
+      aria-invalid={ctx?.isInvalid || undefined}
+      aria-describedby={ctx?.describedBy}
+      aria-disabled={disabled || undefined}
+      data-disabled={disabled ? '' : undefined}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onKeyDown={handleKeyDown}
       style={trackStyle}
       className={cn(
         'relative aspect-square w-full select-none rounded-md border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        isDisabled && 'pointer-events-none opacity-50',
+        disabled && 'pointer-events-none opacity-50',
         className,
       )}
       {...rest}

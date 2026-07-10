@@ -3,6 +3,7 @@ import { Temporal } from 'temporal-polyfill';
 import { Clock } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { selectTriggerVariants, SelectSize, type SelectTriggerVariants } from '../select/Select.variants';
 import { InputState } from '../InputStyles';
@@ -43,10 +44,18 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
     state,
     className,
     disabled,
+    id,
+    'aria-label': ariaLabel,
     ...rest
   },
   forwardedRef,
 ) {
+  /* Inherits id/disabled/invalid/labelledby/describedby from a surrounding <Field>;
+     standalone props win when provided, context fills the gaps (Select parity). */
+  const field = useFormControl();
+  const finalDisabled = disabled ?? field?.isDisabled;
+  const finalInvalid = isInvalid ?? field?.isInvalid;
+
   const [time, setTime] = useControlled<Temporal.PlainTime | null>({
     controlled: value,
     default: defaultValue ?? null,
@@ -78,7 +87,7 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
     });
   }, [open]);
 
-  const triggerState = state ?? (isInvalid ? InputState.Invalid : InputState.Default);
+  const triggerState = state ?? (finalInvalid ? InputState.Invalid : InputState.Default);
 
   const update = (next: { hour?: number; minute?: number }) => {
     const merged = Temporal.PlainTime.from({
@@ -94,7 +103,13 @@ export const TimePicker = forwardRef<HTMLButtonElement, TimePickerProps>(functio
         <button
           ref={forwardedRef}
           type="button"
-          disabled={disabled}
+          id={id ?? field?.id}
+          disabled={finalDisabled}
+          aria-invalid={triggerState === InputState.Invalid || undefined}
+          aria-label={ariaLabel}
+          /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
+          aria-labelledby={ariaLabel ? undefined : field?.labelledBy}
+          aria-describedby={field?.describedBy}
           className={cn(selectTriggerVariants({ size, state: triggerState }), className)}
           {...rest}
         >

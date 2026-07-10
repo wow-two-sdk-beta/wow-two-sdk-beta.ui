@@ -1,6 +1,9 @@
 import { forwardRef, type LabelHTMLAttributes } from 'react';
 import { cn, Size } from '../../../foundation/utils';
-import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
+import {
+  useFormControl,
+  useFormControlChrome,
+} from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 export interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   /** The required state, showing a `*` indicator. Auto-derived from `FormControl.isRequired` when present. */
@@ -24,6 +27,10 @@ const SIZE: Partial<Record<Size, string>> = {
 export const Label = forwardRef<HTMLLabelElement, LabelProps>(
   ({ className, isRequired: isRequiredProp, size = Size.Md, htmlFor, id, children, ...props }, ref) => {
     const ctx = useFormControl();
+    // Registration flips the context's `labelledBy` on — widgets that name
+    // themselves via `aria-labelledby` reference the label only while it exists.
+    // An explicit `id` prop detaches the node from the context's labelId.
+    useFormControlChrome('label', id == null);
     const isRequired = isRequiredProp ?? ctx?.isRequired ?? false;
     return (
       <label

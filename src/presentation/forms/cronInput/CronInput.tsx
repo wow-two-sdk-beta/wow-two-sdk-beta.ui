@@ -1,6 +1,7 @@
 import { forwardRef, useMemo, type InputHTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
 export interface CronInputProps
@@ -163,6 +164,10 @@ function parseCron(value: string): string {
  * Cron-string input with human-readable preview. Supports asterisk, N,
  * step (asterisk-slash-N), N-M, N,M,O per field. Quartz extensions
  * (?, L, W, #) deferred.
+ *
+ * Form-aware: inside a `Field`/`form.Field` the inner input takes the context
+ * id (a label's `htmlFor` focuses it directly) + `aria-describedby`, the
+ * disabled/read-only/required flags, and `aria-invalid`/invalid surface.
  */
 export const CronInput = forwardRef<HTMLInputElement, CronInputProps>(
   function CronInput(
@@ -175,21 +180,26 @@ export const CronInput = forwardRef<HTMLInputElement, CronInputProps>(
       size,
       state,
       hasPreview = true,
+      id,
       disabled,
       readOnly,
+      required,
       name,
       className,
+      'aria-describedby': ariaDescribedBy,
       ...rest
     },
     ref,
   ) {
+    const ctx = useFormControl();
     const [value, setValue] = useControlled<string>({
       controlled: valueProp,
       default: defaultValue ?? '*/5 * * * *',
       onChange: onValueChange,
     });
     const preview = useMemo(() => parseCron(value), [value]);
-    const isError = isInvalid || preview.startsWith('Invalid') || preview.startsWith('Cron');
+    const isError =
+      (isInvalid ?? ctx?.isInvalid) || preview.startsWith('Invalid') || preview.startsWith('Cron');
     const inputState = isError ? InputState.Invalid : (state ?? InputState.Default);
 
     return (
@@ -198,11 +208,14 @@ export const CronInput = forwardRef<HTMLInputElement, CronInputProps>(
           {...rest}
           ref={ref}
           type="text"
+          id={id ?? ctx?.id}
           value={value}
           placeholder={placeholder}
-          disabled={disabled}
-          readOnly={readOnly}
+          disabled={disabled ?? ctx?.isDisabled}
+          readOnly={readOnly ?? ctx?.isReadOnly}
+          required={required ?? ctx?.isRequired}
           aria-invalid={isError || undefined}
+          aria-describedby={ariaDescribedBy ?? ctx?.describedBy}
           spellCheck={false}
           onChange={(e) => setValue(e.target.value)}
           className={cn(inputBaseVariants({ size, state: inputState }), 'font-mono')}

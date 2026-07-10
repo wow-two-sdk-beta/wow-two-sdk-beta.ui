@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 /** Defines the accent palette of a knob's value arc. */
 export const KnobTone = {
@@ -77,8 +78,9 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
     isValueShown = true,
     isDisabled,
     name,
+    id,
     className,
-    'aria-label': ariaLabel = 'Knob',
+    'aria-label': ariaLabel,
     ...rest
   },
   ref,
@@ -88,6 +90,11 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
     default: defaultValue ?? min,
     onChange: onValueChange,
   });
+  /* Inherits id/disabled/invalid/labelling from a surrounding <Field>; explicit props win. */
+  const ctx = useFormControl();
+  const disabled = isDisabled ?? ctx?.isDisabled ?? false;
+  /* Names the knob from the Field label when present; an explicit aria-label always wins. */
+  const labelledBy = !ariaLabel ? ctx?.labelledBy : undefined;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<{ startY: number; startValue: number } | null>(null);
 
@@ -103,13 +110,13 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
   );
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (isDisabled || e.button !== 0) return;
+    if (disabled || e.button !== 0) return;
     dragStateRef.current = { startY: e.clientY, startValue: value };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (isDisabled || !dragStateRef.current) return;
+    if (disabled || !dragStateRef.current) return;
     const dy = dragStateRef.current.startY - e.clientY; // up = increase
     const range = max - min;
     const sensitivity = range / 200; // 200px drag = full range
@@ -127,17 +134,17 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
     const el = containerRef.current;
     if (!el) return;
     const handleWheel = (e: WheelEvent) => {
-      if (isDisabled) return;
+      if (disabled) return;
       e.preventDefault();
       const delta = e.deltaY < 0 ? step : -step;
       setClamped(value + delta);
     };
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, [isDisabled, step, value, setClamped]);
+  }, [disabled, step, value, setClamped]);
 
   const handleKey = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (isDisabled) return;
+    if (disabled) return;
     const s = e.shiftKey ? largeStep : step;
     switch (e.key) {
       case 'ArrowUp':
@@ -188,13 +195,17 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
         else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
       }}
       role="slider"
-      aria-label={ariaLabel}
+      id={id ?? ctx?.id}
+      aria-label={ariaLabel ?? (labelledBy ? undefined : 'Knob')}
+      aria-labelledby={labelledBy}
       aria-valuenow={value}
       aria-valuemin={min}
       aria-valuemax={max}
       aria-orientation="vertical"
-      aria-disabled={isDisabled || undefined}
-      tabIndex={isDisabled ? -1 : 0}
+      aria-invalid={ctx?.isInvalid || undefined}
+      aria-describedby={ctx?.describedBy}
+      aria-disabled={disabled || undefined}
+      tabIndex={disabled ? -1 : 0}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -204,7 +215,7 @@ export const Knob = forwardRef<HTMLDivElement, KnobProps>(function Knob(
       className={cn(
         'relative inline-flex select-none items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         TONE_CLASS[tone],
-        isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-grab active:cursor-grabbing',
+        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-grab active:cursor-grabbing',
         className,
       )}
       {...rest}

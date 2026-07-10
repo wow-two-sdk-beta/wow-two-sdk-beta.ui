@@ -2,6 +2,7 @@ import { forwardRef, useId, useMemo, type HTMLAttributes } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { addDays, addMonths, daysInMonth, formatISODate, parseISODate, sundayIndex, today } from '../DateExtensions';
 import { inputBaseVariants, InputSize } from '../InputStyles';
 
@@ -175,6 +176,10 @@ const DEFAULT_RULE: RecurrenceRule = { freq: RecurrenceFreq.Weekly, interval: 1,
 /**
  * Visual RRULE editor. Output is a JS `RecurrenceRule` object via `onValueChange`;
  * if `name` is set, also emits a hidden `RRULE:FREQ=…` string for forms.
+ *
+ * Form-aware at GROUP level: inside a `Field`/`form.Field` the root (`role="group"`)
+ * takes the context id + `aria-labelledby`/`aria-describedby`/`aria-invalid`, and
+ * the disabled/read-only flags cascade to every inner control.
  */
 export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps>(
   function RecurrenceEditor(
@@ -184,14 +189,18 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
       onValueChange,
       from = today(),
       previewCount = 5,
-      isDisabled,
-      isReadOnly,
+      isDisabled: isDisabledProp,
+      isReadOnly: isReadOnlyProp,
       name,
+      id: idProp,
       className,
       ...rest
     },
     ref,
   ) {
+    const ctx = useFormControl();
+    const isDisabled = isDisabledProp ?? ctx?.isDisabled;
+    const isReadOnly = isReadOnlyProp ?? ctx?.isReadOnly;
     const [rule, setRule] = useControlled({
       controlled: value,
       default: defaultValue ?? DEFAULT_RULE,
@@ -220,6 +229,11 @@ export const RecurrenceEditor = forwardRef<HTMLDivElement, RecurrenceEditorProps
     return (
       <div
         ref={ref}
+        role="group"
+        id={idProp ?? ctx?.id}
+        aria-labelledby={ctx?.labelledBy}
+        aria-describedby={ctx?.describedBy}
+        aria-invalid={ctx?.isInvalid || undefined}
         className={cn(
           'flex flex-col gap-3 rounded-md border border-border bg-card p-4 text-card-foreground shadow-sm',
           isDisabled && 'opacity-60',

@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { clamp01, clampHue, hsvToHex, type HSV } from '../ColorExtensions';
 
 /** Defines which HSV/alpha channel a color slider drives. */
@@ -79,7 +80,8 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
     onValueChange,
     color,
     step,
-    isDisabled = false,
+    isDisabled,
+    id,
     className,
     'aria-label': ariaLabel,
     ...rest
@@ -93,6 +95,11 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
     default: defaultValue ?? 0,
     onChange: onValueChange,
   });
+  /* Inherits id/disabled/invalid/labelling from a surrounding <Field>; explicit props win. */
+  const ctx = useFormControl();
+  const disabled = isDisabled ?? ctx?.isDisabled ?? false;
+  /* Names the track from the Field label when present; an explicit aria-label always wins. */
+  const labelledBy = !ariaLabel ? ctx?.labelledBy : undefined;
 
   const trackRef = useRef<HTMLDivElement | null>(null);
 
@@ -111,26 +118,26 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
 
   const handlePointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (isDisabled) return;
+      if (disabled) return;
       e.preventDefault();
       (e.target as Element).setPointerCapture?.(e.pointerId);
       updateFromClientX(e.clientX);
     },
-    [isDisabled, updateFromClientX],
+    [disabled, updateFromClientX],
   );
 
   const handlePointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (isDisabled) return;
+      if (disabled) return;
       if (e.buttons !== 1) return;
       updateFromClientX(e.clientX);
     },
-    [isDisabled, updateFromClientX],
+    [disabled, updateFromClientX],
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      if (isDisabled) return;
+      if (disabled) return;
       let next = val;
       switch (e.key) {
         case 'ArrowRight':
@@ -159,7 +166,7 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
       e.preventDefault();
       setVal(channel === ColorChannel.Hue ? clampHue(next) : clamp01(next));
     },
-    [channel, isDisabled, max, setVal, stepValue, val],
+    [channel, disabled, max, setVal, stepValue, val],
   );
 
   /* val >= 360 pins the thumb to the right edge — clampHue would wrap the committed max back to 0. */
@@ -186,21 +193,25 @@ export const ColorSlider = forwardRef<HTMLDivElement, ColorSliderProps>(function
       <div
         ref={composeRefs(trackRef)}
         role="slider"
-        tabIndex={isDisabled ? -1 : 0}
-        aria-label={ariaLabel ?? `${channel} slider`}
+        id={id ?? ctx?.id}
+        tabIndex={disabled ? -1 : 0}
+        aria-label={ariaLabel ?? (labelledBy ? undefined : `${channel} slider`)}
+        aria-labelledby={labelledBy}
         aria-valuemin={0}
         aria-valuemax={max}
         aria-valuenow={Math.round(val * 100) / 100}
-        aria-disabled={isDisabled || undefined}
+        aria-invalid={ctx?.isInvalid || undefined}
+        aria-describedby={ctx?.describedBy}
+        aria-disabled={disabled || undefined}
         aria-orientation="horizontal"
-        data-disabled={isDisabled ? '' : undefined}
+        data-disabled={disabled ? '' : undefined}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onKeyDown={handleKeyDown}
         style={trackStyle}
         className={cn(
           'relative h-3 w-full rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          isDisabled && 'pointer-events-none opacity-50',
+          disabled && 'pointer-events-none opacity-50',
         )}
       >
         <div

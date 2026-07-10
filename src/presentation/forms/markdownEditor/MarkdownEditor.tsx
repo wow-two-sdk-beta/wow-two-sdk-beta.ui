@@ -12,6 +12,7 @@ import { Bold, Code, Heading1, Heading2, Italic, Link2, List, Quote } from 'luci
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { InputState } from '../InputStyles';
 
 /** Defines the pane layout of a markdown editor. */
@@ -143,12 +144,15 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
       defaultView,
       onViewChange,
       renderPreview,
+      id,
       disabled,
       readOnly,
+      required,
       isInvalid,
       minHeight = '18rem',
       placeholder,
       className,
+      'aria-describedby': ariaDescribedBy,
       ...rest
     },
     forwardedRef,
@@ -164,7 +168,14 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
       onChange: onViewChange,
     });
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-    const groupId = useId();
+    const generatedId = useId();
+    /* Inherits id/flags/describedby from a surrounding <Field>; explicit props win.
+       The context wires the EDITING surface (textarea) only — the preview pane is
+       read-only chrome, not the control. */
+    const ctx = useFormControl();
+    const finalDisabled = disabled ?? ctx?.isDisabled;
+    const finalReadOnly = readOnly ?? ctx?.isReadOnly;
+    const finalInvalid = isInvalid ?? ctx?.isInvalid;
 
     useImperativeHandle(forwardedRef, () => textareaRef.current as HTMLTextAreaElement);
 
@@ -196,7 +207,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
     const showEdit = view === MarkdownEditorView.Split || view === MarkdownEditorView.Edit;
     const showPreview = view === MarkdownEditorView.Split || view === MarkdownEditorView.Preview;
 
-    const state = isInvalid ? InputState.Invalid : InputState.Default;
+    const state = finalInvalid ? InputState.Invalid : InputState.Default;
 
     return (
       <div
@@ -204,7 +215,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
         className={cn(
           'flex flex-col overflow-hidden rounded-md border border-input bg-card text-card-foreground shadow-sm',
           state === InputState.Invalid && 'border-destructive',
-          disabled && 'opacity-60',
+          finalDisabled && 'opacity-60',
           className,
         )}
         style={{ minHeight }}
@@ -216,7 +227,7 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
                 key={a.key}
                 type="button"
                 aria-label={a.label}
-                disabled={disabled || readOnly}
+                disabled={finalDisabled || finalReadOnly}
                 onClick={() => applyAction(a)}
                 className="inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
               >
@@ -249,13 +260,15 @@ export const MarkdownEditor = forwardRef<HTMLTextAreaElement, MarkdownEditorProp
             <textarea
               {...rest}
               ref={textareaRef}
-              id={groupId}
+              id={id ?? ctx?.id ?? generatedId}
               value={value}
               placeholder={placeholder}
-              disabled={disabled}
-              readOnly={readOnly}
+              disabled={finalDisabled}
+              readOnly={finalReadOnly}
+              required={required ?? ctx?.isRequired}
               spellCheck={false}
-              aria-invalid={isInvalid || undefined}
+              aria-invalid={finalInvalid || undefined}
+              aria-describedby={ariaDescribedBy ?? ctx?.describedBy}
               onChange={(e) => setValue(e.target.value)}
               className={cn(
                 'flex-1 resize-none whitespace-pre-wrap break-words bg-transparent p-3 font-mono text-sm outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed',

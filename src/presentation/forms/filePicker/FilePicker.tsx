@@ -2,6 +2,7 @@ import { forwardRef, useImperativeHandle, useRef, type ComponentPropsWithoutRef,
 import { Upload } from 'lucide-react';
 import { cn, Size } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 export interface FilePickerProps extends Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'value' | 'onChange' | 'size'> {
   /** The button label. Default `"Choose file"`. */
@@ -30,14 +31,20 @@ const SIZE: Partial<Record<Size, string>> = {
  * `Dropzone` organism (planned).
  */
 export const FilePicker = forwardRef<HTMLInputElement, FilePickerProps>(
-  ({ label = 'Choose file', onFilesChange, preview, size = Size.Md, className, disabled, ...props }, ref) => {
+  ({ label = 'Choose file', onFilesChange, preview, size = Size.Md, className, disabled, id, ...props }, ref) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
+    /* FormControlContext adoption — the HIDDEN native input carries the context id, so
+       `Field`-rendered labels/describedby reference it (label click opens the picker).
+       The trigger button mirrors describedby for keyboard users. */
+    const ctx = useFormControl();
+    const isDisabled = disabled ?? ctx?.isDisabled;
     return (
       <div className={cn('inline-flex items-center gap-3', className)}>
         <button
           type="button"
-          disabled={disabled}
+          disabled={isDisabled}
+          aria-describedby={ctx?.describedBy}
           onClick={() => inputRef.current?.click()}
           className={cn(
             'inline-flex items-center gap-2 rounded-md border border-input bg-background font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
@@ -50,7 +57,12 @@ export const FilePicker = forwardRef<HTMLInputElement, FilePickerProps>(
         <input
           ref={inputRef}
           type="file"
-          disabled={disabled}
+          id={id ?? ctx?.id}
+          disabled={isDisabled}
+          aria-invalid={ctx?.isInvalid || undefined}
+          aria-describedby={ctx?.describedBy}
+          /* aria- (not native) required — onChange resets `value` after handing files out, so a native `required` would block every submit. */
+          aria-required={ctx?.isRequired || undefined}
           className="sr-only"
           onChange={(e) => {
             onFilesChange?.(e.target.files);

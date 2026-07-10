@@ -12,6 +12,7 @@ import {
 import { ChevronDown, X } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import type { SurfaceVariants } from '../../../foundation/utils';
 import {
@@ -35,6 +36,12 @@ interface MultiSelectContextValue {
   isDisabled: boolean;
   name?: string;
   isInvalid?: boolean;
+
+  /** Form-control wiring inherited from a surrounding `<Field>` (undefined when standalone).
+   *  `labelId`/`describedBy` carry only ids of chrome that is actually rendered. */
+  fieldId?: string;
+  labelId?: string;
+  describedBy?: string;
 }
 
 const MultiSelectContext = createContext<MultiSelectContextValue | null>(null);
@@ -63,7 +70,7 @@ function MultiSelectRoot({
   value,
   defaultValue,
   onValueChange,
-  isDisabled = false,
+  isDisabled,
   name,
   isInvalid,
   defaultOpen = false,
@@ -72,6 +79,12 @@ function MultiSelectRoot({
   placement = 'bottom',
   children,
 }: MultiSelectProps) {
+  /* Inherits id/disabled/invalid/labelledby/describedby from a surrounding <Field>;
+     standalone props win when provided, context fills the gaps (Select parity). */
+  const field = useFormControl();
+  const finalDisabled = (isDisabled ?? field?.isDisabled) ?? false;
+  const finalInvalid = isInvalid ?? field?.isInvalid;
+
   const [openState, setOpenState] = useControlled({
     controlled: openProp,
     default: defaultOpen,
@@ -105,9 +118,12 @@ function MultiSelectRoot({
       labels,
       registerLabel,
       unregisterLabel,
-      isDisabled,
+      isDisabled: finalDisabled,
       name,
-      isInvalid,
+      isInvalid: finalInvalid,
+      fieldId: field?.id,
+      labelId: field?.labelledBy,
+      describedBy: field?.describedBy,
     }),
     [
       openState,
@@ -117,9 +133,10 @@ function MultiSelectRoot({
       labels,
       registerLabel,
       unregisterLabel,
-      isDisabled,
+      finalDisabled,
       name,
-      isInvalid,
+      finalInvalid,
+      field,
     ],
   );
 
@@ -155,17 +172,24 @@ export interface MultiSelectTriggerProps
 
 export const MultiSelectTrigger = forwardRef<HTMLButtonElement, MultiSelectTriggerProps>(
   function MultiSelectTrigger(
-    { size, state, className, onKeyDown, children, ...rest },
+    { size, state, className, onKeyDown, children, 'aria-label': ariaLabel, ...rest },
     ref,
   ) {
     const ctx = useMultiSelectContext();
     const triggerState = state ?? (ctx.isInvalid ? InputState.Invalid : InputState.Default);
+    /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
+    const labelledBy = !ariaLabel ? ctx.labelId : undefined;
     return (
       <PopoverTrigger asChild>
         <button
           ref={ref}
           type="button"
+          id={ctx.fieldId}
           disabled={ctx.isDisabled}
+          aria-invalid={triggerState === InputState.Invalid || undefined}
+          aria-label={ariaLabel}
+          aria-labelledby={labelledBy}
+          aria-describedby={ctx.describedBy}
           onKeyDown={(e) => {
             onKeyDown?.(e);
             if (e.defaultPrevented) return;

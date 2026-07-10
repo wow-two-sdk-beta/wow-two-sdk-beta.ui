@@ -2,6 +2,7 @@ import { forwardRef, useMemo, type HTMLAttributes } from 'react';
 import { Plus, Trash } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Icon } from '../../../foundation/icons';
 import { inputBaseVariants, InputSize } from '../InputStyles';
 
@@ -56,12 +57,18 @@ export function gradientToCss(g: Gradient): string {
 /**
  * Visual gradient editor — kind / angle / stops. Output `Gradient` object via
  * `onValueChange`; `name` emits the CSS string for forms.
+ *
+ * Form-aware at GROUP level: inside a `Field`/`form.Field` the root (`role="group"`)
+ * takes the context id + `aria-labelledby`/`aria-describedby`/`aria-invalid`, and
+ * the disabled flag cascades to every inner control.
  */
 export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
   function GradientPicker(
-    { value: valueProp, defaultValue, onValueChange, isDisabled, name, className, ...rest },
+    { value: valueProp, defaultValue, onValueChange, isDisabled: isDisabledProp, name, id, className, ...rest },
     ref,
   ) {
+    const ctx = useFormControl();
+    const isDisabled = isDisabledProp ?? ctx?.isDisabled;
     const [gradient, setGradient] = useControlled({
       controlled: valueProp,
       default: defaultValue ?? DEFAULT_GRADIENT,
@@ -92,6 +99,11 @@ export const GradientPicker = forwardRef<HTMLDivElement, GradientPickerProps>(
     return (
       <div
         ref={ref}
+        role="group"
+        id={id ?? ctx?.id}
+        aria-labelledby={ctx?.labelledBy}
+        aria-describedby={ctx?.describedBy}
+        aria-invalid={ctx?.isInvalid || undefined}
         className={cn(
           'flex flex-col gap-3 rounded-md border border-border bg-card p-3 text-card-foreground shadow-sm',
           isDisabled && 'opacity-60',

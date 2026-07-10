@@ -1,6 +1,7 @@
 import { forwardRef, useId, type HTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { inputBaseVariants, InputSize } from '../InputStyles';
 
 export interface Address {
@@ -77,12 +78,31 @@ const EMPTY: Address = { country: 'US', line1: '', city: '', region: '', postalC
  * Country-aware address form. Country select drives the region label/options
  * and postal-code label. Built-in config for US/CA/GB/DE/FR/AU/JP; generic
  * fallback for the rest.
+ *
+ * Form-aware at GROUP level: inside a `Field`/`form.Field` the root (`role="group"`)
+ * takes the context id + `aria-labelledby`/`aria-describedby`/`aria-invalid`, and
+ * the disabled/read-only flags cascade to every sub-field (each keeps its own
+ * self-contained label/id pair).
  */
 export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
   function AddressForm(
-    { value: valueProp, defaultValue, onValueChange, isDisabled, isReadOnly, isCompact, name, className, ...rest },
+    {
+      value: valueProp,
+      defaultValue,
+      onValueChange,
+      isDisabled: isDisabledProp,
+      isReadOnly: isReadOnlyProp,
+      isCompact,
+      name,
+      id,
+      className,
+      ...rest
+    },
     ref,
   ) {
+    const ctx = useFormControl();
+    const isDisabled = isDisabledProp ?? ctx?.isDisabled;
+    const isReadOnly = isReadOnlyProp ?? ctx?.isReadOnly;
     const [address, setAddress] = useControlled({
       controlled: valueProp,
       default: defaultValue ?? EMPTY,
@@ -102,7 +122,16 @@ export const AddressForm = forwardRef<HTMLDivElement, AddressFormProps>(
     const update = (patch: Partial<Address>) => setAddress({ ...address, ...patch });
 
     return (
-      <div ref={ref} className={cn('flex flex-col gap-3', className)} {...rest}>
+      <div
+        ref={ref}
+        role="group"
+        id={id ?? ctx?.id}
+        aria-labelledby={ctx?.labelledBy}
+        aria-describedby={ctx?.describedBy}
+        aria-invalid={ctx?.isInvalid || undefined}
+        className={cn('flex flex-col gap-3', className)}
+        {...rest}
+      >
         {/* Country */}
         <div className="flex flex-col gap-1">
           <label htmlFor={ids.country} className="text-xs font-medium text-foreground">

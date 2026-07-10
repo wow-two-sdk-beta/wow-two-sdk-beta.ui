@@ -41,7 +41,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         required={required ?? ctx?.isRequired}
         readOnly={readOnly ?? ctx?.isReadOnly}
         aria-invalid={ctx?.isInvalid || undefined}
-        aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
+        aria-describedby={ctx?.describedBy}
         className={cn(inputBaseVariants({ size, state: finalState, border, ring }), className)}
         {...props}
       />

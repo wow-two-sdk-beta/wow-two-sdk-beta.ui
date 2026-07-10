@@ -91,7 +91,8 @@ interface SelectContextValue {
   /** Holds the DOM node of the inner Listbox — keyboard bridge re-dispatches onto it. */
   listboxRef: React.MutableRefObject<HTMLDivElement | null>;
 
-  /** Form-control wiring inherited from a surrounding `<Field>` (null when standalone). */
+  /** Form-control wiring inherited from a surrounding `<Field>` (null when standalone).
+   *  `labelId`/`describedBy` carry only ids of chrome that is actually rendered. */
   fieldId?: string;
   labelId?: string;
   describedBy?: string;
@@ -402,8 +403,8 @@ function SelectImpl<K, V = K>({
       setActiveDescendant,
       listboxRef,
       fieldId: field?.id,
-      labelId: field?.labelId,
-      describedBy: field ? `${field.helperId} ${field.errorId}` : undefined,
+      labelId: field?.labelledBy,
+      describedBy: field?.describedBy,
     }),
     [
       openState,

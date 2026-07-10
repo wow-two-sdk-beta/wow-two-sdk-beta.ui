@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { clampHue } from '../ColorExtensions';
 
 export interface ColorWheelProps
@@ -40,9 +41,10 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
     size = 200,
     thickness = 30,
     step = 1,
-    isDisabled = false,
+    isDisabled,
+    id,
     className,
-    'aria-label': ariaLabel = 'Hue',
+    'aria-label': ariaLabel,
     ...rest
   },
   forwardedRef,
@@ -52,6 +54,11 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
     default: defaultValue ?? 0,
     onChange: onValueChange,
   });
+  /* Inherits id/disabled/invalid/labelling from a surrounding <Field>; explicit props win. */
+  const ctx = useFormControl();
+  const disabled = isDisabled ?? ctx?.isDisabled ?? false;
+  /* Names the wheel from the Field label when present; an explicit aria-label always wins. */
+  const labelledBy = !ariaLabel ? ctx?.labelledBy : undefined;
   const trackRef = useRef<HTMLDivElement | null>(null);
 
   const updateFromClient = useCallback(
@@ -65,25 +72,25 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
 
   const handlePointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (isDisabled) return;
+      if (disabled) return;
       e.preventDefault();
       (e.target as Element).setPointerCapture?.(e.pointerId);
       updateFromClient(e.clientX, e.clientY);
     },
-    [isDisabled, updateFromClient],
+    [disabled, updateFromClient],
   );
 
   const handlePointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (isDisabled || e.buttons !== 1) return;
+      if (disabled || e.buttons !== 1) return;
       updateFromClient(e.clientX, e.clientY);
     },
-    [isDisabled, updateFromClient],
+    [disabled, updateFromClient],
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      if (isDisabled) return;
+      if (disabled) return;
       let next = hue;
       switch (e.key) {
         case 'ArrowRight':
@@ -112,7 +119,7 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
       e.preventDefault();
       setHue(clampHue(next));
     },
-    [isDisabled, hue, setHue, step],
+    [disabled, hue, setHue, step],
   );
 
   const radius = (size - thickness) / 2;
@@ -132,20 +139,24 @@ export const ColorWheel = forwardRef<HTMLDivElement, ColorWheelProps>(function C
     <div
       ref={composeRefs(forwardedRef, trackRef)}
       role="slider"
-      tabIndex={isDisabled ? -1 : 0}
-      aria-label={ariaLabel}
+      id={id ?? ctx?.id}
+      tabIndex={disabled ? -1 : 0}
+      aria-label={ariaLabel ?? (labelledBy ? undefined : 'Hue')}
+      aria-labelledby={labelledBy}
       aria-valuemin={0}
       aria-valuemax={360}
       aria-valuenow={Math.round(hue)}
-      aria-disabled={isDisabled || undefined}
-      data-disabled={isDisabled ? '' : undefined}
+      aria-invalid={ctx?.isInvalid || undefined}
+      aria-describedby={ctx?.describedBy}
+      aria-disabled={disabled || undefined}
+      data-disabled={disabled ? '' : undefined}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onKeyDown={handleKeyDown}
       style={wheelStyle}
       className={cn(
         'relative inline-block select-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        isDisabled && 'pointer-events-none opacity-50',
+        disabled && 'pointer-events-none opacity-50',
         className,
       )}
       {...rest}

@@ -39,7 +39,7 @@ export const TimeField = forwardRef<HTMLInputElement, TimeFieldProps>(function T
       disabled={disabled ?? ctx?.isDisabled}
       required={required ?? ctx?.isRequired}
       aria-invalid={ctx?.isInvalid || undefined}
-      aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
+      aria-describedby={ctx?.describedBy}
       value={formatISOTime(current)}
       onChange={(e) => setCurrent(parseISOTime(e.target.value))}
       className={cn(inputBaseVariants({ size, state: state ?? (ctx?.isInvalid ? InputState.Invalid : InputState.Default) }), className)}

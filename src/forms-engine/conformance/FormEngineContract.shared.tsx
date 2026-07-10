@@ -2,7 +2,12 @@ import { act, render, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '../../foundation/http';
-import { useFormControl, type FormControlContextValue } from '../../foundation/primitives';
+import {
+  useFormControl,
+  useFormControlChrome,
+  type FormControlChromeKind,
+  type FormControlContextValue,
+} from '../../foundation/primitives';
 
 import type { AppFieldApi, AppForm, AppFormOptions, FormEngine } from '../AppForm';
 import type { StandardSchemaV1 } from '../StandardSchema';
@@ -703,6 +708,67 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
 
         await act(async () => form.handleSubmit());
         expect(name.current.isTouched).toBe(true);
+      });
+
+      it('exposes the merged field errors on FormControlContext for chrome to render', async () => {
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: { name: 'ada', email: '' },
+          schema: nameRequired(),
+          validateOn: 'change',
+          onSubmit: async () => null,
+        });
+        const name = field('name');
+        const seen: { current: FormControlContextValue | null } = { current: null };
+        function ContextProbe() {
+          seen.current = useFormControl();
+          return null;
+        }
+        render(<form.Field name="name">{() => <ContextProbe />}</form.Field>);
+        expect(seen.current?.errors).toEqual([]);
+
+        // Client error via change-validation, then a server overlay — chrome sees the merge, client first.
+        await act(async () => name.current.setValue(''));
+        await waitFor(() => expect(seen.current?.errors).toEqual(['Name is required']));
+        await act(async () => form.setFieldErrors({ name: ['Server says no'] }));
+        await waitFor(() =>
+          expect(seen.current?.errors).toEqual(['Name is required', 'Server says no']),
+        );
+        expect(seen.current?.isInvalid).toBe(true);
+
+        await act(async () => name.current.setValue('grace'));
+        await waitFor(() => expect(seen.current?.errors).toEqual([]));
+      });
+
+      it('describedBy/labelledBy reference only registered (actually rendered) chrome', async () => {
+        const { form } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          onSubmit: async () => null,
+        });
+        const seen: { current: FormControlContextValue | null } = { current: null };
+        function ChromeProbe({ kinds }: { kinds: FormControlChromeKind[] }) {
+          seen.current = useFormControl();
+          useFormControlChrome('label', kinds.includes('label'));
+          useFormControlChrome('helper', kinds.includes('helper'));
+          useFormControlChrome('error', kinds.includes('error'));
+          return null;
+        }
+        const view = render(<form.Field name="name">{() => <ChromeProbe kinds={[]} />}</form.Field>);
+
+        // Nothing rendered → nothing referenced (the dangling-describedby fix).
+        expect(seen.current?.describedBy).toBeUndefined();
+        expect(seen.current?.labelledBy).toBeUndefined();
+
+        view.rerender(
+          <form.Field name="name">{() => <ChromeProbe kinds={['label', 'helper', 'error']} />}</form.Field>,
+        );
+        await waitFor(() =>
+          expect(seen.current?.describedBy).toBe(`${seen.current?.helperId} ${seen.current?.errorId}`),
+        );
+        expect(seen.current?.labelledBy).toBe(seen.current?.labelId);
+
+        view.rerender(<form.Field name="name">{() => <ChromeProbe kinds={['helper']} />}</form.Field>);
+        await waitFor(() => expect(seen.current?.describedBy).toBe(seen.current?.helperId));
+        expect(seen.current?.labelledBy).toBeUndefined();
       });
     });
 

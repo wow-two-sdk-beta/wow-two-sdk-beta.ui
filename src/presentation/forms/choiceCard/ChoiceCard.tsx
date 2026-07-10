@@ -1,6 +1,7 @@
 import { forwardRef, type ReactNode } from 'react';
 import { cn, Size } from '../../../foundation/utils';
 import { useId } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Radio, type RadioProps } from '../radio/Radio';
 
 export interface ChoiceCardProps extends Omit<RadioProps, 'children' | 'size'> {
@@ -28,7 +29,12 @@ const SIZE: Partial<Record<Size, string>> = {
 export const ChoiceCard = forwardRef<HTMLInputElement, ChoiceCardProps>(
   ({ label, description, icon, size = Size.Md, id, className, ...props }, ref) => {
     const generated = useId();
-    const inputId = id ?? generated;
+    // Context id wins over the generated fallback (see CheckboxField) — inside a
+    // `Field`/`form.Field` the surrounding Label's `htmlFor` targets `ctx.id`, so
+    // the card's radio must carry it. Inside a `RadioGroup` the per-item context
+    // supplies a unique id instead.
+    const ctx = useFormControl();
+    const inputId = id ?? ctx?.id ?? generated;
     return (
       <label
         htmlFor={inputId}

@@ -12,6 +12,7 @@ import {
 import { UploadCloud } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 /** Defines why a picked file was rejected by the uploader. */
 export const FileRejectionReason = {
@@ -79,6 +80,7 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
     children,
     className,
     name,
+    id,
     ...rest
   },
   forwardedRef,
@@ -87,6 +89,13 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
   useImperativeHandle(forwardedRef, () => inputRef.current as HTMLInputElement);
   const dragCounter = useRef(0);
   const [dragState, setDragState] = useState<'idle' | 'over' | 'reject'>('idle');
+
+  /* FormControlContext adoption — explicit props stay as overrides. The HIDDEN native
+     input carries the context id, so `Field`-rendered labels/describedby reference it
+     (label click opens the picker). The dropzone mirrors describedby for keyboard users. */
+  const ctx = useFormControl();
+  const isDisabled = disabled ?? ctx?.isDisabled;
+  const invalid = isInvalid ?? ctx?.isInvalid;
 
   const partition = useCallback(
     (files: FileList | ReadonlyArray<File>): [File[], ReadonlyArray<FileRejection>] => {
@@ -114,11 +123,11 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
   );
 
   const openPicker = () => {
-    if (!disabled) inputRef.current?.click();
+    if (!isDisabled) inputRef.current?.click();
   };
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     e.preventDefault();
     dragCounter.current += 1;
     const items = e.dataTransfer?.items;
@@ -147,13 +156,13 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
   };
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
   };
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     e.preventDefault();
     dragCounter.current -= 1;
     if (dragCounter.current <= 0) {
@@ -163,7 +172,7 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
   };
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     e.preventDefault();
     dragCounter.current = 0;
     setDragState('idle');
@@ -174,21 +183,22 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       openPicker();
     }
   };
 
-  const showError = isInvalid || dragState === 'reject';
+  const showError = invalid || dragState === 'reject';
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       <div
         role="button"
-        tabIndex={disabled ? -1 : 0}
-        aria-disabled={disabled || undefined}
+        tabIndex={isDisabled ? -1 : 0}
+        aria-disabled={isDisabled || undefined}
+        aria-describedby={ctx?.describedBy}
         data-drag-state={dragState}
         data-invalid={showError || undefined}
         onClick={openPicker}
@@ -203,7 +213,7 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           dragState === 'over' && 'border-primary bg-primary-soft/30 text-foreground',
           showError && 'border-destructive bg-destructive-soft/30 text-destructive',
-          disabled && 'cursor-not-allowed opacity-60 hover:border-input hover:bg-background',
+          isDisabled && 'cursor-not-allowed opacity-60 hover:border-input hover:bg-background',
         )}
       >
         <Icon
@@ -221,9 +231,14 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
           {...rest}
           ref={inputRef}
           type="file"
+          id={id ?? ctx?.id}
           accept={accept}
           multiple={multiple}
-          disabled={disabled}
+          disabled={isDisabled}
+          aria-invalid={invalid || undefined}
+          aria-describedby={ctx?.describedBy}
+          /* aria- (not native) required — onChange resets `value` after handing files out, so a native `required` would block every submit. */
+          aria-required={ctx?.isRequired || undefined}
           name={name}
           className="sr-only"
           onChange={(e) => {

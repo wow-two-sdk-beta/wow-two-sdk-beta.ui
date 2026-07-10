@@ -36,6 +36,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(
         min={min}
         max={max}
         aria-invalid={ctx?.isInvalid || undefined}
+        aria-describedby={ctx?.describedBy}
         className={cn(
           'w-full appearance-none bg-transparent disabled:cursor-not-allowed disabled:opacity-50',
           TRACK_CLASS[size] ?? TRACK_CLASS.md,

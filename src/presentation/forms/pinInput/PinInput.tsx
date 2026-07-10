@@ -6,6 +6,7 @@ import {
 } from 'react';
 import { cn, Size } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { inputBaseVariants, InputState } from '../InputStyles';
 
 /** Defines the character set a pin-input cell accepts. */
@@ -84,6 +85,13 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     useImperativeHandle(ref, () => wrapperRef.current as HTMLDivElement);
 
+    /* FormControlContext adoption — flags cascade onto every cell; the id/describedby
+       land on the FIRST cell (the composite's primary input), so `Field`-rendered
+       labels/helper reach the control. A user `id` prop stays on the wrapper div. */
+    const ctx = useFormControl();
+    const disabled = isDisabled ?? ctx?.isDisabled;
+    const invalid = ctx?.isInvalid ?? false;
+
     const isAllowed = (ch: string) =>
       type === PinInputType.Numeric ? /^[0-9]$/.test(ch) : /^[A-Za-z0-9]$/.test(ch);
 
@@ -134,17 +142,23 @@ export const PinInput = forwardRef<HTMLDivElement, PinInputProps>(
             }}
             type={isMasked ? 'password' : 'text'}
             inputMode={type === PinInputType.Numeric ? 'numeric' : 'text'}
-            /* Cells are internal — consumers can't label them individually, so each carries a built-in name. */
+            /* Cells are internal — consumers can't label them individually, so each carries a built-in name
+               (the aria-label wins over a `Field` label's htmlFor, keeping per-digit announcements). */
             aria-label={`${type === PinInputType.Numeric ? 'Digit' : 'Character'} ${i + 1} of ${length}`}
+            id={i === 0 ? ctx?.id : undefined}
+            aria-describedby={i === 0 ? ctx?.describedBy : undefined}
+            aria-required={i === 0 ? ctx?.isRequired || undefined : undefined}
+            aria-invalid={invalid || undefined}
             autoComplete="one-time-code"
             maxLength={1}
-            disabled={isDisabled}
+            disabled={disabled}
+            readOnly={ctx?.isReadOnly || undefined}
             value={ch}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
             onPaste={handlePaste}
             className={cn(
-              inputBaseVariants({ state: InputState.Default }),
+              inputBaseVariants({ state: invalid ? InputState.Invalid : InputState.Default }),
               'text-center font-medium',
               SIZE[size] ?? SIZE.md,
             )}

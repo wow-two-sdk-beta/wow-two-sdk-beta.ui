@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Kbd } from '../../display/kbd';
 
 export interface KeyboardShortcutPickerProps
@@ -61,10 +62,20 @@ export const KeyboardShortcutPicker = forwardRef<HTMLButtonElement, KeyboardShor
       name,
       className,
       type = 'button',
+      id,
+      'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledBy,
+      'aria-describedby': ariaDescribedBy,
       ...rest
     },
     ref,
   ) {
+    /* Inherits id/disabled/invalid/labelledby/describedby from a surrounding <Field>;
+       standalone props win when provided, context fills the gaps (Select parity).
+       Composed explicitly because `rest` spreads BEFORE the wired attributes here. */
+    const field = useFormControl();
+    const finalDisabled = disabled ?? field?.isDisabled;
+
     const [keys, setKeys] = useControlled<ReadonlyArray<string>>({
       controlled: valueProp,
       default: defaultValue ?? [],
@@ -111,7 +122,7 @@ export const KeyboardShortcutPicker = forwardRef<HTMLButtonElement, KeyboardShor
     }, [recording, setKeys]);
 
     const startRecord = () => {
-      if (disabled) return;
+      if (finalDisabled) return;
       setRecording(true);
     };
 
@@ -133,8 +144,14 @@ export const KeyboardShortcutPicker = forwardRef<HTMLButtonElement, KeyboardShor
             else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = el;
           }}
           type={type}
+          id={id ?? field?.id}
           aria-pressed={recording}
-          disabled={disabled}
+          aria-invalid={field?.isInvalid || undefined}
+          aria-label={ariaLabel}
+          /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
+          aria-labelledby={ariaLabelledBy ?? (ariaLabel ? undefined : field?.labelledBy)}
+          aria-describedby={ariaDescribedBy ?? field?.describedBy}
+          disabled={finalDisabled}
           onClick={startRecord}
           onKeyDown={handleButtonKey}
           className={cn(

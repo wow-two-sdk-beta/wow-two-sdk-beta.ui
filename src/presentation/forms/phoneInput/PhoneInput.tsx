@@ -1,6 +1,7 @@
 import { forwardRef, useMemo, useState, type HTMLAttributes } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { inputBaseVariants, InputSize } from '../InputStyles';
 
 export interface PhoneCountry {
@@ -115,6 +116,13 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
       default: defaultValue ?? '',
       onChange: onValueChange,
     });
+    /* FormControlContext adoption — explicit props stay as overrides. The national-number
+       input is the composite's primary control (carries the context id + describedby);
+       a user `id` prop stays on the root div. */
+    const ctx = useFormControl();
+    const disabled = isDisabled ?? ctx?.isDisabled;
+    const readOnly = isReadOnly ?? ctx?.isReadOnly;
+    const invalid = isInvalid ?? ctx?.isInvalid;
     /* Selected ISO is state — shared dial codes (+1 US/CA) make it unrecoverable from the value alone. Re-derive only when the value's dial prefix becomes incompatible with the selection. */
     const [selectedIso, setSelectedIso] = useState(defaultCountry);
     const { iso, national } = useMemo(() => {
@@ -141,8 +149,8 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
         ref={ref}
         className={cn(
           'inline-flex items-stretch overflow-hidden rounded-md border bg-background',
-          isInvalid ? 'border-destructive' : 'border-input',
-          isDisabled && 'opacity-60',
+          invalid ? 'border-destructive' : 'border-input',
+          disabled && 'opacity-60',
           className,
         )}
         {...rest}
@@ -150,7 +158,7 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
         <select
           aria-label="Country"
           value={iso}
-          disabled={isDisabled || isReadOnly}
+          disabled={disabled || readOnly}
           onChange={(e) => setCountry(e.target.value)}
           className={cn(
             'h-10 cursor-pointer border-r border-input bg-card pl-2 pr-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -167,11 +175,15 @@ export const PhoneInput = forwardRef<HTMLDivElement, PhoneInputProps>(
           type="tel"
           inputMode="tel"
           autoComplete="tel-national"
+          id={ctx?.id}
           value={national}
           placeholder={placeholder}
-          disabled={isDisabled}
-          readOnly={isReadOnly}
-          aria-invalid={isInvalid || undefined}
+          disabled={disabled}
+          readOnly={readOnly}
+          aria-invalid={invalid || undefined}
+          aria-describedby={ctx?.describedBy}
+          /* aria- (not native) required — the hidden input carries the submitted E.164 value. */
+          aria-required={ctx?.isRequired || undefined}
           onChange={(e) => setNational(e.target.value)}
           className={cn(
             inputBaseVariants({ size: InputSize.Md }),

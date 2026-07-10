@@ -11,6 +11,7 @@ import { ChevronRight, Copy } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 /** Defines how a JSON editor renders its document. */
 export const JSONEditorMode = {
@@ -99,6 +100,13 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
     default: defaultMode,
     onChange: onModeChange,
   });
+  /* Inherits flags from a surrounding <Field>; explicit props win. The context id /
+     labelling / describedby land on the active editing surface (text-mode textarea or
+     tree-mode tree) — the subviews read the context themselves. */
+  const ctx = useFormControl();
+  const finalDisabled = isDisabled ?? ctx?.isDisabled;
+  const finalReadOnly = isReadOnly ?? ctx?.isReadOnly;
+  const finalInvalid = isInvalid ?? ctx?.isInvalid;
 
   const updateAt = (path: Path, next: unknown) => {
     setValue(setAtPath(value, path, next));
@@ -107,11 +115,11 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
   return (
     <div
       ref={ref}
-      data-state={isInvalid ? 'invalid' : 'default'}
+      data-state={finalInvalid ? 'invalid' : 'default'}
       className={cn(
         'flex flex-col overflow-hidden rounded-md border border-input bg-card text-card-foreground shadow-sm',
-        isInvalid && 'border-destructive',
-        isDisabled && 'opacity-60',
+        finalInvalid && 'border-destructive',
+        finalDisabled && 'opacity-60',
         className,
       )}
       style={{ minHeight }}
@@ -140,9 +148,9 @@ export const JSONEditor = forwardRef<HTMLDivElement, JSONEditorProps>(function J
       </div>
       <div className="flex-1 overflow-auto" style={{ minHeight: 0 }}>
         {mode === JSONEditorMode.Tree ? (
-          <TreeView value={value} updateAt={updateAt} isDisabled={isDisabled} isReadOnly={isReadOnly} />
+          <TreeView value={value} updateAt={updateAt} isDisabled={finalDisabled} isReadOnly={finalReadOnly} isInvalid={finalInvalid} />
         ) : (
-          <TextView value={value} setValue={setValue} isDisabled={isDisabled} isReadOnly={isReadOnly} indent={indent} />
+          <TextView value={value} setValue={setValue} isDisabled={finalDisabled} isReadOnly={finalReadOnly} isInvalid={finalInvalid} indent={indent} />
         )}
       </div>
     </div>
@@ -154,12 +162,23 @@ interface TreeViewProps {
   updateAt: (path: Path, next: unknown) => void;
   isDisabled?: boolean;
   isReadOnly?: boolean;
+  isInvalid?: boolean;
 }
 
-function TreeView({ value, updateAt, isDisabled, isReadOnly }: TreeViewProps) {
+function TreeView({ value, updateAt, isDisabled, isReadOnly, isInvalid }: TreeViewProps) {
+  /* In tree mode the tree IS the editing surface — it carries the context id
+     (label anchor) and is named/described by the Field chrome. */
+  const ctx = useFormControl();
   return (
-    <ul role="tree" className="font-mono text-sm">
-      <TreeNode keyName={null} value={value} path={[]} updateAt={updateAt} isDisabled={isDisabled} isReadOnly={isReadOnly} depth={0} />
+    <ul
+      role="tree"
+      id={ctx?.id}
+      aria-labelledby={ctx?.labelledBy}
+      aria-describedby={ctx?.describedBy}
+      aria-invalid={isInvalid || undefined}
+      className="font-mono text-sm"
+    >
+      <TreeNode keyName={null} value={value} path={[]} updateAt={updateAt} isDisabled={isDisabled} isReadOnly={isReadOnly} isInvalid={isInvalid} depth={0} />
     </ul>
   );
 }
@@ -171,10 +190,14 @@ interface TreeNodeProps {
   updateAt: (path: Path, next: unknown) => void;
   isDisabled?: boolean;
   isReadOnly?: boolean;
+  isInvalid?: boolean;
   depth: number;
 }
 
-function TreeNode({ keyName, value, path, updateAt, isDisabled, isReadOnly, depth }: TreeNodeProps) {
+function TreeNode({ keyName, value, path, updateAt, isDisabled, isReadOnly, isInvalid, depth }: TreeNodeProps) {
+  /* The transient leaf editor is a real editing surface — the Field's helper/error
+     description follows it (the input keeps its own action name). */
+  const ctx = useFormControl();
   const type = describeType(value);
   const isObject = type === 'object' || type === 'array';
   const [open, setOpen] = useState(depth < 2);
@@ -248,6 +271,8 @@ function TreeNode({ keyName, value, path, updateAt, isDisabled, isReadOnly, dept
           <input
             autoFocus
             aria-label="Edit value"
+            aria-invalid={isInvalid || undefined}
+            aria-describedby={ctx?.describedBy}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKey}
@@ -290,6 +315,7 @@ function TreeNode({ keyName, value, path, updateAt, isDisabled, isReadOnly, dept
               updateAt={updateAt}
               isDisabled={isDisabled}
               isReadOnly={isReadOnly}
+              isInvalid={isInvalid}
               depth={depth + 1}
             />
           ))}
@@ -304,10 +330,14 @@ interface TextViewProps {
   setValue: (next: unknown) => void;
   isDisabled?: boolean;
   isReadOnly?: boolean;
+  isInvalid?: boolean;
   indent: number;
 }
 
-function TextView({ value, setValue, isDisabled, isReadOnly, indent }: TextViewProps) {
+function TextView({ value, setValue, isDisabled, isReadOnly, isInvalid, indent }: TextViewProps) {
+  /* In text mode the raw textarea is the editing surface — it takes the context id
+     (Label htmlFor target) and the Field label overrides the generic fallback name. */
+  const ctx = useFormControl();
   const initial = useMemo(() => safeStringify(value, indent), [value, indent]);
   const [draft, setDraft] = useState(initial);
   const [error, setError] = useState<string | null>(null);
@@ -332,7 +362,11 @@ function TextView({ value, setValue, isDisabled, isReadOnly, indent }: TextViewP
   return (
     <div className="flex h-full flex-col">
       <textarea
+        id={ctx?.id}
         aria-label="JSON source"
+        aria-labelledby={ctx?.labelledBy}
+        aria-invalid={isInvalid || undefined}
+        aria-describedby={ctx?.describedBy}
         value={draft}
         disabled={isDisabled}
         readOnly={isReadOnly}

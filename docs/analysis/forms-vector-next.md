@@ -2,6 +2,11 @@
 
 *Last updated: 2026-07-11*
 
+> **F-2a SHIPPED (2026-07-11)** with one design deviation: the chrome seam is the foundation `FormControlContext` (chrome *registration*:
+> `registerChrome`/`useFormControlChrome`, provider adoption, `errors` in context) — NOT `label`/`helper` props on `AppFieldProps` (module→presentation
+> is boundaries-forbidden; those props would be unrenderable by the module). Conformance grew 34→36. §4 F-2a row + §5 "Chrome" bullet read with this
+> substitution.
+
 > Iteration plan for maturing the forms/fields/validation vector after the engine shipped (W2-a). Feeds `docs/planning.md` row **F-2**. Method mirrors how the testing vector matured (`docs/testing.md`): audit → gap table → sized iterations → explicit, checkable DONE definition.
 >
 > Inputs: [`forms-engine.md`](./forms-engine.md) (shipped design, R1–R13, phased plan) · `src/forms-engine/**` source read · `src/presentation/forms/` 73-folder audit (grep `useFormControl` + per-component composition check) · [`frontend-modules-products.md`](./frontend-modules-products.md) §1–2 form rows · `targets.md` §2.2 i18n verdicts.

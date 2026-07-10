@@ -63,6 +63,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Icon } from '../../../foundation/icons';
 import { inputBaseVariants, InputSize } from '../InputStyles';
 
@@ -155,10 +156,20 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
       isDisabled,
       name,
       className,
+      id,
       ...rest
     },
     ref,
   ) {
+    /* Inline panel (no popover trigger) — the `role="group"` grid is the control:
+       it takes the context id (so a Field label's `htmlFor` resolves), is named via
+       `aria-labelledby`, and described via `aria-describedby`. `aria-invalid` is not
+       valid on `group`; invalid state surfaces through the describedby swap to the
+       error chrome. Disabled flows to the search input + icon buttons. */
+    const field = useFormControl();
+    const finalDisabled = isDisabled ?? field?.isDisabled;
+    const labelledBy = field?.labelledBy;
+
     const [value, setValue] = useControlled<string>({
       controlled: valueProp,
       default: defaultValue ?? '',
@@ -186,7 +197,7 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
           type="search"
           value={query}
           placeholder={placeholder}
-          disabled={isDisabled}
+          disabled={finalDisabled}
           onChange={(e) => setQuery(e.target.value)}
           className={cn(inputBaseVariants({ size: InputSize.Sm }))}
         />
@@ -194,7 +205,10 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
           // Flat button collection, no 2D keyboard nav — ARIA grid (grid >
           // row > gridcell) would be a lie; group + labeled buttons is honest.
           role="group"
-          aria-label="Icons"
+          id={id ?? field?.id}
+          aria-label={labelledBy ? undefined : 'Icons'}
+          aria-labelledby={labelledBy}
+          aria-describedby={field?.describedBy}
           className="grid gap-1 overflow-y-auto"
           style={{ gridTemplateColumns: `repeat(${columns}, ${iconButtonSize}px)`, maxHeight: 240 }}
         >
@@ -206,7 +220,7 @@ export const IconPicker = forwardRef<HTMLDivElement, IconPickerProps>(
                   type="button"
                   aria-pressed={selected}
                   aria-label={key}
-                  disabled={isDisabled}
+                  disabled={finalDisabled}
                   onClick={() => setValue(key)}
                   style={{ width: iconButtonSize, height: iconButtonSize }}
                   className={cn(

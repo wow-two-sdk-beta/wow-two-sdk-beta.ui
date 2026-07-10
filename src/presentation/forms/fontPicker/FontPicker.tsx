@@ -2,6 +2,7 @@ import { forwardRef, useMemo, useState, type HTMLAttributes } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Icon } from '../../../foundation/icons';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays/popover';
 
@@ -54,10 +55,17 @@ export const FontPicker = forwardRef<HTMLDivElement, FontPickerProps>(
       isDisabled,
       name,
       className,
+      id,
       ...rest
     },
     ref,
   ) {
+    /* Inherits id/disabled/invalid/labelledby/describedby from a surrounding <Field>;
+       standalone props win when provided, context fills the gaps (Select parity).
+       The `id` lands on the trigger button (the control), not the wrapper div. */
+    const field = useFormControl();
+    const finalDisabled = isDisabled ?? field?.isDisabled;
+
     const [value, setValue] = useControlled<string>({
       controlled: valueProp,
       default: defaultValue ?? fonts[0]?.family ?? '',
@@ -80,7 +88,13 @@ export const FontPicker = forwardRef<HTMLDivElement, FontPickerProps>(
           <PopoverTrigger asChild>
             <button
               type="button"
-              disabled={isDisabled}
+              id={id ?? field?.id}
+              disabled={finalDisabled}
+              aria-invalid={field?.isInvalid || undefined}
+              /* Names the trigger from the Field label when present (the button's content
+                 is the selected font, not a name). */
+              aria-labelledby={field?.labelledBy}
+              aria-describedby={field?.describedBy}
               aria-haspopup="listbox"
               aria-expanded={open}
               className={cn(

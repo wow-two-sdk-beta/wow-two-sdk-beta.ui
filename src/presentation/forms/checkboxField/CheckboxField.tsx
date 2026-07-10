@@ -1,6 +1,7 @@
 import { forwardRef, type ReactNode } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useId } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Checkbox, type CheckboxProps } from '../checkbox/Checkbox';
 
 export interface CheckboxFieldProps extends Omit<CheckboxProps, 'children'> {
@@ -21,7 +22,10 @@ export interface CheckboxFieldProps extends Omit<CheckboxProps, 'children'> {
 export const CheckboxField = forwardRef<HTMLInputElement, CheckboxFieldProps>(
   ({ label, description, id, wrapperClassName, className, ...props }, ref) => {
     const generated = useId();
-    const inputId = id ?? generated;
+    // Context id wins over the generated fallback — inside a `Field`/`form.Field`
+    // the surrounding Label's `htmlFor` targets `ctx.id`, so the box must carry it.
+    const ctx = useFormControl();
+    const inputId = id ?? ctx?.id ?? generated;
     return (
       <label
         htmlFor={inputId}

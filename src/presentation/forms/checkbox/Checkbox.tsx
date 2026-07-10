@@ -156,7 +156,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           checked={checked}
           aria-checked={isIndeterminate ? 'mixed' : undefined}
           aria-invalid={ctx?.isInvalid || undefined}
-          aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
+          aria-describedby={ctx?.describedBy}
           className="peer absolute inset-0 m-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
           {...props}
         />

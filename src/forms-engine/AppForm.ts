@@ -77,8 +77,10 @@ export interface AppFieldProps<TValues extends object, TPath extends string = st
 
 /**
  * Field wrapper — always provides `FormControlContext` (id / labelId / errorId / isInvalid /
- * isDisabled / isRequired) so the control + `FormErrorMessage` auto-wire aria. Label / helper
- * chrome stays with the presentation `Field` composed inside the render prop.
+ * `errors` / isDisabled / isRequired) so the control + chrome auto-wire aria. Label / helper
+ * chrome stays with the presentation `Field` composed inside the render prop — it ADOPTS
+ * this provider (same ids, inherited flags) and renders the context `errors` without
+ * `error={f.errors[0]}` hand-wiring.
  */
 export interface AppFieldComponent<TValues extends object> {
   <TPath extends string>(props: AppFieldProps<TValues, TPath>): ReactNode;
@@ -108,8 +110,9 @@ export interface AppArrayApi {
 
 /** What `useAppForm` returns — identical across engines; `TEngine` types the escape hatch. */
 export interface AppForm<TValues extends object, TEngine = unknown> {
-  /** Field wrapper — optional `label`/`helper` render via presentation `Field`; always provides `FormControlContext`
-   *  (id / labelId / errorId / isInvalid / isDisabled / isRequired) so the control + `FormErrorMessage` auto-wire aria. */
+  /** Field wrapper — always provides `FormControlContext` (id / labelId / errorId / isInvalid / `errors` /
+   *  isDisabled / isRequired); the presentation `Field` composed inside the render prop adopts it, so
+   *  label/helper/error chrome renders from one provider with zero hand-wiring. */
   readonly Field: AppFieldComponent<TValues>;
   /** Render-prop subscription to a state slice (also exposed as the `useFormState(selector)` hook). */
   readonly Subscribe: AppSubscribeComponent<TValues>;

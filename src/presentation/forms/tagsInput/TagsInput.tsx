@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { cn, composeRefs } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Tag, type TagVariants } from '../../display/tag';
 import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
@@ -61,9 +62,13 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
     name,
     tagVariant = 'neutral',
     size,
+    state,
+    id,
     className,
     onKeyDown,
     onBlur,
+    'aria-describedby': ariaDescribedBy,
+    'aria-required': ariaRequired,
     ...rest
   },
   forwardedRef,
@@ -81,7 +86,12 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [pendingDelete, setPendingDelete] = useState(false);
-  const state = isInvalid ? InputState.Invalid : InputState.Default;
+  /* FormControlContext adoption — explicit props stay as overrides. */
+  const ctx = useFormControl();
+  const isDisabled = disabled ?? ctx?.isDisabled;
+  const isReadOnly = readOnly ?? ctx?.isReadOnly;
+  const invalid = isInvalid ?? ctx?.isInvalid;
+  const finalState = state ?? (invalid ? InputState.Invalid : InputState.Default);
 
   const commit = useCallback(
     (raw: string) => {
@@ -104,7 +114,7 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(e);
-    if (e.defaultPrevented || disabled || readOnly) return;
+    if (e.defaultPrevented || isDisabled || isReadOnly) return;
     if (e.key === 'Enter' || (e.key === 'Tab' && text)) {
       if (text) {
         e.preventDefault();
@@ -140,13 +150,13 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
     <div
       role="group"
       onClick={handleContainerClick}
-      data-disabled={disabled || undefined}
-      data-readonly={readOnly || undefined}
-      data-invalid={isInvalid || undefined}
+      data-disabled={isDisabled || undefined}
+      data-readonly={isReadOnly || undefined}
+      data-invalid={invalid || undefined}
       className={cn(
-        inputBaseVariants({ size, state }),
+        inputBaseVariants({ size, state: finalState }),
         'h-auto min-h-10 flex-wrap items-center gap-1.5 py-1.5',
-        disabled && 'cursor-not-allowed opacity-60',
+        isDisabled && 'cursor-not-allowed opacity-60',
         className,
       )}
     >
@@ -155,7 +165,7 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
           key={`${t}-${i}`}
           variant={tagVariant}
           data-pending-delete={pendingDelete && i === tags.length - 1 ? '' : undefined}
-          onClose={!disabled && !readOnly ? () => removeAt(i) : undefined}
+          onClose={!isDisabled && !isReadOnly ? () => removeAt(i) : undefined}
           className={cn(pendingDelete && i === tags.length - 1 && 'ring-1 ring-ring')}
         >
           {t}
@@ -165,11 +175,16 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(function T
         {...rest}
         ref={composeRefs(forwardedRef, inputRef)}
         type="text"
+        /* The inner input is the composite's primary control — it carries the context id so `Field`-rendered chrome reaches it. */
+        id={id ?? ctx?.id}
         value={text}
         placeholder={tags.length === 0 ? placeholder : undefined}
-        disabled={disabled}
-        readOnly={readOnly}
-        aria-invalid={isInvalid || undefined}
+        disabled={isDisabled}
+        readOnly={isReadOnly}
+        aria-invalid={invalid || undefined}
+        aria-describedby={ariaDescribedBy ?? ctx?.describedBy}
+        /* aria- (not native) required — the tag list is the value; a native `required` on the empty inner input would block submits even with tags committed. */
+        aria-required={ariaRequired ?? (ctx?.isRequired || undefined)}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={(e) => {

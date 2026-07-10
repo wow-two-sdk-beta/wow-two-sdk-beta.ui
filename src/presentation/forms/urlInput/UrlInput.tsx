@@ -29,7 +29,7 @@ export const UrlInput = forwardRef<HTMLInputElement, UrlInputProps>(
         required={required ?? ctx?.isRequired}
         readOnly={readOnly ?? ctx?.isReadOnly}
         aria-invalid={ctx?.isInvalid || undefined}
-        aria-describedby={ctx ? `${ctx.helperId} ${ctx.errorId}` : undefined}
+        aria-describedby={ctx?.describedBy}
         className={cn(inputBaseVariants({ size, state: finalState }), className)}
         {...props}
       />

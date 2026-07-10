@@ -1,6 +1,7 @@
 import { type HTMLAttributes, type KeyboardEvent } from 'react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { RovingFocusGroup, useRovingFocusItem } from '../../../foundation/primitives';
 import { ColorSwatch, type ColorSwatchVariants } from '../colorSwatch';
 
@@ -58,10 +59,20 @@ export function ColorSwatchPicker({
   onValueChange,
   swatchSize = 'md',
   swatchShape = 'square',
-  isDisabled = false,
+  isDisabled,
   className,
+  id,
+  'aria-label': ariaLabel,
   ...rest
 }: ColorSwatchPickerProps) {
+  /* Inline swatch group (no popover trigger) — the `role="group"` node is the control:
+     it takes the context id (so a Field label's `htmlFor` resolves), is named via
+     `aria-labelledby`, and described via `aria-describedby`. `aria-invalid` is not valid
+     on `group`; invalid state surfaces through the describedby swap to the error chrome.
+     Disabled flows to every swatch button. */
+  const field = useFormControl();
+  const finalDisabled = (isDisabled ?? field?.isDisabled) ?? false;
+
   const [selected, setSelected] = useControlled<string | null>({
     controlled: value,
     default: defaultValue ?? null,
@@ -72,6 +83,11 @@ export function ColorSwatchPicker({
     <RovingFocusGroup
       orientation="both"
       canLoop
+      id={id ?? field?.id}
+      aria-label={ariaLabel}
+      /* Names the group from the Field label when present; an explicit aria-label always wins. */
+      aria-labelledby={ariaLabel ? undefined : field?.labelledBy}
+      aria-describedby={field?.describedBy}
       className={cn('flex flex-wrap gap-1.5', className)}
       {...rest}
     >
@@ -80,7 +96,7 @@ export function ColorSwatchPicker({
           key={c}
           color={c}
           isSelected={selected === c}
-          isDisabled={isDisabled}
+          isDisabled={finalDisabled}
           size={swatchSize}
           shape={swatchShape}
           onSelect={(color) => setSelected(color)}

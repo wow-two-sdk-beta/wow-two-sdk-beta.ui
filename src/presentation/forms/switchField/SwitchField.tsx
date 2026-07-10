@@ -1,6 +1,7 @@
 import { forwardRef, type ReactNode } from 'react';
 import { cn, Side } from '../../../foundation/utils';
 import { useId } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Switch, type SwitchProps } from '../switch/Switch';
 
 export interface SwitchFieldProps extends Omit<SwitchProps, 'children'> {
@@ -18,7 +19,9 @@ export interface SwitchFieldProps extends Omit<SwitchProps, 'children'> {
 export const SwitchField = forwardRef<HTMLInputElement, SwitchFieldProps>(
   ({ label, description, side = Side.Left, id, wrapperClassName, className, ...props }, ref) => {
     const generated = useId();
-    const inputId = id ?? generated;
+    // Context id wins over the generated fallback (see CheckboxField).
+    const ctx = useFormControl();
+    const inputId = id ?? ctx?.id ?? generated;
     const text = (
       <span className="flex flex-col gap-0.5 text-sm">
         <span className="font-medium text-foreground">{label}</span>
