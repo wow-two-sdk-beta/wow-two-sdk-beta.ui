@@ -26,6 +26,12 @@ export interface AppFormOptions<TValues extends object> {
   readonly mapSubmitError?: (error: unknown) => Record<string, string[]>;
   /** Rewrites a server error path onto a form path. Default: camelCase per segment (`Rules[0].Destination` → `rules[0].destination`). */
   readonly mapFieldPath?: (serverPath: string) => string;
+  /**
+   * The message used when a submit failure is neither an `ApiError`, an `Error`, nor a
+   * string (e.g. a thrown plain object) — the last SDK-authored English literal on the
+   * submit path. Override for i18n. Default: `'Unknown error'`.
+   */
+  readonly fallbackErrorMessage?: string;
 }
 
 /** The per-field render API a `<form.Field>` child receives. */
@@ -49,6 +55,13 @@ export interface AppFormState<TValues> {
   readonly isValidating: boolean;
   /** The submit failure whose mapped paths matched no field — feed the form-level `Alert`. */
   readonly submitError: ApiError | null;
+  /**
+   * The last completed submit's verdict as a reactive slice — `true` when validation passed
+   * AND `onSubmit` resolved, `false` when validation failed or `onSubmit` threw, `null` before
+   * the first completed attempt and after `reset()`. Mirrors `handleSubmit`'s resolved value,
+   * so the imperative return and this slice never disagree (success banners subscribe here).
+   */
+  readonly isSubmitSuccessful: boolean | null;
 }
 
 /**
@@ -90,6 +103,13 @@ export interface AppFieldComponent<TValues extends object> {
 export interface AppSubscribeProps<TValues extends object, TSlice> {
   /** Selects the slice to subscribe to — re-renders only when the selected value changes. */
   readonly selector: (state: AppFormState<TValues>) => TSlice;
+  /**
+   * Optional equality for the selected slice — return `true` to treat two selections as
+   * unchanged and skip the re-render. Defaults to `Object.is`. Pass a shallow-equal for a
+   * composite selector (`{a,b,c}`) whose fresh object identity would otherwise defeat the
+   * adapter's `Object.is` slice cache and re-render on every store change.
+   */
+  readonly isEqual?: (a: TSlice, b: TSlice) => boolean;
   /** Renders from the selected slice. */
   readonly children: (slice: TSlice) => ReactNode;
 }
@@ -116,16 +136,39 @@ export interface AppForm<TValues extends object, TEngine = unknown> {
   readonly Field: AppFieldComponent<TValues>;
   /** Render-prop subscription to a state slice (also exposed as the `useFormState(selector)` hook). */
   readonly Subscribe: AppSubscribeComponent<TValues>;
-  /** Hook form of `Subscribe` — selector-subscribed state slice. Stable on the form instance, so calling it is rules-of-hooks safe. */
-  readonly useFormState: <TSlice>(selector: (state: AppFormState<TValues>) => TSlice) => TSlice;
-  /** Validates, runs `onSubmit`, applies mapped server errors to fields, leaves the remainder in `submitError`. */
-  readonly handleSubmit: (event?: FormEvent) => Promise<void>;
+  /**
+   * Hook form of `Subscribe` — selector-subscribed state slice. Stable on the form instance,
+   * so calling it is rules-of-hooks safe. Pass `isEqual` (defaults to `Object.is`) to keep a
+   * composite selector from re-rendering on every store change.
+   */
+  readonly useFormState: <TSlice>(
+    selector: (state: AppFormState<TValues>) => TSlice,
+    isEqual?: (a: TSlice, b: TSlice) => boolean,
+  ) => TSlice;
+  /**
+   * Validates, runs `onSubmit`, applies mapped server errors to fields, leaves the remainder
+   * in `submitError`. Resolves the verdict — `true` iff validation passed AND `onSubmit`
+   * resolved; `false` on validation failure or an `onSubmit` throw. Never rejects, so a
+   * `<form onSubmit={form.handleSubmit}>` handler ignores the return while an imperative caller
+   * (a wizard-step gate) branches on it. The reactive mirror is `state.isSubmitSuccessful`.
+   */
+  readonly handleSubmit: (event?: FormEvent) => Promise<boolean>;
+  /**
+   * Writes a value at a path outside a `<form.Field>` render prop — cross-field / derived
+   * writes (name → slug) and sibling-group writes. Top-level keys are typed to their value;
+   * deeper dot/index paths accept `unknown` (the typed-values / untyped-paths contract rule,
+   * mirroring {@link AppFieldValue}). Clears that field's server error like an in-field edit
+   * and runs change-time validation under the active `validateOn`.
+   */
+  readonly setValue: <TPath extends string>(path: TPath, value: AppFieldValue<TValues, TPath>) => void;
   /** Array helpers at a path — `push` / `insert` / `remove` / `swap` / `move` (R8). */
   readonly array: (path: string) => AppArrayApi;
   /** Resets to `defaultValues`, or re-seeds with `next` (edit-mode prefill — kills smart-qr's 13-setter effect). */
   readonly reset: (next?: TValues) => void;
   /** Applies server field errors outside the submit pipeline (e.g. a deferred backend check). Replaces the current server-error overlay. */
   readonly setFieldErrors: (errors: Record<string, string[]>) => void;
+  /** Clears the form-level `submitError` (a dismissible error banner's reset) — leaves field errors untouched. */
+  readonly clearSubmitError: () => void;
   /** ESCAPE HATCH — the native engine form instance. See the 90/10 rule in docs/analysis/forms-engine.md §4. */
   readonly engine: TEngine;
 }

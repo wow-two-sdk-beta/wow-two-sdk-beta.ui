@@ -8,6 +8,7 @@ import { Alert } from '../presentation/feedback';
 import { Field, PasswordInput, TextInput } from '../presentation/forms';
 
 import type { StandardSchemaV1 } from './StandardSchema';
+import { useFieldArray } from './UseFieldArray';
 import { useAppForm } from './house';
 
 /*
@@ -316,45 +317,37 @@ function RedirectRulesDemo() {
       return null;
     },
   });
-  const rules = form.array('rules');
+  // The typed row helper: reactive rows + stable keys + element-typed ops + a CAST-FREE row
+  // field — `f.value` is `string` (RedirectRuleValues['destination']), no `as string` per row.
+  const rules = useFieldArray<RedirectRuleValues>(form, 'rules');
   return (
     <form className="flex w-96 flex-col gap-3" onSubmit={(event) => void form.handleSubmit(event)}>
-      <form.Subscribe selector={(s) => s.values.rules}>
-        {(rows) => (
-          <>
-            {rows.map((_, index) => (
-              <div key={index} className="flex items-start gap-2">
-                <form.Field name={`rules[${index}].destination`}>
-                  {(f) => (
-                    <Field label={`Destination ${index + 1}`} className="flex-1">
-                      <TextInput
-                        value={f.value as string}
-                        onChange={(e) => f.setValue(e.target.value)}
-                        onBlur={f.onBlur}
-                      />
-                    </Field>
-                  )}
-                </form.Field>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-7"
-                  isDisabled={index === 0}
-                  onClick={() => rules.move(index, index - 1)}
-                >
-                  Move rule {index + 1} up
-                </Button>
-                <Button variant="outline" size="sm" className="mt-7" onClick={() => rules.remove(index)}>
-                  Remove rule {index + 1}
-                </Button>
-              </div>
-            ))}
-            <Button variant="outline" onClick={() => rules.push({ destination: '' })}>
-              Add rule
-            </Button>
-          </>
-        )}
-      </form.Subscribe>
+      {rules.rows.map((row) => (
+        <div key={row.key} className="flex items-start gap-2">
+          <rules.Field index={row.index} name="destination">
+            {(f) => (
+              <Field label={`Destination ${row.index + 1}`} className="flex-1">
+                <TextInput value={f.value} onChange={(e) => f.setValue(e.target.value)} onBlur={f.onBlur} />
+              </Field>
+            )}
+          </rules.Field>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-7"
+            isDisabled={row.index === 0}
+            onClick={() => rules.move(row.index, row.index - 1)}
+          >
+            Move rule {row.index + 1} up
+          </Button>
+          <Button variant="outline" size="sm" className="mt-7" onClick={() => rules.remove(row.index)}>
+            Remove rule {row.index + 1}
+          </Button>
+        </div>
+      ))}
+      <Button variant="outline" onClick={() => rules.push({ destination: '' })}>
+        Add rule
+      </Button>
       <form.Subscribe selector={(s) => s.isSubmitting}>
         {(busy) => (
           <Button type="submit" isLoading={busy}>

@@ -194,6 +194,7 @@ function createCombinedReader<TValues extends object>(
         // `isValidating` counts field-level validators only, so merge both flags.
         isValidating: tan.isFormValidating || tan.isValidating,
         submitError: ov.submitError,
+        isSubmitSuccessful: ov.isSubmitSuccessful,
       };
       return formState;
     },
@@ -233,9 +234,12 @@ function useCombinedSlice<TValues extends object, TSlice>(
   subscribe: (listener: () => void) => () => void,
   reader: CombinedReader<TValues>,
   selector: (state: AppFormState<TValues>) => TSlice,
+  isEqual?: (a: TSlice, b: TSlice) => boolean,
 ): TSlice {
   const selectorRef = useRef(selector);
   selectorRef.current = selector;
+  const isEqualRef = useRef(isEqual);
+  isEqualRef.current = isEqual;
   const cacheRef = useRef<{
     state: AppFormState<TValues>;
     selector: (state: AppFormState<TValues>) => TSlice;
@@ -248,7 +252,10 @@ function useCombinedSlice<TValues extends object, TSlice>(
     const cached = cacheRef.current;
     if (cached && cached.state === state && cached.selector === currentSelector) return cached.slice;
     const slice = currentSelector(state);
-    if (cached && Object.is(cached.slice, slice)) {
+    // `isEqual` (default `Object.is`) keeps a fresh-but-equal composite selection on the
+    // cached ref, so `useSyncExternalStore` bails the re-render instead of churning on it.
+    const equals = isEqualRef.current ?? Object.is;
+    if (cached && equals(cached.slice, slice)) {
       cacheRef.current = { state, selector: currentSelector, slice: cached.slice };
       return cached.slice;
     }
@@ -313,6 +320,9 @@ function createAdapterPrelude<TValues extends object>(
       overlay.setSubmitting(true);
       try {
         await getOptions().onSubmit(value);
+        // Reached only when validation passed AND the app submit resolved — the verdict's
+        // sole success signal (the invalid path never runs this; a throw skips it).
+        overlay.setSubmitSuccessful(true);
       } finally {
         overlay.setSubmitting(false);
       }
@@ -354,8 +364,10 @@ function buildAppForm<TValues extends object>(
     };
   };
 
-  const useFormState = <TSlice,>(selector: (state: AppFormState<TValues>) => TSlice): TSlice =>
-    useCombinedSlice(subscribe, reader, selector);
+  const useFormState = <TSlice,>(
+    selector: (state: AppFormState<TValues>) => TSlice,
+    isEqual?: (a: TSlice, b: TSlice) => boolean,
+  ): TSlice => useCombinedSlice(subscribe, reader, selector, isEqual);
   const useFieldApi = (path: string): AppFieldApi<unknown> =>
     useCombinedField(subscribe, reader, engine, overlay, path);
 
@@ -391,11 +403,15 @@ function buildAppForm<TValues extends object>(
     useFormState,
     handleSubmit: async (event?: FormEvent) => {
       event?.preventDefault();
-      // Before validation: a new attempt clears the previous server errors/submitError
-      // and marks everything touched — even when client validation then fails.
+      // Before validation: a new attempt clears the previous server errors/submitError,
+      // re-arms the verdict, and marks everything touched — even when validation then fails.
       overlay.beginSubmitAttempt();
+      let succeeded = false;
       try {
         await engine.handleSubmit();
+        // The wrapper `onSubmit` flips the verdict true only on a valid + resolved submit;
+        // an invalid attempt leaves it `null` (no throw, `onSubmit` never ran).
+        succeeded = overlay.getState().isSubmitSuccessful === true;
       } catch (error) {
         // TanStack rethrows `onSubmit` failures — resolve them here so the contract's
         // `handleSubmit` never rejects and no server message silently disappears.
@@ -407,9 +423,20 @@ function buildAppForm<TValues extends object>(
             options.mapSubmitError ?? fieldErrors,
             options.mapFieldPath ?? defaultMapFieldPath,
             (path) => hasPath(values, path),
+            options.fallbackErrorMessage,
           ),
         );
+        succeeded = false;
       }
+      // Settle the verdict — the invalid path's `null` becomes `false`; success is idempotent.
+      overlay.setSubmitSuccessful(succeeded);
+      return succeeded;
+    },
+    setValue: (path, value) => {
+      // Server messages clear on the next change to the field (contract JSDoc) — mirror the
+      // in-field `setValue`; TanStack's 'change'-cause validation runs under `revalidateLogic`.
+      overlay.clearServerErrorsAt(path);
+      engine.setFieldValue(path as DeepKeys<TValues>, value as never);
     },
     array: (path: string) => ({
       push: (value: unknown) => arrayOperation(path, { kind: 'push', value }),
@@ -428,6 +455,7 @@ function buildAppForm<TValues extends object>(
       engine.reset(values);
     },
     setFieldErrors: (errors: Record<string, string[]>) => overlay.replaceServerErrors(errors),
+    clearSubmitError: () => overlay.clearSubmitError(),
     engine,
   };
 }

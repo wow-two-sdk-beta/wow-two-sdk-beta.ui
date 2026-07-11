@@ -32,6 +32,22 @@ export type { StandardSchemaV1 } from './StandardSchema';
 // Server-error path rewrite default — exported so apps can wrap it (`mapFieldPath`)
 export { defaultMapFieldPath } from './SubmitErrors';
 
+// Submit-rejection a11y hop — focuses the first `aria-invalid` control after a failed submit.
+// Engine-neutral (reads the FormControlContext-stamped aria, not engine state).
+export { focusFirstInvalid } from './FocusFirstInvalid';
+
+// Typed array-row helper — engine-free, composes the contract (`form.array` + `form.Field` +
+// `form.useFormState`), so a row cell binds `f.value` typed one level deep (`TItem[name]`) with
+// no per-row cast and no vendor deep-path types. The same instance drives both adapters.
+export { useFieldArray } from './UseFieldArray';
+export type {
+  FieldArray,
+  FieldArrayField,
+  FieldArrayFieldProps,
+  FieldArrayForm,
+  FieldArrayRow,
+} from './UseFieldArray';
+
 // Adapter-author seams — building blocks the in-repo adapters share (house now, tanstack phase 2)
 export { createFieldComponent, createSubscribeComponent } from './FormGlue';
 export { resolveSubmitFailure, toApiError, type SubmitFailureResolution } from './SubmitErrors';

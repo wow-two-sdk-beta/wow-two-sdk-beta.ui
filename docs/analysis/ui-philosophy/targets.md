@@ -164,33 +164,34 @@ Currently **EVERY** component is en-US-locked. The largest single gap. Plan:
 | `asChild`/Slot for interactive | **LOCKED** |
 | Type-safe forwarding | **DONE** — polymorphic types in `utils/` |
 
-### 2.7 Forms — PARTIAL (extend NEXT)
+### 2.7 Forms — DONE (engine shipped 2026-07-11; extras deferred)
+
+`/forms-engine` shipped: house contract + `house`/`tanstack` swappable adapters (one 94-case conformance suite), Standard Schema validation seam, full presentation-field wiring. Design: `docs/analysis/forms-engine.md`; maturation: `docs/analysis/forms-vector-next.md`.
 
 | Sub-vector | Verdict |
 |---|---|
-| Field state primitives | **DONE** — `FormControlContext` wires id/disabled/required/invalid/describedBy |
-| `FormField` molecule | **DONE** — props-driven (label/helper/error/isRequired) |
+| Field state primitives | **DONE** — `FormControlContext` wires id/disabled/required/invalid/describedBy + chrome registration |
+| `Field` molecule | **DONE** — props-driven, adopts the glue provider inside `form.Field` (auto multi-error) |
 | Controlled / uncontrolled | **DONE** — `useControlled` |
-| **Form root** (`<Form>`) | **MAYBE** — could ship a thin `<Form>` that owns submit + provides field bag; or stay agnostic |
-| Validation engine | **MAYBE — lean toward agnostic** — consumer brings RHF / TanStack Form / Zod; we ship adapters if needed |
-| Built-in validators | **SKIP** — consumer's responsibility |
-| Schema lib adapter (Zod/Valibot/Standard Schema) | **MAYBE** — ship adapter only if real consumer asks |
-| Async validation | **MAYBE** — depends on form root verdict |
-| Cross-field validation | **MAYBE** — same |
-| Field array | **MAYBE** — same |
-| Multi-step wizard | **DONE-ish** — `Stepper` molecule shipped (visual); state engine is consumer's |
-| Conditional fields | **SKIP** — consumer pattern |
-| Auto-save | **SKIP** — consumer pattern |
-| Dirty/touched tracking | **MAYBE** — depends on form root verdict |
-| File field with progress | **NEXT** — FileUpload (Dropzone) in batch 7 |
-| Date/time value type | **NOW — Temporal adopted** — date/time components speak `Temporal.PlainDate` / `Temporal.PlainTime` (via `@js-temporal/polyfill`); ecosystem standard, replaces native `Date` |
-| Hidden input emit (DatePicker, ColorPicker, etc.) | **DONE** — pattern locked |
-| FormData / native form interop | **DONE** |
-| ARIA wiring (label/control/error) | **DONE** |
-| Reset event | **MAYBE** — ad-hoc per component |
-| `name` integration | **DONE** |
+| **Form root** | **DONE** — `useAppForm` owns submit + field bag (`form.Field`/`Subscribe`/`array`); agnostic call, no `<Form>` wrapper |
+| Validation engine | **DONE — agnostic via adapters** — swappable `house`/`tanstack`, app pins one in `src/form.ts`; RHF adapter design-checked, deferred |
+| Schema lib adapter | **DONE** — Standard Schema v1 seam (types vendored); zod 4 default, valibot size-first swap — both pinned in conformance |
+| Async validation | **DONE** — gated `isValidating`, submit awaits |
+| Cross-field validation | **DONE** — schema `refine`/`forward` + `form.setValue` for derived writes |
+| Field array | **DONE** — `form.array(path)` push/insert/remove/swap/move, row-scoped error reindex |
+| Multi-step wizard | **DONE** — `Wizard` component + per-step schema-gate recipe |
+| Dirty/touched tracking | **DONE** — baseline-compared (File-aware), touched = blur-or-submit |
+| Submit verdict | **DONE** — `handleSubmit(): Promise<boolean>` + `isSubmitSuccessful` |
+| Server-error application | **DONE** — `fieldErrors` (both .NET shapes) auto-applied; `submitError` + `clearSubmitError()` |
+| File field in forms | **DONE** — FileUpload binds `File` into values; schema validates |
+| Date/time value type | **DONE** — components speak `Temporal.PlainDate`/`PlainTime` via `temporal-polyfill` (swapped off the reference `@js-temporal/polyfill`) |
+| Reset | **DONE** — `reset(next?)` re-seeds baseline |
+| Conditional fields | **DONE** — schema `discriminatedUnion` (smart-qr content proven) |
+| Auto-save | **DEFERRED** — recipe lands with W2-c storage v2 |
+| Built-in validators | **SKIP** — schema owns it |
+| Hidden input emit · FormData interop · ARIA wiring · `name` | **DONE** |
 
-**Discussion item — form root**: ship lightweight `<Form>` that wraps `<form>` and exposes `onSubmit(values, helpers)`, OR stay agnostic. Recommendation: **stay agnostic** for v1; revisit if 2+ consumers ask.
+**Deferred architectural items** (analysis: `forms-deferred-items.md`): per-field union-internal errors · recursive deep-path value typing · configurable `fieldErrors` recognizer.
 
 ### 2.8 Motion — LATER
 

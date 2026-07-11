@@ -1,4 +1,4 @@
-# Textarea
+# TextAreaInput
 
 ## Purpose
 Multi-line text input. Resize-vertical by default. Autosize behavior deferred.

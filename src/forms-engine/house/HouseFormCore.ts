@@ -49,6 +49,8 @@ interface InternalState<TValues extends object> {
   readonly isSubmitting: boolean;
   readonly isValidating: boolean;
   readonly submitError: ApiError | null;
+  /** The last completed submit's verdict — `null` until the first attempt completes and after `reset()`. */
+  readonly isSubmitSuccessful: boolean | null;
 }
 
 /** The native house form instance — what `form.engine` exposes on the house adapter. */
@@ -61,7 +63,8 @@ export interface HouseFormEngine<TValues extends object> {
   readonly applyArrayOperation: (path: string, operation: ArrayOperation) => void;
   readonly reset: (next?: TValues) => void;
   readonly setFieldErrors: (errors: Record<string, string[]>) => void;
-  readonly submit: () => Promise<void>;
+  readonly clearSubmitError: () => void;
+  readonly submit: () => Promise<boolean>;
 }
 
 function mergeErrors(client: ErrorMap, server: ErrorMap): ErrorMap {
@@ -113,6 +116,7 @@ export function createHouseFormEngine<TValues extends object>(
     isSubmitting: false,
     isValidating: false,
     submitError: null,
+    isSubmitSuccessful: null,
   };
 
   let formState: AppFormState<TValues> = buildFormState(state);
@@ -131,6 +135,7 @@ export function createHouseFormEngine<TValues extends object>(
       isSubmitting: internal.isSubmitting,
       isValidating: internal.isValidating,
       submitError: internal.submitError,
+      isSubmitSuccessful: internal.isSubmitSuccessful,
     };
   }
 
@@ -244,6 +249,7 @@ export function createHouseFormEngine<TValues extends object>(
       isSubmitting: state.isSubmitting, // an in-flight submit still owns its flag (its finally clears it)
       isValidating: false,
       submitError: null,
+      isSubmitSuccessful: null,
     });
   }
 
@@ -251,25 +257,37 @@ export function createHouseFormEngine<TValues extends object>(
     patch({ serverErrors: normalizeErrorMap(errors) });
   }
 
-  async function submit(): Promise<void> {
-    patch({ submitCount: state.submitCount + 1, serverErrors: EMPTY_MAP, submitError: null });
+  function clearSubmitError(): void {
+    if (state.submitError !== null) patch({ submitError: null });
+  }
+
+  async function submit(): Promise<boolean> {
+    // A new attempt clears the previous server errors + remainder and re-arms the verdict.
+    patch({ submitCount: state.submitCount + 1, serverErrors: EMPTY_MAP, submitError: null, isSubmitSuccessful: null });
     const errors = await runValidation();
-    if (Object.keys(errors).length > 0) return; // invalid — onSubmit never runs
+    if (Object.keys(errors).length > 0) {
+      patch({ isSubmitSuccessful: false }); // invalid — onSubmit never runs
+      return false;
+    }
     const options = currentOptions();
     patch({ isSubmitting: true });
+    let successful = false;
     try {
       await options.onSubmit(state.values);
+      successful = true;
     } catch (error) {
       const resolution = resolveSubmitFailure(
         error,
         options.mapSubmitError ?? fieldErrors,
         options.mapFieldPath ?? defaultMapFieldPath,
         (path) => hasPath(state.values, path),
+        options.fallbackErrorMessage,
       );
       patch({ serverErrors: normalizeErrorMap(resolution.fieldErrors), submitError: resolution.submitError });
     } finally {
-      patch({ isSubmitting: false });
+      patch({ isSubmitting: false, isSubmitSuccessful: successful });
     }
+    return successful;
   }
 
   return {
@@ -284,6 +302,7 @@ export function createHouseFormEngine<TValues extends object>(
     applyArrayOperation,
     reset,
     setFieldErrors: setFieldErrorsAction,
+    clearSubmitError,
     submit,
   };
 }

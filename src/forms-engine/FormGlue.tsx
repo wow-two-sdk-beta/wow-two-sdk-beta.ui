@@ -47,10 +47,13 @@ export function createFieldComponent<TValues extends object>(
 
 /** Builds the `form.Subscribe` component from an adapter's selector-subscribed state hook. */
 export function createSubscribeComponent<TValues extends object>(
-  useFormState: <TSlice>(selector: (state: AppFormState<TValues>) => TSlice) => TSlice,
+  useFormState: <TSlice>(
+    selector: (state: AppFormState<TValues>) => TSlice,
+    isEqual?: (a: TSlice, b: TSlice) => boolean,
+  ) => TSlice,
 ): AppSubscribeComponent<TValues> {
   function AppSubscribe<TSlice>(props: AppSubscribeProps<TValues, TSlice>): ReactNode {
-    const slice = useFormState(props.selector);
+    const slice = useFormState(props.selector, props.isEqual);
     return props.children(slice);
   }
   return AppSubscribe;

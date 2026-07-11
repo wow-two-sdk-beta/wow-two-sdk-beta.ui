@@ -10,7 +10,7 @@ export * from './urlInput';
 export * from './numberInput';
 export * from './passwordInput';
 export * from './searchInput';
-export * from './textareaInput';
+export * from './textAreaInput';
 export * from './checkbox';
 export * from './radio';
 export * from './switch';

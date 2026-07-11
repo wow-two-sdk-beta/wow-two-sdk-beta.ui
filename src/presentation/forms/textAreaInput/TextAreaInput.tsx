@@ -3,7 +3,7 @@ import { cn } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { inputBaseVariants, InputSize, InputState, type InputBaseVariants } from '../InputStyles';
 
-export interface TextareaInputProps
+export interface TextAreaInputProps
   extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
     Omit<InputBaseVariants, 'size' | 'state'> {
   /** The control size. */
@@ -16,7 +16,7 @@ export interface TextareaInputProps
  * Multi-line text input. Inherits the input visual base. For autosize, pair
  * with a sibling-domain hook in v1 — kept simple at L3.
  */
-export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>(
+export const TextAreaInput = forwardRef<HTMLTextAreaElement, TextAreaInputProps>(
   (
     { className, size, state, id, disabled, required, readOnly, rows = 3, ...props },
     ref,
@@ -43,4 +43,4 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>
     );
   },
 );
-TextareaInput.displayName = 'TextareaInput';
+TextAreaInput.displayName = 'TextAreaInput';

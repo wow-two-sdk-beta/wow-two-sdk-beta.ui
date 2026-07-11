@@ -19,11 +19,16 @@ export function defaultMapFieldPath(serverPath: string): string {
   return formatPath(segments);
 }
 
-/** Coerces any thrown value into the SDK `ApiError` — passes through an `ApiError`, wraps everything else as status `0` (mirrors `/query`'s coercion). */
-export function toApiError(error: unknown): ApiError {
+/**
+ * Coerces any thrown value into the SDK `ApiError` — passes through an `ApiError`, wraps
+ * everything else as status `0` (mirrors `/query`'s coercion). `fallbackMessage` is the
+ * message for a throw that carries none of its own (not an `ApiError`, `Error`, or string) —
+ * overridable for i18n; defaults to the English `'Unknown error'`.
+ */
+export function toApiError(error: unknown, fallbackMessage = 'Unknown error'): ApiError {
   if (error instanceof ApiError) return error;
   if (error instanceof Error) return new ApiError(0, null, error.message);
-  return new ApiError(0, null, typeof error === 'string' ? error : 'Unknown error');
+  return new ApiError(0, null, typeof error === 'string' ? error : fallbackMessage);
 }
 
 /** The outcome of resolving a thrown submit error: per-field server errors + the form-level remainder. */
@@ -45,6 +50,7 @@ export function resolveSubmitFailure(
   mapSubmitError: (error: unknown) => Record<string, string[]>,
   mapFieldPath: (serverPath: string) => string,
   isKnownField: (path: string) => boolean,
+  fallbackMessage?: string,
 ): SubmitFailureResolution {
   const mapped = mapSubmitError(error);
   const matched: Record<string, string[]> = {};
@@ -60,6 +66,6 @@ export function resolveSubmitFailure(
   const hasMatches = Object.keys(matched).length > 0;
   return {
     fieldErrors: matched,
-    submitError: !hasMatches || unplaced ? toApiError(error) : null,
+    submitError: !hasMatches || unplaced ? toApiError(error, fallbackMessage) : null,
   };
 }

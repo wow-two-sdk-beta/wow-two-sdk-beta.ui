@@ -33,6 +33,8 @@ export interface TanstackOverlayState<TValues extends object> {
   readonly submitCount: number;
   readonly isSubmitting: boolean;
   readonly submitError: ApiError | null;
+  /** The last completed submit's verdict — `null` until the first attempt completes and after `reset()`. */
+  readonly isSubmitSuccessful: boolean | null;
 }
 
 /** The overlay store the tanstack adapter combines with the TanStack form store. */
@@ -45,14 +47,18 @@ export interface TanstackFormOverlay<TValues extends object> {
   readonly clearServerErrorsAt: (path: string) => void;
   /** Row-scoped server errors + touched marks follow their rows through array ops. */
   readonly remapForArrayOperation: (arrayPath: string, operation: ArrayOperation) => void;
-  /** A new attempt clears the previous server errors + submitError and counts as touching everything. */
+  /** A new attempt clears the previous server errors + submitError, re-arms the verdict, and counts as touching everything. */
   readonly beginSubmitAttempt: () => void;
   /** Brackets the app's `onSubmit` call — the contract's `isSubmitting` window. */
   readonly setSubmitting: (isSubmitting: boolean) => void;
+  /** Settles the last completed submit's verdict (`handleSubmit` mirrors it into `isSubmitSuccessful`). */
+  readonly setSubmitSuccessful: (value: boolean | null) => void;
   /** Lands a resolved submit failure: matches as the server overlay, remainder as `submitError`. */
   readonly applySubmitFailure: (resolution: SubmitFailureResolution) => void;
   /** Replaces the server-error overlay (`setFieldErrors`). */
   readonly replaceServerErrors: (errors: Record<string, string[]>) => void;
+  /** Clears the form-level `submitError` without touching field errors (`clearSubmitError`). */
+  readonly clearSubmitError: () => void;
   /** Clears everything and re-seeds the dirty baseline. */
   readonly reset: (baseline: TValues) => void;
 }
@@ -74,6 +80,7 @@ export function createTanstackFormOverlay<TValues extends object>(
     submitCount: 0,
     isSubmitting: false,
     submitError: null,
+    isSubmitSuccessful: null,
   };
   const listeners = new Set<() => void>();
 
@@ -113,10 +120,13 @@ export function createTanstackFormOverlay<TValues extends object>(
       });
     },
     beginSubmitAttempt: () => {
-      patch({ submitCount: state.submitCount + 1, serverErrors: EMPTY_MAP, submitError: null });
+      patch({ submitCount: state.submitCount + 1, serverErrors: EMPTY_MAP, submitError: null, isSubmitSuccessful: null });
     },
     setSubmitting: (isSubmitting) => {
       if (state.isSubmitting !== isSubmitting) patch({ isSubmitting });
+    },
+    setSubmitSuccessful: (value) => {
+      if (state.isSubmitSuccessful !== value) patch({ isSubmitSuccessful: value });
     },
     applySubmitFailure: (resolution) => {
       patch({
@@ -127,6 +137,9 @@ export function createTanstackFormOverlay<TValues extends object>(
     replaceServerErrors: (errors) => {
       patch({ serverErrors: normalizeErrorMap(errors) });
     },
+    clearSubmitError: () => {
+      if (state.submitError !== null) patch({ submitError: null });
+    },
     reset: (baseline) => {
       commit({
         baseline,
@@ -135,6 +148,7 @@ export function createTanstackFormOverlay<TValues extends object>(
         submitCount: 0,
         isSubmitting: state.isSubmitting, // an in-flight submit still owns its flag (its finally clears it)
         submitError: null,
+        isSubmitSuccessful: null,
       });
     },
   };

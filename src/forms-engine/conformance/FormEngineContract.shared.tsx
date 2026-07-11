@@ -11,6 +11,7 @@ import {
 
 import type { AppFieldApi, AppForm, AppFormOptions, FormEngine } from '../AppForm';
 import type { StandardSchemaV1 } from '../StandardSchema';
+import { useFieldArray, type FieldArray } from '../UseFieldArray';
 
 /*
  * The engine conformance suite — the anti-LCD instrument (docs/analysis/forms-engine.md §5).
@@ -199,6 +200,52 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
         expect(readState().values.rules).toEqual([{ destination: 'a' }, { destination: 'c' }]);
         expect(row.current.isDirty).toBe(true);
       });
+
+      it('re-flips dirty on a File swap (file-aware deep equality)', async () => {
+        const baseline = new File(['a'], 'a.txt', { type: 'text/plain' });
+        const swapped = new File(['bbb'], 'b.txt', { type: 'text/plain' });
+        const { readState, field } = renderForm<{ doc: File }>({
+          defaultValues: { doc: baseline },
+          onSubmit: async () => null,
+        });
+        const doc = field('doc');
+
+        expect(readState().isDirty).toBe(false);
+        // Swapping to a different File must re-flip dirty — the old deepEqual saw all Files as equal.
+        await act(async () => doc.current.setValue(swapped));
+        expect(doc.current.isDirty).toBe(true);
+        expect(readState().isDirty).toBe(true);
+        // Back to the baseline file (same ref) → clean again.
+        await act(async () => doc.current.setValue(baseline));
+        expect(readState().isDirty).toBe(false);
+      });
+    });
+
+    describe('form.setValue (cross-field write)', () => {
+      it('writes top-level and nested paths, tracks dirty, and clears that field server error', async () => {
+        const { form, readState, field } = renderForm<RulesValues>({
+          defaultValues: { title: '', rules: [{ destination: 'a' }] },
+          onSubmit: async () => null,
+        });
+        const title = field('title');
+        const row = field('rules[0].destination');
+
+        // Top-level key — typed value; tracks dirty against the baseline.
+        await act(async () => form.setValue('title', 'Derived'));
+        expect(title.current.value).toBe('Derived');
+        expect(title.current.isDirty).toBe(true);
+
+        // Deep (untyped) path — unknown value accepted.
+        await act(async () => form.setValue('rules[0].destination', 'b'));
+        expect(row.current.value).toBe('b');
+        expect(readState().values.rules).toEqual([{ destination: 'b' }]);
+
+        // Clears that field's server error like an in-field edit.
+        await act(async () => form.setFieldErrors({ title: ['Server says no'] }));
+        expect(title.current.errors).toEqual(['Server says no']);
+        await act(async () => form.setValue('title', 'Again'));
+        expect(title.current.errors).toEqual([]);
+      });
     });
 
     describe('validateOn timing', () => {
@@ -271,7 +318,7 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
         const name = field('name');
         await act(async () => name.current.setValue('ada'));
 
-        let submitPromise!: Promise<void>;
+        let submitPromise!: Promise<boolean>;
         act(() => {
           submitPromise = form.handleSubmit();
         });
@@ -287,7 +334,7 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
         expect(readState().submitError).toBeNull();
       });
 
-      it('resolves (never rejects) when onSubmit throws', async () => {
+      it('resolves the false verdict (never rejects) when onSubmit throws', async () => {
         const { form, readState } = renderForm<LoginValues>({
           defaultValues: loginDefaults,
           onSubmit: async () => {
@@ -296,10 +343,94 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
         });
 
         await act(async () => {
-          await expect(form.handleSubmit()).resolves.toBeUndefined();
+          // Never rejects — resolves the verdict, which is `false` because onSubmit threw.
+          await expect(form.handleSubmit()).resolves.toBe(false);
         });
         expect(readState().isSubmitting).toBe(false);
         expect(readState().submitError).not.toBeNull();
+      });
+
+      it('resolves true on success and false on validation failure (submit verdict)', async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          schema: nameRequired(),
+          onSubmit,
+        });
+        const name = field('name');
+
+        // Invalid (name empty) — onSubmit never runs, verdict is false.
+        let verdict: boolean | undefined;
+        await act(async () => {
+          verdict = await form.handleSubmit();
+        });
+        expect(verdict).toBe(false);
+        expect(onSubmit).not.toHaveBeenCalled();
+
+        // Fixed + resubmitted — validation passes and onSubmit resolves, verdict is true.
+        await act(async () => name.current.setValue('ada'));
+        await act(async () => {
+          verdict = await form.handleSubmit();
+        });
+        expect(verdict).toBe(true);
+        expect(onSubmit).toHaveBeenCalledTimes(1);
+      });
+
+      it('isSubmitSuccessful mirrors the last verdict and re-arms to null on reset', async () => {
+        let failing = true;
+        const { form, readState } = renderForm<LoginValues>({
+          defaultValues: { name: 'ada', email: '' },
+          onSubmit: async () => {
+            if (failing) throw new Error('boom');
+            return null;
+          },
+        });
+
+        expect(readState().isSubmitSuccessful).toBeNull();
+
+        await act(async () => form.handleSubmit());
+        expect(readState().isSubmitSuccessful).toBe(false);
+
+        failing = false;
+        await act(async () => form.handleSubmit());
+        expect(readState().isSubmitSuccessful).toBe(true);
+
+        await act(async () => form.reset());
+        expect(readState().isSubmitSuccessful).toBeNull();
+      });
+
+      it('clearSubmitError clears the form-level remainder, leaving field errors', async () => {
+        const { form, readState, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          onSubmit: async () => {
+            throw new ApiError(400, { errors: { Name: ['Taken'], Ghost: ['unplaced'] } });
+          },
+        });
+        const name = field('name');
+
+        await act(async () => form.handleSubmit());
+        expect(name.current.errors).toEqual(['Taken']);
+        expect(readState().submitError).not.toBeNull();
+
+        await act(async () => form.clearSubmitError());
+        expect(readState().submitError).toBeNull();
+        // Field errors are untouched — only the form-level banner reset.
+        expect(name.current.errors).toEqual(['Taken']);
+      });
+
+      it('overrides the non-Error submit fallback message via fallbackErrorMessage (i18n)', async () => {
+        const { form, readState } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          fallbackErrorMessage: 'Xatolik yuz berdi',
+          onSubmit: async () => {
+            throw 42; // neither ApiError, Error, nor string — hits the SDK fallback literal
+          },
+        });
+
+        await act(async () => form.handleSubmit());
+        const submitError = readState().submitError;
+        expect(submitError).toBeInstanceOf(ApiError);
+        expect(submitError?.message).toBe('Xatolik yuz berdi');
       });
 
       it('lands ASP.NET ValidationProblemDetails dict errors on fields, camelCased (R5)', async () => {
@@ -611,6 +742,138 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
       });
     });
 
+    describe('useFieldArray (typed row helper, R8+)', () => {
+      interface Rule {
+        destination: string;
+        enabled: boolean;
+      }
+      interface RulesForm {
+        title: string;
+        rules: Rule[];
+      }
+
+      /**
+       * Renders a `useFieldArray` harness: captures the form, the array handle, the live rows,
+       * and a per-index row-field captor. The captor is typed `AppFieldApi<string>` — assigning
+       * the row field to it is the COMPILE-TIME proof that `f.value` is typed one level deep
+       * (`Rule['destination']` = `string`), not `unknown`; a typing regression fails typecheck.
+       */
+      function renderRules(defaults: RulesForm) {
+        const formRef = { current: null as unknown as AppForm<RulesForm> };
+        const arrayRef = { current: null as unknown as FieldArray<Rule> };
+        let rows: readonly { key: string; index: number }[] = [];
+        const cells = new Map<number, { current: AppFieldApi<string> }>();
+        const cell = (index: number): { current: AppFieldApi<string> } => {
+          const existing = cells.get(index);
+          if (existing) return existing;
+          const captor = { current: null as unknown as AppFieldApi<string> };
+          cells.set(index, captor);
+          return captor;
+        };
+
+        function Harness() {
+          const form = useAppForm<RulesForm>({ defaultValues: defaults, onSubmit: async () => null });
+          const rules = useFieldArray<Rule>(form, 'rules');
+          formRef.current = form;
+          arrayRef.current = rules;
+          rows = rules.rows;
+          return (
+            <>
+              {rules.rows.map((row) => (
+                <rules.Field key={row.key} index={row.index} name="destination">
+                  {(field) => {
+                    cell(row.index).current = field; // field: AppFieldApi<string> — no cast at the call site
+                    return null;
+                  }}
+                </rules.Field>
+              ))}
+            </>
+          );
+        }
+
+        render(<Harness />);
+        const stateProbe = renderHook(() => formRef.current.useFormState((state) => state));
+        const destinations = () => stateProbe.result.current.values.rules.map((rule) => rule.destination);
+        return { array: arrayRef, form: formRef, rows: () => rows, cell, destinations };
+      }
+
+      it('exposes reactive rows with unique keys and typed, cast-free row fields', () => {
+        const { array, rows, cell } = renderRules({
+          title: '',
+          rules: [
+            { destination: 'a', enabled: true },
+            { destination: 'b', enabled: false },
+          ],
+        });
+
+        expect(array.current.length).toBe(2);
+        const keys = rows().map((row) => row.key);
+        expect(new Set(keys).size).toBe(2); // stable + unique per row
+        expect(rows().map((row) => row.index)).toEqual([0, 1]);
+        // `f.value` is `string` (the compile-time proof is the captor type); read it here.
+        expect(cell(0).current.value).toBe('a');
+        expect(cell(1).current.value).toBe('b');
+      });
+
+      it('typed row setValue writes the element path and tracks dirty', async () => {
+        const { cell, destinations } = renderRules({
+          title: '',
+          rules: [{ destination: 'a', enabled: true }],
+        });
+
+        // setValue is typed as `string` — a mistyped value is a compile error.
+        await act(async () => cell(0).current.setValue('https://z.example'));
+        expect(cell(0).current.value).toBe('https://z.example');
+        expect(cell(0).current.isDirty).toBe(true);
+        expect(destinations()).toEqual(['https://z.example']);
+      });
+
+      it('push / insert / remove / swap / move mutate rows and carry keys with their row', async () => {
+        const { array, rows, destinations } = renderRules({
+          title: '',
+          rules: [{ destination: 'a', enabled: true }],
+        });
+
+        // push takes the ELEMENT type (delegates to form.array under the hood).
+        await act(async () => array.current.push({ destination: 'b', enabled: false }));
+        expect(destinations()).toEqual(['a', 'b']);
+        expect(array.current.length).toBe(2);
+
+        // swap keeps length — the keys must reorder WITH the rows (focus follows the logical row).
+        const beforeSwap = rows().map((row) => row.key);
+        await act(async () => array.current.swap(0, 1));
+        expect(destinations()).toEqual(['b', 'a']);
+        expect(rows().map((row) => row.key)).toEqual([beforeSwap[1], beforeSwap[0]]);
+
+        await act(async () => array.current.insert(1, { destination: 'mid', enabled: true }));
+        expect(destinations()).toEqual(['b', 'mid', 'a']);
+
+        await act(async () => array.current.remove(0));
+        expect(destinations()).toEqual(['mid', 'a']);
+
+        await act(async () => array.current.move(1, 0));
+        expect(destinations()).toEqual(['a', 'mid']);
+      });
+
+      it('row-scoped server errors follow rows through a helper remove (delegates to form.array reindexing)', async () => {
+        const { array, form, cell } = renderRules({
+          title: '',
+          rules: [
+            { destination: 'a', enabled: true },
+            { destination: 'b', enabled: false },
+          ],
+        });
+
+        await act(async () => form.current.setFieldErrors({ 'rules[1].destination': ['Bad destination'] }));
+        expect(cell(0).current.errors).toEqual([]);
+
+        await act(async () => array.current.remove(0));
+        // Row b shifted into index 0 — its server error came along (the helper's op reindexes via form.array).
+        expect(cell(0).current.value).toBe('b');
+        expect(cell(0).current.errors).toEqual(['Bad destination']);
+      });
+    });
+
     describe('subscription (R10)', () => {
       it('Subscribe renders the selected slice and updates with it', async () => {
         const { form, field } = renderForm<LoginValues>({
@@ -665,6 +928,35 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
         expect(probe.result.current).toBe('');
         await act(async () => name.current.setValue('ada'));
         await waitFor(() => expect(probe.result.current).toBe('ada'));
+      });
+
+      it('a composite selector with isEqual skips re-render until a selected member changes', async () => {
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          onSubmit: async () => null,
+        });
+        const name = field('name');
+        const email = field('email');
+        let renders = 0;
+        render(
+          // The selector returns a FRESH object each read — without isEqual its Object.is
+          // slice cache would miss and re-render on every store change (the perf footgun).
+          <form.Subscribe selector={(state) => ({ name: state.values.name })} isEqual={(a, b) => a.name === b.name}>
+            {(slice) => {
+              renders += 1;
+              return <span data-testid="name-slice">{slice.name}</span>;
+            }}
+          </form.Subscribe>,
+        );
+        const initial = renders;
+
+        // An unrelated field change leaves the selected member equal → no re-render.
+        await act(async () => email.current.setValue('ada@ex.io'));
+        expect(renders).toBe(initial);
+
+        // A change to the selected member re-renders.
+        await act(async () => name.current.setValue('ada'));
+        await waitFor(() => expect(renders).toBeGreaterThan(initial));
       });
     });
 

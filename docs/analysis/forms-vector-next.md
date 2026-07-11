@@ -33,7 +33,7 @@ Headline: **20 wired direct · 3 wired transitively · 3 composites with an id-p
 
 | Bucket | Count | Components |
 |---|---|---|
-| **Wired direct** (read `useFormControl`: id / aria-invalid / aria-describedby / disabled / required / readOnly — `TextInput` is the canonical block) | 20 | 17 controls: `checkbox` `colorField` `dateField` `emailInput` `maskedInput` `numberInput` `passwordInput` `radio` `searchInput` `select` `slider` `switch` `telInput` `textInput` `textareaInput` `timeField` `urlInput` + 3 chrome consumers: `label` `formErrorMessage` `formHelperText` |
+| **Wired direct** (read `useFormControl`: id / aria-invalid / aria-describedby / disabled / required / readOnly — `TextInput` is the canonical block) | 20 | 17 controls: `checkbox` `colorField` `dateField` `emailInput` `maskedInput` `numberInput` `passwordInput` `radio` `searchInput` `select` `slider` `switch` `telInput` `textInput` `textAreaInput` `timeField` `urlInput` + 3 chrome consumers: `label` `formErrorMessage` `formHelperText` |
 | **Wired transitively** (compose a wired atom, props pass through) | 3 | `currencyInput` `percentInput` (wrap `NumberInput`) · `labeledInput` (wraps `TextInput`+`Label`) |
 | **Id-precedence bug** (compose wired atom but `useId()` + explicit `id` overrides `ctx.id` → `Field`-rendered `Label htmlFor` misses the control) | 3 | `checkboxField` `radioField` `switchField` — fix: `id ?? ctx?.id ?? generated` |
 | **Unwired interactive** (the sweep — §below) | 31 | six fix families |
@@ -102,3 +102,40 @@ Mirrors testing.md's coverage philosophy: no percentage gates — explicit, chec
 - [ ] **Patterns:** dirty-nav guard, optimistic submit, wizard per-step schema, focus-first-invalid documented + story-proven; autosave recipe shipped once W2-c lands.
 - [ ] **Product proofs:** drydock + secrets-vault (simple) and smart-qr builder (stress) migrated; their hand-rolled form glue (~500 LOC across products) deleted; discovered contract gaps promoted or explicitly backlogged.
 - [ ] **DX:** `docs/forms.md` consumer guide exists; `product-template` stamps `src/form.ts`; `targets.md` rows synced; `.engine` escape-hatch audit shows only documented reach-ins.
+
+---
+
+## F-2h contract backlog (seeded by F-2d/e/f — 2026-07-11)
+
+**SHIPPED 2026-07-11** (additive, both engines, conformance 72→86): `handleSubmit(): Promise<boolean>` verdict + `isSubmitSuccessful` slice · `form.setValue(path, value)` cross-field write · `form.clearSubmitError()` · selector `isEqual` on `Subscribe`/`useFormState` · File-aware `deepEqual` · `fallbackErrorMessage` option (last English literal now overridable). **Deferred — architectural** (documented, not blocking maturity): per-field content-union errors (needs union explosion) · recursive deep-path value typing (`f.value` unknown on array rows — cast at row) · `fieldErrors` configurable recognizer · autosave recipe (waits on W2-c storage). `reset()`-after-`reset(data)` → documented behavior in `forms.md`.
+
+Original backlog (all above resolved or explicitly deferred):
+
+- **`handleSubmit` has no verdict** — resolves `void`; wizard gate + any "did it pass?" caller needs a `passed` ref. Want `Promise<boolean>` or a last-submit-outcome slice. (F-2d, F-2e)
+- **`reset()` after `reset(data)` returns to ORIGINAL `defaultValues`**, not the re-seeded baseline — edit-screen Discard must call `reset(loadedEntity)`. Document, or make `reset()` return to current baseline. (F-2d)
+- **No cross-field `setValue`** outside a `form.Field` render prop — change-time derived fields (name→slug) need `.engine`. Promotion candidate. (F-2d, drydock)
+- **Array-row `f.value` is `unknown`** — typed values, untyped deep paths; every array form casts. Convention example must show the cast, or improve path typing. (F-2d)
+- **`submitError` has no imperative clear** — a dismissible error banner can't reset it. Facade nit. (secrets-vault)
+- **`fieldErrors` is `instanceof ApiError`-gated** — silently no-ops for non-SDK errors; now documented in `forms.md`, but making the recognizer configurable would remove the footgun. (drydock, secrets-vault)
+- **`'Unknown error'` fallback** (`SubmitErrors.ts`) — last SDK-authored English literal on the submit path; make overridable for i18n. (F-2c)
+- **`deepEqual` blind to `File`** (no enumerable keys → any two Files equal) — file-swap won't re-flip dirty. Cosmetic today. (F-2e)
+- **`InputStyles` `read-only:bg-muted` matches `<button>` triggers** — pickers sit on muted unintentionally; design-pass item, alters every input visually. (F-2b)
+
+### F-2g strains (smart-qr `CreateCodeScreen` stress migration — 2026-07-10)
+
+The stress case (10-member content union · rules array · live preview · 13-setter edit prefill) ran on `0.0.95` +
+`tanstack`. It migrated with **`tsc` + `vite build` + tests green** and **no schema→`useAppForm` cast** — the confirmations and new gaps:
+
+**Confirmed (already backlogged):**
+
+- **Array-row `f.value` is `unknown`** — hit exactly as predicted: each rule cell casts (`f.value as string` / `as RuleConditionType`), 3 casts/row. The docs example must show it.
+- **`handleSubmit` void verdict** — not blocking here (success is observed via a `saved` state set in `onSubmit`, no wizard gate), but the screen has no "did it pass?" branch to lean on.
+- **`reset()`-after-`reset(data)` footgun** — dodged only because "Create another" clears a side panel, not the form; a future "Discard changes" button on this edit screen WILL hit it.
+- **Submit seam** — the app's hand-rolled client already `throw`s the SDK `ApiError`, so `mapSubmitError`'s `instanceof` gate + ProblemDetails field mapping worked with **zero seam changes** (the pre-guard `if (!links) setError(...)` deleted; the backend's 400 "at least one" now lands in `submitError`). Cleanest possible adaptation — but it only worked because a prior iteration had already routed errors through `ApiError`.
+
+**New (extend the backlog):**
+
+- **Discriminated union binds cleanly as ONE field but forecloses per-property field errors.** `content` as a single top-level `form.Field` is the win — `f.value` is the fully-typed `CodeContent`, `f.setValue` takes it, sub-controls bind with no cast, and `z.discriminatedUnion` satisfied `StandardSchemaV1<Values>` with no annotation. **But** the per-type sub-controls edit the whole object (`onChange({...value, url})`), so no input is wired to a `content.url` form path — a schema issue at `content.url` has no subscriber and renders nowhere. Per-field content validation must therefore be whole-object (a `content`-level slot) or server-side (chosen). Exploding the union into `content.<field>` deep paths would restore per-field errors but forces N `unknown` casts + rewrites every typed sub-control. **The single-field union is values-clean and errors-blind; document the trade, or offer a "field errors under an object field" chrome.**
+- **Composite `Subscribe` selectors defeat the slice memo → preview perf footgun.** The natural preview selector `(s) => ({ style, content, symbology })` returns a fresh object every call, so the adapter's `Object.is` slice-cache never hits and the preview re-renders on *every* keystroke (incl. name/rules). Perf-sane required **nested single-slice Subscribes** (`s.values.style` → `s.values.content` → `s.values.symbology`), each a stable ref via TanStack's structural sharing. Convention/`useFormState` docs should warn against object-returning selectors (or the facade could shallow-compare selector output).
+- **Grouped sibling-field controls have no clean binding.** A control that writes 2–3 sibling values (a fill picker → `foreground`+`gradient`; a shape row → 3 shapes) can't bind to one field, and there's **no top-level `setValue`** (the backlogged cross-field gap) to write siblings from outside a render prop. Workaround: model the group as ONE sub-object field (`style`) and spread-merge (`f.setValue({...f.value, foreground})`) — clean, mirrors the union idiom, but it's a modeling constraint the contract silently imposes. Without it: nested `form.Field` (2–3 deep) or `.engine`.
+- **A reorderable-array presentational component must become form-aware.** Driving rows through `form.array` + per-row `form.Field` (needed for row-scoped errors) means the row list can't stay a generic `rules + onChange` component — it must take `form` and reach `form.array(path)` + `form.Field name={\`rules[${i}].x\`}`. Row errors are unreachable via a whole-array single field. Expect this coupling in any array form; a documented `useFieldArray(form, path)` row-render helper would soften it.

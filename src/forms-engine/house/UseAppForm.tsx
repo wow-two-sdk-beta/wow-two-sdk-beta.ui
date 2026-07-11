@@ -15,9 +15,12 @@ import { createHouseFormEngine, type HouseFormEngine } from './HouseFormCore';
 function useEngineSlice<TValues extends object, TSlice>(
   engine: HouseFormEngine<TValues>,
   selector: (state: AppFormState<TValues>) => TSlice,
+  isEqual?: (a: TSlice, b: TSlice) => boolean,
 ): TSlice {
   const selectorRef = useRef(selector);
   selectorRef.current = selector;
+  const isEqualRef = useRef(isEqual);
+  isEqualRef.current = isEqual;
   const cacheRef = useRef<{
     state: AppFormState<TValues>;
     selector: (state: AppFormState<TValues>) => TSlice;
@@ -30,7 +33,10 @@ function useEngineSlice<TValues extends object, TSlice>(
     const cached = cacheRef.current;
     if (cached && cached.state === state && cached.selector === currentSelector) return cached.slice;
     const slice = currentSelector(state);
-    if (cached && Object.is(cached.slice, slice)) {
+    // `isEqual` (default `Object.is`) keeps a fresh-but-equal composite selection on the
+    // cached ref, so `useSyncExternalStore` bails the re-render instead of churning on it.
+    const equals = isEqualRef.current ?? Object.is;
+    if (cached && equals(cached.slice, slice)) {
       cacheRef.current = { state, selector: currentSelector, slice: cached.slice };
       return cached.slice;
     }
@@ -76,8 +82,10 @@ export function useAppForm<TValues extends object>(
   const [form] = useState<AppForm<TValues, HouseFormEngine<TValues>>>(() => {
     const engine = createHouseFormEngine<TValues>(() => optionsRef.current);
 
-    const useFormState = <TSlice,>(selector: (state: AppFormState<TValues>) => TSlice): TSlice =>
-      useEngineSlice(engine, selector);
+    const useFormState = <TSlice,>(
+      selector: (state: AppFormState<TValues>) => TSlice,
+      isEqual?: (a: TSlice, b: TSlice) => boolean,
+    ): TSlice => useEngineSlice(engine, selector, isEqual);
     const useFieldApi = (path: string): AppFieldApi<unknown> => useEngineField(engine, path);
 
     return {
@@ -88,6 +96,7 @@ export function useAppForm<TValues extends object>(
         event?.preventDefault();
         return engine.submit();
       },
+      setValue: (path, value) => engine.setValue(path, value),
       array: (path: string) => ({
         push: (value: unknown) => engine.applyArrayOperation(path, { kind: 'push', value }),
         insert: (index: number, value: unknown) => engine.applyArrayOperation(path, { kind: 'insert', index, value }),
@@ -97,6 +106,7 @@ export function useAppForm<TValues extends object>(
       }),
       reset: (next?: TValues) => engine.reset(next),
       setFieldErrors: (errors: Record<string, string[]>) => engine.setFieldErrors(errors),
+      clearSubmitError: () => engine.clearSubmitError(),
       engine,
     };
   });
