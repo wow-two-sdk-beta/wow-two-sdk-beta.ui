@@ -119,6 +119,23 @@ export function parseISOTime(s: string | null | undefined): Temporal.PlainTime |
   }
 }
 
+/** Format PlainDateTime → "YYYY-MM-DDTHH:MM" for a native `<input type="datetime-local">` value. */
+export function formatISODateTime(dt: Temporal.PlainDateTime | null | undefined): string {
+  if (!dt) return '';
+  return dt.toString({ smallestUnit: 'minute' });
+}
+
+/** Parse "YYYY-MM-DDTHH:MM" (seconds optional) → PlainDateTime. Returns null for invalid input. */
+export function parseISODateTime(s: string | null | undefined): Temporal.PlainDateTime | null {
+  if (!s) return null;
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(s)) return null;
+  try {
+    return Temporal.PlainDateTime.from(s, { overflow: 'reject' });
+  } catch {
+    return null;
+  }
+}
+
 export function clampDate(
   d: Temporal.PlainDate,
   min?: Temporal.PlainDate | null,

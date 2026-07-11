@@ -38,6 +38,7 @@ export * from './multiSelect';
 export * from './combobox';
 export * from './calendar';
 export * from './dateField';
+export * from './dateTimeField';
 export * from './timeField';
 export * from './rangeCalendar';
 export * from './datePicker';
