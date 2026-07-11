@@ -65,6 +65,10 @@ export interface HouseFormEngine<TValues extends object> {
   readonly setFieldErrors: (errors: Record<string, string[]>) => void;
   readonly clearSubmitError: () => void;
   readonly submit: () => Promise<boolean>;
+  /** Validates without submitting — populates errors, marks touched, resolves client validity. */
+  readonly validate: () => Promise<boolean>;
+  /** Releases the pending auto-submit timer (`submitOn: 'change'`) on unmount. */
+  readonly dispose: () => void;
 }
 
 function mergeErrors(client: ErrorMap, server: ErrorMap): ErrorMap {
@@ -126,6 +130,10 @@ export function createHouseFormEngine<TValues extends object>(
   let previousFieldCache = new Map<string, HouseFieldState>();
   /** Monotonic guard: only the newest validation run may apply its result (async schemas). */
   let validationEpoch = 0;
+  /** The pending trailing-debounce auto-submit timer (`submitOn: 'change'`); cleared on reset / unmount. */
+  let autoSubmitTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Single-flight latch: an in-flight submit coalesces re-entrant triggers (double-click / change-burst). */
+  let inFlight: Promise<boolean> | null = null;
 
   function buildFormState(internal: InternalState<TValues>): AppFormState<TValues> {
     return {
@@ -162,6 +170,28 @@ export function createHouseFormEngine<TValues extends object>(
     // 'submit' (default) + 'blur' both re-validate on change after the first attempt,
     // so errors clear as the user fixes them.
     return validateOn === 'change' || state.submitCount > 0;
+  }
+
+  function clearAutoSubmitTimer(): void {
+    if (autoSubmitTimer !== null) {
+      clearTimeout(autoSubmitTimer);
+      autoSubmitTimer = null;
+    }
+  }
+
+  /**
+   * Schedules a trailing-debounced auto-submit for `submitOn: 'change'` — a user-origin write
+   * calls this; a change burst coalesces onto one submit (the timer resets each write), and the
+   * single-flight guard drops any overlap. No-op for `'blur'` / `'manual'`. `reset()` cancels it.
+   */
+  function scheduleAutoSubmit(): void {
+    if ((currentOptions().submitOn ?? 'manual') !== 'change') return;
+    clearAutoSubmitTimer();
+    const delay = currentOptions().submitDebounceMs ?? 0;
+    autoSubmitTimer = setTimeout(() => {
+      autoSubmitTimer = null;
+      void submit();
+    }, delay);
   }
 
   /** Runs whole-schema validation; sync schemas apply synchronously, async ones flip `isValidating`. */
@@ -210,6 +240,7 @@ export function createHouseFormEngine<TValues extends object>(
       : state.serverErrors;
     patch({ values: setPath(state.values, path, value), serverErrors });
     if (shouldValidateOnChange()) void runValidation();
+    scheduleAutoSubmit();
   }
 
   function blurField(path: string): void {
@@ -218,7 +249,9 @@ export function createHouseFormEngine<TValues extends object>(
       touched.add(path);
       patch({ touched });
     }
-    if ((currentOptions().validateOn ?? 'submit') === 'blur') void runValidation();
+    const options = currentOptions();
+    if ((options.validateOn ?? 'submit') === 'blur') void runValidation();
+    if ((options.submitOn ?? 'manual') === 'blur') void submit();
   }
 
   function applyArrayOperation(path: string, operation: ArrayOperation): void {
@@ -233,10 +266,12 @@ export function createHouseFormEngine<TValues extends object>(
       touched: remapPathSet(state.touched, path, operation),
     });
     if (shouldValidateOnChange()) void runValidation();
+    scheduleAutoSubmit();
   }
 
   function reset(next?: TValues): void {
     validationEpoch += 1; // drop any in-flight validation result
+    clearAutoSubmitTimer(); // a reset/prefill never auto-submits — drop any pending trailing submit
     const values = next ?? currentOptions().defaultValues;
     commit({
       values,
@@ -261,12 +296,16 @@ export function createHouseFormEngine<TValues extends object>(
     if (state.submitError !== null) patch({ submitError: null });
   }
 
-  async function submit(): Promise<boolean> {
+  async function performSubmit(): Promise<boolean> {
+    // A whole-form disabled form is inert — no attempt, no onSubmit (read-only / role-locked / frozen).
+    if (currentOptions().isDisabled) return false;
     // A new attempt clears the previous server errors + remainder and re-arms the verdict.
     patch({ submitCount: state.submitCount + 1, serverErrors: EMPTY_MAP, submitError: null, isSubmitSuccessful: null });
     const errors = await runValidation();
-    if (Object.keys(errors).length > 0) {
-      patch({ isSubmitSuccessful: false }); // invalid — onSubmit never runs
+    // `submitInvalid` (default false) blocks onSubmit on client errors; `true` runs onSubmit anyway
+    // (the errors stay populated as advisory) — the backend becomes the source of truth.
+    if (Object.keys(errors).length > 0 && !currentOptions().submitInvalid) {
+      patch({ isSubmitSuccessful: false }); // invalid + block-on-errors — onSubmit never runs
       return false;
     }
     const options = currentOptions();
@@ -290,6 +329,37 @@ export function createHouseFormEngine<TValues extends object>(
     return successful;
   }
 
+  /**
+   * Single-flight submit — while a run is in flight a re-entrant trigger (double-click / Enter-spam
+   * / a `submitOn: 'change'` burst) coalesces onto it instead of starting a second `onSubmit`.
+   */
+  async function submit(): Promise<boolean> {
+    if (inFlight) return inFlight;
+    const run = performSubmit();
+    inFlight = run;
+    try {
+      return await run;
+    } finally {
+      inFlight = null;
+    }
+  }
+
+  /**
+   * Validates without submitting — the validation half of `submit()`: marks every field touched
+   * (so errors display and subsequent changes re-validate), runs the whole-form schema, and resolves
+   * the client validity. `onSubmit` never runs; the server-error overlay is left untouched.
+   */
+  async function validate(): Promise<boolean> {
+    if (state.submitCount === 0) patch({ submitCount: 1 });
+    const errors = await runValidation();
+    return Object.keys(errors).length === 0;
+  }
+
+  // Validate on mount when flagged — seed `isValid` / field errors before any interaction WITHOUT
+  // marking fields touched (submitCount stays 0), so an edit screen shows validity without asserting
+  // the user has interacted. Runs after every action above is defined.
+  if (currentOptions().validateOnMount) void runValidation();
+
   return {
     subscribe: (listener) => {
       listeners.add(listener);
@@ -304,5 +374,7 @@ export function createHouseFormEngine<TValues extends object>(
     setFieldErrors: setFieldErrorsAction,
     clearSubmitError,
     submit,
+    validate,
+    dispose: clearAutoSubmitTimer,
   };
 }

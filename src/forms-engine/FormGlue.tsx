@@ -24,9 +24,15 @@ import type {
  * is the foundation `FormControlContext` alone.
  */
 
-/** Builds the `form.Field` component from an adapter's per-field subscription hook. */
+/**
+ * Builds the `form.Field` component from an adapter's per-field subscription hook.
+ * `isFormDisabled` (optional) reads the whole-form `isDisabled` option per render and ORs
+ * it into every field's control-disabled flag — the lowest-leverage read-only / role-locked
+ * path; a field re-renders with its parent, so the latest form-level flag is picked up.
+ */
 export function createFieldComponent<TValues extends object>(
   useFieldApi: (path: string) => AppFieldApi<unknown>,
+  isFormDisabled?: () => boolean,
 ): AppFieldComponent<TValues> {
   function AppField<TPath extends string>(props: AppFieldProps<TValues, TPath>): ReactNode {
     const field = useFieldApi(props.name);
@@ -34,7 +40,7 @@ export function createFieldComponent<TValues extends object>(
       <FormControlProvider
         isInvalid={field.errors.length > 0}
         errors={field.errors}
-        isDisabled={props.isDisabled}
+        isDisabled={props.isDisabled || (isFormDisabled?.() ?? false)}
         isRequired={props.isRequired}
         isReadOnly={props.isReadOnly}
       >

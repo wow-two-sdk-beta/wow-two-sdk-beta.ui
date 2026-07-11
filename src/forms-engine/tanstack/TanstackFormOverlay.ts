@@ -49,6 +49,8 @@ export interface TanstackFormOverlay<TValues extends object> {
   readonly remapForArrayOperation: (arrayPath: string, operation: ArrayOperation) => void;
   /** A new attempt clears the previous server errors + submitError, re-arms the verdict, and counts as touching everything. */
   readonly beginSubmitAttempt: () => void;
+  /** Marks every field touched (`submitCount > 0`) WITHOUT clearing errors or the verdict — `validate()`'s display gate. */
+  readonly touchAll: () => void;
   /** Brackets the app's `onSubmit` call — the contract's `isSubmitting` window. */
   readonly setSubmitting: (isSubmitting: boolean) => void;
   /** Settles the last completed submit's verdict (`handleSubmit` mirrors it into `isSubmitSuccessful`). */
@@ -121,6 +123,9 @@ export function createTanstackFormOverlay<TValues extends object>(
     },
     beginSubmitAttempt: () => {
       patch({ submitCount: state.submitCount + 1, serverErrors: EMPTY_MAP, submitError: null, isSubmitSuccessful: null });
+    },
+    touchAll: () => {
+      if (state.submitCount === 0) patch({ submitCount: 1 });
     },
     setSubmitting: (isSubmitting) => {
       if (state.isSubmitting !== isSubmitting) patch({ isSubmitting });

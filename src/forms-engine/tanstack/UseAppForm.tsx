@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
 
 import {
   revalidateLogic,
@@ -273,6 +273,8 @@ function useCombinedField<TValues extends object>(
   engine: TanstackFormEngine<TValues>,
   overlay: TanstackFormOverlay<TValues>,
   path: string,
+  scheduleAutoSubmit: () => void,
+  autoSubmitOnBlur: () => void,
 ): AppFieldApi<unknown> {
   const read = () => reader.getFieldState(path);
   const fieldState = useSyncExternalStore(subscribe, read, read);
@@ -287,14 +289,18 @@ function useCombinedField<TValues extends object>(
         overlay.clearServerErrorsAt(path);
         // Triggers TanStack 'change'-cause validation, gated by `revalidateLogic`.
         engine.setFieldValue(path as DeepKeys<TValues>, value as never);
+        // `submitOn: 'change'` — a user-origin write schedules the debounced auto-submit.
+        scheduleAutoSubmit();
       },
       onBlur: () => {
         overlay.markBlurred(path);
         // 'blur'-cause validation — runs the schema only in `validateOn: 'blur'` mode.
         void engine.validateField(path as DeepKeys<TValues>, 'blur');
+        // `submitOn: 'blur'` — save-on-blur.
+        autoSubmitOnBlur();
       },
     }),
-    [engine, overlay, path, fieldState],
+    [engine, overlay, path, fieldState, scheduleAutoSubmit, autoSubmitOnBlur],
   );
 }
 
@@ -347,11 +353,18 @@ function createAdapterPrelude<TValues extends object>(
   return { getOptions, overlay, tanstackOptions };
 }
 
+/** What `buildAppForm` returns — the contract surface plus the unmount hook the adapter's own timer needs. */
+interface BuiltForm<TValues extends object> {
+  readonly form: AppForm<TValues, TanstackFormEngine<TValues>>;
+  /** Releases the pending `submitOn: 'change'` debounce timer on unmount. */
+  readonly dispose: () => void;
+}
+
 /** Builds the referentially-stable contract surface over the TanStack engine + overlay pair. */
 function buildAppForm<TValues extends object>(
   engine: TanstackFormEngine<TValues>,
   prelude: AdapterPrelude<TValues>,
-): AppForm<TValues, TanstackFormEngine<TValues>> {
+): BuiltForm<TValues> {
   const { getOptions, overlay, tanstackOptions } = prelude;
   const reader = createCombinedReader(engine, overlay);
 
@@ -368,8 +381,116 @@ function buildAppForm<TValues extends object>(
     selector: (state: AppFormState<TValues>) => TSlice,
     isEqual?: (a: TSlice, b: TSlice) => boolean,
   ): TSlice => useCombinedSlice(subscribe, reader, selector, isEqual);
+
+  // ── Submit path shared by `handleSubmit` + auto-submit (validate → onSubmit → map failure) ─────
+  /** Resolves a thrown submit failure onto the overlay (matched paths → fields, remainder → banner). */
+  function applySubmitFailure(error: unknown): void {
+    const options = getOptions();
+    const values = engine.store.state.values;
+    overlay.applySubmitFailure(
+      resolveSubmitFailure(
+        error,
+        options.mapSubmitError ?? fieldErrors,
+        options.mapFieldPath ?? defaultMapFieldPath,
+        (path) => hasPath(values, path),
+        options.fallbackErrorMessage,
+      ),
+    );
+  }
+
+  /** Runs the app `onSubmit` inside the contract's `isSubmitting` bracket (the `submitInvalid` path). */
+  async function runOnSubmit(): Promise<boolean> {
+    overlay.setSubmitting(true);
+    try {
+      await getOptions().onSubmit(engine.store.state.values);
+      overlay.setSubmitSuccessful(true);
+      return true;
+    } catch (error) {
+      applySubmitFailure(error);
+      overlay.setSubmitSuccessful(false);
+      return false;
+    } finally {
+      overlay.setSubmitting(false);
+    }
+  }
+
+  async function performSubmit(): Promise<boolean> {
+    // A whole-form disabled form is inert — no attempt, no onSubmit (read-only / role-locked / frozen).
+    if (getOptions().isDisabled) return false;
+    // A new attempt clears the previous server errors/submitError, re-arms the verdict, touches all.
+    overlay.beginSubmitAttempt();
+
+    if (getOptions().submitInvalid) {
+      // Backend-as-source-of-truth: always validate (advisory errors populate + render), then run
+      // `onSubmit` regardless of validity — the verdict reflects `onSubmit`, not the client gate.
+      await engine.validate('submit');
+      return runOnSubmit();
+    }
+
+    // Default — TanStack gates `onSubmit` on validity; a valid pass runs the wrapper `onSubmit`.
+    let succeeded = false;
+    try {
+      await engine.handleSubmit();
+      // The wrapper `onSubmit` flips the verdict true only on a valid + resolved submit;
+      // an invalid attempt leaves it `null` (no throw, `onSubmit` never ran).
+      succeeded = overlay.getState().isSubmitSuccessful === true;
+    } catch (error) {
+      // TanStack rethrows `onSubmit` failures — resolve them here so the contract's
+      // `handleSubmit` never rejects and no server message silently disappears.
+      applySubmitFailure(error);
+      succeeded = false;
+    }
+    // Settle the verdict — the invalid path's `null` becomes `false`; success is idempotent.
+    overlay.setSubmitSuccessful(succeeded);
+    return succeeded;
+  }
+
+  /**
+   * Single-flight submit — while a run is in flight a re-entrant trigger (double-click / Enter-spam /
+   * a `submitOn: 'change'` burst) coalesces onto it instead of starting a second `onSubmit`.
+   */
+  let inFlight: Promise<boolean> | null = null;
+  async function guardedSubmit(): Promise<boolean> {
+    if (inFlight) return inFlight;
+    const run = performSubmit();
+    inFlight = run;
+    try {
+      return await run;
+    } finally {
+      inFlight = null;
+    }
+  }
+
+  /** Validate without submitting — marks touched, runs the whole-form schema, resolves client validity. */
+  async function validate(): Promise<boolean> {
+    overlay.touchAll();
+    await engine.validate('submit');
+    return engine.store.state.isValid;
+  }
+
+  // ── Auto-submit (`submitOn`) — routes through the SAME `guardedSubmit` as manual submit ────────
+  let autoSubmitTimer: ReturnType<typeof setTimeout> | null = null;
+  const clearAutoSubmitTimer = (): void => {
+    if (autoSubmitTimer !== null) {
+      clearTimeout(autoSubmitTimer);
+      autoSubmitTimer = null;
+    }
+  };
+  const scheduleAutoSubmit = (): void => {
+    if ((getOptions().submitOn ?? 'manual') !== 'change') return;
+    clearAutoSubmitTimer();
+    const delay = getOptions().submitDebounceMs ?? 0;
+    autoSubmitTimer = setTimeout(() => {
+      autoSubmitTimer = null;
+      void guardedSubmit();
+    }, delay);
+  };
+  const autoSubmitOnBlur = (): void => {
+    if ((getOptions().submitOn ?? 'manual') === 'blur') void guardedSubmit();
+  };
+
   const useFieldApi = (path: string): AppFieldApi<unknown> =>
-    useCombinedField(subscribe, reader, engine, overlay, path);
+    useCombinedField(subscribe, reader, engine, overlay, path, scheduleAutoSubmit, autoSubmitOnBlur);
 
   const arrayOperation = (path: string, operation: Parameters<typeof overlay.remapForArrayOperation>[1]): void => {
     const field = path as DeepKeys<TValues>;
@@ -395,48 +516,24 @@ function buildAppForm<TValues extends object>(
     // differ, the contract wins because errors/touched surface from the overlay and
     // client errors are recomputed by the op's change-revalidation.
     overlay.remapForArrayOperation(path, operation);
+    scheduleAutoSubmit();
   };
 
-  return {
-    Field: createFieldComponent<TValues>(useFieldApi),
+  const form: AppForm<TValues, TanstackFormEngine<TValues>> = {
+    Field: createFieldComponent<TValues>(useFieldApi, () => getOptions().isDisabled ?? false),
     Subscribe: createSubscribeComponent<TValues>(useFormState),
     useFormState,
     handleSubmit: async (event?: FormEvent) => {
       event?.preventDefault();
-      // Before validation: a new attempt clears the previous server errors/submitError,
-      // re-arms the verdict, and marks everything touched — even when validation then fails.
-      overlay.beginSubmitAttempt();
-      let succeeded = false;
-      try {
-        await engine.handleSubmit();
-        // The wrapper `onSubmit` flips the verdict true only on a valid + resolved submit;
-        // an invalid attempt leaves it `null` (no throw, `onSubmit` never ran).
-        succeeded = overlay.getState().isSubmitSuccessful === true;
-      } catch (error) {
-        // TanStack rethrows `onSubmit` failures — resolve them here so the contract's
-        // `handleSubmit` never rejects and no server message silently disappears.
-        const options = getOptions();
-        const values = engine.store.state.values;
-        overlay.applySubmitFailure(
-          resolveSubmitFailure(
-            error,
-            options.mapSubmitError ?? fieldErrors,
-            options.mapFieldPath ?? defaultMapFieldPath,
-            (path) => hasPath(values, path),
-            options.fallbackErrorMessage,
-          ),
-        );
-        succeeded = false;
-      }
-      // Settle the verdict — the invalid path's `null` becomes `false`; success is idempotent.
-      overlay.setSubmitSuccessful(succeeded);
-      return succeeded;
+      return guardedSubmit();
     },
+    validate,
     setValue: (path, value) => {
       // Server messages clear on the next change to the field (contract JSDoc) — mirror the
       // in-field `setValue`; TanStack's 'change'-cause validation runs under `revalidateLogic`.
       overlay.clearServerErrorsAt(path);
       engine.setFieldValue(path as DeepKeys<TValues>, value as never);
+      scheduleAutoSubmit();
     },
     array: (path: string) => ({
       push: (value: unknown) => arrayOperation(path, { kind: 'push', value }),
@@ -453,11 +550,14 @@ function buildAppForm<TValues extends object>(
       tanstackOptions.defaultValues = values;
       overlay.reset(values);
       engine.reset(values);
+      clearAutoSubmitTimer(); // a reset/prefill never auto-submits — drop any pending trailing submit
     },
     setFieldErrors: (errors: Record<string, string[]>) => overlay.replaceServerErrors(errors),
     clearSubmitError: () => overlay.clearSubmitError(),
     engine,
   };
+
+  return { form, dispose: clearAutoSubmitTimer };
 }
 
 /**
@@ -476,7 +576,16 @@ export function useAppForm<TValues extends object>(
   const [prelude] = useState(() => createAdapterPrelude<TValues>(() => optionsRef.current));
   // The options object is referentially stable, so TanStack's per-render `update()` is a no-op.
   const engine = useForm(prelude.tanstackOptions);
-  const [form] = useState(() => buildAppForm<TValues>(engine, prelude));
+  const [built] = useState(() => buildAppForm<TValues>(engine, prelude));
 
-  return form;
+  useEffect(() => {
+    // Validate once on mount when flagged — seeds `isValid` / field errors WITHOUT marking touched
+    // (the mount pass shows validity without asserting the user interacted). Cleanup releases the
+    // pending `submitOn: 'change'` debounce timer on unmount.
+    if (optionsRef.current.validateOnMount) void engine.validate('submit');
+    return built.dispose;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return built.form;
 }

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react';
 
 import type { AppFieldApi, AppForm, AppFormOptions, AppFormState } from '../AppForm';
 import { createFieldComponent, createSubscribeComponent } from '../FormGlue';
@@ -89,13 +89,14 @@ export function useAppForm<TValues extends object>(
     const useFieldApi = (path: string): AppFieldApi<unknown> => useEngineField(engine, path);
 
     return {
-      Field: createFieldComponent<TValues>(useFieldApi),
+      Field: createFieldComponent<TValues>(useFieldApi, () => optionsRef.current.isDisabled ?? false),
       Subscribe: createSubscribeComponent<TValues>(useFormState),
       useFormState,
       handleSubmit: (event?: FormEvent) => {
         event?.preventDefault();
         return engine.submit();
       },
+      validate: () => engine.validate(),
       setValue: (path, value) => engine.setValue(path, value),
       array: (path: string) => ({
         push: (value: unknown) => engine.applyArrayOperation(path, { kind: 'push', value }),
@@ -110,6 +111,9 @@ export function useAppForm<TValues extends object>(
       engine,
     };
   });
+
+  // Release the pending `submitOn: 'change'` debounce timer when the form unmounts.
+  useEffect(() => () => form.engine.dispose(), [form]);
 
   return form;
 }

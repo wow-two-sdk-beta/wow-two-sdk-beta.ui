@@ -18,10 +18,49 @@ export interface AppFormOptions<TValues extends object> {
   readonly defaultValues: TValues;
   /** The whole-form validator — any Standard Schema (zod / valibot / arktype). Sync or async. */
   readonly schema?: StandardSchemaV1<TValues>;
+
+  // ── validation-config cluster ───────────────────────────────────────────────
   /** When client validation runs. `'submit'` (default) re-validates touched fields on change after the first attempt. */
   readonly validateOn?: 'change' | 'blur' | 'submit';
+  /**
+   * Validate once on mount — seeds `isValid` / field errors before any interaction (edit-screen
+   * validity indicators, wizard step-entry gating). Fields stay untouched (`isTouched` false), so
+   * the initial pass populates state without asserting the user has interacted. Default `false`.
+   */
+  readonly validateOnMount?: boolean;
+  /**
+   * How a failed client validation gates the submit. `false` (default) blocks `onSubmit` on errors
+   * (the client is the gate); `true` validates (errors still populate + render, advisory) but runs
+   * `onSubmit` regardless — the **backend is the source of truth**. Belongs here, on the
+   * validation-config surface, because it is a validation→submit *gate policy*, not a submit callback.
+   * The verdict (`handleSubmit` / `isSubmitSuccessful`) then reflects `onSubmit`'s outcome, not the
+   * bypassed client gate.
+   */
+  readonly submitInvalid?: boolean;
+
   /** Performs the submit with valid values — usually a `useAppMutation` / `useOptimisticMutation` `mutateAsync`. */
   readonly onSubmit: (values: TValues) => Promise<unknown>;
+
+  // ── submit-config cluster ───────────────────────────────────────────────────
+  /**
+   * What triggers a submit. `'manual'` (default) = only `handleSubmit` / the `<form onSubmit>` path.
+   * `'change'` = any field change schedules a submit (settings / live-save); `'blur'` = submit when a
+   * field blurs (save-on-blur). Auto-submits route through the SAME internal submit path as
+   * `handleSubmit`, so validation, the `submitInvalid` gate, server-error mapping, the verdict, and
+   * the concurrent-submit guard all apply identically. `reset()` / `reset(data)` / prefill never
+   * auto-submit — only user-origin writes do. Named `'manual'` (not `'submit'`) so it never reads as
+   * a `validateOn` value.
+   */
+  readonly submitOn?: 'change' | 'blur' | 'manual';
+  /** Debounce (ms, trailing) for `submitOn: 'change'` — coalesces a change burst into one submit. Default `0`. Ignored for `'blur'` / `'manual'`. */
+  readonly submitDebounceMs?: number;
+
+  /**
+   * Disables the whole form — ORs into every `form.Field`'s control-disabled flag (on top of any
+   * per-field `isDisabled`) and makes `handleSubmit` / auto-submit inert. For read-only / role-locked
+   * screens or a while-related-data-loads freeze. Read per render from the latest options. Default `false`.
+   */
+  readonly isDisabled?: boolean;
   /** Maps a thrown submit error to `path → messages`. Default: `fieldErrors` (ProblemDetails, both .NET shapes). */
   readonly mapSubmitError?: (error: unknown) => Record<string, string[]>;
   /** Rewrites a server error path onto a form path. Default: camelCase per segment (`Rules[0].Destination` → `rules[0].destination`). */
@@ -153,6 +192,14 @@ export interface AppForm<TValues extends object, TEngine = unknown> {
    * (a wizard-step gate) branches on it. The reactive mirror is `state.isSubmitSuccessful`.
    */
   readonly handleSubmit: (event?: FormEvent) => Promise<boolean>;
+  /**
+   * Validates the current values WITHOUT submitting — runs the whole-form schema, populates
+   * `field.errors`, and marks fields touched so the errors display (the "validate now" gate), then
+   * resolves the client validity. `onSubmit` never runs. The clean single-form multi-step gate
+   * (`const ok = await form.validate()` before advancing a wizard step) and the imperative
+   * "is it valid now" check. Never rejects. Mirrors RHF `trigger` / TanStack `validateAllFields`.
+   */
+  readonly validate: () => Promise<boolean>;
   /**
    * Writes a value at a path outside a `<form.Field>` render prop — cross-field / derived
    * writes (name → slug) and sibling-group writes. Top-level keys are typed to their value;

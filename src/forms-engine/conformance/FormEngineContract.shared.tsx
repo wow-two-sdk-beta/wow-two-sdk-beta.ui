@@ -1105,5 +1105,212 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
         await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
       });
     });
+
+    describe('submitOn (auto-submit)', () => {
+      it("'change' auto-submits the latest values once — debounced + coalesced", async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          submitOn: 'change',
+          submitDebounceMs: 20,
+          onSubmit,
+        });
+        const name = field('name');
+
+        // A synchronous change burst — the trailing debounce coalesces it to ONE submit.
+        await act(async () => {
+          name.current.setValue('a');
+          name.current.setValue('ab');
+        });
+        expect(onSubmit).not.toHaveBeenCalled(); // debounced, never synchronous
+
+        await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+        expect(onSubmit).toHaveBeenCalledWith({ name: 'ab', email: '' }); // latest values
+      });
+
+      it("'blur' auto-submits when a field blurs, not on change", async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          submitOn: 'blur',
+          onSubmit,
+        });
+        const name = field('name');
+
+        await act(async () => name.current.setValue('ada'));
+        expect(onSubmit).not.toHaveBeenCalled(); // change alone doesn't submit in 'blur' mode
+
+        await act(async () => name.current.onBlur());
+        await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+        expect(onSubmit).toHaveBeenCalledWith({ name: 'ada', email: '' });
+      });
+
+      it("'manual' (default) never auto-submits on change", async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { field } = renderForm<LoginValues>({ defaultValues: loginDefaults, onSubmit });
+        const name = field('name');
+
+        await act(async () => name.current.setValue('ada'));
+        // Give any stray timer a full window to (not) fire.
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 30));
+        });
+        expect(onSubmit).not.toHaveBeenCalled();
+      });
+
+      it('reset / prefill never auto-submits — it cancels a pending change submit', async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          submitOn: 'change',
+          submitDebounceMs: 20,
+          onSubmit,
+        });
+        const name = field('name');
+
+        await act(async () => name.current.setValue('ada')); // schedules a trailing submit
+        await act(async () => form.reset({ name: 'seed', email: 'seed@ex.io' })); // must cancel it
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 40));
+        });
+        expect(onSubmit).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('submitInvalid', () => {
+      it('true runs onSubmit with the invalid values; advisory errors remain; verdict follows onSubmit', async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults, // name empty → client-invalid
+          schema: nameRequired(),
+          submitInvalid: true,
+          onSubmit,
+        });
+        const name = field('name');
+
+        let verdict: boolean | undefined;
+        await act(async () => {
+          verdict = await form.handleSubmit();
+        });
+        expect(onSubmit).toHaveBeenCalledTimes(1);
+        expect(onSubmit).toHaveBeenCalledWith({ name: '', email: '' });
+        expect(verdict).toBe(true); // reflects onSubmit's resolution, not the bypassed client gate
+        expect(name.current.errors).toEqual(['Name is required']); // client errors still advisory
+      });
+
+      it('false (default) blocks onSubmit on invalid values', async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { form } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          schema: nameRequired(),
+          onSubmit,
+        });
+
+        let verdict: boolean | undefined;
+        await act(async () => {
+          verdict = await form.handleSubmit();
+        });
+        expect(onSubmit).not.toHaveBeenCalled();
+        expect(verdict).toBe(false);
+      });
+    });
+
+    describe('concurrent-submit guard', () => {
+      it('coalesces overlapping submits — onSubmit runs exactly once', async () => {
+        const gate = deferred<null>();
+        const onSubmit = vi.fn(() => gate.promise);
+        const { form, field } = renderForm<LoginValues>({ defaultValues: loginDefaults, onSubmit });
+        const name = field('name');
+        await act(async () => name.current.setValue('ada')); // valid (no schema)
+
+        let first!: Promise<boolean>;
+        let second!: Promise<boolean>;
+        act(() => {
+          first = form.handleSubmit();
+          second = form.handleSubmit(); // re-entrant while the first is in flight
+        });
+        await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+
+        await act(async () => {
+          gate.resolve(null);
+          await Promise.all([first, second]);
+        });
+        expect(onSubmit).toHaveBeenCalledTimes(1); // the second trigger never started a second run
+      });
+    });
+
+    describe('validate (validate-without-submit)', () => {
+      it('populates errors, marks touched, returns validity — without calling onSubmit', async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          schema: nameRequired(),
+          onSubmit,
+        });
+        const name = field('name');
+
+        let ok: boolean | undefined;
+        await act(async () => {
+          ok = await form.validate();
+        });
+        expect(ok).toBe(false);
+        expect(name.current.errors).toEqual(['Name is required']);
+        expect(name.current.isTouched).toBe(true); // validate marks touched so errors display
+        expect(onSubmit).not.toHaveBeenCalled();
+
+        // Fix + re-validate → valid, still no submit.
+        await act(async () => name.current.setValue('ada'));
+        await act(async () => {
+          ok = await form.validate();
+        });
+        expect(ok).toBe(true);
+        expect(onSubmit).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('validateOnMount', () => {
+      it('seeds initial validity + errors on mount without marking fields touched', async () => {
+        const { readState, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults, // name empty → invalid
+          schema: nameRequired(),
+          validateOnMount: true,
+          onSubmit: async () => null,
+        });
+        const name = field('name');
+
+        await waitFor(() => expect(readState().isValid).toBe(false));
+        expect(name.current.errors).toEqual(['Name is required']);
+        // The mount pass seeds validity WITHOUT asserting the user interacted — untouched.
+        expect(name.current.isTouched).toBe(false);
+      });
+    });
+
+    describe('whole-form isDisabled', () => {
+      it('disables every field control and makes submit inert', async () => {
+        const onSubmit = vi.fn(async () => null);
+        const { form } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          isDisabled: true,
+          onSubmit,
+        });
+
+        // A field WITHOUT its own isDisabled prop still reports disabled — the form-level flag ORs in.
+        const seen: { current: FormControlContextValue | null } = { current: null };
+        function DisabledProbe() {
+          seen.current = useFormControl();
+          return null;
+        }
+        render(<form.Field name="name">{() => <DisabledProbe />}</form.Field>);
+        expect(seen.current?.isDisabled).toBe(true);
+
+        // Submit is inert while the whole form is disabled.
+        let verdict: boolean | undefined;
+        await act(async () => {
+          verdict = await form.handleSubmit();
+        });
+        expect(verdict).toBe(false);
+        expect(onSubmit).not.toHaveBeenCalled();
+      });
+    });
   });
 }
