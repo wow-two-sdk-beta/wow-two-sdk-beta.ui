@@ -64,7 +64,7 @@ export function NavigationProgress(props: NavigationProgressProps) {
         aria-busy={true}
         aria-label={ariaLabel}
         data-variant={variant}
-        className="fixed right-4 top-4 z-50 inline-flex h-3 w-3 items-center justify-center"
+        className="fixed right-4 top-4 z-toast inline-flex h-3 w-3 items-center justify-center"
       >
         {/* Ping ring conveys the beat; reduced-motion drops it, leaving the solid dot as a static cue. */}
         <span className="absolute inline-flex h-full w-full rounded-full bg-primary/60 animate-ping motion-reduce:hidden" />
@@ -79,7 +79,7 @@ export function NavigationProgress(props: NavigationProgressProps) {
       aria-busy={true}
       aria-label={ariaLabel}
       data-variant={variant}
-      className="fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden"
+      className="fixed inset-x-0 top-0 z-toast h-0.5 overflow-hidden"
     >
       {/* Indeterminate slide; reduced-motion pins it full-width and static. */}
       <div className="h-full w-1/3 bg-primary animate-indeterminate motion-reduce:w-full motion-reduce:animate-none" />
