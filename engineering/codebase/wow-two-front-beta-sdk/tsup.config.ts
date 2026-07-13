@@ -15,6 +15,7 @@ const subpathLayer: Record<string, 'foundation' | 'domain' | 'presentation'> = {
   resilience: 'foundation',
   identifiers: 'foundation',
   i18n: 'foundation',
+  config: 'foundation',
   color: 'domain',
   emoji: 'domain',
   actions: 'presentation',
@@ -53,6 +54,10 @@ export default defineConfig({
     'forms-engine/index': 'src/forms-engine/index.ts',
     'forms-engine/house/index': 'src/forms-engine/house/index.ts',
     'forms-engine/tanstack/index': 'src/forms-engine/tanstack/index.ts',
+    // `foundation/storage/zustand` — the zustand-persist adapter. A nested subpath (below the layer-prefixed
+    // `foundation/storage`), so it needs an explicit entry rather than the `subpathLayer` one-level generation.
+    // No zustand peer: it only mirrors zustand's `PersistStorage` shape structurally (see ZustandPersist.ts).
+    'foundation/storage/zustand/index': 'src/foundation/storage/zustand/index.ts',
     // Entry KEY = dist path (`dist/<layer>/<group>/index.js`) — mirrors the
     // layered source folder so the emitted subpath matches the public export.
     ...Object.fromEntries(

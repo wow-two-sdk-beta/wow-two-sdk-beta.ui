@@ -12,6 +12,12 @@ export { useReducedMotion } from './useReducedMotion';
 export { useClipboard, type UseClipboardOptions, type ClipboardControls } from './useClipboard';
 export { useDebounceHandler } from './useDebounceHandler';
 export {
+  useAutosave,
+  type AutosaveStatus,
+  type UseAutosaveOptions,
+  type AutosaveControls,
+} from './useAutosave';
+export {
   useTypeahead,
   type UseTypeaheadOptions,
   type UseTypeaheadReturn,

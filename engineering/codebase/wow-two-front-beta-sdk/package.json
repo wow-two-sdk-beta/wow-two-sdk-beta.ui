@@ -73,6 +73,11 @@
       "import": "./dist/foundation/storage/index.js",
       "default": "./dist/foundation/storage/index.js"
     },
+    "./foundation/storage/zustand": {
+      "types": "./dist/foundation/storage/zustand/index.d.ts",
+      "import": "./dist/foundation/storage/zustand/index.js",
+      "default": "./dist/foundation/storage/zustand/index.js"
+    },
     "./foundation/resilience": {
       "types": "./dist/foundation/resilience/index.d.ts",
       "import": "./dist/foundation/resilience/index.js",
@@ -87,6 +92,11 @@
       "types": "./dist/foundation/i18n/index.d.ts",
       "import": "./dist/foundation/i18n/index.js",
       "default": "./dist/foundation/i18n/index.js"
+    },
+    "./foundation/config": {
+      "types": "./dist/foundation/config/index.d.ts",
+      "import": "./dist/foundation/config/index.js",
+      "default": "./dist/foundation/config/index.js"
     },
     "./domain/color": {
       "types": "./dist/domain/color/index.d.ts",

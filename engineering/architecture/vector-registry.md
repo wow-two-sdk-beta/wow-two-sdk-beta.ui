@@ -18,14 +18,15 @@ Concrete deliverables — each an `@wow-two-beta/ui/*` subpath export.
 | Forms engine | `forms-engine` · `/house` · `/tanstack` | **shipped** (Wave 2) | house + tanstack adapters · one 114-case conformance · Standard Schema; [`forms-engine.md`](./analysis/forms-engine.md) |
 | Routing | `router` | **shipped** | `react-router-dom` wrap; [`router-review.md`](./analysis/router-review.md) = migration-ready |
 | Theming | `foundation/themes` (+ `themes.css`/`themes.json`) | **shipped** | OKLCH engine · 183 themes · Theme Studio; `theming.md` / `THEMES.md` |
-| Storage | `foundation/storage` | **shipped v1** (v2 NEXT) | v2 = versioned keys · migrations · zustand-persist · autosave |
+| Storage | `foundation/storage` (+ `/zustand`) | **shipped v2** | v1 `StorageBroker` (local/memory) + v2 `namespacedBroker` (key isolation) + `createVersionedStore` (`{v,data}` envelope · on-read migration chain · degrade-to-`initial`); autosave = `useAutosave` hook (`foundation/hooks`); `foundation/storage/zustand` = `brokerPersistStorage` → zustand `PersistStorage` bridge (structural mirror, **zero zustand dep**) |
+| Config (typed env) | `foundation/config` | **shipped** (Wave 2) | `defineConfig(schema)` over ordered sources (runtime `window.__APP_CONFIG__` ahead of build-time `import.meta.env`) · 8 field builders · optional/default/prefix · fail-fast aggregated `ConfigError` · secret redaction |
 | Resilience | `foundation/resilience` | **shipped** | retry / backoff patterns |
 | Pagination contracts | `foundation/http` (`Page`/`TokenPage`) | **shipped** (iter 5) | 9 `IHas*` composables → `Page<T>` / `TokenPage<T,TToken>` / `CursorPage`; type-only, additive; [`pagination-model.md`](./analysis/pagination-model.md) |
 | Identifiers | `foundation/identifiers` | **shipped** (iter 5) | branded `Guid` — `createV7`/`createV4`/`parse`/`compare`… (own ~25-LOC v7, .NET `System.Guid`-parallel); [`guid-type.md`](./analysis/guid-type.md) |
 | i18n (locale foundation) | `foundation/i18n` | **shipped** (foundation) | `LocaleProvider`/`useLocale` (messages dict/callback + SDK fallback) · `useLocaleFormatters` (cached `Intl` number/currency/date/relative/list/plural) · `FormattedRelative`. Per-component string extraction (~150–200 strings) = the remaining §2.2 P6 tail |
 | Icons | `foundation/icons` | **shipped** | `<Icon>` registry (lucide) |
 | Primitives (L2 headless) | `foundation/primitives` | **shipped** (17) | Slot · Portal · FocusScope · AnchoredPositioner · … → [`component-catalog.md`](./component-catalog.md) |
-| Utils / hooks | `foundation/utils` · `foundation/hooks` | **shipped** | `cn` · polymorphic types · `useControlled` · observers |
+| Utils / hooks | `foundation/utils` · `foundation/hooks` | **shipped** | `cn` · polymorphic types · `useControlled` · observers · `useAutosave` (debounced save + status + unmount-flush) |
 | Domain values | `domain/color` · `domain/emoji` | **shipped** | `Gradient` ops · emoji data |
 | Components | `presentation/{actions,display,feedback,forms,layout,nav,overlays}` | **shipped** (231) | → [`component-catalog.md`](./component-catalog.md) |
 
@@ -66,7 +67,7 @@ Concrete deliverables — each an `@wow-two-beta/ui/*` subpath export.
 Product-evidence-ranked — a module N products already hand-roll = proven demand, migration = deletion.
 
 - **Wave 1 — DONE**: `foundation/http` api-client · `auth` · `query` optimistic-mutation · `feedback` bus.
-- **Wave 2**: `forms-engine` **DONE** · `foundation/config` typed env (queued) · `foundation/storage` v2 (queued).
+- **Wave 2 — DONE** (2026-07-13): `forms-engine` · `foundation/config` typed env · `foundation/storage` v2 (`namespacedBroker` + `createVersionedStore` + `useAutosave` + `foundation/storage/zustand` persist adapter).
 - **Wave 3**: `commands`/shortcuts · `foundation/files` + `foundation/format` · `analytics` event bus · `flags` (OpenFeature-shaped).
 - **Deferred (trigger-gated)**: `errors` extraction · `AppDevtools` · `uploadQueue` · i18n (→ own P6 track).
 - **Open triage (raised 2026-07-13)** — **global-state abstraction**: a swappable house contract + `zustand` (default) / `redux` adapter as optional peers, forms-engine-style. ⚠️ *Bundling* a state manager is verdicted **SKIP** ([`frontend-modules-ecosystem.md`](./analysis/frontend-modules-ecosystem.md) E#26 — React 19 + RQ cache + `usePersistentState` cover app state; consumer brings zustand). The **swappable-adapter** framing is the un-decided question — owner call before it becomes an iteration.
