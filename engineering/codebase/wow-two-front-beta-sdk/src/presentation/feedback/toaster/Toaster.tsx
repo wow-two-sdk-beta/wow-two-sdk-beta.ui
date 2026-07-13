@@ -22,6 +22,24 @@ export interface ToastOptions {
   /** ms before auto-dismiss. Default: Toaster's `defaultDuration`. `Infinity` = sticky. */
   duration?: number;
   action?: ReactNode;
+  /** Dedup key — a `toast` whose `key` is already showing updates that toast in place (refreshing its timer) instead of stacking a duplicate. */
+  key?: string;
+}
+
+/** Content for a `toaster.promise` phase — a title string, or a full partial options object. */
+export type ToastContent = string | Partial<ToastOptions>;
+
+/** Options for `toaster.promise` — loading / success / error content (success + error may be a fn of the settled value). */
+export interface ToastPromiseOptions<T> {
+  loading: ToastContent;
+  success: ToastContent | ((value: T) => ToastContent);
+  error: ToastContent | ((err: unknown) => ToastContent);
+  /** Auto-dismiss (ms) for the settled toast; defaults to the Toaster's `defaultDuration`. */
+  duration?: number;
+}
+
+function normalizeContent(content: ToastContent): Partial<ToastOptions> {
+  return typeof content === 'string' ? { title: content } : content;
 }
 
 interface ToastEntry extends ToastOptions {
@@ -38,6 +56,13 @@ class ToasterStore {
   private idSeq = 0;
 
   toast(opts: ToastOptions): string {
+    if (opts.key !== undefined) {
+      const existing = this.items.find((t) => t.key === opts.key);
+      if (existing) {
+        this.update(existing.id, opts);
+        return existing.id;
+      }
+    }
     const id = `t_${++this.idSeq}`;
     this.items = [...this.items, { id, ...opts, nonce: 0 }];
     this.emit();
@@ -48,6 +73,18 @@ class ToasterStore {
   update(id: string, patch: Partial<ToastOptions>): void {
     this.items = this.items.map((t) => (t.id === id ? { ...t, ...patch, nonce: t.nonce + 1 } : t));
     this.emit();
+  }
+
+  /** Shows a sticky loading toast, then updates it in place to success / error when `promise` settles. Returns `promise`. */
+  promise<T>(promise: Promise<T>, opts: ToastPromiseOptions<T>): Promise<T> {
+    const id = this.toast({ ...normalizeContent(opts.loading), severity: 'info', duration: Infinity });
+    const settle = (content: ToastContent, severity: ToastSeverity) =>
+      this.update(id, { ...normalizeContent(content), severity, duration: opts.duration });
+    promise.then(
+      (value) => settle(typeof opts.success === 'function' ? opts.success(value) : opts.success, 'success'),
+      (err) => settle(typeof opts.error === 'function' ? opts.error(err) : opts.error, 'danger'),
+    );
+    return promise;
   }
 
   dismiss(id: string): void {
@@ -80,6 +117,7 @@ export function useToaster() {
     () => ({
       toast: (opts: ToastOptions) => toaster.toast(opts),
       update: (id: string, patch: Partial<ToastOptions>) => toaster.update(id, patch),
+      promise: <T,>(promise: Promise<T>, opts: ToastPromiseOptions<T>) => toaster.promise(promise, opts),
       dismiss: (id: string) => toaster.dismiss(id),
       dismissAll: () => toaster.dismissAll(),
     }),

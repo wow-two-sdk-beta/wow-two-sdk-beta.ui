@@ -261,3 +261,59 @@ export const UpdatesToastContent: Story = {
     await expectDismissed(() => viewport.queryByText('Uploaded'));
   },
 };
+
+export const DedupesByKey: Story = {
+  render: () => <Toaster defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+
+    const first = toaster.toast({ key: 'sync', title: 'Syncing', description: 'attempt 1' });
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    await viewport.findByText('attempt 1');
+
+    // Same key → updates the live toast in place, returns the SAME id, no second card.
+    const second = toaster.toast({ key: 'sync', title: 'Syncing', description: 'attempt 2' });
+    await expect(second).toBe(first);
+    await viewport.findByText('attempt 2');
+    await expect(viewport.queryByText('attempt 1')).not.toBeInTheDocument();
+    await expect(viewport.getAllByRole('status')).toHaveLength(1);
+
+    toaster.dismissAll();
+    await expectDismissed(() => viewport.queryByText('attempt 2'));
+  },
+};
+
+export const PromiseToast: Story = {
+  render: () => <Toaster defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+
+    let resolve!: (value: string) => void;
+    const pending = new Promise<string>((r) => {
+      resolve = r;
+    });
+    toaster.promise(pending, {
+      loading: 'Saving…',
+      success: (name) => `Saved ${name}`,
+      error: 'Save failed',
+      duration: Infinity,
+    });
+
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    await viewport.findByText('Saving…');
+    await expect(viewport.getAllByRole('status')).toHaveLength(1);
+
+    // Settling updates the SAME toast in place (loading → success), never a second card.
+    resolve('report');
+    await viewport.findByText('Saved report');
+    await expect(viewport.queryByText('Saving…')).not.toBeInTheDocument();
+    await expect(viewport.getAllByRole('status')).toHaveLength(1);
+
+    toaster.dismissAll();
+    await expectDismissed(() => viewport.queryByText('Saved report'));
+  },
+};
