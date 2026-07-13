@@ -1,0 +1,30 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { Grid } from '@src/presentation/layout/grid/Grid';
+
+const meta: Meta<typeof Grid> = {
+  title: 'Layout/Grid',
+  component: Grid,
+  tags: ['autodocs'],
+};
+export default meta;
+type Story = StoryObj<typeof Grid>;
+
+export const ThreeColumns: Story = {
+  render: () => (
+    <Grid columns="3" gap="4">
+      {Array.from({ length: 6 }, (_, i) => (
+        <div key={i} className="rounded-md bg-neutral-100 p-4 text-center">{i + 1}</div>
+      ))}
+    </Grid>
+  ),
+};
+
+export const Responsive: Story = {
+  render: () => (
+    <Grid columns={{ base: '1', sm: '2', lg: '3' }} gap={{ base: '2', lg: '6' }}>
+      {Array.from({ length: 6 }, (_, i) => (
+        <div key={i} className="rounded-md bg-neutral-100 p-4 text-center">{i + 1}</div>
+      ))}
+    </Grid>
+  ),
+};

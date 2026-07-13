@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.bump.outputs.version }}
+    defaults:
+      run:
+        working-directory: engineering/codebase/wow-two-front-beta-sdk
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,13 +31,16 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        # version inferred from packageManager field in package.json
+        with:
+          # version inferred from packageManager field in the nested package.json
+          package_json_file: engineering/codebase/wow-two-front-beta-sdk/package.json
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: engineering/codebase/wow-two-front-beta-sdk/pnpm-lock.yaml
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install
@@ -155,7 +161,7 @@ jobs:
       - name: Upload Storybook artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: storybook-static
+          path: engineering/codebase/wow-two-front-beta-sdk/storybook-static
 
   pages:
     name: deploy Storybook

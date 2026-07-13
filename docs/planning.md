@@ -34,6 +34,12 @@
 
 ---
 
+## SDK organize (2026-07-11)
+
+The O-1…O-6 restructure/docs/vectors iterations now live in the version track → [`engineering/planning/version-track/v0.1.md`](../engineering/planning/version-track/v0.1.md). (This `docs/planning.md` itself moves into `engineering/planning/` during O-1.)
+
+---
+
 ## Standing rules
 
 - new iteration → add a row here FIRST; deep analysis goes to `analysis/*.md` and is linked, never inlined

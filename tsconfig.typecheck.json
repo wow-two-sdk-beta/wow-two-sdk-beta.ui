@@ -1,8 +1,0 @@
-{
-  // Typecheck gate: same options as tsconfig.json but WITHOUT the `**/*.stories.tsx`
-  // exclusion, so story drift (wrong props, stale APIs) fails `pnpm typecheck`.
-  // The build (`tsc --emitDeclarationOnly`) still uses tsconfig.json, which excludes
-  // stories — they must never emit into `dist`.
-  "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "dist", "storybook-static"]
-}
