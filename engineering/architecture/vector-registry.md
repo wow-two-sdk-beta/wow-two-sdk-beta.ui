@@ -22,6 +22,7 @@ Concrete deliverables — each an `@wow-two-beta/ui/*` subpath export.
 | Resilience | `foundation/resilience` | **shipped** | retry / backoff patterns |
 | Pagination contracts | `foundation/http` (`Page`/`TokenPage`) | **shipped** (iter 5) | 9 `IHas*` composables → `Page<T>` / `TokenPage<T,TToken>` / `CursorPage`; type-only, additive; [`pagination-model.md`](./analysis/pagination-model.md) |
 | Identifiers | `foundation/identifiers` | **shipped** (iter 5) | branded `Guid` — `createV7`/`createV4`/`parse`/`compare`… (own ~25-LOC v7, .NET `System.Guid`-parallel); [`guid-type.md`](./analysis/guid-type.md) |
+| i18n (locale foundation) | `foundation/i18n` | **shipped** (foundation) | `LocaleProvider`/`useLocale` (messages dict/callback + SDK fallback) · `useLocaleFormatters` (cached `Intl` number/currency/date/relative/list/plural) · `FormattedRelative`. Per-component string extraction (~150–200 strings) = the remaining §2.2 P6 tail |
 | Icons | `foundation/icons` | **shipped** | `<Icon>` registry (lucide) |
 | Primitives (L2 headless) | `foundation/primitives` | **shipped** (17) | Slot · Portal · FocusScope · AnchoredPositioner · … → [`component-catalog.md`](./component-catalog.md) |
 | Utils / hooks | `foundation/utils` · `foundation/hooks` | **shipped** | `cn` · polymorphic types · `useControlled` · observers |

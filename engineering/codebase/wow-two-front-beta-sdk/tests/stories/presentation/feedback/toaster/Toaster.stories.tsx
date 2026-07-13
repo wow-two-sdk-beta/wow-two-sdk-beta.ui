@@ -317,3 +317,51 @@ export const PromiseToast: Story = {
     await expectDismissed(() => viewport.queryByText('Saved report'));
   },
 };
+
+export const CustomContent: Story = {
+  render: () => <Toaster defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+
+    const id = toaster.toast({
+      content: (
+        <div
+          data-testid="custom-toast"
+          className="pointer-events-auto rounded-md border border-border bg-background p-4 shadow-lg"
+        >
+          <p className="text-sm font-medium">Custom layout</p>
+        </div>
+      ),
+    });
+
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    const custom = await viewport.findByTestId('custom-toast');
+    await expectVisible(custom);
+    // Custom content replaces the default Toast chrome — no built-in Dismiss button.
+    await expect(viewport.queryByRole('button', { name: 'Dismiss' })).not.toBeInTheDocument();
+
+    toaster.dismiss(id);
+    await expectDismissed(() => viewport.queryByTestId('custom-toast'));
+  },
+};
+
+export const DismissFiresOnDismiss: Story = {
+  render: () => <Toaster defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+    const onDismiss = fn();
+
+    const id = toaster.toast({ title: 'Closing soon', onDismiss });
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    await viewport.findByText('Closing soon');
+
+    // The callback fires exactly once on removal (here via the imperative dismiss).
+    toaster.dismiss(id);
+    await expect(onDismiss).toHaveBeenCalledTimes(1);
+    await expectDismissed(() => viewport.queryByText('Closing soon'));
+  },
+};

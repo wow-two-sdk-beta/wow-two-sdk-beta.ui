@@ -92,6 +92,8 @@ Mirrors `ideas.md` §4. One row per vector — concise verdict + path forward.
 
 Currently **EVERY** component is en-US-locked. The largest single gap. Plan:
 
+> **Foundation SHIPPED (2026-07-13)** — `foundation/i18n`: `LocaleProvider`/`useLocale` (messages dict or `(key,vars)=>string` callback + SDK-authored fallback per call), `useLocaleFormatters` (cached `Intl` number/currency/percent/date/time/`RelativeTimeFormat`/`ListFormat`/`PluralRules`), `FormattedRelative`. The **provider + formatter layer** below is now real; what remains is the per-component **string extraction** (~150–200 strings → `t(key, vars, fallback)` call sites + per-component `labels` overrides).
+
 | Sub-vector | Verdict |
 |---|---|
 | **Translation provider** | **NEXT** — `<LocaleProvider locale messages={…}>` consumed via `useLocale()` hook; ships English defaults; consumer overrides via `messages` dictionary OR `(key, vars) => string` callback |

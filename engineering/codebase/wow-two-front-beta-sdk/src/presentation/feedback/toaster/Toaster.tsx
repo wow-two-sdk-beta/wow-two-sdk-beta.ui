@@ -22,6 +22,10 @@ export interface ToastOptions {
   /** ms before auto-dismiss. Default: Toaster's `defaultDuration`. `Infinity` = sticky. */
   duration?: number;
   action?: ReactNode;
+  /** Fully custom body — replaces the default `Toast` chrome (icon/title/description/close). The toast still animates + auto-dismisses; the content owns its own close via the returned id. */
+  content?: ReactNode;
+  /** Fired when the toast is removed — auto-dismiss, close button, `dismiss(id)`, or `dismissAll()` (NOT on a dedup-update). For undo cleanup / analytics. */
+  onDismiss?: () => void;
   /** Dedup key — a `toast` whose `key` is already showing updates that toast in place (refreshing its timer) instead of stacking a duplicate. */
   key?: string;
 }
@@ -88,12 +92,16 @@ class ToasterStore {
   }
 
   dismiss(id: string): void {
+    const entry = this.items.find((t) => t.id === id);
     this.items = this.items.filter((t) => t.id !== id);
+    entry?.onDismiss?.();
     this.emit();
   }
 
   dismissAll(): void {
+    const gone = this.items;
     this.items = [];
+    for (const t of gone) t.onDismiss?.();
     this.emit();
   }
 
@@ -369,14 +377,16 @@ export function Toaster({
               motionClass={MOTION_CLASSES[position]}
               onRemoved={t.present ? undefined : () => removeExiting(t.id)}
             >
-              <Toast
-                icon={t.icon}
-                title={t.title}
-                description={t.description}
-                severity={t.severity}
-                actions={t.action}
-                onClose={() => toaster.dismiss(t.id)}
-              />
+              {t.content ?? (
+                <Toast
+                  icon={t.icon}
+                  title={t.title}
+                  description={t.description}
+                  severity={t.severity}
+                  actions={t.action}
+                  onClose={() => toaster.dismiss(t.id)}
+                />
+              )}
             </ToastItem>
           </Presence>
         ))}

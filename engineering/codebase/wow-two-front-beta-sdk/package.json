@@ -83,6 +83,11 @@
       "import": "./dist/foundation/identifiers/index.js",
       "default": "./dist/foundation/identifiers/index.js"
     },
+    "./foundation/i18n": {
+      "types": "./dist/foundation/i18n/index.d.ts",
+      "import": "./dist/foundation/i18n/index.js",
+      "default": "./dist/foundation/i18n/index.js"
+    },
     "./domain/color": {
       "types": "./dist/domain/color/index.d.ts",
       "import": "./dist/domain/color/index.js",
