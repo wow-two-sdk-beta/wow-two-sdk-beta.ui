@@ -64,6 +64,7 @@ Templates exist at [`engineering/architecture/templates/component-standard.md`](
 - `engineering/architecture/templates/component-standard.md` — template every `*.standard.md` fills
 - `engineering/architecture/templates/component-spec.md` — template every `*.spec.md` fills
 - `engineering/architecture/architecture.md` — full layering rule + ESLint mechanics
+- `engineering/architecture/component-catalog.md` — every shipped component, per group + import subpath (**derived** — run `node engineering/architecture/gen-catalog.mjs` to sync)
 - `engineering/architecture/testing.md` — test-layer plan, tiers, iteration tracker, findings
 - `engineering/architecture/decisions/` — cross-component ADRs
 - `.storybook/` — catalog config (+ `vitest.setup.ts` for story tests)

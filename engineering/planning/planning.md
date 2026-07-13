@@ -9,7 +9,7 @@
 
 | Vector | Deep reference | Status |
 |---|---|---|
-| Components (P3 build-out) | `analysis/ui-philosophy/targets.md` + roadmap | organisms done; P6 refactor vectors NEXT |
+| Components (P3 build-out) | [`component-catalog.md`](../architecture/component-catalog.md) (index) · `../architecture/analysis/ui-philosophy/targets.md` + roadmap | organisms done; P6 refactor vectors NEXT |
 | Testing layer | [`testing.md`](../architecture/testing.md) (own iteration table, It1–10 done) | live — 1550 tests; a11y contrast tail deferred |
 | Infra modules (waves) | [`analysis/frontend-modules.md`](../architecture/analysis/frontend-modules.md) | Wave 1 done · Wave 2 in progress |
 | Forms / fields / validation | [`analysis/forms-engine.md`](../architecture/analysis/forms-engine.md) | **COMPLETE** — engine + 2 adapters + 114-case conformance + all fields wired + 3 product proofs + [completeness map](../architecture/analysis/forms-completeness.md) (34 shipped · 0 ship-now) |
