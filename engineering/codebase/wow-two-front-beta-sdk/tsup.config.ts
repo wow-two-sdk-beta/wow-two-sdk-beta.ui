@@ -16,6 +16,7 @@ const subpathLayer: Record<string, 'foundation' | 'domain' | 'presentation'> = {
   identifiers: 'foundation',
   i18n: 'foundation',
   config: 'foundation',
+  shortcuts: 'foundation',
   color: 'domain',
   emoji: 'domain',
   actions: 'presentation',

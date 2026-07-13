@@ -98,6 +98,11 @@
       "import": "./dist/foundation/config/index.js",
       "default": "./dist/foundation/config/index.js"
     },
+    "./foundation/shortcuts": {
+      "types": "./dist/foundation/shortcuts/index.d.ts",
+      "import": "./dist/foundation/shortcuts/index.js",
+      "default": "./dist/foundation/shortcuts/index.js"
+    },
     "./domain/color": {
       "types": "./dist/domain/color/index.d.ts",
       "import": "./dist/domain/color/index.js",
