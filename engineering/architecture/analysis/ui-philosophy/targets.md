@@ -61,6 +61,8 @@
 
 Mirrors `ideas.md` §4. One row per vector — concise verdict + path forward.
 
+> **Live at-a-glance index → [`vector-registry.md`](../../vector-registry.md).** Modules shipped since several verdicts below were written: `foundation/http` · `auth` · `query` (+ optimistic mutation) · `feedback` bus · `forms-engine` · `router` · `foundation/storage`. Where a verdict here still reads NEXT/PARTIAL/SKIP for one of those (notably §2.16, §2.17, §3.6, §3.8), the shipped module supersedes it — the registry holds the current state.
+
 ### 2.1 Accessibility — NOW
 
 | Sub-vector | Verdict |
@@ -452,7 +454,7 @@ Mirrors `ideas.md` §8. Per-API verdict for inclusion as a hook/wrapper in `src/
 
 | API | Verdict | Hook |
 |---|---|---|
-| Web Storage | **NEXT** | `useLocalStorage`, `useSessionStorage` (token theme, density preference) |
+| Web Storage | **DONE** | shipped in `foundation/storage` (`useLocalStorage`/`useSessionStorage`); v2 versioned-keys/migrations NEXT |
 | IndexedDB | **SKIP** | data layer concern |
 | Cache | **SKIP** | service worker |
 | Cookie Store | **MAYBE** | |
@@ -479,6 +481,8 @@ Mirrors `ideas.md` §8. Per-API verdict for inclusion as a hook/wrapper in `src/
 | Push | **SKIP** | |
 | Background Fetch | **SKIP** | |
 | Network Information | **MAYBE** | `useOnlineStatus`; reduced-data UI |
+
+> **Shipped:** `foundation/http` `createApiClient` — a **backend-contract** client (native-fetch transport, envelope unwrap, `ProblemDetails`→`ApiError`, bearer/cookie, 401 hook). The §9 generic-fetch-wrapper lock was revised in practice (2026-07-10) to permit exactly this; a general axios-style wrapper stays SKIP.
 
 ### 3.9 Communication / Channels
 

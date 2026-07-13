@@ -7,6 +7,8 @@
 
 ## Vectors
 
+> Full vector index (shipped modules + cross-cutting + possible-unbuilt) → [`vector-registry.md`](../architecture/vector-registry.md). The table below is the active/tracked subset.
+
 | Vector | Deep reference | Status |
 |---|---|---|
 | Components (P3 build-out) | [`component-catalog.md`](../architecture/component-catalog.md) (index) · `../architecture/analysis/ui-philosophy/targets.md` + roadmap | organisms done; P6 refactor vectors NEXT |
