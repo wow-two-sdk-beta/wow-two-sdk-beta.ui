@@ -26,6 +26,8 @@ export interface ToastOptions {
 
 interface ToastEntry extends ToastOptions {
   id: string;
+  /** Bumped on every `update` / dedup so the viewport can reset that toast's auto-dismiss timer. */
+  nonce: number;
 }
 
 type Listener = (toasts: ReadonlyArray<ToastEntry>) => void;
@@ -37,9 +39,15 @@ class ToasterStore {
 
   toast(opts: ToastOptions): string {
     const id = `t_${++this.idSeq}`;
-    this.items = [...this.items, { id, ...opts }];
+    this.items = [...this.items, { id, ...opts, nonce: 0 }];
     this.emit();
     return id;
+  }
+
+  /** Merges a patch into an existing toast (content + severity + duration), refreshing its timer. */
+  update(id: string, patch: Partial<ToastOptions>): void {
+    this.items = this.items.map((t) => (t.id === id ? { ...t, ...patch, nonce: t.nonce + 1 } : t));
+    this.emit();
   }
 
   dismiss(id: string): void {
@@ -71,6 +79,7 @@ export function useToaster() {
   return useMemo(
     () => ({
       toast: (opts: ToastOptions) => toaster.toast(opts),
+      update: (id: string, patch: Partial<ToastOptions>) => toaster.update(id, patch),
       dismiss: (id: string) => toaster.dismiss(id),
       dismissAll: () => toaster.dismissAll(),
     }),
@@ -171,6 +180,7 @@ export function Toaster({
   const timersRef = useRef(new Map<string, number>());
   const remainingRef = useRef(new Map<string, number>());
   const startRef = useRef(new Map<string, number>());
+  const noncesRef = useRef(new Map<string, number>());
 
   useEffect(() => {
     return toaster.subscribe(setItems);
@@ -235,7 +245,22 @@ export function Toaster({
         startRef.current.delete(id);
       }
     }
+    for (const id of noncesRef.current.keys()) {
+      if (!ids.has(id)) noncesRef.current.delete(id);
+    }
     if (paused) return;
+    // A content update / dedup bumps `nonce` — clear that toast's timer so it reschedules fresh.
+    for (const v of visible) {
+      const seen = noncesRef.current.get(v.id);
+      if (seen !== undefined && seen !== v.nonce) {
+        const h = timersRef.current.get(v.id);
+        if (h !== undefined) window.clearTimeout(h);
+        timersRef.current.delete(v.id);
+        remainingRef.current.delete(v.id);
+        startRef.current.delete(v.id);
+      }
+      noncesRef.current.set(v.id, v.nonce);
+    }
     for (const v of visible) {
       if (v.resolvedDuration === Infinity) continue;
       if (timersRef.current.has(v.id)) continue;

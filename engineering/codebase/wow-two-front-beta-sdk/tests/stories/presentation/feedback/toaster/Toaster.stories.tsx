@@ -238,3 +238,26 @@ export const ActionButtonFiresCallback: Story = {
     await expectDismissed(() => viewport.queryByText('File archived'));
   },
 };
+
+export const UpdatesToastContent: Story = {
+  render: () => <Toaster defaultDuration={Infinity} />,
+  play: async ({ canvasElement }) => {
+    toaster.dismissAll();
+    const doc = canvasElement.ownerDocument;
+
+    const id = toaster.toast({ title: 'Uploading', description: '0%' });
+    await waitFor(() => expect(toastViewport(doc)).toBeTruthy());
+    const viewport = within(toastViewport(doc));
+    await viewport.findByText('Uploading');
+
+    // `update` merges a patch onto the live toast in place (same id, no re-stack).
+    toaster.update(id, { title: 'Uploaded', description: 'Done', severity: 'success' });
+    await viewport.findByText('Uploaded');
+    await expect(viewport.queryByText('Uploading')).not.toBeInTheDocument();
+    await expect(viewport.getByText('Done')).toBeInTheDocument();
+    await expect(viewport.getAllByRole('status')).toHaveLength(1);
+
+    toaster.dismissAll();
+    await expectDismissed(() => viewport.queryByText('Uploaded'));
+  },
+};
