@@ -29,7 +29,7 @@ const preview: Preview = {
     // Axe runs against every story in the vitest `storybook` project.
     // 'todo' = violations reported, not failing — baseline inventory 2026-07-06:
     // 260/720 stories violate (aria-allowed/prohibited-attr ≫ color-contrast >
-    // label > aria-required-parent; see docs/testing.md). Flip to 'error' after
+    // label > aria-required-parent; see engineering/architecture/testing.md). Flip to 'error' after
     // the a11y burn-down; per-story override via `parameters.a11y.test`.
     a11y: { test: 'todo' },
   },

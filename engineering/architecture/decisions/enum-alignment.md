@@ -3,7 +3,7 @@
 *Last updated: 2026-07-07*
 
 > Campaign to bring every string-literal value-set in `@wow-two-beta/ui` onto the const-object enum rule
-> ([`enums.md §8`](../../../../../conventions/development/frontend/code-style/enums.md)) — no bare `type X='a'|'b'`, no inline
+> ([`enums.md §8`](../../../../../../conventions/development/frontend/code-style/enums.md)) — no bare `type X='a'|'b'`, no inline
 > `prop?:'a'|'b'`, no `VariantProps<>`-only variant axis a consumer names by string. ~200 conversions across ~120 components.
 > This doc is the canonical reference for the whole sweep: recipe + shared-enum registry + execution lanes.
 

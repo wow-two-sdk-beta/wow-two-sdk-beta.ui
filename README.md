@@ -41,7 +41,7 @@ pnpm lint            # ESLint with boundary enforcement
 - `src/tokens` `src/tailwind` `src/utils` `src/hooks` `src/icons` — **foundation** (no upward deps)
 - `src/actions` `src/display` `src/feedback` `src/forms` `src/layout` — **domains** (foundation OK; sibling domains BLOCKED by ESLint)
 
-See `docs/architecture.md` for the layering rule and `docs/component-standard.md` for the per-component spec template every new component fills out before code.
+See `engineering/architecture/architecture.md` for the layering rule and `engineering/architecture/templates/component-standard.md` for the per-component spec template every new component fills out before code.
 
 ## License
 

@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const srcAlias = { '@src': fileURLToPath(new URL('./src', import.meta.url)) };
 
 /*
- * Three projects (docs/testing.md):
+ * Three projects (engineering/architecture/testing.md):
  *  - unit      — node, pure logic (foundation utils/themes/http + domain)
  *  - browser   — real chromium, hooks + bespoke component tests
  *  - storybook — every story = render-smoke test; play() = interaction test

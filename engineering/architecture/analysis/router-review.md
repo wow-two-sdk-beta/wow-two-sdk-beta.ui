@@ -3,7 +3,7 @@
 *Last updated: 2026-07-11*
 
 > Review of the `/router` subpath (`src/router/**`, ~1,040 source LOC / 16 test files · ~1,630 test LOC after this pass) before apps migrate onto it.
-> Scope: correctness/edge cases · React 19 + StrictMode · coverage map · API/DX · performance · [swappable-modules](../../../../../conventions/development/swappable-modules.md) scoring.
+> Scope: correctness/edge cases · React 19 + StrictMode · coverage map · API/DX · performance · [swappable-modules](../../../../../../conventions/development/swappable-modules.md) scoring.
 > Verified against installed `react-router-dom@7.18.1` internals (`createClientSideRequest`, browser/hash `createURL`) and the built `dist/` chunk graph — not just source reading.
 > Companion seams read: `src/auth/AuthBridge.ts` (feeds `requireAuth`), `src/query/QueryProgressBridge.tsx` (consumes the progress heartbeat), `tsup.config.ts`, `eslint.config.js`, `conventions/…/frontend/architecture/routing.md`.
 

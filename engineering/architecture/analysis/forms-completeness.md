@@ -3,7 +3,7 @@
 *Last updated: 2026-07-11*
 
 > The whole forms/fields/validation vector — "everything known to the universe about forms" — each capability with a verdict, per the SDK doctrine
-> [`conventions/development/dev-cycle.md` §Vector completeness](../../../../../conventions/development/dev-cycle.md): build the vector proactively to completeness, not the triggering
+> [`conventions/development/dev-cycle.md` §Vector completeness](../../../../../../conventions/development/dev-cycle.md): build the vector proactively to completeness, not the triggering
 > product's ask. This is the completeness map that doctrine mandates (`docs/analysis/{vector}-*.md`, all capabilities enumerated, each verdicted
 > ship-now / defer-with-named-trigger / skip-with-reason — plus **shipped** for what already exists).
 >
@@ -15,8 +15,8 @@
 > **Prior analyses (extend, don't re-derive):** [`forms-engine.md`](./forms-engine.md) (the shipped design — R1–R13, adapters, conformance) ·
 > [`forms-vector-next.md`](./forms-vector-next.md) (the F-2 maturation plan + §5 DONE checklist this doc extends) ·
 > [`forms-deferred-items.md`](./forms-deferred-items.md) (the 3 architectural deep-dives: union errors · deep-path typing · error recognizer) ·
-> app-facing rules [`conventions/…/presentation/forms.md`](../../../../../conventions/development/frontend/presentation/forms.md) ·
-> engine architecture [`conventions/…/swappable-modules.md`](../../../../../conventions/development/swappable-modules.md).
+> app-facing rules [`conventions/…/presentation/forms.md`](../../../../../../conventions/development/frontend/presentation/forms.md) ·
+> engine architecture [`conventions/…/swappable-modules.md`](../../../../../../conventions/development/swappable-modules.md).
 
 ---
 
@@ -209,4 +209,4 @@ conformance · i18n-ready · interaction tier · patterns · product proofs · D
       as option fields (`submitOn` / `submitDebounceMs` / `submitInvalid` / `validateOnMount` / `isDisabled`) + one method (`form.validate()`), no builder.
 
 When these are ticked alongside `forms-vector-next.md` §5, the second product that reaches for forms finds the whole vector present — never re-triggering a
-capability question, exactly as the [dev-cycle §Vector completeness](../../../../../conventions/development/dev-cycle.md) doctrine requires.
+capability question, exactly as the [dev-cycle §Vector completeness](../../../../../../conventions/development/dev-cycle.md) doctrine requires.

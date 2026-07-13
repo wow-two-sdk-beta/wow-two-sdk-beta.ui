@@ -4,14 +4,14 @@
 
 The `@wow-two-beta/ui` package — beta-forever React UI library for the wow-two ecosystem. Intentionally pre-1.0. Ship as much as possible to feed real consumers (haven first); distill into a clean `@wow-two/ui` only after the platform layer below stabilizes.
 
-> **Beta-forever rules**: no CHANGELOG, no PR gates, push directly to main, fix-forward when broken. CI builds + auto-bumps `0.0.y` on each main push. Tests exist (`pnpm test`) but are not a CI gate yet — see `docs/testing.md`.
+> **Beta-forever rules**: no CHANGELOG, no PR gates, push directly to main, fix-forward when broken. CI builds + auto-bumps `0.0.y` on each main push. Tests exist (`pnpm test`) but are not a CI gate yet — see `engineering/architecture/testing.md`.
 
 ## Tech catalog & roadmap
 
-Source-of-truth for every UI tech, pattern, and browser API we may consider. Two co-located docs in [`docs/analysis/ui-philosophy/`](./docs/analysis/ui-philosophy/):
+Source-of-truth for every UI tech, pattern, and browser API we may consider. Two co-located docs in [`engineering/architecture/analysis/ui-philosophy/`](./engineering/architecture/analysis/ui-philosophy/):
 
-- **[`ideas.md`](./docs/analysis/ui-philosophy/ideas.md)** — every UI tech / pattern / framework / cross-cutting vector / component / delegate / browser API (full MDN encyclopedia) / React+client ecosystem (sketch) that exists in Web2. **No verdicts** — pure inventory. Source of ideas; read when considering scope expansion.
-- **[`targets.md`](./docs/analysis/ui-philosophy/targets.md)** — verdict per item: **DONE / NOW / NEXT / LATER / MAYBE / SKIP / LOCKED**. Mirrors `ideas.md`'s structure. Read when deciding what to ship next; cross-references the [roadmap](../../../../docs/ui-beta-roadmap.md) for phase placement.
+- **[`ideas.md`](./engineering/architecture/analysis/ui-philosophy/ideas.md)** — every UI tech / pattern / framework / cross-cutting vector / component / delegate / browser API (full MDN encyclopedia) / React+client ecosystem (sketch) that exists in Web2. **No verdicts** — pure inventory. Source of ideas; read when considering scope expansion.
+- **[`targets.md`](./engineering/architecture/analysis/ui-philosophy/targets.md)** — verdict per item: **DONE / NOW / NEXT / LATER / MAYBE / SKIP / LOCKED**. Mirrors `ideas.md`'s structure. Read when deciding what to ship next; cross-references the [roadmap](../../../../docs/ui-beta-roadmap.md) for phase placement.
 
 When scope expansion is considered, walk `targets.md` first. If the desired vector is missing or marked **MAYBE/LATER**, raise it for triage and update both files. Treat these two as a paired source-of-truth — when one changes, sync the other.
 
@@ -52,7 +52,7 @@ forms/numberInput/
 - `Component.standard.md` — behavioral contract (RFC 2119 rules + rationale)
 - `Component.spec.md` — concrete API (enums, prop signatures, anatomy)
 
-Templates exist at [`docs/templates/component-standard.md`](./docs/templates/component-standard.md) and [`docs/templates/component-spec.md`](./docs/templates/component-spec.md) — they're picked up during the standardization pass, not during first-gen build.
+Templates exist at [`engineering/architecture/templates/component-standard.md`](./engineering/architecture/templates/component-standard.md) and [`engineering/architecture/templates/component-spec.md`](./engineering/architecture/templates/component-spec.md) — they're picked up during the standardization pass, not during first-gen build.
 
 > **Note**: many existing components still have a legacy `*.spec.md` from earlier iterations. These will be rewritten (or replaced by the dual-doc pair) when the standardization pass walks each component. Don't author new ones during build batches.
 
@@ -61,11 +61,11 @@ Templates exist at [`docs/templates/component-standard.md`](./docs/templates/com
 - `src/foundation/{utils,hooks,http,icons,primitives,themes}` — **foundation** (no upward deps; ESLint enforces). `primitives/` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.). Hooks/utils are 1-per-folder (`useControlled/{useControlled.ts,index.ts}`).
 - `src/domain/*` — pure types/ops (may import foundation only).
 - `src/presentation/{actions,display,feedback,forms,layout,nav,overlays}` — **components** (may import foundation + domain **and any sibling presentation group**; ESLint enforces no upward reach into root)
-- `docs/templates/component-standard.md` — template every `*.standard.md` fills
-- `docs/templates/component-spec.md` — template every `*.spec.md` fills
-- `docs/architecture.md` — full layering rule + ESLint mechanics
-- `docs/testing.md` — test-layer plan, tiers, iteration tracker, findings
-- `docs/decisions/` — cross-component ADRs
+- `engineering/architecture/templates/component-standard.md` — template every `*.standard.md` fills
+- `engineering/architecture/templates/component-spec.md` — template every `*.spec.md` fills
+- `engineering/architecture/architecture.md` — full layering rule + ESLint mechanics
+- `engineering/architecture/testing.md` — test-layer plan, tiers, iteration tracker, findings
+- `engineering/architecture/decisions/` — cross-component ADRs
 - `.storybook/` — catalog config (+ `vitest.setup.ts` for story tests)
 - `apps/playground/` — Vite sandbox for ad-hoc prototyping
 
@@ -85,7 +85,7 @@ Templates exist at [`docs/templates/component-standard.md`](./docs/templates/com
 ## Testing
 
 - `pnpm test` (all) · `test:unit` · `test:browser` · `test:stories` · `test:watch` · `test:ui` · `coverage` (report-only, never a gate)
-- E2E-first: interaction `play()` stories in `*.stories.tsx` are the primary tier; bespoke unit tests only for pure logic (themes engine, hooks, utils). Plan, conventions, and known harness gotchas: **`docs/testing.md`**.
+- E2E-first: interaction `play()` stories in `*.stories.tsx` are the primary tier; bespoke unit tests only for pure logic (themes engine, hooks, utils). Plan, conventions, and known harness gotchas: **`engineering/architecture/testing.md`**.
 - New component → ship interaction `play()` stories with it (import from `'storybook/test'`).
 - Path filters are substring matches: `pnpm vitest run --project storybook src/presentation/nav/menu` also runs `menubar`.
 

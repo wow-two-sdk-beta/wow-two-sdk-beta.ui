@@ -69,7 +69,7 @@ export type Guid = string & { readonly __brand: 'Guid' };
 | Safety | compile-time provenance (cast-through possible) | runtime-enforced invariant |
 | Precedent in this SDK | matches `IsoDateTime` / `IsoDate` in `foundation/http/DateBrands.ts` | none |
 
-**Why branded string wins decisively:** the SDK's data doctrine is *wire shape == app shape; a mapper only reshapes, never parses* ([models.md](../../../../conventions/development/frontend/code-style/models.md) §5, [type-mapping.md](../../../../conventions/development/frontend/code-style/type-mapping.md)). A class id would force a `*Dto` mapper onto every entity that carries an id — the exact per-field mapping the design eliminates. A brand keeps ids in the **no-mapping** lane while adding compile-time "this string is an id, not free text." It is the same call already made for dates-as-brands, so it needs no new mental model.
+**Why branded string wins decisively:** the SDK's data doctrine is *wire shape == app shape; a mapper only reshapes, never parses* ([models.md](../../../../../conventions/development/frontend/code-style/models.md) §5, [type-mapping.md](../../../../../conventions/development/frontend/code-style/type-mapping.md)). A class id would force a `*Dto` mapper onto every entity that carries an id — the exact per-field mapping the design eliminates. A brand keeps ids in the **no-mapping** lane while adding compile-time "this string is an id, not free text." It is the same call already made for dates-as-brands, so it needs no new mental model.
 
 **Refines, doesn't break, `type-mapping.md`.** That table says `Guid → string → string, "ids are plain strings."` The brand is still a `string` at runtime — it is an **opt-in tightening** of that row, not a contradiction. A field may stay `id: string` or upgrade to `id: Guid`; both serialize identically.
 
@@ -112,7 +112,7 @@ Notes:
 
 - **New foundation sibling `identifiers/`**, alongside `http` / `storage` / `resilience`. A concept-noun folder (matching those siblings) leaves room for future branded ids (`Slug`, `ShortId`) without a rename — cleaner than a single-type `foundation/guid/`.
 - Not in `foundation/http/` next to `DateBrands`: id **creation** (`createV7`) is not an HTTP concern — it drives optimistic inserts + React keys independent of any request. The brand is wire-adjacent but the factory is not.
-- **File `Guid.ts`** (PascalCase = primary export), per [naming.md](../../../../conventions/development/frontend/code-style/naming.md). The type + the `const Guid` statics live in one file (a cohesive family — [models.md](../../../../conventions/development/frontend/code-style/models.md) §2), barrel re-exports both.
+- **File `Guid.ts`** (PascalCase = primary export), per [naming.md](../../../../../conventions/development/frontend/code-style/naming.md). The type + the `const Guid` statics live in one file (a cohesive family — [models.md](../../../../../conventions/development/frontend/code-style/models.md) §2), barrel re-exports both.
 
 ```
 src/foundation/identifiers/

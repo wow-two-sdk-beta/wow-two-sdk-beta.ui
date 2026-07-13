@@ -6,7 +6,7 @@
 >
 > **Purpose**: per-vector verdict for `@wow-two-beta/ui`. This is the **roadmap** that mirrors `ideas.md`'s structure. When scope expansion is considered, walk this file first; if the desired vector is already covered, build to that target — if not, raise it for discussion and update this doc.
 >
-> **Phase reference**: [`docs/ui-beta-roadmap.md`](../../../../../../docs/ui-beta-roadmap.md) (P1–P7). Current phase: P3 (base layer build-out).
+> **Phase reference**: [`docs/ui-beta-roadmap.md`](../../../../../../../docs/ui-beta-roadmap.md) (P1–P7). Current phase: P3 (base layer build-out).
 
 ---
 
@@ -761,7 +761,7 @@ Locked direction:
 | **P2** Shell setup | DONE | Build/lint/Storybook/CI |
 | **P3** Base layer build-out | **NOW** | All atoms (49 ✓) + molecules (61 ✓) + organisms (18 ✓ → batches 5–7 next: disclosure/nav · data · specialized) |
 | **P4** Haven audit | DEFERRED | Real-consumer gap analysis (after P3 complete) |
-| **P5** External library audit | DONE | See [`library-references.md`](../../../../../../docs/audits/library-references.md) |
+| **P5** External library audit | DONE | See [`library-references.md`](../../../../../../../docs/audits/library-references.md) |
 | **P6** Refactor pass | **NEXT** | Density · i18n provider + Intl wrappers · z-index tokens · motion tokens · `prefers-reduced-motion` · roving focus apply · type-ahead · forced-colors · floating arrow positioning · Drawer drag-dismiss · 12h/AM-PM TimePicker · multi-month Calendar · year/month dropdown jumper · segmented DateField · ColorField RGB/HSL · format toggle · recent colors · eyedropper · stories rich variants · specs full anatomy · `axe-core` CI · bundle size CI |
 | **P7** Haven migration | LATER | Real-app shake-out |
 

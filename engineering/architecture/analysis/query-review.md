@@ -2,7 +2,7 @@
 
 *Last updated: 2026-07-11*
 
-> Pre-migration review of `src/query/**` (all 18 sources + 16 test files) against correctness, TanStack v5 idioms, coverage, migration DX (smart-qr · drydock · transcript-forge), performance, and the [swappable-modules convention](../../../../../conventions/development/swappable-modules.md). Verified against installed `@tanstack/*` **5.101.2** source (retryer, query, queryClient, queriesObserver) and the built `dist/`.
+> Pre-migration review of `src/query/**` (all 18 sources + 16 test files) against correctness, TanStack v5 idioms, coverage, migration DX (smart-qr · drydock · transcript-forge), performance, and the [swappable-modules convention](../../../../../../conventions/development/swappable-modules.md). Verified against installed `@tanstack/*` **5.101.2** source (retryer, query, queryClient, queriesObserver) and the built `dist/`.
 
 ## Verdict
 

@@ -97,7 +97,7 @@ Compact vector axes. ✓ strong · ◐ partial · ○ none/weak.
 | NG-ZORRO | Styled (Ang) | ◐ | ✓ | ✓ | ○ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ heavy |
 | PrimeNG | Styled (Ang) | ◐ | ✓ | ✓ | ○ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ heavy |
 
-> Source: per-lib docs scan + companion [`library-references.md`](../../../../../../docs/audits/library-references.md) in workspace (component coverage matrix).
+> Source: per-lib docs scan + companion [`library-references.md`](../../../../../../../docs/audits/library-references.md) in workspace (component coverage matrix).
 
 ---
 
@@ -3766,7 +3766,7 @@ Grafana / Datadog / New Relic / Honeycomb / Lightstep / Tempo / Jaeger / Zipkin 
 
 ### Companion docs
 - [`targets.md`](./targets.md) — what *we'll* implement (verdicts)
-- Workspace audit: [`docs/audits/library-references.md`](../../../../../../docs/audits/library-references.md) — component coverage matrix
+- Workspace audit: [`docs/audits/library-references.md`](../../../../../../../docs/audits/library-references.md) — component coverage matrix
 
 ### Standards & specs
 - WAI-ARIA APG — w3.org/WAI/ARIA/apg/

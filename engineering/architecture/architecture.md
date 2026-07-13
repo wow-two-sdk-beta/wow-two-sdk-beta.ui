@@ -1,6 +1,6 @@
 # Architecture
 
-> Applies the ecosystem's [wow-two-ws frontend architecture](../../../../conventions/development/frontend/architecture/architecture.md) to `@wow-two-beta/ui`. The `wow-two-ws/conventions/` are the converging single source of truth; this doc is the SDK's local application + ESLint mechanics.
+> Applies the ecosystem's [wow-two-ws frontend architecture](../../../../../conventions/development/frontend/architecture/architecture.md) to `@wow-two-beta/ui`. The `wow-two-ws/conventions/` are the converging single source of truth; this doc is the SDK's local application + ESLint mechanics.
 
 The single architectural rule of `@wow-two-beta/ui`: **layered imports**.
 
