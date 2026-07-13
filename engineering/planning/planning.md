@@ -36,6 +36,24 @@
 
 ---
 
+## Backlog — trigger-gated / unscheduled
+
+> Forward-looking items surfaced from the analyses (iter 7 consolidation) — **not** in the active/queued table above; each fires on its own trigger. Deep detail stays in the linked analysis.
+
+| Item | Trigger | Source |
+|---|---|---|
+| `foundation/errors` extraction | when the `foundation/http` error path is next touched (promote-on-touch) | [`frontend-modules.md`](../architecture/analysis/frontend-modules.md) E#6 |
+| `AppDevtools` panel | a consumer wants an in-app dev panel | `frontend-modules.md` E#10 |
+| `uploadQueue` module | a product needs queued / resumable uploads | `frontend-modules.md` E#9 |
+| Forms — union per-leaf error ergonomics | a **2nd** product wants inline union-field errors → ship a `forms.md` userland pattern first, a thin `variantField` doc-helper only then (never the `subForm`) | [`forms-deferred-items.md`](../architecture/analysis/forms-deferred-items.md) item 1 |
+| Forms — `fieldErrors` duck-type default | opportunistic — only if `foundation/http/FieldErrors.ts` is opened for another reason (else stays a convention line) | `forms-deferred-items.md` item 3a |
+| Forms — 5 deferred completeness capabilities | each per its named trigger (async-field-validation @ 2nd product, warnings channel, …) | [`forms-completeness.md`](../architecture/analysis/forms-completeness.md) |
+| global-state swappable module | scheduled → **v0.1 iter 8** (design-first) | [`vector-registry.md`](../architecture/vector-registry.md) §Infra-pipeline |
+| Docs — content-audit (v0.1 2b) | delete stale `enum-alignment` record (first verify its 16-enum registry is in `conventions/…/enums.md`) + split analyses → conventions | [`v0.1.md`](./version-track/v0.1.md) iter 2 |
+| Docs — catalog convention | codify the derived-`component-catalog` pattern in `sdk-structure.md` (the instance stays local/auto-gen) | `v0.1.md` iter 3 |
+
+---
+
 ## SDK organize (2026-07-11)
 
 The O-1…O-6 restructure/docs/vectors iterations now live in the version track → [`version-track/v0.1.md`](./version-track/v0.1.md). (This registry moved from `docs/planning.md` into `engineering/planning/` in iter 1, 2026-07-13.)

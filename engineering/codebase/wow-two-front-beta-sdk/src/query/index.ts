@@ -36,6 +36,7 @@ export {
 } from './UseOptimisticMutation';
 export { useAppQueries, type UseAppQueriesOptions, type AppQueriesEntry, type AppQueryResult } from './UseAppQueries';
 export { useAppPaginatedQuery, type UseAppPaginatedQueryOptions } from './UseAppPaginatedQuery';
+export { byPageToken, pageItems } from './PageHelpers';
 export { useAppLazyQuery, type UseAppLazyQueryOptions } from './UseAppLazyQuery';
 export { useQueryCache, type QueryCacheApi, type QueryCachePrefetch } from './UseQueryCache';
 
