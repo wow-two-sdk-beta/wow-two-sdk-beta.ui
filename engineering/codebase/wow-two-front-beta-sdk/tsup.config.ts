@@ -13,6 +13,7 @@ const subpathLayer: Record<string, 'foundation' | 'domain' | 'presentation'> = {
   http: 'foundation',
   storage: 'foundation',
   resilience: 'foundation',
+  identifiers: 'foundation',
   color: 'domain',
   emoji: 'domain',
   actions: 'presentation',

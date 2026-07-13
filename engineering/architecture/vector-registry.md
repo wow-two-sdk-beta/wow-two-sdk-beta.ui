@@ -20,6 +20,8 @@ Concrete deliverables — each an `@wow-two-beta/ui/*` subpath export.
 | Theming | `foundation/themes` (+ `themes.css`/`themes.json`) | **shipped** | OKLCH engine · 183 themes · Theme Studio; `theming.md` / `THEMES.md` |
 | Storage | `foundation/storage` | **shipped v1** (v2 NEXT) | v2 = versioned keys · migrations · zustand-persist · autosave |
 | Resilience | `foundation/resilience` | **shipped** | retry / backoff patterns |
+| Pagination contracts | `foundation/http` (`Page`/`TokenPage`) | **shipped** (iter 5) | 9 `IHas*` composables → `Page<T>` / `TokenPage<T,TToken>` / `CursorPage`; type-only, additive; [`pagination-model.md`](./analysis/pagination-model.md) |
+| Identifiers | `foundation/identifiers` | **shipped** (iter 5) | branded `Guid` — `createV7`/`createV4`/`parse`/`compare`… (own ~25-LOC v7, .NET `System.Guid`-parallel); [`guid-type.md`](./analysis/guid-type.md) |
 | Icons | `foundation/icons` | **shipped** | `<Icon>` registry (lucide) |
 | Primitives (L2 headless) | `foundation/primitives` | **shipped** (17) | Slot · Portal · FocusScope · AnchoredPositioner · … → [`component-catalog.md`](./component-catalog.md) |
 | Utils / hooks | `foundation/utils` · `foundation/hooks` | **shipped** | `cn` · polymorphic types · `useControlled` · observers |
@@ -66,6 +68,7 @@ Product-evidence-ranked — a module N products already hand-roll = proven deman
 - **Wave 2**: `forms-engine` **DONE** · `foundation/config` typed env (queued) · `foundation/storage` v2 (queued).
 - **Wave 3**: `commands`/shortcuts · `foundation/files` + `foundation/format` · `analytics` event bus · `flags` (OpenFeature-shaped).
 - **Deferred (trigger-gated)**: `errors` extraction · `AppDevtools` · `uploadQueue` · i18n (→ own P6 track).
+- **Open triage (raised 2026-07-13)** — **global-state abstraction**: a swappable house contract + `zustand` (default) / `redux` adapter as optional peers, forms-engine-style. ⚠️ *Bundling* a state manager is verdicted **SKIP** ([`frontend-modules-ecosystem.md`](./analysis/frontend-modules-ecosystem.md) E#26 — React 19 + RQ cache + `usePersistentState` cover app state; consumer brings zustand). The **swappable-adapter** framing is the un-decided question — owner call before it becomes an iteration.
 
 ## 4. Browser-API wrapper plan (`targets.md` §3 — 27 groups)
 

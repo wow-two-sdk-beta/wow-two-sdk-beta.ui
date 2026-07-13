@@ -1,4 +1,5 @@
 export * from './ApiResponse';
+export * from './Page';
 export * from './ProblemDetails';
 export * from './ApiError';
 export * from './Envelope';

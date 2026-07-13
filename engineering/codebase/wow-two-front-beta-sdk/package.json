@@ -78,6 +78,11 @@
       "import": "./dist/foundation/resilience/index.js",
       "default": "./dist/foundation/resilience/index.js"
     },
+    "./foundation/identifiers": {
+      "types": "./dist/foundation/identifiers/index.d.ts",
+      "import": "./dist/foundation/identifiers/index.js",
+      "default": "./dist/foundation/identifiers/index.js"
+    },
     "./domain/color": {
       "types": "./dist/domain/color/index.d.ts",
       "import": "./dist/domain/color/index.js",

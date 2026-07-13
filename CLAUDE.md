@@ -58,7 +58,7 @@ Templates exist at [`engineering/architecture/templates/component-standard.md`](
 
 ## Layout
 
-- `src/foundation/{utils,hooks,http,icons,primitives,themes}` — **foundation** (no upward deps; ESLint enforces). `primitives/` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.). Hooks/utils are 1-per-folder (`useControlled/{useControlled.ts,index.ts}`).
+- `src/foundation/{utils,hooks,http,icons,primitives,themes,storage,resilience,identifiers}` — **foundation** (no upward deps; ESLint enforces). `identifiers/` = branded `Guid`; `http/` also holds the `Page`/`TokenPage` pagination contracts. `primitives/` is the L2 headless layer (Slot, Portal, FocusScope, AnchoredPositioner, etc.). Hooks/utils are 1-per-folder (`useControlled/{useControlled.ts,index.ts}`).
 - `src/domain/*` — pure types/ops (may import foundation only).
 - `src/presentation/{actions,display,feedback,forms,layout,nav,overlays}` — **components** (may import foundation + domain **and any sibling presentation group**; ESLint enforces no upward reach into root)
 - `engineering/architecture/templates/component-standard.md` — template every `*.standard.md` fills
