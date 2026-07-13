@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
-import { cn } from '../../../foundation/utils';
+import { cn, compareStrings } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import {
   Table,
@@ -85,7 +85,7 @@ function defaultCompare(a: unknown, b: unknown): number {
   // consumer may still put a `Date` in a column — this is a generic value
   // comparator, not a date-value API surface.
   if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
-  return String(a).localeCompare(String(b));
+  return compareStrings(String(a), String(b));
 }
 
 export function DataTable<T>({

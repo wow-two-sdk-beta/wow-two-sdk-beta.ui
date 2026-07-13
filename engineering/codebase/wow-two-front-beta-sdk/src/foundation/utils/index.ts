@@ -41,6 +41,7 @@ export type {
 } from './SurfaceStyles';
 export { Layer, layerStyle, type LayerName } from './Layers';
 export { Equality, type EqualityComparer } from './Equality';
+export { createCollator, compareStrings } from './Compare';
 export { Tone, Size, Radius, Padding } from './StyleTokens';
 export type { Elevation } from './StyleTokens';
 export { Tones, ToneFamily } from './Tones';
