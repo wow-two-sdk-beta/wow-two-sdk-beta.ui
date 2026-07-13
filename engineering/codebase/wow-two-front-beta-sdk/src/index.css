@@ -297,3 +297,18 @@ html, body {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
 }
+
+/* Lib-wide reduced-motion safety net — honors `prefers-reduced-motion: reduce` for EVERY
+ * animation + transition, over and above the per-component `motion-reduce:` variants (so an
+ * un-tagged animation can't slip through). `0.01ms` (not `0`) keeps `animationend` /
+ * `transitionend` firing, so `Presence` and other transition-gated unmounts still complete. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
