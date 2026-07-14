@@ -20,6 +20,7 @@ export const subpathLayer = {
   i18n: 'foundation',
   config: 'foundation',
   shortcuts: 'foundation',
+  format: 'foundation',
   color: 'domain',
   emoji: 'domain',
   actions: 'presentation',

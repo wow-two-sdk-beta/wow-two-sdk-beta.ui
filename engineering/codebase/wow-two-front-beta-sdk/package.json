@@ -103,6 +103,11 @@
       "import": "./dist/foundation/shortcuts/index.js",
       "default": "./dist/foundation/shortcuts/index.js"
     },
+    "./foundation/format": {
+      "types": "./dist/foundation/format/index.d.ts",
+      "import": "./dist/foundation/format/index.js",
+      "default": "./dist/foundation/format/index.js"
+    },
     "./domain/color": {
       "types": "./dist/domain/color/index.d.ts",
       "import": "./dist/domain/color/index.js",
