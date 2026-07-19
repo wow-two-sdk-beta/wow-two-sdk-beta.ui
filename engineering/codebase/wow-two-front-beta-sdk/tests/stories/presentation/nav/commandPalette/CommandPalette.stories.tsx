@@ -129,6 +129,53 @@ export const KeyboardShortcutOpens: Story = {
   },
 };
 
+/** ⌘K and ⌃K both open, on every platform — the palette accepts either primary modifier (spec § Accessibility). */
+export const MetaShortcutAlsoOpens: Story = {
+  render: () => <InteractionDemo />,
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+
+    await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+    await userEvent.keyboard('{Meta>}k{/Meta}');
+
+    const dialog = await body.findByRole('dialog');
+    await waitFor(() => expect(dialog).toBeVisible());
+  },
+};
+
+/**
+ * A command palette must open *while the user is typing*. Bare-key shortcuts are suppressed in a text field, but
+ * a chord carrying Ctrl/Meta is not — this pins that exemption, and that the chord never reaches the field.
+ */
+export const ShortcutOpensWhileTypingInAField: Story = {
+  render: () => (
+    <div className="space-y-2">
+      <input
+        aria-label="Search"
+        className="h-9 w-64 rounded-md border border-border bg-background px-3 text-sm"
+      />
+      <InteractionDemo />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+
+    const field = canvas.getByLabelText('Search');
+    await userEvent.click(field);
+    await userEvent.keyboard('hello');
+    await expect(field).toHaveValue('hello');
+    await expect(body.queryByRole('dialog')).not.toBeInTheDocument();
+
+    await userEvent.keyboard('{Control>}k{/Control}');
+
+    const dialog = await body.findByRole('dialog');
+    await waitFor(() => expect(dialog).toBeVisible());
+    // preventDefault held: the chord neither typed a character nor ran the field's own ⌃K edit command.
+    await expect(field).toHaveValue('hello');
+  },
+};
+
 export const TypingFiltersItems: Story = {
   render: () => <InteractionDemo defaultOpen />,
   play: async ({ canvasElement }) => {

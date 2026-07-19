@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
+import { formatBytes } from '@src/foundation/format';
 import { FileUpload, type FileRejection } from '@src/presentation/forms/fileUpload/FileUpload';
 
 const meta: Meta<typeof FileUpload> = {
@@ -51,7 +52,7 @@ export const WithList: Story = {
                 {files.map((f, i) => (
                   <li key={i} className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-1.5">
                     <span className="truncate">{f.name}</span>
-                    <span className="text-xs text-muted-foreground">{(f.size / 1024).toFixed(1)} KB</span>
+                    <span className="text-xs text-muted-foreground">{formatBytes(f.size)}</span>
                   </li>
                 ))}
               </ul>

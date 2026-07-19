@@ -17,6 +17,7 @@ import { Search } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
+import { useHotkeys } from '../../../foundation/shortcuts';
 import { Modal, ModalContent } from '../../overlays/modal';
 import {
   listboxEmptyVariants,
@@ -117,22 +118,13 @@ function CommandPaletteRoot({
     setRegistryVersion((v) => v + 1);
   }, []);
 
-  // Global keybinding (cmd-/ctrl-K).
-  useEffect(() => {
-    if (!triggerKey) return;
-    const onKey = (e: KeyboardEvent | globalThis.KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === triggerKey.toLowerCase()) {
-        e.preventDefault();
-        setOpen(true);
-      }
-    };
-    document.addEventListener('keydown', onKey as (e: globalThis.KeyboardEvent) => void);
-    return () =>
-      document.removeEventListener(
-        'keydown',
-        onKey as (e: globalThis.KeyboardEvent) => void,
-      );
-  }, [triggerKey, setOpen]);
+  // Global keybinding (cmd-/ctrl-K). `mod` = ⌘ on Apple / Ctrl elsewhere; the explicit `ctrl+`/`meta+` pair keeps
+  // the spec's "we accept both on every platform" contract. The chord must always parse (`+` is the token
+  // separator → `plus`; a falsy `triggerKey` needs a placeholder), so `enabled` — not an early return — unbinds.
+  const chordKey = !triggerKey ? 'k' : triggerKey === '+' ? 'plus' : triggerKey;
+  useHotkeys([`mod+${chordKey}`, `ctrl+${chordKey}`, `meta+${chordKey}`], () => setOpen(true), {
+    enabled: Boolean(triggerKey),
+  });
 
   // Reset search + active id on open/close transitions.
   useEffect(() => {

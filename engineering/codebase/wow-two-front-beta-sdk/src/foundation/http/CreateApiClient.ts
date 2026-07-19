@@ -1,3 +1,4 @@
+import { getErrorMessage, isAbortError } from '../errors';
 import { computeRetryDelay, shouldRetry, type RetryPolicy } from '../resilience';
 
 import { ApiError } from './ApiError';
@@ -92,11 +93,6 @@ function buildQueryString(query: ApiQueryParams): string {
   return params.toString();
 }
 
-/** Checks whether a thrown value is the native cancellation error — rethrown as-is, never wrapped. */
-function isAbortError(error: unknown): boolean {
-  return error instanceof Error && error.name === 'AbortError';
-}
-
 /** Waits `ms` before a retry attempt, rejecting with the signal's native abort reason if aborted mid-wait. */
 function wait(ms: number, signal?: AbortSignal | null): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -176,7 +172,7 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
       });
     } catch (error) {
       if (isAbortError(error)) throw error;
-      throw new ApiError(0, null, error instanceof Error ? error.message : 'Network request failed');
+      throw new ApiError(0, null, getErrorMessage(error, 'Network request failed'));
     }
 
     if (!response.ok) throw envelope.toError(await readErrorBody(response), response);

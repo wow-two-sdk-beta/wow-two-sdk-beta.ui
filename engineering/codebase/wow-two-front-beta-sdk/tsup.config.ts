@@ -18,6 +18,10 @@ const subpathLayer: Record<string, 'foundation' | 'domain' | 'presentation'> = {
   config: 'foundation',
   shortcuts: 'foundation',
   format: 'foundation',
+  files: 'foundation',
+  commands: 'foundation',
+  errors: 'foundation',
+  share: 'foundation',
   color: 'domain',
   emoji: 'domain',
   actions: 'presentation',
@@ -48,6 +52,10 @@ export default defineConfig({
     // peer of its own; the headless notice bus stays importable without any presentation entry
     // (the `<FeedbackToasts/>` adapter ships in `presentation/feedback`).
     'feedback/index': 'src/feedback/index.ts',
+    // `analytics` + `flags` mirror `feedback` — standalone top-level subpaths, no peer of their own. The
+    // headless event bus / flag evaluator stay importable without pulling any presentation entry.
+    'analytics/index': 'src/analytics/index.ts',
+    'flags/index': 'src/flags/index.ts',
     // `forms-engine` — the engine-free forms facade contract (types + glue + server-error
     // pipeline, zero peer). Each engine adapter is its own sibling entry so an adapter's
     // peer never rides along: `forms-engine/house` is the zero-dependency micro-engine;

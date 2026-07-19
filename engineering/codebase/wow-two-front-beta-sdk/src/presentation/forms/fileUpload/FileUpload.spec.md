@@ -13,8 +13,8 @@ Drag-drop file zone with click-to-pick fallback. Dropzone variant of the L4 `Fil
 
 ## Required behaviors
 - Click → opens native file picker.
-- Drag-over → highlight zone; if any file is rejected (extension / size / count), show reject styling.
-- Drop → fires `onFilesChange` with the (filtered) array.
+- Drag-over → highlight zone. The pre-drop check is advisory — only the MIME type is exposed, so a dragged item is flagged reject solely on a MIME-token mismatch; extension tokens and size can't be judged yet and stay optimistic.
+- Drop → re-checks authoritatively (extension / size / count) and fires `onFilesChange` with the accepted + rejected arrays.
 - Keyboard: Enter / Space on focused zone → opens picker.
 - Disabled zone: no pointer / drag handlers.
 

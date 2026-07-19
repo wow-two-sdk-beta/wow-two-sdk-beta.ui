@@ -108,6 +108,36 @@
       "import": "./dist/foundation/format/index.js",
       "default": "./dist/foundation/format/index.js"
     },
+    "./foundation/files": {
+      "types": "./dist/foundation/files/index.d.ts",
+      "import": "./dist/foundation/files/index.js",
+      "default": "./dist/foundation/files/index.js"
+    },
+    "./foundation/commands": {
+      "types": "./dist/foundation/commands/index.d.ts",
+      "import": "./dist/foundation/commands/index.js",
+      "default": "./dist/foundation/commands/index.js"
+    },
+    "./foundation/errors": {
+      "types": "./dist/foundation/errors/index.d.ts",
+      "import": "./dist/foundation/errors/index.js",
+      "default": "./dist/foundation/errors/index.js"
+    },
+    "./foundation/share": {
+      "types": "./dist/foundation/share/index.d.ts",
+      "import": "./dist/foundation/share/index.js",
+      "default": "./dist/foundation/share/index.js"
+    },
+    "./analytics": {
+      "types": "./dist/analytics/index.d.ts",
+      "import": "./dist/analytics/index.js",
+      "default": "./dist/analytics/index.js"
+    },
+    "./flags": {
+      "types": "./dist/flags/index.d.ts",
+      "import": "./dist/flags/index.js",
+      "default": "./dist/flags/index.js"
+    },
     "./domain/color": {
       "types": "./dist/domain/color/index.d.ts",
       "import": "./dist/domain/color/index.js",

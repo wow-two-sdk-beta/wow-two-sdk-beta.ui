@@ -26,9 +26,9 @@ export default defineConfig({
           // Suffix convention: `*.browser.test.ts` = needs a real DOM → browser
           // project; plain `*.test.ts` in these layers = pure logic → here.
           include: [
-            'tests/unit/foundation/{utils,themes,http,storage,resilience,identifiers,i18n,config,shortcuts,format}/**/*.test.ts',
+            'tests/unit/foundation/{utils,themes,http,storage,resilience,identifiers,i18n,config,shortcuts,format,files,commands,errors,share}/**/*.test.ts',
             'tests/unit/domain/**/*.test.ts',
-            'tests/unit/{router,query,auth,feedback,forms-engine}/**/*.test.ts',
+            'tests/unit/{router,query,auth,feedback,forms-engine,analytics,flags}/**/*.test.ts',
           ],
           exclude: ['**/*.browser.test.ts'],
         },

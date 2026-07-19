@@ -1,5 +1,6 @@
 import { CancelledError, MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
+import { isAbortError } from '../foundation/errors';
 import type { ApiError } from '../foundation/http';
 
 import { computeRetryDelay, DefaultRetryPolicy, shouldRetry, type RetryPolicy } from '../foundation/resilience';
@@ -16,7 +17,7 @@ const GcTimeMs = 5 * 60_000;
  * status `0`, which the transient set would otherwise retry) nor reach the global `onError` toast.
  */
 function isCancellation(error: unknown): boolean {
-  return error instanceof CancelledError || (error instanceof Error && error.name === 'AbortError');
+  return error instanceof CancelledError || isAbortError(error);
 }
 
 /** The metadata bag a hook's `meta` option attaches to its query/mutation — free-form keys, read back by the global error seam. `suppressGlobalError: true` keeps that call's failures out of the global `onError` (per-query opt-out for polling / boundary-handled errors). */

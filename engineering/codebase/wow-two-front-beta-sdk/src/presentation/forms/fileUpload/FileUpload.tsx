@@ -12,6 +12,7 @@ import {
 import { UploadCloud } from 'lucide-react';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
+import { matchesAccept, matchesAcceptType } from '../../../foundation/files';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 
 /** Defines why a picked file was rejected by the uploader. */
@@ -45,19 +46,6 @@ export interface FileUploadProps
   label?: ReactNode;
   hint?: ReactNode;
   children?: ReactNode;
-}
-
-function matchesAccept(file: File, accept?: string): boolean {
-  if (!accept) return true;
-  const tokens = accept.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
-  if (tokens.length === 0) return true;
-  const fileType = file.type.toLowerCase();
-  const fileName = file.name.toLowerCase();
-  return tokens.some((t) => {
-    if (t.startsWith('.')) return fileName.endsWith(t);
-    if (t.endsWith('/*')) return fileType.startsWith(t.slice(0, -1));
-    return fileType === t;
-  });
 }
 
 /**
@@ -132,23 +120,16 @@ export const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(function
     dragCounter.current += 1;
     const items = e.dataTransfer?.items;
     let reject = false;
-    if (items && (accept || maxSize)) {
-      // We can only inspect type at dragenter — size is not exposed pre-drop.
-      if (accept) {
-        const tokens = accept.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
-        for (let i = 0; i < items.length; i++) {
-          const it = items[i];
-          if (!it || it.kind !== 'file') continue;
-          const t = it.type.toLowerCase();
-          const ok = tokens.some((tk) => {
-            if (tk.startsWith('.')) return false; // can't check extension here
-            if (tk.endsWith('/*')) return t.startsWith(tk.slice(0, -1));
-            return t === tk;
-          });
-          if (!ok) {
-            reject = true;
-            break;
-          }
+    /* Only the MIME type is exposed pre-drop — size is unavailable and extension tokens are
+       unverifiable, so this check is advisory and stays optimistic (`extensionTokens: 'allow'`).
+       `handleDrop` re-checks authoritatively with `matchesAccept`. */
+    if (items && accept) {
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        if (!it || it.kind !== 'file') continue;
+        if (!matchesAcceptType(it.type, accept)) {
+          reject = true;
+          break;
         }
       }
     }
