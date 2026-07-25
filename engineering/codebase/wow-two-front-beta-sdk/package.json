@@ -128,6 +128,126 @@
       "import": "./dist/foundation/share/index.js",
       "default": "./dist/foundation/share/index.js"
     },
+    "./foundation/logger": {
+      "types": "./dist/foundation/logger/index.d.ts",
+      "import": "./dist/foundation/logger/index.js",
+      "default": "./dist/foundation/logger/index.js"
+    },
+    "./foundation/device": {
+      "types": "./dist/foundation/device/index.d.ts",
+      "import": "./dist/foundation/device/index.js",
+      "default": "./dist/foundation/device/index.js"
+    },
+    "./foundation/notifications": {
+      "types": "./dist/foundation/notifications/index.d.ts",
+      "import": "./dist/foundation/notifications/index.js",
+      "default": "./dist/foundation/notifications/index.js"
+    },
+    "./foundation/uploads": {
+      "types": "./dist/foundation/uploads/index.d.ts",
+      "import": "./dist/foundation/uploads/index.js",
+      "default": "./dist/foundation/uploads/index.js"
+    },
+    "./foundation/gestures": {
+      "types": "./dist/foundation/gestures/index.d.ts",
+      "import": "./dist/foundation/gestures/index.js",
+      "default": "./dist/foundation/gestures/index.js"
+    },
+    "./foundation/selection": {
+      "types": "./dist/foundation/selection/index.d.ts",
+      "import": "./dist/foundation/selection/index.js",
+      "default": "./dist/foundation/selection/index.js"
+    },
+    "./foundation/media": {
+      "types": "./dist/foundation/media/index.d.ts",
+      "import": "./dist/foundation/media/index.js",
+      "default": "./dist/foundation/media/index.js"
+    },
+    "./foundation/animation": {
+      "types": "./dist/foundation/animation/index.d.ts",
+      "import": "./dist/foundation/animation/index.js",
+      "default": "./dist/foundation/animation/index.js"
+    },
+    "./foundation/virtualization": {
+      "types": "./dist/foundation/virtualization/index.d.ts",
+      "import": "./dist/foundation/virtualization/index.js",
+      "default": "./dist/foundation/virtualization/index.js"
+    },
+    "./foundation/observers": {
+      "types": "./dist/foundation/observers/index.d.ts",
+      "import": "./dist/foundation/observers/index.js",
+      "default": "./dist/foundation/observers/index.js"
+    },
+    "./foundation/crypto": {
+      "types": "./dist/foundation/crypto/index.d.ts",
+      "import": "./dist/foundation/crypto/index.js",
+      "default": "./dist/foundation/crypto/index.js"
+    },
+    "./foundation/sync": {
+      "types": "./dist/foundation/sync/index.d.ts",
+      "import": "./dist/foundation/sync/index.js",
+      "default": "./dist/foundation/sync/index.js"
+    },
+    "./foundation/idb": {
+      "types": "./dist/foundation/idb/index.d.ts",
+      "import": "./dist/foundation/idb/index.js",
+      "default": "./dist/foundation/idb/index.js"
+    },
+    "./foundation/workers": {
+      "types": "./dist/foundation/workers/index.d.ts",
+      "import": "./dist/foundation/workers/index.js",
+      "default": "./dist/foundation/workers/index.js"
+    },
+    "./foundation/screen": {
+      "types": "./dist/foundation/screen/index.d.ts",
+      "import": "./dist/foundation/screen/index.js",
+      "default": "./dist/foundation/screen/index.js"
+    },
+    "./foundation/geolocation": {
+      "types": "./dist/foundation/geolocation/index.d.ts",
+      "import": "./dist/foundation/geolocation/index.js",
+      "default": "./dist/foundation/geolocation/index.js"
+    },
+    "./foundation/async": {
+      "types": "./dist/foundation/async/index.d.ts",
+      "import": "./dist/foundation/async/index.js",
+      "default": "./dist/foundation/async/index.js"
+    },
+    "./foundation/undo": {
+      "types": "./dist/foundation/undo/index.d.ts",
+      "import": "./dist/foundation/undo/index.js",
+      "default": "./dist/foundation/undo/index.js"
+    },
+    "./foundation/clipboard": {
+      "types": "./dist/foundation/clipboard/index.d.ts",
+      "import": "./dist/foundation/clipboard/index.js",
+      "default": "./dist/foundation/clipboard/index.js"
+    },
+    "./foundation/speech": {
+      "types": "./dist/foundation/speech/index.d.ts",
+      "import": "./dist/foundation/speech/index.js",
+      "default": "./dist/foundation/speech/index.js"
+    },
+    "./foundation/collections": {
+      "types": "./dist/foundation/collections/index.d.ts",
+      "import": "./dist/foundation/collections/index.js",
+      "default": "./dist/foundation/collections/index.js"
+    },
+    "./foundation/datetime": {
+      "types": "./dist/foundation/datetime/index.d.ts",
+      "import": "./dist/foundation/datetime/index.js",
+      "default": "./dist/foundation/datetime/index.js"
+    },
+    "./foundation/validation": {
+      "types": "./dist/foundation/validation/index.d.ts",
+      "import": "./dist/foundation/validation/index.js",
+      "default": "./dist/foundation/validation/index.js"
+    },
+    "./foundation/net": {
+      "types": "./dist/foundation/net/index.d.ts",
+      "import": "./dist/foundation/net/index.js",
+      "default": "./dist/foundation/net/index.js"
+    },
     "./analytics": {
       "types": "./dist/analytics/index.d.ts",
       "import": "./dist/analytics/index.js",
