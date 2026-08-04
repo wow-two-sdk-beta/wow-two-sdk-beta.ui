@@ -28,6 +28,7 @@ export class StringValidator extends Validator<string> {
       (value) => value.length >= limit,
       message ?? `must be at least ${limit} character${limit === 1 ? '' : 's'}`,
       'min',
+      { min: limit, unit: 'characters' },
     );
   }
 
@@ -37,6 +38,7 @@ export class StringValidator extends Validator<string> {
       (value) => value.length <= limit,
       message ?? `must be at most ${limit} character${limit === 1 ? '' : 's'}`,
       'max',
+      { max: limit, unit: 'characters' },
     );
   }
 
@@ -46,6 +48,7 @@ export class StringValidator extends Validator<string> {
       (value) => value.length === exact,
       message ?? `must be exactly ${exact} character${exact === 1 ? '' : 's'}`,
       'length',
+      { length: exact, unit: 'characters' },
     );
   }
 
@@ -65,6 +68,7 @@ export class StringValidator extends Validator<string> {
       (value) => stateless.test(value),
       message ?? `must match ${String(stateless)}`,
       code,
+      { pattern: stateless.source },
     );
   }
 }
@@ -73,12 +77,16 @@ export class StringValidator extends Validator<string> {
 export class NumberValidator extends Validator<number> {
   /** Requires a value greater than or equal to `limit`. */
   min(limit: number, message?: string): this {
-    return this.refine((value) => value >= limit, message ?? `must be at least ${limit}`, 'min');
+    return this.refine((value) => value >= limit, message ?? `must be at least ${limit}`, 'min', {
+      min: limit,
+    });
   }
 
   /** Requires a value less than or equal to `limit`. */
   max(limit: number, message?: string): this {
-    return this.refine((value) => value <= limit, message ?? `must be at most ${limit}`, 'max');
+    return this.refine((value) => value <= limit, message ?? `must be at most ${limit}`, 'max', {
+      max: limit,
+    });
   }
 
   /** Requires a whole number — rejects any fractional part. */
@@ -95,6 +103,7 @@ export class DateValidator extends Validator<Date> {
       (value) => value.getTime() >= limit.getTime(),
       message ?? `must be on or after ${limit.toISOString()}`,
       'min',
+      { min: limit.toISOString(), unit: 'instant' },
     );
   }
 
@@ -104,6 +113,7 @@ export class DateValidator extends Validator<Date> {
       (value) => value.getTime() <= limit.getTime(),
       message ?? `must be on or before ${limit.toISOString()}`,
       'max',
+      { max: limit.toISOString(), unit: 'instant' },
     );
   }
 }

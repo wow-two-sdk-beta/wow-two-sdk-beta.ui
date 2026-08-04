@@ -68,3 +68,20 @@ export {
 export { email, url, uuid, isoDate } from './Formats';
 
 export { ValidationError, assertValid } from './ValidationError';
+
+// Shared rule-code vocabulary + the message catalogue that renders it. The one voice a rule speaks in,
+// whichever side reported it — see the header of `Messages.ts` for why this is a vocabulary and not a
+// shared rule set.
+export {
+  type FieldIssue,
+  type ValidationCode,
+  type ValidationMessageContext,
+  type ValidationMessageEntry,
+  type ValidationMessageCatalogue,
+  type ResolveValidationMessage,
+  VALIDATION_CODES,
+  FLUENT_VALIDATION_CODES,
+  FLUENT_VALIDATION_PARAMS,
+  defaultValidationMessages,
+  createMessageResolver,
+} from './Messages';

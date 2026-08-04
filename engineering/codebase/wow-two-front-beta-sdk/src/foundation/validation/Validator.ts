@@ -152,8 +152,16 @@ export class Validator<TOutput> implements StandardSchemaV1<TOutput, TOutput> {
    * Adds a custom check that runs only after this validator accepts the value, so `check` always sees a
    * fully parsed `TOutput`. Returns the same validator class, keeping type-specific methods chainable.
    * A `check` that throws is reported as this same failure rather than propagating.
+   *
+   * `params` carries the rule's operands onto the issue so a message catalogue can re-render it
+   * (`Messages.ts`). Pass the limits the check compares against, never the value it rejected.
    */
-  refine(check: (value: TOutput) => boolean, message: string, code = 'custom'): this {
+  refine(
+    check: (value: TOutput) => boolean,
+    message: string,
+    code = 'custom',
+    params?: Readonly<Record<string, unknown>>,
+  ): this {
     return this.derive((value, path) => {
       const result = this.parseAt(value, path);
       if (!result.valid) return result;
@@ -164,7 +172,7 @@ export class Validator<TOutput> implements StandardSchemaV1<TOutput, TOutput> {
       } catch {
         passed = false;
       }
-      return passed ? result : invalid([{ path, message, code }]);
+      return passed ? result : invalid([{ path, message, code, params }]);
     });
   }
 

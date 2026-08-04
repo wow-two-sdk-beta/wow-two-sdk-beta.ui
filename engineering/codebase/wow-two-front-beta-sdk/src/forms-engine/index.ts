@@ -50,8 +50,19 @@ export type {
 
 // Adapter-author seams — building blocks the in-repo adapters share (house now, tanstack phase 2)
 export { createFieldComponent, createSubscribeComponent } from './FormGlue';
-export { resolveSubmitFailure, toApiError, type SubmitFailureResolution } from './SubmitErrors';
-export { runStandardSchema, issuePathToString, resultToFieldErrors } from './SchemaValidation';
+export {
+  resolveSubmitFailure,
+  toApiError,
+  type SubmitFailureResolution,
+  type SubmitErrorMap,
+  type SubmitFieldEntry,
+} from './SubmitErrors';
+export {
+  runStandardSchema,
+  createOptionsMessageResolver,
+  issuePathToString,
+  resultToFieldErrors,
+} from './SchemaValidation';
 export {
   parsePath,
   formatPath,

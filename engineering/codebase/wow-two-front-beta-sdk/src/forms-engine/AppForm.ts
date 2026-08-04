@@ -1,8 +1,10 @@
 import type { FormEvent, ReactNode } from 'react';
 
 import type { ApiError } from '../foundation/http';
+import type { ValidationMessageCatalogue } from '../foundation/validation';
 
 import type { StandardSchemaV1 } from './StandardSchema';
+import type { SubmitErrorMap } from './SubmitErrors';
 
 /*
  * The facade contract every engine adapter satisfies (docs/analysis/forms-engine.md §4).
@@ -61,8 +63,12 @@ export interface AppFormOptions<TValues extends object> {
    * screens or a while-related-data-loads freeze. Read per render from the latest options. Default `false`.
    */
   readonly isDisabled?: boolean;
-  /** Maps a thrown submit error to `path → messages`. Default: `fieldErrors` (ProblemDetails, both .NET shapes). */
-  readonly mapSubmitError?: (error: unknown) => Record<string, string[]>;
+  /**
+   * Maps a thrown submit error to `path → failures`. Default: `fieldIssues` (ProblemDetails, both .NET
+   * shapes), which keeps each failure's rule code for `messages`. A mapper returning plain strings is
+   * still valid — those render as-is.
+   */
+  readonly mapSubmitError?: (error: unknown) => SubmitErrorMap;
   /** Rewrites a server error path onto a form path. Default: camelCase per segment (`Rules[0].Destination` → `rules[0].destination`). */
   readonly mapFieldPath?: (serverPath: string) => string;
   /**
@@ -71,6 +77,30 @@ export interface AppFormOptions<TValues extends object> {
    * submit path. Override for i18n. Default: `'Unknown error'`.
    */
   readonly fallbackErrorMessage?: string;
+
+  // ── message-catalogue cluster ───────────────────────────────────────────────
+  /**
+   * Overrides the wording of individual rule codes, merged over `defaultValidationMessages`.
+   *
+   * The point is ONE voice per rule: a failure the client caught and the same failure the server caught
+   * render from the same entry, instead of "Name is required" from one side and "'Name' must not be
+   * empty." from the other. Server codes are normalized onto the shared vocabulary on read
+   * (`foundation/http` `fieldIssues`), so both sides reach the same key.
+   *
+   * Applies to server failures always, and to client failures when the schema is a
+   * `foundation/validation` validator — a third-party spec schema's codes are erased by the spec, so its
+   * messages render as the schema authored them. An unknown code falls back to the source's own message,
+   * which is why wiring this can never render a form worse than not wiring it.
+   *
+   * i18n: swap the whole table per locale off `foundation/i18n`'s `LocaleContext`.
+   */
+  readonly messages?: ValidationMessageCatalogue;
+  /**
+   * Display labels per field path, prefixed to a catalogue-rendered message (`rules[].destination` also
+   * matches every row). Omitted, messages render as bare fragments — correct under a labelled control,
+   * which is why this is opt-in rather than required.
+   */
+  readonly labels?: Readonly<Record<string, string>>;
 }
 
 /** The per-field render API a `<form.Field>` child receives. */

@@ -10,13 +10,14 @@ import {
   type ReactFormExtendedApi,
 } from '@tanstack/react-form';
 
-import { fieldErrors } from '../../foundation/http';
+import { fieldIssues } from '../../foundation/http';
+import type { ResolveValidationMessage } from '../../foundation/validation';
 
 import type { AppFieldApi, AppForm, AppFormOptions, AppFormState } from '../AppForm';
 import { deepEqual } from '../DeepEqual';
 import { createFieldComponent, createSubscribeComponent } from '../FormGlue';
 import { getPath, hasPath } from '../Paths';
-import { runStandardSchema } from '../SchemaValidation';
+import { createOptionsMessageResolver, runStandardSchema } from '../SchemaValidation';
 import { defaultMapFieldPath, resolveSubmitFailure } from '../SubmitErrors';
 
 import {
@@ -308,6 +309,8 @@ interface AdapterPrelude<TValues extends object> {
   readonly getOptions: () => AppFormOptions<TValues>;
   readonly overlay: TanstackFormOverlay<TValues>;
   readonly tanstackOptions: TanstackFormOptions<TValues>;
+  /** The form's message resolver, memoized against the `messages` / `labels` option identities. */
+  readonly messageResolver: () => ResolveValidationMessage;
 }
 
 /** Builds the overlay + the stable TanStack options (all callbacks latest-ref through `getOptions`). */
@@ -316,6 +319,7 @@ function createAdapterPrelude<TValues extends object>(
 ): AdapterPrelude<TValues> {
   const initialOptions = getOptions();
   const overlay = createTanstackFormOverlay<TValues>(initialOptions.defaultValues);
+  const messageResolver = createOptionsMessageResolver(getOptions);
 
   const tanstackOptions: TanstackFormOptions<TValues> = {
     defaultValues: initialOptions.defaultValues,
@@ -339,7 +343,7 @@ function createAdapterPrelude<TValues extends object>(
     const validateWithSchema: FormValidateAsyncFn<TValues> = async ({ value }) => {
       const schema = getOptions().schema;
       if (!schema) return undefined;
-      return toEngineValidationError(await runStandardSchema(schema, value));
+      return toEngineValidationError(await runStandardSchema(schema, value, messageResolver()));
     };
     tanstackOptions.validators = { onDynamicAsync: validateWithSchema };
     tanstackOptions.validationLogic = revalidateLogic({
@@ -350,7 +354,7 @@ function createAdapterPrelude<TValues extends object>(
     });
   }
 
-  return { getOptions, overlay, tanstackOptions };
+  return { getOptions, overlay, tanstackOptions, messageResolver };
 }
 
 /** What `buildAppForm` returns — the contract surface plus the unmount hook the adapter's own timer needs. */
@@ -365,7 +369,7 @@ function buildAppForm<TValues extends object>(
   engine: TanstackFormEngine<TValues>,
   prelude: AdapterPrelude<TValues>,
 ): BuiltForm<TValues> {
-  const { getOptions, overlay, tanstackOptions } = prelude;
+  const { getOptions, overlay, tanstackOptions, messageResolver } = prelude;
   const reader = createCombinedReader(engine, overlay);
 
   const subscribe = (listener: () => void): (() => void) => {
@@ -390,10 +394,11 @@ function buildAppForm<TValues extends object>(
     overlay.applySubmitFailure(
       resolveSubmitFailure(
         error,
-        options.mapSubmitError ?? fieldErrors,
+        options.mapSubmitError ?? fieldIssues,
         options.mapFieldPath ?? defaultMapFieldPath,
         (path) => hasPath(values, path),
         options.fallbackErrorMessage,
+        messageResolver(),
       ),
     );
   }

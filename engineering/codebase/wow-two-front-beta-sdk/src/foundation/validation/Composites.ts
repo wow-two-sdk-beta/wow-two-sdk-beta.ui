@@ -68,6 +68,7 @@ export class ArrayValidator<TItem> extends Validator<TItem[]> {
       (value) => value.length >= limit,
       message ?? `must have at least ${limit} item${limit === 1 ? '' : 's'}`,
       'min',
+      { min: limit, unit: 'items' },
     );
   }
 
@@ -77,6 +78,7 @@ export class ArrayValidator<TItem> extends Validator<TItem[]> {
       (value) => value.length <= limit,
       message ?? `must have at most ${limit} item${limit === 1 ? '' : 's'}`,
       'max',
+      { max: limit, unit: 'items' },
     );
   }
 
@@ -86,6 +88,7 @@ export class ArrayValidator<TItem> extends Validator<TItem[]> {
       (value) => value.length === exact,
       message ?? `must have exactly ${exact} item${exact === 1 ? '' : 's'}`,
       'length',
+      { length: exact, unit: 'items' },
     );
   }
 }

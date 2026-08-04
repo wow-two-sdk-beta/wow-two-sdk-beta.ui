@@ -26,6 +26,17 @@ export interface ValidationIssue {
 
   /** Stable machine tag for the rule that failed (`type`, `min`, `pattern`, `union`, `custom`, …). */
   readonly code?: string;
+
+  /**
+   * The rule's own operands — `{ min: 2, unit: 'characters' }` for `string().min(2)`.
+   *
+   * Present so a message CATALOGUE can re-render the failure in another voice or another language
+   * (`Messages.ts`). `message` already reads correctly on its own; without the operands beside it, a
+   * catalogue could only ever emit parameterless text, which is a catalogue that cannot replace the
+   * message it exists to replace. Holds operands only — never the rejected value, for the same reason
+   * `describeType` exists.
+   */
+  readonly params?: Readonly<Record<string, unknown>>;
 }
 
 /** The outcome of validating a value: the parsed output, or every issue found. Never a thrown error. */

@@ -8,6 +8,9 @@ import {
   type FormControlChromeKind,
   type FormControlContextValue,
 } from '@src/foundation/primitives';
+// Reaches sideways into the validation slice on purpose: the message-catalogue cases need a HOUSE
+// validator, since a third-party spec schema's rule codes are erased by the spec itself.
+import { object, string } from '@src/foundation/validation';
 
 import type { AppFieldApi, AppForm, AppFormOptions, FormEngine } from '@src/forms-engine/AppForm';
 import type { StandardSchemaV1 } from '@src/forms-engine/StandardSchema';
@@ -485,6 +488,100 @@ export function describeFormEngineConformance(engineName: string, useAppForm: Fo
         await act(async () => form.handleSubmit());
         expect(row.current.errors).toEqual(['Invalid URL']);
         expect(readState().submitError).toBeNull();
+      });
+    });
+
+    // ── Message catalogue — one voice per rule, whichever layer caught it ────────────────────
+    describe('message catalogue', () => {
+      it('renders a server failure from the catalogue instead of the server wording', async () => {
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          onSubmit: async () => {
+            throw new ApiError(400, {
+              errors: [{ property: 'Name', message: "'Name' must not be empty.", code: 'NotEmptyValidator' }],
+            });
+          },
+        });
+        const name = field('name');
+
+        await act(async () => form.handleSubmit());
+        expect(name.current.errors).toEqual(['is required']);
+      });
+
+      it('renders a client failure of the same rule with the same words', async () => {
+        // The whole point: the user must not hear two voices for one rule.
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          schema: object({ name: string().min(1), email: string() }) as StandardSchemaV1<LoginValues>,
+          onSubmit: async () => undefined,
+        });
+        const name = field('name');
+
+        await act(async () => form.handleSubmit());
+        expect(name.current.errors).toEqual(['must be at least 1 character']);
+      });
+
+      it('renders a client failure operand through the catalogue, not the baked message', async () => {
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          schema: object({ name: string().max(3), email: string() }) as StandardSchemaV1<LoginValues>,
+          messages: { max: (context) => `no more than ${String(context.params.max)}!` },
+          onSubmit: async () => undefined,
+        });
+        const name = field('name');
+
+        await act(async () => name.current.setValue('abcd'));
+        await act(async () => form.handleSubmit());
+        expect(name.current.errors).toEqual(['no more than 3!']);
+      });
+
+      it('prefixes the field label when the form named one', async () => {
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          labels: { name: 'Name' },
+          onSubmit: async () => {
+            throw new ApiError(400, {
+              errors: [{ property: 'Name', message: 'whatever', code: 'NotEmptyValidator' }],
+            });
+          },
+        });
+        const name = field('name');
+
+        await act(async () => form.handleSubmit());
+        expect(name.current.errors).toEqual(['Name is required']);
+      });
+
+      it('falls back to the server message for a code the catalogue does not cover', async () => {
+        // Adoption is additive: an unknown code can never render worse than not wiring the catalogue.
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          labels: { name: 'Name' },
+          onSubmit: async () => {
+            throw new ApiError(400, {
+              errors: [{ property: 'Name', message: 'Name is already taken', code: 'NameTakenValidator' }],
+            });
+          },
+        });
+        const name = field('name');
+
+        await act(async () => form.handleSubmit());
+        expect(name.current.errors).toEqual(['Name is already taken']);
+      });
+
+      it('leaves a third-party spec schema rendering its own messages', async () => {
+        // The spec's `Issue` has no code slot, so a non-house schema never reaches a catalogue entry.
+        const { form, field } = renderForm<LoginValues>({
+          defaultValues: loginDefaults,
+          schema: schemaOf<LoginValues>((values) =>
+            values.name.length === 0 ? [{ message: 'vendor says required', path: ['name'] }] : [],
+          ),
+          messages: { required: () => 'catalogue says required' },
+          onSubmit: async () => undefined,
+        });
+        const name = field('name');
+
+        await act(async () => form.handleSubmit());
+        expect(name.current.errors).toEqual(['vendor says required']);
       });
 
       it('feeds a failure whose mapped paths match no field into submitError', async () => {

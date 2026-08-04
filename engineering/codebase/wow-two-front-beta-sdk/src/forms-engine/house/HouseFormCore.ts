@@ -1,4 +1,4 @@
-import { fieldErrors, type ApiError } from '../../foundation/http';
+import { fieldIssues, type ApiError } from '../../foundation/http';
 
 import type { AppFormOptions, AppFormState } from '../AppForm';
 import { deepEqual } from '../DeepEqual';
@@ -11,7 +11,7 @@ import {
   setPath,
   type ArrayOperation,
 } from '../Paths';
-import { runStandardSchema } from '../SchemaValidation';
+import { createOptionsMessageResolver, runStandardSchema } from '../SchemaValidation';
 import { defaultMapFieldPath, resolveSubmitFailure } from '../SubmitErrors';
 
 /*
@@ -134,6 +134,8 @@ export function createHouseFormEngine<TValues extends object>(
   let autoSubmitTimer: ReturnType<typeof setTimeout> | null = null;
   /** Single-flight latch: an in-flight submit coalesces re-entrant triggers (double-click / change-burst). */
   let inFlight: Promise<boolean> | null = null;
+  /** The form's message resolver, memoized against the `messages` / `labels` option identities. */
+  const messageResolver = createOptionsMessageResolver(getOptions);
 
   function buildFormState(internal: InternalState<TValues>): AppFormState<TValues> {
     return {
@@ -204,7 +206,7 @@ export function createHouseFormEngine<TValues extends object>(
       }
       return {};
     }
-    const outcome = runStandardSchema(schema, state.values);
+    const outcome = runStandardSchema(schema, state.values, messageResolver());
     if (outcome instanceof Promise) {
       if (!state.isValidating) patch({ isValidating: true });
       return outcome.then((errors) => {
@@ -317,10 +319,11 @@ export function createHouseFormEngine<TValues extends object>(
     } catch (error) {
       const resolution = resolveSubmitFailure(
         error,
-        options.mapSubmitError ?? fieldErrors,
+        options.mapSubmitError ?? fieldIssues,
         options.mapFieldPath ?? defaultMapFieldPath,
         (path) => hasPath(state.values, path),
         options.fallbackErrorMessage,
+        messageResolver(),
       );
       patch({ serverErrors: normalizeErrorMap(resolution.fieldErrors), submitError: resolution.submitError });
     } finally {
