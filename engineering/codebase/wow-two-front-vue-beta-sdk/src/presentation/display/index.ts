@@ -51,9 +51,9 @@ export * from './audioWaveform';
 export * from './audioPlayer';
 export * from './videoPlayer';
 export * from './pdfViewer';
-// `scheduleView`, `gantt` and `eventCalendar` are not ported yet — all three import
-// `../../forms/DateExtensions`, and `presentation/forms` has no Vue counterpart in this
-// package yet. Restore these three lines with that module.
+export * from './scheduleView';
+export * from './gantt';
+export * from './eventCalendar';
 export * from './gradientText';
 export * from './countUp';
 export * from './animatedNumber';

@@ -21,6 +21,7 @@ export interface OptionTileGroupProps {
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/utils';
+import { Fieldset } from '../../forms/fieldset';
 import { optionTileGroupVariants } from './OptionTileGroup.variants';
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
@@ -43,21 +44,16 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
+/* `Fieldset` owns the `m-0 min-w-0 border-0 p-0` reset, so only the layout variants are
+   composed here — the same split the React original had. */
 const rootClass = computed(() =>
-  cn(
-    /* The React original composed `presentation/forms`' `Fieldset`, whose whole body is this reset.
-       That group has not ported yet, so the reset is inlined onto a native `<fieldset>`; swap the
-       element back for `<Fieldset>` once `forms/fieldset` lands. */
-    'm-0 min-w-0 border-0 p-0',
-    optionTileGroupVariants({ wrap: props.wrap, align: props.align }),
-    attrs.class as ClassValue,
-  ),
+  cn(optionTileGroupVariants({ wrap: props.wrap, align: props.align }), attrs.class as ClassValue),
 );
 
-const root = useTemplateRef<HTMLFieldSetElement>('root');
+const root = useTemplateRef<{ el: HTMLFieldSetElement | null }>('root');
 
 /** The rendered element — the Vue stand-in for the React original's forwarded ref. */
-defineExpose({ el: root });
+defineExpose({ el: computed(() => root.value?.el ?? null) });
 </script>
 
 <template>
@@ -66,7 +62,7 @@ defineExpose({ el: root });
     `disabled` greys + blocks the whole group) laid out as a tile row, with the
     group's accessible name on `aria-label`.
   -->
-  <fieldset
+  <Fieldset
     ref="root"
     :disabled="disabled"
     :aria-label="label"
@@ -74,5 +70,5 @@ defineExpose({ el: root });
     v-bind="passthroughAttrs"
   >
     <slot />
-  </fieldset>
+  </Fieldset>
 </template>
