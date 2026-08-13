@@ -1,0 +1,23 @@
+<script lang="ts">
+/* No props: React typed this as bare `HTMLAttributes<HTMLDivElement>`, every member of which is
+   a Vue fallthrough attr. The block exists because a `<script setup>`-only SFC loses
+   `ignoreRestSiblings` in `vue-eslint-parser` and trips `no-unused-vars` on the house
+   `const { class: _class, ...others }` idiom. */
+</script>
+
+<script setup lang="ts">
+import { listboxSeparatorVariants } from './Listbox.variants';
+
+/**
+ * Provides a thin horizontal rule between groups of items. Decorative only —
+ * `separator` is not an allowed child role of `listbox` (option/group only),
+ * so the rule is hidden from the accessibility tree entirely.
+ */
+/* `inheritAttrs` stays ON: React put `className` straight onto the div with no `cn()` merge
+   of its own, so plain fallthrough reproduces it exactly. */
+defineOptions({ name: 'ListboxSeparator' });
+</script>
+
+<template>
+  <div aria-hidden="true" :class="listboxSeparatorVariants()" />
+</template>

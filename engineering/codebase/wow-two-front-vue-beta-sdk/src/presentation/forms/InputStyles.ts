@@ -1,0 +1,119 @@
+// Shared visual primitives for form atoms. Co-located in `forms/` so imports
+// stay within-domain (ESLint boundaries allow same-domain imports).
+
+import { tv, type VariantProps } from '../../foundation/utils';
+
+export const inputBaseVariants = tv({
+  base: 'flex w-full rounded-md bg-popover text-foreground placeholder:text-subtle-foreground transition-colors focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60 read-only:bg-muted',
+  variants: {
+    size: {
+      xs: 'h-7 px-2 text-xs',
+      sm: 'h-8 px-2.5 text-sm',
+      md: 'h-10 px-3 text-sm',
+      lg: 'h-12 px-4 text-base',
+    },
+    state: {
+      default: 'border-input hover:border-border-strong',
+      invalid: 'border-destructive focus-visible:ring-destructive',
+    },
+    /* Border weight — scale like `size`/`radius`; default `sm` (1px). Set a literal via `className="border-[1.5px]"`. */
+    border: {
+      none: 'border-0',
+      xs: 'border-[0.5px]',
+      sm: 'border',
+      md: 'border-2',
+      lg: 'border-4',
+      xl: 'border-8',
+    },
+    /* Focus-ring weight — default `md` (2px). The ring being wider than the border read as "thick"; use `sm` for a hairline focus. */
+    ring: {
+      none: 'focus-visible:ring-0',
+      sm: 'focus-visible:ring-1',
+      md: 'focus-visible:ring-2',
+      lg: 'focus-visible:ring-4',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+    state: 'default',
+    border: 'sm',
+    ring: 'md',
+  },
+});
+
+export type InputBaseVariants = VariantProps<typeof inputBaseVariants>;
+
+/** Defines the size step of a form input control. */
+export const InputSize = {
+  /** Refers to the extra-small step (h-7). */
+  Xs: 'xs',
+  /** Refers to the small step (h-8). */
+  Sm: 'sm',
+  /** Refers to the medium (default) step (h-10). */
+  Md: 'md',
+  /** Refers to the large step (h-12). */
+  Lg: 'lg',
+} as const;
+
+export type InputSize = (typeof InputSize)[keyof typeof InputSize];
+
+/** Defines the validity surface of a form input control. */
+export const InputState = {
+  /** Refers to the default (valid / untouched) surface. */
+  Default: 'default',
+  /** Refers to the invalid surface (destructive border + ring). */
+  Invalid: 'invalid',
+} as const;
+
+export type InputState = (typeof InputState)[keyof typeof InputState];
+
+/** Defines the border-weight step of a form input control. */
+export const InputBorder = {
+  /** Refers to no border. */
+  None: 'none',
+  /** Refers to a 0.5px hairline border. */
+  Xs: 'xs',
+  /** Refers to a 1px border (default). */
+  Sm: 'sm',
+  /** Refers to a 2px border. */
+  Md: 'md',
+  /** Refers to a 4px border. */
+  Lg: 'lg',
+  /** Refers to an 8px border. */
+  Xl: 'xl',
+} as const;
+
+export type InputBorder = (typeof InputBorder)[keyof typeof InputBorder];
+
+/** Defines the focus-ring-weight step of a form input control. */
+export const InputRing = {
+  /** Refers to no focus ring. */
+  None: 'none',
+  /** Refers to a 1px focus ring. */
+  Sm: 'sm',
+  /** Refers to a 2px focus ring (default). */
+  Md: 'md',
+  /** Refers to a 4px focus ring. */
+  Lg: 'lg',
+} as const;
+
+export type InputRing = (typeof InputRing)[keyof typeof InputRing];
+
+/* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
+const _assertInputSize: AssertExact<
+  InputSize, NonNullable<VariantProps<typeof inputBaseVariants>['size']>
+> = true;
+const _assertInputState: AssertExact<
+  InputState, NonNullable<VariantProps<typeof inputBaseVariants>['state']>
+> = true;
+const _assertInputBorder: AssertExact<
+  InputBorder, NonNullable<VariantProps<typeof inputBaseVariants>['border']>
+> = true;
+const _assertInputRing: AssertExact<
+  InputRing, NonNullable<VariantProps<typeof inputBaseVariants>['ring']>
+> = true;
+void _assertInputSize;
+void _assertInputState;
+void _assertInputBorder;
+void _assertInputRing;

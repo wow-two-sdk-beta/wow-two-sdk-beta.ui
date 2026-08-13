@@ -1,0 +1,194 @@
+<script lang="ts">
+import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
+
+export interface SearchInputProps {
+  /** The control size. */
+  size?: InputSize;
+  /** The validity surface. */
+  state?: InputState;
+  /** The border weight. */
+  border?: InputBorder;
+  /** The focus-ring weight. */
+  ring?: InputRing;
+
+  /** The clearable state, showing a clear (×) button when the input has a value. Default true. */
+  isClearable?: boolean;
+
+  /** The value, controlled. The `v-model` binding target. */
+  modelValue?: string | number;
+
+  /** The value, controlled — React's spelling of `modelValue`, which wins when both are set. */
+  value?: string | number;
+
+  /** The initial value when uncontrolled. */
+  defaultValue?: string | number;
+
+  /** The control's id. Auto-filled from `FormControl` context when omitted. */
+  id?: string;
+
+  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  disabled?: boolean;
+
+  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  required?: boolean;
+
+  /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
+  readOnly?: boolean;
+
+  /** The DOM spelling of {@link SearchInputProps.readOnly}, which wins when both are set. */
+  readonly?: boolean;
+}
+</script>
+
+<script setup lang="ts">
+import { computed, useAttrs, useTemplateRef } from 'vue';
+import type { ClassValue } from 'clsx';
+import { Search, X } from 'lucide-vue-next';
+import { cn } from '../../../foundation/utils';
+import { Icon } from '../../../foundation/icons';
+import { useControlled } from '../../../foundation/hooks';
+import { useFormControl } from '../../../foundation/primitives';
+import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
+
+const SearchIcon = Search;
+const ClearIcon = X;
+
+/**
+ * Search input with leading search icon and optional clear button.
+ * Buttons are raw `<button>` elements to keep the strict atom rule.
+ */
+/* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
+   appends outside it and loses tailwind-merge conflict resolution. Everything else is forwarded
+   onto the inner `<input>` by hand, matching React's `{...props}` placement. */
+defineOptions({ name: 'SearchInput', inheritAttrs: false });
+
+const props = withDefaults(defineProps<SearchInputProps>(), {
+  isClearable: true,
+  /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
+     control context, and Vue casts an absent `boolean` prop to `false` — which would
+     shadow the context with a hard "not disabled / not required / not read-only". */
+  disabled: undefined,
+  required: undefined,
+  readOnly: undefined,
+  readonly: undefined,
+});
+
+const emit = defineEmits<{
+  /** The `v-model` half. */
+  'update:modelValue': [value: string];
+  /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
+  'value-change': [value: string];
+  /** Replaces React's `onClear`. Fires after the value has been reset to empty. */
+  clear: [];
+}>();
+
+const attrs = useAttrs();
+
+/* `ctx` is a live-getter object — read fields off it, never destructure. */
+const ctx = useFormControl();
+
+const controlled = useControlled<string | number>({
+  controlled: () => props.modelValue ?? props.value,
+  default: () => props.defaultValue ?? '',
+  onChange: (next) => {
+    emit('update:modelValue', String(next));
+    emit('value-change', String(next));
+  },
+});
+
+const currentValue = controlled.value;
+
+const root = useTemplateRef<HTMLInputElement>('root');
+
+function onInput(event: Event): void {
+  controlled.setValue((event.target as HTMLInputElement).value);
+}
+
+const showClear = computed(
+  () => props.isClearable && String(currentValue.value ?? '').length > 0,
+);
+
+function handleClear(): void {
+  const el = root.value;
+  if (el) {
+    /* React needed the native value-setter to defeat its own value tracker; Vue reads the
+       value straight off the element, so a plain assignment plus a bubbling `input` drives
+       both this component's handler and any fallthrough `input` listener. */
+    el.value = '';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.focus();
+  } else {
+    controlled.setValue('');
+  }
+  emit('clear');
+}
+
+const finalState = computed(
+  () => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
+);
+
+const inputId = computed(() => props.id ?? ctx?.id);
+const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled ?? false);
+const isRequired = computed(() => props.required ?? ctx?.isRequired);
+const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
+const isInvalid = computed(() => ctx?.isInvalid || undefined);
+const describedBy = computed(() => ctx?.describedBy);
+
+const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const passthroughAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+);
+
+const wrapperClass = computed(() => cn('relative', attrs.class as ClassValue));
+
+const inputClass = computed(() =>
+  cn(
+    inputBaseVariants({
+      size: props.size,
+      state: finalState.value,
+      border: props.border,
+      ring: props.ring,
+    }),
+    'pl-9',
+    showClear.value && 'pr-9',
+    '[&::-webkit-search-cancel-button]:appearance-none',
+  ),
+);
+
+/** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+defineExpose({ el: root });
+</script>
+
+<template>
+  <div :class="wrapperClass">
+    <Icon
+      :icon="SearchIcon"
+      :size="16"
+      class="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground"
+    />
+    <input
+      ref="root"
+      type="search"
+      :id="inputId"
+      :value="currentValue"
+      :disabled="isDisabled"
+      :required="isRequired"
+      :readonly="isReadOnly"
+      :aria-invalid="isInvalid"
+      :aria-describedby="describedBy"
+      :class="inputClass"
+      v-bind="passthroughAttrs"
+      @input="onInput"
+    />
+    <button
+      v-if="showClear"
+      type="button"
+      :disabled="isDisabled"
+      aria-label="Clear search"
+      class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-subtle-foreground hover:bg-muted hover:text-muted-foreground"
+      @click="handleClear"
+    >
+      <Icon :icon="ClearIcon" :size="14" />
+    </button>
+  </div>
+</template>
