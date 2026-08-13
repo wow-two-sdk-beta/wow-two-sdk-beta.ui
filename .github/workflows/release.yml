@@ -1,8 +1,15 @@
 name: release
 
+# React package release. Scoped to `engineering/codebase/wow-two-front-beta-sdk/` so a
+# Vue-only push never republishes `@wow-two-beta/ui`. Without this filter every push to
+# `main` bumped and republished React with no React source change — ui-vue's first release
+# alone cost a no-op `0.0.106`. Mirrors the `paths:` block in `release-vue.yml`.
 on:
   push:
     branches: [main]
+    paths:
+      - 'engineering/codebase/wow-two-front-beta-sdk/**'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
 
 permissions:
