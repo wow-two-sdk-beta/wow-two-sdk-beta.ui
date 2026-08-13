@@ -1,0 +1,68 @@
+<script lang="ts">
+import type { Size } from '../../../foundation/utils';
+
+export interface LoadingStateProps {
+  /** The heading copy. Default `"Loading…"`. Rich content → the `title` slot. */
+  title?: string;
+
+  /** The body text below the title. Rich content → the `description` slot. */
+  description?: string;
+
+  /** The size of the spinner. Default `lg`. */
+  size?: Size;
+}
+</script>
+
+<script setup lang="ts">
+import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
+import { cn, Size as SizeToken } from '../../../foundation/utils';
+import Spinner from '../spinner/Spinner.vue';
+
+/**
+ * Centered loading affordance for full sections / pages — Spinner + title +
+ * description stacked. Use inline `InlineSpinner` for in-row loading.
+ *
+ * `role="status"` is the live-region contract; bound before `v-bind="rest"`
+ * so a caller-supplied `role` still wins.
+ */
+defineOptions({ name: 'LoadingState', inheritAttrs: false });
+
+const props = withDefaults(defineProps<LoadingStateProps>(), {
+  title: 'Loading…',
+  size: SizeToken.Lg,
+});
+
+const attrs = useAttrs();
+const slots = useSlots();
+const el = useTemplateRef<HTMLDivElement>('el');
+
+const hasTitle = computed(() => Boolean(props.title) || Boolean(slots.title));
+const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
+
+const classes = computed(() =>
+  cn(
+    'flex flex-col items-center justify-center gap-3 py-12 text-center',
+    attrs.class as string | undefined,
+  ),
+);
+
+/** Everything but `class`, which is re-applied through `cn` above. */
+const rest = computed(() => {
+  const { class: _class, ...others } = attrs;
+  return others;
+});
+
+defineExpose({ el });
+</script>
+
+<template>
+  <div ref="el" role="status" v-bind="rest" :class="classes">
+    <Spinner :size="props.size" tone="brand" />
+    <div v-if="hasTitle" class="text-sm font-medium text-foreground">
+      <slot name="title">{{ props.title }}</slot>
+    </div>
+    <div v-if="hasDescription" class="text-sm text-muted-foreground">
+      <slot name="description">{{ props.description }}</slot>
+    </div>
+  </div>
+</template>
