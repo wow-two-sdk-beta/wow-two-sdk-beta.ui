@@ -17,8 +17,7 @@ export * from './frame';
 export * from './twoColumn';
 export * from './resizablePanels';
 export * from './pullToRefresh';
-// `appShell` is not ported yet — its `Sidebar` collapses into `presentation/overlays/drawer`,
-// which has no Vue counterpart in this package yet. Restore this line with the folder.
+export * from './appShell';
 export * from './overlay';
 export * from './surface';
 export * from './section';

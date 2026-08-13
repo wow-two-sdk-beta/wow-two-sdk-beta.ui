@@ -16,8 +16,8 @@ export * from './statusIndicator';
 export * from './meterBar';
 export * from './trendIndicator';
 export * from './toaster';
-/* `feedbackToasts` — blocked: needs the root `src/feedback` bus module, not yet ported. */
-/* `loadingOverlay` — blocked: needs `presentation/overlays/backdrop`, not yet ported. */
+export * from './feedbackToasts';
+export * from './loadingOverlay';
 export * from './undoBar';
 export * from './onboardingChecklist';
 export * from './tour';
