@@ -23,7 +23,7 @@ export interface TrendIndicatorProps {
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { Minus, TrendingDown, TrendingUp } from 'lucide-vue-next';
 import { cn, Size as SizeToken } from '../../../foundation/utils';
-import { Icon, type IconAdapter } from '../../../foundation/icons';
+import { Icon } from '../../../foundation/icons';
 
 /* Only xs/sm/md carry a scale; other `Size` members fall through to `md` at
    the lookup below. */
@@ -38,17 +38,10 @@ const SIZE_ICON: Partial<Record<Size, number>> = {
   md: 16,
 };
 
-/**
- * `lucide-vue-next` types `size` as `24 | number`; `IconAdapterProps` widens it to
- * `number | string`, which makes the two functional-component types contravariantly
- * incompatible even though the runtime shape matches. Cast at the import boundary —
- * `foundation/icons` is outside this lane, and the real fix is narrowing
- * `IconAdapterProps['size']` there.
- */
 const ARROW = {
-  up: TrendingUp as unknown as IconAdapter,
-  down: TrendingDown as unknown as IconAdapter,
-  flat: Minus as unknown as IconAdapter,
+  up: TrendingUp,
+  down: TrendingDown,
+  flat: Minus,
 };
 
 /**

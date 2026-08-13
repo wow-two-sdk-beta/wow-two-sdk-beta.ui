@@ -17,16 +17,9 @@ export interface ProgressStepsProps {
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { Check } from 'lucide-vue-next';
 import { cn, Orientation as OrientationToken } from '../../../foundation/utils';
-import { Icon, type IconAdapter } from '../../../foundation/icons';
+import { Icon } from '../../../foundation/icons';
 
-/**
- * `lucide-vue-next` types `size` as `24 | number`; `IconAdapterProps` widens it to
- * `number | string`, which makes the two functional-component types contravariantly
- * incompatible even though the runtime shape matches. Cast at the import boundary —
- * `foundation/icons` is outside this lane, and the real fix is narrowing
- * `IconAdapterProps['size']` there.
- */
-const CheckIcon = Check as unknown as IconAdapter;
+const CheckIcon = Check;
 
 /**
  * Visual N-of-M progress dots / pills with connectors. No state machine —

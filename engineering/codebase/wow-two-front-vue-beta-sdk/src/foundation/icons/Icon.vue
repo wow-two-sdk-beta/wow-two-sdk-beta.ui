@@ -2,7 +2,16 @@
 import type { Component, SVGAttributes } from 'vue';
 
 export interface IconAdapterProps extends SVGAttributes {
-  size?: number | string;
+  /**
+   * The pixel size handed to the adapter. `number` only, NOT `number | string`.
+   *
+   * Component props are contravariant: an adapter satisfies this type only if it accepts every
+   * prop declared here. `lucide-vue-next` types its own `size` as `number`, so widening this to
+   * `number | string` — as the React original did, where the looser `SVGProps` made it moot —
+   * makes every lucide icon unassignable to `IconAdapter` and forces an `as unknown as` cast at
+   * each import site. Narrow is the fix; a CSS-unit size belongs on `class`, not on this prop.
+   */
+  size?: number;
 }
 
 export type IconAdapter = Component<IconAdapterProps>;
@@ -12,7 +21,7 @@ export interface IconProps extends Omit<SVGAttributes, 'aria-hidden'> {
   icon: IconAdapter;
 
   /** The pixel size of the rendered SVG. Default 20. */
-  size?: number | string;
+  size?: number;
 
   /**
    * The aria-label for when the icon stands alone (decorative siblings
@@ -45,7 +54,7 @@ withDefaults(
     /** The icon component — pass a `lucide-vue-next` icon, custom SVG component, or any matching shape. */
     icon: IconAdapter;
     /** The pixel size of the rendered SVG. Default 20. */
-    size?: number | string;
+    size?: number;
   }>(),
   { size: 20 },
 );

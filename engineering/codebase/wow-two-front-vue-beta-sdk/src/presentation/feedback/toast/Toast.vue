@@ -21,17 +21,10 @@ export interface ToastProps {
 import { computed, getCurrentInstance, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { X } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
-import { Icon, type IconAdapter } from '../../../foundation/icons';
+import { Icon } from '../../../foundation/icons';
 import ToastSimple from '../toastSimple/ToastSimple.vue';
 
-/**
- * `lucide-vue-next` types `size` as `24 | number`; `IconAdapterProps` widens it to
- * `number | string`, which makes the two functional-component types contravariantly
- * incompatible even though the runtime shape matches. Cast at the import boundary —
- * `foundation/icons` is outside this lane, and the real fix is narrowing
- * `IconAdapterProps['size']` there.
- */
-const CloseIcon = X as unknown as IconAdapter;
+const CloseIcon = X;
 
 /**
  * Slotted toast — visual only (no queue / portal / lifecycle, those land

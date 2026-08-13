@@ -53,16 +53,9 @@ export function useOnboardingChecklist(): OnboardingContextValue {
 import { computed, provide, ref, shallowRef, useAttrs, useTemplateRef, watch } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
-import { Icon, type IconAdapter } from '../../../foundation/icons';
+import { Icon } from '../../../foundation/icons';
 
-/**
- * `lucide-vue-next` types `size` as `24 | number`; `IconAdapterProps` widens it to
- * `number | string`, which makes the two functional-component types contravariantly
- * incompatible even though the runtime shape matches. Cast at the import boundary —
- * `foundation/icons` is outside this lane, and the real fix is narrowing
- * `IconAdapterProps['size']` there.
- */
-const ChevronDownIcon = ChevronDown as unknown as IconAdapter;
+const ChevronDownIcon = ChevronDown;
 
 /**
  * Onboarding task card. The default slot holds `OnboardingChecklistTask`

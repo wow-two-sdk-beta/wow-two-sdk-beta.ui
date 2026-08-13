@@ -14,17 +14,10 @@ export interface OnboardingChecklistTaskProps {
 import { computed, inject, onMounted, onUnmounted, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { Check } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
-import { Icon, type IconAdapter } from '../../../foundation/icons';
+import { Icon } from '../../../foundation/icons';
 import { onboardingRegistryKey, type OnboardingTaskRecord } from './OnboardingChecklist.vue';
 
-/**
- * `lucide-vue-next` types `size` as `24 | number`; `IconAdapterProps` widens it to
- * `number | string`, which makes the two functional-component types contravariantly
- * incompatible even though the runtime shape matches. Cast at the import boundary —
- * `foundation/icons` is outside this lane, and the real fix is narrowing
- * `IconAdapterProps['size']` there.
- */
-const CheckIcon = Check as unknown as IconAdapter;
+const CheckIcon = Check;
 
 /** A single checklist row. Registers itself with the enclosing `OnboardingChecklist` so it counts toward progress. */
 defineOptions({ name: 'OnboardingChecklistTask', inheritAttrs: false });
