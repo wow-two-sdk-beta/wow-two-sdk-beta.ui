@@ -351,7 +351,7 @@
   "scripts": {
     "build": "vite build && cp src/index.css dist/index.css && node scripts/build-themes-css.mjs",
     "dev": "vite build --watch",
-    "typecheck": "vue-tsc --noEmit -p tsconfig.typecheck.json",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.typecheck.json && node scripts/check-sfc.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -359,7 +359,8 @@
     "test:unit": "vitest run --project unit",
     "test:browser": "vitest run --project browser",
     "coverage": "vitest run --coverage",
-    "prepublishOnly": "pnpm typecheck && pnpm build"
+    "prepublishOnly": "pnpm typecheck && pnpm build",
+    "check:sfc": "node scripts/check-sfc.mjs"
   },
   "peerDependencies": {
     "@tanstack/vue-form": "^1.0.0",

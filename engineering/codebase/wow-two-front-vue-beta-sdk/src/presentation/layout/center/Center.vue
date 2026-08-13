@@ -12,7 +12,6 @@ import { cn } from '../../../foundation/utils';
 /* `<center>` is a deprecated HTML element. This is a library component — imported,
    never globally registered — so the name cannot shadow the tag, and renaming it
    would break parity with the React package. */
-// eslint-disable-next-line vue/no-reserved-component-names
 defineOptions({ name: 'Center', inheritAttrs: false });
 
 const attrs = useAttrs();

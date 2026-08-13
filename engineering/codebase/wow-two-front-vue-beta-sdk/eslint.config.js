@@ -135,6 +135,18 @@ export default tseslint.config(
     },
   },
   {
+    // The component vocabulary collides with HTML by design — `Center`, `Frame`, `Spacer`,
+    // `Section`, `Link`, `Image`, `Code`, `Mark`, `Quote`, `List`, `Table` and more are the
+    // names the React package already ships, and D5 keeps them. The rule guards against
+    // GLOBAL registration shadowing a real tag; every component here is imported explicitly
+    // in the consumer's `<script setup>`, so it can never shadow one. Scoped off rather than
+    // silenced per-file: ~20 of the 237 components would otherwise carry a disable comment.
+    files: ['src/presentation/**/*.{ts,vue}'],
+    rules: {
+      'vue/no-reserved-component-names': 'off',
+    },
+  },
+  {
     // Test files + the local test kit cross layers freely — they exercise, not ship.
     files: ['tests/**/*.{ts,vue}'],
     rules: {

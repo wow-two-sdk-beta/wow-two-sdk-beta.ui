@@ -37,7 +37,6 @@ import { sectionVariants } from './Section.variants';
 /* `<section>` is a live HTML element, but SFC templates are case-sensitive
    (`<Section>` ≠ `<section>`) and this is a library component — imported, never
    globally registered. Renaming it would break parity with the React package. */
-// eslint-disable-next-line vue/no-reserved-component-names
 defineOptions({ name: 'Section', inheritAttrs: false });
 
 const props = withDefaults(defineProps<SectionProps>(), { bleed: false });

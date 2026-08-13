@@ -24,7 +24,6 @@ import { cn } from '../../../foundation/utils';
 /* `<spacer>` is an obsolete HTML element. This is a library component — imported,
    never globally registered — so the name cannot shadow the tag, and renaming it
    would break parity with the React package. */
-// eslint-disable-next-line vue/no-reserved-component-names
 defineOptions({ name: 'Spacer', inheritAttrs: false });
 
 const props = withDefaults(defineProps<SpacerProps>(), { axis: Orientation.Horizontal });
