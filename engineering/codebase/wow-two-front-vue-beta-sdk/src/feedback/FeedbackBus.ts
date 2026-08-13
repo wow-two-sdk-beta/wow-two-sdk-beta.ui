@@ -56,6 +56,24 @@ export interface PublishedNotice extends FeedbackNotice {
 /** Defines a listener notified on every published notice. */
 export type NoticeListener = (notice: PublishedNotice) => void;
 
+/** Defines the context handed to `onError` when a subscriber throws. */
+export interface FeedbackErrorContext {
+  /** The listener that threw. */
+  readonly listener: NoticeListener;
+
+  /** The notice being delivered when it threw. */
+  readonly notice: PublishedNotice;
+}
+
+/** Defines the subscriber-failure handler — publishing must never break the publisher, so every listener throw lands here instead of propagating. */
+export type FeedbackErrorHandler = (error: unknown, context: FeedbackErrorContext) => void;
+
+/** Defines the options for {@link createFeedbackBus}. */
+export interface FeedbackBusOptions {
+  /** Receives every subscriber failure. Omitted means failures are swallowed — a broken subscriber is never worth an app crash. */
+  readonly onError?: FeedbackErrorHandler;
+}
+
 /**
  * Defines the module-scope feedback hub wiring app code to whatever surface renders notices.
  * Fire-and-forget pub/sub (no replay): a notice published with no subscriber is dropped, so mount
@@ -72,22 +90,48 @@ export type NoticeListener = (notice: PublishedNotice) => void;
  * `bus` prop on the adapter is the isolation seam an app needs instead.
  */
 export interface FeedbackBus {
-  /** Publishes a notice to all subscribers — safe to call with none mounted (no-op); returns the notice id. */
+  /** Publishes a notice to all subscribers — safe to call with none mounted (no-op), and never throws whatever a subscriber does; returns the notice id. */
   notify(notice: FeedbackNotice): string;
 
   /** Subscribes to published notices; returns an unsubscribe. */
   subscribe(listener: NoticeListener): () => void;
 }
 
-/** Creates a {@link FeedbackBus} — one per app, module scope, shared by publishers and the rendering adapter. Apps that don't need isolation use the default {@link feedbackBus}. */
-export function createFeedbackBus(): FeedbackBus {
+/**
+ * Creates a {@link FeedbackBus} — one per app, module scope, shared by publishers and the rendering adapter.
+ * Apps that don't need isolation use the default {@link feedbackBus}; pass `onError` to see the subscriber
+ * failures the bus otherwise swallows.
+ */
+export function createFeedbackBus(options: FeedbackBusOptions = {}): FeedbackBus {
+  const { onError } = options;
   const listeners = new Set<NoticeListener>();
   let idSeq = 0;
+
+  /** Routes a subscriber failure to `onError` — a handler that itself throws is swallowed, since there is nowhere left to report. */
+  const report = (error: unknown, listener: NoticeListener, notice: PublishedNotice): void => {
+    if (!onError) return;
+    try {
+      onError(error, { listener, notice });
+    } catch {
+      // The handler is the last line of defence; a throw here must not reach the caller either.
+    }
+  };
 
   return {
     notify(notice: FeedbackNotice): string {
       const published: PublishedNotice = { ...notice, id: notice.id ?? `n_${++idSeq}` };
-      for (const listener of [...listeners]) listener(published);
+      // Every subscriber is invoked in isolation. A subscriber is adapter code the publisher does not own,
+      // and `notify()` is called from click handlers, `catch` blocks and error boundaries — precisely where a
+      // second exception masks the first and takes down the path that was meant to recover. So a throwing
+      // subscriber costs only its own delivery: the rest of the fan-out still runs, `notify()` still returns
+      // the id, and the failure surfaces on `onError` rather than in the caller.
+      for (const listener of [...listeners]) {
+        try {
+          listener(published);
+        } catch (failure) {
+          report(failure, listener, published);
+        }
+      }
       return published.id;
     },
 

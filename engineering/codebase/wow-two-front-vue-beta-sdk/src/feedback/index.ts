@@ -19,6 +19,9 @@ export {
   type PublishedNotice,
   type NoticeListener,
   type FeedbackBus,
+  type FeedbackBusOptions,
+  type FeedbackErrorContext,
+  type FeedbackErrorHandler,
 } from './FeedbackBus';
 
 // Query bridge — plugs the bus into `createQueryClient({ onError })`

@@ -5,6 +5,7 @@ import {
   feedbackQueryErrors,
   NoticeTone,
   toErrorNotice,
+  type NoticeListener,
   type PublishedNotice,
 } from '@src/feedback';
 
@@ -65,6 +66,91 @@ describe('createFeedbackBus', () => {
 
   it('publishes to no one when nothing has subscribed', () => {
     expect(() => createFeedbackBus().notify({ tone: NoticeTone.Info, title: 'ignored' })).not.toThrow();
+  });
+});
+
+/*
+ * A subscriber is adapter code the publisher does not own, and `notify()` is called from click handlers
+ * and `catch` blocks. So the fan-out isolates each listener: one that throws costs its own delivery and
+ * nothing else — not the subscribers after it in the set, and not the caller.
+ */
+describe('subscriber isolation', () => {
+  const boom = new Error('adapter down');
+
+  /** Builds a listener that always throws — the broken presentation adapter. */
+  const throwing = (): NoticeListener => () => {
+    throw boom;
+  };
+
+  it('keeps delivering to the subscribers after one that throws', () => {
+    const bus = createFeedbackBus();
+    const first = publishedTo();
+    const third = publishedTo();
+    bus.subscribe(first.listener);
+    bus.subscribe(throwing());
+    bus.subscribe(third.listener);
+
+    bus.notify({ tone: NoticeTone.Success, title: 'Saved' });
+
+    expect(first.received.map((notice) => notice.title)).toEqual(['Saved']);
+    expect(third.received.map((notice) => notice.title)).toEqual(['Saved']);
+  });
+
+  it('does not let a throwing subscriber reach the caller, and still returns the id', () => {
+    const bus = createFeedbackBus();
+    bus.subscribe(throwing());
+
+    let id = '';
+    expect(() => {
+      id = bus.notify({ tone: NoticeTone.Danger, title: 'Failed', id: 'mine' });
+    }).not.toThrow();
+    expect(id).toBe('mine');
+  });
+
+  it('reports the failure to onError with the listener and the notice that was in flight', () => {
+    const failures: { error: unknown; listener: unknown; title: unknown }[] = [];
+    const broken = throwing();
+    const bus = createFeedbackBus({
+      onError: (error, context) =>
+        failures.push({ error, listener: context.listener, title: context.notice.title }),
+    });
+    bus.subscribe(broken);
+
+    bus.notify({ tone: NoticeTone.Info, title: 'Heads up' });
+
+    expect(failures).toEqual([{ error: boom, listener: broken, title: 'Heads up' }]);
+  });
+
+  it('swallows the failure when no onError is supplied', () => {
+    const bus = createFeedbackBus();
+    bus.subscribe(throwing());
+
+    expect(() => bus.notify({ tone: NoticeTone.Info, title: 'ignored' })).not.toThrow();
+  });
+
+  it('survives an onError that itself throws', () => {
+    const bus = createFeedbackBus({
+      onError: () => {
+        throw new Error('handler down');
+      },
+    });
+    const healthy = publishedTo();
+    bus.subscribe(throwing());
+    bus.subscribe(healthy.listener);
+
+    expect(() => bus.notify({ tone: NoticeTone.Info, title: 'still delivered' })).not.toThrow();
+    expect(healthy.received).toHaveLength(1);
+  });
+
+  it('keeps a throwing subscriber subscribed — the bus does not evict it', () => {
+    const failures: unknown[] = [];
+    const bus = createFeedbackBus({ onError: (error) => failures.push(error) });
+    bus.subscribe(throwing());
+
+    bus.notify({ tone: NoticeTone.Info, title: 'first' });
+    bus.notify({ tone: NoticeTone.Info, title: 'second' });
+
+    expect(failures).toHaveLength(2);
   });
 });
 
