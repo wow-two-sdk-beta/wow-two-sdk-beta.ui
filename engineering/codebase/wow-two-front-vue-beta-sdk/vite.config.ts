@@ -113,12 +113,31 @@ const declaredEntries: Record<string, string> = {
   ),
 };
 
-// The port lands layer by layer, so most entries above have no source file yet. Building only
-// what exists keeps `pnpm build` usable during the migration; the full map stays declared so an
-// entry starts emitting the moment its `index.ts` lands. Remove this filter once the port closes.
+// The port lands layer by layer, so some entries above have no source file yet (wave W1d in
+// `engineering/planning/vue-port-track.md`). Building only what exists keeps `pnpm build` usable
+// during the migration; the full map stays declared so an entry starts emitting the moment its
+// `index.ts` lands. Remove this filter once the port closes.
+//
+// The skip is announced, never silent: a filtered entry is a `package.json` export subpath that
+// resolves to nothing, so a consumer importing it gets ERR_MODULE_NOT_FOUND. Decision D5 keeps the
+// export map mirroring the React package 1:1, so the gap is expected until W1d lands — but it must
+// be visible on every build rather than discovered after publish.
+const skipped = Object.entries(declaredEntries).filter(([, file]) => !existsSync(resolve(here, file)));
+
 const entry = Object.fromEntries(
   Object.entries(declaredEntries).filter(([, file]) => existsSync(resolve(here, file))),
 );
+
+if (skipped.length > 0) {
+  const subpaths = skipped.map(([name]) => `@wow-two-beta/ui-vue/${name.replace(/\/index$/, '')}`);
+  console.warn(
+    `\n[entries] ${Object.keys(entry).length}/${Object.keys(declaredEntries).length} entries resolved — ` +
+      `${skipped.length} skipped, no source yet (wave W1d).\n` +
+      `[entries] These package.json export subpaths will NOT resolve for consumers:\n` +
+      subpaths.map((s) => `  - ${s}`).join('\n') +
+      `\n`,
+  );
+}
 
 // tsup auto-externalizes `dependencies` + `peerDependencies`; Vite's lib mode does not, so
 // reproduce it here — otherwise `clsx`/`tailwind-merge`/… get inlined into all ~50 entries.
