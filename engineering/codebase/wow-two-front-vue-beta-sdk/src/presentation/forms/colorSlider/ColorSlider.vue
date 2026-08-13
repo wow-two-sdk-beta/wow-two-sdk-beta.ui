@@ -94,7 +94,7 @@ const max = computed(() => channelMax(props.channel));
 const stepValue = computed(() => props.step ?? defaultStep(props.channel));
 
 const controlled = useControlled<number>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? 0,
   onChange: (next) => {
     emit('update:modelValue', next);

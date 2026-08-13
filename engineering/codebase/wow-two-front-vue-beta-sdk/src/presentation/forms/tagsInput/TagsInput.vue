@@ -114,7 +114,7 @@ const emit = defineEmits<{
 const attrs = useAttrs();
 
 const tagsControlled = useControlled<ReadonlyArray<string>>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? [],
   onChange: (next) => {
     emit('update:modelValue', next);

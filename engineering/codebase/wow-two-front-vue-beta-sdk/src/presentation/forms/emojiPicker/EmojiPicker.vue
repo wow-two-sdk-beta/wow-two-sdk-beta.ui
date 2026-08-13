@@ -89,7 +89,9 @@ const emit = defineEmits<{
   'value-change': [entry: EmojiCatalogEntry | null];
 }>();
 
-const currentValue = computed(() => props.modelValue ?? props.value ?? null);
+const currentValue = computed(() =>
+  props.value !== undefined ? props.value : (props.modelValue ?? null),
+);
 
 function onChange(entry: EmojiCatalogEntry | null): void {
   emit('update:modelValue', entry);

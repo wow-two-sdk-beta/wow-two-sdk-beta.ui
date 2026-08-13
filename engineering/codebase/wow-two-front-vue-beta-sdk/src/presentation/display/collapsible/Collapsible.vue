@@ -10,7 +10,7 @@ export interface CollapsibleProps {
   /** The open state, controlled. The `v-model:open` binding target. */
   open?: boolean;
 
-  /** The open state, controlled — the house spelling of `open`, which wins when both are set. */
+  /** The open state, controlled — the house spelling of `open`; `open` wins when both are set. */
   isOpen?: boolean;
 
   /** The uncontrolled initial state. Default `false`. */
@@ -56,7 +56,7 @@ const emit = defineEmits<{
 /* `useControlled` returns a handle, not React's tuple, and takes `controlled` as a getter so the
    controlled branch tracks the prop. */
 const { value: open, setValue: setOpen } = useControlled<boolean>({
-  controlled: () => props.open ?? props.isOpen,
+  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
   default: props.defaultOpen,
   onChange: (next) => {
     emit('update:open', next);

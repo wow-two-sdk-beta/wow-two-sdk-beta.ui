@@ -59,7 +59,7 @@ export interface SelectProps<K, V = K> {
   /** The dropdown open state, controlled. The `v-model:open` binding target. */
   open?: boolean;
 
-  /** The dropdown open state, controlled — the house boolean spelling of `open`, which wins when both are set. */
+  /** The dropdown open state, controlled — the house boolean spelling of `open`; `open` wins when both are set. */
   isOpen?: boolean;
 
   /** The floating placement of the dropdown. */
@@ -127,7 +127,7 @@ const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled ?? fa
 const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid ?? false);
 
 const openCtl = useControlled<boolean>({
-  controlled: () => props.open ?? props.isOpen,
+  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
   default: () => props.defaultOpen,
   onChange: (value) => {
     emit('update:open', value);
@@ -136,7 +136,7 @@ const openCtl = useControlled<boolean>({
 });
 
 const keyCtl = useControlled<K | null>({
-  controlled: () => props.modelValue ?? props.value,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? null,
   onChange: (value) => emit('update:modelValue', value),
 });

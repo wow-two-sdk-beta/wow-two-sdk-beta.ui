@@ -78,7 +78,7 @@ const isGroupDisabled = computed(() => props.isDisabled ?? ctx?.isDisabled);
 const isGroupInvalid = computed(() => ctx?.isInvalid ?? false);
 
 const controlled = useControlled<ReadonlyArray<string>>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? [],
   onChange: (next) => {
     emit('update:modelValue', next);

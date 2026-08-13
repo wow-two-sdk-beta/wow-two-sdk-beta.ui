@@ -124,7 +124,7 @@ const resolvedIndicator = computed(
 );
 
 const controlled = useControlled<unknown>({
-  controlled: () => props.modelValue ?? props.value,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? (props.isMultiple ? [] : undefined),
   onChange: (next) => {
     emit('update:modelValue', next);

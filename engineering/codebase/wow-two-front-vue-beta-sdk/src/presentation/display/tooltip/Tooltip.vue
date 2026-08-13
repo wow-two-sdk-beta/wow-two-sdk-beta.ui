@@ -23,7 +23,7 @@ export interface TooltipProps {
    */
   open?: boolean;
 
-  /** The open state, controlled — the house spelling of `open`, which wins when both are set. */
+  /** The open state, controlled — the house spelling of `open`; `open` wins when both are set. */
   isOpen?: boolean;
 
   /** The initial open state when uncontrolled. Default `false`. */
@@ -95,7 +95,7 @@ const slots = useSlots();
 /* `useControlled` returns a handle, not React's tuple, and takes `controlled` as a getter so the
    controlled branch tracks the prop. */
 const { value: open, setValue: setOpen } = useControlled<boolean>({
-  controlled: () => props.open ?? props.isOpen,
+  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
   default: props.defaultOpen,
   onChange: (next) => {
     emit('update:open', next);

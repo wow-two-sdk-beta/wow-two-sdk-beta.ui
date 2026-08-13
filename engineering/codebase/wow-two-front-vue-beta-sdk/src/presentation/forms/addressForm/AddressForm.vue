@@ -137,7 +137,7 @@ const isDisabled = computed(() => props.isDisabled ?? ctx?.isDisabled);
 const isReadOnly = computed(() => props.isReadOnly ?? ctx?.isReadOnly);
 
 const controlled = useControlled<Address>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? EMPTY,
   onChange: (next) => {
     emit('update:modelValue', next);

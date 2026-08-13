@@ -97,7 +97,7 @@ const field = useFormControl();
 const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled);
 
 const controlled = useControlled<string>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? props.fonts[0]?.family ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);

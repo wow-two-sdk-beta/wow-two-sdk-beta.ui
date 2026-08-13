@@ -78,7 +78,7 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<Temporal.PlainDateTime | null>({
-  controlled: () => props.modelValue ?? props.value,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
     emit('update:modelValue', next);

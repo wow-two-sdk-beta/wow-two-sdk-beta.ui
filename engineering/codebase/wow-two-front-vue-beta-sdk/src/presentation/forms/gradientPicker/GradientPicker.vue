@@ -105,7 +105,7 @@ const ctx = useFormControl();
 const isDisabled = computed(() => props.isDisabled ?? ctx?.isDisabled);
 
 const controlled = useControlled<Gradient>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? DEFAULT_GRADIENT,
   onChange: (next) => {
     emit('update:modelValue', next);

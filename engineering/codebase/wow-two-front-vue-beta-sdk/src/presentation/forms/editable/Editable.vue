@@ -93,7 +93,7 @@ const emit = defineEmits<{
 const attrs = useAttrs();
 
 const valueCtl = useControlled<string>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);
@@ -102,7 +102,7 @@ const valueCtl = useControlled<string>({
 });
 
 const editingCtl = useControlled<boolean>({
-  controlled: () => props.isEditing ?? props.editing,
+  controlled: () => (props.isEditing !== undefined ? props.isEditing : props.editing),
   default: () => props.defaultEditing,
   onChange: (next) => {
     emit('update:editing', next);

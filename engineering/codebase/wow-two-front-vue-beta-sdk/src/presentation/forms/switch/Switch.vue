@@ -82,7 +82,7 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<boolean>({
-  controlled: () => props.checked ?? props.modelValue,
+  controlled: () => (props.checked !== undefined ? props.checked : props.modelValue),
   default: () => props.defaultChecked ?? false,
   onChange: (next) => {
     emit('update:modelValue', next);

@@ -268,7 +268,7 @@ const input = useTemplateRef<HTMLInputElement>('input');
 const ctx = useFormControl();
 
 const controlled = useControlled<string>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? '*/5 * * * *',
   onChange: (next) => {
     emit('update:modelValue', next);

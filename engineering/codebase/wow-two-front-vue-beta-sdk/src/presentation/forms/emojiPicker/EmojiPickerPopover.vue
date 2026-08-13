@@ -54,7 +54,7 @@ export interface EmojiPickerPopoverProps {
   /** The open state, controlled. The `v-model:open` binding target. */
   readonly open?: boolean;
 
-  /** The open state, controlled — the house boolean spelling of `open`, which wins when both are set. */
+  /** The open state, controlled — the house boolean spelling of `open`; `open` wins when both are set. */
   readonly isOpen?: boolean;
 
   /** The initial open state when uncontrolled. Default `false`. */
@@ -103,7 +103,7 @@ const emit = defineEmits<{
 }>();
 
 const openCtl = useControlled<boolean>({
-  controlled: () => props.open ?? props.isOpen,
+  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
   default: () => props.defaultOpen,
   onChange: (next) => {
     emit('update:open', next);
@@ -112,7 +112,9 @@ const openCtl = useControlled<boolean>({
 });
 
 const isOpenNow = computed(() => openCtl.value.value);
-const currentValue = computed(() => props.modelValue ?? props.value ?? null);
+const currentValue = computed(() =>
+  props.value !== undefined ? props.value : (props.modelValue ?? null),
+);
 
 /* Inherits id/invalid/labelledby/describedby from a surrounding <Field> for the DEFAULT trigger
    (`Button` already inherits `isDisabled` from the context itself). A custom trigger slot owns

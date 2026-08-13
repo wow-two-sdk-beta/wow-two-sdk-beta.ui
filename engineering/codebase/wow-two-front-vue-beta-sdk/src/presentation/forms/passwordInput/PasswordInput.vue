@@ -84,7 +84,7 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<string | number>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', String(next));

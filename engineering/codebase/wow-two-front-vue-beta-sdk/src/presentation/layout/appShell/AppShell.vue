@@ -63,7 +63,9 @@ export function useAppShell(): AppShellContextValue {
  *
  * `sidebarOpen` and `isSidebarOpen` are the same controlled state under two
  * names: `sidebarOpen` is the `v-model:sidebarOpen` binding target,
- * `isSidebarOpen` React's spelling. `sidebarOpen` wins when both are set.
+ * `isSidebarOpen` React's spelling. `isSidebarOpen` wins when both are set —
+ * React's name always resolves first, so an explicit binding is never
+ * swallowed by a `v-model` that is also present.
  * React's `onSidebarOpenChange` is the `sidebar-open-change` emit;
  * `update:sidebarOpen` fires alongside it so `v-model` works.
  */
@@ -83,7 +85,7 @@ export interface AppShellProps {
   /** The mobile-sidebar open state, controlled. The `v-model:sidebarOpen` binding target. */
   sidebarOpen?: boolean;
 
-  /** The mobile-sidebar open state, controlled — React's spelling, which `sidebarOpen` wins over. */
+  /** The mobile-sidebar open state, controlled — React's spelling, which wins when both are set. */
   isSidebarOpen?: boolean;
 
   /** The initial mobile-sidebar state when uncontrolled. Default `false`. */
@@ -133,7 +135,8 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
 const controlled = useControlled<boolean>({
-  controlled: () => props.sidebarOpen ?? props.isSidebarOpen,
+  controlled: () =>
+    props.isSidebarOpen !== undefined ? props.isSidebarOpen : props.sidebarOpen,
   default: () => props.defaultSidebarOpen,
   onChange: (value) => {
     emit('update:sidebarOpen', value);

@@ -122,7 +122,7 @@ const emit = defineEmits<{
 const attrs = useAttrs();
 
 const controlled = useControlled<number>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? props.min,
   onChange: (next) => {
     emit('update:modelValue', next);

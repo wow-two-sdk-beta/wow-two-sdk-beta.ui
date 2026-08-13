@@ -25,8 +25,8 @@ export function toErrorNotice(error: ApiError): FeedbackNotice {
  * `onError` after `toApiError` coercion. Explicit opt-in wiring — nothing toasts until an app
  * passes this.
  *
- * The Vue port has no `/query` subpath yet; the callback is already usable against
- * `@tanstack/vue-query`'s own cache options, and lands unchanged when `/query` ports.
+ * The Vue port's `/query` subpath has landed, so `createQueryClient({ onError: … })` is the
+ * primary seam; the callback also stays usable against `@tanstack/vue-query`'s own cache options.
  */
 export function feedbackQueryErrors(bus: FeedbackBus = feedbackBus): (error: ApiError) => void {
   return (error) => void bus.notify(toErrorNotice(error));

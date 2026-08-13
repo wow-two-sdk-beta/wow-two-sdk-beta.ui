@@ -1,5 +1,5 @@
 /* Order mirrors the React package's `presentation/display/index.ts` line for line, so the
-   two barrels stay diffable. Three folders are held back — see the comments in place. */
+   two barrels stay diffable. Complete — every display folder is exported. */
 export * from './heading';
 export * from './text';
 export * from './code';

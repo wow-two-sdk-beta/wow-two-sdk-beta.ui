@@ -106,7 +106,7 @@ const attrs = useAttrs();
 const slots = useSlots();
 
 const controlled = useControlled<string>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);
@@ -135,7 +135,9 @@ onMounted(resize);
 /* React re-ran the resize effect on `value` and on `maxHeight` (a `resize` callback dep). */
 watch([text, () => props.maxHeight], () => void nextTick(resize));
 
-const isControlled = computed(() => (props.value ?? props.modelValue) !== undefined);
+const isControlled = computed(
+  () => (props.value !== undefined ? props.value : props.modelValue) !== undefined,
+);
 const isEmpty = computed(() => text.value.trim().length === 0);
 
 function submit(event?: Event): void {

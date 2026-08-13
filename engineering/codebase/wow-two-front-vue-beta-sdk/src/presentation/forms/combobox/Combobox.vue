@@ -30,7 +30,7 @@ export interface ComboboxProps {
   /** The panel open state, controlled. The `v-model:open` binding target. */
   open?: boolean;
 
-  /** The panel open state, controlled — the house boolean spelling of `open`, which wins. */
+  /** The panel open state, controlled — the house boolean spelling of `open`; `open` wins when both are set. */
   isOpen?: boolean;
 
   /** The fill-on-select behavior — when the user picks an item, set the input value to its label. Default true. */
@@ -87,7 +87,7 @@ const emit = defineEmits<{
 }>();
 
 const openCtl = useControlled<boolean>({
-  controlled: () => props.open ?? props.isOpen,
+  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
   default: () => props.defaultOpen,
   onChange: (next) => {
     emit('update:open', next);
@@ -96,7 +96,7 @@ const openCtl = useControlled<boolean>({
 });
 
 const valueCtl = useControlled<string>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);

@@ -57,7 +57,9 @@ const emit = defineEmits<{
 }>();
 
 /* Controlled-only, exactly as React had it — the component owns no state, the host does. */
-const currentRatio = computed(() => props.modelValue ?? props.sizeRatio ?? DefaultEmojiSize);
+const currentRatio = computed(() =>
+  props.sizeRatio !== undefined ? props.sizeRatio : (props.modelValue ?? DefaultEmojiSize),
+);
 
 const presets = computed(() =>
   Object.values(CenterEmojiSize).map((preset) => {

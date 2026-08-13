@@ -42,7 +42,7 @@ export interface PopoverProps {
   /** The open state, controlled. The `v-model:open` binding target. */
   open?: boolean;
 
-  /** The open state, controlled — the house spelling of `open`, which wins when both are set. */
+  /** The open state, controlled — the house spelling of `open`; `open` wins when both are set. */
   isOpen?: boolean;
 
   /** The initial open state when uncontrolled. Default `false`. */
@@ -94,7 +94,7 @@ const emit = defineEmits<{
 }>();
 
 const controlled = useControlled<boolean>({
-  controlled: () => props.open ?? props.isOpen,
+  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
   default: () => props.defaultOpen,
   onChange: (value) => {
     emit('update:open', value);

@@ -102,7 +102,9 @@ const emit = defineEmits<{
 
 const attrs = useAttrs();
 
-const isMenuOpen = computed(() => props.open ?? props.isOpen ?? false);
+const isMenuOpen = computed(() =>
+  props.open !== undefined ? props.open : (props.isOpen ?? false),
+);
 
 /** The live item registry — a plain array, not reactive: the ordering is read imperatively. */
 const items: Array<MenuItemEntry> = [];

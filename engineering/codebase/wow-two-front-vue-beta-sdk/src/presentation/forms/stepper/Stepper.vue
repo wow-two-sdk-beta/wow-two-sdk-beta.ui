@@ -55,7 +55,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
 const controlled = useControlled<string>({
-  controlled: () => props.value ?? props.modelValue,
+  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);

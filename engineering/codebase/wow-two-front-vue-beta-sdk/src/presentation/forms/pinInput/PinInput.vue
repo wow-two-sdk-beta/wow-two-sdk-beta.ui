@@ -89,7 +89,7 @@ function toCells(s: string): ReadonlyArray<string> {
 
 const controlled = useControlled<ReadonlyArray<string>>({
   controlled: () => {
-    const external = props.value ?? props.modelValue;
+    const external = props.value !== undefined ? props.value : props.modelValue;
     return external === undefined ? undefined : toCells(external);
   },
   default: () => toCells(props.defaultValue ?? ''),
