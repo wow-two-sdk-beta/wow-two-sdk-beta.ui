@@ -76,6 +76,10 @@ jobs:
           git add package.json
           git commit -m "chore: release v${{ steps.bump.outputs.version }} [skip ci]"
           git tag -a "v${{ steps.bump.outputs.version }}" -m "v${{ steps.bump.outputs.version }}"
+          # `release-vue.yml` bumps the sibling package on the same push and races us to `main`.
+          # Whoever lands second gets `! [rejected] main -> main (fetch first)`. Rebasing the
+          # one-line bump onto whatever landed first is always safe; the two touch different files.
+          git pull --rebase origin "${GITHUB_REF_NAME}"
           git push --follow-tags
 
       - name: Create GitHub Release
