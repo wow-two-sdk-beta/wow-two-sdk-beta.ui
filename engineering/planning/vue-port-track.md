@@ -55,18 +55,88 @@ Source measurements: `src/` 79,673 LOC · 1,001 files · 237 components · 41 fo
 
 | Wave | Scope | Size | Status |
 |---|---|---:|---|
-| W0 | Scaffold — package, Vite lib config, eslint boundaries, `release-vue.yml`, `index.css` | — | 🔄 |
-| W1a | Agnostic core — 19 foundation modules + `domain/{color,emoji}` | ~14k LOC | 🔄 |
-| W1b | `foundation/primitives` — 18 primitives, the headless layer | 1,407 LOC | 🔄 |
-| W1c | `foundation/hooks` — 18 hooks → composables | 997 LOC | ⬜ |
+| W0 | Scaffold — package, Vite lib config, eslint boundaries, `release-vue.yml`, `index.css` | 13 files | ✅ `dc6e929` |
+| W1a | Agnostic core — 19 foundation modules + `domain/{color,emoji}` | 174 files | ✅ `5ab0d6d` |
+| W1b | `foundation/primitives` — 18 primitives, the headless layer | 41 files | ✅ `f70f645` |
+| W1c | `foundation/hooks` — 17 composables + `UseHotkeys` + `Spinner` fixes | 37 files | ✅ `5510735` |
 | W1d | Remaining 21 foundation modules (engine copies + `useX` re-wrap) | ~18k LOC | ⬜ |
-| W2a | `presentation/layout` 24 + `presentation/actions` 14 | ~5.2k LOC | ⬜ |
-| W2b | `presentation/forms` 79 | ~4.7k+ LOC | ⬜ |
-| W2c | `presentation/display` 73 | — | ⬜ |
-| W2d | `presentation/{feedback 27, nav 11, overlays 9}` | — | ⬜ |
-| W3 | `forms-engine` + `house` + `tanstack`(vue-form) | 2,529 LOC | ⬜ |
+| W2a | `presentation/layout` — 23 of 24 (`appShell` blocked on `overlays/drawer`) | 78 files | ✅ `1d9882c` |
+| W2a | `presentation/actions` 14 | 59 files | ✅ `0b6396e` |
+| W2b | `presentation/forms` 79 — unblocks `DateExtensions` for 3 display components | — | 🔄 |
+| W2c | `presentation/display` — 70 of 73, 115 SFCs | 259 files | ✅ `53f12f0` |
+| W2d | `presentation/feedback` — 25 of 27 (2 blocked on `overlays` + root `feedback`) | 81 files | ✅ `b5eb30a` |
+| W2e | `presentation/overlays` 9 — `v-model:open` on all 7 stateful roots | 48 files | ✅ `2f29752` |
+| W2f | `presentation/nav` — 11 of 11, 34 SFCs | 67 files | ✅ `bd01267` |
+| W2g | Gap-close — `src/feedback` bus, `appShell`, `loadingOverlay`, `feedbackToasts`, `focusScope` stack | 19 files | ✅ `a0c8b56` |
+
+### House rules learned in W2 (apply to every later wave)
+
+1. **`vue-tsc` green ≠ buildable.** `@vue/compiler-sfc` resolves `defineProps<T>()` with its own,
+   narrower resolver. `scripts/check-sfc.mjs` runs the real `compileScript` over every SFC and is wired
+   into `pnpm typecheck`. It caught a live build break on its first run.
+2. **Variant-derived prop types break that resolver** — `VariantProps<typeof xVariants>` throws
+   `Failed to resolve extends base type` at build time. Spell the union out and lock it with `AssertExact`.
+   Pattern: `presentation/layout/stack/Stack.vue`.
+3. **`defineOptions()` cannot reference a local const** — it is hoisted outside `setup()`.
+4. **An optional `Boolean` prop with no default is cast to `false`** — any tri-state boolean whose
+   `undefined` is meaningful needs an explicit `x: undefined` in `withDefaults`.
+5. **`inheritAttrs: false` + `cn(attrs.class)`, never `inheritAttrs: true`** — fallthrough concatenates
+   `class` without tailwind-merge, losing React's `cn(variants(), className)` consumer-wins precedence.
+6. **`vue/no-reserved-component-names` is off for `src/presentation/**`** — ~20 of 237 components are
+   named after HTML tags, and none is globally registered, so none can shadow one.
+
+### Traps no static gate catches
+
+Found by the `actions` lane running a throwaway SSR smoke suite. Each passes `vue-tsc`, `eslint`, AND
+`check-sfc`, then renders wrong. **Rule 4 above is the narrow case of trap 1.**
+
+7. **`VNodeChild`-typed props are Boolean-castable.** `VNodeChild` includes `boolean`, so Vue casts an
+   absent node prop to `false`, not `undefined`. Every `x !== undefined` guard reads truthy and the
+   component locks into the wrong branch — `Button` rendered hover-swap markup on every instance and
+   never rendered its loading spinner. Needs explicit `default: undefined` per node-valued prop.
+8. **A declared hyphenated prop is camelized.** Declaring `'aria-label'` delivers it as `props.ariaLabel`,
+   so `props['aria-label']` is always `undefined`. Six `actions` components shipped with no accessible
+   name. Keep `aria-*` as fallthrough attrs; relocate via `attrs['aria-label']` when an inner node needs it.
+9. **Chained listeners arrive as arrays.** A wrapper binding `@click` over a forwarded `onClick` gives the
+   inner component an array in `attrs.onClick`; invoking it throws. Normalise before calling.
+
+10. **Every SFC needs BOTH a plain `<script lang="ts">` and a `<script setup lang="ts">` block.** A
+    setup-only SFC fails lint with `'_class' is assigned a value but never used` — `vue-eslint-parser`
+    loses `ignoreRestSiblings` without the separate block, and the house `const { class: _class,
+    ...others } = attrs` idiom trips it. Exported interfaces and `as const` enums go in the plain block.
+    An empty `export interface FooProps {}` trips `no-empty-object-type` — keep the name, inline-disable.
+
+Attr-forwarding order that reproduces React exactly: `inheritAttrs: false` → own attrs → `v-bind="rest"`
+→ own handlers last, each guarded by `if (event.defaultPrevented) return`. Consumer attrs win (React's
+`{...rest}` was last); consumer handlers still run first.
+
+**Callback presence is load-bearing.** Vue strips a declared emit's listener out of `useAttrs()`, so a
+callback whose *presence* picks an element or a role (`AudioWaveform.onSeek` → `role="slider"` vs
+`"img"`; `HeatmapCalendar.onCellClick` → `<button>` vs `<div>`) must stay a PROP, not become an emit.
+
+**Nothing under `tests/`.** `tsconfig.typecheck.json` includes `tests/**`, so one scratch file gates the
+whole package for every lane. Three lanes have done this; one took the package RED for ~10 minutes.
+
+`/* @vue-ignore */` on `VariantProps`-derived heritage keeps the SFC compiler off `typeof someVariants`
+entirely — a simpler alternative to rule 2's spelled-out union + `AssertExact`.
+| W3 | `forms-engine` + `house` + `tanstack`(vue-form) | 2,529 LOC | 🔄 |
+| W3b | `analytics` + `flags` + `auth` — headless top-level modules | ~1,835 LOC | 🔄 |
 | W4 | Smoke tests (D6) + publish `0.0.1` + pipeline verify | — | ⬜ |
 | W5 | `smart-qr` Vue frontend — the gate | 6,880 LOC | ⬜ |
+
+`router` and `query` stay deferred to v0.2 per D8 — both need `vue-router` / `@tanstack/vue-query`
+design calls, and `smart-qr` imports neither.
+
+### Bugs the port surfaced
+
+- `focusScope` nesting was **runaway recursion**, not a cosmetic ping-pong: `.focus()` dispatches
+  `focusin` synchronously, so two live listeners re-entered until the stack blew. Replaced
+  registration-order luck with a module-level scope stack — one listener, topmost scope owns it.
+- Four SSR crashes of one shape: a browser global touched from an `immediate: true, flush: 'post'`
+  watcher, which Vue runs on the server. `requestAnimationFrame` (`Presence`, `Tour`, `UndoBar`) and
+  `HTMLElement` (`overlays`).
+- `Tour.isOpen` was pinned controlled-and-closed by rule 4 and could never open. Fixing it unmasked two
+  of the SSR crashes above, which that bug had been suppressing.
 
 W2a is sequenced first inside W2 because it is `smart-qr`'s critical path.
 

@@ -1,4 +1,4 @@
-export { default as Button, type ButtonProps } from './Button.vue';
+export { default as Button, type ButtonProps, type ButtonSize } from './Button.vue';
 export {
   buttonVariants,
   ButtonVariant,
