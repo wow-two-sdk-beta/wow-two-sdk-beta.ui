@@ -17,6 +17,7 @@
 | Forms / fields / validation | [`analysis/forms-engine.md`](../architecture/analysis/forms-engine.md) | **COMPLETE** — engine + 2 adapters + 114-case conformance + all fields wired + 3 product proofs + [completeness map](../architecture/analysis/forms-completeness.md) (34 shipped · 0 ship-now) |
 | Lib adoption | [`analysis/lib-adoption.md`](../architecture/analysis/lib-adoption.md) | verdicts set; consumed per-wave |
 | Theming | `THEMES.md` | engine + 183 themes; smart-qr AA exception pinned |
+| **Vue port** | [`vue-port-track.md`](vue-port-track.md) (own wave table = the queue) | W0/W1a/W1b in flight — `@wow-two-beta/ui-vue` beside the React pkg; gate = smart-qr rebuilt on it |
 
 ---
 
