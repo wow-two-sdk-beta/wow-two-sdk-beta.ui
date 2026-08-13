@@ -80,6 +80,12 @@ const props = withDefaults(defineProps<TourProps>(), {
   defaultOpen: false,
   defaultCurrentStep: 0,
   padding: 8,
+  /* `isOpen` is the controlled-mode signal, and `useControlled` keys on `=== undefined`.
+     A `boolean` prop is Boolean-castable, so without this explicit `undefined` Vue turns an
+     ABSENT `isOpen` into `false` — which reads as "controlled, and closed", pinning the tour
+     shut and making `defaultOpen` dead. `currentStep` needs no such default: `number` is not
+     Boolean-castable, so it already arrives as `undefined`. */
+  isOpen: undefined,
 });
 
 const emit = defineEmits<{
@@ -142,6 +148,10 @@ watch(
   [open, step],
   ([isOpen, currentStepValue], _previous, onCleanup) => {
     if (!isOpen || !currentStepValue) return;
+    /* `immediate: true` runs this on the server too, where there is no rAF and no `window`.
+       The spotlight rect is measured from live DOM, so there is nothing to compute there —
+       bail, and let the same watcher measure on the client. */
+    if (typeof requestAnimationFrame === 'undefined' || typeof window === 'undefined') return;
 
     const update = () => {
       rect.value = rectFromTarget(currentStepValue.target);
@@ -165,6 +175,8 @@ watch(
   open,
   (isOpen, _previous, onCleanup) => {
     if (!isOpen) return;
+    // Same `immediate: true` SSR pass — there is no `document` to listen on there.
+    if (typeof document === 'undefined') return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === Key.Escape) {
         event.preventDefault();

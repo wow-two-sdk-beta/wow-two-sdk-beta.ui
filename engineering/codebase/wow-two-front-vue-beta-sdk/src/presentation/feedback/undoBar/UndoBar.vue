@@ -89,6 +89,10 @@ watch(
       return;
     }
     if (isPaused) return;
+    /* `immediate: true` runs this watcher on the server too, and an UndoBar is rendered
+       `is-open`. Neither `window` nor `requestAnimationFrame` exists there — start no clock;
+       the same watcher arms it on the client, where the countdown is the only thing it drives. */
+    if (typeof window === 'undefined' || typeof requestAnimationFrame === 'undefined') return;
 
     start = performance.now();
     if (!hasCountdown) {

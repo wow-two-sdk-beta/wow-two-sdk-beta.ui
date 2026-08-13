@@ -76,6 +76,12 @@ export const Presence = defineComponent({
           return;
         }
         if (dataState.value === 'open') return;
+        /* `immediate: true` makes this watcher run during SSR too (Vue skips only the
+           non-immediate post-flush ones), and there is no `requestAnimationFrame` on the
+           server. Bail rather than throw: the server emits `data-state="closed"`, which is
+           exactly what the client's first render produces, so hydration still matches and
+           this same watcher runs the enter on the client. */
+        if (typeof requestAnimationFrame === 'undefined') return;
         let raf2 = 0;
         const raf1 = requestAnimationFrame(() => {
           raf2 = requestAnimationFrame(() => {
