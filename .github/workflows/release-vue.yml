@@ -80,13 +80,19 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package.json
           git commit -m "chore: release ui-vue v${{ steps.bump.outputs.version }} [skip ci]"
-          git tag -a "ui-vue-v${{ steps.bump.outputs.version }}" -m "ui-vue v${{ steps.bump.outputs.version }}"
           # `release.yml` bumps the React package on the same push and races us to `main`.
           # Whoever lands second gets `! [rejected] main -> main (fetch first)` — which is what
           # happened on ui-vue v0.0.2: npm had the package, `main` never got the bump, and the
           # next run would have tried to republish a version that already existed. Rebasing the
           # one-line bump onto whatever landed first is always safe; the two touch different files.
+          #
+          # TAG AFTER THE REBASE, never before. A rebase replays the bump commit under a new SHA,
+          # and an annotated tag made beforehand keeps pointing at the orphaned original — so
+          # `--follow-tags` skips it (it only pushes tags reachable from the pushed commits) and
+          # `gh release create` then fails with "tag exists locally but has not been pushed".
+          # That is exactly how ui-vue v0.0.3 published to npm with no tag and no GitHub Release.
           git pull --rebase origin "${GITHUB_REF_NAME}"
+          git tag -a "ui-vue-v${{ steps.bump.outputs.version }}" -m "ui-vue v${{ steps.bump.outputs.version }}"
           git push --follow-tags
 
       - name: Create GitHub Release
