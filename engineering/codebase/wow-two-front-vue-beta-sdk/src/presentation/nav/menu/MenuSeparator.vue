@@ -1,0 +1,38 @@
+<script lang="ts">
+/**
+ * The prop surface of `MenuSeparator`.
+ *
+ * React declared `HTMLAttributes<HTMLDivElement>`; attributes reach the root
+ * through `useAttrs` here, which leaves no declared prop.
+ */
+export type MenuSeparatorProps = Record<string, never>;
+</script>
+
+<script setup lang="ts">
+import { computed, useAttrs, useTemplateRef } from 'vue';
+import { cn } from '../../../foundation/utils';
+import { menuSeparatorVariants } from './Menu.variants';
+
+/** The hairline rule between menu sections. */
+defineOptions({ name: 'MenuSeparator', inheritAttrs: false });
+
+const attrs = useAttrs();
+const el = useTemplateRef<HTMLDivElement>('el');
+
+/* React spread `{...props}` *after* its own `className`, so a consumer's class
+   replaced the recipe outright; `cn` reproduces that precedence through
+   tailwind-merge rather than concatenating the two. */
+const classes = computed(() => cn(menuSeparatorVariants(), attrs.class as string | undefined));
+
+/** Everything but `class`, which is re-applied through `cn` above. */
+const rest = computed(() => {
+  const { class: _class, ...others } = attrs;
+  return others;
+});
+
+defineExpose({ el });
+</script>
+
+<template>
+  <div ref="el" role="separator" v-bind="rest" :class="classes" />
+</template>

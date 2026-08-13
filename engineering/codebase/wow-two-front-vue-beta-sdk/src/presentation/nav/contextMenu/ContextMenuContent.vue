@@ -1,0 +1,72 @@
+<script lang="ts">
+import type { Placement } from '@floating-ui/vue';
+
+/**
+ * The prop surface of `ContextMenuContent`.
+ *
+ * React declared `className` and `'aria-label'` alongside these; both are
+ * fallthrough attrs here and are relayed to `Menu`, which lands `aria-label` on
+ * the menu surface. A declared `'aria-label'` would arrive as `props.ariaLabel`
+ * and never render, so it stays an attr. `placement` is `Placement` rather than
+ * an indexed access into `MenuProps`, which the SFC compiler cannot resolve.
+ */
+export interface ContextMenuContentProps {
+  /** The Floating UI placement. Default `bottom-start`. */
+  placement?: Placement;
+
+  /** The distance between the gesture point and the menu in px. Default 2. */
+  offset?: number;
+}
+</script>
+
+<script setup lang="ts">
+import { computed, useAttrs } from 'vue';
+import { cn } from '../../../foundation/utils';
+import Menu from '../menu/Menu.vue';
+import { useContextMenuContext } from './ContextMenuContext';
+
+/** The menu surface, anchored to the point the gesture happened at. */
+defineOptions({ name: 'ContextMenuContent', inheritAttrs: false });
+
+/** The menu contents — React's `children`. */
+defineSlots<{ default(): unknown }>();
+
+const props = withDefaults(defineProps<ContextMenuContentProps>(), {
+  placement: 'bottom-start',
+  offset: 2,
+});
+
+const attrs = useAttrs();
+const context = useContextMenuContext();
+
+/* Lifted to setup consts so the template auto-unwraps them (a plain injected object does not). */
+const isOpen = context.open;
+const anchor = context.anchor;
+
+/* Enter-only pop: the surface mounts when `open` flips true, so the anim fires
+   once on mount. motion-safe gates it for reduced-motion. (Exit anim is owned by
+   the shared `Menu`'s Presence gate.) */
+const classes = computed(() =>
+  cn('motion-safe:animate-(--animate-pop-in)', attrs.class as string | undefined),
+);
+
+/** Everything but `class` — relayed to `Menu`, which lands `aria-label` on the surface. */
+const rest = computed(() => {
+  const { class: _class, ...others } = attrs;
+  return others;
+});
+</script>
+
+<template>
+  <Menu
+    :open="isOpen"
+    :anchor="anchor"
+    :placement="props.placement"
+    :offset="props.offset"
+    v-bind="rest"
+    :class="classes"
+    @close="context.setOpen(false)"
+  >
+    <slot />
+  </Menu>
+</template>
