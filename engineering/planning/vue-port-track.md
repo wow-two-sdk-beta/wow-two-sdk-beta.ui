@@ -59,10 +59,10 @@ Source measurements: `src/` 79,673 LOC · 1,001 files · 237 components · 41 fo
 | W1a | Agnostic core — 19 foundation modules + `domain/{color,emoji}` | 174 files | ✅ `5ab0d6d` |
 | W1b | `foundation/primitives` — 18 primitives, the headless layer | 41 files | ✅ `f70f645` |
 | W1c | `foundation/hooks` — 17 composables + `UseHotkeys` + `Spinner` fixes | 37 files | ✅ `5510735` |
-| W1d | Remaining 21 foundation modules (engine copies + `useX` re-wrap) | ~18k LOC | ⬜ |
+| W1d | Remaining **20** foundation modules (engine copies + `useX` re-wrap) | ~18k LOC | 🔄 |
 | W2a | `presentation/layout` — 23 of 24 (`appShell` blocked on `overlays/drawer`) | 78 files | ✅ `1d9882c` |
 | W2a | `presentation/actions` 14 | 59 files | ✅ `0b6396e` |
-| W2b | `presentation/forms` 79 — unblocks `DateExtensions` for 3 display components | — | 🔄 |
+| W2b | `presentation/forms` — **79 of 79**, three lanes (`be5a442` · `482f6f6` · `978e3cf`) | 272 files | ✅ |
 | W2c | `presentation/display` — 70 of 73, 115 SFCs | 259 files | ✅ `53f12f0` |
 | W2d | `presentation/feedback` — 25 of 27 (2 blocked on `overlays` + root `feedback`) | 81 files | ✅ `b5eb30a` |
 | W2e | `presentation/overlays` 9 — `v-model:open` on all 7 stateful roots | 48 files | ✅ `2f29752` |
@@ -114,8 +114,20 @@ Attr-forwarding order that reproduces React exactly: `inheritAttrs: false` → o
 callback whose *presence* picks an element or a role (`AudioWaveform.onSeek` → `role="slider"` vs
 `"img"`; `HeatmapCalendar.onCellClick` → `<button>` vs `<div>`) must stay a PROP, not become an emit.
 
-**Nothing under `tests/`.** `tsconfig.typecheck.json` includes `tests/**`, so one scratch file gates the
-whole package for every lane. Three lanes have done this; one took the package RED for ~10 minutes.
+11. **A `TPath extends string` type param is literal-widened when `vue-tsc` resolves a template tag.**
+    `name="title"` infers as `string`, not `"title"`, so a path-derived payload type falls through to
+    `unknown` and every slot payload silently loses its type. A plain `.ts` call site infers correctly,
+    which is what makes the regression invisible without a template-level test. Constrain with a type
+    that contains literals: `(keyof TValues & string) | (string & {})`.
+
+**Nothing that is not shipped code goes anywhere inside the package** — not under `tests/`, and not under
+`src/`. `tsconfig.typecheck.json` includes `tests/**`, so a scratch file there gates every lane; a scratch
+file under `src/` also gets committed and published. Four lanes have done one or the other; one took the
+package RED for ~10 minutes.
+
+**Reactive granularity is not free.** Exposing state through raw getters wakes every reader on every
+commit — the tanstack engine fired 7 effect runs for 2 writes. Back each state member and each field slice
+with its own `computed` so a sibling field's edit leaves an unrelated control asleep.
 
 `/* @vue-ignore */` on `VariantProps`-derived heritage keeps the SFC compiler off `typeof someVariants`
 entirely — a simpler alternative to rule 2's spelled-out union + `AssertExact`.
@@ -124,8 +136,18 @@ entirely — a simpler alternative to rule 2's spelled-out union + `AssertExact`
 | W4 | Smoke tests (D6) + publish `0.0.1` + pipeline verify | — | ⬜ |
 | W5 | `smart-qr` Vue frontend — the gate | 6,880 LOC | ⬜ |
 
-`router` and `query` stay deferred to v0.2 per D8 — both need `vue-router` / `@tanstack/vue-query`
-design calls, and `smart-qr` imports neither.
+| W3c | `router` + `query` onto `vue-router` / `@tanstack/vue-query` | 46 files | ✅ `1026bd7` |
+| W4b | Root barrel + `MIGRATION.md` + README | — | 🔄 |
+
+**D8 revised:** `router` and `query` were ported after all. The user's scope was "move everything we have
+with React", and deferring two modules to v0.2 served a v0.1 boundary he never asked for.
+
+`router` is the largest API delta in the port. React hung five behaviours off an `<AppRoot>` layout route;
+`vue-router` has no root element and expresses "every navigation" as `afterEach`, so they became
+`installDocumentTitle` / `installDocumentMeta` / `installRoutePersistence` / `installPageViewTracker`.
+`createAppRouter` still takes the same options, so an app that only calls it sees no difference —
+**`nth26`'s whole migration is `element:` → `component:` per route**, plus `app.use(router)` in place of
+`<RouterProvider>`.
 
 ### Bugs the port surfaced
 

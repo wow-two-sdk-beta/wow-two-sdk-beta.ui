@@ -140,8 +140,9 @@ Also aliased, for the DOM spelling vs React spelling split: `readonly` / `readOn
 
 Uncontrolled seeds (`defaultOpen`, `defaultValue`, `defaultChecked`) are unchanged.
 
-**Set exactly one of the two spellings.** When both are set the winner is documented per
-component, and it is not uniform across the package — see [§11](#11-known-gaps).
+**When both are set, React's name wins** — uniformly, across every alias pair. See
+[§11.4](#114-alias-precedence--uniform-as-of-acd6b87) for the exact expression and why it
+checks `undefined` rather than using `??`.
 
 Components carrying the dual `open` / `isOpen` surface: `Modal`, `AlertModal`, `Drawer`,
 `Popover`, `HoverCard`, `ActionSheet`, `BottomSheet`, `Tooltip`, `Collapsible`, `Menu`,
@@ -624,23 +625,30 @@ All seven groups match the React package folder-for-folder and barrel-line-for-b
 | `router` | `useMatches()` | `route.meta`. |
 | presentation | `export default` on 8 component folders | Named exports. |
 
-### 11.4 Alias precedence is not uniform
+### 11.4 Alias precedence — uniform as of `acd6b87`
 
-When both spellings of a controlled prop are set, the winner differs by component:
+**React's name always wins.** When both spellings of a controlled prop are set, the React one takes
+precedence, checked against `undefined` rather than with `??`:
 
-- **`value` wins** in 25 components (`AddressForm`, `ChatComposer`, `CheckboxGroup`, `CodeEditor`,
-  `ColorSlider`, `ColorWheel`, `Combobox`, `CronInput`, `Editable`, `FontPicker`, `GradientPicker`,
-  `IconPicker`, `JSONEditor`, `KeyboardShortcutPicker`, `Knob`, `MarkdownEditor`, `MaskedInput`,
-  `MultiSelect`, `PasswordInput`, `PhoneInput`, `PinInput`, `RecurrenceEditor`, `Slider`,
-  `Stepper`, `TagsInput`)
-- **`modelValue` wins** in 14 (`DateField`, `DateTimeField`, `EmailInput`, `EmojiPicker`,
-  `EmojiPickerPopover`, `Listbox`, `NumberInput`, `SearchInput`, `Select`, `TelInput`,
-  `TextAreaInput`, `TextInput`, `TimeField`, `UrlInput`)
+```ts
+controlled: () => (props.value !== undefined ? props.value : props.modelValue)
+```
 
-Several of the `modelValue`-first components carry a doc comment claiming `value` wins — the
-comment is wrong, the code is right. **Set exactly one spelling and the ambiguity never arises.**
+The `!== undefined` check is load-bearing, not style: `null` is a meaningful *"nothing selected"*
+for the pickers, selects and colour controls, and `??` swallows it and falls through to the other
+prop. `DateField` and `TimeField` with `:value="null"` alongside a `v-model` holding a real date
+rendered the date under `??`; they render empty now.
 
-For `open` / `isOpen` the precedence is uniform: `open` wins everywhere.
+The rule holds across all six alias pairs — `value`/`modelValue`, `open`/`isOpen`,
+`checked`/`modelValue`, `isSidebarOpen`/`sidebarOpen`, `isEditing`/`editing`,
+`sizeRatio`/`modelValue`.
+
+Two components had the Vue-added name winning over React's and were flipped: **`AppShell`**
+(`isSidebarOpen` now wins over `sidebarOpen`) and **`EmojiSizeControl`** (`sizeRatio` over
+`modelValue`). If an app bound `:is-sidebar-open` and saw no effect, it works now.
+
+Fourteen components resolved `modelValue` first while their own docs claimed `value` won; the code
+was the wrong half and now matches the documentation.
 
 ### 11.5 Narrower behaviour
 
