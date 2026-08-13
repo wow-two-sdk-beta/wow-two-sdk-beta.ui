@@ -11,6 +11,29 @@
 
 ---
 
+## Status — port complete, unpublished
+
+Verified from a clean `dist` at `2ea9c55`:
+
+| Gate | Result |
+|---|---|
+| `pnpm typecheck` | exit 0 — **404 SFCs compile** |
+| `pnpm lint` | exit 0 |
+| `pnpm test` | **1,260 assertions**, 50 files, 3.8s |
+| `pnpm build` | exit 0 from clean, byte-reproducible |
+| Export targets | **128 resolved, 0 unresolved** across 66 subpaths |
+| Declaration emit | 0 files with erased slot types |
+| `npm pack` | 1,507 files · 2.1 MB packed · 9.6 MB unpacked |
+
+Surface: **41 foundation modules · 18 primitives · 17 composables · 237 components in 7 groups ·
+`domain` · `feedback` · `analytics` · `flags` · `auth` · `forms-engine` (+2 adapters) · `router` · `query`.**
+Nothing from the React package is unported.
+
+Not done: publish (the developer pushes; CI releases on `main`), and the `smart-qr` Vue rebuild that
+is the actual proof gate.
+
+---
+
 ## Locked decisions
 
 | # | Decision | Rationale |
@@ -59,7 +82,7 @@ Source measurements: `src/` 79,673 LOC · 1,001 files · 237 components · 41 fo
 | W1a | Agnostic core — 19 foundation modules + `domain/{color,emoji}` | 174 files | ✅ `5ab0d6d` |
 | W1b | `foundation/primitives` — 18 primitives, the headless layer | 41 files | ✅ `f70f645` |
 | W1c | `foundation/hooks` — 17 composables + `UseHotkeys` + `Spinner` fixes | 37 files | ✅ `5510735` |
-| W1d | Remaining **20** foundation modules (engine copies + `useX` re-wrap) | ~18k LOC | 🔄 |
+| W1d | Remaining **20** foundation modules (engine copies + `useX` re-wrap) | 157 files | ✅ `2ea9c55` |
 | W2a | `presentation/layout` — 23 of 24 (`appShell` blocked on `overlays/drawer`) | 78 files | ✅ `1d9882c` |
 | W2a | `presentation/actions` 14 | 59 files | ✅ `0b6396e` |
 | W2b | `presentation/forms` — **79 of 79**, three lanes (`be5a442` · `482f6f6` · `978e3cf`) | 272 files | ✅ |
