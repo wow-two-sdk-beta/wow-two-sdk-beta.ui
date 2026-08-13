@@ -1,0 +1,146 @@
+name: release-vue
+
+# Vue package release. Mirrors `release.yml` (the React package) but is scoped to
+# `engineering/codebase/wow-two-front-vue-beta-sdk/` via the `paths:` filter below, so a
+# React-only push never publishes `@wow-two-beta/ui-vue` and vice versa. Tags carry a
+# `ui-vue-v` prefix so the two packages' tag namespaces never collide.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'engineering/codebase/wow-two-front-vue-beta-sdk/**'
+      - '.github/workflows/release-vue.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # commit version bump + push tags + create GitHub Releases
+
+concurrency:
+  group: release-vue-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: validate · bump · publish
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+    defaults:
+      run:
+        working-directory: engineering/codebase/wow-two-front-vue-beta-sdk
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # version inferred from packageManager field in the nested package.json
+          package_json_file: engineering/codebase/wow-two-front-vue-beta-sdk/package.json
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: engineering/codebase/wow-two-front-vue-beta-sdk/pnpm-lock.yaml
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install
+        run: pnpm install
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      - name: Bump patch version
+        id: bump
+        run: |
+          pnpm version patch --no-git-tag-version
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "::notice::Releasing @wow-two-beta/ui-vue v$VERSION"
+
+      # --- npm publish: the release gate. Everything below must NOT block it. ---
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Commit + tag version bump
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: release ui-vue v${{ steps.bump.outputs.version }} [skip ci]"
+          git tag -a "ui-vue-v${{ steps.bump.outputs.version }}" -m "ui-vue v${{ steps.bump.outputs.version }}"
+          git push --follow-tags
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="ui-vue-v${VERSION}"
+
+          # Previous ui-vue tag (the one before this just-pushed tag). `--match` keeps the
+          # React package's `v*` tags out. Empty on first release.
+          PREV=$(git describe --tags --abbrev=0 --match 'ui-vue-v*' "${TAG}^" 2>/dev/null || true)
+          if [ -n "$PREV" ]; then
+            RANGE="${PREV}..HEAD"
+            echo "::notice::Changelog range ${RANGE}"
+          else
+            RANGE="HEAD"
+            echo "::notice::First release — using full history"
+          fi
+
+          # Collect subjects for commits touching THIS package only ('.' = the package dir,
+          # since every step runs with working-directory set to it), skipping the [skip ci]
+          # release commit.
+          LOG=$(git log "$RANGE" --no-merges --pretty=format:'%s' -- . \
+            | grep -vF '[skip ci]' || true)
+
+          section() {
+            # $1 = conventional-commit type, $2 = section heading
+            local body
+            body=$(printf '%s\n' "$LOG" \
+              | grep -E "^$1(\(.+\))?!?:" \
+              | sed -E "s/^$1(\(.+\))?!?:[[:space:]]*//" \
+              | sed -E 's/^/- /' || true)
+            if [ -n "$body" ]; then
+              printf '### %s\n\n%s\n\n' "$2" "$body"
+            fi
+          }
+
+          {
+            echo "Published \`@wow-two-beta/ui-vue\` v${VERSION} to npm."
+            echo
+            CHANGELOG=$(
+              section 'feat'     'Features'
+              section 'fix'      'Fixes'
+              section 'refactor' 'Refactors'
+              section 'docs'     'Docs'
+              section 'chore'    'Chores'
+            )
+            if [ -n "$CHANGELOG" ]; then
+              echo "## Changelog"
+              echo
+              # $(...) strips trailing newlines, so re-add the blank separator.
+              printf '%s\n\n' "$CHANGELOG"
+            else
+              echo "_No conventional-commit changes since ${PREV:-the beginning}._"
+              echo
+            fi
+          } > release-notes.md
+
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes-file release-notes.md

@@ -1,0 +1,425 @@
+{
+  "name": "@wow-two-beta/ui-vue",
+  "version": "0.0.1",
+  "description": "Beta-forever Vue 3 UI library for the wow-two ecosystem — the Vue port of @wow-two-beta/ui.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wow-two-sdk-beta/wow-two-sdk-beta.ui.git",
+    "directory": "engineering/codebase/wow-two-front-vue-beta-sdk"
+  },
+  "homepage": "https://github.com/wow-two-sdk-beta/wow-two-sdk-beta.ui#readme",
+  "bugs": {
+    "url": "https://github.com/wow-two-sdk-beta/wow-two-sdk-beta.ui/issues"
+  },
+  "keywords": [
+    "vue",
+    "ui",
+    "components",
+    "tailwind",
+    "wow-two",
+    "beta"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./foundation/utils": {
+      "types": "./dist/foundation/utils/index.d.ts",
+      "import": "./dist/foundation/utils/index.js",
+      "default": "./dist/foundation/utils/index.js"
+    },
+    "./foundation/hooks": {
+      "types": "./dist/foundation/hooks/index.d.ts",
+      "import": "./dist/foundation/hooks/index.js",
+      "default": "./dist/foundation/hooks/index.js"
+    },
+    "./foundation/icons": {
+      "types": "./dist/foundation/icons/index.d.ts",
+      "import": "./dist/foundation/icons/index.js",
+      "default": "./dist/foundation/icons/index.js"
+    },
+    "./foundation/primitives": {
+      "types": "./dist/foundation/primitives/index.d.ts",
+      "import": "./dist/foundation/primitives/index.js",
+      "default": "./dist/foundation/primitives/index.js"
+    },
+    "./foundation/themes": {
+      "types": "./dist/foundation/themes/index.d.ts",
+      "import": "./dist/foundation/themes/index.js",
+      "default": "./dist/foundation/themes/index.js"
+    },
+    "./foundation/http": {
+      "types": "./dist/foundation/http/index.d.ts",
+      "import": "./dist/foundation/http/index.js",
+      "default": "./dist/foundation/http/index.js"
+    },
+    "./foundation/storage": {
+      "types": "./dist/foundation/storage/index.d.ts",
+      "import": "./dist/foundation/storage/index.js",
+      "default": "./dist/foundation/storage/index.js"
+    },
+    "./foundation/storage/zustand": {
+      "types": "./dist/foundation/storage/zustand/index.d.ts",
+      "import": "./dist/foundation/storage/zustand/index.js",
+      "default": "./dist/foundation/storage/zustand/index.js"
+    },
+    "./foundation/resilience": {
+      "types": "./dist/foundation/resilience/index.d.ts",
+      "import": "./dist/foundation/resilience/index.js",
+      "default": "./dist/foundation/resilience/index.js"
+    },
+    "./foundation/identifiers": {
+      "types": "./dist/foundation/identifiers/index.d.ts",
+      "import": "./dist/foundation/identifiers/index.js",
+      "default": "./dist/foundation/identifiers/index.js"
+    },
+    "./foundation/i18n": {
+      "types": "./dist/foundation/i18n/index.d.ts",
+      "import": "./dist/foundation/i18n/index.js",
+      "default": "./dist/foundation/i18n/index.js"
+    },
+    "./foundation/config": {
+      "types": "./dist/foundation/config/index.d.ts",
+      "import": "./dist/foundation/config/index.js",
+      "default": "./dist/foundation/config/index.js"
+    },
+    "./foundation/shortcuts": {
+      "types": "./dist/foundation/shortcuts/index.d.ts",
+      "import": "./dist/foundation/shortcuts/index.js",
+      "default": "./dist/foundation/shortcuts/index.js"
+    },
+    "./foundation/format": {
+      "types": "./dist/foundation/format/index.d.ts",
+      "import": "./dist/foundation/format/index.js",
+      "default": "./dist/foundation/format/index.js"
+    },
+    "./foundation/files": {
+      "types": "./dist/foundation/files/index.d.ts",
+      "import": "./dist/foundation/files/index.js",
+      "default": "./dist/foundation/files/index.js"
+    },
+    "./foundation/commands": {
+      "types": "./dist/foundation/commands/index.d.ts",
+      "import": "./dist/foundation/commands/index.js",
+      "default": "./dist/foundation/commands/index.js"
+    },
+    "./foundation/errors": {
+      "types": "./dist/foundation/errors/index.d.ts",
+      "import": "./dist/foundation/errors/index.js",
+      "default": "./dist/foundation/errors/index.js"
+    },
+    "./foundation/share": {
+      "types": "./dist/foundation/share/index.d.ts",
+      "import": "./dist/foundation/share/index.js",
+      "default": "./dist/foundation/share/index.js"
+    },
+    "./foundation/logger": {
+      "types": "./dist/foundation/logger/index.d.ts",
+      "import": "./dist/foundation/logger/index.js",
+      "default": "./dist/foundation/logger/index.js"
+    },
+    "./foundation/device": {
+      "types": "./dist/foundation/device/index.d.ts",
+      "import": "./dist/foundation/device/index.js",
+      "default": "./dist/foundation/device/index.js"
+    },
+    "./foundation/notifications": {
+      "types": "./dist/foundation/notifications/index.d.ts",
+      "import": "./dist/foundation/notifications/index.js",
+      "default": "./dist/foundation/notifications/index.js"
+    },
+    "./foundation/uploads": {
+      "types": "./dist/foundation/uploads/index.d.ts",
+      "import": "./dist/foundation/uploads/index.js",
+      "default": "./dist/foundation/uploads/index.js"
+    },
+    "./foundation/gestures": {
+      "types": "./dist/foundation/gestures/index.d.ts",
+      "import": "./dist/foundation/gestures/index.js",
+      "default": "./dist/foundation/gestures/index.js"
+    },
+    "./foundation/selection": {
+      "types": "./dist/foundation/selection/index.d.ts",
+      "import": "./dist/foundation/selection/index.js",
+      "default": "./dist/foundation/selection/index.js"
+    },
+    "./foundation/media": {
+      "types": "./dist/foundation/media/index.d.ts",
+      "import": "./dist/foundation/media/index.js",
+      "default": "./dist/foundation/media/index.js"
+    },
+    "./foundation/animation": {
+      "types": "./dist/foundation/animation/index.d.ts",
+      "import": "./dist/foundation/animation/index.js",
+      "default": "./dist/foundation/animation/index.js"
+    },
+    "./foundation/virtualization": {
+      "types": "./dist/foundation/virtualization/index.d.ts",
+      "import": "./dist/foundation/virtualization/index.js",
+      "default": "./dist/foundation/virtualization/index.js"
+    },
+    "./foundation/observers": {
+      "types": "./dist/foundation/observers/index.d.ts",
+      "import": "./dist/foundation/observers/index.js",
+      "default": "./dist/foundation/observers/index.js"
+    },
+    "./foundation/crypto": {
+      "types": "./dist/foundation/crypto/index.d.ts",
+      "import": "./dist/foundation/crypto/index.js",
+      "default": "./dist/foundation/crypto/index.js"
+    },
+    "./foundation/sync": {
+      "types": "./dist/foundation/sync/index.d.ts",
+      "import": "./dist/foundation/sync/index.js",
+      "default": "./dist/foundation/sync/index.js"
+    },
+    "./foundation/idb": {
+      "types": "./dist/foundation/idb/index.d.ts",
+      "import": "./dist/foundation/idb/index.js",
+      "default": "./dist/foundation/idb/index.js"
+    },
+    "./foundation/workers": {
+      "types": "./dist/foundation/workers/index.d.ts",
+      "import": "./dist/foundation/workers/index.js",
+      "default": "./dist/foundation/workers/index.js"
+    },
+    "./foundation/screen": {
+      "types": "./dist/foundation/screen/index.d.ts",
+      "import": "./dist/foundation/screen/index.js",
+      "default": "./dist/foundation/screen/index.js"
+    },
+    "./foundation/geolocation": {
+      "types": "./dist/foundation/geolocation/index.d.ts",
+      "import": "./dist/foundation/geolocation/index.js",
+      "default": "./dist/foundation/geolocation/index.js"
+    },
+    "./foundation/async": {
+      "types": "./dist/foundation/async/index.d.ts",
+      "import": "./dist/foundation/async/index.js",
+      "default": "./dist/foundation/async/index.js"
+    },
+    "./foundation/undo": {
+      "types": "./dist/foundation/undo/index.d.ts",
+      "import": "./dist/foundation/undo/index.js",
+      "default": "./dist/foundation/undo/index.js"
+    },
+    "./foundation/clipboard": {
+      "types": "./dist/foundation/clipboard/index.d.ts",
+      "import": "./dist/foundation/clipboard/index.js",
+      "default": "./dist/foundation/clipboard/index.js"
+    },
+    "./foundation/speech": {
+      "types": "./dist/foundation/speech/index.d.ts",
+      "import": "./dist/foundation/speech/index.js",
+      "default": "./dist/foundation/speech/index.js"
+    },
+    "./foundation/collections": {
+      "types": "./dist/foundation/collections/index.d.ts",
+      "import": "./dist/foundation/collections/index.js",
+      "default": "./dist/foundation/collections/index.js"
+    },
+    "./foundation/datetime": {
+      "types": "./dist/foundation/datetime/index.d.ts",
+      "import": "./dist/foundation/datetime/index.js",
+      "default": "./dist/foundation/datetime/index.js"
+    },
+    "./foundation/validation": {
+      "types": "./dist/foundation/validation/index.d.ts",
+      "import": "./dist/foundation/validation/index.js",
+      "default": "./dist/foundation/validation/index.js"
+    },
+    "./foundation/net": {
+      "types": "./dist/foundation/net/index.d.ts",
+      "import": "./dist/foundation/net/index.js",
+      "default": "./dist/foundation/net/index.js"
+    },
+    "./analytics": {
+      "types": "./dist/analytics/index.d.ts",
+      "import": "./dist/analytics/index.js",
+      "default": "./dist/analytics/index.js"
+    },
+    "./flags": {
+      "types": "./dist/flags/index.d.ts",
+      "import": "./dist/flags/index.js",
+      "default": "./dist/flags/index.js"
+    },
+    "./domain/color": {
+      "types": "./dist/domain/color/index.d.ts",
+      "import": "./dist/domain/color/index.js",
+      "default": "./dist/domain/color/index.js"
+    },
+    "./domain/emoji": {
+      "types": "./dist/domain/emoji/index.d.ts",
+      "import": "./dist/domain/emoji/index.js",
+      "default": "./dist/domain/emoji/index.js"
+    },
+    "./presentation/actions": {
+      "types": "./dist/presentation/actions/index.d.ts",
+      "import": "./dist/presentation/actions/index.js",
+      "default": "./dist/presentation/actions/index.js"
+    },
+    "./presentation/display": {
+      "types": "./dist/presentation/display/index.d.ts",
+      "import": "./dist/presentation/display/index.js",
+      "default": "./dist/presentation/display/index.js"
+    },
+    "./presentation/feedback": {
+      "types": "./dist/presentation/feedback/index.d.ts",
+      "import": "./dist/presentation/feedback/index.js",
+      "default": "./dist/presentation/feedback/index.js"
+    },
+    "./presentation/forms": {
+      "types": "./dist/presentation/forms/index.d.ts",
+      "import": "./dist/presentation/forms/index.js",
+      "default": "./dist/presentation/forms/index.js"
+    },
+    "./presentation/layout": {
+      "types": "./dist/presentation/layout/index.d.ts",
+      "import": "./dist/presentation/layout/index.js",
+      "default": "./dist/presentation/layout/index.js"
+    },
+    "./presentation/nav": {
+      "types": "./dist/presentation/nav/index.d.ts",
+      "import": "./dist/presentation/nav/index.js",
+      "default": "./dist/presentation/nav/index.js"
+    },
+    "./presentation/overlays": {
+      "types": "./dist/presentation/overlays/index.d.ts",
+      "import": "./dist/presentation/overlays/index.js",
+      "default": "./dist/presentation/overlays/index.js"
+    },
+    "./router": {
+      "types": "./dist/router/index.d.ts",
+      "import": "./dist/router/index.js",
+      "default": "./dist/router/index.js"
+    },
+    "./query": {
+      "types": "./dist/query/index.d.ts",
+      "import": "./dist/query/index.js",
+      "default": "./dist/query/index.js"
+    },
+    "./query/testing": {
+      "types": "./dist/query/testing.d.ts",
+      "import": "./dist/query/testing.js",
+      "default": "./dist/query/testing.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "import": "./dist/auth/index.js",
+      "default": "./dist/auth/index.js"
+    },
+    "./feedback": {
+      "types": "./dist/feedback/index.d.ts",
+      "import": "./dist/feedback/index.js",
+      "default": "./dist/feedback/index.js"
+    },
+    "./forms-engine": {
+      "types": "./dist/forms-engine/index.d.ts",
+      "import": "./dist/forms-engine/index.js",
+      "default": "./dist/forms-engine/index.js"
+    },
+    "./forms-engine/house": {
+      "types": "./dist/forms-engine/house/index.d.ts",
+      "import": "./dist/forms-engine/house/index.js",
+      "default": "./dist/forms-engine/house/index.js"
+    },
+    "./forms-engine/tanstack": {
+      "types": "./dist/forms-engine/tanstack/index.d.ts",
+      "import": "./dist/forms-engine/tanstack/index.js",
+      "default": "./dist/forms-engine/tanstack/index.js"
+    },
+    "./styles.css": "./dist/index.css",
+    "./themes.css": "./dist/themes.css",
+    "./themes.json": "./dist/themes.json",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && cp src/index.css dist/index.css && node scripts/build-themes-css.mjs",
+    "dev": "vite build --watch",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.typecheck.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run --project unit",
+    "test:browser": "vitest run --project browser",
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "pnpm typecheck && pnpm build"
+  },
+  "peerDependencies": {
+    "@tanstack/vue-form": "^1.0.0",
+    "@tanstack/vue-query": "^5.0.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue-router": {
+      "optional": true
+    },
+    "@tanstack/vue-form": {
+      "optional": true
+    },
+    "@tanstack/vue-query": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@floating-ui/vue": "^1.1.0",
+    "clsx": "^2.1.1",
+    "lucide-vue-next": "^0.460.0",
+    "marked": "^18.0.3",
+    "tailwind-merge": "^3.0.0",
+    "tailwind-variants": "^0.3.0",
+    "temporal-polyfill": "^1.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "@tanstack/vue-form": "^1.0.0",
+    "@tanstack/vue-query": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitest/browser": "^4.1.10",
+    "@vitest/browser-playwright": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/ui": "^4.1.10",
+    "@vue/test-utils": "^2.4.6",
+    "axe-core": "^4.12.1",
+    "eslint": "^9.14.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-boundaries": "^5.0.1",
+    "eslint-plugin-vue": "^9.32.0",
+    "playwright": "^1.61.1",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0",
+    "valibot": "^1.4.2",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.5.0",
+    "vitest": "^4.1.10",
+    "vue": "^3.5.13",
+    "vue-eslint-parser": "^9.4.3",
+    "vue-router": "^4.5.0",
+    "vue-tsc": "^2.2.0",
+    "zod": "^4.4.3"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

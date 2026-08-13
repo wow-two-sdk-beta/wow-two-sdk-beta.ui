@@ -1,0 +1,9 @@
+{
+  // Typecheck gate: same options as tsconfig.json but widened to `tests/**`, so test drift
+  // (wrong props, stale APIs) fails `pnpm typecheck`. The build emits declarations through
+  // vite-plugin-dts against tsconfig.json, which stays source-only — tests must never emit
+  // into `dist`.
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.vue"],
+  "exclude": ["node_modules", "dist"]
+}

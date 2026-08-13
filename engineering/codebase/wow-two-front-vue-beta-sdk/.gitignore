@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+.turbo/
+.cache/
+.vitest-attachments/
+.DS_Store
+*.log
+*.tsbuildinfo
+.pnpm-store/
+.env
+.env.local
