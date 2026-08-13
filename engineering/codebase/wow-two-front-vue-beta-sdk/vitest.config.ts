@@ -14,7 +14,11 @@ const smokeSuffixes = ['**/*.ssr.test.ts', '**/*.dom.test.ts'];
 
 /*
  * Four projects (the React package's `storybook` third has no Vue counterpart yet):
- *  - unit    — node, pure logic (foundation utils/themes/http + domain)
+ *  - unit    — node, pure logic: the framework-agnostic engines under the components
+ *              (`foundation/*`, `domain/*`, `feedback` / `analytics` / `flags` / `auth`,
+ *              `forms-engine`). Node is load-bearing here too, not just in `ssr`: with no
+ *              `localStorage` and no `indexedDB`, a slice that forgot its capability guard
+ *              throws on the first read rather than degrading.
  *  - ssr     — node, `renderToString` only. NO DOM globals, deliberately: the whole point of
  *              the tier is that a component touching `window`/`document` at setup or from an
  *              `immediate: true` watcher throws here. Giving this project a DOM environment
@@ -44,9 +48,6 @@ export default defineConfig({
             'tests/unit/{router,query,auth,feedback,forms-engine,analytics,flags}/**/*.test.ts',
           ],
           exclude: ['**/*.browser.test.ts', '**/*.component.test.ts', ...smokeSuffixes],
-          // Scaffold-only: the logic layers this project owns have no tests yet — the first
-          // wave is the component smoke layer (`ssr` + `dom`). Drop when logic tests land.
-          passWithNoTests: true,
         },
       },
       {
