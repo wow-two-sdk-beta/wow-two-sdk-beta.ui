@@ -1,5 +1,5 @@
-/* Export order mirrors the React package's `presentation/forms/index.ts`; the folders it lists
-   that have not been ported to Vue yet are simply absent, so the two stay diffable. */
+/* Export order mirrors the React package's `presentation/forms/index.ts`. Every folder it
+   lists is now ported, so the two lists are line-for-line identical. */
 export * from './label';
 export * from './formHelperText';
 export * from './formErrorMessage';
@@ -36,6 +36,8 @@ export * from './passwordStrength';
 export * from './filePicker';
 export * from './listbox';
 export * from './select';
+export * from './multiSelect';
+export * from './combobox';
 export * from './calendar';
 export * from './dateField';
 export * from './dateTimeField';
@@ -51,10 +53,27 @@ export * from './colorArea';
 export * from './colorWheel';
 export * from './colorSwatchPicker';
 export * from './colorPicker';
+export * from './stepper';
 export * from './tagsInput';
+export * from './fileUpload';
+export * from './editable';
+export * from './wizard';
+export * from './codeEditor';
+export * from './markdownEditor';
+export * from './jsonEditor';
+export * from './recurrenceEditor';
+export * from './knob';
+export * from './keyboardShortcutPicker';
+export * from './iconPicker';
+export * from './fontPicker';
+export * from './cronInput';
+export * from './gradientPicker';
+export * from './addressForm';
+export * from './phoneInput';
 export * from './emojiPicker';
 export * from './emojiSizeControl';
 export * from './reactionPicker';
+export * from './chatComposer';
 
 // Shared form-control axis enums (public prop API; the tv config in InputStyles stays internal).
 export { InputSize, InputState, InputBorder, InputRing } from './InputStyles';

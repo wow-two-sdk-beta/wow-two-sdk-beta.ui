@@ -1,0 +1,174 @@
+<script lang="ts">
+import type { InputSize, InputState } from '../InputStyles';
+
+export interface ComboboxInputProps {
+  /** The control size. */
+  size?: InputSize;
+
+  /** The validity surface. */
+  state?: InputState;
+}
+/* React also inherited `Omit<InputBaseVariants, 'size' | 'state'>` — the `border` / `ring`
+   axes — but never forwarded them to `inputBaseVariants`, so they were dead props that landed
+   on the DOM as unknown attributes. Only the two axes the original consumed are declared here. */
+</script>
+
+<script setup lang="ts">
+import { computed, useAttrs } from 'vue';
+import type { ClassValue } from 'clsx';
+import { cn } from '../../../foundation/utils';
+import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
+import { useComboboxContext } from './ComboboxContext';
+
+/** The text field that drives the combobox: filters, opens the panel, and owns keyboard nav. */
+/* `inheritAttrs: false` so `class` folds into the component's own `cn()` call. */
+defineOptions({ name: 'ComboboxInput', inheritAttrs: false });
+
+const props = defineProps<ComboboxInputProps>();
+
+const attrs = useAttrs();
+
+/* `ctx` is a live-getter object — read fields off it, never destructure. */
+const ctx = useComboboxContext();
+
+const inputState = computed(
+  () => props.state ?? (ctx.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
+);
+
+function setRef(node: unknown): void {
+  ctx.inputEl.value = (node ?? null) as HTMLInputElement | null;
+}
+
+/* `document` is reached only from a keydown handler, which cannot fire during SSR. */
+function setActiveAndScroll(id: string): void {
+  ctx.setActiveId(id);
+  document.getElementById(id)?.scrollIntoView({ block: 'nearest' });
+}
+
+function moveActive(direction: 1 | -1): void {
+  const list = ctx.items.filter((i) => !i.isDisabled);
+  if (list.length === 0) return;
+  const idx = list.findIndex((i) => i.id === ctx.activeId);
+  let nextIdx = idx + direction;
+  if (idx === -1) nextIdx = direction === 1 ? 0 : list.length - 1;
+  if (nextIdx < 0) nextIdx = list.length - 1;
+  if (nextIdx >= list.length) nextIdx = 0;
+  const next = list[nextIdx];
+  if (next) setActiveAndScroll(next.id);
+}
+
+/* Runs after any caller-supplied `@keydown` (declared after `v-bind`), exactly as React's
+   `onKeyDown?.(e)` ran before this body. */
+function onKeydown(event: KeyboardEvent): void {
+  if (event.defaultPrevented || ctx.isDisabled) return;
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault();
+      if (!ctx.open) ctx.setOpen(true);
+      else moveActive(1);
+      break;
+    case 'ArrowUp':
+      event.preventDefault();
+      if (!ctx.open) ctx.setOpen(true);
+      else moveActive(-1);
+      break;
+    case 'Home':
+      if (ctx.open) {
+        event.preventDefault();
+        const first = ctx.items.find((i) => !i.isDisabled);
+        if (first) setActiveAndScroll(first.id);
+      }
+      break;
+    case 'End':
+      if (ctx.open) {
+        event.preventDefault();
+        const list = ctx.items.filter((i) => !i.isDisabled);
+        const last = list[list.length - 1];
+        if (last) setActiveAndScroll(last.id);
+      }
+      break;
+    case 'Tab':
+      /* Lets focus move on — DismissableLayer only closes on pointer/Escape. */
+      if (ctx.open) ctx.setOpen(false);
+      break;
+    case 'Enter': {
+      if (!ctx.open || !ctx.activeId) return;
+      const entry = ctx.items.find((i) => i.id === ctx.activeId);
+      if (!entry || entry.isDisabled) return;
+      event.preventDefault();
+      ctx.selectItem(entry);
+      break;
+    }
+    case 'Escape':
+      if (ctx.open) {
+        event.preventDefault();
+        ctx.setOpen(false);
+      } else if (ctx.inputValue) {
+        event.preventDefault();
+        ctx.setInputValue('');
+        ctx.setValue('');
+      }
+      break;
+  }
+}
+
+function onInput(event: Event): void {
+  ctx.setInputValue((event.target as HTMLInputElement).value);
+  if (!ctx.open) ctx.setOpen(true);
+  // Clear active when input changes — re-seeded by ComboboxContent's clamp.
+  ctx.setActiveId(null);
+}
+
+function onFocus(): void {
+  if (!ctx.open) ctx.setOpen(true);
+}
+
+function onBlur(event: FocusEvent): void {
+  /* `relatedTarget === null` = pointer interaction — DismissableLayer owns that path. */
+  const next = event.relatedTarget as Node | null;
+  if (!next || !ctx.open) return;
+  if (ctx.inputEl.value?.contains(next)) return;
+  if (ctx.contentEl.value?.contains(next)) return;
+  ctx.setOpen(false);
+}
+
+/* Only while open — options unmount on close but `activeId` state survives, and a dangling id
+   is an axe aria-valid-attr-value hit. */
+const activeDescendant = computed(() => (ctx.open ? (ctx.activeId ?? undefined) : undefined));
+
+const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const passthroughAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+);
+
+const inputClass = computed(() =>
+  cn(
+    inputBaseVariants({ size: props.size, state: inputState.value }),
+    attrs.class as ClassValue,
+  ),
+);
+
+/** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+defineExpose({ el: ctx.inputEl });
+</script>
+
+<template>
+  <input
+    :ref="setRef"
+    type="text"
+    role="combobox"
+    :aria-expanded="ctx.open"
+    :aria-controls="ctx.listboxId"
+    :aria-activedescendant="activeDescendant"
+    aria-autocomplete="list"
+    :aria-disabled="ctx.isDisabled || undefined"
+    :disabled="ctx.isDisabled"
+    :value="ctx.inputValue"
+    :class="inputClass"
+    v-bind="passthroughAttrs"
+    @input="onInput"
+    @focus="onFocus"
+    @blur="onBlur"
+    @keydown="onKeydown"
+  />
+</template>
