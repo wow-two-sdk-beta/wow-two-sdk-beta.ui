@@ -279,7 +279,9 @@ const ROWS = [
         </div>
       </Demo>
 
-      <Demo name="Heading" note="size × weight">
+      <!-- 8 × 4. Squeezed into a 330px track it grew an inner horizontal scrollbar,
+           which defeats the point of a matrix — the axes stop being comparable. -->
+      <Demo name="Heading" note="size × weight" is-wide>
         <Matrix
           row-axis="size"
           col-axis="weight"
@@ -318,7 +320,7 @@ const ROWS = [
         </div>
       </Demo>
 
-      <Demo name="Status" note="tone × size, pulse">
+      <Demo name="Status" note="tone × size, pulse" is-wide>
         <Matrix
           row-axis="tone"
           col-axis="size"
@@ -485,7 +487,7 @@ const ROWS = [
         </EmptyState>
       </Demo>
 
-      <Demo name="Sparkline" note="variant × tone">
+      <Demo name="Sparkline" note="variant × tone" is-wide>
         <Matrix
           row-axis="variant"
           col-axis="tone"

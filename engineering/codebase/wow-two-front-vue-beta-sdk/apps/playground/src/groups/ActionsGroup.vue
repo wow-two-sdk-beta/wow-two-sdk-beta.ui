@@ -66,7 +66,14 @@ const BUTTON_VARIANTS = [
 const BUTTON_TONES = ['primary', 'neutral', 'danger', 'success', 'warning'] as const;
 const SIZES = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 
+const ALIGNMENTS = [
+  { value: 'left', label: 'Left' },
+  { value: 'center', label: 'Center' },
+  { value: 'right', label: 'Right' },
+] as const;
+
 const pressed = ref(false);
+const align = ref('center');
 const toggleValue = ref<string[]>(['bold']);
 const segment = ref('week');
 const tile = ref('b');
@@ -187,6 +194,45 @@ const tile = ref('b');
         </div>
       </Demo>
 
+      <!-- `orientation` already shipped (it is React's, ported) — it was just never demoed.
+           Vertical collapses top/bottom radii and stacks with `-mt-px`, the mirror of the
+           horizontal row. `smart-qr` uses the vertical form. -->
+      <Demo name="ToggleButtonGroup" note="orientation axis — horizontal + vertical">
+        <div class="flex items-start gap-6">
+          <ToggleButtonGroup
+            :value="align"
+            @value-change="(v) => (align = v as string)"
+            aria-label="Align (horizontal)"
+          >
+            <ToggleButton v-for="a in ALIGNMENTS" :key="a.value" :value="a.value">
+              {{ a.label }}
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <ToggleButtonGroup
+            orientation="vertical"
+            :value="align"
+            @value-change="(v) => (align = v as string)"
+            aria-label="Align (vertical)"
+          >
+            <ToggleButton v-for="a in ALIGNMENTS" :key="a.value" :value="a.value">
+              {{ a.label }}
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <ToggleButtonGroup
+            orientation="vertical"
+            variant="segmented"
+            :value="align"
+            @value-change="(v) => (align = v as string)"
+            aria-label="Align (vertical, segmented)"
+          >
+            <ToggleButton v-for="a in ALIGNMENTS" :key="a.value" :value="a.value">
+              {{ a.label }}
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+        <p class="mt-2 text-xs text-subtle-foreground">value = {{ align }}</p>
+      </Demo>
+
       <Demo name="SegmentedControl" note="single-select ToggleButtonGroup preset">
         <SegmentedControl :value="segment" @value-change="(v) => (segment = v as string)">
           <ToggleButton value="day">Day</ToggleButton>
@@ -257,11 +303,15 @@ const tile = ref('b');
         </div>
       </Demo>
 
+      <!-- `transform-gpu` is what makes the frame work: `SpeedDial` is `position: fixed`, so
+           a plain `relative` ancestor does not contain it and the dial lands in the window's
+           bottom-right corner instead of the card — reading as "renders nothing" here. A
+           transformed ancestor becomes the containing block for fixed descendants. -->
       <Demo name="SpeedDial" note="click the trigger to fan the actions out">
         <!-- Actions go DIRECTLY inside the root: `SpeedDial` renders its own internal
              `SpeedDialList` around whatever is not a trigger. `SpeedDialList` is not a
              public export. -->
-        <div class="relative h-36 rounded-md bg-muted">
+        <div class="relative h-36 transform-gpu rounded-md bg-muted">
           <SpeedDial position="bottom-right" direction="up" default-open>
             <SpeedDialTrigger />
             <SpeedDialAction aria-label="Edit" tooltip="Edit"><Pencil :size="14" /></SpeedDialAction>
@@ -271,8 +321,8 @@ const tile = ref('b');
         </div>
       </Demo>
 
-      <Demo name="BackToTopButton" note="only appears past a 400px scroll — mounted with threshold 0">
-        <div class="relative h-24 rounded-md bg-muted">
+      <Demo name="BackToTopButton" note="threshold 0 so it shows unscrolled — normally past 400px">
+        <div class="relative h-24 transform-gpu rounded-md bg-muted">
           <BackToTopButton :threshold="0" label="Back to top" />
         </div>
       </Demo>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import * as layout from '@wow-two-beta/ui-vue/presentation/layout';
+import { cn } from '@wow-two-beta/ui-vue/foundation/utils';
 import Demo from '../gallery/Demo.vue';
 import Matrix from '../gallery/Matrix.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
@@ -73,6 +74,25 @@ const SURFACE_VARIANTS = [
 const TONES = ['neutral', 'primary', 'danger', 'success', 'warning', 'info'] as const;
 const GAPS = ['0', '1', '2', '4', '8', '12'] as const;
 const DIRECTIONS = ['row', 'column', 'row-reverse', 'column-reverse'] as const;
+
+/** The `max-width` each `Container` size resolves to — printed so the axis is readable
+    even at the steps that clamp to `w-full` on a narrow viewport. */
+const CONTAINER_MAX: Record<string, string> = {
+  sm: '640px',
+  md: '768px',
+  lg: '1024px',
+  xl: '1280px',
+  '2xl': '1536px',
+  full: 'none',
+};
+
+/** `Flex` has no variant axes, so the demo drives it through fallthrough utilities. */
+const FLEX_CASES = [
+  { label: 'gap-2', class: 'gap-2' },
+  { label: 'gap-2 justify-between', class: 'gap-2 justify-between' },
+  { label: 'gap-2 flex-col (h-auto)', class: 'gap-2 flex-col !h-auto' },
+  { label: 'gap-2 items-end', class: 'gap-2 items-end' },
+] as const;
 </script>
 
 <template>
@@ -92,7 +112,9 @@ const DIRECTIONS = ['row', 'column', 'row-reverse', 'column-reverse'] as const;
     </Demo>
 
     <div class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-3">
-      <Demo name="Surface" note="radius × elevation">
+      <!-- 7 × 6. In a 320px track this grew an inner horizontal scrollbar, and two
+           axes you have to scroll between cannot be compared. -->
+      <Demo name="Surface" note="radius × elevation" is-wide>
         <Matrix
           row-axis="radius"
           col-axis="elevation"
@@ -120,7 +142,7 @@ const DIRECTIONS = ['row', 'column', 'row-reverse', 'column-reverse'] as const;
         </Matrix>
       </Demo>
 
-      <Demo name="Stack" note="direction × gap">
+      <Demo name="Stack" note="direction × gap" is-wide>
         <Matrix row-axis="direction" col-axis="gap" :rows="DIRECTIONS" :cols="GAPS">
           <template #default="{ row, col }">
             <Stack :direction="row as never" :gap="col as never">
@@ -132,7 +154,7 @@ const DIRECTIONS = ['row', 'column', 'row-reverse', 'column-reverse'] as const;
         </Matrix>
       </Demo>
 
-      <Demo name="Stack" note="align × justify inside a fixed 120×48 box">
+      <Demo name="Stack" note="align × justify inside a fixed 120×48 box" is-wide>
         <Matrix
           row-axis="align"
           col-axis="justify"
@@ -180,24 +202,42 @@ const DIRECTIONS = ['row', 'column', 'row-reverse', 'column-reverse'] as const;
         </Matrix>
       </Demo>
 
-      <Demo name="Container" note="size scale — max-width steps">
+      <!-- Needs the full row: every step is a max-width between 640px and 1536px, so in a
+           320px track all six clamp to `w-full` and render as six identical bars — which is
+           what "Container shows nothing" was. Full-width, the first four steps separate. -->
+      <Demo name="Container" note="size scale — max-width steps, centred by mx-auto" is-wide>
         <div class="space-y-1">
           <Container
             v-for="s in ['sm', 'md', 'lg', 'xl', '2xl', 'full']"
             :key="s"
             :size="s as never"
-            class="bg-muted"
+            class="bg-muted py-0.5 text-center"
           >
-            <span class="text-[10px]">{{ s }}</span>
+            <span class="font-mono text-[10px]">{{ s }} — {{ CONTAINER_MAX[s] }}</span>
           </Container>
         </div>
+        <p class="mt-2 text-[10px] text-subtle-foreground">
+          Steps wider than the viewport collapse to `w-full` — expected, `max-width` is a cap.
+        </p>
       </Demo>
 
-      <Demo name="Flex">
-        <Flex class="gap-2">
-          <div class="rounded-xs bg-info px-2 py-1 text-xs text-info-foreground">a</div>
-          <div class="rounded-xs bg-info px-2 py-1 text-xs text-info-foreground">b</div>
-        </Flex>
+      <!-- `Flex` declares ONE prop (`as`). It is a bare `display:flex` box, so the demo has to
+           prove the two things it actually does: fall through utility classes via `cn`, and
+           re-tag through `as`. Two chips proved neither. -->
+      <Demo name="Flex" note="bare flex box — utilities fall through cn(), `as` re-tags">
+        <div class="space-y-2">
+          <div v-for="f in FLEX_CASES" :key="f.label">
+            <p class="mb-0.5 font-mono text-[10px] text-subtle-foreground">{{ f.label }}</p>
+            <Flex :class="cn('h-10 rounded-xs bg-muted p-1', f.class)">
+              <div class="rounded-xs bg-info px-2 py-1 text-xs text-info-foreground">a</div>
+              <div class="rounded-xs bg-info px-2 py-1 text-xs text-info-foreground">b</div>
+              <div class="rounded-xs bg-info px-2 py-1 text-xs text-info-foreground">c</div>
+            </Flex>
+          </div>
+          <Flex as="ul" class="gap-2 rounded-xs bg-muted p-1">
+            <li class="text-xs">as="ul" → renders &lt;ul&gt;</li>
+          </Flex>
+        </div>
       </Demo>
 
       <Demo name="AspectRatio" note="1 / 16:9 / 4:3">
@@ -251,12 +291,30 @@ const DIRECTIONS = ['row', 'column', 'row-reverse', 'column-reverse'] as const;
         </div>
       </Demo>
 
-      <Demo name="ScrollArea" note="vertical — should clip and scroll, not grow">
-        <ScrollArea class="h-24 rounded-md border border-border">
-          <div class="space-y-1 p-2">
-            <p v-for="n in 20" :key="n" class="text-xs">scroll line {{ n }}</p>
-          </div>
-        </ScrollArea>
+      <!-- `ScrollArea` is the NATIVE-scrollbar atom (custom track + thumb is the deferred L5
+           organism), so the scrollbar paints inside the element's own border box. Putting the
+           border + rounding on the scroller therefore drew the bar across the rounded corners
+           and read as overflow. The border belongs on a wrapper; the scroller sits inside it. -->
+      <Demo name="ScrollArea" note="vertical — native scrollbar, border on the wrapper">
+        <div class="overflow-hidden rounded-md border border-border">
+          <ScrollArea class="h-24">
+            <div class="space-y-1 p-2">
+              <p v-for="n in 20" :key="n" class="text-xs">scroll line {{ n }}</p>
+            </div>
+          </ScrollArea>
+        </div>
+        <p class="mt-2 text-[10px] text-subtle-foreground">
+          axis="horizontal" and "both" below share the same wrapper rule.
+        </p>
+        <div class="mt-1 overflow-hidden rounded-md border border-border">
+          <ScrollArea axis="horizontal" class="w-full">
+            <div class="flex w-max gap-2 p-2">
+              <span v-for="n in 14" :key="n" class="whitespace-nowrap rounded-xs bg-muted px-2 py-1 text-xs">
+                col {{ n }}
+              </span>
+            </div>
+          </ScrollArea>
+        </div>
       </Demo>
 
       <Demo name="Inline" note="align variants, wrapping">
@@ -267,15 +325,26 @@ const DIRECTIONS = ['row', 'column', 'row-reverse', 'column-reverse'] as const;
         </Inline>
       </Demo>
 
-      <Demo name="Cluster">
-        <Cluster gap="2">
-          <span class="rounded-full bg-primary-soft px-2 py-0.5 text-xs text-primary-soft-foreground">
-            one
-          </span>
-          <span class="rounded-full bg-primary-soft px-2 py-0.5 text-xs text-primary-soft-foreground">
-            two
-          </span>
-        </Cluster>
+      <!-- `Cluster` has two axes (gap × justify) and the old demo exercised neither — two
+           centred chips look the same under every combination. -->
+      <Demo name="Cluster" note="gap × justify — centres by default, unlike Inline" is-wide>
+        <Matrix
+          row-axis="justify"
+          col-axis="gap"
+          :rows="['start', 'center', 'end']"
+          :cols="['2', '3', '4', '6', '8']"
+        >
+          <template #default="{ row, col }">
+            <Cluster :gap="col as never" :justify="row as never" class="w-40 bg-muted/40 py-1">
+              <span class="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] text-primary-soft-foreground">
+                one
+              </span>
+              <span class="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] text-primary-soft-foreground">
+                two
+              </span>
+            </Cluster>
+          </template>
+        </Matrix>
       </Demo>
 
       <Demo name="Frame" note="surface card / muted / transparent">
