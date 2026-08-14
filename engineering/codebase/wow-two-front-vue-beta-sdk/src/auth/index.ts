@@ -26,6 +26,11 @@ export { useAuth, type AuthApi } from './AuthContext';
 // Non-Vue seams — api-client 401s in, router-guard reads out
 export { createAuthBridge, type AuthBridge, type UnauthorizedListener, type SessionListener } from './AuthBridge';
 
+// Google sign-in is NOT here. The GIS client (`useGoogleIdentity`) is a provider-script wrapper
+// with no session concepts, so it ships as `foundation/oauth`; its button is
+// `presentation/actions`'s `GoogleSignInButton`. Feed the credential either one emits to this
+// module's `signIn` — that handoff is where the session starts.
+
 // Strategies
 export { createCookieStrategy, type CreateCookieStrategyOptions, type CookieAuthClient, type CookieSignInContext } from './CookieStrategy';
 export { createBearerStrategy, type CreateBearerStrategyOptions, type BearerStrategy, type BearerAuthenticateResult } from './BearerStrategy';

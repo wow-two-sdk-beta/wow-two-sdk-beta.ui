@@ -58,6 +58,7 @@ const subpathLayer: Record<string, 'foundation' | 'domain' | 'presentation'> = {
   datetime: 'foundation',
   validation: 'foundation',
   net: 'foundation',
+  oauth: 'foundation',
   color: 'domain',
   emoji: 'domain',
   actions: 'presentation',

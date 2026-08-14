@@ -8,6 +8,7 @@ export * from './optionTileGroup';
 export * from './segmentedControl';
 export * from './fab';
 export * from './copyButton';
+export * from './googleSignInButton';
 export * from './disclosureButton';
 export * from './toolbar';
 export * from './speedDial';

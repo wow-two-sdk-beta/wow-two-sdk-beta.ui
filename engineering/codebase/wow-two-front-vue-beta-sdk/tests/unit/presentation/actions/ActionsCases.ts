@@ -6,6 +6,7 @@ import {
   CopyButton,
   DisclosureButton,
   FAB,
+  GoogleSignInButton,
   Link,
   OptionTile,
   OptionTileGroup,
@@ -42,6 +43,12 @@ export const actionsCases: readonly SmokeCase[] = [
   smokeCase('CopyButton', CopyButton, { text: 'copied', 'aria-label': 'Copy' }, { slot: true }),
   smokeCase('DisclosureButton', DisclosureButton, {}, { slot: true }),
   smokeCase('BackToTopButton', BackToTopButton, {}),
+  // No slot (Google draws the button into the host, so there is nothing to probe) and no client
+  // id: an id would send the breadth tier off to fetch the real GIS script. The unconfigured path
+  // is a supported state — apps without a client id stay guest-only — so this covers setup and the
+  // SSR tier honestly, and `GoogleSignInButton.dom.test.ts` carries the rendered flow against a
+  // stubbed client.
+  smokeCase('GoogleSignInButton', GoogleSignInButton, {}),
 
   smokeCase('Toolbar', Toolbar, {}, { slot: true }),
   smokeCase('ToolbarButton', ToolbarButton, {}, {

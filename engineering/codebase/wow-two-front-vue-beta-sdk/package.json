@@ -248,6 +248,11 @@
       "import": "./dist/foundation/net/index.js",
       "default": "./dist/foundation/net/index.js"
     },
+    "./foundation/oauth": {
+      "types": "./dist/foundation/oauth/index.d.ts",
+      "import": "./dist/foundation/oauth/index.js",
+      "default": "./dist/foundation/oauth/index.js"
+    },
     "./analytics": {
       "types": "./dist/analytics/index.d.ts",
       "import": "./dist/analytics/index.js",
