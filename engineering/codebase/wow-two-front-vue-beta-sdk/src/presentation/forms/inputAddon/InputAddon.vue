@@ -47,9 +47,15 @@ const passthroughAttrs = computed(() =>
 
 const rootClass = computed(() =>
   cn(
-    'inline-flex w-full items-stretch [&>*]:rounded-none',
+    'inline-flex w-full items-stretch rounded-md [&>*]:rounded-none',
     '[&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md',
     '[&>*:not(:first-child)]:-ml-px',
+    /* The group is the control, so the focus ring belongs to the group. Past the React
+       original, where the ring landed on the input segment alone and the addons read as
+       separate boxes hanging off a highlighted middle. The segment's own ring is
+       suppressed; it is raised instead so its border paints over its neighbours'. */
+    '[&:has(>*:focus-visible)]:ring-2 [&:has(>*:focus-visible)]:ring-ring',
+    '[&>*:focus-visible]:z-10 [&>*:focus-visible]:relative [&>*:focus-visible]:ring-0',
     attrs.class as ClassValue,
   ),
 );

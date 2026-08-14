@@ -8,6 +8,12 @@ export interface MultiSelectTriggerProps {
 
   /** The validity surface. */
   state?: InputState;
+
+  /**
+   * The chip budget handed to the default `<MultiSelectTags />` — past it the rest collapse
+   * into a `+N` block. Ignored when the trigger's default slot is filled.
+   */
+  maxVisibleTags?: number;
 }
 /* React also inherited `Omit<SelectTriggerVariants, 'size' | 'state'>` — the `border` / `ring`
    axes — but never forwarded them to `selectTriggerVariants`, so they were dead props that
@@ -108,7 +114,7 @@ defineExpose({ el: root });
       @keydown="onKeydown"
     >
       <slot v-if="hasContent" />
-      <MultiSelectTags v-else />
+      <MultiSelectTags v-else :max-visible="maxVisibleTags" />
       <ChevronDownIcon :class="chevronClass" />
     </button>
   </PopoverTrigger>

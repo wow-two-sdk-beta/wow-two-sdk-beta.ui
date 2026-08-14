@@ -27,6 +27,16 @@ export interface MultiSelectContextValue {
   registerLabel: (value: string, label: string | number) => void;
   unregisterLabel: (value: string) => void;
 
+  /**
+   * Resolves a chip label for a value the registry has never seen — `null` when it cannot.
+   *
+   * Rows only register while the panel is mounted, so a preselected value has no registered
+   * label until the dropdown has been opened once and the trigger shows the raw key. Same
+   * gap `Select` closes with `getOptionLabel`; this is that escape hatch, and the registry
+   * still wins where it has an entry.
+   */
+  getOptionLabel: (value: string) => string | number | null;
+
   readonly isDisabled: boolean;
   readonly name?: string;
   readonly isInvalid?: boolean;

@@ -172,7 +172,12 @@ const ChevronDownIcon = ChevronDown;
           <Icon :icon="ChevronDownIcon" :size="14" class="text-muted-foreground" />
         </button>
       </PopoverTrigger>
-      <PopoverContent is-bare class="w-[20rem] p-2">
+      <!-- NOT `is-bare` (which the React original passed): bare strips the whole surface
+           recipe — background, border, shadow — leaving a transparent panel with the page
+           showing through the font list. The explicit `w-`/`p-` classes already override the
+           chrome defaults (`w-72`, `padding: lg`) through `cn`, which is all `is-bare` was
+           being used for. -->
+      <PopoverContent class="w-[20rem] p-2">
         <input
           type="search"
           autofocus

@@ -39,8 +39,12 @@ const passthroughAttrs = computed(() =>
 
 const rootClass = computed(() =>
   cn(
-    'inline-flex w-full',
+    'inline-flex w-full rounded-md',
     isHorizontal.value ? 'flex-row' : 'flex-col',
+    /* Same contract as `InputAddon`: the joined row is one control, so the ring goes round
+       the whole group and the focused segment only rises above its neighbours' borders. */
+    '[&:has(>*:focus-visible)]:ring-2 [&:has(>*:focus-visible)]:ring-ring',
+    '[&>*:focus-visible]:z-10 [&>*:focus-visible]:relative [&>*:focus-visible]:ring-0',
     isHorizontal.value
       ? '[&>*]:rounded-none [&>*:first-child]:rounded-l-md [&>*:last-child]:rounded-r-md [&>*:not(:first-child)]:-ml-px'
       : '[&>*]:rounded-none [&>*:first-child]:rounded-t-md [&>*:last-child]:rounded-b-md [&>*:not(:first-child)]:-mt-px',

@@ -35,6 +35,11 @@ export interface MaskedInputProps {
 }
 
 export function applyMask(raw: string, mask: string): string {
+  /* Hardening past the React original, which read `mask.length` unguarded: `mask` is a
+     required prop, but Vue only WARNS on a missing required prop and then renders, so an
+     omitted mask turned every keystroke into a TypeError instead of a console warning.
+     Passing the raw value through keeps the control usable while the warning still fires. */
+  if (!mask) return raw;
   let out = '';
   let r = 0;
   for (let m = 0; m < mask.length && r < raw.length; m++) {

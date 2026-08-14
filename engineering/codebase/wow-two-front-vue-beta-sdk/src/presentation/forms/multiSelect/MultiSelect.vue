@@ -31,6 +31,15 @@ export interface MultiSelectProps {
 
   /** The floating placement of the dropdown. */
   placement?: Placement;
+
+  /**
+   * Resolves a chip label for a value whose row has not mounted yet — `null` when unknown.
+   *
+   * `MultiSelectItem` registers its label only while the panel is open, so a preselected
+   * value renders as its raw key until the first open. Supply this (or open the panel) to
+   * label a closed trigger. The mirror of `Select`'s prop of the same name.
+   */
+  getOptionLabel?: (value: string) => string | number | null;
 }
 </script>
 
@@ -117,6 +126,14 @@ function unregisterLabel(value: string): void {
   labels.value = next;
 }
 
+/* Wrapped rather than passed through: the context field is non-optional, so consumers read
+   one shape whether or not the prop was supplied. The `Fn` suffix is not cosmetic — a local
+   named exactly like a declared prop trips `vue/no-dupe-keys`, which is why `Select` spells
+   its own the same way. */
+function getOptionLabelFn(value: string): string | number | null {
+  return props.getOptionLabel?.(value) ?? null;
+}
+
 provide<MultiSelectContextValue>(multiSelectContextKey, {
   get open() {
     return openCtl.value.value;
@@ -131,6 +148,7 @@ provide<MultiSelectContextValue>(multiSelectContextKey, {
   },
   registerLabel,
   unregisterLabel,
+  getOptionLabel: getOptionLabelFn,
   get isDisabled() {
     return finalDisabled.value;
   },

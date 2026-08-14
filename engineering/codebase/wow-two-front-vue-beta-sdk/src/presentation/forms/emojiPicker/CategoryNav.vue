@@ -45,7 +45,10 @@ const emit = defineEmits<{
 
 const isPills = computed(() => props.variant === CategoryNavVariantValue.Pills);
 const navSize = computed(() => EmojiPickerSizes[props.size].nav);
-const stripIconSize = computed(() => props.iconSize ?? Math.round(navSize.value * 0.8));
+/* 0.55, not the React original's 0.8. `EmojiPickerSizes` already fixes the house glyph-in-box
+   ratio at 0.55 (md: glyph 22 in tile 40); 0.8 left a 24px icon in a 30px segment, filling the
+   strip edge-to-edge. Matching the tile ratio puts the nav back in scale with the picker. */
+const stripIconSize = computed(() => props.iconSize ?? Math.round(navSize.value * 0.55));
 const stripItemStyle = computed<CSSProperties>(() => ({ height: `${navSize.value}px` }));
 
 const categories = computed(() =>

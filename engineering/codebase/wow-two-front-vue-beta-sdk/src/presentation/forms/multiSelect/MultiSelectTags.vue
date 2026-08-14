@@ -2,31 +2,65 @@
 export interface MultiSelectTagsProps {
   /** The content shown when no values are selected. Fill the `placeholder` slot for richer content. */
   placeholder?: string | number;
+
+  /**
+   * The number of chips rendered before the rest collapse into a `+N` block. Omit to render
+   * every selection (the React original's only behaviour).
+   *
+   * A declarative budget rather than a measured fit: the trigger wraps by default, so a
+   * measured overflow would never trigger, and measuring would put the chip strip behind a
+   * `ResizeObserver` frame — invisible until the browser paints. Capping is deterministic,
+   * renders identically on the server, and is the axis a caller actually wants to control.
+   */
+  maxVisible?: number;
 }
 </script>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { X } from 'lucide-vue-next';
+import { cn } from '../../../foundation/utils';
 import { useMultiSelectContext } from './MultiSelectContext';
 
 /** The chip strip rendered inside the trigger. */
 defineOptions({ name: 'MultiSelectTags' });
 
-defineProps<MultiSelectTagsProps>();
+const props = defineProps<MultiSelectTagsProps>();
 
 defineSlots<{ placeholder?(): unknown }>();
 
 /* `ctx` is a live-getter object — read fields off it, never destructure. */
 const ctx = useMultiSelectContext();
 
+const isCapped = computed(
+  () => props.maxVisible !== undefined && ctx.values.length > props.maxVisible,
+);
+
+const visibleValues = computed(() =>
+  isCapped.value ? ctx.values.slice(0, props.maxVisible) : ctx.values,
+);
+
+const overflowCount = computed(() => ctx.values.length - visibleValues.value.length);
+
+/* Capped: one line that clips, so the `+N` stays pinned at the end. Uncapped: the historical
+   wrap, which grows the trigger (`h-auto min-h-10` there) instead of hiding anything. */
+const stripClass = computed(() =>
+  cn(
+    'flex min-w-0 flex-1 items-center gap-1',
+    isCapped.value ? 'flex-nowrap overflow-hidden' : 'flex-wrap',
+  ),
+);
+
+/* Registry (rows currently mounted) → `getOptionLabel` (a value whose row has never mounted,
+   which is every preselected one before the first open) → the raw value. */
 function tagLabel(value: string): string | number {
-  return ctx.labels[value] ?? value;
+  return ctx.labels[value] ?? ctx.getOptionLabel(value) ?? value;
 }
 
 /* Matches React exactly: a non-string label (a numeric one) falls back to the raw value
    rather than being interpolated into the accessible name. */
 function removeLabel(value: string): string {
-  const label = ctx.labels[value];
+  const label = tagLabel(value);
   return `Remove ${typeof label === 'string' ? label : value}`;
 }
 
@@ -44,11 +78,14 @@ const CloseIcon = X;
   <span v-if="ctx.values.length === 0" class="text-muted-foreground">
     <slot name="placeholder">{{ placeholder }}</slot>
   </span>
-  <span v-else class="flex flex-1 flex-wrap items-center gap-1">
+  <span v-else :class="stripClass">
+    <!-- `border-border` is load-bearing, not decoration: `bg-muted` resolves to the same
+         color as the trigger's `bg-popover` in several shipped themes (smart-qr among
+         them), and a chip with no edge reads as a bare trigger. -->
     <span
-      v-for="v in ctx.values"
+      v-for="v in visibleValues"
       :key="v"
-      class="inline-flex items-center gap-1 rounded-sm bg-muted px-1.5 py-0.5 text-xs"
+      class="inline-flex max-w-full shrink-0 items-center gap-1 truncate rounded-sm border border-border bg-muted px-1.5 py-0.5 text-xs"
     >
       {{ tagLabel(v) }}
       <span
@@ -61,6 +98,16 @@ const CloseIcon = X;
         @pointerdown.stop
       >
         <CloseIcon class="h-3 w-3" />
+      </span>
+    </span>
+
+    <!-- Deliberately NOT chip-shaped: no radius, no fill, no remove control. A `+N` that
+         borrows the chip's surface reads as one more removable selection; the rule and the
+         bare count read as the summary it is. -->
+    <span v-if="overflowCount > 0" class="ml-0.5 flex shrink-0 items-center gap-1.5">
+      <span aria-hidden="true" class="h-4 w-px shrink-0 bg-border" />
+      <span class="text-xs font-medium tabular-nums text-muted-foreground">
+        +{{ overflowCount }}
       </span>
     </span>
   </span>
