@@ -59,6 +59,10 @@ import AgendaView from './AgendaView.vue';
 defineOptions({ name: 'EventCalendar', inheritAttrs: false });
 
 const props = withDefaults(defineProps<EventCalendarProps>(), {
+  /* `events` stays declared-required — Vue still warns when it is missing — but a
+     default keeps an absent (or transiently-undefined) value out of the `[...spread]`
+     below, which threw `props.events is not iterable` and took the whole page down. */
+  events: () => [],
   defaultView: EventCalendarViewValue.Month,
   weekStart: 0,
   hourRange: () => [0, 24],

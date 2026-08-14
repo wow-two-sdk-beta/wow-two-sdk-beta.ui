@@ -110,7 +110,7 @@ defineExpose({ el });
   <Primitive
     ref="inner"
     as="div"
-    :as-child="props.asChild"
+    :as-child="asChild"
     v-bind="attrs"
     @contextmenu="handleContextMenu"
     @pointerdown="handlePointerDown"

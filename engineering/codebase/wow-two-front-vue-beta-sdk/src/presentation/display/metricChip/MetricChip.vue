@@ -34,19 +34,29 @@ export interface MetricChipProps {
   /** The value rendered after the label, tabular-nums. Rich content goes through the `value` slot. */
   value: string | number;
 
-  /** The tone tinting for the icon. Default `neutral`. */
+  /** The tone tinting the icon and the value. Default `neutral`. */
   tone?: MetricChipTone;
 
   /** The visual size — drives gap + text-size token. Default `sm`. */
   size?: MetricChipSize;
 }
 
-const TONE: Record<MetricChipTone, string> = {
-  neutral: 'text-muted-foreground',
-  success: 'text-success',
-  warning: 'text-warning',
-  danger: 'text-destructive',
-  info: 'text-info',
+/**
+ * Tints the icon *and* the value.
+ *
+ * Tinting only the icon made `tone` a no-op on the icon-less chip — every tone
+ * emitted an identical class string. The value is the part a reader scans, so it
+ * carries the tone whether or not an icon is supplied.
+ *
+ * Coloured tones use `-soft-foreground`, not the full-strength `{tone}`: this text
+ * sits on the host surface, where `text-warning` measures 2.15:1.
+ */
+const TONE: Record<MetricChipTone, { icon: string; value: string }> = {
+  neutral: { icon: 'text-muted-foreground', value: 'text-foreground' },
+  success: { icon: 'text-success-soft-foreground', value: 'text-success-soft-foreground' },
+  warning: { icon: 'text-warning-soft-foreground', value: 'text-warning-soft-foreground' },
+  danger: { icon: 'text-destructive-soft-foreground', value: 'text-destructive-soft-foreground' },
+  info: { icon: 'text-info-soft-foreground', value: 'text-info-soft-foreground' },
 };
 
 const SIZE: Record<MetricChipSize, { wrapper: string; label: string; value: string }> = {
@@ -91,15 +101,17 @@ const classes = computed(() =>
   cn('inline-flex items-center', size.value.wrapper, attrs.class as string | undefined),
 );
 
+const tone = computed(() => TONE[props.tone]);
+
 const iconClasses = computed(() =>
-  cn('inline-flex shrink-0 items-center', TONE[props.tone]),
+  cn('inline-flex shrink-0 items-center', tone.value.icon),
 );
 
 const labelClasses = computed(() =>
   cn('font-medium uppercase tracking-wide text-muted-foreground', size.value.label),
 );
 
-const valueClasses = computed(() => cn('tabular-nums text-foreground', size.value.value));
+const valueClasses = computed(() => cn('tabular-nums', tone.value.value, size.value.value));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

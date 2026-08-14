@@ -53,6 +53,10 @@ defineSlots<{
 }>();
 
 const props = withDefaults(defineProps<ReactionBarProps>(), {
+  /* `reactions` stays declared-required — Vue still warns when it is missing — but a
+     default keeps an absent (or transiently-undefined) value out of the `.filter`
+     below, which took the whole page down. */
+  reactions: () => [],
   hasAddButton: true,
   isCompact: undefined,
   hasEmpty: false,

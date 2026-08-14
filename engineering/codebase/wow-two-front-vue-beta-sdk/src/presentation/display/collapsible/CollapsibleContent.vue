@@ -21,7 +21,9 @@ defineOptions({ name: 'CollapsibleContent', inheritAttrs: false });
 /** The pane content — React's required `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<CollapsibleContentProps>(), {
+/* Not bound to a `props` const: with every reference now in the template — where the bare
+   name compiles to `$props`, which survives a setup throw — the binding would be unused. */
+withDefaults(defineProps<CollapsibleContentProps>(), {
   isForceMounted: undefined,
 });
 
@@ -38,9 +40,9 @@ defineExpose({ el });
 
 <template>
   <CollapsibleContentInner
-    v-if="props.isForceMounted"
+    v-if="isForceMounted"
     ref="inner"
-    :is-force-mounted="props.isForceMounted"
+    :is-force-mounted="isForceMounted"
     :data-state="context.open ? 'open' : 'closed'"
     v-bind="$attrs"
   >
@@ -49,7 +51,7 @@ defineExpose({ el });
   <Presence v-else :is-present="context.open">
     <CollapsibleContentInner
       ref="inner"
-      :is-force-mounted="props.isForceMounted"
+      :is-force-mounted="isForceMounted"
       v-bind="$attrs"
     >
       <slot />

@@ -31,7 +31,9 @@ defineOptions({ name: 'ContextMenuContent', inheritAttrs: false });
 /** The menu contents — React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<ContextMenuContentProps>(), {
+/* Not bound to a `props` const: with every reference now in the template — where the bare
+   name compiles to `$props`, which survives a setup throw — the binding would be unused. */
+withDefaults(defineProps<ContextMenuContentProps>(), {
   placement: 'bottom-start',
   offset: 2,
 });
@@ -61,8 +63,8 @@ const rest = computed(() => {
   <Menu
     :open="isOpen"
     :anchor="anchor"
-    :placement="props.placement"
-    :offset="props.offset"
+    :placement="placement"
+    :offset="offset"
     v-bind="rest"
     :class="classes"
     @close="context.setOpen(false)"

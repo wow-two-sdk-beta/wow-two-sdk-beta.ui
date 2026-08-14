@@ -49,6 +49,13 @@ import CellEditor from './CellEditor.vue';
 defineOptions({ name: 'DataGrid', inheritAttrs: false });
 
 const props = withDefaults(defineProps<DataGridProps<T>>(), {
+  /* These three stay declared-required — Vue still warns when one is missing — but
+     the defaults keep an absent (or transiently-undefined) value from reaching the
+     `.length` reads below, which took the whole page down. An empty grid renders
+     its own header-only shell instead. */
+  columns: () => [],
+  rows: () => [],
+  rowKey: (row: unknown) => String(row),
   // Explicit `undefined` so an absent Boolean prop is not cast to `false`.
   isDense: undefined,
 });

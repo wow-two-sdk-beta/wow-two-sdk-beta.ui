@@ -1,6 +1,12 @@
 <script lang="ts">
 export interface ListItemProps {
-  /** The auto-check-marker mode — renders a check marker if the parent List uses `marker="check"`. */
+  /**
+   * The check-marker override.
+   *
+   * Omitted, it follows the parent `List`'s `marker` — a check appears under
+   * `marker="check"` and nowhere else. Set it explicitly to force the marker on or
+   * off for one row.
+   */
   hasCheckMarker?: boolean;
 }
 </script>
@@ -10,6 +16,7 @@ import { computed, useAttrs, useTemplateRef } from 'vue';
 import { Check } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
 import { listItemVariants } from './List.variants';
+import { useListContext } from './ListContext';
 
 /** A `List` row — optional check marker, leading and trailing adornments. */
 defineOptions({ name: 'ListItem', inheritAttrs: false });
@@ -27,6 +34,10 @@ const props = withDefaults(defineProps<ListItemProps>(), { hasCheckMarker: undef
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLLIElement>('el');
+const list = useListContext();
+
+/* The prop is an override; with it omitted the parent's `marker` decides. */
+const showCheck = computed(() => props.hasCheckMarker ?? list.marker === 'check');
 
 const classes = computed(() =>
   cn(listItemVariants(), attrs.class as string | undefined),
@@ -43,7 +54,7 @@ defineExpose({ el });
 
 <template>
   <li ref="el" v-bind="rest" :class="classes">
-    <span v-if="props.hasCheckMarker" aria-hidden="true" class="mt-0.5 shrink-0 text-primary">
+    <span v-if="showCheck" aria-hidden="true" class="mt-0.5 shrink-0 text-primary">
       <Check class="h-4 w-4" />
     </span>
     <span v-if="$slots.leading" aria-hidden="true" class="mt-0.5 shrink-0 text-muted-foreground">

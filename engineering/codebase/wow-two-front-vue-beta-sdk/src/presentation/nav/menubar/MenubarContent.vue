@@ -31,7 +31,9 @@ defineOptions({ name: 'MenubarContent', inheritAttrs: false });
 /** The menu contents — React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<MenubarContentProps>(), {
+/* Not bound to a `props` const: with every reference now in the template — where the bare
+   name compiles to `$props`, which survives a setup throw — the binding would be unused. */
+withDefaults(defineProps<MenubarContentProps>(), {
   placement: 'bottom-start',
   offset: 4,
 });
@@ -70,8 +72,8 @@ function handleKeydown(event: KeyboardEvent): void {
   <Menu
     :open="isOpen"
     :anchor="anchor"
-    :placement="props.placement"
-    :offset="props.offset"
+    :placement="placement"
+    :offset="offset"
     v-bind="attrs"
     @close="handleClose"
     @keydown="handleKeydown"

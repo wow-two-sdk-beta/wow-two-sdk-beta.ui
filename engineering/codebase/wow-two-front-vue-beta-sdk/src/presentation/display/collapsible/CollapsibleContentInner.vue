@@ -23,7 +23,9 @@ defineOptions({ name: 'CollapsibleContentInner', inheritAttrs: false });
 /** The pane content. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<CollapsibleContentInnerProps>(), {
+/* Not bound to a `props` const: with every reference now in the template — where the bare
+   name compiles to `$props`, which survives a setup throw — the binding would be unused. */
+withDefaults(defineProps<CollapsibleContentInnerProps>(), {
   isForceMounted: undefined,
 });
 
@@ -58,7 +60,7 @@ defineExpose({ el });
     :id="context.contentId"
     role="region"
     :aria-labelledby="context.triggerId"
-    :hidden="!context.open && !props.isForceMounted"
+    :hidden="!context.open && !isForceMounted"
     v-bind="rest"
     :class="classes"
   >

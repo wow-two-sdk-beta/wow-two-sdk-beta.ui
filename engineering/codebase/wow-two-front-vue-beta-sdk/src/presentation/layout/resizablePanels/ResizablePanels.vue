@@ -288,7 +288,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div ref="el" :data-orientation="props.orientation" v-bind="rest" :class="classes">
+  <div ref="el" :data-orientation="orientation" v-bind="rest" :class="classes">
     <slot />
   </div>
 </template>

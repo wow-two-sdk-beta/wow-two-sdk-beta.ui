@@ -17,7 +17,9 @@ defineOptions({ name: 'CollapsibleTrigger', inheritAttrs: false });
 /** The trigger content — React's required `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<CollapsibleTriggerProps>(), { asChild: false });
+/* Not bound to a `props` const: with every reference now in the template — where the bare
+   name compiles to `$props`, which survives a setup throw — the binding would be unused. */
+withDefaults(defineProps<CollapsibleTriggerProps>(), { asChild: false });
 
 const context = useCollapsibleContext();
 
@@ -44,7 +46,7 @@ defineExpose({ el });
   <Primitive
     :ref="setEl"
     :as="HtmlElement.Button"
-    :as-child="props.asChild"
+    :as-child="asChild"
     :id="context.triggerId"
     :type="ButtonType.Button"
     :aria-expanded="context.open"

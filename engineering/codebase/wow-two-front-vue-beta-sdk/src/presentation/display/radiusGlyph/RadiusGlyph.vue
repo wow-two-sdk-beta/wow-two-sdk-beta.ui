@@ -25,6 +25,10 @@ import { computed, useTemplateRef } from 'vue';
 defineOptions({ name: 'RadiusGlyph' });
 
 const props = withDefaults(defineProps<RadiusGlyphProps>(), {
+  /* `extent` stays declared-required — Vue still warns when it is missing — but a
+     default keeps `undefined` out of `discRadius`, which rendered as `r="NaN"` and
+     made the browser reject the `<circle>`. `0` is the low end of its own `0..1`. */
+  extent: 0,
   size: 16,
   color: 'currentColor',
   strokeWidth: 1.5,

@@ -116,6 +116,11 @@ defineSlots<{
 }>();
 
 const props = withDefaults(defineProps<DiffViewerProps>(), {
+  /* Both sides stay declared-required — Vue still warns when one is missing — but
+     the defaults keep an absent (or transiently-undefined) value out of
+     `computeDiff`, which called `.split` on it and took the whole page down. */
+  left: '',
+  right: '',
   view: DiffView.Split,
   leftLabel: 'Before',
   rightLabel: 'After',

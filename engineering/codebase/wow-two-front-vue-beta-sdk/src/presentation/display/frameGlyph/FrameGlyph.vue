@@ -23,7 +23,16 @@ defineOptions({ name: 'FrameGlyph' });
 
 /* `isDot` defaults to `undefined`, not `false`: Vue casts an absent `Boolean`
    prop to `false`, and React's original left it genuinely optional. */
-const props = withDefaults(defineProps<FrameGlyphProps>(), { isDot: undefined, size: 20 });
+/* `frameRx` / `pupilRoundness` stay declared-required — Vue still warns when one is
+   missing — but the defaults keep `undefined` out of the `rx` attributes, which
+   rendered as `rx="NaN"` and made the browser reject the `<rect>`. `0` = square for
+   both, which is each prop's own documented zero. */
+const props = withDefaults(defineProps<FrameGlyphProps>(), {
+  frameRx: 0,
+  pupilRoundness: 0,
+  isDot: undefined,
+  size: 20,
+});
 
 const el = useTemplateRef<SVGSVGElement>('el');
 

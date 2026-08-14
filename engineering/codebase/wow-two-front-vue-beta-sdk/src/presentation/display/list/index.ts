@@ -4,3 +4,4 @@ export { default as List, type ListProps } from './List.vue';
    other compound family in this group uses. */
 export { default as ListItem, type ListItemProps } from './ListItem.vue';
 export { listVariants, ListMarker, ListSpacing, type ListVariants } from './List.variants';
+export { ListKey, useListContext, type ListContextValue } from './ListContext';

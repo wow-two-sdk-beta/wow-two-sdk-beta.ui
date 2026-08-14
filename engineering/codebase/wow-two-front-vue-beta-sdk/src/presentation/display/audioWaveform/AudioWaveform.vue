@@ -93,6 +93,10 @@ import { cn } from '../../../foundation/utils';
 defineOptions({ name: 'AudioWaveform', inheritAttrs: false });
 
 const props = withDefaults(defineProps<AudioWaveformProps>(), {
+  /* `peaks` stays declared-required — Vue still warns when it is missing — but a
+     default keeps an absent (or transiently-undefined) value from reaching
+     `sampleTo`, which read `.length` off it and took the whole page down. */
+  peaks: () => [],
   progress: 0,
   width: 320,
   height: 48,

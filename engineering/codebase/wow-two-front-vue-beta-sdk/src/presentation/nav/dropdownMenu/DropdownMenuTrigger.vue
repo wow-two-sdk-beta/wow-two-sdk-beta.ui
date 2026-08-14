@@ -23,7 +23,9 @@ defineOptions({ name: 'DropdownMenuTrigger', inheritAttrs: false });
 /** The trigger content — React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<DropdownMenuTriggerProps>(), { asChild: false });
+/* Not bound to a `props` const: with every reference now in the template — where the bare
+   name compiles to `$props`, which survives a setup throw — the binding would be unused. */
+withDefaults(defineProps<DropdownMenuTriggerProps>(), { asChild: false });
 
 const attrs = useAttrs();
 const context = useDropdownMenuContext();
@@ -75,7 +77,7 @@ defineExpose({ el });
   <Primitive
     ref="inner"
     as="button"
-    :as-child="props.asChild"
+    :as-child="asChild"
     type="button"
     aria-haspopup="menu"
     :aria-expanded="isOpen"

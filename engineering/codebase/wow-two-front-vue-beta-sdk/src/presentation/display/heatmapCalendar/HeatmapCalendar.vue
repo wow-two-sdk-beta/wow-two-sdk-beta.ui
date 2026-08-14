@@ -122,6 +122,10 @@ import { cn } from '../../../foundation/utils';
 defineOptions({ name: 'HeatmapCalendar', inheritAttrs: false });
 
 const props = withDefaults(defineProps<HeatmapCalendarProps>(), {
+  /* `values` stays declared-required — Vue still warns when it is missing — but a
+     default keeps an absent (or transiently-undefined) value out of the `for...of`
+     below, which threw `props.values is not iterable` and took the whole page down. */
+  values: () => new Map<Temporal.PlainDate, number>(),
   // `year` stays undefined so the current-year fallback is evaluated lazily —
   // `withDefaults` would freeze a module-eval-time value into the options object.
   year: undefined,

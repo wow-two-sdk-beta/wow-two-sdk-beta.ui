@@ -79,6 +79,10 @@ import { daysBetween, isWeekend, today } from '../../forms/DateExtensions';
 defineOptions({ name: 'Gantt', inheritAttrs: false });
 
 const props = withDefaults(defineProps<GanttProps>(), {
+  /* `tasks` stays declared-required — Vue still warns when it is missing — but a
+     default keeps an absent (or transiently-undefined) value out of the `.length`
+     and `.map().reduce()` reads below. The empty-tasks branch already exists. */
+  tasks: () => [],
   dependencies: () => [],
   milestones: () => [],
   cellWidth: 40,

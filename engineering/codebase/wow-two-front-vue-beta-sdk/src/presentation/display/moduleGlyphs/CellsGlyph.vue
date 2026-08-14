@@ -15,7 +15,10 @@ import { CELL_POSITIONS, CELL_SIZE } from './ModuleGlyphs';
 /** Renders a three-cell glyph with the given corner radius. */
 defineOptions({ name: 'CellsGlyph' });
 
-const props = withDefaults(defineProps<CellsGlyphProps>(), { size: 20 });
+/* `cornerRx` stays declared-required — Vue still warns when it is missing — but a
+   default keeps `undefined` out of the `rx` attribute, which rendered as
+   `rx="NaN"` and made the browser reject the whole `<rect>`. `0` = square. */
+const props = withDefaults(defineProps<CellsGlyphProps>(), { cornerRx: 0, size: 20 });
 
 const el = useTemplateRef<SVGSVGElement>('el');
 

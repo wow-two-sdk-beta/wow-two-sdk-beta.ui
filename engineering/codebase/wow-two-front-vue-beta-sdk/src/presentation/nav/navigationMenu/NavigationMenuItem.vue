@@ -34,7 +34,11 @@ provide(navigationMenuItemContextKey, {
   triggerId: useId(),
 });
 
-const classes = computed(() => cn('relative', attrs.class as string | undefined));
+/* `list-none` is load-bearing, not cosmetic. `NavigationMenuList` renders a `<div
+   role="list">` (it wraps `RovingFocusGroup`), so this `<li>` has no `ul`/`ol`
+   parent — and Tailwind preflight only resets `list-style` on `ul`/`ol`. The
+   orphan keeps the UA's `list-item` display and drew a disc: `• Products ⌄`. */
+const classes = computed(() => cn('relative list-none', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -46,5 +50,8 @@ defineExpose({ el });
 </script>
 
 <template>
-  <li ref="el" v-bind="rest" :class="classes"><slot /></li>
+  <!-- `role` sits before `v-bind="rest"` so a consumer-supplied one wins. An `<li>`
+       only maps to `listitem` under a `ul`/`ol`/`menu` parent; under the list div it
+       would leave `role="list"` with no children, so the role is stated. -->
+  <li ref="el" role="listitem" v-bind="rest" :class="classes"><slot /></li>
 </template>

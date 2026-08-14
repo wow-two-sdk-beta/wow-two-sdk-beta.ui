@@ -115,7 +115,7 @@ defineExpose({ el });
     ref="el"
     role="option"
     :aria-selected="isActive"
-    :aria-disabled="props.isDisabled || undefined"
+    :aria-disabled="isDisabled || undefined"
     :data-active="isActive ? '' : undefined"
     v-bind="rest"
     :class="classes"

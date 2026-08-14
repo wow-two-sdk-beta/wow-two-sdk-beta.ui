@@ -62,7 +62,7 @@ defineExpose({ el });
 <template>
   <!-- `data-status` precedes `v-bind="rest"` so a consumer-supplied one still wins, as it did
        through React's trailing `{...rest}` spread. -->
-  <li ref="el" :data-status="props.status" v-bind="rest" :class="classes">
+  <li ref="el" :data-status="status" v-bind="rest" :class="classes">
     <!-- Marker + connector column -->
     <div class="relative flex flex-col items-center">
       <span aria-hidden="true" :class="markerClasses">
