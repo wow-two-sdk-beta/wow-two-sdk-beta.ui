@@ -77,6 +77,11 @@ function placementCoords(rect: Rect, placement: NonNullable<TourStep['placement'
 defineOptions({ name: 'Tour', inheritAttrs: false });
 
 const props = withDefaults(defineProps<TourProps>(), {
+  /* `steps` stays declared-required — Vue still warns when it is missing — but a
+     default keeps an absent (or transiently-undefined) value out of the indexed read
+     in `step` below. Everything downstream already handles an absent step
+     (`step.value?.…`, and the template gates on `v-if="mounted && step"`). */
+  steps: () => [],
   defaultOpen: false,
   defaultCurrentStep: 0,
   padding: 8,
