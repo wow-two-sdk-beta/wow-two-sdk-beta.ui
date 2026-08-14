@@ -240,11 +240,23 @@ function cellAttrs(date: Temporal.PlainDate, outOfMonth: boolean): Record<string
   return rest;
 }
 
+/*
+ * `bg-primary/10` — the ghost/outline hover the rest of the package uses (see
+ * `Button.variants`) — NOT `bg-muted`: the grid paints on `bg-popover`, and in most themes
+ * `muted` and `popover` are within a point of each other, so a muted hover is invisible.
+ * A tint of the selection colour reads on every surface, light and dark.
+ *
+ * Both halves are also what a consumer's `dayProps` OVERRIDES for its selected cells, and
+ * tailwind-merge can only drop a class it recognises as conflicting — same utility group AND
+ * same variant. So a consumer that wants a different selected-hover has to spell both
+ * `hover:bg-*` and `hover:text-*`; a bare `text-primary-foreground` does not displace
+ * `hover:text-foreground` here and the day number flips to near-black on hover.
+ */
 function cellClass(date: Temporal.PlainDate, outOfMonth: boolean): string {
   const consumer = props.dayProps?.(date, { outOfMonth });
   return cn(
     'grid h-9 w-9 place-items-center text-sm transition-colors',
-    'hover:bg-muted hover:text-foreground',
+    'hover:bg-primary/10 hover:text-foreground',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     outOfMonth && 'text-muted-foreground/60',
     dayDisabled(date) && 'pointer-events-none opacity-40',

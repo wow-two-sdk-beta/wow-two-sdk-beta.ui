@@ -197,8 +197,10 @@ import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/utils';
 import { useControlled, useId } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives';
-import { parseISODate, today } from '../DateExtensions';
+import { today } from '../DateExtensions';
 import { inputBaseVariants, InputSize } from '../InputStyles';
+import Radio from '../radio/Radio.vue';
+import DatePicker from '../datePicker/DatePicker.vue';
 
 /**
  * Visual RRULE editor. Output is a JS `RecurrenceRule` object via `update:modelValue` /
@@ -300,8 +302,8 @@ function onCountInput(event: Event): void {
   update({ count: Math.max(1, raw), until: null });
 }
 
-function onUntilInput(event: Event): void {
-  update({ until: parseISODate((event.target as HTMLInputElement).value), count: undefined });
+function onUntilPick(next: Temporal.PlainDate | null): void {
+  update({ until: next, count: undefined });
 }
 
 function weekdayClass(wd: RecurrenceWeekday): string {
@@ -319,7 +321,6 @@ function weekdayLabel(wd: RecurrenceWeekday): string {
 
 const rootId = computed(() => props.id ?? ctx?.id);
 const endRadioName = computed(() => `${props.name ?? 'rule'}-end`);
-const untilValue = computed(() => formatISODate(rule.value.until ?? null));
 const serialized = computed(() => serializeRule(rule.value));
 
 const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
@@ -339,7 +340,6 @@ const intervalClass = cn(inputBaseVariants({ size: InputSize.Sm }), 'w-16');
 const freqClass = cn(inputBaseVariants({ size: InputSize.Sm }), 'w-32');
 const monthDayClass = cn(inputBaseVariants({ size: InputSize.Sm }), 'w-20');
 const countClass = cn(inputBaseVariants({ size: InputSize.Sm }), 'w-20');
-const untilClass = cn(inputBaseVariants({ size: InputSize.Sm }), 'w-44');
 
 /** The rendered root `<div>` — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el });
@@ -417,24 +417,30 @@ defineExpose({ el });
       <span class="text-muted-foreground">of the month</span>
     </div>
 
+    <!-- The design-system `Radio`, not a bare `<input type="radio">`: the native control
+         renders platform chrome that matches nothing else in the package. Each one carries an
+         explicit `id` — `Radio` otherwise adopts the surrounding `Field`'s id and all three
+         would collide on it. -->
     <div role="radiogroup" aria-label="End mode" class="flex flex-col gap-2 text-sm">
-      <label class="flex items-center gap-2">
-        <input
-          type="radio"
+      <label :for="`${uid}-end-never`" class="flex items-center gap-2">
+        <Radio
+          :id="`${uid}-end-never`"
+          size="sm"
           :name="endRadioName"
           :checked="endMode === 'never'"
           :disabled="isDisabled || isReadOnly"
-          @change="update({ count: undefined, until: null })"
+          @value-change="update({ count: undefined, until: null })"
         />
         Never
       </label>
-      <label class="flex items-center gap-2">
-        <input
-          type="radio"
+      <label :for="`${uid}-end-count`" class="flex items-center gap-2">
+        <Radio
+          :id="`${uid}-end-count`"
+          size="sm"
           :name="endRadioName"
           :checked="endMode === 'count'"
           :disabled="isDisabled || isReadOnly"
-          @change="update({ count: rule.count ?? 10, until: null })"
+          @value-change="update({ count: rule.count ?? 10, until: null })"
         />
         After
         <input
@@ -448,24 +454,31 @@ defineExpose({ el });
         />
         occurrences
       </label>
-      <label class="flex items-center gap-2">
-        <input
-          type="radio"
-          :name="endRadioName"
-          :checked="endMode === 'until'"
-          :disabled="isDisabled || isReadOnly"
-          @change="update({ until: addMonths(from, 6), count: undefined })"
-        />
-        On
-        <input
-          type="date"
+      <!-- The end date sits BESIDE the label, not inside it: `DatePicker` is a button, and a
+           button inside a `<label>` forwards its click to the labelled radio. -->
+      <div class="flex items-center gap-2">
+        <label :for="`${uid}-end-until`" class="flex items-center gap-2">
+          <Radio
+            :id="`${uid}-end-until`"
+            size="sm"
+            :name="endRadioName"
+            :checked="endMode === 'until'"
+            :disabled="isDisabled || isReadOnly"
+            @value-change="update({ until: addMonths(from, 6), count: undefined })"
+          />
+          On
+        </label>
+        <DatePicker
+          :id="`${uid}-end-date`"
+          size="sm"
           aria-label="End date"
-          :value="untilValue"
+          class="w-44"
+          placeholder="Pick a date"
+          :value="rule.until ?? null"
           :disabled="isDisabled || isReadOnly || endMode !== 'until'"
-          :class="untilClass"
-          @input="onUntilInput"
+          @value-change="onUntilPick"
         />
-      </label>
+      </div>
     </div>
 
     <div class="rounded-md bg-muted/40 p-3 text-xs">

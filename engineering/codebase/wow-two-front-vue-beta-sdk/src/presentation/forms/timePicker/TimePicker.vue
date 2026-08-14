@@ -44,14 +44,11 @@ export interface TimePickerProps {
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   disabled?: boolean;
 }
-
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
 </script>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
+import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { Temporal as TemporalValue } from 'temporal-polyfill';
 import { Clock } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
@@ -59,6 +56,7 @@ import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { selectTriggerVariants } from '../select/Select.variants';
 import { InputState as InputStateValue } from '../InputStyles';
+import TimeColumns from '../TimeColumns.vue';
 
 /** Trigger button + popover hour/minute columns. */
 /* `inheritAttrs: false` so `class` folds into the trigger's own `cn()` call — plain fallthrough
@@ -105,35 +103,6 @@ const controlled = useControlled<Temporal.PlainTime | null>({
 const time = controlled.value;
 
 const open = ref(false);
-const hours = useTemplateRef<HTMLDivElement>('hours');
-const minutesEl = useTemplateRef<HTMLDivElement>('minutesEl');
-
-const minutes = computed(() => {
-  const list: Array<number> = [];
-  for (let m = 0; m < 60; m += props.minuteStep) list.push(m);
-  return list;
-});
-
-/*
- * Auto-scroll the selected hour/minute into view when opening. NOT `immediate` — an
- * immediate watcher runs during setup, on the server too, where `requestAnimationFrame`
- * is undefined; a change-only watcher can only fire in the browser.
- */
-watch(
-  open,
-  (isOpen) => {
-    if (!isOpen) return;
-    requestAnimationFrame(() => {
-      hours.value
-        ?.querySelector<HTMLButtonElement>('[data-selected]')
-        ?.scrollIntoView({ block: 'center' });
-      minutesEl.value
-        ?.querySelector<HTMLButtonElement>('[data-selected]')
-        ?.scrollIntoView({ block: 'center' });
-    });
-  },
-  { flush: 'post' },
-);
 
 const triggerState = computed(
   () =>
@@ -141,23 +110,10 @@ const triggerState = computed(
     (finalInvalid.value ? InputStateValue.Invalid : InputStateValue.Default),
 );
 
-function update(next: { hour?: number; minute?: number }): void {
-  const merged = TemporalValue.PlainTime.from({
-    hour: next.hour ?? time.value?.hour ?? 0,
-    minute: next.minute ?? time.value?.minute ?? 0,
-  });
-  controlled.setValue(merged);
-}
-
-function cellClass(isSelected: boolean): string {
-  return cn(
-    'grid h-8 w-12 place-items-center rounded-sm text-sm transition-colors hover:bg-muted',
-    isSelected && 'bg-primary text-primary-foreground hover:bg-primary',
-  );
-}
-
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
+/* The columns live in the shared `TimeColumns` — the same panel `TimeField` and
+   `DateTimeField` open, so the three cannot drift. */
+function onColumnsChange(next: Temporal.PlainTime): void {
+  controlled.setValue(next);
 }
 
 const displayText = computed(() =>
@@ -191,8 +147,6 @@ const triggerClass = computed(() =>
 
 const labelClass = computed(() => cn('truncate', !time.value && 'text-muted-foreground'));
 
-const HOUR_LIST = HOURS;
-
 const trigger = useTemplateRef<{ el: HTMLElement | null }>('trigger');
 
 /** The rendered trigger — the Vue stand-in for the React original's forwarded ref. */
@@ -218,49 +172,7 @@ defineExpose({ el: computed(() => trigger.value?.el ?? null) });
       <Clock class="h-4 w-4 shrink-0 text-muted-foreground" />
     </PopoverTrigger>
     <PopoverContent is-bare>
-      <div
-        class="flex gap-1 rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-md"
-      >
-        <div
-          ref="hours"
-          role="listbox"
-          aria-label="Hours"
-          class="flex max-h-56 flex-col gap-0.5 overflow-y-auto pr-1"
-        >
-          <button
-            v-for="h in HOUR_LIST"
-            :key="h"
-            type="button"
-            role="option"
-            :aria-selected="time?.hour === h"
-            :data-selected="time?.hour === h ? '' : undefined"
-            :class="cellClass(time?.hour === h)"
-            @click="update({ hour: h })"
-          >
-            {{ pad(h) }}
-          </button>
-        </div>
-        <div class="w-px self-stretch bg-border" />
-        <div
-          ref="minutesEl"
-          role="listbox"
-          aria-label="Minutes"
-          class="flex max-h-56 flex-col gap-0.5 overflow-y-auto pl-1"
-        >
-          <button
-            v-for="m in minutes"
-            :key="m"
-            type="button"
-            role="option"
-            :aria-selected="time?.minute === m"
-            :data-selected="time?.minute === m ? '' : undefined"
-            :class="cellClass(time?.minute === m)"
-            @click="update({ minute: m })"
-          >
-            {{ pad(m) }}
-          </button>
-        </div>
-      </div>
+      <TimeColumns :value="time" :minute-step="minuteStep" :on-time-change="onColumnsChange" />
     </PopoverContent>
     <input v-if="name && time" type="hidden" :name="name" :value="hiddenValue" />
   </Popover>

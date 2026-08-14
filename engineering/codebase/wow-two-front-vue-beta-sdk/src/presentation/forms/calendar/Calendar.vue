@@ -91,6 +91,15 @@ function onDayActivate(d: Temporal.PlainDate): void {
   controlled.setValue(d);
 }
 
+/*
+ * `hover:text-primary-foreground` is load-bearing, not decoration: `MonthGrid`'s base carries
+ * `hover:text-foreground`, and tailwind-merge only drops a class from the same utility group
+ * AND the same variant — a plain `text-primary-foreground` does not displace a `hover:text-*`.
+ * Without it the selected day's number flipped to near-black on `bg-primary` while hovered.
+ *
+ * `hover:bg-primary/90` (the package's solid-surface hover, see `Button.variants`) rather than
+ * a flat `hover:bg-primary`, so hovering the selected day still reads as a hover.
+ */
 function dayProps(date: Temporal.PlainDate): MonthGridDayProps {
   const isSelectedCell = isSameDay(selected.value, date);
   return {
@@ -99,7 +108,8 @@ function dayProps(date: Temporal.PlainDate): MonthGridDayProps {
     class: cn(
       'rounded-sm',
       isToday(date) && !isSelectedCell && 'border border-border',
-      isSelectedCell && 'bg-primary text-primary-foreground hover:bg-primary',
+      isSelectedCell &&
+        'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground',
     ),
   };
 }

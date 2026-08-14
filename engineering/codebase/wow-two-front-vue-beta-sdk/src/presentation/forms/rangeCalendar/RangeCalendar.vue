@@ -149,11 +149,25 @@ function dayProps(date: Temporal.PlainDate): MonthGridDayProps {
     onPointerleave: () => {
       if (isSameDay(hoveredDate.value, date)) hoveredDate.value = null;
     },
+    /*
+     * Every painted cell has to restate BOTH `hover:bg-*` and `hover:text-*`. `MonthGrid`'s
+     * base hover is `hover:bg-primary/10 hover:text-foreground`, and a `:hover` rule outranks
+     * the unqualified `bg-primary` / `bg-primary-soft` here on specificity — so without an
+     * explicit hover the selected ends and the in-range run lost their fill the moment the
+     * pointer touched them. tailwind-merge only resolves same-group + same-variant pairs.
+     *
+     * The ladder: `/90` on the solid ends (the package's solid-surface hover), `/25` on the
+     * in-range run — a step deeper than its `primary-soft` fill, so the hover reads against
+     * the range without competing with the ends.
+     */
     class: cn(
       isToday(date) && !startCell && !endCell && 'border border-border rounded-sm',
-      rangeCell && 'bg-primary-soft text-primary-soft-foreground',
-      startCell && 'bg-primary text-primary-foreground rounded-l-sm',
-      endCell && 'bg-primary text-primary-foreground rounded-r-sm',
+      rangeCell &&
+        'bg-primary-soft text-primary-soft-foreground hover:bg-primary/25 hover:text-primary-soft-foreground',
+      startCell &&
+        'bg-primary text-primary-foreground rounded-l-sm hover:bg-primary/90 hover:text-primary-foreground',
+      endCell &&
+        'bg-primary text-primary-foreground rounded-r-sm hover:bg-primary/90 hover:text-primary-foreground',
       !startCell && !endCell && !rangeCell && 'rounded-sm',
     ),
   };
