@@ -49,12 +49,19 @@ export const toggleButtonVariants = tv({
     },
   },
   compoundVariants: [
+    /*
+     * Pressed text is `-soft-foreground`, not `{tone}`, for `ghost` and `outline`: both keep a
+     * transparent fill, so the pressed label lands on the host surface where the full-strength
+     * accent is too light — `ghost/warning` measured 1.85:1 pressed. The `soft` rows below
+     * already resolved it this way; these two were missed. Same fix as `Button.variants.ts`
+     * and `foundation/utils/Tones.ts`. Borders keep full-strength `{tone}`.
+     */
     // === GHOST × tone — text color only, transparent bg ===
-    { variant: 'ghost', tone: 'primary', class: 'text-foreground/50 data-[pressed=true]:text-primary' },
+    { variant: 'ghost', tone: 'primary', class: 'text-foreground/50 data-[pressed=true]:text-primary-soft-foreground' },
     { variant: 'ghost', tone: 'neutral', class: 'text-foreground/50 data-[pressed=true]:text-foreground' },
-    { variant: 'ghost', tone: 'danger',  class: 'text-foreground/50 data-[pressed=true]:text-destructive' },
-    { variant: 'ghost', tone: 'success', class: 'text-foreground/50 data-[pressed=true]:text-success' },
-    { variant: 'ghost', tone: 'warning', class: 'text-foreground/50 data-[pressed=true]:text-warning' },
+    { variant: 'ghost', tone: 'danger',  class: 'text-foreground/50 data-[pressed=true]:text-destructive-soft-foreground' },
+    { variant: 'ghost', tone: 'success', class: 'text-foreground/50 data-[pressed=true]:text-success-soft-foreground' },
+    { variant: 'ghost', tone: 'warning', class: 'text-foreground/50 data-[pressed=true]:text-warning-soft-foreground' },
 
     // === SOFT × tone — pressed gets tone-soft bg ===
     { variant: 'soft', tone: 'primary', class: 'text-foreground/70 data-[pressed=true]:bg-primary-soft data-[pressed=true]:text-primary-soft-foreground' },
@@ -64,11 +71,11 @@ export const toggleButtonVariants = tv({
     { variant: 'soft', tone: 'warning', class: 'text-foreground/70 data-[pressed=true]:bg-warning-soft data-[pressed=true]:text-warning-soft-foreground' },
 
     // === OUTLINE × tone — pressed swaps to tone border + tone text ===
-    { variant: 'outline', tone: 'primary', class: 'border-input text-foreground/70 data-[pressed=true]:border-primary data-[pressed=true]:text-primary' },
+    { variant: 'outline', tone: 'primary', class: 'border-input text-foreground/70 data-[pressed=true]:border-primary data-[pressed=true]:text-primary-soft-foreground' },
     { variant: 'outline', tone: 'neutral', class: 'border-input text-foreground/70 data-[pressed=true]:border-foreground data-[pressed=true]:text-foreground' },
-    { variant: 'outline', tone: 'danger',  class: 'border-input text-foreground/70 data-[pressed=true]:border-destructive data-[pressed=true]:text-destructive' },
-    { variant: 'outline', tone: 'success', class: 'border-input text-foreground/70 data-[pressed=true]:border-success data-[pressed=true]:text-success' },
-    { variant: 'outline', tone: 'warning', class: 'border-input text-foreground/70 data-[pressed=true]:border-warning data-[pressed=true]:text-warning' },
+    { variant: 'outline', tone: 'danger',  class: 'border-input text-foreground/70 data-[pressed=true]:border-destructive data-[pressed=true]:text-destructive-soft-foreground' },
+    { variant: 'outline', tone: 'success', class: 'border-input text-foreground/70 data-[pressed=true]:border-success data-[pressed=true]:text-success-soft-foreground' },
+    { variant: 'outline', tone: 'warning', class: 'border-input text-foreground/70 data-[pressed=true]:border-warning data-[pressed=true]:text-warning-soft-foreground' },
 
     // === SOLID × tone — pressed fills with tone ===
     { variant: 'solid', tone: 'primary', class: 'border-input bg-background text-foreground/70 data-[pressed=true]:bg-primary data-[pressed=true]:border-primary data-[pressed=true]:text-primary-foreground' },

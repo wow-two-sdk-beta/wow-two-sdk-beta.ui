@@ -122,43 +122,57 @@ export const buttonVariants = tv({
     { variant: 'soft', tone: 'success',   class: 'bg-success-soft text-success-soft-foreground hover:bg-success-soft/80 active:bg-success-soft/85' },
     { variant: 'soft', tone: 'warning',   class: 'bg-warning-soft text-warning-soft-foreground hover:bg-warning-soft/80 active:bg-warning-soft/85' },
 
+    /*
+     * `text-{tone}-soft-foreground`, not `text-{tone}`, everywhere the fill is transparent or
+     * a light tint (surface · outline · ghost · reveal · link below).
+     *
+     * `text-{tone}` is the SOLID-fill accent: it is picked to carry the tone at full strength
+     * against its own opaque background, and on a light surface it is simply too light —
+     * `outline/warning` measured 1.85:1 and `surface/warning` 1.72:1 on this file's own
+     * `theme-smart-qr` card. `--color-{tone}-soft-foreground` is the token minted for exactly
+     * this pairing, and the `soft` rows below have always used it; these rows were the ones
+     * that were missed. Borders stay full-strength `{tone}` so the tone still reads.
+     * Matches `foundation/utils/Tones.ts`, which routes `soft` + `outline` the same way.
+     */
     // === SURFACE × tone (subtle tinted bg + visible tone-colored border) ===
-    { variant: 'surface', tone: 'primary',  class: 'bg-primary/5 border-primary/40 text-primary hover:bg-primary/10 active:bg-primary/15' },
+    { variant: 'surface', tone: 'primary',  class: 'bg-primary/5 border-primary/40 text-primary-soft-foreground hover:bg-primary/10 active:bg-primary/15' },
     { variant: 'surface', tone: 'neutral',  class: 'bg-muted/30 border-border-strong text-foreground hover:bg-muted/50 active:bg-muted/70' },
-    { variant: 'surface', tone: 'danger',   class: 'bg-destructive/5 border-destructive/40 text-destructive hover:bg-destructive/10 active:bg-destructive/15' },
-    { variant: 'surface', tone: 'success',  class: 'bg-success/5 border-success/40 text-success hover:bg-success/10 active:bg-success/15' },
-    { variant: 'surface', tone: 'warning',  class: 'bg-warning/10 border-warning/40 text-warning hover:bg-warning/15 active:bg-warning/20' },
+    { variant: 'surface', tone: 'danger',   class: 'bg-destructive/5 border-destructive/40 text-destructive-soft-foreground hover:bg-destructive/10 active:bg-destructive/15' },
+    { variant: 'surface', tone: 'success',  class: 'bg-success/5 border-success/40 text-success-soft-foreground hover:bg-success/10 active:bg-success/15' },
+    { variant: 'surface', tone: 'warning',  class: 'bg-warning/10 border-warning/40 text-warning-soft-foreground hover:bg-warning/15 active:bg-warning/20' },
 
     // === OUTLINE × tone ===
-    { variant: 'outline', tone: 'primary',  class: 'border-primary/50 text-primary hover:bg-primary/10 active:bg-primary/15' },
+    { variant: 'outline', tone: 'primary',  class: 'border-primary/50 text-primary-soft-foreground hover:bg-primary/10 active:bg-primary/15' },
     { variant: 'outline', tone: 'neutral',  class: 'border-border-strong text-foreground hover:bg-muted/50 active:bg-muted/70' },
-    { variant: 'outline', tone: 'danger',   class: 'border-destructive/50 text-destructive hover:bg-destructive/10 active:bg-destructive/15' },
-    { variant: 'outline', tone: 'success',  class: 'border-success/50 text-success hover:bg-success/10 active:bg-success/15' },
-    { variant: 'outline', tone: 'warning',  class: 'border-warning/60 text-warning hover:bg-warning/10 active:bg-warning/15' },
+    { variant: 'outline', tone: 'danger',   class: 'border-destructive/50 text-destructive-soft-foreground hover:bg-destructive/10 active:bg-destructive/15' },
+    { variant: 'outline', tone: 'success',  class: 'border-success/50 text-success-soft-foreground hover:bg-success/10 active:bg-success/15' },
+    { variant: 'outline', tone: 'warning',  class: 'border-warning/60 text-warning-soft-foreground hover:bg-warning/10 active:bg-warning/15' },
 
     // === GHOST × tone ===
-    { variant: 'ghost', tone: 'primary',  class: 'text-primary hover:bg-primary/10 active:bg-primary/15' },
+    { variant: 'ghost', tone: 'primary',  class: 'text-primary-soft-foreground hover:bg-primary/10 active:bg-primary/15' },
     { variant: 'ghost', tone: 'neutral',  class: 'text-foreground hover:bg-foreground/10 active:bg-foreground/15' },
-    { variant: 'ghost', tone: 'danger',   class: 'text-destructive hover:bg-destructive/10 active:bg-destructive/15' },
-    { variant: 'ghost', tone: 'success',  class: 'text-success hover:bg-success/10 active:bg-success/15' },
-    { variant: 'ghost', tone: 'warning',  class: 'text-warning hover:bg-warning/10 active:bg-warning/15' },
+    { variant: 'ghost', tone: 'danger',   class: 'text-destructive-soft-foreground hover:bg-destructive/10 active:bg-destructive/15' },
+    { variant: 'ghost', tone: 'success',  class: 'text-success-soft-foreground hover:bg-success/10 active:bg-success/15' },
+    { variant: 'ghost', tone: 'warning',  class: 'text-warning-soft-foreground hover:bg-warning/10 active:bg-warning/15' },
 
     // === REVEAL × tone (idle: muted transparent · hover/focus-visible: bordered chip revealed) ===
     // Idle text sits at reduced emphasis (muted-foreground / tone-tinted); hover & focus-visible
     // resolve the border + a surface background + full-emphasis foreground so a bordered chip
     // "appears". neutral is the common case (borderless icon affordance).
-    { variant: 'reveal', tone: 'primary',  class: 'text-primary/70 hover:border-border hover:bg-background hover:text-primary focus-visible:border-border focus-visible:bg-background focus-visible:text-primary active:bg-muted/70' },
+    /* The `/70` idle alpha is the intended de-emphasis and is kept; only the token under it
+       changes, which is what lifts idle `warning` off 1.56:1. */
+    { variant: 'reveal', tone: 'primary',  class: 'text-primary-soft-foreground/70 hover:border-border hover:bg-background hover:text-primary-soft-foreground focus-visible:border-border focus-visible:bg-background focus-visible:text-primary-soft-foreground active:bg-muted/70' },
     { variant: 'reveal', tone: 'neutral',  class: 'text-muted-foreground hover:border-border hover:bg-background hover:text-foreground focus-visible:border-border focus-visible:bg-background focus-visible:text-foreground active:bg-muted/70' },
-    { variant: 'reveal', tone: 'danger',   class: 'text-destructive/70 hover:border-border hover:bg-background hover:text-destructive focus-visible:border-border focus-visible:bg-background focus-visible:text-destructive active:bg-muted/70' },
-    { variant: 'reveal', tone: 'success',  class: 'text-success/70 hover:border-border hover:bg-background hover:text-success focus-visible:border-border focus-visible:bg-background focus-visible:text-success active:bg-muted/70' },
-    { variant: 'reveal', tone: 'warning',  class: 'text-warning/70 hover:border-border hover:bg-background hover:text-warning focus-visible:border-border focus-visible:bg-background focus-visible:text-warning active:bg-muted/70' },
+    { variant: 'reveal', tone: 'danger',   class: 'text-destructive-soft-foreground/70 hover:border-border hover:bg-background hover:text-destructive-soft-foreground focus-visible:border-border focus-visible:bg-background focus-visible:text-destructive-soft-foreground active:bg-muted/70' },
+    { variant: 'reveal', tone: 'success',  class: 'text-success-soft-foreground/70 hover:border-border hover:bg-background hover:text-success-soft-foreground focus-visible:border-border focus-visible:bg-background focus-visible:text-success-soft-foreground active:bg-muted/70' },
+    { variant: 'reveal', tone: 'warning',  class: 'text-warning-soft-foreground/70 hover:border-border hover:bg-background hover:text-warning-soft-foreground focus-visible:border-border focus-visible:bg-background focus-visible:text-warning-soft-foreground active:bg-muted/70' },
 
     // === LINK × tone (h/padding/radius cleared by variant) ===
-    { variant: 'link', tone: 'primary',  class: 'text-primary' },
+    { variant: 'link', tone: 'primary',  class: 'text-primary-soft-foreground' },
     { variant: 'link', tone: 'neutral',  class: 'text-foreground' },
-    { variant: 'link', tone: 'danger',   class: 'text-destructive' },
-    { variant: 'link', tone: 'success',  class: 'text-success' },
-    { variant: 'link', tone: 'warning',  class: 'text-warning' },
+    { variant: 'link', tone: 'danger',   class: 'text-destructive-soft-foreground' },
+    { variant: 'link', tone: 'success',  class: 'text-success-soft-foreground' },
+    { variant: 'link', tone: 'warning',  class: 'text-warning-soft-foreground' },
 
     // === GLASS / GLASS-SURFACE × tone ===
     // neutral = the image-overlay default: fixed dark wash + light text (reads over any imagery).

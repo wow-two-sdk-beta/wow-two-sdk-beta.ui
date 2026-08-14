@@ -30,7 +30,11 @@ export const linkVariants = tv({
   base: 'inline-flex items-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm',
   variants: {
     variant: {
-      default: 'text-primary hover:text-primary/85 hover:underline',
+      /* `-soft-foreground`, not `text-primary`: a link has no fill of its own, so it lands on
+         whatever surface hosts it — the pairing `--color-primary-soft-foreground` is toned for.
+         `text-primary` measured 4.19:1 on `theme-smart-qr`'s own page background, under AA for
+         body text. Same fix as `Button.variants.ts` and `foundation/utils/Tones.ts`. */
+      default: 'text-primary-soft-foreground hover:text-primary-soft-foreground/85 hover:underline',
       subtle: 'text-foreground hover:underline',
       muted: 'text-muted-foreground hover:text-foreground hover:underline',
       inherit: 'text-current underline-offset-2 hover:underline',

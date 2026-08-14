@@ -43,6 +43,15 @@ const emit = defineEmits<{
   select: [];
 }>();
 
+defineSlots<{
+  /** The action's glyph. Preferred over the `icon` prop. */
+  icon?(): unknown;
+  /** The glyph, in the plain-children shape a Vue caller reaches for. Same slot as `icon`. */
+  default?(): unknown;
+  /** The label chip beside the button. Preferred over the `tooltip` prop. */
+  tooltip?(): unknown;
+}>();
+
 const attrs = useAttrs();
 const slots = useSlots();
 const context = useSpeedDialContext();
@@ -118,7 +127,13 @@ defineExpose({ el: root });
       :class="buttonClass"
       @click="handleClick"
     >
-      <slot name="icon"><IconProp v-if="icon !== undefined" /></slot>
+      <!-- The default slot is the fallback, not a second API: React typed `children` away,
+           so a Vue caller writing `<SpeedDialAction><Pencil /></SpeedDialAction>` — the
+           idiomatic shape — got a silently empty button. Precedence stays `icon` slot →
+           default slot → `icon` prop. -->
+      <slot name="icon">
+        <slot><IconProp v-if="icon !== undefined" /></slot>
+      </slot>
     </button>
     <span
       v-if="hasTooltip && labelSide === Side.Right"
