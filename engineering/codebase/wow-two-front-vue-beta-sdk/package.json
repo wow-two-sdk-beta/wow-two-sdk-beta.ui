@@ -360,7 +360,8 @@
     "test:browser": "vitest run --project browser",
     "coverage": "vitest run --coverage",
     "prepublishOnly": "pnpm typecheck && pnpm build",
-    "check:sfc": "node scripts/check-sfc.mjs"
+    "check:sfc": "node scripts/check-sfc.mjs",
+    "playground": "pnpm --filter playground dev"
   },
   "peerDependencies": {
     "@tanstack/vue-form": "^1.0.0",
