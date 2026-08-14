@@ -36,6 +36,59 @@ function toElement(value: unknown): HTMLElement | null {
 }
 
 /**
+ * The timeout that stands in for two frames where `requestAnimationFrame` never fires.
+ *
+ * ~2 frames at 60Hz. Long enough that rAF wins whenever the document is actually being
+ * painted, short enough that the enter flip is not perceptibly late when it does not.
+ */
+const TWO_FRAMES_MS = 32;
+
+/**
+ * Runs `cb` after two animation frames, or after {@link TWO_FRAMES_MS}, whichever lands first.
+ *
+ * `requestAnimationFrame` does not fire at all while `document.hidden` — a background tab, a
+ * prerendered page, an embedded webview. Gating on rAF alone left an overlay mounted stuck at
+ * `data-state="closed"` on enter and, worse, never unmounted on exit: a full-viewport
+ * `pointer-events: auto` layer over a page that looked idle. The timer is the floor under that.
+ *
+ * Returns a cancel function; whichever path fires first cancels the other, so `cb` runs once.
+ */
+function afterTwoFrames(cb: () => void): () => void {
+  let settled = false;
+  let raf1 = 0;
+  let raf2 = 0;
+
+  const clear = (): void => {
+    if (typeof cancelAnimationFrame !== 'undefined') {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    }
+    clearTimeout(timer);
+  };
+
+  const run = (): void => {
+    if (settled) return;
+    settled = true;
+    clear();
+    cb();
+  };
+
+  if (typeof requestAnimationFrame !== 'undefined') {
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(run);
+    });
+  }
+  /* Declared after `clear` closes over it: both callers are async, so the binding is
+     always initialised by the time either one reads it. */
+  const timer = setTimeout(run, TWO_FRAMES_MS);
+
+  return (): void => {
+    settled = true;
+    clear();
+  };
+}
+
+/**
  * Defer unmount until the child's exit animation/transition finishes.
  * Pass `is-present="false"` to start the exit; the child stays mounted with
  * `data-state="closed"` until its own `animationend`/`transitionend` fires
@@ -50,6 +103,10 @@ function toElement(value: unknown): HTMLElement | null {
  *
  * Both effects use `flush: 'post'`, the analogue of React's `useEffect` here —
  * the DOM node must exist before the timing window opens.
+ *
+ * Neither effect depends on `requestAnimationFrame` firing. Both go through
+ * {@link afterTwoFrames}, and the exit additionally arms its unmount timer up front, so a
+ * document that is never painted still enters and — the part that matters — still unmounts.
  */
 export const Presence = defineComponent({
   name: 'Presence',
@@ -77,21 +134,18 @@ export const Presence = defineComponent({
         }
         if (dataState.value === 'open') return;
         /* `immediate: true` makes this watcher run during SSR too (Vue skips only the
-           non-immediate post-flush ones), and there is no `requestAnimationFrame` on the
-           server. Bail rather than throw: the server emits `data-state="closed"`, which is
-           exactly what the client's first render produces, so hydration still matches and
-           this same watcher runs the enter on the client. */
-        if (typeof requestAnimationFrame === 'undefined') return;
-        let raf2 = 0;
-        const raf1 = requestAnimationFrame(() => {
-          raf2 = requestAnimationFrame(() => {
+           non-immediate post-flush ones), and there is neither `requestAnimationFrame` nor a
+           useful `setTimeout` on the server. Bail rather than throw: the server emits
+           `data-state="closed"`, which is exactly what the client's first render produces, so
+           hydration still matches and this same watcher runs the enter on the client. */
+        if (typeof requestAnimationFrame === 'undefined' && typeof setTimeout === 'undefined') {
+          return;
+        }
+        onCleanup(
+          afterTwoFrames(() => {
             dataState.value = 'open';
-          });
-        });
-        onCleanup(() => {
-          cancelAnimationFrame(raf1);
-          cancelAnimationFrame(raf2);
-        });
+          }),
+        );
       },
       { immediate: true, flush: 'post' },
     );
@@ -109,8 +163,6 @@ export const Presence = defineComponent({
           return;
         }
         let started = false;
-        let timer: number | undefined;
-        let raf2 = 0;
         const onStart = (event: Event) => {
           if (event.target === el) started = true;
         };
@@ -125,26 +177,33 @@ export const Presence = defineComponent({
         // deterministic; the next render settles on the same value.
         el.setAttribute('data-state', 'closed');
         dataState.value = 'closed';
-        const raf1 = requestAnimationFrame(() => {
-          raf2 = requestAnimationFrame(() => {
-            const animating = started || (el.getAnimations?.().length ?? 0) > 0;
-            if (!animating) {
-              rendered.value = false;
-              return;
-            }
-            timer = window.setTimeout(() => {
-              rendered.value = false;
-            }, getTotalDurationMs(el) + 100);
-          });
+
+        /* Armed here, NOT inside the frame callback.
+           This is the unmount guarantee: `animationend` does not fire for an animation that
+           never started, and neither the frame callback nor the event listeners run at all in
+           a document that is never painted. Previously this timer lived inside the inner rAF,
+           so all three failure paths converged on "stays mounted forever" — a full-viewport
+           `pointer-events: auto` scrim the user cannot click past. `getComputedStyle` recalcs
+           synchronously, so reading the duration right after the flip already reflects the
+           closed state's timing. */
+        const safety = setTimeout(() => {
+          rendered.value = false;
+        }, getTotalDurationMs(el) + 100);
+
+        /* The fast path — nothing is animating, so drop it now rather than wait out the
+           safety timer. */
+        const cancelFrames = afterTwoFrames(() => {
+          const animating = started || (el.getAnimations?.().length ?? 0) > 0;
+          if (!animating) rendered.value = false;
         });
+
         onCleanup(() => {
           el.removeEventListener('animationstart', onStart);
           el.removeEventListener('transitionrun', onStart);
           el.removeEventListener('animationend', onEnd);
           el.removeEventListener('transitionend', onEnd);
-          cancelAnimationFrame(raf1);
-          cancelAnimationFrame(raf2);
-          if (timer !== undefined) window.clearTimeout(timer);
+          cancelFrames();
+          clearTimeout(safety);
         });
       },
       { immediate: true, flush: 'post' },

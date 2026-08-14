@@ -119,12 +119,21 @@ function containerEl(): HTMLElement | null {
   return el instanceof HTMLElement ? el : null;
 }
 
+/*
+ * `preventScroll` is load-bearing, not a nicety. An anchored scope (Popover,
+ * Select, MultiSelect) mounts before Floating UI has resolved its position —
+ * `useFloating` seeds `left: 0; top: 0` and applies the real transform one
+ * async tick later — so at mount the panel sits at the document origin. A plain
+ * `.focus()` there makes the browser scroll the page up to reveal it, and the
+ * whole document jumps to the top the moment a dropdown opens. Radix's
+ * FocusScope focuses the same way for the same reason.
+ */
 function focusFirst(container: HTMLElement): void {
   const focusable = getFocusable(container);
-  if (focusable.length > 0) focusable[0]?.focus();
+  if (focusable.length > 0) focusable[0]?.focus({ preventScroll: true });
   // Nothing focusable inside — the container itself takes the focus, which is
   // what `tabindex="-1"` on it is for.
-  else container.focus();
+  else container.focus({ preventScroll: true });
 }
 
 let previouslyFocused: HTMLElement | null = null;
