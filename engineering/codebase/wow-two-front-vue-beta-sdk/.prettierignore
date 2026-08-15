@@ -1,0 +1,5 @@
+dist
+node_modules
+apps/playground/dist
+# Generated data — 663 lines are a single emoji table Prettier would reflow into noise.
+src/domain/emoji/EmojiCatalogData.ts

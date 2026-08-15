@@ -1,25 +1,34 @@
 <script lang="ts">
+import { AriaAttribute } from '../../../foundation/utils';
 import type { ButtonProps } from '../button';
 
-/* The required accessible label rides on the ignored heritage rather than the body — clipboard
-   buttons are commonly icon-only, so the name is mandatory, but it must reach the DOM as an
-   attribute rather than a (camelized) prop. */
-type CopyButtonAttributes = Omit<ButtonProps, 'onClick' | 'children' | 'aria-label' | 'onError'> & {
-  'aria-label': string;
-};
+/** @internal The attributes this component renders itself rather than forwarding. */
+const OwnedAttributes = [AriaAttribute.Label] as const;
 
+/** @internal An attribute name from {@link OwnedAttributes}. */
+type OwnedAttribute = (typeof OwnedAttributes)[number];
+
+/**
+ * @internal A `ButtonProps` member this component replaces with its own emit. Written through `Pick`
+ * rather than as a bare key union: `Omit` accepts a key the type does not have, `Pick` does not.
+ */
+type ReplacedButtonProp = keyof Pick<ButtonProps, 'onError'>;
+
+/** Defines the forwarded `ButtonProps`, with the owned attributes re-added as required. */
+type CopyButtonAttributes = Omit<ButtonProps, ReplacedButtonProp | OwnedAttribute> & Record<OwnedAttribute, string>;
+
+/** Defines props for the clipboard-copy button. */
 export interface CopyButtonProps extends /* @vue-ignore */ CopyButtonAttributes {
   /** The text to copy when the button is activated. */
   text: string;
 
-  /** The reset window for the `copied` state in ms. Default 2000. Set 0 to keep `copied` true until the next mount / explicit reset. */
+  /** The reset window for the `copied` state in ms. Default 2000. Set 0 to hold `copied` until the next mount. */
   resetAfter?: number;
 
-  /** The aria-label override while copied=true. Falls back to `aria-label` when omitted (i18n discipline — consumer supplies all user-facing strings). */
+  /** The accessible name to announce while `copied` is true. Falls back to `aria-label` when omitted. */
   copiedAriaLabel?: string;
 
-  /* Re-declared from `ButtonProps` (identical type) purely so the SFC compiler sees it: a default
-     can only be attached to a prop it actually generates, and the heritage is ignored. */
+  /* Re-declared from the ignored heritage so the SFC compiler generates a prop to hang a default on. */
 
   /** The visual surface style. Default `ghost`. */
   variant?: ButtonVariant;
@@ -29,69 +38,76 @@ export interface CopyButtonProps extends /* @vue-ignore */ CopyButtonAttributes 
 <script setup lang="ts">
 import { computed, useAttrs, watch } from 'vue';
 import { Check, Copy } from 'lucide-vue-next';
+
 import { Icon } from '../../../foundation/icons';
 import { useClipboard } from '../../../foundation/hooks';
 import { OptionalExtensions } from '../../../foundation/utils';
 import Button from '../button/Button.vue';
 import { ButtonVariant } from '../button';
 
-/* Renders a clipboard-copy button — for code blocks, ID / URL fields, and inline copy affordances. */
-/* `inheritAttrs: false` so the raw `aria-label` attr can be swapped for the copied-state one
-   below; everything else (`class` included — `Button` folds it into its own `cn()`) is forwarded
-   verbatim, which is where the original's trailing `{...props}` spread landed. */
+/** Renders a clipboard-copy button — for code blocks, ID / URL fields, and inline copy affordances. */
 defineOptions({ name: 'CopyButton', inheritAttrs: false });
 
-/* `children` became the default slot; its render-prop form is the slot's `{ copied, error }` props.
-   `onError` became the `error` emit. */
 const props = withDefaults(defineProps<CopyButtonProps>(), {
   resetAfter: 2000,
   variant: ButtonVariant.Ghost,
 });
 
 const emit = defineEmits<{
-  /** Emits the caught Error when `navigator.clipboard.writeText` rejects. Fires once per error transition. */
+  /** Fires when `navigator.clipboard.writeText` rejects, once per error transition. */
   error: [error: Error];
 }>();
 
-const attrs = useAttrs();
+const slots = defineSlots<{
+  /** The content — receives `{ copied, error }` for a state-driven swap. Icon-only Copy/Check when omitted. */
+  default?: (props: { copied: boolean; error: Error | null }) => unknown;
+}>();
 
-/* `aria-label` is read off `attrs`, not `props`: Vue camelizes declared prop keys, so a declared
-   `'aria-label'` would arrive as `props.ariaLabel` and never render. */
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['aria-label']);
-const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
-);
+/** @internal {@link OwnedAttributes} as a lookup, for filtering the fallthrough set. */
+const OwnedAttributeLookup: ReadonlySet<string> = new Set(OwnedAttributes);
+
+/**
+ * @internal The `data-copied` value emitted while the copy has succeeded.
+ *
+ * Pinned to `'true'` by Standard rule 8, not the `''` the house `dataAttr` helper emits — the
+ * attribute is specified as a value, and analytics scrapers read it.
+ */
+const CopiedAttributeValue = 'true';
+
+const attrs = useAttrs();
 
 const { copied, error, copy } = useClipboard({ resetAfter: () => props.resetAfter });
 
-// Fires once per error transition — the React original's effect keyed on `error`.
+/** The fallthrough attributes minus the ones this component renders itself. */
+const passthroughAttrs = computed(() =>
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributeLookup.has(key))),
+);
+
+/** The accessible name for the current state — `copiedAriaLabel` while copied, `aria-label` otherwise. */
+const effectiveAriaLabel = computed(() => {
+  const label = attrs[AriaAttribute.Label] as string | undefined;
+  return copied.value ? (props.copiedAriaLabel ?? label) : label;
+});
+
+/** The state icon shown when the consumer supplies no content. */
+const fallbackIcon = computed(() => (copied.value ? Check : Copy));
+
+/** Emits `error` on each transition into a failed copy. */
 watch(error, (next) => {
   if (next) emit('error', next);
 });
 
-const effectiveAriaLabel = computed(() => {
-  const label = attrs['aria-label'] as string | undefined;
-  return copied.value ? (props.copiedAriaLabel ?? label) : label;
-});
-
-const fallbackIcon = computed(() => (copied.value ? Check : Copy));
-
+/** Copies the current text, discarding the settled promise. */
 function handleClick(): void {
   void copy(props.text);
 }
-
-/* Whether the consumer supplied their own content — the React original's `children ?? <Icon …>`. */
-const slots = defineSlots<{
-  /** The content — receives `{ copied, error }` for a state-driven swap. Falls back to icon-only Copy/Check when omitted. */
-  default?: (props: { copied: boolean; error: Error | null }) => unknown;
-}>();
 </script>
 
 <template>
   <Button
     :variant="variant"
     :aria-label="effectiveAriaLabel"
-    :data-copied="OptionalExtensions.from(copied, 'true')"
+    :data-copied="OptionalExtensions.from(copied, CopiedAttributeValue)"
     v-bind="passthroughAttrs"
     @click="handleClick"
   >

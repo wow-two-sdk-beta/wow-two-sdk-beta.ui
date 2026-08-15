@@ -33,6 +33,30 @@ export default tseslint.config(
     rules: { ...tseslint.configs.eslintRecommended.rules },
   },
   {
+    // Line width. Prettier owns CODE width via `printWidth: 120` but never reflows a comment, so the
+    // rule that actually holds prose to the wrap is this one. `warn` until the package-wide sweep
+    // closes — 385 comment lines across 187 files predate it, and an error would hide new ones in
+    // the backlog's noise. Promote to `error` once the sweep lands.
+    files: ['src/**/*.{ts,vue}', 'tests/**/*.{ts,vue}'],
+    rules: {
+      'max-len': [
+        1,
+        {
+          code: 120,
+          comments: 120,
+          tabWidth: 2,
+          // A lone template `class="…"` attribute — Prettier keeps a long utility chain on one line
+          // and there is nowhere to break it. Everything else in a template fits.
+          ignorePattern: '^\\s*class="[^"]*"$',
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreRegExpLiterals: true,
+        },
+      ],
+    },
+  },
+  {
     // Components are one-per-folder PascalCase files (`Button.vue`) — single-word names are
     // the convention here, not a smell. Scoped to `{ts,vue}` because headless primitives are
     // authored as `defineComponent()` in plain `.ts`, which the rule also inspects.

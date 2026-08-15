@@ -13,7 +13,7 @@ export interface BackToTopButtonProps extends /* @vue-ignore */ ButtonHTMLAttrib
   /** The anchor position on the viewport. Default `bottom-right`. */
   position?: OverlayPosition;
 
-  /** The visible label. Omit for icon-only. Prefer the `label` named slot; this prop stays for parity with the React API. */
+  /** The visible label. Omit for icon-only. Prefer the `label` named slot. */
   label?: VNodeChild;
 
   /** The button type. Default `ButtonType.Button`. */

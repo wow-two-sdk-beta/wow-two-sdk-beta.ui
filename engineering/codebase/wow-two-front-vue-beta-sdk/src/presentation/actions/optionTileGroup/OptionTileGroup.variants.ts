@@ -1,6 +1,6 @@
 import { tv, Align, type VariantProps } from '../../../foundation/utils';
 
-/** Provides the tile-row layout for `OptionTileGroup` on top of the reset `Fieldset` — flex row, gap, optional wrap + main-axis alignment. */
+/** Provides the tile-row layout for `OptionTileGroup` — flex row, gap, optional wrap and alignment. */
 export const optionTileGroupVariants = tv({
   base: 'flex items-center gap-2',
   variants: {

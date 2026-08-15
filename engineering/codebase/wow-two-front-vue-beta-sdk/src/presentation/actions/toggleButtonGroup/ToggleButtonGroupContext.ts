@@ -18,7 +18,7 @@ export interface ToggleButtonGroupContextValue {
   /** True while the item carrying `value` is active. Always false for a valueless item. */
   isPressed: (value: string | undefined) => boolean;
 
-  /** Flips the item carrying `value` — clears the selection in single mode, adds/removes in multi. No-op for a valueless item. */
+  /** Flips the item carrying `value` — clears in single mode, adds / removes in multi. */
   toggle: (value: string | undefined) => void;
 
   /** The ARIA role wiring the group applies to each item. Live getter — read it, don't destructure it. */

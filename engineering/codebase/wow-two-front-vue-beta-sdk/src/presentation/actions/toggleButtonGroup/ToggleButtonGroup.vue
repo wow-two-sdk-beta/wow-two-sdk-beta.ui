@@ -21,7 +21,7 @@ export interface ToggleButtonGroupProps<T extends string = string> extends /* @v
   HTMLAttributes,
   'defaultValue' | 'onChange'
 > {
-  /** The selection cardinality — omit or `ToggleMode.Single` for at-most-one, `ToggleMode.Multi` for any-number-active. */
+  /** The selection cardinality — `Single` for at-most-one, `Multi` for any number. */
   type?: ToggleMode;
 
   /** The controlled value — `T | null` in single mode, a string array in multi mode. */

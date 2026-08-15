@@ -46,7 +46,7 @@ withDefaults(defineProps<OptionTileProps>(), {
 });
 
 const emit = defineEmits<{
-  /** Fires when this tile is selected. Single-select — the parent owns the value, so re-selecting the active tile is a harmless no-op. */
+  /** Fires when this tile is selected. Re-selecting the active tile is a no-op. */
   select: [];
 }>();
 

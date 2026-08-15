@@ -4,12 +4,7 @@ export { cn } from './cn';
 export { composeEventHandlers } from './composeEventHandlers';
 export { dataAttr } from './dataAttr';
 export { tv, type VariantProps } from './tv';
-export type {
-  ElementType,
-  PolymorphicProps,
-  PolymorphicPropsWithoutRef,
-  PolymorphicRef,
-} from './polymorphic';
+export type { ElementType, PolymorphicProps, PolymorphicPropsWithoutRef, PolymorphicRef } from './polymorphic';
 export { CssExtensions, RadiusToken, SizePreset, AbsolutePositionPreset } from './CssExtensions';
 export type {
   PaddingToken,
@@ -29,18 +24,9 @@ export { HtmlElement, ButtonType } from './HtmlExtensions';
 export { Key } from './KeyboardExtensions';
 export { Environment, IS_DEV, IS_PRODUCTION } from './Environment';
 export { TransitionExtensions } from './TransitionExtensions';
-export type {
-  PresenceAnimationDurationProp,
-  PresenceAnimationDuration,
-} from './TransitionExtensions';
+export type { PresenceAnimationDurationProp, PresenceAnimationDuration } from './TransitionExtensions';
 export { surfaceVariants, SurfaceVariant } from './SurfaceStyles';
-export type {
-  SurfaceVariants,
-  SurfaceTone,
-  SurfaceRadius,
-  SurfacePadding,
-  SurfaceElevation,
-} from './SurfaceStyles';
+export type { SurfaceVariants, SurfaceTone, SurfaceRadius, SurfacePadding, SurfaceElevation } from './SurfaceStyles';
 export { Layer, layerStyle, type LayerName } from './Layers';
 export { Equality, type EqualityComparer } from './Equality';
 export { createCollator, compareStrings } from './Compare';
@@ -57,4 +43,5 @@ export { CornerPosition } from './CornerPosition';
 export { OverlayPosition } from './OverlayPosition';
 export { ProgressTone } from './ProgressTone';
 export { ElementTag } from './ElementTag';
+export { AriaAttribute } from './AriaAttribute';
 export { StatusTone } from './StatusTone';

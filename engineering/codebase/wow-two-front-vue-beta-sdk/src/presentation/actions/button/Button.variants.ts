@@ -297,7 +297,7 @@ export const buttonVariants = tv({
       class: 'bg-black/45 text-white/70 hover:bg-black/65 hover:text-white active:bg-black/75',
     },
     // Every other tone resolves through the shared `Tones.glass` palette (`bg-{tone}/30 text-{tone}-foreground`)
-    // so `tone="success"` etc. AND per-instance `color` overrides actually apply, plus a tone-matched hover/active wash.
+    // so `tone="success"` and per-instance `color` apply, plus a tone-matched hover / active wash.
     {
       variant: ['glass', 'glass-surface'],
       tone: 'primary',

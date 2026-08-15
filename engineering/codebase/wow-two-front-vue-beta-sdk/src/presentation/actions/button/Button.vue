@@ -11,23 +11,19 @@ import type {
 } from '../../../foundation/utils';
 import type { ButtonVariant, ButtonShape, ButtonVariants } from './Button.variants';
 
-/* Named size presets — used for variant lookup. Any other string/number/object flows to box-overrides. Subset of the canonical `SizePreset` vocabulary. */
+/* Named size presets for variant lookup. Any other string / number / object flows to box-overrides. */
 type ButtonSizePreset = Extract<SizePreset, 'xs' | 'sm' | 'md' | 'lg' | 'xl'>;
 
 /* `size`: preset (variant class) | number/string (square inline dims) | `{width,height,minWidth,minHeight,boxSize}`.
    Raw/object forms set inline dims only — pair with `padding` if text-bearing. */
 export type ButtonSize = SizeUnion<ButtonSizePreset>;
 
-/* Both heritage types are `@vue-ignore`d: they contribute to the *type* surface exactly as in the
-   React original, but must not become runtime props. Native button attributes belong in attribute
-   fallthrough, and `ButtonVariants` resolves through `typeof buttonVariants`, which the SFC prop
-   compiler cannot walk. */
-export interface ButtonProps
-  extends /* @vue-ignore */ Omit<
-      ButtonHTMLAttributes,
-      'type' | 'disabled' | 'color' | 'onClick'
-    >,
-    /* @vue-ignore */ Omit<ButtonVariants, 'size' | 'variant' | 'tone' | 'shape'> {
+/** @internal The type-only surface `ButtonProps` inherits — native attributes plus the variant keys. */
+type ButtonAttributes = Omit<ButtonHTMLAttributes, 'type' | 'disabled' | 'color' | 'onClick'> &
+  Omit<ButtonVariants, 'size' | 'variant' | 'tone' | 'shape'>;
+
+/** Defines props for the button. */
+export interface ButtonProps extends /* @vue-ignore */ ButtonAttributes {
   /** The visual surface style. */
   variant?: ButtonVariant;
 
@@ -40,13 +36,13 @@ export interface ButtonProps
   /** The size — preset name OR raw value OR explicit dim object; see `ButtonSize` for details. */
   size?: ButtonSize;
 
-  /** The per-instance color override for the active `tone`. String → all slots derived; object → per-slot (bg/text/soft/softText/ring). Sets local CSS vars that `bg-{tone}` etc. pick up. */
+  /** The per-instance color override for `tone` — a string derives all slots, an object sets each. */
   color?: ColorProp;
 
-  /** The slot before children (logical start). Prefer the `leading` named slot; this prop stays for parity with the React API. */
+  /** The slot before children. Prefer the `leading` named slot. */
   leadingSlot?: VNodeChild;
 
-  /** The slot after children (logical end). Prefer the `trailing` named slot; this prop stays for parity with the React API. */
+  /** The slot after children. Prefer the `trailing` named slot. */
   trailingSlot?: VNodeChild;
 
   /** The content shown in place of children on hover / focus-visible (CSS-only swap — no JS hover state).
@@ -54,7 +50,7 @@ export interface ButtonProps
      for a reveal-on-hover icon swap. When undefined (and no `hover` slot), children render normally. */
   hoverSlot?: VNodeChild;
 
-  /** The indicator shown in place of the built-in `<Spinner/>` when `isLoading` is true. Prefer the `loading` named slot. */
+  /** The indicator replacing the built-in `<Spinner/>` while loading. Prefer the `loading` slot. */
   loadingSlot?: VNodeChild;
 
   /** The action-loading state — replaces leading w/ spinner, sets aria-busy, blocks clicks. */
@@ -63,10 +59,10 @@ export interface ButtonProps
   /** The text that replaces children when loading. No default — consumer supplies (i18n). */
   loadingText?: string;
 
-  /** The content-loading state — hides content (preserves dimensions) + shimmer. Mutually exclusive with `isLoading`. */
+  /** The content-loading state — hides content, keeps dimensions, shimmers. Excludes `isLoading`. */
   isSkeleton?: boolean;
 
-  /** The disabled state — removes from focus order, blocks clicks. Forwards to native `disabled`. Inherited from an enclosing `Field` when omitted. */
+  /** The disabled state — drops focus order and clicks. Inherited from an enclosing `Field`. */
   isDisabled?: boolean;
 
   /** The full-width state — stretches to fill container width. */
@@ -96,7 +92,7 @@ export interface ButtonProps
   /** The min height reserved — symmetric with `minWidth`. */
   minHeight?: SizeValue;
 
-  /** The square-size shorthand — applied as fallback for both `width` and `height`. Explicit `width`/`height` win when both are set. Pairs with `shape="square"` / `shape="circle"` for icon buttons. */
+  /** The square-size shorthand — fallback for `width` and `height`, which win when both are set. */
   boxSize?: SizeValue;
 
   /** The button type. Default `ButtonType.Button` — NOT browser-default `'submit'`. */
@@ -147,13 +143,7 @@ import { buttonVariants } from './Button.variants';
 
 const COMPONENT_NAME = 'Button';
 
-const BUTTON_SIZE_PRESETS: ReadonlySet<string> = new Set<ButtonSizePreset>([
-  'xs',
-  'sm',
-  'md',
-  'lg',
-  'xl',
-]);
+const BUTTON_SIZE_PRESETS: ReadonlySet<string> = new Set<ButtonSizePreset>(['xs', 'sm', 'md', 'lg', 'xl']);
 
 /* Observable state surfaced via the `data-state` DOM attribute. */
 const ButtonDataState = {
@@ -221,9 +211,7 @@ const resolvedDisabled = computed(() => props.isDisabled ?? formControl?.isDisab
 
 const skeletonActive = computed(() => !!props.isSkeleton);
 const loadingActive = computed(() => !skeletonActive.value && !!props.isLoading);
-const isInactive = computed(
-  () => loadingActive.value || skeletonActive.value || resolvedDisabled.value,
-);
+const isInactive = computed(() => loadingActive.value || skeletonActive.value || resolvedDisabled.value);
 
 const dataState = computed<ButtonDataState | undefined>(() =>
   skeletonActive.value
@@ -236,8 +224,7 @@ const dataState = computed<ButtonDataState | undefined>(() =>
 );
 
 const safeLongPressDelay = computed(() =>
-  props.longPressDelay < PressExtensions.longPressDelay.min ||
-  props.longPressDelay > PressExtensions.longPressDelay.max
+  props.longPressDelay < PressExtensions.longPressDelay.min || props.longPressDelay > PressExtensions.longPressDelay.max
     ? PressExtensions.longPressDelay.default
     : props.longPressDelay,
 );
@@ -254,11 +241,7 @@ watchEffect(() => {
       `[${COMPONENT_NAME}] longPressDelay=${props.longPressDelay}ms is outside reasonable range (${PressExtensions.longPressDelay.min}–${PressExtensions.longPressDelay.max}ms). Falling back to ${PressExtensions.longPressDelay.default}ms.`,
     );
   }
-  if (
-    slots.default === undefined &&
-    attrs['aria-label'] === undefined &&
-    attrs['aria-labelledby'] === undefined
-  ) {
+  if (slots.default === undefined && attrs['aria-label'] === undefined && attrs['aria-labelledby'] === undefined) {
     console.warn(
       `[${COMPONENT_NAME}] icon-only button (no text children) is missing an accessible name — pass \`aria-label\` or \`aria-labelledby\` (Button.standard.md rule 12).`,
     );
@@ -266,9 +249,7 @@ watchEffect(() => {
 });
 
 /* Parse the union-typed `size` prop into preset (for variant lookup) + box overrides (for inline dims). */
-const parsedSize = computed(() =>
-  CssExtensions.parseSizeUnion<ButtonSizePreset>(props.size, BUTTON_SIZE_PRESETS),
-);
+const parsedSize = computed(() => CssExtensions.parseSizeUnion<ButtonSizePreset>(props.size, BUTTON_SIZE_PRESETS));
 
 const rootClass = computed(() =>
   cn(
@@ -287,7 +268,7 @@ const rootClass = computed(() =>
 const overrideStyle = computed<StyleValue | undefined>(() => {
   const padStyle = CssExtensions.resolvePadding(props.padding);
   const radStyle = CssExtensions.resolveRadius(props.radius);
-  /* Box overrides — `size` (object form or raw value) is the base; flat width/height/minWidth/minHeight/boxSize props win when both are set. */
+  /* Box overrides — `size` is the base; flat width / height / minWidth / minHeight / boxSize win. */
   const composedBox: BoxSizeOverrides = {
     ...(parsedSize.value.box ?? {}),
     ...(props.width !== undefined ? { width: props.width } : {}),
@@ -377,8 +358,7 @@ function handlePointerLeave(): void {
   cancelLongPress();
 }
 
-const isActivationKey = (event: KeyboardEvent) =>
-  event.key === Key.Space || event.key === Key.Enter;
+const isActivationKey = (event: KeyboardEvent) => event.key === Key.Space || event.key === Key.Enter;
 
 function handleKeyDown(event: KeyboardEvent): void {
   if (isInactive.value) return;
@@ -404,9 +384,7 @@ function handleKeyUp(event: KeyboardEvent): void {
 function toHandler<E extends Event>(value: unknown): ((event: E) => void) | undefined {
   if (typeof value === 'function') return value as (event: E) => void;
   if (!Array.isArray(value)) return undefined;
-  const handlers = value.filter(
-    (entry): entry is (event: E) => void => typeof entry === 'function',
-  );
+  const handlers = value.filter((entry): entry is (event: E) => void => typeof entry === 'function');
   if (handlers.length === 0) return undefined;
   return (event) => {
     for (const handler of handlers) handler(event);
@@ -471,14 +449,8 @@ const rootProps = computed(() => ({
   onClick: handleClick,
   onPointerdown: composeEventHandlers(consumerHandler<PointerEvent>('onPointerdown'), handlePointerDown),
   onPointerup: composeEventHandlers(consumerHandler<PointerEvent>('onPointerup'), handlePointerUp),
-  onPointercancel: composeEventHandlers(
-    consumerHandler<PointerEvent>('onPointercancel'),
-    handlePointerCancel,
-  ),
-  onPointerleave: composeEventHandlers(
-    consumerHandler<PointerEvent>('onPointerleave'),
-    handlePointerLeave,
-  ),
+  onPointercancel: composeEventHandlers(consumerHandler<PointerEvent>('onPointercancel'), handlePointerCancel),
+  onPointerleave: composeEventHandlers(consumerHandler<PointerEvent>('onPointerleave'), handlePointerLeave),
   onKeydown: composeEventHandlers(consumerHandler<KeyboardEvent>('onKeydown'), handleKeyDown),
   onKeyup: composeEventHandlers(consumerHandler<KeyboardEvent>('onKeyup'), handleKeyUp),
   ...passthroughAttrs.value,
@@ -518,9 +490,7 @@ defineExpose({ el });
            on the root `group` — no JS hover state. `aria-hidden` on the hidden layer so AT
            reads one label. -->
       <span class="relative inline-flex items-center justify-center">
-        <span
-          class="inline-flex items-center justify-center group-hover:invisible group-focus-visible:invisible"
-        >
+        <span class="inline-flex items-center justify-center group-hover:invisible group-focus-visible:invisible">
           <slot />
         </span>
         <span

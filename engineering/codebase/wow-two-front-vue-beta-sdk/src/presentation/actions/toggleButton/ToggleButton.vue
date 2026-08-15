@@ -32,19 +32,19 @@ export interface ToggleButtonProps
   /** The uncontrolled initial state. Ignored if `isPressed` is set. */
   defaultPressed?: boolean;
 
-  /** The item's identity inside a `ToggleButtonGroup` — the group keys its selection off this. Also rendered as the native `value` attribute. */
+  /** The identity inside a `ToggleButtonGroup`, keying its selection. Also the native `value` attr. */
   value?: string;
 
-  /** The tooltip text — string OR fn receiving `{ pressed }`. State-aware form keeps consumer-supplied strings (i18n discipline). */
+  /** The tooltip text — a string, or a fn receiving `{ pressed }` for a state-aware label. */
   title?: StateAware<string>;
 
   /** The per-instance color override — applies to the active `tone`'s theme tokens. See `ColorProp`. */
   color?: ColorProp;
 
-  /** The optional rich tooltip shown on hover/focus — use for icon-only toggles. Until `presentation/display` ports, a string value degrades to the native `title` attribute (when `title` itself is unset) and a node value is ignored. */
+  /** The rich tooltip for icon-only toggles. A string degrades to native `title`; a node is ignored. */
   tooltip?: VNodeChild;
 
-  /** The render element. `'div'` (role=button + Space/Enter keyboard) lets you nest INTERACTIVE children (a color picker, a link) inside a segment without invalid button-in-button markup. Default `'button'`. */
+  /** The render element. `div` (role=button) lets interactive children nest. Default `button`. */
   as?: ToggleButtonElement;
 }
 </script>
