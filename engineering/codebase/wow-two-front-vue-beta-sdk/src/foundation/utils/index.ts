@@ -44,4 +44,6 @@ export { OverlayPosition } from './OverlayPosition';
 export { ProgressTone } from './ProgressTone';
 export { ElementTag } from './ElementTag';
 export { AriaAttribute } from './AriaAttribute';
+export { AttributeValue } from './AttributeValue';
+export { DomEvent, type HandlerProp } from './DomEvent';
 export { StatusTone } from './StatusTone';

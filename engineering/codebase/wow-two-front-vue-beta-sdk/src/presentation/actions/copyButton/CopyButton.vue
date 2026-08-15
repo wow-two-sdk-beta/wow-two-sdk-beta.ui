@@ -1,5 +1,5 @@
 <script lang="ts">
-import { AriaAttribute } from '../../../foundation/utils';
+import { AriaAttribute, DomEvent, type HandlerProp } from '../../../foundation/utils';
 import type { ButtonProps } from '../button';
 
 /** @internal The attributes this component renders itself rather than forwarding. */
@@ -8,11 +8,8 @@ const OwnedAttributes = [AriaAttribute.Label] as const;
 /** @internal An attribute name from {@link OwnedAttributes}. */
 type OwnedAttribute = (typeof OwnedAttributes)[number];
 
-/**
- * @internal A `ButtonProps` member this component replaces with its own emit. Written through `Pick`
- * rather than as a bare key union: `Omit` accepts a key the type does not have, `Pick` does not.
- */
-type ReplacedButtonProp = keyof Pick<ButtonProps, 'onError'>;
+/** @internal The `ButtonProps` handler this component replaces with its own emit. */
+type ReplacedButtonProp = keyof Pick<ButtonProps, HandlerProp<typeof DomEvent.Error>>;
 
 /** Defines the forwarded `ButtonProps`, with the owned attributes re-added as required. */
 type CopyButtonAttributes = Omit<ButtonProps, ReplacedButtonProp | OwnedAttribute> & Record<OwnedAttribute, string>;
@@ -28,8 +25,6 @@ export interface CopyButtonProps extends /* @vue-ignore */ CopyButtonAttributes 
   /** The accessible name to announce while `copied` is true. Falls back to `aria-label` when omitted. */
   copiedAriaLabel?: string;
 
-  /* Re-declared from the ignored heritage so the SFC compiler generates a prop to hang a default on. */
-
   /** The visual surface style. Default `ghost`. */
   variant?: ButtonVariant;
 }
@@ -41,7 +36,7 @@ import { Check, Copy } from 'lucide-vue-next';
 
 import { Icon } from '../../../foundation/icons';
 import { useClipboard } from '../../../foundation/hooks';
-import { OptionalExtensions } from '../../../foundation/utils';
+import { AttributeValue, OptionalExtensions } from '../../../foundation/utils';
 import Button from '../button/Button.vue';
 import { ButtonVariant } from '../button';
 
@@ -66,14 +61,6 @@ const slots = defineSlots<{
 /** @internal {@link OwnedAttributes} as a lookup, for filtering the fallthrough set. */
 const OwnedAttributeLookup: ReadonlySet<string> = new Set(OwnedAttributes);
 
-/**
- * @internal The `data-copied` value emitted while the copy has succeeded.
- *
- * Pinned to `'true'` by Standard rule 8, not the `''` the house `dataAttr` helper emits — the
- * attribute is specified as a value, and analytics scrapers read it.
- */
-const CopiedAttributeValue = 'true';
-
 const attrs = useAttrs();
 
 const { copied, error, copy } = useClipboard({ resetAfter: () => props.resetAfter });
@@ -94,7 +81,7 @@ const fallbackIcon = computed(() => (copied.value ? Check : Copy));
 
 /** Emits `error` on each transition into a failed copy. */
 watch(error, (next) => {
-  if (next) emit('error', next);
+  if (next) emit(DomEvent.Error, next);
 });
 
 /** Copies the current text, discarding the settled promise. */
@@ -107,7 +94,7 @@ function handleClick(): void {
   <Button
     :variant="variant"
     :aria-label="effectiveAriaLabel"
-    :data-copied="OptionalExtensions.from(copied, CopiedAttributeValue)"
+    :data-copied="OptionalExtensions.from(copied, AttributeValue.True)"
     v-bind="passthroughAttrs"
     @click="handleClick"
   >
