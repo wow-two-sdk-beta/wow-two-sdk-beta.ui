@@ -1,6 +1,6 @@
 import type { Router } from 'vue-router';
 
-import { deepestHandleValue } from './RouteHandles';
+import { deepestHandleValue, resolveHandleValue } from './RouteHandles';
 
 /** Represents a single page-view event — the resolved pathname and the deepest matched route title. */
 export interface PageView {
@@ -31,6 +31,9 @@ export function installPageViewTracker(router: Router, options: PageViewTrackerO
 
   return router.afterEach((to, _from, failure) => {
     if (failure) return;
-    onPageView({ pathname: to.path, title: deepestHandleValue(to, (handle) => handle.title) });
+    onPageView({
+      pathname: to.path,
+      title: deepestHandleValue(to, (handle) => resolveHandleValue(handle.title, to)),
+    });
   });
 }

@@ -2,9 +2,9 @@
 // `meta`, so every one of these is a plain read off `route.matched[i].meta`. React reached the same
 // data through `useMatches()`; there is no Vue counterpart, and none is needed.
 
-import type { RouteParamsGeneric } from 'vue-router';
+import type { RouteLocationNormalized, RouteParamsGeneric } from 'vue-router';
 
-import type { RouteHandle } from './RouteConfig';
+import type { RouteHandle, RouteHandleResolver } from './RouteConfig';
 
 /**
  * The only part of a route location these readers need. Structural on purpose: `afterEach` hands
@@ -31,6 +31,22 @@ export function deepestHandleValue<TValue>(
     if (value !== undefined) return value;
   }
   return undefined;
+}
+
+/**
+ * Resolves a handle value that may be a literal or a {@link RouteHandleResolver} against the active
+ * location. A resolver returning `undefined` falls through to the next-shallowest match, exactly as
+ * an absent literal does.
+ */
+export function resolveHandleValue<TValue>(
+  value: TValue | RouteHandleResolver<TValue> | undefined,
+  route: MatchedRoute,
+): TValue | undefined {
+  if (typeof value !== 'function') return value;
+  // Widened for the same reason `MatchedRoute` exists: `afterEach` hands out a
+  // `RouteLocationNormalized` and `useRoute()` a `RouteLocationNormalizedLoaded`. The resolver's
+  // author-facing signature stays concrete so `route.params` is typed where it is written.
+  return (value as RouteHandleResolver<TValue>)(route as RouteLocationNormalized);
 }
 
 /*

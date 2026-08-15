@@ -21,7 +21,7 @@ function focusMainContent(): void {
 import { onMounted, shallowRef, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { deepestHandleValue } from './RouteHandles';
+import { deepestHandleValue, resolveHandleValue } from './RouteHandles';
 
 /**
  * Resets focus to the main content and announces the newly navigated page title through a polite,
@@ -59,7 +59,7 @@ watch(
 function announce(path: string): void {
   lastPath = path;
   focusMainContent();
-  message.value = deepestHandleValue(route, (handle) => handle.title) ?? document.title;
+  message.value = deepestHandleValue(route, (handle) => resolveHandleValue(handle.title, route)) ?? document.title;
 }
 </script>
 

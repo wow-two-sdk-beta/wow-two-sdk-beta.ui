@@ -4,13 +4,29 @@ import type { RouteLocationNormalized, RouteLocationRaw, RouteParamsGeneric } fr
 /** Defines a breadcrumb label — the Vue counterpart of React's `ReactNode` crumb (mirrors `feedback`'s `NoticeNode`). */
 export type CrumbNode = string | VNode;
 
-/** Defines per-route meta tags surfaced to the document head (read off the deepest match's `meta.meta`). */
+/**
+ * Defines per-route meta tags surfaced to the document head (read off the deepest match's `meta.meta`).
+ *
+ * A key beginning `og:` is written as `<meta property="…">`, which the Open Graph spec requires and
+ * scrapers key on; every other key is written as `<meta name="…">`, the form Twitter cards and
+ * `description` use. The prefix IS the discriminator — there is no second field to set.
+ */
 export interface RouteMeta {
   /** The meta description for this route. */
   readonly description?: string;
 
   readonly [key: string]: string | undefined;
 }
+
+/**
+ * Defines a per-route value computed from the active location — the escape hatch for anything a
+ * static handle cannot know, a `:slug` page's title being the case that forces it.
+ *
+ * Runs on every navigation, so it must stay synchronous and cheap: read `route.params` / `route.query`
+ * and a module-scope lookup, never fetch. A page whose title only exists after a request sets it from
+ * the component instead, once the data lands.
+ */
+export type RouteHandleResolver<TValue> = (route: RouteLocationNormalized) => TValue | undefined;
 
 /** Defines the outcome of a route guard — `true` to allow activation, or a location to redirect to. */
 export type GuardResult = true | { readonly redirect: RouteLocationRaw };
@@ -45,11 +61,11 @@ export interface RouteHandle {
   /** The breadcrumb label for this route. */
   readonly crumb?: CrumbNode;
 
-  /** The document title for this route. */
-  readonly title?: string;
+  /** The document title for this route, or a resolver against the active location. */
+  readonly title?: string | RouteHandleResolver<string>;
 
-  /** The per-route meta tags (description / og) surfaced to the document head. */
-  readonly meta?: RouteMeta;
+  /** The per-route meta tags (description / og) for the document head, or a resolver against the active location. */
+  readonly meta?: RouteMeta | RouteHandleResolver<RouteMeta>;
 
   readonly [key: string]: unknown;
 }

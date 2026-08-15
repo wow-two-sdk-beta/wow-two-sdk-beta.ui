@@ -1,6 +1,6 @@
 import type { Router } from 'vue-router';
 
-import { deepestHandleValue } from './RouteHandles';
+import { deepestHandleValue, resolveHandleValue } from './RouteHandles';
 
 /** Defines options for `installDocumentTitle`. */
 export interface DocumentTitleOptions {
@@ -24,7 +24,9 @@ export function installDocumentTitle(router: Router, options: DocumentTitleOptio
 
   const { suffix } = options;
   return router.afterEach((to) => {
-    const title = deepestHandleValue(to, (handle) => handle.title);
+    // `handle.title` may be a resolver — a `:slug` page's title is not knowable statically. One
+    // returning `undefined` falls through to the next-shallowest match, as an absent literal does.
+    const title = deepestHandleValue(to, (handle) => resolveHandleValue(handle.title, to));
     document.title = title ? (suffix ? `${title} · ${suffix}` : title) : (suffix ?? document.title);
   });
 }

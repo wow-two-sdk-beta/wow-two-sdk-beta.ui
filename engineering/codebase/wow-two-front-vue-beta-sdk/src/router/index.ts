@@ -19,16 +19,12 @@
 // vue-router-free.
 
 // Core wrapper + declarative model
-export {
-  createAppRouter,
-  RouterHistoryMode,
-  RouterHistory,
-  type CreateAppRouterOptions,
-} from './CreateAppRouter';
+export { createAppRouter, RouterHistoryMode, RouterHistory, type CreateAppRouterOptions } from './CreateAppRouter';
 export type {
   AppRoute,
   RouteConfig,
   RouteHandle,
+  RouteHandleResolver,
   RouteMeta,
   RouteGuard,
   GuardContext,
