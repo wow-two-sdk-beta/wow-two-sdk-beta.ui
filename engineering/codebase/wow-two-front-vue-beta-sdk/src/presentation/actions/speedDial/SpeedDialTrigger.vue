@@ -3,8 +3,7 @@ import type { ButtonHTMLAttributes, VNodeChild } from 'vue';
 import type { FabVariant, FabSize } from '../fab/FAB.variants';
 
 /* Native button attributes stay in attribute fallthrough rather than becoming runtime props. */
-export interface SpeedDialTriggerProps
-  extends /* @vue-ignore */ Omit<ButtonHTMLAttributes, 'children'> {
+export interface SpeedDialTriggerProps extends /* @vue-ignore */ Omit<ButtonHTMLAttributes, 'children'> {
   /** The glyph shown while closed. Defaults to a `Plus` icon. Prefer the `closed-icon` named slot. */
   closedIcon?: VNodeChild;
 
@@ -66,10 +65,7 @@ watchPostEffect(() => {
 });
 
 const rootClass = computed(() =>
-  cn(
-    'static !bottom-auto !left-auto !right-auto !top-auto !translate-x-0',
-    attrs.class as ClassValue,
-  ),
+  cn('static !bottom-auto !left-auto !right-auto !top-auto !translate-x-0', attrs.class as ClassValue),
 );
 
 /* Chained after the consumer's own click (attribute fallthrough puts theirs first) and skipped

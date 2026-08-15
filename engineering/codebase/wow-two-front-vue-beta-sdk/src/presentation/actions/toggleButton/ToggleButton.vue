@@ -14,14 +14,12 @@ type StateAware<T> = T | PressedFn<T>;
    `typeof toggleButtonVariants`, which the SFC prop compiler cannot walk. */
 /* The state-aware accessible label rides on the ignored heritage rather than the body — a declared
    `'aria-label'` would be camelized to `props.ariaLabel` and never reach the DOM. */
-type ToggleButtonAttributes = Omit<
-  ButtonProps,
-  'variant' | 'tone' | 'children' | 'title' | 'aria-label' | 'color'
-> & { 'aria-label'?: StateAware<string> };
+type ToggleButtonAttributes = Omit<ButtonProps, 'variant' | 'tone' | 'children' | 'title' | 'aria-label' | 'color'> & {
+  'aria-label'?: StateAware<string>;
+};
 
 export interface ToggleButtonProps
-  extends /* @vue-ignore */ ToggleButtonAttributes,
-    /* @vue-ignore */ Omit<ToggleButtonVariants, 'variant' | 'tone'> {
+  extends /* @vue-ignore */ ToggleButtonAttributes, /* @vue-ignore */ Omit<ToggleButtonVariants, 'variant' | 'tone'> {
   /** The press-state surface style. */
   variant?: ToggleButtonVariant;
 
@@ -115,8 +113,7 @@ const isDiv = computed(() => props.as === ToggleButtonElementValue.Div);
 
 /* Resolve state-aware string props to plain strings for the underlying Button. */
 const resolvedTitle = computed(() => {
-  const title =
-    typeof props.title === 'function' ? props.title({ pressed: pressed.value }) : props.title;
+  const title = typeof props.title === 'function' ? props.title({ pressed: pressed.value }) : props.title;
   /* `presentation/display` has not ported yet, so a string `tooltip` degrades to the native
      attribute rather than silently vanishing. An explicit `title` always wins. */
   return title ?? (typeof props.tooltip === 'string' ? props.tooltip : undefined);
@@ -128,16 +125,11 @@ const resolvedAriaLabel = computed(() => {
 });
 
 const rootClass = computed(() =>
-  cn(
-    toggleButtonVariants({ variant: props.variant, tone: props.tone }),
-    attrs.class as ClassValue,
-  ),
+  cn(toggleButtonVariants({ variant: props.variant, tone: props.tone }), attrs.class as ClassValue),
 );
 
 /* Tablist wiring is layered by the group, exactly as the original's `cloneElement` did. */
-const itemRole = computed(() =>
-  group?.itemRole === ToggleItemRole.Tab ? ('tab' as const) : undefined,
-);
+const itemRole = computed(() => (group?.itemRole === ToggleItemRole.Tab ? ('tab' as const) : undefined));
 const ariaSelected = computed(() => (itemRole.value === 'tab' ? pressed.value : undefined));
 
 function toggle(): void {

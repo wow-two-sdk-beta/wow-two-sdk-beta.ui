@@ -1,9 +1,5 @@
 <script lang="ts">
-import type {
-  AbsolutePosition,
-  PresenceAnimationDurationProp,
-  SizeValue,
-} from '../../../foundation/utils';
+import type { AbsolutePosition, PresenceAnimationDurationProp, SizeValue } from '../../../foundation/utils';
 import { OverlayTransition } from './Overlay.variants';
 
 /* Re-exported for ergonomic consumer imports — same shape as the shared types. */
@@ -103,9 +99,7 @@ const props = withDefaults(defineProps<OverlayProps>(), {
 const attrs = useAttrs();
 
 const isPresenceMode = computed(() => props.isOpen !== undefined);
-const isCustomPosition = computed(
-  () => typeof props.position === 'object' && props.position !== null,
-);
+const isCustomPosition = computed(() => typeof props.position === 'object' && props.position !== null);
 
 const effectiveTransition = computed<OverlayTransition>(
   () =>
@@ -128,9 +122,7 @@ const visibilityMode = computed<OverlayVisibilityMode>(() =>
 const classes = computed(() =>
   cn(
     overlayVariants({
-      position: isCustomPosition.value
-        ? 'custom'
-        : (props.position as AbsolutePositionPreset),
+      position: isCustomPosition.value ? 'custom' : (props.position as AbsolutePositionPreset),
       visibilityMode: visibilityMode.value,
       transition: effectiveTransition.value,
     }),
@@ -181,13 +173,7 @@ const inlineStyle = computed(() => {
     </Primitive>
   </Presence>
 
-  <Primitive
-    v-else
-    as="div"
-    :as-child="props.asChild"
-    :class="classes"
-    :style="inlineStyle"
-  >
+  <Primitive v-else as="div" :as-child="props.asChild" :class="classes" :style="inlineStyle">
     <slot />
   </Primitive>
 </template>

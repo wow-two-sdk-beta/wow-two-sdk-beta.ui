@@ -102,10 +102,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const rootClass = computed(() =>
-  cn(
-    props.orientation === OrientationValue.Vertical ? 'flex gap-4' : 'flex flex-col gap-4',
-    attrs.class as ClassValue,
-  ),
+  cn(props.orientation === OrientationValue.Vertical ? 'flex gap-4' : 'flex flex-col gap-4', attrs.class as ClassValue),
 );
 
 /** The rendered root `<div>` — the Vue stand-in for the React original's forwarded ref. */

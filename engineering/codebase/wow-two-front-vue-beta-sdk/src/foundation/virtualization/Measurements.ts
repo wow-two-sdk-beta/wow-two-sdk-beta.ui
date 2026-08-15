@@ -114,11 +114,7 @@ export function measurementsTotalSize(measurements: Measurements): number {
  * @param offset The pixel offset to locate. Negative values are treated as 0.
  * @returns The item index at that offset, or `-1` when there are no items.
  */
-export function findIndexByOffsetAccessor(
-  offsetAt: (index: number) => number,
-  count: number,
-  offset: number,
-): number {
+export function findIndexByOffsetAccessor(offsetAt: (index: number) => number, count: number, offset: number): number {
   if (count <= 0) return -1;
   const target = Number.isFinite(offset) ? Math.max(0, offset) : 0;
 
@@ -146,11 +142,7 @@ export function findIndexByOffsetAccessor(
  * @returns The item index at that offset, or `-1` for an empty list.
  */
 export function findIndexAtOffset(measurements: Measurements, offset: number): number {
-  return findIndexByOffsetAccessor(
-    (index) => itemOffset(measurements, index),
-    measurements.count,
-    offset,
-  );
+  return findIndexByOffsetAccessor((index) => itemOffset(measurements, index), measurements.count, offset);
 }
 
 /**
@@ -164,11 +156,7 @@ export function findIndexAtOffset(measurements: Measurements, offset: number): n
  * @param size Its real size in pixels. Non-finite or negative values are floored to 0.
  * @returns New measurements, or the original when nothing changed.
  */
-export function withMeasuredSize(
-  measurements: Measurements,
-  index: number,
-  size: number,
-): Measurements {
+export function withMeasuredSize(measurements: Measurements, index: number, size: number): Measurements {
   if (index < 0 || index >= measurements.count) return measurements;
 
   const next = normalizeSize(size);

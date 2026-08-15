@@ -20,14 +20,7 @@
 // Reduced motion is read here (`useReducedMotion`) rather than inside `playFlip`, keeping the pure layer
 // Vue-free. An explicit `reducedMotion` option still wins, so a consumer can force either behaviour.
 
-import {
-  onMounted,
-  onScopeDispose,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type WatchSource,
-} from 'vue';
+import { onMounted, onScopeDispose, toValue, watch, type MaybeRefOrGetter, type WatchSource } from 'vue';
 
 import { useReducedMotion } from '../hooks';
 

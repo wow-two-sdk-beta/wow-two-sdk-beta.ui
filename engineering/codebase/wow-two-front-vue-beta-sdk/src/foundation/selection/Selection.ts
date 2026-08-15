@@ -64,10 +64,7 @@ export interface SelectRangeOptions {
 }
 
 /** Reports whether two key sets hold the same members — the identity check behind the no-op short circuit. */
-function areKeySetsEqual<TKey extends SelectionKey>(
-  a: ReadonlySet<TKey>,
-  b: ReadonlySet<TKey>,
-): boolean {
+function areKeySetsEqual<TKey extends SelectionKey>(a: ReadonlySet<TKey>, b: ReadonlySet<TKey>): boolean {
   if (a === b) return true;
   if (a.size !== b.size) return false;
   for (const key of a) if (!b.has(key)) return false;
@@ -111,10 +108,7 @@ export function createSelection<TKey extends SelectionKey>(
 }
 
 /** Reports whether a key is currently selected. */
-export function isSelected<TKey extends SelectionKey>(
-  state: SelectionState<TKey>,
-  key: TKey,
-): boolean {
+export function isSelected<TKey extends SelectionKey>(state: SelectionState<TKey>, key: TKey): boolean {
   return state.keys.has(key);
 }
 
@@ -124,9 +118,7 @@ export function selectionCount<TKey extends SelectionKey>(state: SelectionState<
 }
 
 /** The selected keys as an array, in insertion order — the shape a controlled `onSelectionChange` emits. */
-export function selectedKeys<TKey extends SelectionKey>(
-  state: SelectionState<TKey>,
-): readonly TKey[] {
+export function selectedKeys<TKey extends SelectionKey>(state: SelectionState<TKey>): readonly TKey[] {
   return [...state.keys];
 }
 
@@ -134,10 +126,7 @@ export function selectedKeys<TKey extends SelectionKey>(
  * Selects a key and moves the anchor to it. In `single` mode this REPLACES the selection rather than
  * accumulating; in `none` mode it is inert.
  */
-export function select<TKey extends SelectionKey>(
-  state: SelectionState<TKey>,
-  key: TKey,
-): SelectionState<TKey> {
+export function select<TKey extends SelectionKey>(state: SelectionState<TKey>, key: TKey): SelectionState<TKey> {
   if (state.mode === SelectionMode.None) return state;
   if (state.mode === SelectionMode.Single) return withSelection(state, new Set([key]), key);
   const next = new Set(state.keys);
@@ -149,10 +138,7 @@ export function select<TKey extends SelectionKey>(
  * Deselects a key and moves the anchor to it. Inert in `none` mode, and inert when the key was not
  * selected — an unselected key carries no interaction to anchor on.
  */
-export function deselect<TKey extends SelectionKey>(
-  state: SelectionState<TKey>,
-  key: TKey,
-): SelectionState<TKey> {
+export function deselect<TKey extends SelectionKey>(state: SelectionState<TKey>, key: TKey): SelectionState<TKey> {
   if (state.mode === SelectionMode.None || !state.keys.has(key)) return state;
   const next = new Set(state.keys);
   next.delete(key);
@@ -163,10 +149,7 @@ export function deselect<TKey extends SelectionKey>(
  * Flips one key's membership and moves the anchor to it — the plain click. In `single` mode, toggling the
  * selected key clears the selection and toggling any other key replaces it.
  */
-export function toggle<TKey extends SelectionKey>(
-  state: SelectionState<TKey>,
-  key: TKey,
-): SelectionState<TKey> {
+export function toggle<TKey extends SelectionKey>(state: SelectionState<TKey>, key: TKey): SelectionState<TKey> {
   if (state.mode === SelectionMode.None) return state;
   return state.keys.has(key) ? deselect(state, key) : select(state, key);
 }
@@ -188,9 +171,7 @@ export function selectAll<TKey extends SelectionKey>(
 }
 
 /** Empties the selection and drops the anchor — with nothing selected there is no range to extend from. */
-export function clear<TKey extends SelectionKey>(
-  state: SelectionState<TKey>,
-): SelectionState<TKey> {
+export function clear<TKey extends SelectionKey>(state: SelectionState<TKey>): SelectionState<TKey> {
   if (state.keys.size === 0 && state.anchor === null) return state;
   return { mode: state.mode, keys: new Set<TKey>(), anchor: null };
 }

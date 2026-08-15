@@ -145,9 +145,7 @@ const labelledBy = computed(() => (!ariaLabel.value ? ctx?.labelledBy : undefine
 const container = useTemplateRef<HTMLDivElement>('container');
 const dragState = ref<{ startY: number; startValue: number } | null>(null);
 
-const fraction = computed(
-  () => (clamp(current.value, props.min, props.max) - props.min) / (props.max - props.min),
-);
+const fraction = computed(() => (clamp(current.value, props.min, props.max) - props.min) / (props.max - props.min));
 const halfArc = computed(() => props.arcDegrees / 2);
 const startAngle = computed(() => -halfArc.value - 90); // -90 puts 0° at top
 const endAngle = computed(() => halfArc.value - 90);
@@ -308,13 +306,7 @@ defineExpose({ el: container });
         stroke-linecap="round"
         class="opacity-20"
       />
-      <path
-        :d="valuePath"
-        fill="none"
-        stroke="currentColor"
-        :stroke-width="4"
-        stroke-linecap="round"
-      />
+      <path :d="valuePath" fill="none" stroke="currentColor" :stroke-width="4" stroke-linecap="round" />
       <line
         :x1="pointerInner[0]"
         :y1="pointerInner[1]"

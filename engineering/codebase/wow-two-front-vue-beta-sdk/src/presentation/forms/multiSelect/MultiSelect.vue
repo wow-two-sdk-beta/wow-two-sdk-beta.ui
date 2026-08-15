@@ -174,12 +174,7 @@ const selected = computed(() => valuesCtl.value.value);
 </script>
 
 <template>
-  <Popover
-    :open="isOpenNow"
-    :placement="placement"
-    :offset="6"
-    @open-change="openCtl.setValue"
-  >
+  <Popover :open="isOpenNow" :placement="placement" :offset="6" @open-change="openCtl.setValue">
     <slot />
     <!-- Always-rendered — inside PopoverContent they would vanish from form submission when closed. -->
     <template v-if="name">

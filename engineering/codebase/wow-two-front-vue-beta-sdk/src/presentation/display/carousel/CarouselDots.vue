@@ -20,9 +20,7 @@ const carousel = useCarouselContext();
 
 const slideIndexes = computed(() => Array.from({ length: carousel.count }, (_unused, i) => i));
 
-const classes = computed(() =>
-  cn('mt-3 flex items-center justify-center gap-1.5', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('mt-3 flex items-center justify-center gap-1.5', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

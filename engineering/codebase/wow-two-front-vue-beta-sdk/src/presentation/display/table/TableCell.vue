@@ -19,9 +19,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLTableCellElement>('el');
 const table = useTableContext();
 
-const classes = computed(() =>
-  cn(DENSITY_CELL[table.density], 'align-middle', attrs.class as string | undefined),
-);
+const classes = computed(() => cn(DENSITY_CELL[table.density], 'align-middle', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

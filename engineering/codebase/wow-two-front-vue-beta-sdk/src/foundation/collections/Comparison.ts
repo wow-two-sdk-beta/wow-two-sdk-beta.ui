@@ -61,10 +61,7 @@ export function shallowEqual(first: unknown, second: unknown): boolean {
   if (Array.isArray(first) || Array.isArray(second)) {
     return Array.isArray(first) && Array.isArray(second) && arrayShallowEqual(first, second);
   }
-  return Equality.shallowEquals(
-    first as Record<string, unknown>,
-    second as Record<string, unknown>,
-  );
+  return Equality.shallowEquals(first as Record<string, unknown>, second as Record<string, unknown>);
 }
 
 /**
@@ -86,11 +83,7 @@ export function deepEqual(first: unknown, second: unknown): boolean {
 }
 
 /** Runs one comparison against the set of pairs already under comparison on this walk. */
-function deepEqualWithin(
-  first: unknown,
-  second: unknown,
-  seen: Map<object, Set<object>>,
-): boolean {
+function deepEqualWithin(first: unknown, second: unknown, seen: Map<object, Set<object>>): boolean {
   if (Object.is(first, second)) return true;
   if (first === null || second === null) return false;
   if (typeof first !== 'object' || typeof second !== 'object') return false;
@@ -109,11 +102,7 @@ function deepEqualWithin(
 /** Dispatches two non-null objects to the branch that matches their built-in type. */
 function compareObjects(first: object, second: object, seen: Map<object, Set<object>>): boolean {
   if (first instanceof Date || second instanceof Date) {
-    return (
-      first instanceof Date &&
-      second instanceof Date &&
-      Object.is(first.getTime(), second.getTime())
-    );
+    return first instanceof Date && second instanceof Date && Object.is(first.getTime(), second.getTime());
   }
   if (first instanceof RegExp || second instanceof RegExp) {
     return (
@@ -157,9 +146,7 @@ function compareObjects(first: object, second: object, seen: Map<object, Set<obj
   const left = first as Record<string, unknown>;
   const right = second as Record<string, unknown>;
   return leftKeys.every(
-    (key) =>
-      Object.prototype.hasOwnProperty.call(second, key) &&
-      deepEqualWithin(left[key], right[key], seen),
+    (key) => Object.prototype.hasOwnProperty.call(second, key) && deepEqualWithin(left[key], right[key], seen),
   );
 }
 
@@ -199,8 +186,7 @@ function mapsEqual(
   const unclaimed = [...second.entries()];
   for (const [key, value] of first) {
     const index = unclaimed.findIndex(
-      (entry) =>
-        deepEqualWithin(key, entry[0], seen) && deepEqualWithin(value, entry[1], seen),
+      (entry) => deepEqualWithin(key, entry[0], seen) && deepEqualWithin(value, entry[1], seen),
     );
     if (index === -1) return false;
     unclaimed.splice(index, 1);
@@ -212,11 +198,7 @@ function mapsEqual(
  * Compares two equally-sized sets. Members present in both by identity are settled first and cost nothing;
  * only the structural leftovers are matched pairwise.
  */
-function setsEqual(
-  first: ReadonlySet<unknown>,
-  second: ReadonlySet<unknown>,
-  seen: Map<object, Set<object>>,
-): boolean {
+function setsEqual(first: ReadonlySet<unknown>, second: ReadonlySet<unknown>, seen: Map<object, Set<object>>): boolean {
   const unmatched: unknown[] = [];
   for (const member of first) {
     if (!second.has(member)) unmatched.push(member);

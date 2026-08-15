@@ -64,10 +64,12 @@ export type ColorSwatchVariants = VariantProps<typeof colorSwatchVariants>;
 /* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
 const _assertColorSwatchSize: AssertExact<
-  ColorSwatchSize, NonNullable<VariantProps<typeof colorSwatchVariants>['size']>
+  ColorSwatchSize,
+  NonNullable<VariantProps<typeof colorSwatchVariants>['size']>
 > = true;
 const _assertSwatchShape: AssertExact<
-  SwatchShape, NonNullable<VariantProps<typeof colorSwatchVariants>['shape']>
+  SwatchShape,
+  NonNullable<VariantProps<typeof colorSwatchVariants>['shape']>
 > = true;
 void _assertColorSwatchSize;
 void _assertSwatchShape;

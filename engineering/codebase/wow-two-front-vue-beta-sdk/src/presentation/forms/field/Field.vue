@@ -80,9 +80,7 @@ const hasOwnError = computed(() => Boolean(props.error) || Boolean(slots.error))
 /* Mirrors FormErrorMessage's visibility so the helper never hides behind an error
    that won't render. */
 const showError = computed(
-  () =>
-    hasOwnError.value ||
-    ((parent?.errors?.length ?? 0) > 0 && (parent?.isInvalid ?? false)),
+  () => hasOwnError.value || ((parent?.errors?.length ?? 0) > 0 && (parent?.isInvalid ?? false)),
 );
 
 const parentId = computed(() => parent?.id);

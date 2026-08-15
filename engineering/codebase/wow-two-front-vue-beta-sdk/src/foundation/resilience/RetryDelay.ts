@@ -31,7 +31,12 @@ function applyJitter(policy: RetryPolicy, delay: number, previousDelayMs: number
 }
 
 /** Computes the delay (ms) to wait before a retry attempt (1-based), per the policy's backoff + jitter — `random` is injectable for deterministic tests. */
-export function computeRetryDelay(policy: RetryPolicy, attempt: number, previousDelayMs = 0, random: () => number = Math.random): number {
+export function computeRetryDelay(
+  policy: RetryPolicy,
+  attempt: number,
+  previousDelayMs = 0,
+  random: () => number = Math.random,
+): number {
   const delay = backoffDelay(policy, attempt);
   return Math.round(applyJitter(policy, delay, previousDelayMs || delay, random));
 }

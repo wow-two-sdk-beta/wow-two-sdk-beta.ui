@@ -54,13 +54,7 @@ import {
 
 import { useResizeObserver } from '../hooks';
 
-import {
-  buildMeasurements,
-  itemOffset,
-  itemSize,
-  measurementsTotalSize,
-  type Measurements,
-} from './Measurements';
+import { buildMeasurements, itemOffset, itemSize, measurementsTotalSize, type Measurements } from './Measurements';
 import {
   DEFAULT_OVERSCAN,
   computeRange,

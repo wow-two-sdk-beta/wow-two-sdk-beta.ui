@@ -40,10 +40,7 @@ const hasTitle = computed(() => Boolean(props.title) || Boolean(slots.title));
 const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
 
 const classes = computed(() =>
-  cn(
-    'flex flex-col items-center justify-center gap-3 py-12 text-center',
-    attrs.class as string | undefined,
-  ),
+  cn('flex flex-col items-center justify-center gap-3 py-12 text-center', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

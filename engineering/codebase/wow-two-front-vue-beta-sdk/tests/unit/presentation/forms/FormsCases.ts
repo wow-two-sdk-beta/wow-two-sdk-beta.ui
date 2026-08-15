@@ -118,31 +118,25 @@ const inListbox = (node: VNode): VNode => h(Listbox, null, () => node);
 
 /* Select declares a required `default` slot, so its children go in as a slots object — the
    bare-function children form does not satisfy that. Every root below declares one too. */
-const inSelect = (node: VNode): VNode =>
-  h(Select, { defaultOpen: true }, { default: () => node });
+const inSelect = (node: VNode): VNode => h(Select, { defaultOpen: true }, { default: () => node });
 const inSelectTrigger = (node: VNode): VNode => inSelect(h(SelectTrigger, null, () => node));
 const inSelectContent = (node: VNode): VNode => inSelect(h(SelectContent, null, () => node));
 
 /* MultiSelect hosts a `Popover`, so its parts need the popover context as well as its own —
    wrapping is what supplies both. `MultiSelectItem` renders a `ListboxItem`, whose Listbox
    lives inside `MultiSelectContent`, so it nests one level deeper. */
-const inMultiSelect = (node: VNode): VNode =>
-  h(MultiSelect, { defaultOpen: true }, { default: () => node });
+const inMultiSelect = (node: VNode): VNode => h(MultiSelect, { defaultOpen: true }, { default: () => node });
 const inMultiSelectContent = (node: VNode): VNode =>
   inMultiSelect(h(MultiSelectContent, null, { default: () => node }));
 
-const inCombobox = (node: VNode): VNode =>
-  h(Combobox, { defaultOpen: true }, { default: () => node });
-const inComboboxContent = (node: VNode): VNode =>
-  inCombobox(h(ComboboxContent, null, { default: () => node }));
+const inCombobox = (node: VNode): VNode => h(Combobox, { defaultOpen: true }, { default: () => node });
+const inComboboxContent = (node: VNode): VNode => inCombobox(h(ComboboxContent, null, { default: () => node }));
 
 /* `StepperPanel` renders its slot only while the stepper's value matches its own, so the root
    is seeded with the value the cases below declare. `StepperStep` additionally reads the
    roving-focus context that `StepperList` owns. */
-const inStepper = (node: VNode): VNode =>
-  h(Stepper, { defaultValue: 'one' }, { default: () => node });
-const inStepperList = (node: VNode): VNode =>
-  inStepper(h(StepperList, null, { default: () => node }));
+const inStepper = (node: VNode): VNode => h(Stepper, { defaultValue: 'one' }, { default: () => node });
+const inStepperList = (node: VNode): VNode => inStepper(h(StepperList, null, { default: () => node }));
 
 /* `Wizard` seeds its active step from the first one that registers, so a lone `WizardStep`
    is the current step and renders its panel. */
@@ -152,8 +146,7 @@ const inWizard = (node: VNode): VNode => h(Wizard, null, { default: () => node }
    and the two commit buttons only while editing. Each part gets the root in the state that
    actually renders it. */
 const inEditable = (node: VNode): VNode => h(Editable, null, { default: () => node });
-const inEditingEditable = (node: VNode): VNode =>
-  h(Editable, { defaultEditing: true }, { default: () => node });
+const inEditingEditable = (node: VNode): VNode => h(Editable, { defaultEditing: true }, { default: () => node });
 
 /**
  * Every component `@wow-two-beta/ui-vue/presentation/forms` exports, as smoke cases.

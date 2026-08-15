@@ -78,9 +78,4 @@ export {
   type VirtualRange,
 } from './Windowing';
 
-export {
-  useVirtualList,
-  type UseVirtualListOptions,
-  type VirtualItem,
-  type VirtualList,
-} from './UseVirtualList';
+export { useVirtualList, type UseVirtualListOptions, type VirtualItem, type VirtualList } from './UseVirtualList';

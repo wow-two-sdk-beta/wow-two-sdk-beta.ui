@@ -39,9 +39,7 @@ const list = useListContext();
 /* The prop is an override; with it omitted the parent's `marker` decides. */
 const showCheck = computed(() => props.hasCheckMarker ?? list.marker === 'check');
 
-const classes = computed(() =>
-  cn(listItemVariants(), attrs.class as string | undefined),
-);
+const classes = computed(() => cn(listItemVariants(), attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -61,8 +59,6 @@ defineExpose({ el });
       <slot name="leading" />
     </span>
     <span class="flex-1"><slot /></span>
-    <span v-if="$slots.trailing" class="shrink-0 text-muted-foreground"
-      ><slot name="trailing"
-    /></span>
+    <span v-if="$slots.trailing" class="shrink-0 text-muted-foreground"><slot name="trailing" /></span>
   </li>
 </template>

@@ -46,12 +46,7 @@ export interface ScheduleViewProps {
 import { computed, useAttrs, useTemplateRef, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/utils';
-import {
-  formatZonedTime,
-  minutesBetween,
-  nowZoned,
-  zonedAtHour,
-} from '../../forms/DateExtensions';
+import { formatZonedTime, minutesBetween, nowZoned, zonedAtHour } from '../../forms/DateExtensions';
 
 /**
  * Multi-resource single-day schedule. Resources × hours grid; bookings
@@ -91,9 +86,7 @@ const hourCount = computed(() => endHour.value - startHour.value);
 const totalMinutes = computed(() => hourCount.value * 60);
 const slotCount = computed(() => Math.ceil(totalMinutes.value / props.slotMinutes));
 
-const dayStart = computed(() =>
-  zonedAtHour(day.value.toPlainDate(), startHour.value, day.value.timeZoneId),
-);
+const dayStart = computed(() => zonedAtHour(day.value.toPlainDate(), startHour.value, day.value.timeZoneId));
 
 const bookingsByResource = computed(() => {
   const map = new Map<string, Array<ScheduleBooking>>();
@@ -176,10 +169,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const rootClass = computed(() =>
-  cn(
-    'overflow-auto rounded-md border border-border bg-card text-sm shadow-sm',
-    attrs.class as ClassValue,
-  ),
+  cn('overflow-auto rounded-md border border-border bg-card text-sm shadow-sm', attrs.class as ClassValue),
 );
 
 const root = useTemplateRef<HTMLDivElement>('root');
@@ -191,18 +181,10 @@ defineExpose({ el: root });
 <template>
   <!-- Timeline layout, no 2D keyboard nav — ARIA grid (grid > row > gridcell)
        would be a lie; group + labeled slot/booking buttons is honest. -->
-  <div
-    ref="root"
-    role="group"
-    aria-label="Schedule"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <div ref="root" role="group" aria-label="Schedule" :class="rootClass" v-bind="passthroughAttrs">
     <!-- Hour header -->
     <div class="sticky top-0 z-raised flex border-b border-border bg-muted/40">
-      <div
-        class="w-32 shrink-0 border-r border-border px-3 py-2 text-xs font-medium text-muted-foreground"
-      >
+      <div class="w-32 shrink-0 border-r border-border px-3 py-2 text-xs font-medium text-muted-foreground">
         {{ dayLabel }}
       </div>
       <div class="flex-1 grid" :style="hourColumns">
@@ -216,14 +198,8 @@ defineExpose({ el: root });
       </div>
     </div>
     <!-- Rows -->
-    <div
-      v-for="resource in resources"
-      :key="resource.id"
-      class="flex border-b border-border last:border-b-0"
-    >
-      <div
-        class="w-32 shrink-0 border-r border-border bg-muted/20 px-3 py-2 text-xs font-medium"
-      >
+    <div v-for="resource in resources" :key="resource.id" class="flex border-b border-border last:border-b-0">
+      <div class="w-32 shrink-0 border-r border-border bg-muted/20 px-3 py-2 text-xs font-medium">
         <slot name="resource" :resource="resource">{{ resource.label }}</slot>
       </div>
       <div class="relative flex-1" :style="ROW_STYLE">

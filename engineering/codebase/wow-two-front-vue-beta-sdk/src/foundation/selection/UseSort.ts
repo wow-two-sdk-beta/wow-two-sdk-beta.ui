@@ -52,9 +52,7 @@ export interface SortControls<TField extends string = string> {
  * `onSortChange` — the shape a server-side sorted table wants, where the ordering round-trips through a query
  * rather than local state.
  */
-export function useSort<TField extends string = string>(
-  options: UseSortOptions<TField> = {},
-): SortControls<TField> {
+export function useSort<TField extends string = string>(options: UseSortOptions<TField> = {}): SortControls<TField> {
   const { sort, defaultSort, onSortChange, isMulti } = options;
 
   const { value: descriptors, setValue: setDescriptors } = useControlled<readonly SortDescriptor<TField>[]>({
@@ -65,8 +63,7 @@ export function useSort<TField extends string = string>(
 
   return {
     descriptors: computed(() => descriptors.value),
-    toggle: (field) =>
-      setDescriptors(toggleSort(descriptors.value, field, { isMulti: toValue(isMulti) ?? false })),
+    toggle: (field) => setDescriptors(toggleSort(descriptors.value, field, { isMulti: toValue(isMulti) ?? false })),
     setSort: setDescriptors,
     clear: () => setDescriptors(NO_SORT),
     directionFor: (field) => sortDirectionFor(descriptors.value, field),

@@ -19,11 +19,7 @@ function format(b: Uint8Array): string {
  */
 function createV7(timestamp?: number | Temporal.Instant): Guid {
   const ms =
-    timestamp === undefined
-      ? Date.now()
-      : typeof timestamp === 'number'
-        ? timestamp
-        : timestamp.epochMilliseconds;
+    timestamp === undefined ? Date.now() : typeof timestamp === 'number' ? timestamp : timestamp.epochMilliseconds;
 
   const b = new Uint8Array(16);
   crypto.getRandomValues(b);

@@ -41,8 +41,7 @@ export interface ResizableContextValue {
   resetPair: (separatorIndex: number) => void;
 }
 
-export const resizableContextKey: InjectionKey<ResizableContextValue> =
-  Symbol('wow-two.resizablePanels');
+export const resizableContextKey: InjectionKey<ResizableContextValue> = Symbol('wow-two.resizablePanels');
 
 export function useResizableContext(): ResizableContextValue {
   const context = inject(resizableContextKey, null);
@@ -176,8 +175,7 @@ function beginDrag(separatorIndex: number, event: MouseEvent): void {
   const startSizes = controlled.value.value.slice();
 
   const onMove = (e: MouseEvent): void => {
-    const deltaPx =
-      props.orientation === Orientation.Horizontal ? e.clientX - startX : e.clientY - startY;
+    const deltaPx = props.orientation === Orientation.Horizontal ? e.clientX - startX : e.clientY - startY;
     const deltaPct = (deltaPx / total) * 100;
     // Recompute against the start state, not the live state, to prevent drift.
     const a = separatorIndex;
@@ -215,8 +213,7 @@ function beginDrag(separatorIndex: number, event: MouseEvent): void {
     dragCleanup = null;
   };
 
-  document.body.style.cursor =
-    props.orientation === Orientation.Horizontal ? 'col-resize' : 'row-resize';
+  document.body.style.cursor = props.orientation === Orientation.Horizontal ? 'col-resize' : 'row-resize';
   document.body.style.userSelect = 'none';
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onUp);
@@ -250,9 +247,7 @@ provide(resizableContextKey, {
     panelEntries.value = [...panelEntries.value, { token, info }];
   },
   updatePanel: (token, info) => {
-    panelEntries.value = panelEntries.value.map((entry) =>
-      entry.token === token ? { token, info } : entry,
-    );
+    panelEntries.value = panelEntries.value.map((entry) => (entry.token === token ? { token, info } : entry));
   },
   unregisterPanel: (token) => {
     panelEntries.value = panelEntries.value.filter((entry) => entry.token !== token);

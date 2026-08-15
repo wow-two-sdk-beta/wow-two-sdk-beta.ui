@@ -56,12 +56,7 @@ interface GuardCase {
  * types anyway: omitting the required prop is the whole point, so a typed surface would only
  * be in the way.
  */
-function guardCase(
-  name: string,
-  component: unknown,
-  omits: string,
-  props?: Record<string, unknown>,
-): GuardCase {
+function guardCase(name: string, component: unknown, omits: string, props?: Record<string, unknown>): GuardCase {
   return { name, component: component as Component, omits, props };
 }
 
@@ -125,12 +120,8 @@ describe('presentation/display — a missing required collection degrades, it do
         wrapper.unmount();
       });
 
-      const warned = messages.some(
-        (m) => m.includes('Missing required prop') && m.includes(testCase.omits),
-      );
-      expect(warned, `${testCase.name} silently accepted a missing \`${testCase.omits}\``).toBe(
-        true,
-      );
+      const warned = messages.some((m) => m.includes('Missing required prop') && m.includes(testCase.omits));
+      expect(warned, `${testCase.name} silently accepted a missing \`${testCase.omits}\``).toBe(true);
     });
   }
 });

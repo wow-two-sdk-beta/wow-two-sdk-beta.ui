@@ -49,10 +49,7 @@ export interface MonthGridProps {
   onDayActivate?: (date: Temporal.PlainDate, meta: { outOfMonth: boolean }) => void;
 
   /** The extra per-day attributes for selection styling and hover handlers. */
-  dayProps?: (
-    date: Temporal.PlainDate,
-    meta: { outOfMonth: boolean },
-  ) => MonthGridDayProps | undefined;
+  dayProps?: (date: Temporal.PlainDate, meta: { outOfMonth: boolean }) => MonthGridDayProps | undefined;
 }
 
 // Upper bound when scanning past disabled days — covers a Shift+PageUp/PageDown
@@ -103,9 +100,7 @@ watch(
   () => props.focusedDate,
   (next) => {
     if (!interacted) return;
-    const cell = grid.value?.querySelector<HTMLButtonElement>(
-      `[data-date="${next.toString()}"]`,
-    );
+    const cell = grid.value?.querySelector<HTMLButtonElement>(`[data-date="${next.toString()}"]`);
     cell?.focus();
   },
   { flush: 'post' },
@@ -157,11 +152,7 @@ function moveFocus(next: Temporal.PlainDate, dir: 1 | -1): void {
   props.onFocusedDateChange(target);
 }
 
-function onCellKeydown(
-  event: KeyboardEvent,
-  date: Temporal.PlainDate,
-  outOfMonth: boolean,
-): void {
+function onCellKeydown(event: KeyboardEvent, date: Temporal.PlainDate, outOfMonth: boolean): void {
   switch (event.key) {
     case 'ArrowRight':
       event.preventDefault();
@@ -211,17 +202,14 @@ function dayDisabled(date: Temporal.PlainDate): boolean {
 
 const cells = computed(() => buildMonthGrid(props.viewMonth.year, props.viewMonth.month));
 
-const weeks = computed(() =>
-  Array.from({ length: 6 }, (_, w) => cells.value.slice(w * 7, w * 7 + 7)),
-);
+const weeks = computed(() => Array.from({ length: 6 }, (_, w) => cells.value.slice(w * 7, w * 7 + 7)));
 
 /* Roving tab stop — the focused date unless it's disabled (e.g. today before `min`); then
    the first enabled cell so the grid stays Tab-reachable. */
 const tabStopDate = computed(() => {
   if (!dayDisabled(props.focusedDate)) return props.focusedDate;
   const fallback =
-    cells.value.find((c) => !c.outOfMonth && !dayDisabled(c.date)) ??
-    cells.value.find((c) => !dayDisabled(c.date));
+    cells.value.find((c) => !c.outOfMonth && !dayDisabled(c.date)) ?? cells.value.find((c) => !dayDisabled(c.date));
   return fallback ? fallback.date : props.focusedDate;
 });
 
@@ -268,9 +256,7 @@ function cellClass(date: Temporal.PlainDate, outOfMonth: boolean): string {
    stop reaching the DOM. It is read off the attrs so it can be relocated onto the grid. */
 const ariaLabel = computed(() => (attrs['aria-label'] as string | undefined) ?? 'Calendar');
 
-const monthLabel = computed(
-  () => `${MONTHS_LONG[props.viewMonth.month - 1]} ${props.viewMonth.year}`,
-);
+const monthLabel = computed(() => `${MONTHS_LONG[props.viewMonth.month - 1]} ${props.viewMonth.year}`);
 
 const rootClass = computed(() =>
   cn(
@@ -322,12 +308,7 @@ defineExpose({ el: root });
 
     <!-- Day grid -->
     <div ref="grid" role="grid" :aria-label="ariaLabel" class="px-1">
-      <div
-        v-for="(week, weekIndex) in weeks"
-        :key="weekIndex"
-        role="row"
-        class="grid grid-cols-7 gap-0"
-      >
+      <div v-for="(week, weekIndex) in weeks" :key="weekIndex" role="row" class="grid grid-cols-7 gap-0">
         <button
           v-for="cell in week"
           :key="cell.date.toString()"

@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createLogger,
-  isLevelEnabled,
-  LogLevel,
-  memoryLogSink,
-  redactContext,
-} from '@src/foundation/logger';
+import { createLogger, isLevelEnabled, LogLevel, memoryLogSink, redactContext } from '@src/foundation/logger';
 
 /*
  * Smoke depth, `unit` project (node). Three contracts: the threshold actually drops records

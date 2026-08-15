@@ -31,9 +31,7 @@ const attrs = useAttrs();
 /* `ctx` is a live-getter object — read fields off it, never destructure. */
 const ctx = useComboboxContext();
 
-const inputState = computed(
-  () => props.state ?? (ctx.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const inputState = computed(() => props.state ?? (ctx.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 function setRef(node: unknown): void {
   ctx.inputEl.value = (node ?? null) as HTMLInputElement | null;
@@ -142,10 +140,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const inputClass = computed(() =>
-  cn(
-    inputBaseVariants({ size: props.size, state: inputState.value }),
-    attrs.class as ClassValue,
-  ),
+  cn(inputBaseVariants({ size: props.size, state: inputState.value }), attrs.class as ClassValue),
 );
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */

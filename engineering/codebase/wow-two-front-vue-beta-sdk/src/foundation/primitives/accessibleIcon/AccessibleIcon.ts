@@ -25,9 +25,7 @@ export const AccessibleIcon = defineComponent({
     return () => {
       const children = renderableChildren(slots.default?.());
       const target = children[0];
-      const icon = target
-        ? cloneVNode(target, { 'aria-hidden': 'true', focusable: 'false' })
-        : children;
+      const icon = target ? cloneVNode(target, { 'aria-hidden': 'true', focusable: 'false' }) : children;
       return h(Fragment, [icon, h(VisuallyHidden, null, { default: () => props.label })]);
     };
   },

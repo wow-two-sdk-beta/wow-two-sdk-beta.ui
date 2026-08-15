@@ -19,11 +19,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const rootClass = computed(() =>
-  cn(
-    'shrink-0 bg-border',
-    isVertical.value ? 'mx-1 h-px' : 'my-1 w-px self-stretch',
-    attrs.class as ClassValue,
-  ),
+  cn('shrink-0 bg-border', isVertical.value ? 'mx-1 h-px' : 'my-1 w-px self-stretch', attrs.class as ClassValue),
 );
 </script>
 

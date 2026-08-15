@@ -48,13 +48,8 @@ export type BadgeVariants = VariantProps<typeof badgeVariants>;
 
 /* Compile-time lock: enum values ≡ tv variant value-set (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertBadgeVariant: AssertExact<
-  BadgeVariant,
-  NonNullable<VariantProps<typeof badgeVariants>['variant']>
-> = true;
+const _assertBadgeVariant: AssertExact<BadgeVariant, NonNullable<VariantProps<typeof badgeVariants>['variant']>> = true;
 /* `size` prop adopts the shared 5-member `Size`; the tv axis only styles sm/md/lg (widening is intentional). */
-const _assertBadgeSize: [NonNullable<VariantProps<typeof badgeVariants>['size']>] extends [Size]
-  ? true
-  : never = true;
+const _assertBadgeSize: [NonNullable<VariantProps<typeof badgeVariants>['size']>] extends [Size] ? true : never = true;
 void _assertBadgeVariant;
 void _assertBadgeSize;

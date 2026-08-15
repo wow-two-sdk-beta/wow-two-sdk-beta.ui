@@ -49,9 +49,7 @@ const el = useTemplateRef<HTMLDivElement>('el');
 
 const isLabelled = computed(() => props.label != null);
 
-const labelledClasses = computed(() =>
-  cn('flex w-full items-center gap-3', attrs.class as string | undefined),
-);
+const labelledClasses = computed(() => cn('flex w-full items-center gap-3', attrs.class as string | undefined));
 
 const plainClasses = computed(() =>
   cn(dividerVariants({ orientation: props.orientation }), attrs.class as string | undefined),
@@ -67,25 +65,13 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div
-    v-if="isLabelled"
-    ref="el"
-    role="separator"
-    aria-orientation="horizontal"
-    v-bind="rest"
-    :class="labelledClasses"
-  >
+  <div v-if="isLabelled" ref="el" role="separator" aria-orientation="horizontal" v-bind="rest" :class="labelledClasses">
     <span class="h-px flex-1 bg-border" />
-    <span class="text-sm text-muted-foreground"><slot name="label">{{ props.label }}</slot></span>
+    <span class="text-sm text-muted-foreground"
+      ><slot name="label">{{ props.label }}</slot></span
+    >
     <span class="h-px flex-1 bg-border" />
   </div>
 
-  <div
-    v-else
-    ref="el"
-    role="separator"
-    :aria-orientation="props.orientation"
-    v-bind="rest"
-    :class="plainClasses"
-  />
+  <div v-else ref="el" role="separator" :aria-orientation="props.orientation" v-bind="rest" :class="plainClasses" />
 </template>

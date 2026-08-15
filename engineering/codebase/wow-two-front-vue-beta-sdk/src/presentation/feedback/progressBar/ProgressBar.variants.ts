@@ -38,11 +38,8 @@ export type ProgressBarVariants = VariantProps<typeof progressTrackVariants> &
    the assert is one-directional (tv keys ⊆ Size) — widening a narrower prop is
    allowed for beta. */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertProgressSize: NonNullable<
-  VariantProps<typeof progressTrackVariants>['size']
-> extends Size
-  ? true
-  : never = true;
+const _assertProgressSize: NonNullable<VariantProps<typeof progressTrackVariants>['size']> extends Size ? true : never =
+  true;
 void _assertProgressSize;
 const _assertProgressTone: AssertExact<
   ProgressTone,

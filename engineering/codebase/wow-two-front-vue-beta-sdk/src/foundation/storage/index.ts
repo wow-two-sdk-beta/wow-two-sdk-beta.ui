@@ -5,11 +5,7 @@
 // broker: `namespacedBroker` (key prefixing / isolation) and `createVersionedStore` (schema-versioned values
 // with an on-read migration chain).
 
-export {
-  type StorageBroker,
-  localStorageStorageBroker,
-  memoryStorageBroker,
-} from './StorageBroker';
+export { type StorageBroker, localStorageStorageBroker, memoryStorageBroker } from './StorageBroker';
 
 export { namespacedBroker } from './NamespacedBroker';
 

@@ -49,9 +49,7 @@ const isVisible = computed(() => !(props.value === 0 && props.canHideZero));
 
 const display = computed(() => (props.value > props.max ? `${props.max}+` : `${props.value}`));
 
-const classes = computed(() =>
-  cn('min-w-5 justify-center px-1.5', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('min-w-5 justify-center px-1.5', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -63,13 +61,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <Badge
-    v-if="isVisible"
-    ref="inner"
-    :variant="props.variant"
-    :size="Size.Sm"
-    v-bind="rest"
-    :class="classes"
-    >{{ display }}</Badge
-  >
+  <Badge v-if="isVisible" ref="inner" :variant="props.variant" :size="Size.Sm" v-bind="rest" :class="classes">{{
+    display
+  }}</Badge>
 </template>

@@ -187,10 +187,7 @@ function defaultFirst(voices: readonly SpeechSynthesisVoice[]): readonly SpeechS
  * @param lang A BCP-47 tag (`de`, `en-GB`). Same vocabulary as `foundation/i18n`'s locale.
  * @returns The matching voices, best match first. Empty when nothing matches.
  */
-export function voicesForLang(
-  voices: readonly SpeechSynthesisVoice[],
-  lang: string,
-): readonly SpeechSynthesisVoice[] {
+export function voicesForLang(voices: readonly SpeechSynthesisVoice[], lang: string): readonly SpeechSynthesisVoice[] {
   const wanted = normalizeTag(lang);
   if (wanted === '') return NoVoices;
 

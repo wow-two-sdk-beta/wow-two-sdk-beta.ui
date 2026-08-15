@@ -28,11 +28,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLOListElement>('el');
 
 const classes = computed(() =>
-  cn(
-    'flex list-none flex-col',
-    props.isDense ? 'gap-3' : 'gap-5',
-    attrs.class as string | undefined,
-  ),
+  cn('flex list-none flex-col', props.isDense ? 'gap-3' : 'gap-5', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -45,5 +41,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <ol ref="el" :data-dense="dataAttr(props.isDense)" v-bind="rest" :class="classes"><slot /></ol>
+  <ol ref="el" :data-dense="dataAttr(props.isDense)" v-bind="rest" :class="classes">
+    <slot />
+  </ol>
 </template>

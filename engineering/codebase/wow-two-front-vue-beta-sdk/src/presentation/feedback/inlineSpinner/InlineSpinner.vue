@@ -27,10 +27,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLSpanElement>('el');
 
 const classes = computed(() =>
-  cn(
-    'inline-flex items-center gap-2 text-sm text-muted-foreground',
-    attrs.class as string | undefined,
-  ),
+  cn('inline-flex items-center gap-2 text-sm text-muted-foreground', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

@@ -166,9 +166,7 @@ function onStopPositionInput(index: number, event: Event): void {
 function kindClass(kind: GradientKind): string {
   return cn(
     'inline-flex h-6 items-center rounded px-2 text-xs font-medium transition-colors',
-    gradient.value.kind === kind
-      ? 'bg-primary text-primary-foreground'
-      : 'text-muted-foreground hover:text-foreground',
+    gradient.value.kind === kind ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
   );
 }
 
@@ -229,10 +227,7 @@ defineExpose({ el });
           {{ k }}
         </button>
       </div>
-      <label
-        v-if="gradient.kind !== 'radial'"
-        class="ml-auto flex items-center gap-2 text-xs text-muted-foreground"
-      >
+      <label v-if="gradient.kind !== 'radial'" class="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
         Angle
         <input
           type="number"
@@ -248,11 +243,7 @@ defineExpose({ el });
     </div>
 
     <!-- Preview bar -->
-    <div
-      aria-hidden="true"
-      class="h-12 rounded-md border border-border"
-      :style="{ background: css }"
-    />
+    <div aria-hidden="true" class="h-12 rounded-md border border-border" :style="{ background: css }" />
 
     <!-- Stops -->
     <ul class="flex flex-col gap-2">
@@ -306,9 +297,7 @@ defineExpose({ el });
     </button>
 
     <!-- CSS output -->
-    <code
-      class="block break-all rounded-md bg-muted/40 px-2 py-1.5 text-[10px] text-muted-foreground"
-    >
+    <code class="block break-all rounded-md bg-muted/40 px-2 py-1.5 text-[10px] text-muted-foreground">
       {{ css }}
     </code>
     <input v-if="name" type="hidden" :name="name" :value="css" />

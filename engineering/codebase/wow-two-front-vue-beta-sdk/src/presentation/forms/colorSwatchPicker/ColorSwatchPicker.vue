@@ -40,11 +40,7 @@ import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
-import {
-  Orientation,
-  RovingFocusGroup,
-  useFormControl,
-} from '../../../foundation/primitives';
+import { Orientation, RovingFocusGroup, useFormControl } from '../../../foundation/primitives';
 import ColorSwatchItem from './ColorSwatchItem.vue';
 
 /**

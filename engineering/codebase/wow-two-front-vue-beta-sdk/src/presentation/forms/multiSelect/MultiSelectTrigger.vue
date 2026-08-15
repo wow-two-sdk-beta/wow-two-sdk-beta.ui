@@ -53,9 +53,7 @@ const ctx = useMultiSelectContext();
    renders. Left in the fallthrough set, it also still lands on the button. */
 const ariaLabel = computed(() => attrs['aria-label'] as string | undefined);
 
-const triggerState = computed(
-  () => props.state ?? (ctx.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const triggerState = computed(() => props.state ?? (ctx.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
 const labelledBy = computed(() => (!ariaLabel.value ? ctx.labelId : undefined));
@@ -85,10 +83,7 @@ const buttonClass = computed(() =>
 /* Chevron rotate kept; gated motion-safe so reduced-motion users get an instant flip, not a
    tween. Panel pop-in/out is owned by PopoverContent (Presence + --animate-pop-*). */
 const chevronClass = computed(() =>
-  cn(
-    'h-4 w-4 shrink-0 self-center text-muted-foreground motion-safe:transition-transform',
-    ctx.open && 'rotate-180',
-  ),
+  cn('h-4 w-4 shrink-0 self-center text-muted-foreground motion-safe:transition-transform', ctx.open && 'rotate-180'),
 );
 
 const hasContent = computed(() => Boolean(slots.default));

@@ -17,9 +17,7 @@ defineOptions({ name: 'Center', inheritAttrs: false });
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const classes = computed(() =>
-  cn('flex items-center justify-center', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('flex items-center justify-center', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

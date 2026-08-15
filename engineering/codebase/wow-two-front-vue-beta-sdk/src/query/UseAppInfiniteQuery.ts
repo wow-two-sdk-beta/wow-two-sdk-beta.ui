@@ -70,8 +70,7 @@ export function useAppInfiniteQuery<TItem, TPage>({
 }: UseAppInfiniteQueryOptions<TItem, TPage>): UseAppInfiniteQueryReturn<TItem> {
   // React memoized this with `useCallback` so the `useMemo` below did not re-run each render; Vue
   // recomputes only when a tracked dependency changes, so a plain closure is enough.
-  const extract = (page: TPage): readonly TItem[] =>
-    mapPage ? mapPage(page) : (page as unknown as readonly TItem[]);
+  const extract = (page: TPage): readonly TItem[] => (mapPage ? mapPage(page) : (page as unknown as readonly TItem[]));
 
   const query = useInfiniteQuery<TPage, Error, InfiniteData<TPage, unknown>, QueryKey, unknown>(() => ({
     queryKey: toValue(key),

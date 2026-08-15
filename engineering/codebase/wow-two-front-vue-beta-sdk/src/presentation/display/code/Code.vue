@@ -27,9 +27,7 @@ const props = defineProps<CodeProps>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
 
-const classes = computed(() =>
-  cn(codeVariants({ variant: props.variant }), attrs.class as string | undefined),
-);
+const classes = computed(() => cn(codeVariants({ variant: props.variant }), attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

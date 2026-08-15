@@ -15,11 +15,7 @@
 // - Merged actions replay forward in push order and unwind in REVERSE order. Any other pairing fails as soon as
 //   two coalesced edits touch the same field: undoing the first before the second restores a stale value.
 
-import {
-  createHistoryCore,
-  type HistoryOptions,
-  type HistoryStore,
-} from './HistoryCore';
+import { createHistoryCore, type HistoryOptions, type HistoryStore } from './HistoryCore';
 
 /** One reversible unit of work — what a command-based history stores and travels over. */
 export interface UndoableAction {

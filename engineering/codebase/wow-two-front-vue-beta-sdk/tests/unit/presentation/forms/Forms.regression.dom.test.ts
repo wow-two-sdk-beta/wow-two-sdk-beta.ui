@@ -41,10 +41,8 @@ describe('MultiSelectTags', () => {
   function mountTrigger(values: string[], maxVisibleTags?: number) {
     return mount({
       render: () =>
-        h(
-          MultiSelect,
-          { modelValue: values, getOptionLabel: (v: string) => OPTIONS[v] ?? null },
-          () => h(MultiSelectTrigger, { maxVisibleTags }),
+        h(MultiSelect, { modelValue: values, getOptionLabel: (v: string) => OPTIONS[v] ?? null }, () =>
+          h(MultiSelectTrigger, { maxVisibleTags }),
         ),
     });
   }
@@ -63,9 +61,7 @@ describe('MultiSelectTags', () => {
     const chips = wrapper.findAll('span.bg-muted');
     expect(chips).toHaveLength(2);
     expect(chips.map((c) => c.text().trim())).toEqual(['Alpha', 'Beta']);
-    expect(chips[0]?.classes(), 'chip has no border to separate it from the trigger').toContain(
-      'border-border',
-    );
+    expect(chips[0]?.classes(), 'chip has no border to separate it from the trigger').toContain('border-border');
   });
 
   /*
@@ -79,9 +75,7 @@ describe('MultiSelectTags', () => {
     expect(wrapper.findAll('span.bg-muted')).toHaveLength(2);
     expect(wrapper.text()).toContain('+3');
 
-    const overflow = wrapper
-      .findAll('span')
-      .find((s) => s.text().trim() === '+3' && s.element.children.length === 0);
+    const overflow = wrapper.findAll('span').find((s) => s.text().trim() === '+3' && s.element.children.length === 0);
     expect(overflow, 'no +N element rendered').toBeDefined();
     expect(overflow?.attributes('role'), '+N is exposed as a control').toBeUndefined();
     expect(overflow?.classes().join(' ')).not.toMatch(/rounded|bg-muted/);

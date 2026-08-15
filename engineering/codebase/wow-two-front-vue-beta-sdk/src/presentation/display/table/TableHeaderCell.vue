@@ -20,11 +20,7 @@ const el = useTemplateRef<HTMLTableCellElement>('el');
 const table = useTableContext();
 
 const classes = computed(() =>
-  cn(
-    DENSITY_CELL[table.density],
-    'font-semibold text-foreground',
-    attrs.class as string | undefined,
-  ),
+  cn(DENSITY_CELL[table.density], 'font-semibold text-foreground', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

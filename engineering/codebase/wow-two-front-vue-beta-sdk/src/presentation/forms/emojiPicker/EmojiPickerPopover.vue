@@ -2,11 +2,7 @@
 import type { Placement } from '@floating-ui/vue';
 import type { EmojiCatalogEntry } from '../../../domain/emoji';
 import type { StorageBroker } from '../../../foundation/storage';
-import type {
-  CategoryNavVariant,
-  EmojiPickerSizeInput,
-  EmojiTileShape,
-} from './EmojiPicker.variants';
+import type { CategoryNavVariant, EmojiPickerSizeInput, EmojiTileShape } from './EmojiPicker.variants';
 
 /**
  * Defines props for the popover-hosted emoji picker.
@@ -112,9 +108,7 @@ const openCtl = useControlled<boolean>({
 });
 
 const isOpenNow = computed(() => openCtl.value.value);
-const currentValue = computed(() =>
-  props.value !== undefined ? props.value : (props.modelValue ?? null),
-);
+const currentValue = computed(() => (props.value !== undefined ? props.value : (props.modelValue ?? null)));
 
 /* Inherits id/invalid/labelledby/describedby from a surrounding <Field> for the DEFAULT trigger
    (`Button` already inherits `isDisabled` from the context itself). A custom trigger slot owns

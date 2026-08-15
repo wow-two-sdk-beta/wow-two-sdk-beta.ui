@@ -1,4 +1,1 @@
-export {
-  default as LoadingOverlay,
-  type LoadingOverlayProps,
-} from './LoadingOverlay.vue';
+export { default as LoadingOverlay, type LoadingOverlayProps } from './LoadingOverlay.vue';

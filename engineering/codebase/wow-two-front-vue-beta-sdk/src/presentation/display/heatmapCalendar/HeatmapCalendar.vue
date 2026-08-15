@@ -26,20 +26,8 @@ const TONE_CLASSES: Record<HeatmapCalendarTone, ReadonlyArray<string>> = {
   brand: ['bg-muted/50', 'bg-primary/20', 'bg-primary/40', 'bg-primary/70', 'bg-primary'],
   success: ['bg-muted/50', 'bg-success/20', 'bg-success/40', 'bg-success/70', 'bg-success'],
   warning: ['bg-muted/50', 'bg-warning/20', 'bg-warning/40', 'bg-warning/70', 'bg-warning'],
-  danger: [
-    'bg-muted/50',
-    'bg-destructive/20',
-    'bg-destructive/40',
-    'bg-destructive/70',
-    'bg-destructive',
-  ],
-  muted: [
-    'bg-muted/30',
-    'bg-muted',
-    'bg-muted-foreground/30',
-    'bg-muted-foreground/60',
-    'bg-muted-foreground',
-  ],
+  danger: ['bg-muted/50', 'bg-destructive/20', 'bg-destructive/40', 'bg-destructive/70', 'bg-destructive'],
+  muted: ['bg-muted/30', 'bg-muted', 'bg-muted-foreground/30', 'bg-muted-foreground/60', 'bg-muted-foreground'],
 };
 
 const DEFAULT_MONTHS: ReadonlyArray<string> = [
@@ -56,15 +44,7 @@ const DEFAULT_MONTHS: ReadonlyArray<string> = [
   'Nov',
   'Dec',
 ];
-const DEFAULT_WEEKDAYS: ReadonlyArray<string> = [
-  'Sun',
-  'Mon',
-  'Tue',
-  'Wed',
-  'Thu',
-  'Fri',
-  'Sat',
-];
+const DEFAULT_WEEKDAYS: ReadonlyArray<string> = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export interface HeatmapCalendarProps {
   /** The per-day counts, keyed by calendar date. */
@@ -240,9 +220,7 @@ const renderColumns = computed(() =>
           // range widgets and is invalid on button/generic cells.
           role: isInteractive ? undefined : 'img',
           'aria-label': `${cell.key}: ${cell.value}`,
-          onClick: isInteractive
-            ? (): void => props.onCellClick?.(cell.date, cell.value)
-            : undefined,
+          onClick: isInteractive ? (): void => props.onCellClick?.(cell.date, cell.value) : undefined,
         },
         class: cn(
           'rounded-[2px] transition-colors',
@@ -308,10 +286,7 @@ defineExpose({ el });
     </div>
     <div class="flex" :style="gapStyle">
       <!-- Weekday labels — show every other to avoid clutter. -->
-      <div
-        class="flex flex-col text-[10px] uppercase text-muted-foreground"
-        :style="weekdayColumnStyle"
-      >
+      <div class="flex flex-col text-[10px] uppercase text-muted-foreground" :style="weekdayColumnStyle">
         <span
           v-for="(weekday, index) in weekdayOrder"
           :key="index"
@@ -322,12 +297,7 @@ defineExpose({ el });
       </div>
       <!-- Grid -->
       <div class="flex" :style="gapStyle">
-        <div
-          v-for="column in renderColumns"
-          :key="column.key"
-          class="flex flex-col"
-          :style="gapStyle"
-        >
+        <div v-for="column in renderColumns" :key="column.key" class="flex flex-col" :style="gapStyle">
           <component
             :is="cell.tag"
             v-for="cell in column.cells"
@@ -339,10 +309,7 @@ defineExpose({ el });
         </div>
       </div>
     </div>
-    <div
-      v-if="hasLegend"
-      class="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground"
-    >
+    <div v-if="hasLegend" class="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground">
       <span>Less</span>
       <span
         v-for="(stepCls, index) in toneSteps"

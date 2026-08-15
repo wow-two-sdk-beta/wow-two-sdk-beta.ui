@@ -19,14 +19,7 @@
 // aware). This slice adds no collator of its own — text must not order differently here than in a component.
 
 // Field access — the accessor vocabulary shared by sort and filter
-export {
-  isNullish,
-  readField,
-  toText,
-  type FieldAccessor,
-  type FieldAccessors,
-  type LocaleOptions,
-} from './Field';
+export { isNullish, readField, toText, type FieldAccessor, type FieldAccessors, type LocaleOptions } from './Field';
 
 // Selection — immutable key-set model with modes, anchor tracking, and the header tri-state
 export {
@@ -77,10 +70,6 @@ export {
 } from './Filter';
 
 // Vue — thin controlled/uncontrolled wrappers over the pure models
-export {
-  useSelection,
-  type SelectionControls,
-  type UseSelectionOptions,
-} from './UseSelection';
+export { useSelection, type SelectionControls, type UseSelectionOptions } from './UseSelection';
 export { useSort, type SortControls, type UseSortOptions } from './UseSort';
 export { useFilters, type FilterControls, type UseFiltersOptions } from './UseFilters';

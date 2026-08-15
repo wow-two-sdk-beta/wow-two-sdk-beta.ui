@@ -127,16 +127,7 @@ function run(): void {
 
 onMounted(run);
 
-watch(
-  [
-    () => props.to,
-    () => props.from,
-    () => props.duration,
-    () => props.easing,
-    () => props.canTriggerOnView,
-  ],
-  run,
-);
+watch([() => props.to, () => props.from, () => props.duration, () => props.easing, () => props.canTriggerOnView], run);
 
 onBeforeUnmount(() => cleanup?.());
 

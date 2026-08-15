@@ -56,20 +56,14 @@ const attrs = useAttrs();
 const slots = useSlots();
 const el = useTemplateRef<HTMLSpanElement>('el');
 
-const direction = computed<'up' | 'down' | 'flat'>(() =>
-  props.value > 0 ? 'up' : props.value < 0 ? 'down' : 'flat',
-);
+const direction = computed<'up' | 'down' | 'flat'>(() => (props.value > 0 ? 'up' : props.value < 0 ? 'down' : 'flat'));
 
 const positive = computed(() =>
   direction.value === 'flat' ? false : (direction.value === 'up') !== Boolean(props.isInverse),
 );
 
 const tone = computed(() =>
-  direction.value === 'flat'
-    ? 'text-muted-foreground'
-    : positive.value
-      ? 'text-success'
-      : 'text-destructive',
+  direction.value === 'flat' ? 'text-muted-foreground' : positive.value ? 'text-success' : 'text-destructive',
 );
 
 const arrow = computed(() => ARROW[direction.value]);

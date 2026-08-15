@@ -44,11 +44,7 @@ export {
 export { createUndoHistory, type UndoableAction, type UndoHistory } from './UndoHistory';
 
 // Snapshot flavor — a history of states
-export {
-  createSnapshotHistory,
-  type SnapshotHistory,
-  type SnapshotRecordOptions,
-} from './SnapshotHistory';
+export { createSnapshotHistory, type SnapshotHistory, type SnapshotRecordOptions } from './SnapshotHistory';
 
 // Vue — ownership and reactivity
 export {

@@ -45,15 +45,11 @@ const ctx = useFormControl();
 /* React tested `children != null && children !== false && children !== ''` because
    `{cond && 'msg'}` renders nothing; the Vue counterpart is an empty `message` or an
    absent slot, both of which must fall through to the context's errors. */
-const hasChildren = computed(
-  () => (props.message != null && props.message !== '') || Boolean(slots.default),
-);
+const hasChildren = computed(() => (props.message != null && props.message !== '') || Boolean(slots.default));
 
 const messages = computed<readonly string[]>(() => (hasChildren.value ? [] : (ctx?.errors ?? [])));
 
-const isShown = computed(
-  () => (hasChildren.value || messages.value.length > 0) && (ctx ? ctx.isInvalid : true),
-);
+const isShown = computed(() => (hasChildren.value || messages.value.length > 0) && (ctx ? ctx.isInvalid : true));
 
 /* Register only while rendering under the context id — an explicit `id` prop
    means the context's errorId is NOT in the DOM and must stay unreferenced. */
@@ -75,14 +71,7 @@ defineExpose({ el: root });
 </script>
 
 <template>
-  <p
-    v-if="isShown"
-    ref="root"
-    :id="errorId"
-    role="alert"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <p v-if="isShown" ref="root" :id="errorId" role="alert" :class="rootClass" v-bind="passthroughAttrs">
     <template v-if="hasChildren">
       <slot>{{ message }}</slot>
     </template>

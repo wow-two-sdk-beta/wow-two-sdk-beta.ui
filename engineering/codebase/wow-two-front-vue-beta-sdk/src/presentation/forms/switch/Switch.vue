@@ -107,11 +107,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const wrapperClass = computed(() =>
-  cn(
-    'relative inline-flex shrink-0',
-    TRACK_CLASS[props.size] ?? TRACK_CLASS.md,
-    attrs.class as ClassValue,
-  ),
+  cn('relative inline-flex shrink-0', TRACK_CLASS[props.size] ?? TRACK_CLASS.md, attrs.class as ClassValue),
 );
 
 const trackClass = computed(() =>

@@ -19,8 +19,7 @@ export interface SortableItemContextValue {
   disarm: () => void;
 }
 
-export const SortableItemKey: InjectionKey<SortableItemContextValue> =
-  Symbol('wow-two.sortableItem');
+export const SortableItemKey: InjectionKey<SortableItemContextValue> = Symbol('wow-two.sortableItem');
 
 /** Reads the enclosing `Sortable` drag state. */
 export function useSortableRoot(): SortableContextValue {

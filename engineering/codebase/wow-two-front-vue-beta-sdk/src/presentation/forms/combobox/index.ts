@@ -8,8 +8,4 @@ export { default as ComboboxItem, type ComboboxItemProps } from './ComboboxItem.
 export { default as ComboboxGroup, type ComboboxGroupProps } from './ComboboxGroup.vue';
 export { default as ComboboxSeparator } from './ComboboxSeparator.vue';
 export { default as ComboboxEmpty } from './ComboboxEmpty.vue';
-export {
-  useComboboxContext,
-  type ComboboxContextValue,
-  type ComboboxItemEntry,
-} from './ComboboxContext';
+export { useComboboxContext, type ComboboxContextValue, type ComboboxItemEntry } from './ComboboxContext';

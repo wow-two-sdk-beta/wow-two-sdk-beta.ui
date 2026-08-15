@@ -47,20 +47,16 @@ import { smokeCase, type SmokeCase } from '../../../support/Smoke';
  * `undefined` default, and a root that got that wrong reads as controlled-and-closed, so every
  * part below would render nothing and these cases would fail.
  */
-const inOpenModal = (node: VNode): VNode =>
-  h(Modal, { defaultOpen: true }, () => h(ModalContent, null, () => node));
+const inOpenModal = (node: VNode): VNode => h(Modal, { defaultOpen: true }, () => h(ModalContent, null, () => node));
 
-const inOpenDrawer = (node: VNode): VNode =>
-  h(Drawer, { defaultOpen: true }, () => h(DrawerContent, null, () => node));
+const inOpenDrawer = (node: VNode): VNode => h(Drawer, { defaultOpen: true }, () => h(DrawerContent, null, () => node));
 
-const inOpenBottomSheet = (node: VNode): VNode =>
-  h(BottomSheet, { defaultOpen: true }, () => node);
+const inOpenBottomSheet = (node: VNode): VNode => h(BottomSheet, { defaultOpen: true }, () => node);
 
 const inOpenAlertModal = (node: VNode): VNode =>
   h(AlertModal, { defaultOpen: true }, () => h(AlertModalContent, null, () => node));
 
-const inOpenActionSheet = (node: VNode): VNode =>
-  h(ActionSheet, { defaultOpen: true }, () => node);
+const inOpenActionSheet = (node: VNode): VNode => h(ActionSheet, { defaultOpen: true }, () => node);
 
 const inPopover = (node: VNode): VNode => h(Popover, { defaultOpen: true }, () => node);
 const inHoverCard = (node: VNode): VNode => h(HoverCard, { defaultOpen: true }, () => node);
@@ -76,14 +72,24 @@ export const overlaysCases: readonly SmokeCase[] = [
   smokeCase('Backdrop', Backdrop, {}, { slot: true }),
 
   smokeCase('Modal', Modal, {}, { slot: true }),
-  smokeCase('ModalTrigger', ModalTrigger, {}, {
-    slot: true,
-    wrap: (node) => h(Modal, null, () => node),
-  }),
-  smokeCase('ModalContent', ModalContent, {}, {
-    slot: true,
-    wrap: (node) => h(Modal, { defaultOpen: true }, () => node),
-  }),
+  smokeCase(
+    'ModalTrigger',
+    ModalTrigger,
+    {},
+    {
+      slot: true,
+      wrap: (node) => h(Modal, null, () => node),
+    },
+  ),
+  smokeCase(
+    'ModalContent',
+    ModalContent,
+    {},
+    {
+      slot: true,
+      wrap: (node) => h(Modal, { defaultOpen: true }, () => node),
+    },
+  ),
   smokeCase('ModalHeader', ModalHeader, {}, { slot: true, wrap: inOpenModal }),
   smokeCase('ModalTitle', ModalTitle, {}, { slot: true, wrap: inOpenModal }),
   smokeCase('ModalDescription', ModalDescription, {}, { slot: true, wrap: inOpenModal }),
@@ -92,22 +98,37 @@ export const overlaysCases: readonly SmokeCase[] = [
   smokeCase('ModalClose', ModalClose, {}, { slot: true, wrap: inOpenModal }),
 
   smokeCase('AlertModal', AlertModal, {}, { slot: true }),
-  smokeCase('AlertModalContent', AlertModalContent, {}, {
-    slot: true,
-    wrap: (node) => h(AlertModal, { defaultOpen: true }, () => node),
-  }),
+  smokeCase(
+    'AlertModalContent',
+    AlertModalContent,
+    {},
+    {
+      slot: true,
+      wrap: (node) => h(AlertModal, { defaultOpen: true }, () => node),
+    },
+  ),
   smokeCase('AlertModalAction', AlertModalAction, {}, { slot: true, wrap: inOpenAlertModal }),
   smokeCase('AlertModalCancel', AlertModalCancel, {}, { slot: true, wrap: inOpenAlertModal }),
 
   smokeCase('Drawer', Drawer, {}, { slot: true }),
-  smokeCase('DrawerTrigger', DrawerTrigger, {}, {
-    slot: true,
-    wrap: (node) => h(Drawer, null, () => node),
-  }),
-  smokeCase('DrawerContent', DrawerContent, {}, {
-    slot: true,
-    wrap: (node) => h(Drawer, { defaultOpen: true }, () => node),
-  }),
+  smokeCase(
+    'DrawerTrigger',
+    DrawerTrigger,
+    {},
+    {
+      slot: true,
+      wrap: (node) => h(Drawer, null, () => node),
+    },
+  ),
+  smokeCase(
+    'DrawerContent',
+    DrawerContent,
+    {},
+    {
+      slot: true,
+      wrap: (node) => h(Drawer, { defaultOpen: true }, () => node),
+    },
+  ),
   smokeCase('DrawerHeader', DrawerHeader, {}, { slot: true, wrap: inOpenDrawer }),
   smokeCase('DrawerTitle', DrawerTitle, {}, { slot: true, wrap: inOpenDrawer }),
   smokeCase('DrawerDescription', DrawerDescription, {}, { slot: true, wrap: inOpenDrawer }),
@@ -118,16 +139,26 @@ export const overlaysCases: readonly SmokeCase[] = [
   smokeCase('Popover', Popover, {}, { slot: true }),
   smokeCase('PopoverTrigger', PopoverTrigger, {}, { slot: true, wrap: inPopover }),
   smokeCase('PopoverContent', PopoverContent, {}, { slot: true, wrap: inPopover }),
-  smokeCase('PopoverArrow', PopoverArrow, {}, {
-    wrap: (node) => inPopover(h(PopoverContent, null, () => node)),
-  }),
+  smokeCase(
+    'PopoverArrow',
+    PopoverArrow,
+    {},
+    {
+      wrap: (node) => inPopover(h(PopoverContent, null, () => node)),
+    },
+  ),
 
   smokeCase('HoverCard', HoverCard, {}, { slot: true }),
   smokeCase('HoverCardTrigger', HoverCardTrigger, {}, { slot: true, wrap: inHoverCard }),
   smokeCase('HoverCardContent', HoverCardContent, {}, { slot: true, wrap: inHoverCard }),
-  smokeCase('HoverCardArrow', HoverCardArrow, {}, {
-    wrap: (node) => inHoverCard(h(HoverCardContent, null, () => node)),
-  }),
+  smokeCase(
+    'HoverCardArrow',
+    HoverCardArrow,
+    {},
+    {
+      wrap: (node) => inHoverCard(h(HoverCardContent, null, () => node)),
+    },
+  ),
 
   // Opened via the uncontrolled path so the slot is actually rendered — these two roots host
   // their content directly rather than through a `*Content` part.
@@ -137,8 +168,13 @@ export const overlaysCases: readonly SmokeCase[] = [
 
   smokeCase('BottomSheet', BottomSheet, { defaultOpen: true }, { slot: true }),
   smokeCase('BottomSheetTitle', BottomSheetTitle, {}, { slot: true, wrap: inOpenBottomSheet }),
-  smokeCase('BottomSheetDescription', BottomSheetDescription, {}, {
-    slot: true,
-    wrap: inOpenBottomSheet,
-  }),
+  smokeCase(
+    'BottomSheetDescription',
+    BottomSheetDescription,
+    {},
+    {
+      slot: true,
+      wrap: inOpenBottomSheet,
+    },
+  ),
 ];

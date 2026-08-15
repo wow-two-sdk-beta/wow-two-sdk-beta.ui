@@ -1,12 +1,6 @@
 <script lang="ts">
 import type { ElementType } from '../../../foundation/utils';
-import type {
-  StackVariants,
-  StackDirection,
-  StackAlign,
-  StackJustify,
-  StackWrap,
-} from './Stack.variants';
+import type { StackVariants, StackDirection, StackAlign, StackJustify, StackWrap } from './Stack.variants';
 
 /**
  * The gap between children. Spelled out rather than derived from

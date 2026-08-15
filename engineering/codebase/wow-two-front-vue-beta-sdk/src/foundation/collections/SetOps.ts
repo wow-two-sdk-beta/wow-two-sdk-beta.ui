@@ -34,11 +34,7 @@ function toKeySet<T, TKey>(items: readonly T[], keyFn?: (item: T) => TKey): Set<
  * @param keyFn Optional key extractor; defaults to the item itself (SameValueZero).
  * @returns A new array; neither input is mutated.
  */
-export function union<T, TKey = T>(
-  first: readonly T[],
-  second: readonly T[],
-  keyFn?: (item: T) => TKey,
-): T[] {
+export function union<T, TKey = T>(first: readonly T[], second: readonly T[], keyFn?: (item: T) => TKey): T[] {
   const seen = new Set<TKey | T>();
   const result: T[] = [];
   for (const item of first) {
@@ -65,11 +61,7 @@ export function union<T, TKey = T>(
  * @param keyFn Optional key extractor; defaults to the item itself (SameValueZero).
  * @returns A new array; neither input is mutated.
  */
-export function intersection<T, TKey = T>(
-  first: readonly T[],
-  second: readonly T[],
-  keyFn?: (item: T) => TKey,
-): T[] {
+export function intersection<T, TKey = T>(first: readonly T[], second: readonly T[], keyFn?: (item: T) => TKey): T[] {
   const other = toKeySet(second, keyFn);
   const seen = new Set<TKey | T>();
   const result: T[] = [];
@@ -93,11 +85,7 @@ export function intersection<T, TKey = T>(
  * @param keyFn Optional key extractor; defaults to the item itself (SameValueZero).
  * @returns A new array; neither input is mutated.
  */
-export function difference<T, TKey = T>(
-  first: readonly T[],
-  second: readonly T[],
-  keyFn?: (item: T) => TKey,
-): T[] {
+export function difference<T, TKey = T>(first: readonly T[], second: readonly T[], keyFn?: (item: T) => TKey): T[] {
   const other = toKeySet(second, keyFn);
   const seen = new Set<TKey | T>();
   const result: T[] = [];

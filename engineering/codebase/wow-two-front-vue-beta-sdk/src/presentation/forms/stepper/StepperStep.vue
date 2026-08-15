@@ -66,9 +66,7 @@ const stepNumber = computed(() => index.value + 1);
 const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
 
 const showConnector = computed(
-  () =>
-    stepper.orientation === Orientation.Horizontal &&
-    index.value < stepper.steps.length - 1,
+  () => stepper.orientation === Orientation.Horizontal && index.value < stepper.steps.length - 1,
 );
 
 function onClick(event: MouseEvent): void {
@@ -94,17 +92,11 @@ const markerClass = computed(() =>
 );
 
 const titleClass = computed(() =>
-  cn(
-    'font-medium',
-    status.value === StepStatus.Pending ? 'text-muted-foreground' : 'text-foreground',
-  ),
+  cn('font-medium', status.value === StepStatus.Pending ? 'text-muted-foreground' : 'text-foreground'),
 );
 
 const connectorClass = computed(() =>
-  cn(
-    'h-px flex-1 transition-colors',
-    status.value === StepStatus.Pending ? 'bg-border' : 'bg-primary',
-  ),
+  cn('h-px flex-1 transition-colors', status.value === StepStatus.Pending ? 'bg-border' : 'bg-primary'),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -120,9 +112,7 @@ const rest = computed(() => {
  * would drop the consumer's. Reading `item`'s members inside a computed keeps them tracked,
  * so `tabindex` still follows the group's tab stop.
  */
-const bindings = computed(() =>
-  mergeProps(rest.value, item as unknown as Record<string, unknown>),
-);
+const bindings = computed(() => mergeProps(rest.value, item as unknown as Record<string, unknown>));
 
 const CheckIcon = Check;
 

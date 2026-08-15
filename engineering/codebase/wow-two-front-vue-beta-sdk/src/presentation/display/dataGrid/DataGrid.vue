@@ -1,10 +1,5 @@
 <script lang="ts">
-import {
-  DataGridCellType,
-  DataGridColumnAlign,
-  DataGridMove,
-  type DataGridColumn,
-} from './DataGridTypes';
+import { DataGridCellType, DataGridColumnAlign, DataGridMove, type DataGridColumn } from './DataGridTypes';
 
 export interface DataGridProps<T> {
   columns: ReadonlyArray<DataGridColumn<T>>;
@@ -72,12 +67,7 @@ defineSlots<{
    * Overrides a body cell in read mode. Falls back to the column's `cell`
    * renderer, then to its `accessor`.
    */
-  cell(props: {
-    row: T;
-    column: DataGridColumn<T>;
-    rowIndex: number;
-    colIndex: number;
-  }): unknown;
+  cell(props: { row: T; column: DataGridColumn<T>; rowIndex: number; colIndex: number }): unknown;
 }>();
 
 const attrs = useAttrs();
@@ -204,8 +194,7 @@ function onKeydown(event: KeyboardEvent): void {
 function onCellClick(rowIndex: number, colIndex: number): void {
   const column = props.columns[colIndex];
   if (!column) return;
-  const isEditingThisCell =
-    editing.value && active.value.row === rowIndex && active.value.col === colIndex;
+  const isEditingThisCell = editing.value && active.value.row === rowIndex && active.value.col === colIndex;
   active.value = { row: rowIndex, col: colIndex };
   // React deferred this to a `requestAnimationFrame` because its `active` state
   // was still stale inside the click closure. A Vue ref updates on the line
@@ -219,9 +208,7 @@ function isActiveCell(rowIndex: number, colIndex: number): boolean {
 
 const cellPad = computed(() => (props.isDense ? 'px-2 py-1' : 'px-3 py-2'));
 
-const headerClasses = computed(() =>
-  cn('border-b border-border font-medium text-muted-foreground', cellPad.value),
-);
+const headerClasses = computed(() => cn('border-b border-border font-medium text-muted-foreground', cellPad.value));
 
 /** `width` is consumer-supplied CSS, so no unit is implied — Vue would not add one. */
 function headerStyle(column: DataGridColumn<T>): Record<string, string | undefined> {
@@ -249,10 +236,7 @@ function displayValue(column: DataGridColumn<T>, row: T): string {
 }
 
 const classes = computed(() =>
-  cn(
-    'overflow-auto rounded-md border border-border bg-card text-sm',
-    attrs.class as string | undefined,
-  ),
+  cn('overflow-auto rounded-md border border-border bg-card text-sm', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -324,14 +308,7 @@ defineExpose({ el });
               @commit="commitEdit"
               @cancel="cancelEdit"
             />
-            <slot
-              v-else
-              name="cell"
-              :row="row"
-              :column="column"
-              :row-index="rowIndex"
-              :col-index="colIndex"
-            >
+            <slot v-else name="cell" :row="row" :column="column" :row-index="rowIndex" :col-index="colIndex">
               <template v-if="column.cell">{{ column.cell(row) }}</template>
               <span v-else class="tabular-nums">{{ displayValue(column, row) }}</span>
             </slot>

@@ -22,9 +22,7 @@ defineSlots<{ default(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const classes = computed(() =>
-  cn('text-sm text-foreground', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('text-sm text-foreground', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

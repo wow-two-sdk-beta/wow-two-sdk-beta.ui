@@ -42,8 +42,7 @@ function harness() {
   const isPresent = ref(true);
   const wrapper = mount(
     defineComponent({
-      setup: () => () =>
-        h(Presence, { isPresent: isPresent.value }, { default: () => h('div', { id: 'child' }) }),
+      setup: () => () => h(Presence, { isPresent: isPresent.value }, { default: () => h('div', { id: 'child' }) }),
     }),
   );
   return { isPresent, wrapper };

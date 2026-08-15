@@ -18,15 +18,7 @@
 // NOT call `useOnlineStatus`: doing so would update reactive state on every connectivity flip merely to tell
 // the poller something it already knows from the same events.
 
-import {
-  onMounted,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 import { PollerState, createPoller, type PollFn, type Poller, type PollerOptions } from './CreatePoller';
 
@@ -57,10 +49,7 @@ export interface PollingHandle {
  *   re-read per emission, so a ref or getter keeps them live.
  * @returns The poller state and `pause` / `resume` / `stop`.
  */
-export function usePolling(
-  fn: MaybeRefOrGetter<PollFn>,
-  options: MaybeRefOrGetter<PollerOptions> = {},
-): PollingHandle {
+export function usePolling(fn: MaybeRefOrGetter<PollFn>, options: MaybeRefOrGetter<PollerOptions> = {}): PollingHandle {
   const state = shallowRef<PollerState>(PollerState.Idle);
 
   let poller: Poller | null = null;

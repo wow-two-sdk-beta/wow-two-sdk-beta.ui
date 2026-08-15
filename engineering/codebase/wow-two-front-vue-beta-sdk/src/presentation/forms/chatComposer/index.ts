@@ -1,5 +1,1 @@
-export {
-  default as ChatComposer,
-  SubmitTrigger,
-  type ChatComposerProps,
-} from './ChatComposer.vue';
+export { default as ChatComposer, SubmitTrigger, type ChatComposerProps } from './ChatComposer.vue';

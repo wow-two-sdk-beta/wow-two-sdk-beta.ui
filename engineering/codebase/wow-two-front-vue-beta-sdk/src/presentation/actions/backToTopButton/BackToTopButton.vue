@@ -22,15 +22,7 @@ export interface BackToTopButtonProps extends /* @vue-ignore */ ButtonHTMLAttrib
 </script>
 
 <script setup lang="ts">
-import {
-  computed,
-  defineComponent,
-  shallowRef,
-  useAttrs,
-  useSlots,
-  useTemplateRef,
-  watchPostEffect,
-} from 'vue';
+import { computed, defineComponent, shallowRef, useAttrs, useSlots, useTemplateRef, watchPostEffect } from 'vue';
 import { ArrowUp } from 'lucide-vue-next';
 import type { ClassValue } from 'clsx';
 import { ButtonType, cn, OverlayPosition as OverlayPositionValue } from '../../../foundation/utils';
@@ -77,8 +69,7 @@ watchPostEffect((onCleanup) => {
   if (typeof window === 'undefined') return;
   const element: HTMLElement | Window = props.scrollContainer ?? window;
   const read = (): void => {
-    const y =
-      'scrollY' in element ? (element as Window).scrollY : (element as HTMLElement).scrollTop;
+    const y = 'scrollY' in element ? (element as Window).scrollY : (element as HTMLElement).scrollTop;
     visible.value = y >= props.threshold;
   };
   read();
@@ -111,8 +102,7 @@ const rootClass = computed(() =>
 function handleClick(event: MouseEvent): void {
   if (event.defaultPrevented) return;
   const reducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const target = props.scrollContainer ?? window;
   if ('scrollTo' in target) {
     target.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });

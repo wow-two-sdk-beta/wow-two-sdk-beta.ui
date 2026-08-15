@@ -120,9 +120,7 @@ function adjust(direction: 1 | -1): void {
   el.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
-const finalState = computed(
-  () => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled ?? false);

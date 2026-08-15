@@ -3,8 +3,7 @@ import type { ButtonHTMLAttributes } from 'vue';
 import type { Side } from '../../../foundation/utils';
 
 /* Native button attributes stay in attribute fallthrough rather than becoming runtime props. */
-export interface DisclosureButtonProps
-  extends /* @vue-ignore */ Omit<ButtonHTMLAttributes, 'children' | 'onChange'> {
+export interface DisclosureButtonProps extends /* @vue-ignore */ Omit<ButtonHTMLAttributes, 'children' | 'onChange'> {
   /** The controlled open state. */
   isOpen?: boolean;
   /** The uncontrolled initial state. */
@@ -89,18 +88,8 @@ defineExpose({ el: root });
     v-bind="passthroughAttrs"
     @click="handleClick"
   >
-    <Icon
-      v-if="chevronSide === SideValue.Left"
-      :icon="ChevronDown"
-      :size="16"
-      :class="chevronClass"
-    />
+    <Icon v-if="chevronSide === SideValue.Left" :icon="ChevronDown" :size="16" :class="chevronClass" />
     <span class="flex-1 text-left"><slot /></span>
-    <Icon
-      v-if="chevronSide === SideValue.Right"
-      :icon="ChevronDown"
-      :size="16"
-      :class="chevronClass"
-    />
+    <Icon v-if="chevronSide === SideValue.Right" :icon="ChevronDown" :size="16" :class="chevronClass" />
   </button>
 </template>

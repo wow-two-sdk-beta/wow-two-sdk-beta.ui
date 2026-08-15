@@ -169,9 +169,7 @@ const calendarMonth = computed(() => committed.value ?? today());
 const minValue = computed(() => formatISODate(props.min));
 const maxValue = computed(() => formatISODate(props.max));
 
-const finalState = computed(
-  () => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);

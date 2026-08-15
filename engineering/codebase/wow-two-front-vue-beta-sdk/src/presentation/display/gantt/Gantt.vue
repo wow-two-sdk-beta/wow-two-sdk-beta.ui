@@ -51,10 +51,7 @@ function maxDate(a: Temporal.PlainDate, b: Temporal.PlainDate): Temporal.PlainDa
   return Temporal.PlainDate.compare(a, b) >= 0 ? a : b;
 }
 
-function* eachDay(
-  from: Temporal.PlainDate,
-  to: Temporal.PlainDate,
-): Generator<Temporal.PlainDate> {
+function* eachDay(from: Temporal.PlainDate, to: Temporal.PlainDate): Generator<Temporal.PlainDate> {
   let cur = from;
   while (Temporal.PlainDate.compare(cur, to) <= 0) {
     yield cur;
@@ -121,9 +118,7 @@ const totalDays = computed(() => range.value.totalDays);
 
 const headerDates = computed(() => Array.from(eachDay(range.value.from, range.value.to)));
 const todayOffset = computed(() => daysBetween(rangeFrom.value, today()));
-const todayInRange = computed(
-  () => todayOffset.value >= 0 && todayOffset.value < totalDays.value,
-);
+const todayInRange = computed(() => todayOffset.value >= 0 && todayOffset.value < totalDays.value);
 
 const taskIndex = computed(() => new Map(props.tasks.map((t, i) => [t.id, i])));
 
@@ -220,9 +215,7 @@ function milestonePoints(m: GanttMilestone): string {
   return `${x},2 ${x + 6},10 ${x},18 ${x - 6},10`;
 }
 
-const todayX = computed(
-  () => todayOffset.value * props.cellWidth + props.cellWidth / 2,
-);
+const todayX = computed(() => todayOffset.value * props.cellWidth + props.cellWidth / 2);
 const todayY2 = computed(() => props.tasks.length * props.rowHeight);
 
 const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
@@ -231,10 +224,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const rootClass = computed(() =>
-  cn(
-    'overflow-auto rounded-md border border-border bg-card text-sm shadow-sm',
-    attrs.class as ClassValue,
-  ),
+  cn('overflow-auto rounded-md border border-border bg-card text-sm shadow-sm', attrs.class as ClassValue),
 );
 
 const root = useTemplateRef<HTMLDivElement>('root');
@@ -244,20 +234,11 @@ defineExpose({ el: root });
 </script>
 
 <template>
-  <div
-    ref="root"
-    role="grid"
-    aria-label="Gantt chart"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <div ref="root" role="grid" aria-label="Gantt chart" :class="rootClass" v-bind="passthroughAttrs">
     <div class="flex">
       <!-- Label column -->
       <div class="shrink-0 border-r border-border bg-muted/30" :style="labelColumnStyle">
-        <div
-          class="border-b border-border px-3 py-2 text-xs font-medium text-muted-foreground"
-          :style="rowStyle"
-        >
+        <div class="border-b border-border px-3 py-2 text-xs font-medium text-muted-foreground" :style="rowStyle">
           Task
         </div>
         <div
@@ -276,12 +257,7 @@ defineExpose({ el: root });
         <div :style="timelineStyle">
           <!-- Header -->
           <div class="flex border-b border-border" :style="rowStyle">
-            <div
-              v-for="(d, i) in headerDates"
-              :key="i"
-              :class="headerCellClass(d)"
-              :style="cellStyle"
-            >
+            <div v-for="(d, i) in headerDates" :key="i" :class="headerCellClass(d)" :style="cellStyle">
               <div
                 v-if="d.day === 1"
                 class="border-b border-border bg-muted px-1 py-0.5 text-center font-medium text-muted-foreground"
@@ -300,12 +276,7 @@ defineExpose({ el: root });
           >
             <!-- Vertical day gridlines + weekend shading -->
             <div class="absolute inset-0 flex pointer-events-none">
-              <div
-                v-for="(d, i) in headerDates"
-                :key="i"
-                :style="cellStyle"
-                :class="gridlineClass(d)"
-              />
+              <div v-for="(d, i) in headerDates" :key="i" :style="cellStyle" :class="gridlineClass(d)" />
             </div>
             <!-- Bar -->
             <button
@@ -331,21 +302,11 @@ defineExpose({ el: root });
         <!-- Dependency arrows + today line -->
         <svg class="pointer-events-none absolute" :style="overlayStyle">
           <g v-for="arrow in dependencyArrows" :key="arrow.key">
-            <path
-              :d="arrow.path"
-              fill="none"
-              stroke="currentColor"
-              :stroke-width="1"
-              class="text-border-strong"
-            />
+            <path :d="arrow.path" fill="none" stroke="currentColor" :stroke-width="1" class="text-border-strong" />
             <polygon :points="arrow.points" class="fill-border-strong" />
           </g>
           <g v-for="m in milestones" :key="m.id">
-            <polygon
-              :points="milestonePoints(m)"
-              class="fill-warning stroke-warning-foreground"
-              :stroke-width="1"
-            />
+            <polygon :points="milestonePoints(m)" class="fill-warning stroke-warning-foreground" :stroke-width="1" />
           </g>
           <line
             v-if="todayInRange"

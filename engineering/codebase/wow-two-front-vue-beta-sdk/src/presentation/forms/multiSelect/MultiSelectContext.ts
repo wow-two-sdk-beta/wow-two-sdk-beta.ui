@@ -48,8 +48,7 @@ export interface MultiSelectContextValue {
   readonly describedBy?: string;
 }
 
-export const multiSelectContextKey: InjectionKey<MultiSelectContextValue> =
-  Symbol('wow-two.multiSelect');
+export const multiSelectContextKey: InjectionKey<MultiSelectContextValue> = Symbol('wow-two.multiSelect');
 
 /** Reads the surrounding multi-select context; throws when used outside a `<MultiSelect>`. */
 export function useMultiSelectContext(): MultiSelectContextValue {

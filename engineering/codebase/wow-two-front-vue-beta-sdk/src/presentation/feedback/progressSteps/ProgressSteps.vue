@@ -38,11 +38,7 @@ const el = useTemplateRef<HTMLOListElement>('el');
 const isHorizontal = computed(() => props.orientation === OrientationToken.Horizontal);
 
 const classes = computed(() =>
-  cn(
-    'flex',
-    isHorizontal.value ? 'flex-row items-center gap-2' : 'flex-col gap-3',
-    attrs.class as string | undefined,
-  ),
+  cn('flex', isHorizontal.value ? 'flex-row items-center gap-2' : 'flex-col gap-3', attrs.class as string | undefined),
 );
 
 /** The per-index step status, driving both the marker and the connector tone. */
@@ -83,11 +79,7 @@ defineExpose({ el });
         <template v-else>{{ i + 1 }}</template>
       </span>
       <span :class="labelClasses(i)">{{ label }}</span>
-      <span
-        v-if="isHorizontal && i < props.steps.length - 1"
-        :class="connectorClasses(i)"
-        aria-hidden="true"
-      />
+      <span v-if="isHorizontal && i < props.steps.length - 1" :class="connectorClasses(i)" aria-hidden="true" />
     </li>
   </ol>
 </template>

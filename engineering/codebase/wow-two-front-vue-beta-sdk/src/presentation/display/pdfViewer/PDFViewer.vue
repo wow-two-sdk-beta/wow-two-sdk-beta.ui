@@ -74,10 +74,7 @@ const { value: zoom, setValue: setZoom } = useControlled<number>({
 // Build URL with hash for page/zoom hint to native PDF viewer.
 const hashedSrc = computed(() => {
   try {
-    const url = new URL(
-      props.src,
-      typeof window !== 'undefined' ? window.location.href : 'http://localhost',
-    );
+    const url = new URL(props.src, typeof window !== 'undefined' ? window.location.href : 'http://localhost');
     url.hash = `page=${page.value}&zoom=${zoom.value}`;
     return url.toString();
   } catch {

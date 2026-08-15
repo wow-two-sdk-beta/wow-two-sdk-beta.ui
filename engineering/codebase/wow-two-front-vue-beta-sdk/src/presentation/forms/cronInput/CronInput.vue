@@ -101,8 +101,7 @@ function parseField(raw: string, min: number, max: number): CronField {
   // Range: "N-M".
   if (/^(\d+)-(\d+)$/.test(raw)) {
     const [a, b] = raw.split('-').map(Number);
-    if (a == null || b == null || a < min || b > max || a > b)
-      return { raw, kind: CronFieldKind.Invalid };
+    if (a == null || b == null || a < min || b > max || a > b) return { raw, kind: CronFieldKind.Invalid };
     return { raw, kind: CronFieldKind.Range, range: [a, b] };
   }
   // List: "N,M,O".
@@ -120,16 +119,10 @@ function parseField(raw: string, min: number, max: number): CronField {
   return { raw, kind: CronFieldKind.Invalid };
 }
 
-function describeField(
-  field: CronField,
-  names?: ReadonlyArray<string>,
-  unit = '',
-  plural = '',
-): string {
+function describeField(field: CronField, names?: ReadonlyArray<string>, unit = '', plural = ''): string {
   if (field.kind === CronFieldKind.Every) return '*';
   if (field.kind === CronFieldKind.Invalid) return '?';
-  if (field.kind === CronFieldKind.Step && field.step != null)
-    return `every ${field.step} ${plural || unit + 's'}`;
+  if (field.kind === CronFieldKind.Step && field.step != null) return `every ${field.step} ${plural || unit + 's'}`;
   if (field.kind === CronFieldKind.Range && field.range) {
     const [a, b] = field.range;
     const aLabel = names?.[a] ?? a;
@@ -207,15 +200,11 @@ function parseCron(value: string): string {
   }
   // Fallback — describe each field.
   const parts2 = [];
-  if (minute.kind !== CronFieldKind.Every)
-    parts2.push(`minute: ${describeField(minute, undefined, 'minute')}`);
-  if (hour.kind !== CronFieldKind.Every)
-    parts2.push(`hour: ${describeField(hour, undefined, 'hour')}`);
+  if (minute.kind !== CronFieldKind.Every) parts2.push(`minute: ${describeField(minute, undefined, 'minute')}`);
+  if (hour.kind !== CronFieldKind.Every) parts2.push(`hour: ${describeField(hour, undefined, 'hour')}`);
   if (dom.kind !== CronFieldKind.Every) parts2.push(`day: ${describeField(dom)}`);
-  if (month.kind !== CronFieldKind.Every)
-    parts2.push(`month: ${describeField(month, ['', ...MONTH_NAMES])}`);
-  if (dow.kind !== CronFieldKind.Every)
-    parts2.push(`weekday: ${describeField(dow, WEEKDAY_NAMES)}`);
+  if (month.kind !== CronFieldKind.Every) parts2.push(`month: ${describeField(month, ['', ...MONTH_NAMES])}`);
+  if (dow.kind !== CronFieldKind.Every) parts2.push(`weekday: ${describeField(dow, WEEKDAY_NAMES)}`);
   return parts2.length === 0 ? 'Every minute' : parts2.join(' · ');
 }
 </script>
@@ -281,15 +270,10 @@ const cron = controlled.value;
 const preview = computed(() => parseCron(cron.value));
 
 const isError = computed(
-  () =>
-    (props.isInvalid ?? ctx?.isInvalid) ||
-    preview.value.startsWith('Invalid') ||
-    preview.value.startsWith('Cron'),
+  () => (props.isInvalid ?? ctx?.isInvalid) || preview.value.startsWith('Invalid') || preview.value.startsWith('Cron'),
 );
 
-const inputState = computed(() =>
-  isError.value ? InputStateValue.Invalid : (props.state ?? InputStateValue.Default),
-);
+const inputState = computed(() => (isError.value ? InputStateValue.Invalid : (props.state ?? InputStateValue.Default)));
 
 function onInput(event: Event): void {
   controlled.setValue((event.target as HTMLInputElement).value);
@@ -310,17 +294,11 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const wrapperClass = computed(() =>
-  cn('flex flex-col gap-1', attrs.class as ClassValue),
-);
+const wrapperClass = computed(() => cn('flex flex-col gap-1', attrs.class as ClassValue));
 
-const inputClass = computed(() =>
-  cn(inputBaseVariants({ size: props.size, state: inputState.value }), 'font-mono'),
-);
+const inputClass = computed(() => cn(inputBaseVariants({ size: props.size, state: inputState.value }), 'font-mono'));
 
-const previewClass = computed(() =>
-  cn('px-1 text-xs', isError.value ? 'text-destructive' : 'text-muted-foreground'),
-);
+const previewClass = computed(() => cn('px-1 text-xs', isError.value ? 'text-destructive' : 'text-muted-foreground'));
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: input });

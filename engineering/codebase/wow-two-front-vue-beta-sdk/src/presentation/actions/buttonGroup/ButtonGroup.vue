@@ -56,13 +56,7 @@ defineExpose({ el: root });
 
 <template>
   <!-- Visually groups action-children — collapses inner radii when `isAttached`. -->
-  <div
-    ref="root"
-    role="group"
-    :data-orientation="orientation"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <div ref="root" role="group" :data-orientation="orientation" :class="rootClass" v-bind="passthroughAttrs">
     <slot />
   </div>
 </template>

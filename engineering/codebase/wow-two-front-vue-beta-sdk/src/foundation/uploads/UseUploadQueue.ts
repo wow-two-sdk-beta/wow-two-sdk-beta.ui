@@ -39,9 +39,7 @@ import { createUploadQueue, type UploadQueue, type UploadQueueOptions, type Uplo
  * {@link useUploadQueueSnapshot}; use it directly to derive a custom projection
  * (`computed(() => (version.value, queue.items().filter(failed)))`).
  */
-export function useUploadQueueVersion<TResult = unknown>(
-  queue: UploadQueue<TResult>,
-): Readonly<ShallowRef<number>> {
+export function useUploadQueueVersion<TResult = unknown>(queue: UploadQueue<TResult>): Readonly<ShallowRef<number>> {
   const version = shallowRef(queue.version());
 
   let unsubscribe: (() => void) | undefined;

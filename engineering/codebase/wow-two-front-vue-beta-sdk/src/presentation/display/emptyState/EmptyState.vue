@@ -80,18 +80,11 @@ const textSize = computed(() => (props.size === EmptyStateSize.Lg ? 'md' : 'sm')
 const hasDescription = computed(() => props.description !== undefined || !!slots.description);
 
 const classes = computed(() =>
-  cn(
-    'flex flex-col items-center text-center',
-    sizing.value.wrap,
-    attrs.class as string | undefined,
-  ),
+  cn('flex flex-col items-center text-center', sizing.value.wrap, attrs.class as string | undefined),
 );
 
 const iconBoxClasses = computed(() =>
-  cn(
-    'flex items-center justify-center rounded-full bg-muted text-muted-foreground',
-    sizing.value.iconBox,
-  ),
+  cn('flex items-center justify-center rounded-full bg-muted text-muted-foreground', sizing.value.iconBox),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

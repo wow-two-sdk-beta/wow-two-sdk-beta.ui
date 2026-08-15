@@ -56,9 +56,7 @@ const ctx = useMultiSelectContext();
 
 const resolvedPadding = computed(() => props.padding ?? 'none');
 
-const panelClass = computed(() =>
-  cn('w-auto min-w-[var(--anchor-width)] overflow-hidden', attrs.class as ClassValue),
-);
+const panelClass = computed(() => cn('w-auto min-w-[var(--anchor-width)] overflow-hidden', attrs.class as ClassValue));
 
 const selected = computed(() => ctx.values);
 
@@ -76,13 +74,7 @@ function onValueChange(next: unknown): void {
     :elevation="elevation"
     :class="panelClass"
   >
-    <Listbox
-      is-multiple
-      :value="selected"
-      variant="flat"
-      radius="none"
-      @value-change="onValueChange"
-    >
+    <Listbox is-multiple :value="selected" variant="flat" radius="none" @value-change="onValueChange">
       <slot />
     </Listbox>
   </PopoverContent>

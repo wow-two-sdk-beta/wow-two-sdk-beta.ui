@@ -30,9 +30,7 @@ const passthroughAttrs = computed(() =>
 const listClass = computed(() =>
   cn(
     'flex',
-    stepper.orientation === Orientation.Vertical
-      ? 'flex-col gap-4'
-      : 'flex-row items-center gap-2',
+    stepper.orientation === Orientation.Vertical ? 'flex-col gap-4' : 'flex-row items-center gap-2',
     attrs.class as ClassValue,
   ),
 );

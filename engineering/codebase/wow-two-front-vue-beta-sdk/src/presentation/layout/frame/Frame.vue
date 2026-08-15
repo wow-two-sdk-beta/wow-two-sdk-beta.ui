@@ -30,7 +30,12 @@ export interface FrameProps {
 }
 
 const PADDING: Record<NonNullable<FrameProps['padding']>, string> = {
-  '0': '', '2': 'p-2', '3': 'p-3', '4': 'p-4', '6': 'p-6', '8': 'p-8',
+  '0': '',
+  '2': 'p-2',
+  '3': 'p-3',
+  '4': 'p-4',
+  '6': 'p-6',
+  '8': 'p-8',
 };
 const RADIUS: Record<Radius, string> = {
   none: '',

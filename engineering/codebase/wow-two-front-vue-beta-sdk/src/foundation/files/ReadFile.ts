@@ -3,10 +3,7 @@
 // `readFileAsText` takes an encoding, which is the one thing `Blob.text()` cannot express.
 
 /** Runs one `FileReader` operation as a promise that always settles — resolve on load, reject on error or abort. */
-function readWith<T extends string | ArrayBuffer>(
-  blob: Blob,
-  start: (reader: FileReader) => void,
-): Promise<T> {
+function readWith<T extends string | ArrayBuffer>(blob: Blob, start: (reader: FileReader) => void): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const reader = new FileReader();
 

@@ -40,6 +40,7 @@ export type SelectTriggerVariants = VariantProps<typeof selectTriggerVariants>;
 /* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
 const _assertSelectSize: AssertExact<
-  SelectSize, NonNullable<VariantProps<typeof selectTriggerVariants>['size']>
+  SelectSize,
+  NonNullable<VariantProps<typeof selectTriggerVariants>['size']>
 > = true;
 void _assertSelectSize;

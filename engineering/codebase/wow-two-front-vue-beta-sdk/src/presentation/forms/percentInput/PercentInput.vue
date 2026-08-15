@@ -47,9 +47,7 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
 <template>
   <div :class="wrapperClass">
     <NumberInput ref="inner" v-bind="{ ...props, ...passthroughAttrs }" class="pr-16" />
-    <span
-      class="pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
-    >
+    <span class="pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
       %
     </span>
   </div>

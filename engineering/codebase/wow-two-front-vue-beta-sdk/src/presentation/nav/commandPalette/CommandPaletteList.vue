@@ -23,9 +23,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 const context = useCommandPaletteContext();
 
-const classes = computed(() =>
-  cn('max-h-80 overflow-y-auto p-1', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('max-h-80 overflow-y-auto p-1', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

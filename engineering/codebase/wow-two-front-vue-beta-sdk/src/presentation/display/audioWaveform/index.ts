@@ -1,5 +1,1 @@
-export {
-  default as AudioWaveform,
-  AudioWaveformTone,
-  type AudioWaveformProps,
-} from './AudioWaveform.vue';
+export { default as AudioWaveform, AudioWaveformTone, type AudioWaveformProps } from './AudioWaveform.vue';

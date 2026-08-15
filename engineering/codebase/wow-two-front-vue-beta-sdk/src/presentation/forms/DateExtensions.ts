@@ -35,10 +35,7 @@ export function today(): Temporal.PlainDate {
   return Temporal.Now.plainDateISO();
 }
 
-export function isSameDay(
-  a: Temporal.PlainDate | null | undefined,
-  b: Temporal.PlainDate | null | undefined,
-): boolean {
+export function isSameDay(a: Temporal.PlainDate | null | undefined, b: Temporal.PlainDate | null | undefined): boolean {
   if (!a || !b) return false;
   return a.equals(b);
 }
@@ -71,10 +68,7 @@ export function daysInMonth(year: number, month: number): number {
  * `year`/`month` are 1-indexed (Temporal convention). Cells outside the target
  * month carry `outOfMonth: true`.
  */
-export function buildMonthGrid(
-  year: number,
-  month: number,
-): { date: Temporal.PlainDate; outOfMonth: boolean }[] {
+export function buildMonthGrid(year: number, month: number): { date: Temporal.PlainDate; outOfMonth: boolean }[] {
   const first = Temporal.PlainDate.from({ year, month, day: 1 });
   const start = first.subtract({ days: sundayIndex(first) });
   const cells: { date: Temporal.PlainDate; outOfMonth: boolean }[] = [];

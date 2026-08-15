@@ -51,9 +51,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const rowClass = computed(() =>
-  cn('mt-2 flex items-center justify-between gap-3', attrs.class as ClassValue),
-);
+const rowClass = computed(() => cn('mt-2 flex items-center justify-between gap-3', attrs.class as ClassValue));
 
 function onNext(): void {
   void ctx.next();

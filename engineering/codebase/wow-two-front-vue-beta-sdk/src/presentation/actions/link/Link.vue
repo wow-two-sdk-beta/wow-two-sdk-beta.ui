@@ -6,8 +6,7 @@ import type { LinkVariants, LinkVariant, LinkSize } from './Link.variants';
    fallthrough, and `LinkVariants` resolves through `typeof linkVariants`, which the SFC prop
    compiler cannot walk. The type surface is unchanged. */
 export interface LinkProps
-  extends /* @vue-ignore */ AnchorHTMLAttributes,
-    /* @vue-ignore */ Omit<LinkVariants, 'variant' | 'size'> {
+  extends /* @vue-ignore */ AnchorHTMLAttributes, /* @vue-ignore */ Omit<LinkVariants, 'variant' | 'size'> {
   /** The color treatment. */
   variant?: LinkVariant;
   /** The text size. */
@@ -59,13 +58,7 @@ defineExpose({ el });
 
 <template>
   <!-- Anchor with consistent focus/hover styling — `asChild` swaps in router links. -->
-  <Primitive
-    ref="root"
-    :as="HtmlElement.Anchor"
-    :as-child="asChild"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <Primitive ref="root" :as="HtmlElement.Anchor" :as-child="asChild" :class="rootClass" v-bind="passthroughAttrs">
     <slot />
   </Primitive>
 </template>

@@ -168,10 +168,7 @@ const _assertSurfaceVariant: AssertExact<
   SurfaceVariant,
   NonNullable<VariantProps<typeof surfaceVariants>['variant']>
 > = true;
-const _assertSurfaceTone: AssertExact<
-  SurfaceTone,
-  NonNullable<VariantProps<typeof surfaceVariants>['tone']>
-> = true;
+const _assertSurfaceTone: AssertExact<SurfaceTone, NonNullable<VariantProps<typeof surfaceVariants>['tone']>> = true;
 void _assertSurfaceVariant;
 void _assertSurfaceTone;
 

@@ -46,9 +46,7 @@ const startHour = computed(() => props.hourRange[0]);
 const endHour = computed(() => props.hourRange[1]);
 const visibleHours = computed(() => endHour.value - startHour.value);
 
-const dayDates = computed(() =>
-  Array.from({ length: props.days }, (_, i) => props.firstDay.add({ days: i })),
-);
+const dayDates = computed(() => Array.from({ length: props.days }, (_, i) => props.firstDay.add({ days: i })));
 
 function eventsForDay(day: Temporal.PlainDate): Array<EventCalendarEvent> {
   return props.events.filter((e) => !e.isAllDay && isZonedOnDay(e.start, day));
@@ -56,8 +54,7 @@ function eventsForDay(day: Temporal.PlainDate): Array<EventCalendarEvent> {
 
 function allDayForDay(day: Temporal.PlainDate): Array<EventCalendarEvent> {
   return props.events.filter(
-    (e) =>
-      e.isAllDay && isZonedDayInRange(startOfCellInstant(day, props.timeZone), e.start, e.end),
+    (e) => e.isAllDay && isZonedDayInRange(startOfCellInstant(day, props.timeZone), e.start, e.end),
   );
 }
 
@@ -89,10 +86,7 @@ function dayHeaderLabel(d: Temporal.PlainDate): string {
 }
 
 function allDayClass(e: EventCalendarEvent): string {
-  return cn(
-    'truncate rounded-sm px-1 py-0.5',
-    !e.color && 'bg-primary-soft text-primary-soft-foreground',
-  );
+  return cn('truncate rounded-sm px-1 py-0.5', !e.color && 'bg-primary-soft text-primary-soft-foreground');
 }
 
 function eventStyle(e: EventCalendarEvent, d: Temporal.PlainDate): StyleValue {
@@ -181,12 +175,7 @@ function onEvent(ev: MouseEvent, e: EventCalendarEvent): void {
           </div>
         </div>
         <!-- Time grid columns -->
-        <div
-          v-for="(d, di) in dayDates"
-          :key="`g-${di}`"
-          class="relative border-r border-border"
-          :style="columnStyle"
-        >
+        <div v-for="(d, di) in dayDates" :key="`g-${di}`" class="relative border-r border-border" :style="columnStyle">
           <!-- Hour grid lines -->
           <div
             v-for="i in visibleHours"

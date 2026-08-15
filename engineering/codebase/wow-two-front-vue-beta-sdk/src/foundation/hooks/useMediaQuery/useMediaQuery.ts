@@ -1,12 +1,4 @@
-import {
-  onMounted,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 /**
  * Reactively follow a CSS media query. Pass a query string like

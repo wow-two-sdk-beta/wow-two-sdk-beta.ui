@@ -6,8 +6,5 @@ export {
   type ResizableContextValue,
   type PanelInfo,
 } from './ResizablePanels.vue';
-export {
-  default as ResizableSeparator,
-  type ResizableSeparatorProps,
-} from './ResizableSeparator.vue';
+export { default as ResizableSeparator, type ResizableSeparatorProps } from './ResizableSeparator.vue';
 export { default } from './ResizablePanels.vue';

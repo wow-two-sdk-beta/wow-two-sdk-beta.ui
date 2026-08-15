@@ -35,15 +35,10 @@ const el = useTemplateRef<HTMLLIElement>('el');
 /** The root marks its last child with `data-last`; the connector line is dropped there. */
 const isLast = computed(() => attrs['data-last'] !== undefined);
 
-const classes = computed(() =>
-  cn('relative flex gap-3 pb-6 last:pb-0', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('relative flex gap-3 pb-6 last:pb-0', attrs.class as string | undefined));
 
 const markerClasses = computed(() =>
-  cn(
-    'relative z-raised grid h-7 w-7 place-items-center rounded-full border-2',
-    STATUS_BG[props.status],
-  ),
+  cn('relative z-raised grid h-7 w-7 place-items-center rounded-full border-2', STATUS_BG[props.status]),
 );
 
 const contentClasses = computed(() =>
@@ -68,11 +63,7 @@ defineExpose({ el });
       <span aria-hidden="true" :class="markerClasses">
         <slot name="icon"><span class="h-1.5 w-1.5 rounded-full bg-current" /></slot>
       </span>
-      <span
-        v-if="!isLast"
-        aria-hidden="true"
-        class="absolute left-1/2 top-7 h-full w-px -translate-x-1/2 bg-border"
-      />
+      <span v-if="!isLast" aria-hidden="true" class="absolute left-1/2 top-7 h-full w-px -translate-x-1/2 bg-border" />
     </div>
     <!-- Content -->
     <div :class="contentClasses"><slot /></div>

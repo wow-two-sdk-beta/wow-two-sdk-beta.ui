@@ -11,7 +11,8 @@ import { defaultSources, resolveRaw, type ConfigSource } from './ConfigSource';
 export type ConfigSchema = Readonly<Record<string, AnyConfigField>>;
 
 /** Widens an optional field's output to include `undefined`; a required / defaulted field stays `T`. */
-type InferField<F> = F extends ConfigField<infer T, infer Optional> ? (Optional extends true ? T | undefined : T) : never;
+type InferField<F> =
+  F extends ConfigField<infer T, infer Optional> ? (Optional extends true ? T | undefined : T) : never;
 
 /** The resolved, typed config object inferred from a schema. */
 export type InferConfig<S extends ConfigSchema> = { readonly [K in keyof S]: InferField<S[K]> };

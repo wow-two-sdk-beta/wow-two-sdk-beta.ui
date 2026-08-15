@@ -109,14 +109,10 @@ function handleClick(event: MouseEvent): void {
 }
 
 const itemState = computed(
-  () =>
-    props.state ??
-    (props.isDisabled ? MenuItemStateToken.Disabled : MenuItemStateToken.Default),
+  () => props.state ?? (props.isDisabled ? MenuItemStateToken.Disabled : MenuItemStateToken.Default),
 );
 
-const classes = computed(() =>
-  cn(menuItemVariants({ state: itemState.value }), attrs.class as string | undefined),
-);
+const classes = computed(() => cn(menuItemVariants({ state: itemState.value }), attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

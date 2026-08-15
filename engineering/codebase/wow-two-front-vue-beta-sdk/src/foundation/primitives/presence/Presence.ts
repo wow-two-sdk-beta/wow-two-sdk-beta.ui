@@ -18,10 +18,7 @@ function parseTimes(value: string): ReadonlyArray<number> {
 function getTotalDurationMs(node: HTMLElement): number {
   const cs = getComputedStyle(node);
   const maxOf = (durations: ReadonlyArray<number>, delays: ReadonlyArray<number>) =>
-    durations.reduce(
-      (max, duration, i) => Math.max(max, duration + (delays[i % delays.length] ?? 0)),
-      0,
-    );
+    durations.reduce((max, duration, i) => Math.max(max, duration + (delays[i % delays.length] ?? 0)), 0);
   return Math.max(
     maxOf(parseTimes(cs.transitionDuration), parseTimes(cs.transitionDelay)),
     maxOf(parseTimes(cs.animationDuration), parseTimes(cs.animationDelay)),
@@ -186,9 +183,12 @@ export const Presence = defineComponent({
            `pointer-events: auto` scrim the user cannot click past. `getComputedStyle` recalcs
            synchronously, so reading the duration right after the flip already reflects the
            closed state's timing. */
-        const safety = setTimeout(() => {
-          rendered.value = false;
-        }, getTotalDurationMs(el) + 100);
+        const safety = setTimeout(
+          () => {
+            rendered.value = false;
+          },
+          getTotalDurationMs(el) + 100,
+        );
 
         /* The fast path — nothing is animating, so drop it now rather than wait out the
            safety timer. */

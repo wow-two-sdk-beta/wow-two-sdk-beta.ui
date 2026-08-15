@@ -16,11 +16,7 @@
 // - Recording the identical reference is a no-op. A setter that returns its own input is a common shape and must not
 //   deposit an entry that undoes to the value it already holds.
 
-import {
-  createHistoryCore,
-  type HistoryOptions,
-  type HistoryStore,
-} from './HistoryCore';
+import { createHistoryCore, type HistoryOptions, type HistoryStore } from './HistoryCore';
 
 /** The state pair one entry carries — travelling is assigning one of these two ends to `present`. */
 interface SnapshotPayload<TState> {
@@ -63,10 +59,7 @@ export interface SnapshotHistory<TState> extends HistoryStore {
  * history.undo(); // present → { title: '' }
  * ```
  */
-export function createSnapshotHistory<TState>(
-  initial: TState,
-  options?: HistoryOptions,
-): SnapshotHistory<TState> {
+export function createSnapshotHistory<TState>(initial: TState, options?: HistoryOptions): SnapshotHistory<TState> {
   let present = initial;
 
   const core = createHistoryCore<SnapshotPayload<TState>>({

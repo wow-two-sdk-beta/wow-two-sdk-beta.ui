@@ -81,9 +81,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const rowClass = computed(() =>
-  cn(listboxItemVariants({ state: state.value }), attrs.class as ClassValue),
-);
+const rowClass = computed(() => cn(listboxItemVariants({ state: state.value }), attrs.class as ClassValue));
 
 const CheckIcon = Check;
 

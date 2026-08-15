@@ -105,9 +105,7 @@ const lineCount = computed(() => source.value.split('\n').length);
 const indentChar = computed(() => (props.isTabIndented ? '\t' : ' '.repeat(props.tabSize)));
 
 // Generate line-number string once per line count.
-const gutterText = computed(() =>
-  Array.from({ length: lineCount.value }, (_, i) => String(i + 1)).join('\n'),
-);
+const gutterText = computed(() => Array.from({ length: lineCount.value }, (_, i) => String(i + 1)).join('\n'));
 
 function insertAtSelection(insert: string, selStart: number, selEnd: number): number {
   const next = source.value.slice(0, selStart) + insert + source.value.slice(selEnd);
@@ -227,8 +225,7 @@ const surfaceClass = computed(() =>
   cn(
     'relative flex overflow-hidden rounded-md border border-input bg-card text-card-foreground font-mono text-sm shadow-sm',
     'focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/40',
-    state.value === 'invalid' &&
-      'border-destructive focus-within:border-destructive focus-within:ring-destructive/40',
+    state.value === 'invalid' && 'border-destructive focus-within:border-destructive focus-within:ring-destructive/40',
     finalDisabled.value && 'cursor-not-allowed opacity-60',
     attrs.class as ClassValue,
   ),

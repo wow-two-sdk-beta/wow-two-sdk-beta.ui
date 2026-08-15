@@ -21,8 +21,7 @@ export const GradientTextDirection = {
   BottomLeft: 'bl',
 } as const;
 
-export type GradientTextDirection =
-  (typeof GradientTextDirection)[keyof typeof GradientTextDirection];
+export type GradientTextDirection = (typeof GradientTextDirection)[keyof typeof GradientTextDirection];
 
 export interface GradientTextProps {
   /** The first color stop. Default `var(--color-primary)`. */
@@ -82,9 +81,7 @@ const props = withDefaults(defineProps<GradientTextProps>(), {
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
 
-const stops = computed(() =>
-  props.via ? `${props.from}, ${props.via}, ${props.to}` : `${props.from}, ${props.to}`,
-);
+const stops = computed(() => (props.via ? `${props.from}, ${props.via}, ${props.to}` : `${props.from}, ${props.to}`));
 
 const classes = computed(() =>
   cn(

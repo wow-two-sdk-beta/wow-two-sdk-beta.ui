@@ -38,15 +38,17 @@ export interface ColorOverride {
 export type ColorProp = string | ColorOverride;
 
 /* Per-tone CSS variable name suffixes (after `--color-`). */
-const TONE_TOKEN_MAP: Record<
-  ColorTone,
-  { main: string; fg: string; soft: string; softFg: string }
-> = {
-  primary: { main: 'primary',     fg: 'primary-foreground',     soft: 'primary-soft',     softFg: 'primary-soft-foreground' },
-  neutral: { main: 'foreground',  fg: 'background',             soft: 'muted',            softFg: 'foreground' },
-  danger:  { main: 'destructive', fg: 'destructive-foreground', soft: 'destructive-soft', softFg: 'destructive-soft-foreground' },
-  success: { main: 'success',     fg: 'success-foreground',     soft: 'success-soft',     softFg: 'success-soft-foreground' },
-  warning: { main: 'warning',     fg: 'warning-foreground',     soft: 'warning-soft',     softFg: 'warning-soft-foreground' },
+const TONE_TOKEN_MAP: Record<ColorTone, { main: string; fg: string; soft: string; softFg: string }> = {
+  primary: { main: 'primary', fg: 'primary-foreground', soft: 'primary-soft', softFg: 'primary-soft-foreground' },
+  neutral: { main: 'foreground', fg: 'background', soft: 'muted', softFg: 'foreground' },
+  danger: {
+    main: 'destructive',
+    fg: 'destructive-foreground',
+    soft: 'destructive-soft',
+    softFg: 'destructive-soft-foreground',
+  },
+  success: { main: 'success', fg: 'success-foreground', soft: 'success-soft', softFg: 'success-soft-foreground' },
+  warning: { main: 'warning', fg: 'warning-foreground', soft: 'warning-soft', softFg: 'warning-soft-foreground' },
 };
 
 /**
@@ -66,10 +68,7 @@ const TONE_TOKEN_MAP: Record<
  * Object mode (`input` is a `ColorOverride`):
  * - Each slot independently overridable; unset slots retain the theme default.
  */
-function toneColorOverride(
-  input: ColorProp | undefined,
-  tone: ColorTone | undefined,
-): CSSProperties | undefined {
+function toneColorOverride(input: ColorProp | undefined, tone: ColorTone | undefined): CSSProperties | undefined {
   if (input === undefined || input === null) return undefined;
   const activeTone = tone ?? 'primary';
   const tokens = TONE_TOKEN_MAP[activeTone];

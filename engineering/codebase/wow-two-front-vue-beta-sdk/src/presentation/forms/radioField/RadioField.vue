@@ -71,9 +71,7 @@ function onGroupChange(): void {
   group?.select(props.value);
 }
 
-const hasDescription = computed(
-  () => Boolean(props.description) || Boolean(slots.description),
-);
+const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
 
 /* No `defineEmits`: the consumer's `v-model` listeners must stay in `useAttrs()` to reach
    the inner `Radio` — see the CheckboxField note. */
@@ -94,9 +92,7 @@ const radioProps = computed(() => {
   return rest;
 });
 
-const wrapperClass = computed(() =>
-  cn('flex items-start gap-2.5 cursor-pointer', props.wrapperClassName),
-);
+const wrapperClass = computed(() => cn('flex items-start gap-2.5 cursor-pointer', props.wrapperClassName));
 
 const radioClass = computed(() => attrs.class as ClassValue);
 
@@ -111,11 +107,7 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
     <!-- Inside a group the item gets a FRESH provider — React wrapped each cloned child in
          one so siblings never adopt the surrounding Field's id or `describedBy`, while the
          group's disabled/invalid flags still cascade. -->
-    <FormControlProvider
-      v-if="isInGroup"
-      :is-disabled="groupDisabled"
-      :is-invalid="groupInvalid"
-    >
+    <FormControlProvider v-if="isInGroup" :is-disabled="groupDisabled" :is-invalid="groupInvalid">
       <Radio
         ref="inner"
         v-bind="{ ...radioProps, ...passthroughAttrs }"
@@ -126,13 +118,7 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
         @change="onGroupChange"
       />
     </FormControlProvider>
-    <Radio
-      v-else
-      ref="inner"
-      v-bind="{ ...radioProps, ...passthroughAttrs }"
-      :id="inputId"
-      :class="radioClass"
-    />
+    <Radio v-else ref="inner" v-bind="{ ...radioProps, ...passthroughAttrs }" :id="inputId" :class="radioClass" />
     <span class="flex flex-col gap-0.5 text-sm">
       <span class="font-medium text-foreground">
         <slot name="label">{{ label }}</slot>

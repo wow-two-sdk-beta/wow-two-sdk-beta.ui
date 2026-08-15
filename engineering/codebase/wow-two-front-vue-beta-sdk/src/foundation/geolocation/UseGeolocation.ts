@@ -70,9 +70,7 @@ export interface GeolocationControls {
  * @param options Default tuning for every `request()` call. A ref or getter is read at call time, so the value
  *   in effect is always the current one.
  */
-export function useGeolocation(
-  options?: MaybeRefOrGetter<PositionRequestOptions | undefined>,
-): GeolocationControls {
+export function useGeolocation(options?: MaybeRefOrGetter<PositionRequestOptions | undefined>): GeolocationControls {
   const reading: ShallowRef<GeolocationReading> = shallowRef(IdleGeolocationReading);
 
   /** Monotonic request token — only the newest request may write state. See the header. */

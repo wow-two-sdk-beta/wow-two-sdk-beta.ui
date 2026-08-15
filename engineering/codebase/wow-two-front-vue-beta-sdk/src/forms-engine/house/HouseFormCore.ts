@@ -4,15 +4,7 @@ import { fieldIssues, type ApiError } from '../../foundation/http';
 
 import type { AppFormOptions, AppFormState } from '../AppForm';
 import { deepEqual } from '../DeepEqual';
-import {
-  getPath,
-  hasPath,
-  mutateRows,
-  remapPathMap,
-  remapPathSet,
-  setPath,
-  type ArrayOperation,
-} from '../Paths';
+import { getPath, hasPath, mutateRows, remapPathMap, remapPathSet, setPath, type ArrayOperation } from '../Paths';
 import { createOptionsMessageResolver, runStandardSchema } from '../SchemaValidation';
 import { defaultMapFieldPath, resolveSubmitFailure } from '../SubmitErrors';
 
@@ -336,7 +328,12 @@ export function createHouseFormEngine<TValues extends object>(
     // A whole-form disabled form is inert — no attempt, no onSubmit (read-only / role-locked / frozen).
     if (currentOptions().isDisabled) return false;
     // A new attempt clears the previous server errors + remainder and re-arms the verdict.
-    patch({ submitCount: peek().submitCount + 1, serverErrors: EMPTY_MAP, submitError: null, isSubmitSuccessful: null });
+    patch({
+      submitCount: peek().submitCount + 1,
+      serverErrors: EMPTY_MAP,
+      submitError: null,
+      isSubmitSuccessful: null,
+    });
     const errors = await runValidation();
     // `submitInvalid` (default false) blocks onSubmit on client errors; `true` runs onSubmit anyway
     // (the errors stay populated as advisory) — the backend becomes the source of truth.

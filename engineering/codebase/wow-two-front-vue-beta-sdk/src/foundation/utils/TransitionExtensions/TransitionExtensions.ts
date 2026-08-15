@@ -7,9 +7,7 @@
 // =============================================================================
 
 /** Input prop — symmetric number OR asymmetric `{ enter, exit }`. */
-export type PresenceAnimationDurationProp =
-  | number
-  | { enter?: number; exit?: number };
+export type PresenceAnimationDurationProp = number | { enter?: number; exit?: number };
 
 /** Resolved (canonical) — both sides always present. */
 export interface PresenceAnimationDuration {
@@ -27,14 +25,12 @@ const DEFAULT_DURATION_MS = 200;
 // Internal resolvers
 // =============================================================================
 
-function resolveDuration(
-  d: PresenceAnimationDurationProp | undefined,
-): PresenceAnimationDuration {
+function resolveDuration(d: PresenceAnimationDurationProp | undefined): PresenceAnimationDuration {
   if (typeof d === 'number') return { enter: d, exit: d };
   if (d && typeof d === 'object') {
     return {
       enter: d.enter ?? DEFAULT_DURATION_MS,
-      exit:  d.exit  ?? DEFAULT_DURATION_MS,
+      exit: d.exit ?? DEFAULT_DURATION_MS,
     };
   }
   return { enter: DEFAULT_DURATION_MS, exit: DEFAULT_DURATION_MS };

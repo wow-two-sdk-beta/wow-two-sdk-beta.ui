@@ -44,10 +44,7 @@ export function startOfWeek(d: Temporal.PlainDate, weekStart: 0 | 1): Temporal.P
 }
 
 /** Midnight instant for a calendar day in `timeZone` — the range-anchor for all-day/multi-day spans. */
-export function startOfCellInstant(
-  day: Temporal.PlainDate,
-  timeZone: string,
-): Temporal.ZonedDateTime {
+export function startOfCellInstant(day: Temporal.PlainDate, timeZone: string): Temporal.ZonedDateTime {
   return zonedAtHour(day, 0, timeZone);
 }
 

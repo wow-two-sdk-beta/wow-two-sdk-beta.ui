@@ -13,16 +13,8 @@ export type NavigationMenuContentProps = Record<string, never>;
 import { computed, shallowRef, useAttrs, watch } from 'vue';
 import { cn, surfaceVariants } from '../../../foundation/utils';
 import { useReducedMotion } from '../../../foundation/hooks';
-import {
-  AnchoredPositioner,
-  DismissableLayer,
-  Portal,
-  Presence,
-} from '../../../foundation/primitives';
-import {
-  useNavigationMenuContext,
-  useNavigationMenuItemContext,
-} from './NavigationMenuContext';
+import { AnchoredPositioner, DismissableLayer, Portal, Presence } from '../../../foundation/primitives';
+import { useNavigationMenuContext, useNavigationMenuItemContext } from './NavigationMenuContext';
 
 /**
  * The anchored panel for one item. `Presence` clones `data-state`
@@ -115,10 +107,7 @@ defineExpose({ el });
 <template>
   <Portal v-if="mounted">
     <AnchoredPositioner :anchor="anchor" placement="bottom-start" :offset="6" class="z-dropdown">
-      <DismissableLayer
-        :on-escape="handleClose"
-        :on-outside-pointer-down="handleOutsidePointerDown"
-      >
+      <DismissableLayer :on-escape="handleClose" :on-outside-pointer-down="handleOutsidePointerDown">
         <Presence :is-present="isOpen">
           <div
             :id="item.contentId"

@@ -1,7 +1,4 @@
-export {
-  default as FormControlProvider,
-  type FormControlProviderProps,
-} from './FormControlProvider.vue';
+export { default as FormControlProvider, type FormControlProviderProps } from './FormControlProvider.vue';
 export {
   useFormControl,
   useFormControlChrome,

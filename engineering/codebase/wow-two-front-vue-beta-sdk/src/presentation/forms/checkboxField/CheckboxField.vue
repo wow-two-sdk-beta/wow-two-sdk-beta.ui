@@ -71,9 +71,7 @@ function onGroupChange(): void {
   group?.toggle(props.value);
 }
 
-const hasDescription = computed(
-  () => Boolean(props.description) || Boolean(slots.description),
-);
+const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
 
 /*
  * No `defineEmits` on purpose: `update:modelValue` / `value-change` are NOT re-declared, so a
@@ -97,9 +95,7 @@ const checkboxProps = computed(() => {
   return rest;
 });
 
-const wrapperClass = computed(() =>
-  cn('flex items-start gap-2.5 cursor-pointer', props.wrapperClassName),
-);
+const wrapperClass = computed(() => cn('flex items-start gap-2.5 cursor-pointer', props.wrapperClassName));
 
 const checkboxClass = computed(() => attrs.class as ClassValue);
 
@@ -114,11 +110,7 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
     <!-- Inside a group the item gets a FRESH provider — React wrapped each cloned child in
          one so siblings never adopt the surrounding Field's id or `describedBy`, while the
          group's disabled/invalid flags still cascade. -->
-    <FormControlProvider
-      v-if="isInGroup"
-      :is-disabled="groupDisabled"
-      :is-invalid="groupInvalid"
-    >
+    <FormControlProvider v-if="isInGroup" :is-disabled="groupDisabled" :is-invalid="groupInvalid">
       <Checkbox
         ref="inner"
         v-bind="{ ...checkboxProps, ...passthroughAttrs }"

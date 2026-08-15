@@ -295,9 +295,7 @@ export function createWorkerClient<TApi extends WorkerApiOf<TApi>>(
       method: TMethod,
       ...args: Parameters<TApi[TMethod]>
     ) {
-      return invoke(callOptions, method, args as readonly unknown[]) as Promise<
-        Awaited<ReturnType<TApi[TMethod]>>
-      >;
+      return invoke(callOptions, method, args as readonly unknown[]) as Promise<Awaited<ReturnType<TApi[TMethod]>>>;
     },
     get pendingCount() {
       return pendingCalls.size;

@@ -32,7 +32,17 @@ export { createAuthBridge, type AuthBridge, type UnauthorizedListener, type Sess
 // module's `signIn` — that handoff is where the session starts.
 
 // Strategies
-export { createCookieStrategy, type CreateCookieStrategyOptions, type CookieAuthClient, type CookieSignInContext } from './CookieStrategy';
-export { createBearerStrategy, type CreateBearerStrategyOptions, type BearerStrategy, type BearerAuthenticateResult } from './BearerStrategy';
+export {
+  createCookieStrategy,
+  type CreateCookieStrategyOptions,
+  type CookieAuthClient,
+  type CookieSignInContext,
+} from './CookieStrategy';
+export {
+  createBearerStrategy,
+  type CreateBearerStrategyOptions,
+  type BearerStrategy,
+  type BearerAuthenticateResult,
+} from './BearerStrategy';
 export { createRedirectStrategy, type CreateRedirectStrategyOptions } from './RedirectStrategy';
 export { createMemoryTokenStorage, type TokenStorage } from './TokenStorage';

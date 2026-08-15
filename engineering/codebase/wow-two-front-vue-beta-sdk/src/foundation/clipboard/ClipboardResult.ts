@@ -62,8 +62,7 @@ export type ClipboardReadTextResult = { readonly status: 'read'; readonly text: 
 
 /** The outcome of a multi-format clipboard read. `read` carries one entry per MIME type the platform offered. */
 export type ClipboardReadItemsResult =
-  | { readonly status: 'read'; readonly items: readonly ClipboardReadItem[] }
-  | ClipboardFailure;
+  { readonly status: 'read'; readonly items: readonly ClipboardReadItem[] } | ClipboardFailure;
 
 /** The `status` discriminant shared by both read results. */
 export type ClipboardReadStatus = ClipboardReadTextResult['status'];

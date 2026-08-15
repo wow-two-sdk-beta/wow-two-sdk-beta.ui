@@ -9,10 +9,7 @@ export interface NavigationMenuItemProps {
 import { computed, provide, shallowRef, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/utils';
 import { useId } from '../../../foundation/hooks';
-import {
-  navigationMenuItemContextKey,
-  useNavigationMenuContext,
-} from './NavigationMenuContext';
+import { navigationMenuItemContextKey, useNavigationMenuContext } from './NavigationMenuContext';
 
 /** One `<li>` of the strip — pairs a Trigger / Link with its Content panel. */
 defineOptions({ name: 'NavigationMenuItem', inheritAttrs: false });

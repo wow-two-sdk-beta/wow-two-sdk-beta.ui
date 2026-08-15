@@ -25,9 +25,7 @@ export type SubmitErrorMap = Record<string, readonly SubmitFieldEntry[]>;
 /** Rewrites a server error path onto a form path — camelCase per property segment (`Rules[0].Destination` → `rules[0].destination`). */
 export function defaultMapFieldPath(serverPath: string): string {
   const segments = parsePath(serverPath).map((segment) =>
-    typeof segment === 'string' && segment.length > 0
-      ? segment.charAt(0).toLowerCase() + segment.slice(1)
-      : segment,
+    typeof segment === 'string' && segment.length > 0 ? segment.charAt(0).toLowerCase() + segment.slice(1) : segment,
   );
   return formatPath(segments);
 }

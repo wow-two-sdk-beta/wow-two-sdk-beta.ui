@@ -61,10 +61,7 @@ export function useFormControl(): FormControlContextValue | null {
  * named. `flush: 'post'` is the `useLayoutEffect` equivalent: the registration
  * lands after the DOM updates, before paint.
  */
-export function useFormControlChrome(
-  kind: FormControlChromeKind,
-  isRendered: MaybeRefOrGetter<boolean>,
-): void {
+export function useFormControlChrome(kind: FormControlChromeKind, isRendered: MaybeRefOrGetter<boolean>): void {
   const context = useFormControl();
   watch(
     () => toValue(isRendered),

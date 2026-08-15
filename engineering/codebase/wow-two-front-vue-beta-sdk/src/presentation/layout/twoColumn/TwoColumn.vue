@@ -15,7 +15,11 @@ export interface TwoColumnProps {
 }
 
 const GAP: Record<NonNullable<TwoColumnProps['gap']>, string> = {
-  '0': 'gap-0', '4': 'gap-4', '6': 'gap-6', '8': 'gap-8', '10': 'gap-10',
+  '0': 'gap-0',
+  '4': 'gap-4',
+  '6': 'gap-6',
+  '8': 'gap-8',
+  '10': 'gap-10',
 };
 </script>
 

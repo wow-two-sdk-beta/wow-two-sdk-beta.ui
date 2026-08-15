@@ -17,9 +17,7 @@ defineSlots<{ default(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLTableCaptionElement>('el');
 
-const classes = computed(() =>
-  cn('mt-2 text-sm text-muted-foreground', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('mt-2 text-sm text-muted-foreground', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -31,5 +29,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <caption ref="el" v-bind="rest" :class="classes"><slot /></caption>
+  <caption ref="el" v-bind="rest" :class="classes">
+    <slot />
+  </caption>
 </template>

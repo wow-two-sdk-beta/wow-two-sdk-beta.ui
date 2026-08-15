@@ -10,15 +10,7 @@ export interface TimelineProps {
 </script>
 
 <script setup lang="ts">
-import {
-  cloneVNode,
-  computed,
-  provide,
-  useAttrs,
-  useSlots,
-  useTemplateRef,
-  type VNode,
-} from 'vue';
+import { cloneVNode, computed, provide, useAttrs, useSlots, useTemplateRef, type VNode } from 'vue';
 import { cn } from '../../../foundation/utils';
 import { renderableChildren } from '../../../foundation/primitives';
 import { TimelineKey } from './TimelineContext';
@@ -51,9 +43,7 @@ const total = computed(() => renderableChildren(slots.default?.()).length);
 function items(): Array<VNode> {
   const children = renderableChildren(slots.default?.());
   const last = children.length - 1;
-  return children.map((child, index) =>
-    index === last ? cloneVNode(child, { 'data-last': '' }) : child,
-  );
+  return children.map((child, index) => (index === last ? cloneVNode(child, { 'data-last': '' }) : child));
 }
 
 provide(TimelineKey, {
@@ -66,11 +56,7 @@ provide(TimelineKey, {
 });
 
 const classes = computed(() =>
-  cn(
-    'flex list-none flex-col',
-    props.align === TimelineAlign.Right && 'items-end',
-    attrs.class as string | undefined,
-  ),
+  cn('flex list-none flex-col', props.align === TimelineAlign.Right && 'items-end', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

@@ -34,5 +34,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <tr ref="el" v-bind="rest" :class="classes"><slot /></tr>
+  <tr ref="el" v-bind="rest" :class="classes">
+    <slot />
+  </tr>
 </template>

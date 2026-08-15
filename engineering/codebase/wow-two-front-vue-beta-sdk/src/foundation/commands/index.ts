@@ -13,12 +13,7 @@
 // displays and what the keyboard triggers can't drift apart.
 
 // Contract — the vocabulary every other file in the slice speaks
-export {
-  CommandRunOutcome,
-  isCommandAvailable,
-  type Command,
-  type CommandContext,
-} from './Command';
+export { CommandRunOutcome, isCommandAvailable, type Command, type CommandContext } from './Command';
 
 // Registry — the headless store
 export {
@@ -36,11 +31,7 @@ export { CommandMatchRank, NO_MATCH, rankCommand, searchCommands } from './Searc
 export { commandShortcutLabel } from './CommandShortcut';
 
 // Vue — registry subscription primitives (explicit registry)
-export {
-  useAvailableCommands,
-  useCommandList,
-  useCommandRegistryVersion,
-} from './UseCommandRegistry';
+export { useAvailableCommands, useCommandList, useCommandRegistryVersion } from './UseCommandRegistry';
 
 // Vue — shortcut binding
 export { useCommandShortcuts, type CommandShortcutOptions } from './UseCommandShortcuts';
@@ -48,12 +39,6 @@ export { useCommandShortcuts, type CommandShortcutOptions } from './UseCommandSh
 // Vue — ambient registry seam. `CommandsProvider` is an SFC, so it needs its own named re-export; the
 // provide/inject half lives in `CommandsContext.ts` as `provideCommands`, for a component that owns a registry
 // and wants no wrapper element.
-export {
-  CommandsKey,
-  provideCommands,
-  useCommand,
-  useCommands,
-  useRegisterCommands,
-} from './CommandsContext';
+export { CommandsKey, provideCommands, useCommand, useCommands, useRegisterCommands } from './CommandsContext';
 
 export { default as CommandsProvider, type CommandsProviderProps } from './CommandsProvider.vue';

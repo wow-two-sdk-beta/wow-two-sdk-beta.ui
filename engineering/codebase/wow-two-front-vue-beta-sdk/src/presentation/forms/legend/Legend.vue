@@ -29,9 +29,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const rootClass = computed(() =>
-  cn('mb-2 text-sm font-medium text-foreground', attrs.class as ClassValue),
-);
+const rootClass = computed(() => cn('mb-2 text-sm font-medium text-foreground', attrs.class as ClassValue));
 
 const root = useTemplateRef<HTMLLegendElement>('root');
 

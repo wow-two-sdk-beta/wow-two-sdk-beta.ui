@@ -70,9 +70,7 @@ const selected = controlled.value;
 
 /* `today()` reads the host time zone through `Temporal.Now` — universal, not a browser
    global, so both seeds are safe on the server. */
-const viewMonth = ref<Temporal.PlainDate>(
-  startOfMonth(props.defaultMonth ?? selected.value ?? today()),
-);
+const viewMonth = ref<Temporal.PlainDate>(startOfMonth(props.defaultMonth ?? selected.value ?? today()));
 const focusedDate = ref<Temporal.PlainDate>(selected.value ?? today());
 
 function setViewMonth(next: Temporal.PlainDate): void {
@@ -108,8 +106,7 @@ function dayProps(date: Temporal.PlainDate): MonthGridDayProps {
     class: cn(
       'rounded-sm',
       isToday(date) && !isSelectedCell && 'border border-border',
-      isSelectedCell &&
-        'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground',
+      isSelectedCell && 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground',
     ),
   };
 }

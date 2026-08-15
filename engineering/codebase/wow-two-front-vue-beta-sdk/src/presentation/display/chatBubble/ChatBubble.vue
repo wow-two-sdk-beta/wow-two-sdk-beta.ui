@@ -138,21 +138,15 @@ const STATUS_ICON_CLASS: Record<ChatStatus, string> = {
 
 const isEnd = computed(() => props.side === ChatSide.End);
 
-const effectiveTone = computed<ChatTone>(
-  () => props.tone ?? (isEnd.value ? ChatTone.Primary : ChatTone.Default),
-);
+const effectiveTone = computed<ChatTone>(() => props.tone ?? (isEnd.value ? ChatTone.Primary : ChatTone.Default));
 
 const isSystem = computed(() => effectiveTone.value === ChatTone.System);
 
-const showStatus = computed(
-  () => Boolean(props.status) && (isEnd.value || Boolean(props.canShowStatusOnStart)),
-);
+const showStatus = computed(() => Boolean(props.status) && (isEnd.value || Boolean(props.canShowStatusOnStart)));
 
 const statusIcon = computed(() => (props.status ? STATUS_ICON[props.status] : undefined));
 
-const statusIconClass = computed(() =>
-  props.status ? STATUS_ICON_CLASS[props.status] : undefined,
-);
+const statusIconClass = computed(() => (props.status ? STATUS_ICON_CLASS[props.status] : undefined));
 
 const hasAuthor = computed(() => props.author != null || Boolean(slots.author));
 
@@ -161,36 +155,23 @@ const hasTimestamp = computed(() => props.timestamp != null || Boolean(slots.tim
 const classes = computed(() =>
   isSystem.value
     ? cn('flex w-full justify-center', attrs.class as string | undefined)
-    : cn(
-        'flex w-full gap-2',
-        isEnd.value ? 'flex-row-reverse' : 'flex-row',
-        attrs.class as string | undefined,
-      ),
+    : cn('flex w-full gap-2', isEnd.value ? 'flex-row-reverse' : 'flex-row', attrs.class as string | undefined),
 );
 
 const systemInnerClasses = computed(() => cn('text-center text-xs', TONE_BASE.system));
 
-const columnClasses = computed(() =>
-  cn('flex max-w-[75%] flex-col gap-1', isEnd.value ? 'items-end' : 'items-start'),
-);
+const columnClasses = computed(() => cn('flex max-w-[75%] flex-col gap-1', isEnd.value ? 'items-end' : 'items-start'));
 
 const bubbleClasses = computed(() =>
   cn(
     'relative inline-block px-3 py-2 text-sm break-words',
     TONE_BASE[effectiveTone.value],
-    props.isTailless
-      ? 'rounded-2xl'
-      : isEnd.value
-        ? 'rounded-2xl rounded-br-sm'
-        : 'rounded-2xl rounded-bl-sm',
+    props.isTailless ? 'rounded-2xl' : isEnd.value ? 'rounded-2xl rounded-br-sm' : 'rounded-2xl rounded-bl-sm',
   ),
 );
 
 const metaClasses = computed(() =>
-  cn(
-    'flex items-center gap-1 text-[11px] text-muted-foreground',
-    isEnd.value ? 'flex-row-reverse' : 'flex-row',
-  ),
+  cn('flex items-center gap-1 text-[11px] text-muted-foreground', isEnd.value ? 'flex-row-reverse' : 'flex-row'),
 );
 
 const footerClasses = computed(() => cn(isEnd.value && 'self-end'));
@@ -216,7 +197,9 @@ defineExpose({ el });
       </div>
       <div :class="bubbleClasses"><slot /></div>
       <div v-if="hasTimestamp || showStatus" :class="metaClasses">
-        <span v-if="hasTimestamp"><slot name="timestamp">{{ props.timestamp }}</slot></span>
+        <span v-if="hasTimestamp"
+          ><slot name="timestamp">{{ props.timestamp }}</slot></span
+        >
         <!-- aria-label is prohibited on a generic span — img role carries it. -->
         <span v-if="showStatus && statusIcon" role="img" :aria-label="`Status: ${props.status}`">
           <component :is="statusIcon" :class="statusIconClass" />

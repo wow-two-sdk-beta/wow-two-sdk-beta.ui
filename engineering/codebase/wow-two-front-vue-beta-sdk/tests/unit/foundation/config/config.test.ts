@@ -51,9 +51,9 @@ describe('failure', () => {
   });
 
   it('reports an unparseable value as invalid rather than coercing it', () => {
-    expect(() =>
-      defineConfig({ PAGE_SIZE: num() }, { sources: sources({ PAGE_SIZE: 'twenty' }) }),
-    ).toThrow(ConfigError);
+    expect(() => defineConfig({ PAGE_SIZE: num() }, { sources: sources({ PAGE_SIZE: 'twenty' }) })).toThrow(
+      ConfigError,
+    );
   });
 
   /* A secret's raw value must never reach the error message — the message is what ends up in a

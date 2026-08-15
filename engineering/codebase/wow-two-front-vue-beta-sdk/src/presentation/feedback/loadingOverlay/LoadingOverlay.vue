@@ -96,12 +96,7 @@ defineExpose({ el });
 <template>
   <!-- `Backdrop` self-wraps in `Presence`; driving `is-open` with `isOpen` lets its
        fade-out play before it defers its own unmount. -->
-  <Backdrop
-    v-if="!props.isInline"
-    :is-open="props.isOpen"
-    :is-blurred="props.hasBlur"
-    class="bg-background/70"
-  />
+  <Backdrop v-if="!props.isInline" :is-open="props.isOpen" :is-blurred="props.hasBlur" class="bg-background/70" />
   <Presence :is-present="props.isOpen">
     <div ref="el" role="status" v-bind="rest" :class="classes">
       <Spinner :size="props.spinnerSize" :tone="props.spinnerTone" :label="spinnerLabel" />

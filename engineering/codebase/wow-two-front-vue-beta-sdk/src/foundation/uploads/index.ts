@@ -18,13 +18,7 @@
 // keeps running through all three.
 
 // Contract — the vocabulary every other file in the slice speaks
-export {
-  UploadRejectionReason,
-  UploadStatus,
-  isUploadActive,
-  isUploadTerminal,
-  type UploadItem,
-} from './UploadItem';
+export { UploadRejectionReason, UploadStatus, isUploadActive, isUploadTerminal, type UploadItem } from './UploadItem';
 
 // Transport seam — what a consumer implements, and how a failure carries its HTTP status
 export {

@@ -1,5 +1,1 @@
-export {
-  default as MarkdownEditor,
-  MarkdownEditorView,
-  type MarkdownEditorProps,
-} from './MarkdownEditor.vue';
+export { default as MarkdownEditor, MarkdownEditorView, type MarkdownEditorProps } from './MarkdownEditor.vue';

@@ -60,8 +60,7 @@ function register(id: string, node: HTMLElement | null): void {
     const index = node
       ? items.findIndex(
           (item) =>
-            item.node !== null &&
-            (node.compareDocumentPosition(item.node) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+            item.node !== null && (node.compareDocumentPosition(item.node) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
         )
       : -1;
     if (index === -1) items.push(entry);
@@ -102,10 +101,8 @@ watch(
 function onItemKeyDown(event: KeyboardEvent, id: string): void {
   const idx = items.findIndex((item) => item.id === id);
   if (idx === -1) return;
-  const isVert =
-    props.orientation === Orientation.Vertical || props.orientation === Orientation.Both;
-  const isHoriz =
-    props.orientation === Orientation.Horizontal || props.orientation === Orientation.Both;
+  const isVert = props.orientation === Orientation.Vertical || props.orientation === Orientation.Both;
+  const isHoriz = props.orientation === Orientation.Horizontal || props.orientation === Orientation.Both;
   // Horizontal arrows mirror in RTL.
   const nextHorizKey = direction.value === Direction.Rtl ? 'ArrowLeft' : 'ArrowRight';
   const prevHorizKey = direction.value === Direction.Rtl ? 'ArrowRight' : 'ArrowLeft';

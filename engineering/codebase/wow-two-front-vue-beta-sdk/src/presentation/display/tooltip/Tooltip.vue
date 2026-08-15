@@ -35,23 +35,10 @@ export interface TooltipProps {
 </script>
 
 <script setup lang="ts">
-import {
-  cloneVNode,
-  computed,
-  onBeforeUnmount,
-  ref,
-  shallowRef,
-  useSlots,
-  watch,
-} from 'vue';
+import { cloneVNode, computed, onBeforeUnmount, ref, shallowRef, useSlots, watch } from 'vue';
 import { cn } from '../../../foundation/utils';
 import { useControlled, useEscape, useId, useReducedMotion } from '../../../foundation/hooks';
-import {
-  AnchoredPositioner,
-  Portal,
-  Presence,
-  renderableChildren,
-} from '../../../foundation/primitives';
+import { AnchoredPositioner, Portal, Presence, renderableChildren } from '../../../foundation/primitives';
 
 /**
  * Hover-/focus-triggered tooltip. Wraps a single default-slot child as the
@@ -211,12 +198,7 @@ const contentClasses = cn(
     <!-- Exit animation bubbles up from the body; once the closed-state pop-out ends, tear down
          the Portal shell. Also covers the reduced-motion path, where no animation runs and
          `Presence` has already unmounted the body. -->
-    <AnchoredPositioner
-      :anchor="anchor"
-      :placement="props.placement"
-      :offset="6"
-      @animationend="onAnimationEnd"
-    >
+    <AnchoredPositioner :anchor="anchor" :placement="props.placement" :offset="6" @animationend="onAnimationEnd">
       <!-- `Presence` clones `data-state` ("open" | "closed") + its tracking ref onto the body,
            which is what gates the pop-in / pop-out keyframes. Motion sits behind `motion-safe:`
            so reduced-motion users get an instant show/hide. -->

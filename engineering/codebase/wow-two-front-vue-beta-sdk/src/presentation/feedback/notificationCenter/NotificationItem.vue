@@ -72,9 +72,7 @@ const classes = computed(() =>
   ),
 );
 
-const titleClasses = computed(() =>
-  cn('truncate text-foreground', props.isUnread ? 'font-semibold' : 'font-medium'),
-);
+const titleClasses = computed(() => cn('truncate text-foreground', props.isUnread ? 'font-semibold' : 'font-medium'));
 
 const bodyClasses = computed(() => cn('min-w-0 flex-1', !hasIcon.value && 'pl-3'));
 
@@ -125,10 +123,7 @@ defineExpose({ el });
         <span :class="titleClasses">
           <slot name="title">{{ props.title }}</slot>
         </span>
-        <span
-          v-if="hasTimestamp"
-          class="ml-auto whitespace-nowrap text-xs text-muted-foreground"
-        >
+        <span v-if="hasTimestamp" class="ml-auto whitespace-nowrap text-xs text-muted-foreground">
           <slot name="timestamp">{{ props.timestamp }}</slot>
         </span>
       </div>

@@ -70,9 +70,7 @@ const classes = computed(() =>
 );
 
 /** `normalizeStyle` merges left → right, so a caller's `style` lands last and wins. */
-const styles = computed(() =>
-  normalizeStyle([{ '--marquee-gap': `${props.gap}px` }, attrs.style]),
-);
+const styles = computed(() => normalizeStyle([{ '--marquee-gap': `${props.gap}px` }, attrs.style]));
 
 const trackClasses = computed(() =>
   cn(
@@ -109,24 +107,11 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div
-    ref="el"
-    role="marquee"
-    :data-direction="props.direction"
-    v-bind="rest"
-    :class="classes"
-    :style="styles"
-  >
+  <div ref="el" role="marquee" :data-direction="props.direction" v-bind="rest" :class="classes" :style="styles">
     <!-- Single animated track holding both copies — each copy is exactly
          50% of the track, so the -50% keyframes loop seamlessly. -->
     <div :class="trackClasses" :style="trackStyle">
-      <div
-        v-for="copy in COPIES"
-        :key="copy"
-        :aria-hidden="copy === 1"
-        :class="copyClasses"
-        :style="copyStyle"
-      >
+      <div v-for="copy in COPIES" :key="copy" :aria-hidden="copy === 1" :class="copyClasses" :style="copyStyle">
         <slot />
       </div>
     </div>

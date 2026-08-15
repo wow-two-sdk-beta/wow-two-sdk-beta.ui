@@ -33,11 +33,7 @@
 // as soon as control returns to the event loop with no IDB work pending, so awaiting a `fetch` (or any
 // non-IDB promise) inside one silently kills it. Explained with an example in `IdbPromises.ts`.
 
-export {
-  DefaultProbeTimeoutMs,
-  isIndexedDbAvailable,
-  probeIndexedDb,
-} from './IndexedDbSupport';
+export { DefaultProbeTimeoutMs, isIndexedDbAvailable, probeIndexedDb } from './IndexedDbSupport';
 
 export { requestToPromise, transactionToPromise } from './IdbPromises';
 
@@ -51,13 +47,7 @@ export {
   openDatabase,
 } from './OpenDatabase';
 
-export {
-  type IdbCursorVisitor,
-  type IdbEntry,
-  type IterateOptions,
-  iterate,
-  withTransaction,
-} from './Transactions';
+export { type IdbCursorVisitor, type IdbEntry, type IterateOptions, iterate, withTransaction } from './Transactions';
 
 export {
   DefaultKeyValueStoreName,

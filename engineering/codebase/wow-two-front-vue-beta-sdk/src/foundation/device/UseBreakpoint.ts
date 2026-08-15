@@ -23,12 +23,7 @@ import { computed, toValue, type ComputedRef, type MaybeRefOrGetter } from 'vue'
 
 import { useMediaQuery } from '../hooks';
 
-import {
-  resolveBreakpoint,
-  toBreakpointQueries,
-  type BreakpointQuery,
-  type BreakpointScale,
-} from './Breakpoints';
+import { resolveBreakpoint, toBreakpointQueries, type BreakpointQuery, type BreakpointScale } from './Breakpoints';
 
 /** A valid media query that never matches — parks the slots a scale smaller than `MAX_BREAKPOINTS` leaves unused. */
 const NEVER_MATCHES = 'not all';

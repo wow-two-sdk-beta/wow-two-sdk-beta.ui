@@ -72,12 +72,7 @@ import { computed, provide, ref, shallowRef, watch } from 'vue';
 import { Equality } from '../../../foundation/utils';
 import { useControlled, useId } from '../../../foundation/hooks';
 import { Popover } from '../../overlays';
-import {
-  extractText,
-  selectContextKey,
-  type ItemRegistryEntry,
-  type SelectContextValue,
-} from './SelectContext';
+import { extractText, selectContextKey, type ItemRegistryEntry, type SelectContextValue } from './SelectContext';
 import { useFormControl } from '../../../foundation/primitives';
 
 /**
@@ -375,12 +370,7 @@ const serializedKey = computed(() => serializeKeyFn.value(keyCtl.value.value));
 </script>
 
 <template>
-  <Popover
-    :open="isOpenNow"
-    :placement="placement"
-    :offset="4"
-    @open-change="onPopoverOpenChange"
-  >
+  <Popover :open="isOpenNow" :placement="placement" :offset="4" @open-change="onPopoverOpenChange">
     <slot />
     <!-- Always-rendered — inside PopoverContent it would vanish from form submission when closed. -->
     <input v-if="name && hasSelection" type="hidden" :name="name" :value="serializedKey" />

@@ -78,10 +78,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const inputClass = computed(() =>
-  cn(
-    inputBaseVariants({ size: props.size, state: props.state }),
-    attrs.class as ClassValue,
-  ),
+  cn(inputBaseVariants({ size: props.size, state: props.state }), attrs.class as ClassValue),
 );
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */

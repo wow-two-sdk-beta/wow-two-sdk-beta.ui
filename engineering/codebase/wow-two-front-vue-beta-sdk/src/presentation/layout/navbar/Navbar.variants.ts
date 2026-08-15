@@ -38,8 +38,5 @@ export type NavbarVariants = VariantProps<typeof navbarVariants>;
 
 /* Compile-time lock: enum values ≡ tv `height` keys (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertNavbarHeight: AssertExact<
-  NavbarHeight,
-  NonNullable<VariantProps<typeof navbarVariants>['height']>
-> = true;
+const _assertNavbarHeight: AssertExact<NavbarHeight, NonNullable<VariantProps<typeof navbarVariants>['height']>> = true;
 void _assertNavbarHeight;

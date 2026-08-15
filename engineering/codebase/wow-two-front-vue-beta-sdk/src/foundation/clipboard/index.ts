@@ -42,12 +42,7 @@ export {
   type ClipboardCopyOptions,
 } from './ClipboardResult';
 
-export {
-  canCopy,
-  canCopyItems,
-  canReadClipboard,
-  canLegacyCopy,
-} from './ClipboardSupport';
+export { canCopy, canCopyItems, canReadClipboard, canLegacyCopy } from './ClipboardSupport';
 
 export { copyText } from './CopyText';
 

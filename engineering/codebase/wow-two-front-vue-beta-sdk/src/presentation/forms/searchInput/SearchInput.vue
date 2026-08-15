@@ -104,9 +104,7 @@ function onInput(event: Event): void {
   controlled.setValue((event.target as HTMLInputElement).value);
 }
 
-const showClear = computed(
-  () => props.isClearable && String(currentValue.value ?? '').length > 0,
-);
+const showClear = computed(() => props.isClearable && String(currentValue.value ?? '').length > 0);
 
 function handleClear(): void {
   const el = root.value;
@@ -123,9 +121,7 @@ function handleClear(): void {
   emit('clear');
 }
 
-const finalState = computed(
-  () => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled ?? false);
@@ -161,11 +157,7 @@ defineExpose({ el: root });
 
 <template>
   <div :class="wrapperClass">
-    <Icon
-      :icon="SearchIcon"
-      :size="16"
-      class="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground"
-    />
+    <Icon :icon="SearchIcon" :size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-foreground" />
     <input
       ref="root"
       type="search"

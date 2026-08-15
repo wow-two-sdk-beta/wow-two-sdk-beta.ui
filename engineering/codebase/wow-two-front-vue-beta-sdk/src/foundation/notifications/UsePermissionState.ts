@@ -12,11 +12,7 @@
 
 import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
-import {
-  subscribeToPermissionChange,
-  type PermissionQueryName,
-  type PermissionQueryState,
-} from './QueryPermission';
+import { subscribeToPermissionChange, type PermissionQueryName, type PermissionQueryState } from './QueryPermission';
 
 /**
  * Follows a permission's state reactively, updating when the user grants or revokes it — including from

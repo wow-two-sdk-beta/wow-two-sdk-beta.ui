@@ -37,14 +37,11 @@ const emit = defineEmits<{
   'active-change': [id: string | null];
 }>();
 
-const activeId = useScrollSpy(
-  () => props.ids,
-  {
-    rootMargin: () => props.rootMargin,
-    threshold: () => props.threshold,
-    root: () => props.root,
-  },
-);
+const activeId = useScrollSpy(() => props.ids, {
+  rootMargin: () => props.rootMargin,
+  threshold: () => props.threshold,
+  root: () => props.root,
+});
 
 watch(activeId, (id) => emit('active-change', id), { immediate: true, flush: 'post' });
 </script>

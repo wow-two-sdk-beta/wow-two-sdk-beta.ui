@@ -7,8 +7,7 @@ export const BackdropPointerEvents = {
   None: 'none',
 } as const;
 
-export type BackdropPointerEvents =
-  (typeof BackdropPointerEvents)[keyof typeof BackdropPointerEvents];
+export type BackdropPointerEvents = (typeof BackdropPointerEvents)[keyof typeof BackdropPointerEvents];
 
 /**
  * The prop surface of `Backdrop`.
@@ -70,9 +69,7 @@ const classes = computed(() =>
 );
 
 /** `pointerEvents` is normalized first so a caller's `style` still wins — React's `{ pointerEvents, ...style }`. */
-const inlineStyle = computed(() =>
-  normalizeStyle([{ pointerEvents: props.pointerEvents }, attrs.style]),
-);
+const inlineStyle = computed(() => normalizeStyle([{ pointerEvents: props.pointerEvents }, attrs.style]));
 
 /** Everything but `class` / `style`, both re-applied above. */
 const rest = computed(() => {

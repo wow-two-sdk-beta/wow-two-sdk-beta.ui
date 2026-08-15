@@ -98,7 +98,9 @@ export interface FieldArrayFieldProps<TItem extends object, TName extends keyof 
 
 /** The typed row-field accessor — one level deep (`keyof TItem`), no recursion, no vendor deep-path types. */
 export interface FieldArrayField<TItem extends object> {
-  new <TName extends keyof TItem & string>(props: FieldArrayFieldProps<TItem, TName>): {
+  new <TName extends keyof TItem & string>(
+    props: FieldArrayFieldProps<TItem, TName>,
+  ): {
     $props: FieldArrayFieldProps<TItem, TName> & PublicProps;
     /** `field.value` / `field.setValue` are typed as `TItem[name]` — no cast, and `v-model="f.value"` binds. */
     $slots: { default?: (field: AppFieldApi<TItem[TName]>) => VNode[] };
@@ -197,9 +199,7 @@ export function useFieldArray<TItem extends object>(form: FieldArrayForm, path: 
     { flush: 'sync' },
   );
 
-  const rows = computed<readonly FieldArrayRow[]>(() =>
-    keysRef.value.map((key, index) => ({ key, index })),
-  );
+  const rows = computed<readonly FieldArrayRow[]>(() => keysRef.value.map((key, index) => ({ key, index })));
 
   const Field = defineComponent({
     name: 'FieldArrayField',
@@ -226,7 +226,8 @@ export function useFieldArray<TItem extends object>(form: FieldArrayForm, path: 
           },
           {
             // The one `unknown → element` cast — sound by construction (`${path}[${index}].${name}` is `TItem[name]`).
-            default: (field: AppFieldApi<unknown>) => slots.default?.(field as AppFieldApi<TItem[keyof TItem & string]>),
+            default: (field: AppFieldApi<unknown>) =>
+              slots.default?.(field as AppFieldApi<TItem[keyof TItem & string]>),
           },
         );
     },
@@ -250,13 +251,30 @@ export function useFieldArray<TItem extends object>(form: FieldArrayForm, path: 
       return rows.value.length;
     },
     Field,
-    push: (value: TItem) => apply((next) => next.push(makeKey(seq)), () => ops.push(value)),
+    push: (value: TItem) =>
+      apply(
+        (next) => next.push(makeKey(seq)),
+        () => ops.push(value),
+      ),
     insert: (index: number, value: TItem) =>
-      apply((next) => next.splice(index, 0, makeKey(seq)), () => ops.insert(index, value)),
-    remove: (index: number) => apply((next) => next.splice(index, 1), () => ops.remove(index)),
+      apply(
+        (next) => next.splice(index, 0, makeKey(seq)),
+        () => ops.insert(index, value),
+      ),
+    remove: (index: number) =>
+      apply(
+        (next) => next.splice(index, 1),
+        () => ops.remove(index),
+      ),
     swap: (indexA: number, indexB: number) =>
-      apply((next) => swapKeys(next, indexA, indexB), () => ops.swap(indexA, indexB)),
+      apply(
+        (next) => swapKeys(next, indexA, indexB),
+        () => ops.swap(indexA, indexB),
+      ),
     move: (fromIndex: number, toIndex: number) =>
-      apply((next) => moveKey(next, fromIndex, toIndex), () => ops.move(fromIndex, toIndex)),
+      apply(
+        (next) => moveKey(next, fromIndex, toIndex),
+        () => ops.move(fromIndex, toIndex),
+      ),
   };
 }

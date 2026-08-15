@@ -39,11 +39,7 @@ const el = useTemplateRef<HTMLDivElement>('el');
 const isEmpty = () => renderableChildren(slots.default?.()).length === 0;
 
 const classes = computed(() =>
-  cn(
-    'flex w-80 flex-col',
-    surfaceVariants({ variant: 'surface', radius: 'md' }),
-    attrs.class as string | undefined,
-  ),
+  cn('flex w-80 flex-col', surfaceVariants({ variant: 'surface', radius: 'md' }), attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -74,9 +70,7 @@ defineExpose({ el });
     <div class="max-h-96 overflow-y-auto py-1">
       <template v-if="isEmpty()">
         <slot name="emptyState">
-          <div
-            class="flex flex-col items-center gap-2 px-4 py-10 text-center text-muted-foreground"
-          >
+          <div class="flex flex-col items-center gap-2 px-4 py-10 text-center text-muted-foreground">
             <Bell class="h-6 w-6" />
             <p class="text-sm">You're all caught up.</p>
           </div>
@@ -84,10 +78,7 @@ defineExpose({ el });
       </template>
       <div v-else class="flex flex-col"><slot /></div>
     </div>
-    <div
-      v-if="$slots.footer"
-      class="border-t border-border px-3 py-2 text-center text-xs"
-    >
+    <div v-if="$slots.footer" class="border-t border-border px-3 py-2 text-center text-xs">
       <slot name="footer" />
     </div>
   </div>

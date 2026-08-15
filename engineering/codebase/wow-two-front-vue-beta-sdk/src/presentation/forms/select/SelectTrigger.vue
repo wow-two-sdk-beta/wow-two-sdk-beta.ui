@@ -103,9 +103,7 @@ const ctx = useSelectContext();
    renders. Left in the fallthrough set, it also still lands on the button. */
 const ariaLabel = computed(() => attrs['aria-label'] as string | undefined);
 
-const triggerState = computed(
-  () => props.state ?? (ctx.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const triggerState = computed(() => props.state ?? (ctx.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 /* Closed-only type-to-select (native `<select>`): typing picks the matching option without
    opening; while OPEN the inner Listbox owns typeahead. Matches each item's `entry.text`,
@@ -114,8 +112,7 @@ const triggerTypeahead = useTypeahead<ItemRegistryEntry>({
   items: () => ctx.items,
   getLabel: (entry) => entry.text,
   isDisabled: (entry) => entry.isDisabled,
-  getActiveIndex: () =>
-    ctx.hasSelection ? ctx.items.findIndex((i) => ctx.keyEquals(i.itemKey, ctx.selectedKey)) : -1,
+  getActiveIndex: () => (ctx.hasSelection ? ctx.items.findIndex((i) => ctx.keyEquals(i.itemKey, ctx.selectedKey)) : -1),
   onMatch: (entry) => ctx.onSelect(entry),
   enabled: () => !ctx.open && !ctx.isDisabled && !ctx.isLoading,
 });
@@ -133,9 +130,7 @@ function handleTriggerKeyDown(event: KeyboardEvent): void {
   }
 }
 
-const showClear = computed(
-  () => ctx.isClearable && ctx.hasSelection && !ctx.isLoading && !ctx.isDisabled,
-);
+const showClear = computed(() => ctx.isClearable && ctx.hasSelection && !ctx.isLoading && !ctx.isDisabled);
 
 const sizeKey = computed<SelectSize>(() => props.size ?? 'md');
 const iconClass = computed(() => TRIGGER_ICON_CLASSES[sizeKey.value]);
@@ -146,17 +141,13 @@ const clearOffsetClass = computed(() => TRIGGER_CLEAR_OFFSET_CLASSES[sizeKey.val
 /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
 const labelledBy = computed(() => (!ariaLabel.value ? ctx.labelId : undefined));
 
-const dataState = computed(() =>
-  triggerDataState(ctx.open, ctx.isLoading, ctx.isDisabled, ctx.isInvalid),
-);
+const dataState = computed(() => triggerDataState(ctx.open, ctx.isLoading, ctx.isDisabled, ctx.isInvalid));
 
 const chevronClass = computed(() =>
   cn(iconClass.value, 'text-muted-foreground transition-transform', ctx.open && 'rotate-180'),
 );
 
-const spinnerClass = computed(() =>
-  cn(iconClass.value, 'animate-spin text-subtle-foreground'),
-);
+const spinnerClass = computed(() => cn(iconClass.value, 'animate-spin text-subtle-foreground'));
 
 const clearButtonClass = computed(() =>
   cn(
@@ -174,10 +165,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const buttonClass = computed(() =>
-  cn(
-    selectTriggerVariants({ size: props.size, state: triggerState.value }),
-    attrs.class as ClassValue,
-  ),
+  cn(selectTriggerVariants({ size: props.size, state: triggerState.value }), attrs.class as ClassValue),
 );
 
 const root = useTemplateRef<HTMLButtonElement>('root');

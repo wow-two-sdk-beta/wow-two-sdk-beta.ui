@@ -124,12 +124,7 @@ defineExpose({ el: root });
 
 <template>
   <div ref="root" :class="rootClass" v-bind="passthroughAttrs">
-    <div
-      ref="hoursEl"
-      role="listbox"
-      aria-label="Hours"
-      class="flex max-h-56 flex-col gap-0.5 overflow-y-auto pr-1"
-    >
+    <div ref="hoursEl" role="listbox" aria-label="Hours" class="flex max-h-56 flex-col gap-0.5 overflow-y-auto pr-1">
       <button
         v-for="h in HOUR_LIST"
         :key="h"

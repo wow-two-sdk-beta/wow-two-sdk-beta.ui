@@ -41,14 +41,7 @@ import type { ClassValue } from 'clsx';
 import { Temporal as TemporalValue } from 'temporal-polyfill';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
-import {
-  isDateDisabled,
-  isInRange,
-  isSameDay,
-  isToday,
-  startOfMonth,
-  today,
-} from '../DateExtensions';
+import { isDateDisabled, isInRange, isSameDay, isToday, startOfMonth, today } from '../DateExtensions';
 import MonthGrid from '../MonthGrid.vue';
 import type { MonthGridDayProps } from '../MonthGrid.vue';
 
@@ -83,9 +76,7 @@ const range = controlled.value;
 
 /* `today()` reads the host time zone through `Temporal.Now` — universal, not a browser
    global, so both seeds are safe on the server. */
-const viewMonth = ref<Temporal.PlainDate>(
-  startOfMonth(props.defaultMonth ?? range.value?.start ?? today()),
-);
+const viewMonth = ref<Temporal.PlainDate>(startOfMonth(props.defaultMonth ?? range.value?.start ?? today()));
 const focusedDate = ref<Temporal.PlainDate>(range.value?.start ?? today());
 const hoveredDate = ref<Temporal.PlainDate | null>(null);
 const pendingStart = ref<Temporal.PlainDate | null>(null);
@@ -117,9 +108,7 @@ function onDayActivate(date: Temporal.PlainDate): void {
   pendingStart.value = null;
 }
 
-const previewEnd = computed(() =>
-  pendingStart.value ? hoveredDate.value : (range.value?.end ?? null),
-);
+const previewEnd = computed(() => (pendingStart.value ? hoveredDate.value : (range.value?.end ?? null)));
 
 function isStart(d: Temporal.PlainDate): boolean {
   return isSameDay(d, range.value?.start ?? null) || isSameDay(d, pendingStart.value);
@@ -164,10 +153,8 @@ function dayProps(date: Temporal.PlainDate): MonthGridDayProps {
       isToday(date) && !startCell && !endCell && 'border border-border rounded-sm',
       rangeCell &&
         'bg-primary-soft text-primary-soft-foreground hover:bg-primary/25 hover:text-primary-soft-foreground',
-      startCell &&
-        'bg-primary text-primary-foreground rounded-l-sm hover:bg-primary/90 hover:text-primary-foreground',
-      endCell &&
-        'bg-primary text-primary-foreground rounded-r-sm hover:bg-primary/90 hover:text-primary-foreground',
+      startCell && 'bg-primary text-primary-foreground rounded-l-sm hover:bg-primary/90 hover:text-primary-foreground',
+      endCell && 'bg-primary text-primary-foreground rounded-r-sm hover:bg-primary/90 hover:text-primary-foreground',
       !startCell && !endCell && !rangeCell && 'rounded-sm',
     ),
   };
@@ -175,9 +162,7 @@ function dayProps(date: Temporal.PlainDate): MonthGridDayProps {
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel`. It is
    read off the attrs so it can be relocated onto the inner grid, as React did. */
-const ariaLabel = computed(
-  () => (attrs['aria-label'] as string | undefined) ?? 'Date range',
-);
+const ariaLabel = computed(() => (attrs['aria-label'] as string | undefined) ?? 'Date range');
 
 const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-label']);
 const passthroughAttrs = computed(() =>

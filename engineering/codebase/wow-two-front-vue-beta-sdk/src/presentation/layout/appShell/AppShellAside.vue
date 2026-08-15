@@ -35,9 +35,7 @@ const classes = computed(() =>
 );
 
 /** The width is normalized first so a caller's `style` still wins per-property. */
-const asideStyle = computed(() =>
-  normalizeStyle([{ width: context.asideWidth.value }, attrs.style]),
-);
+const asideStyle = computed(() => normalizeStyle([{ width: context.asideWidth.value }, attrs.style]));
 
 /** Everything but `class` / `style`, both re-applied above. */
 const rest = computed(() => {

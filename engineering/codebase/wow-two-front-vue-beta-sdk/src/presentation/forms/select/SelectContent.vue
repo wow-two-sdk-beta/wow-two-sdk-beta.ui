@@ -45,15 +45,7 @@ export interface SelectContentProps {
 }
 
 /** The navigation keys the search input forwards to the Listbox keyboard handler. */
-const FORWARDED_NAV_KEYS = new Set([
-  'ArrowDown',
-  'ArrowUp',
-  'Home',
-  'End',
-  'PageDown',
-  'PageUp',
-  'Enter',
-]);
+const FORWARDED_NAV_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Home', 'End', 'PageDown', 'PageUp', 'Enter']);
 </script>
 
 <script setup lang="ts">
@@ -87,9 +79,7 @@ const ctx = useSelectContext();
 const hasItems = computed(() => ctx.items.length > 0);
 
 const visibleCount = computed(() =>
-  ctx.query
-    ? ctx.items.filter((i) => i.text.toLowerCase().includes(ctx.query.toLowerCase())).length
-    : ctx.items.length,
+  ctx.query ? ctx.items.filter((i) => i.text.toLowerCase().includes(ctx.query.toLowerCase())).length : ctx.items.length,
 );
 
 const showEmpty = computed(() => hasItems.value && visibleCount.value === 0);
@@ -119,9 +109,7 @@ function handleSearchKeyDown(event: KeyboardEvent): void {
   const node = ctx.listboxEl.value;
   if (!node) return;
   event.preventDefault();
-  node.dispatchEvent(
-    new KeyboardEvent('keydown', { key: event.key, bubbles: true, cancelable: true }),
-  );
+  node.dispatchEvent(new KeyboardEvent('keydown', { key: event.key, bubbles: true, cancelable: true }));
 }
 
 function onListboxValueChange(next: unknown): void {
@@ -188,11 +176,7 @@ const selectedForListbox = computed(() => ctx.selectedKey ?? undefined);
         is open (e.g. a dependent re-fetch). Suppresses the no-results message so a mid-load
         empty set doesn't read as "no results".
       -->
-      <div
-        v-if="ctx.isLoading"
-        role="status"
-        class="flex items-center gap-2 px-2 py-2 text-sm text-subtle-foreground"
-      >
+      <div v-if="ctx.isLoading" role="status" class="flex items-center gap-2 px-2 py-2 text-sm text-subtle-foreground">
         <LoaderIcon class="h-4 w-4 animate-spin" />
         <span>{{ ctx.loadingLabel }}</span>
       </div>

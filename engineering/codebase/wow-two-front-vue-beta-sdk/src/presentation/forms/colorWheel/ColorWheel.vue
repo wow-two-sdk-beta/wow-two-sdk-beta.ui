@@ -171,9 +171,7 @@ const thumbStyle = computed<StyleValue>(() => {
 });
 
 const controlId = computed(() => props.id ?? ctx?.id);
-const finalAriaLabel = computed(
-  () => ariaLabel.value ?? (labelledBy.value ? undefined : 'Hue'),
-);
+const finalAriaLabel = computed(() => ariaLabel.value ?? (labelledBy.value ? undefined : 'Hue'));
 const valueNow = computed(() => Math.round(hue.value));
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);

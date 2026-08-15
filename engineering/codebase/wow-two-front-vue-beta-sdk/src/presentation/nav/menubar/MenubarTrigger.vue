@@ -91,9 +91,7 @@ function handleKeydown(event: KeyboardEvent): void {
   item.onKeydown(event);
 }
 
-const classes = computed(() =>
-  cn(menubarTriggerVariants(), attrs.class as string | undefined),
-);
+const classes = computed(() => cn(menubarTriggerVariants(), attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

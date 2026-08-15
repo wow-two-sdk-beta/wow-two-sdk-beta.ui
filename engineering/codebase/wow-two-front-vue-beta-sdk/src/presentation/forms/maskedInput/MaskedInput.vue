@@ -150,8 +150,7 @@ const rootClass = computed(() =>
   cn(
     inputBaseVariants({
       size: props.size,
-      state:
-        props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
+      state: props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
     }),
     attrs.class as ClassValue,
   ),

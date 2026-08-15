@@ -97,11 +97,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const wrapperClass = computed(() =>
-  cn(
-    'relative inline-flex shrink-0',
-    SIZE_CLASS[props.size] ?? SIZE_CLASS.md,
-    attrs.class as ClassValue,
-  ),
+  cn('relative inline-flex shrink-0', SIZE_CLASS[props.size] ?? SIZE_CLASS.md, attrs.class as ClassValue),
 );
 
 const visualClass = cn(

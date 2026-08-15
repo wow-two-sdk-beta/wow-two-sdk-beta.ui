@@ -108,9 +108,7 @@ const inputType = computed(() => (visible.value ? 'text' : 'password'));
 const toggleLabel = computed(() => (visible.value ? 'Hide password' : 'Show password'));
 const toggleIcon = computed(() => (visible.value ? EyeOff : Eye));
 
-const autocompleteValue = computed(
-  () => props.autocomplete ?? props.autoComplete ?? 'current-password',
-);
+const autocompleteValue = computed(() => props.autocomplete ?? props.autoComplete ?? 'current-password');
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled ?? false);
@@ -130,8 +128,7 @@ const inputClass = computed(() =>
   cn(
     inputBaseVariants({
       size: props.size,
-      state:
-        props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
+      state: props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
     }),
     props.hasToggle && 'pr-10',
   ),

@@ -64,11 +64,7 @@ export { useQueryCache, type QueryCacheApi, type QueryCachePrefetch } from './Us
 
 // Prefetch + suspense
 export { usePrefetchQuery, prefetchProps, type PrefetchTarget, type PrefetchProps } from './UsePrefetchQuery';
-export {
-  useAppSuspenseQuery,
-  type AppSuspenseQueryOptions,
-  type AppSuspenseQueryReturn,
-} from './UseAppSuspenseQuery';
+export { useAppSuspenseQuery, type AppSuspenseQueryOptions, type AppSuspenseQueryReturn } from './UseAppSuspenseQuery';
 
 // Integrations
 export { QueryProgressBridge, useQueryProgressBridge } from './QueryProgressBridge';

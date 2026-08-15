@@ -157,7 +157,8 @@ defineExpose({ el });
 <template>
   <!-- Text and caret sit flush: a newline between them would condense to a
        rendered space that the React original never emitted. -->
-  <component :is="props.as" ref="el" v-bind="rest" :class="classes">{{ fullText
+  <component :is="props.as" ref="el" v-bind="rest" :class="classes"
+    >{{ fullText
     }}<span
       v-if="hasCursor"
       aria-hidden="true"

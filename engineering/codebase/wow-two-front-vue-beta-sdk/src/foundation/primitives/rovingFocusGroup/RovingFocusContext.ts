@@ -45,9 +45,7 @@ export interface ItemEntry {
 export function isNodeDisabled(node: HTMLElement | null): boolean {
   if (!node) return false;
   return (
-    node.matches(':disabled') ||
-    node.getAttribute('aria-disabled') === 'true' ||
-    node.hasAttribute('data-disabled')
+    node.matches(':disabled') || node.getAttribute('aria-disabled') === 'true' || node.hasAttribute('data-disabled')
   );
 }
 
@@ -77,10 +75,7 @@ export function findEnabled(
 }
 
 /** Nearest enabled entry around `idx` (excluding it), preferring the next one on ties. */
-export function findNearestEnabled(
-  list: ReadonlyArray<ItemEntry>,
-  idx: number,
-): ItemEntry | undefined {
+export function findNearestEnabled(list: ReadonlyArray<ItemEntry>, idx: number): ItemEntry | undefined {
   for (let distance = 1; distance < list.length; distance++) {
     const forward = list[idx + distance];
     if (forward && !isEntryDisabled(forward)) return forward;
@@ -138,9 +133,7 @@ function toElement(value: unknown): HTMLElement | null {
  * The returned object is `reactive` — `tabindex` tracks the group's tab stop,
  * so bind the object rather than destructuring it.
  */
-export function useRovingFocusItem(
-  options: UseRovingFocusItemOptions = {},
-): UseRovingFocusItemReturn {
+export function useRovingFocusItem(options: UseRovingFocusItemOptions = {}): UseRovingFocusItemReturn {
   const context = inject(RovingFocusKey, null);
   const id = useId();
   const node = shallowRef<HTMLElement | null>(null);
@@ -174,12 +167,7 @@ export function useRovingFocusItem(
   watch(
     () => context?.focusedId.value,
     (focusedId) => {
-      if (
-        focusedId === id &&
-        context?.interacted.value &&
-        node.value &&
-        document.activeElement !== node.value
-      ) {
+      if (focusedId === id && context?.interacted.value && node.value && document.activeElement !== node.value) {
         node.value.focus();
       }
     },

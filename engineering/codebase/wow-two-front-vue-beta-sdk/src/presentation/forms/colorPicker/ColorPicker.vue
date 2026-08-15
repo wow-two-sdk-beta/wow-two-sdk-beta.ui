@@ -12,8 +12,7 @@ export const ColorPickerTriggerVariant = {
   Value: 'value',
 } as const;
 
-export type ColorPickerTriggerVariant =
-  (typeof ColorPickerTriggerVariant)[keyof typeof ColorPickerTriggerVariant];
+export type ColorPickerTriggerVariant = (typeof ColorPickerTriggerVariant)[keyof typeof ColorPickerTriggerVariant];
 
 export interface ColorPickerProps {
   /** The selected hex, controlled — React's spelling, which wins when both are set. */
@@ -120,9 +119,7 @@ const ariaLabel = computed(() => attrs['aria-label'] as string | undefined);
 /* Names the trigger from the Field label when present; an explicit aria-label always
    wins, and the default label only applies when nothing else names the trigger. */
 const labelledBy = computed(() => (ariaLabel.value ? undefined : field?.labelledBy));
-const finalAriaLabel = computed(
-  () => ariaLabel.value ?? (labelledBy.value ? undefined : 'Pick a color'),
-);
+const finalAriaLabel = computed(() => ariaLabel.value ?? (labelledBy.value ? undefined : 'Pick a color'));
 const describedBy = computed(() => field?.describedBy);
 const isInvalid = computed(() => field?.isInvalid || undefined);
 
@@ -189,9 +186,7 @@ function onPresetChange(next: string | null): void {
 function noop(): void {}
 
 const hasCustomTrigger = computed(() => Boolean(slots.trigger));
-const isSwatchTrigger = computed(
-  () => props.triggerVariant === ColorPickerTriggerVariant.Swatch,
-);
+const isSwatchTrigger = computed(() => props.triggerVariant === ColorPickerTriggerVariant.Swatch);
 const isFullTrigger = computed(() => props.triggerVariant === ColorPickerTriggerVariant.Full);
 
 const swatchColor = computed(() => hex.value ?? '#00000000');
@@ -272,20 +267,10 @@ defineExpose({ el: computed(() => trigger.value?.el ?? null) });
            label/describedby/invalid chrome. One provider per widget: they all read
            `id ?? ctx.id`, so a single shared provider would duplicate ids among them. -->
       <FormControlProvider>
-        <ColorArea
-          :hue="hsv.h"
-          :saturation="hsv.s"
-          :value="hsv.v"
-          @value-change="onAreaChange"
-        />
+        <ColorArea :hue="hsv.h" :saturation="hsv.s" :value="hsv.v" @value-change="onAreaChange" />
       </FormControlProvider>
       <FormControlProvider>
-        <ColorSlider
-          :channel="ColorChannel.Hue"
-          :value="hsv.h"
-          aria-label="Hue"
-          @value-change="onHueChange"
-        />
+        <ColorSlider :channel="ColorChannel.Hue" :value="hsv.h" aria-label="Hue" @value-change="onHueChange" />
       </FormControlProvider>
       <FormControlProvider v-if="hasAlpha">
         <ColorSlider
@@ -297,20 +282,10 @@ defineExpose({ el: computed(() => trigger.value?.el ?? null) });
         />
       </FormControlProvider>
       <FormControlProvider>
-        <ColorField
-          aria-label="Hex color"
-          :value="hex"
-          :has-alpha="hasAlpha"
-          @value-change="onHexChange"
-        />
+        <ColorField aria-label="Hex color" :value="hex" :has-alpha="hasAlpha" @value-change="onHexChange" />
       </FormControlProvider>
       <FormControlProvider v-if="hasPresets">
-        <ColorSwatchPicker
-          :colors="presets ?? []"
-          :value="hex"
-          swatch-size="sm"
-          @value-change="onPresetChange"
-        />
+        <ColorSwatchPicker :colors="presets ?? []" :value="hex" swatch-size="sm" @value-change="onPresetChange" />
       </FormControlProvider>
     </PopoverContent>
 

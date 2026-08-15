@@ -55,9 +55,7 @@ export function useOptimisticMutation<TData, TVars>({
     mutationFn,
     onMutate: async (vars) => {
       // Cancel in-flight fetches first so a late server response can't clobber the patch.
-      await Promise.all(
-        targets.map((target) => queryClient.cancelQueries({ queryKey: resolveKey(target.key) })),
-      );
+      await Promise.all(targets.map((target) => queryClient.cancelQueries({ queryKey: resolveKey(target.key) })));
 
       // Snapshot, then patch. A later mutation on the same key snapshots this patch — rollbacks chain.
       return targets.map((target) => {
@@ -76,9 +74,7 @@ export function useOptimisticMutation<TData, TVars>({
     },
     onSettled: async () => {
       if (!invalidateOnSettle) return;
-      await Promise.all(
-        targets.map((target) => queryClient.invalidateQueries({ queryKey: resolveKey(target.key) })),
-      );
+      await Promise.all(targets.map((target) => queryClient.invalidateQueries({ queryKey: resolveKey(target.key) })));
     },
   });
 

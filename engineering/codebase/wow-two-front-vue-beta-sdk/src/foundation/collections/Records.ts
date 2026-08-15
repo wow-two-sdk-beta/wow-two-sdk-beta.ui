@@ -24,10 +24,7 @@
  * @returns A new `Map` in first-seen key order.
  * @see groupBy — the same shape when a key can legitimately hold several items.
  */
-export function keyBy<T, TKey>(
-  items: readonly T[],
-  keyFn: (item: T, index: number) => TKey,
-): Map<TKey, T> {
+export function keyBy<T, TKey>(items: readonly T[], keyFn: (item: T, index: number) => TKey): Map<TKey, T> {
   const result = new Map<TKey, T>();
   items.forEach((item, index) => {
     result.set(keyFn(item, index), item);
@@ -88,10 +85,7 @@ export function mapValues(
  * @param keys The keys to keep.
  * @returns A new object holding only the present named keys.
  */
-export function pickKeys<T extends object, TKey extends keyof T>(
-  source: T,
-  keys: readonly TKey[],
-): Pick<T, TKey> {
+export function pickKeys<T extends object, TKey extends keyof T>(source: T, keys: readonly TKey[]): Pick<T, TKey> {
   const result = {} as Pick<T, TKey>;
   for (const key of keys) {
     if (Object.prototype.hasOwnProperty.call(source, key)) result[key] = source[key];
@@ -107,10 +101,7 @@ export function pickKeys<T extends object, TKey extends keyof T>(
  * @param keys The keys to drop.
  * @returns A new object without the named keys.
  */
-export function omitKeys<T extends object, TKey extends keyof T>(
-  source: T,
-  keys: readonly TKey[],
-): Omit<T, TKey> {
+export function omitKeys<T extends object, TKey extends keyof T>(source: T, keys: readonly TKey[]): Omit<T, TKey> {
   const omitted = new Set<PropertyKey>(keys);
   const record = source as Record<string, unknown>;
   const result: Record<string, unknown> = {};

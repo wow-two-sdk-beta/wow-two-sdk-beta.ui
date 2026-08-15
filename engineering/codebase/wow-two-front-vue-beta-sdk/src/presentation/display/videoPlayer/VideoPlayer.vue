@@ -194,11 +194,9 @@ function togglePiP(): void {
   const video = el.value;
   if (!video) return;
   if ('pictureInPictureElement' in document && document.pictureInPictureElement) {
-    void (document as unknown as { exitPictureInPicture?: () => Promise<void> })
-      .exitPictureInPicture?.()
-      ?.catch(() => {
-        /* not in picture-in-picture */
-      });
+    void (document as unknown as { exitPictureInPicture?: () => Promise<void> }).exitPictureInPicture?.()?.catch(() => {
+      /* not in picture-in-picture */
+    });
   } else if ('requestPictureInPicture' in video) {
     void (video as HTMLVideoElement & { requestPictureInPicture?: () => Promise<unknown> })
       .requestPictureInPicture?.()
@@ -320,8 +318,7 @@ const classes = computed(() =>
 
 /** `aspect-ratio` is unitless, so the numeric form only needs stringifying. */
 const containerStyle = computed(() => ({
-  aspectRatio:
-    typeof props.aspectRatio === 'number' ? String(props.aspectRatio) : props.aspectRatio,
+  aspectRatio: typeof props.aspectRatio === 'number' ? String(props.aspectRatio) : props.aspectRatio,
 }));
 
 const controlsClasses = computed(() =>
@@ -391,9 +388,7 @@ defineExpose({ el });
       class="absolute inset-0 grid place-items-center bg-black/30 transition-opacity hover:bg-black/40"
       @click="togglePlay"
     >
-      <span
-        class="grid h-16 w-16 place-items-center rounded-full bg-white/90 text-foreground shadow-lg"
-      >
+      <span class="grid h-16 w-16 place-items-center rounded-full bg-white/90 text-foreground shadow-lg">
         <Icon :icon="Play" :size="28" />
       </span>
     </button>
@@ -408,9 +403,7 @@ defineExpose({ el });
       >
         <Icon :icon="playing ? Pause : Play" :size="14" />
       </button>
-      <span class="text-xs tabular-nums">
-        {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-      </span>
+      <span class="text-xs tabular-nums"> {{ formatTime(currentTime) }} / {{ formatTime(duration) }} </span>
       <input
         type="range"
         role="slider"
@@ -436,9 +429,7 @@ defineExpose({ el });
         aria-label="Playback speed"
         class="h-7 rounded-sm border border-white/20 bg-black/40 px-1 text-xs"
       >
-        <option v-for="rate in SPEEDS" :key="rate" :value="rate" class="text-foreground">
-          {{ rate }}×
-        </option>
+        <option v-for="rate in SPEEDS" :key="rate" :value="rate" class="text-foreground">{{ rate }}×</option>
       </select>
       <button
         v-if="hasTracks"
@@ -450,12 +441,7 @@ defineExpose({ el });
       >
         <Icon :icon="captionsOn ? Captions : CaptionsOff" :size="14" />
       </button>
-      <button
-        type="button"
-        aria-label="Picture in picture"
-        :class="ICON_BUTTON_CLASS"
-        @click="togglePiP"
-      >
+      <button type="button" aria-label="Picture in picture" :class="ICON_BUTTON_CLASS" @click="togglePiP">
         <Icon :icon="PictureInPicture2" :size="14" />
       </button>
       <button

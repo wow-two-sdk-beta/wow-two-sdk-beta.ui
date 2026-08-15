@@ -8,11 +8,7 @@ export interface SortableItemProps {
 <script setup lang="ts">
 import { computed, provide, ref, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/utils';
-import {
-  SortableItemKey,
-  useSortableRoot,
-  type SortableItemContextValue,
-} from './SortableContext';
+import { SortableItemKey, useSortableRoot, type SortableItemContextValue } from './SortableContext';
 
 /** One reorderable row. Becomes `draggable` only while its `SortableHandle` is pressed. */
 defineOptions({ name: 'SortableItem', inheritAttrs: false });

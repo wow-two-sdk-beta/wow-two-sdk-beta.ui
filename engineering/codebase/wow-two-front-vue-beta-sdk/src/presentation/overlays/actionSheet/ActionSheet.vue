@@ -6,9 +6,7 @@ export interface ActionSheetContextValue {
   setOpen: (open: boolean) => void;
 }
 
-export const actionSheetContextKey: InjectionKey<ActionSheetContextValue> = Symbol(
-  'wow-two.actionSheet',
-);
+export const actionSheetContextKey: InjectionKey<ActionSheetContextValue> = Symbol('wow-two.actionSheet');
 
 export function useActionSheetContext(): ActionSheetContextValue {
   const context = inject(actionSheetContextKey, null);
@@ -103,15 +101,10 @@ const resolvedOpen = controlled.value;
 provide(actionSheetContextKey, { setOpen: controlled.setValue });
 
 const hasTitle = computed(() => props.title !== undefined || slots.title !== undefined);
-const hasDescription = computed(
-  () => props.description !== undefined || slots.description !== undefined,
-);
+const hasDescription = computed(() => props.description !== undefined || slots.description !== undefined);
 
 const classes = computed(() =>
-  cn(
-    'mx-auto max-w-md rounded-t-xl bg-card p-2 text-card-foreground',
-    attrs.class as string | undefined,
-  ),
+  cn('mx-auto max-w-md rounded-t-xl bg-card p-2 text-card-foreground', attrs.class as string | undefined),
 );
 </script>
 
@@ -122,10 +115,7 @@ const classes = computed(() =>
         <OverlayTitle v-if="hasTitle" class="text-sm font-medium text-muted-foreground">
           <slot name="title">{{ props.title }}</slot>
         </OverlayTitle>
-        <OverlayDescription
-          v-if="hasDescription"
-          class="mt-1 text-xs text-muted-foreground"
-        >
+        <OverlayDescription v-if="hasDescription" class="mt-1 text-xs text-muted-foreground">
           <slot name="description">{{ props.description }}</slot>
         </OverlayDescription>
       </div>

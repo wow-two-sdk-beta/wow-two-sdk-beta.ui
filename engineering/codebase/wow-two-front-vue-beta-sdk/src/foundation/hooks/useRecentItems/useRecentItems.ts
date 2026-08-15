@@ -53,10 +53,7 @@ export function prependRecent<T>(
  *
  * `recents` is a read-only computed — mutate the list through `push` / `clear`, never in place.
  */
-export function useRecentItems<T>(
-  key: MaybeRefOrGetter<string>,
-  options: RecentItemsOptions<T>,
-): RecentItems<T> {
+export function useRecentItems<T>(key: MaybeRefOrGetter<string>, options: RecentItemsOptions<T>): RecentItems<T> {
   const { identify, max = DefaultMax, broker } = options;
 
   const state = usePersistentState<ReadonlyArray<T>>(key, [], { broker });

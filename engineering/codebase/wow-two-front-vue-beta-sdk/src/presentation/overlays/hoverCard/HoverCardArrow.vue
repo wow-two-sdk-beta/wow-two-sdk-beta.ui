@@ -31,10 +31,5 @@ const rest = computed(() => {
 </script>
 
 <template>
-  <OverlayArrow
-    :width="props.width"
-    :height="props.height"
-    v-bind="rest"
-    :class="classes"
-  />
+  <OverlayArrow :width="props.width" :height="props.height" v-bind="rest" :class="classes" />
 </template>

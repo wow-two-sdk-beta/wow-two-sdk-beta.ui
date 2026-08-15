@@ -8,10 +8,7 @@ import { toValue, watchPostEffect, type MaybeRefOrGetter } from 'vue';
  * `enabled` may be a ref or a getter (`() => props.isOpen`); the listener
  * detaches and re-attaches as it flips.
  */
-export function useEscape(
-  handler: (event: KeyboardEvent) => void,
-  enabled: MaybeRefOrGetter<boolean> = true,
-): void {
+export function useEscape(handler: (event: KeyboardEvent) => void, enabled: MaybeRefOrGetter<boolean> = true): void {
   watchPostEffect((onCleanup) => {
     if (!toValue(enabled) || typeof document === 'undefined') return;
     const onKeyDown = (e: KeyboardEvent): void => {

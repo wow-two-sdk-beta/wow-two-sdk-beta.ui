@@ -11,11 +11,7 @@ export interface AccordionItemProps {
 import { computed, provide, useAttrs, useTemplateRef } from 'vue';
 import { cn, dataAttr } from '../../../foundation/utils';
 import { useId } from '../../../foundation/hooks';
-import {
-  AccordionItemKey,
-  useAccordionContext,
-  type AccordionItemContextValue,
-} from './AccordionContext';
+import { AccordionItemKey, useAccordionContext, type AccordionItemContextValue } from './AccordionContext';
 
 /** One disclosure panel — wraps an `AccordionTrigger` and an `AccordionContent`. */
 defineOptions({ name: 'AccordionItem', inheritAttrs: false });

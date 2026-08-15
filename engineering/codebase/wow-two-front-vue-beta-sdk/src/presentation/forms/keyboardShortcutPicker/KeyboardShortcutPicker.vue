@@ -26,8 +26,7 @@ export interface KeyboardShortcutPickerProps {
 }
 
 // SSR-safe: `navigator` is undefined in Node < 21.
-const IS_MAC =
-  typeof navigator !== 'undefined' && navigator.platform?.toLowerCase().includes('mac');
+const IS_MAC = typeof navigator !== 'undefined' && navigator.platform?.toLowerCase().includes('mac');
 
 const MODIFIER_NAMES: Record<string, string> = {
   Control: 'Ctrl',
@@ -178,17 +177,11 @@ function modifierLabel(key: string): string {
 
 const buttonId = computed(() => props.id ?? field?.id);
 /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
-const labelledBy = computed(
-  () => ariaLabelledBy.value ?? (ariaLabel.value ? undefined : field?.labelledBy),
-);
+const labelledBy = computed(() => ariaLabelledBy.value ?? (ariaLabel.value ? undefined : field?.labelledBy));
 const describedBy = computed(() => ariaDescribedBy.value ?? field?.describedBy);
 const hiddenValue = computed(() => keys.value.join('+'));
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set([
-  'class',
-  'aria-labelledby',
-  'aria-describedby',
-]);
+const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-labelledby', 'aria-describedby']);
 const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );

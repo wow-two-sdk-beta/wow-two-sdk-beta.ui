@@ -5,10 +5,7 @@ export { default as Editable, type EditableProps } from './Editable.vue';
 export { default as EditableCancel } from './EditableCancel.vue';
 export { default as EditableInput, type EditableInputProps } from './EditableInput.vue';
 export { default as EditablePreview, type EditablePreviewProps } from './EditablePreview.vue';
-export {
-  default as EditableSubmit,
-  type EditableButtonProps,
-} from './EditableSubmit.vue';
+export { default as EditableSubmit, type EditableButtonProps } from './EditableSubmit.vue';
 export { useEditableContext, type EditableContextValue } from './EditableContext';
 /* React shipped the compound root as the module default too; the Vue default is the root SFC
    (the parts are the flat named exports above). */

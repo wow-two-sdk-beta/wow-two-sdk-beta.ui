@@ -111,9 +111,7 @@ export function useSelection<TKey extends SelectionKey>(
   });
   const anchor = shallowRef<TKey | null>(null);
 
-  const state = computed(() =>
-    createSelection(toValue(mode) ?? SelectionMode.Multiple, keys.value, anchor.value),
-  );
+  const state = computed(() => createSelection(toValue(mode) ?? SelectionMode.Multiple, keys.value, anchor.value));
 
   const commit = (next: SelectionState<TKey>): void => {
     // Pure ops return the same reference for a no-op — nothing to publish, no listener to wake.

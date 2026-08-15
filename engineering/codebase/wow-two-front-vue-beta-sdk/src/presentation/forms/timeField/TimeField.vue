@@ -172,9 +172,7 @@ function onColumnsChange(next: Temporal.PlainTime): void {
 
 const displayValue = computed(() => formatISOTime(committed.value));
 
-const finalState = computed(
-  () => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
@@ -255,11 +253,7 @@ defineExpose({ el: root });
         <Clock class="h-4 w-4" />
       </PopoverTrigger>
       <PopoverContent is-bare>
-        <TimeColumns
-          :value="committed"
-          :minute-step="minuteStep"
-          :on-time-change="onColumnsChange"
-        />
+        <TimeColumns :value="committed" :minute-step="minuteStep" :on-time-change="onColumnsChange" />
       </PopoverContent>
     </Popover>
   </div>

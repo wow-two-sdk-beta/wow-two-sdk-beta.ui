@@ -67,12 +67,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <Drawer
-    v-if="isCollapsed"
-    :open="isSidebarOpen"
-    side="left"
-    @open-change="context.setSidebarOpen"
-  >
+  <Drawer v-if="isCollapsed" :open="isSidebarOpen" side="left" @open-change="context.setSidebarOpen">
     <DrawerContent class="w-72 max-w-[80%]">
       <nav :class="navClasses"><slot /></nav>
     </DrawerContent>

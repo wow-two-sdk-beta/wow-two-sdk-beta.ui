@@ -78,13 +78,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <Primitive
-    ref="inner"
-    :as="props.as"
-    :as-child="props.asChild"
-    v-bind="rest"
-    :class="classes"
-  >
+  <Primitive ref="inner" :as="props.as" :as-child="props.asChild" v-bind="rest" :class="classes">
     <slot />
   </Primitive>
 </template>

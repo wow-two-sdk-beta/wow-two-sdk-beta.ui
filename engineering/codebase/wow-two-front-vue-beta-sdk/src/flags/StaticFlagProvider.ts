@@ -1,5 +1,11 @@
 import type { FlagProvider, FlagResolution } from './FlagProvider';
-import { FlagReason, type ContextAttribute, type EvaluationContext, type FlagValue, type JsonObject } from './FlagTypes';
+import {
+  FlagReason,
+  type ContextAttribute,
+  type EvaluationContext,
+  type FlagValue,
+  type JsonObject,
+} from './FlagTypes';
 
 /*
  * The in-memory provider: the test double AND the local-dev default (`createFlagClient()` with no
@@ -21,8 +27,7 @@ import { FlagReason, type ContextAttribute, type EvaluationContext, type FlagVal
  * `{ plan: 'pro' }` · `{ plan: ['pro', 'team'], region: 'eu' }` · `(ctx) => ctx.seats > 50`
  */
 export type StaticFlagCondition =
-  | Readonly<Record<string, ContextAttribute | readonly ContextAttribute[]>>
-  | ((context: EvaluationContext) => boolean);
+  Readonly<Record<string, ContextAttribute | readonly ContextAttribute[]>> | ((context: EvaluationContext) => boolean);
 
 /** Defines one targeting rule of a static flag — the value served to contexts matching `when`. */
 export interface StaticFlagRule<TValue extends FlagValue> {
@@ -63,7 +68,10 @@ export type StaticFlagEntry = boolean | string | number | JsonObject | StaticFla
 export type StaticFlags = Readonly<Record<string, StaticFlagEntry>>;
 
 /** Reports whether one context attribute satisfies one expected value — an expected array means "is one of", an actual array means "contains". */
-function attributeMatches(actual: ContextAttribute | undefined, expected: ContextAttribute | readonly ContextAttribute[]): boolean {
+function attributeMatches(
+  actual: ContextAttribute | undefined,
+  expected: ContextAttribute | readonly ContextAttribute[],
+): boolean {
   if (Array.isArray(expected)) {
     return (expected as readonly ContextAttribute[]).some((candidate) => attributeMatches(actual, candidate));
   }

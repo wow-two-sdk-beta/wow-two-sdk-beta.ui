@@ -19,10 +19,7 @@ export type ReturnToSource = URLSearchParams | string | LocationQuery;
  * const isAuthenticated = () => Boolean(localStorage.getItem('token'));
  * // { path: '/library', guard: requireAuth(isAuthenticated), lazy: … }
  */
-export function requireAuth(
-  isAuthenticated: () => boolean | Promise<boolean>,
-  loginPath = '/login',
-): RouteGuard {
+export function requireAuth(isAuthenticated: () => boolean | Promise<boolean>, loginPath = '/login'): RouteGuard {
   return async (context: GuardContext): Promise<GuardResult> => {
     if (await isAuthenticated()) return true;
     // vue-router hands guards a normalized location, not a `Request` — `fullPath` is already the

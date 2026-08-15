@@ -38,11 +38,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLTableSectionElement>('el');
 
 const classes = computed(() =>
-  cn(
-    'border-b border-border bg-muted/50',
-    HEAD_VARIANT[props.headVariant],
-    attrs.class as string | undefined,
-  ),
+  cn('border-b border-border bg-muted/50', HEAD_VARIANT[props.headVariant], attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -55,5 +51,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <thead ref="el" v-bind="rest" :class="classes"><slot /></thead>
+  <thead ref="el" v-bind="rest" :class="classes">
+    <slot />
+  </thead>
 </template>

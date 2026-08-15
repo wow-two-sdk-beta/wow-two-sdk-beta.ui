@@ -94,9 +94,7 @@ function linearRgbToSrgb(rgb: LinearRgb): Srgb {
 export function isInSrgbGamut(color: Oklch): boolean {
   const { r, g, b } = oklchToLinearRgb(color);
   const eps = 1e-4;
-  return (
-    r >= -eps && r <= 1 + eps && g >= -eps && g <= 1 + eps && b >= -eps && b <= 1 + eps
-  );
+  return r >= -eps && r <= 1 + eps && g >= -eps && g <= 1 + eps && b >= -eps && b <= 1 + eps;
 }
 
 /**

@@ -43,13 +43,7 @@ export interface ModalContentProps {
 <script setup lang="ts">
 import { computed, provide, useAttrs, useTemplateRef } from 'vue';
 import { cn, surfaceVariants } from '../../../foundation/utils';
-import {
-  DismissableLayer,
-  FocusScope,
-  Portal,
-  Presence,
-  ScrollLockProvider,
-} from '../../../foundation/primitives';
+import { DismissableLayer, FocusScope, Portal, Presence, ScrollLockProvider } from '../../../foundation/primitives';
 import Backdrop from '../backdrop/Backdrop.vue';
 import { overlayChromeContextKey } from '../OverlayChrome';
 import { useModalContext } from './Modal.vue';
@@ -124,12 +118,7 @@ defineExpose({ el });
            fade-out plays before it unmounts. React wrapped it in a second, outer
            `Presence`, whose injected `data-state` the inner one then overwrote —
            passing the state straight in is the same intent without the masking. -->
-      <Backdrop
-        v-if="!props.hideBackdrop"
-        is-inline
-        :is-open="isOpen"
-        :is-blurred="props.isBlurred"
-      />
+      <Backdrop v-if="!props.hideBackdrop" is-inline :is-open="isOpen" :is-blurred="props.isBlurred" />
       <!-- Outside-click dismissal lives on the centering wrapper (it covers the
            backdrop): a click on the padding (`.self`) = outside. The wrapper is the
            Presence-animated node — `Presence` injects `data-state` + `ref` onto it and

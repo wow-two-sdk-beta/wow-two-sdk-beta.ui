@@ -140,14 +140,11 @@ const gridRows: readonly GridRow[] = [{ id: 'r1', name: 'Ada' }];
 
 /* Wrappers for the compound parts — each renders the part inside the root whose `provide` it
    injects, so the part is smoke-tested in the shape it actually ships in. */
-const inCollapsible = (node: VNode): VNode =>
-  h(Collapsible, { defaultOpen: true }, () => node);
+const inCollapsible = (node: VNode): VNode => h(Collapsible, { defaultOpen: true }, () => node);
 
-const inAccordion = (node: VNode): VNode =>
-  h(Accordion, { defaultValue: 'item-1' }, () => node);
+const inAccordion = (node: VNode): VNode => h(Accordion, { defaultValue: 'item-1' }, () => node);
 
-const inAccordionItem = (node: VNode): VNode =>
-  inAccordion(h(AccordionItem, { value: 'item-1' }, () => node));
+const inAccordionItem = (node: VNode): VNode => inAccordion(h(AccordionItem, { value: 'item-1' }, () => node));
 
 const inTabs = (node: VNode): VNode => h(Tabs, { defaultValue: 'tab-1' }, () => node);
 const inTabsList = (node: VNode): VNode => inTabs(h(TabsList, null, () => node));
@@ -155,16 +152,13 @@ const inTabsList = (node: VNode): VNode => inTabs(h(TabsList, null, () => node))
 const inTree = (node: VNode): VNode => h(Tree, null, () => node);
 /* TreeGroup renders its children inside `Presence :is-present="isExpanded"`, so the branch has
    to start expanded for the slot to exist at all. */
-const inExpandedTree = (node: VNode): VNode =>
-  h(Tree, { defaultExpanded: ['group-1'] }, () => node);
+const inExpandedTree = (node: VNode): VNode => h(Tree, { defaultExpanded: ['group-1'] }, () => node);
 
 const inCarousel = (node: VNode): VNode => h(Carousel, null, () => node);
-const inCarouselViewport = (node: VNode): VNode =>
-  inCarousel(h(CarouselViewport, null, () => node));
+const inCarouselViewport = (node: VNode): VNode => inCarousel(h(CarouselViewport, null, () => node));
 
 const inSortable = (node: VNode): VNode => h(Sortable, null, () => node);
-const inSortableItem = (node: VNode): VNode =>
-  inSortable(h(SortableItem, { index: 0 }, () => node));
+const inSortableItem = (node: VNode): VNode => inSortable(h(SortableItem, { index: 0 }, () => node));
 
 /**
  * Every component `@wow-two-beta/ui-vue/presentation/display` exports, as smoke cases.
@@ -224,10 +218,15 @@ export const displayCases: readonly SmokeCase[] = [
   smokeCase('TimelineTitle', TimelineTitle, {}, { slot: true }),
   smokeCase('TimelineDescription', TimelineDescription, {}, { slot: true }),
   smokeCase('Tree', Tree, {}, { slot: true }),
-  smokeCase('TreeGroup', TreeGroup, { value: 'group-1', label: 'Group' }, {
-    slot: true,
-    wrap: inExpandedTree,
-  }),
+  smokeCase(
+    'TreeGroup',
+    TreeGroup,
+    { value: 'group-1', label: 'Group' },
+    {
+      slot: true,
+      wrap: inExpandedTree,
+    },
+  ),
   smokeCase('TreeItem', TreeItem, { value: 'item-1' }, { slot: true, wrap: inTree }),
   smokeCase('Table', Table, {}, { slot: true }),
   smokeCase('TableHead', TableHead, {}, { slot: true }),

@@ -18,12 +18,7 @@ const signedOutStrategy = {
  * every route under it fails rather than one component.
  */
 export const providersCases: readonly SmokeCase[] = [
-  smokeCase(
-    'AuthProvider',
-    AuthProvider,
-    { strategy: signedOutStrategy, resolveOnMount: false },
-    { slot: true },
-  ),
+  smokeCase('AuthProvider', AuthProvider, { strategy: signedOutStrategy, resolveOnMount: false }, { slot: true }),
   smokeCase('FlagsProvider', FlagsProvider, {}, { slot: true }),
   smokeCase('ProgressProvider', ProgressProvider, {}, { slot: true }),
 ];

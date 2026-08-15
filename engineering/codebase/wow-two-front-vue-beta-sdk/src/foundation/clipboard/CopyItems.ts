@@ -144,8 +144,7 @@ export async function copyBlob(
     }
 
     const ownType: unknown = (blob as { type?: unknown }).type;
-    const type =
-      mimeType ?? (typeof ownType === 'string' && ownType.length > 0 ? ownType : FallbackMimeType);
+    const type = mimeType ?? (typeof ownType === 'string' && ownType.length > 0 ? ownType : FallbackMimeType);
 
     return await copyItems({ [type]: blob }, options);
   } catch (error) {

@@ -80,11 +80,7 @@ function nativeResultToFieldErrors(
 }
 
 function isThenable(value: unknown): value is PromiseLike<unknown> {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    typeof (value as { then?: unknown }).then === 'function'
-  );
+  return value !== null && typeof value === 'object' && typeof (value as { then?: unknown }).then === 'function';
 }
 
 /**
@@ -125,9 +121,7 @@ interface MessageOptions {
  * adapter author wanting the catalogue wires this once and passes the result to `runStandardSchema` and
  * `resolveSubmitFailure`.
  */
-export function createOptionsMessageResolver(
-  getOptions: () => MessageOptions,
-): () => ResolveValidationMessage {
+export function createOptionsMessageResolver(getOptions: () => MessageOptions): () => ResolveValidationMessage {
   let resolver: ResolveValidationMessage | null = null;
   let lastMessages: ValidationMessageCatalogue | undefined;
   let lastLabels: Readonly<Record<string, string>> | undefined;

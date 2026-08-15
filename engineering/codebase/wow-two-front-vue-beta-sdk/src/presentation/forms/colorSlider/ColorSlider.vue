@@ -199,11 +199,7 @@ const isAlpha = computed(() => props.channel === ColorChannel.Alpha);
 
 /* val >= 360 pins the thumb to the right edge — clampHue would wrap the committed max back to 0. */
 const ratio = computed(() =>
-  props.channel === ColorChannel.Hue
-    ? val.value >= 360
-      ? 1
-      : clampHue(val.value) / 360
-    : clamp01(val.value),
+  props.channel === ColorChannel.Hue ? (val.value >= 360 ? 1 : clampHue(val.value) / 360) : clamp01(val.value),
 );
 
 const trackStyle = computed<StyleValue>(() => ({
@@ -216,9 +212,7 @@ const thumbStyle = computed<StyleValue>(() => ({ left: `${ratio.value * 100}%` }
 const checkerboardStyle = CHECKERBOARD as StyleValue;
 
 const controlId = computed(() => props.id ?? ctx?.id);
-const finalAriaLabel = computed(
-  () => ariaLabel.value ?? (labelledBy.value ? undefined : `${props.channel} slider`),
-);
+const finalAriaLabel = computed(() => ariaLabel.value ?? (labelledBy.value ? undefined : `${props.channel} slider`));
 const valueNow = computed(() => Math.round(val.value * 100) / 100);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
@@ -230,9 +224,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const rootClass = computed(() =>
-  cn('relative inline-flex w-full select-none items-center', attrs.class as ClassValue),
-);
+const rootClass = computed(() => cn('relative inline-flex w-full select-none items-center', attrs.class as ClassValue));
 
 const innerClass = computed(() =>
   cn(

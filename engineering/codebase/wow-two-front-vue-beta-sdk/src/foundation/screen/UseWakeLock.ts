@@ -13,15 +13,7 @@
 // later flip, and both funnel through the same `apply` so `active: true → false` releases through exactly the
 // same code path as a disposal, with no second teardown to keep in sync.
 
-import {
-  onMounted,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 import { holdWakeLock, IdleWakeLockState } from './WakeLock';
 import type { WakeLockHold, WakeLockKind, WakeLockState } from './WakeLock';

@@ -68,9 +68,7 @@ watch(
 );
 onBeforeUnmount(() => ctx.unregisterItem(props.itemKey));
 
-const matchesQuery = computed(
-  () => !ctx.query || itemText.value.toLowerCase().includes(ctx.query.toLowerCase()),
-);
+const matchesQuery = computed(() => !ctx.query || itemText.value.toLowerCase().includes(ctx.query.toLowerCase()));
 </script>
 
 <template>

@@ -40,9 +40,7 @@ export type ScreenResult = { readonly status: 'ok' } | ScreenFailure;
  * The failure legs are identical to {@link ScreenResult}'s, so `result.status === 'ok'` narrows to the value and
  * every other branch reads the same as it does elsewhere in the slice.
  */
-export type ScreenValueResult<TValue> =
-  | { readonly status: 'ok'; readonly value: TValue }
-  | ScreenFailure;
+export type ScreenValueResult<TValue> = { readonly status: 'ok'; readonly value: TValue } | ScreenFailure;
 
 /** The `status` discriminant of a {@link ScreenResult} — for a consumer's own status→copy map. */
 export type ScreenStatus = ScreenResult['status'];

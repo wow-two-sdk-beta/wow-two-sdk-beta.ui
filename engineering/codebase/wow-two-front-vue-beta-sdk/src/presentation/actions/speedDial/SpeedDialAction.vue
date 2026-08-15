@@ -119,14 +119,7 @@ defineExpose({ el: root });
     >
       <slot name="tooltip"><TooltipProp v-if="tooltip !== undefined" /></slot>
     </span>
-    <button
-      ref="root"
-      v-bind="passthroughAttrs"
-      :type="type"
-      role="menuitem"
-      :class="buttonClass"
-      @click="handleClick"
-    >
+    <button ref="root" v-bind="passthroughAttrs" :type="type" role="menuitem" :class="buttonClass" @click="handleClick">
       <!-- The default slot is the fallback, not a second API: React typed `children` away,
            so a Vue caller writing `<SpeedDialAction><Pencil /></SpeedDialAction>` — the
            idiomatic shape — got a silently empty button. Precedence stays `icon` slot →

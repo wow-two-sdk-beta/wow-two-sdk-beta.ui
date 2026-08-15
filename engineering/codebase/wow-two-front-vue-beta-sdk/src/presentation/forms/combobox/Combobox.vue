@@ -41,11 +41,7 @@ export interface ComboboxProps {
 <script setup lang="ts">
 import { computed, provide, ref, shallowRef } from 'vue';
 import { useControlled, useId } from '../../../foundation/hooks';
-import {
-  comboboxContextKey,
-  type ComboboxContextValue,
-  type ComboboxItemEntry,
-} from './ComboboxContext';
+import { comboboxContextKey, type ComboboxContextValue, type ComboboxItemEntry } from './ComboboxContext';
 
 /**
  * State + a11y-id owner for a Combobox tree. Renders its children plus the hidden form input

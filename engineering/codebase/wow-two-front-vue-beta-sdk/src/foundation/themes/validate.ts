@@ -59,9 +59,7 @@ function checkMode(set: TokenSet, mode: ColorMode): ReadonlyArray<string> {
   for (const { fg, bg, min } of contrastPairs()) {
     const ratio = contrastRatioCss(set[fg], set[bg]);
     if (ratio + 1e-3 < min) {
-      failures.push(
-        `${mode}: ${fg} on ${bg} = ${ratio.toFixed(2)} (need ${min.toFixed(1)})`,
-      );
+      failures.push(`${mode}: ${fg} on ${bg} = ${ratio.toFixed(2)} (need ${min.toFixed(1)})`);
     }
   }
   return failures;
@@ -72,11 +70,6 @@ function checkMode(set: TokenSet, mode: ColorMode): ReadonlyArray<string> {
  * `contrastAA` is true only when both modes pass every pair.
  */
 export function validateTheme(theme: Pick<Theme, 'light' | 'dark'>): ThemeMeta {
-  const failures = [
-    ...checkMode(theme.light, ColorMode.Light),
-    ...checkMode(theme.dark, ColorMode.Dark),
-  ];
-  return failures.length === 0
-    ? { contrastAA: true }
-    : { contrastAA: false, failures };
+  const failures = [...checkMode(theme.light, ColorMode.Light), ...checkMode(theme.dark, ColorMode.Dark)];
+  return failures.length === 0 ? { contrastAA: true } : { contrastAA: false, failures };
 }

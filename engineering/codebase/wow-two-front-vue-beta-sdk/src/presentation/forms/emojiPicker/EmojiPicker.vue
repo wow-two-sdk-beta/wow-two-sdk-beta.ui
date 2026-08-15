@@ -1,11 +1,7 @@
 <script lang="ts">
 import type { EmojiCatalogEntry } from '../../../domain/emoji';
 import type { StorageBroker } from '../../../foundation/storage';
-import type {
-  CategoryNavVariant,
-  EmojiPickerSizeInput,
-  EmojiTileShape,
-} from './EmojiPicker.variants';
+import type { CategoryNavVariant, EmojiPickerSizeInput, EmojiTileShape } from './EmojiPicker.variants';
 
 /** Defines props for the emoji picker. */
 export interface EmojiPickerProps {
@@ -89,9 +85,7 @@ const emit = defineEmits<{
   'value-change': [entry: EmojiCatalogEntry | null];
 }>();
 
-const currentValue = computed(() =>
-  props.value !== undefined ? props.value : (props.modelValue ?? null),
-);
+const currentValue = computed(() => (props.value !== undefined ? props.value : (props.modelValue ?? null)));
 
 function onChange(entry: EmojiCatalogEntry | null): void {
   emit('update:modelValue', entry);
@@ -105,13 +99,9 @@ const picker = useEmojiPicker({
   showFirstCategoryWhenRecentsEmpty: () => props.showFirstCategoryWhenRecentsEmpty,
 });
 
-const searchSize = computed(() =>
-  resolveElementSize(props.size, PickerElement.Search, DefaultPickerSize),
-);
+const searchSize = computed(() => resolveElementSize(props.size, PickerElement.Search, DefaultPickerSize));
 const navSize = computed(() => resolveElementSize(props.size, PickerElement.Nav, DefaultPickerSize));
-const tileSize = computed(() =>
-  resolveElementSize(props.size, PickerElement.Tile, DefaultPickerSize),
-);
+const tileSize = computed(() => resolveElementSize(props.size, PickerElement.Tile, DefaultPickerSize));
 /* The strip icon is a single dimension → px straight off the size object (undefined for a
    uniform scale → CategoryNav's nav-derived default). */
 const iconSize = computed(() => (typeof props.size === 'object' ? props.size.icon : undefined));
@@ -121,9 +111,7 @@ const isNoneSelected = computed(() => currentValue.value === null);
 
 const emptyLabel = computed(() => {
   if (picker.showSearch.value) return EmojiEmptyLabels.search;
-  return picker.activeCategory.value === RecentCategory
-    ? EmojiEmptyLabels.recents
-    : EmojiEmptyLabels.category;
+  return picker.activeCategory.value === RecentCategory ? EmojiEmptyLabels.recents : EmojiEmptyLabels.category;
 });
 </script>
 

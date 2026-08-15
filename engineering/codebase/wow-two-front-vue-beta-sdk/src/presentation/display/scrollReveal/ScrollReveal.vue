@@ -137,8 +137,7 @@ const styles = computed(() =>
   normalizeStyle([
     {
       opacity: revealed.value || reducedMotion.value ? 1 : 0,
-      transform:
-        revealed.value || reducedMotion.value ? 'none' : HIDDEN_TRANSFORMS[props.effect],
+      transform: revealed.value || reducedMotion.value ? 'none' : HIDDEN_TRANSFORMS[props.effect],
       transition: reducedMotion.value
         ? undefined
         : `opacity ${props.duration}ms ease-out ${props.delay}ms, transform ${props.duration}ms ease-out ${props.delay}ms`,

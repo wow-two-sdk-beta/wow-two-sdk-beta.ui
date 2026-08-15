@@ -17,11 +17,7 @@ function range(start: number, end: number): ReadonlyArray<number> {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
 
-function buildPages(
-  total: number,
-  page: number,
-  siblings: number,
-): ReadonlyArray<number | 'ellipsis'> {
+function buildPages(total: number, page: number, siblings: number): ReadonlyArray<number | 'ellipsis'> {
   if (total <= 1) return [1];
   const left = Math.max(2, page - siblings);
   const right = Math.min(total - 1, page + siblings);
@@ -73,9 +69,7 @@ function go(page: number): void {
   emit('page-change', next);
 }
 
-const classes = computed(() =>
-  cn('inline-flex items-center gap-1', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('inline-flex items-center gap-1', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -114,12 +108,7 @@ defineExpose({ el });
         :key="p"
         type="button"
         :aria-current="p === props.page ? 'page' : undefined"
-        :class="
-          cn(
-            BASE_BTN,
-            p === props.page ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted',
-          )
-        "
+        :class="cn(BASE_BTN, p === props.page ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted')"
         @click="go(p)"
       >
         {{ p }}

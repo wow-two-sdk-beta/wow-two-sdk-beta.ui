@@ -19,8 +19,7 @@ export interface ContextMenuContextValue {
   restoreFocus: { current: HTMLElement | null };
 }
 
-export const contextMenuContextKey: InjectionKey<ContextMenuContextValue> =
-  Symbol('wow-two.contextMenu');
+export const contextMenuContextKey: InjectionKey<ContextMenuContextValue> = Symbol('wow-two.contextMenu');
 
 export function useContextMenuContext(): ContextMenuContextValue {
   const context = inject(contextMenuContextKey, null);

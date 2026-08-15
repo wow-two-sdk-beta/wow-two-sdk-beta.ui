@@ -42,7 +42,6 @@ const inResizablePanels = (node: VNode): VNode => h(ResizablePanels, null, () =>
 const inAppShell = (node: VNode): VNode => h(AppShell, null, () => node);
 const inAppShellMain = (node: VNode): VNode => inAppShell(h(AppShellMain, null, () => node));
 
-
 /**
  * Every component `@wow-two-beta/ui-vue/presentation/layout` exports, as smoke cases.
  * Imported through the public barrel on purpose — a component missing from `index.ts` fails

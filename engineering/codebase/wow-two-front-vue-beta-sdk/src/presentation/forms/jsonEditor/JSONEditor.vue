@@ -40,11 +40,7 @@ import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives';
-import {
-  JSONEditorKey,
-  JSONEditorMode as JSONEditorModeValue,
-  type JSONEditorContextValue,
-} from './JSONEditorContext';
+import { JSONEditorKey, JSONEditorMode as JSONEditorModeValue, type JSONEditorContextValue } from './JSONEditorContext';
 import { setAtPath, type JsonPath } from './JSONEditorHelpers';
 import JSONEditorTreeView from './JSONEditorTreeView.vue';
 import JSONEditorTextView from './JSONEditorTextView.vue';
@@ -143,9 +139,7 @@ const modes = Object.values(JSONEditorModeValue);
 function modeButtonClass(m: JSONEditorMode): string {
   return cn(
     'inline-flex h-6 items-center rounded px-2 text-xs font-medium transition-colors',
-    renderMode.value === m
-      ? 'bg-primary text-primary-foreground'
-      : 'text-muted-foreground hover:text-foreground',
+    renderMode.value === m ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
   );
 }
 

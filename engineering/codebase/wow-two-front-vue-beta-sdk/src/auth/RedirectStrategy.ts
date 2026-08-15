@@ -2,7 +2,10 @@ import type { AuthStrategy } from './AuthSession';
 import { createCookieStrategy, type CreateCookieStrategyOptions } from './CookieStrategy';
 
 /** Defines the options for {@link createRedirectStrategy}. */
-export interface CreateRedirectStrategyOptions<TUser> extends Omit<CreateCookieStrategyOptions<TUser, never>, 'signIn'> {
+export interface CreateRedirectStrategyOptions<TUser> extends Omit<
+  CreateCookieStrategyOptions<TUser, never>,
+  'signIn'
+> {
   /** The sign-in challenge endpoint the browser navigates to. Default `/api/identity/sign-in` — the backend SDK identity baseline. */
   readonly signInPath?: string;
 
@@ -38,11 +41,20 @@ function currentPath(): string {
  * but `signIn` itself is a browser-only operation, and says so with a real message instead of a
  * bare `ReferenceError` if it is ever reached on the server.
  */
-export function createRedirectStrategy<TUser>(options: CreateRedirectStrategyOptions<TUser>): AuthStrategy<TUser, string | undefined> {
-  const { signInPath = '/api/identity/sign-in', returnUrlParam = 'returnUrl', buildSignInUrl, navigate, ...cookieOptions } = options;
+export function createRedirectStrategy<TUser>(
+  options: CreateRedirectStrategyOptions<TUser>,
+): AuthStrategy<TUser, string | undefined> {
+  const {
+    signInPath = '/api/identity/sign-in',
+    returnUrlParam = 'returnUrl',
+    buildSignInUrl,
+    navigate,
+    ...cookieOptions
+  } = options;
 
   const base = createCookieStrategy<TUser, never>(cookieOptions);
-  const buildUrl = buildSignInUrl ?? ((returnUrl: string) => `${signInPath}?${returnUrlParam}=${encodeURIComponent(returnUrl)}`);
+  const buildUrl =
+    buildSignInUrl ?? ((returnUrl: string) => `${signInPath}?${returnUrlParam}=${encodeURIComponent(returnUrl)}`);
   const doNavigate =
     navigate ??
     ((url: string) => {
@@ -50,7 +62,9 @@ export function createRedirectStrategy<TUser>(options: CreateRedirectStrategyOpt
       // from a render rather than a user action — fail loudly, since silently dropping a sign-in
       // leaves the session stuck with no signal at all. Pass `navigate` to drive it in a test.
       if (typeof window === 'undefined') {
-        throw new Error('createRedirectStrategy: signIn needs a browser to navigate. Pass `navigate` to drive it elsewhere.');
+        throw new Error(
+          'createRedirectStrategy: signIn needs a browser to navigate. Pass `navigate` to drive it elsewhere.',
+        );
       }
       window.location.assign(url);
     });

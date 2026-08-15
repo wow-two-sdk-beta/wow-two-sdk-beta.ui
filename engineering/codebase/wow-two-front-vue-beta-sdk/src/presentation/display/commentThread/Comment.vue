@@ -137,10 +137,7 @@ defineExpose({ el });
         </span>
       </div>
       <div class="mt-1 text-sm text-foreground"><slot /></div>
-      <div
-        v-if="$slots.actions"
-        class="mt-1 flex items-center gap-2 text-xs text-muted-foreground"
-      >
+      <div v-if="$slots.actions" class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
         <slot name="actions" />
       </div>
 

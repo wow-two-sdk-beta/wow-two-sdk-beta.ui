@@ -22,13 +22,7 @@
 // visits each value exactly once and rejects the object-valued one.
 
 import { Validator, type Infer } from './Validator';
-import {
-  describeType,
-  invalid,
-  valid,
-  type ValidationIssue,
-  type ValidationResult,
-} from './ValidationResult';
+import { describeType, invalid, valid, type ValidationIssue, type ValidationResult } from './ValidationResult';
 
 /** A map of property name to the validator for that property. */
 export type ObjectShape = Readonly<Record<string, Validator<unknown>>>;
@@ -108,17 +102,12 @@ function defineOwn(target: Record<string, unknown>, key: string, value: unknown)
  * output carries only declared properties, so a validated payload cannot smuggle extra fields past the
  * boundary into storage or a log.
  */
-export function object<TShape extends ObjectShape>(
-  shape: TShape,
-  message?: string,
-): Validator<InferObject<TShape>> {
+export function object<TShape extends ObjectShape>(shape: TShape, message?: string): Validator<InferObject<TShape>> {
   const entries = Object.entries(shape);
 
   return new Validator<InferObject<TShape>>('object', (value, path) => {
     if (!isRecord(value)) {
-      return invalid([
-        { path, message: message ?? `expected object, received ${describeType(value)}`, code: 'type' },
-      ]);
+      return invalid([{ path, message: message ?? `expected object, received ${describeType(value)}`, code: 'type' }]);
     }
 
     const output: Record<string, unknown> = {};
@@ -144,9 +133,7 @@ export function object<TShape extends ObjectShape>(
 export function array<TItem>(item: Validator<TItem>, message?: string): ArrayValidator<TItem> {
   return new ArrayValidator<TItem>(`${item.typeName}[]`, (value, path) => {
     if (!Array.isArray(value)) {
-      return invalid([
-        { path, message: message ?? `expected array, received ${describeType(value)}`, code: 'type' },
-      ]);
+      return invalid([{ path, message: message ?? `expected array, received ${describeType(value)}`, code: 'type' }]);
     }
 
     const items: readonly unknown[] = value;
@@ -168,15 +155,10 @@ export function array<TItem>(item: Validator<TItem>, message?: string): ArrayVal
  * Keys are not validated — only own enumerable string keys are visited, which is what `Object.entries`
  * gives and what a JSON payload can carry.
  */
-export function record<TValue>(
-  value: Validator<TValue>,
-  message?: string,
-): Validator<Record<string, TValue>> {
+export function record<TValue>(value: Validator<TValue>, message?: string): Validator<Record<string, TValue>> {
   return new Validator<Record<string, TValue>>(`record<${value.typeName}>`, (input, path) => {
     if (!isRecord(input)) {
-      return invalid([
-        { path, message: message ?? `expected object, received ${describeType(input)}`, code: 'type' },
-      ]);
+      return invalid([{ path, message: message ?? `expected object, received ${describeType(input)}`, code: 'type' }]);
     }
 
     const output: Record<string, TValue> = {};
@@ -233,9 +215,7 @@ export function tuple<const TValidators extends readonly Validator<unknown>[]>(
 
   return new Validator<InferTuple<TValidators>>(label, (value, path) => {
     if (!Array.isArray(value)) {
-      return invalid([
-        { path, message: message ?? `expected array, received ${describeType(value)}`, code: 'type' },
-      ]);
+      return invalid([{ path, message: message ?? `expected array, received ${describeType(value)}`, code: 'type' }]);
     }
 
     const items: readonly unknown[] = value;

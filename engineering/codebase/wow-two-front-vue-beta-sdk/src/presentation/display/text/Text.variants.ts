@@ -100,22 +100,10 @@ export type TextVariants = VariantProps<typeof textVariants>;
 
 /* Compile-time lock: enum values ≡ tv size/weight/color/align value-sets (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertTextSize: AssertExact<
-  Size,
-  NonNullable<VariantProps<typeof textVariants>['size']>
-> = true;
-const _assertTextWeight: AssertExact<
-  TextWeight,
-  NonNullable<VariantProps<typeof textVariants>['weight']>
-> = true;
-const _assertTextColor: AssertExact<
-  TextColor,
-  NonNullable<VariantProps<typeof textVariants>['color']>
-> = true;
-const _assertTextAlign: AssertExact<
-  TextAlign,
-  NonNullable<VariantProps<typeof textVariants>['align']>
-> = true;
+const _assertTextSize: AssertExact<Size, NonNullable<VariantProps<typeof textVariants>['size']>> = true;
+const _assertTextWeight: AssertExact<TextWeight, NonNullable<VariantProps<typeof textVariants>['weight']>> = true;
+const _assertTextColor: AssertExact<TextColor, NonNullable<VariantProps<typeof textVariants>['color']>> = true;
+const _assertTextAlign: AssertExact<TextAlign, NonNullable<VariantProps<typeof textVariants>['align']>> = true;
 void _assertTextSize;
 void _assertTextWeight;
 void _assertTextColor;

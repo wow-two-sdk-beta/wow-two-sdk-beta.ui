@@ -125,10 +125,7 @@ function bindToLatest(command: Command, latest: MaybeRefOrGetter<readonly Comman
  *
  * Pass `registry` to target a specific registry; otherwise the ambient one is used (and a missing provider throws).
  */
-export function useRegisterCommands(
-  commands: MaybeRefOrGetter<readonly Command[]>,
-  registry?: CommandRegistry,
-): void {
+export function useRegisterCommands(commands: MaybeRefOrGetter<readonly Command[]>, registry?: CommandRegistry): void {
   const target = registry ?? inject(CommandsKey, undefined);
   if (target === undefined) {
     throw new Error('useRegisterCommands must be used inside a <CommandsProvider>, or given an explicit registry');
@@ -140,9 +137,7 @@ export function useRegisterCommands(
   watch(
     signature,
     (_next, _previous, onCleanup) => {
-      const dispose = target.registerAll(
-        toValue(commands).map((command) => bindToLatest(command, commands)),
-      );
+      const dispose = target.registerAll(toValue(commands).map((command) => bindToLatest(command, commands)));
       onCleanup(dispose);
     },
     { immediate: true },

@@ -59,13 +59,7 @@ export interface MenuProps {
 <script setup lang="ts">
 import { computed, provide, useAttrs } from 'vue';
 import { cn, surfaceVariants } from '../../../foundation/utils';
-import {
-  AnchoredPositioner,
-  DismissableLayer,
-  FocusScope,
-  Portal,
-  Presence,
-} from '../../../foundation/primitives';
+import { AnchoredPositioner, DismissableLayer, FocusScope, Portal, Presence } from '../../../foundation/primitives';
 import { MenuKey, type MenuItemEntry } from './MenuContext';
 import { menuVariants } from './Menu.variants';
 
@@ -102,9 +96,7 @@ const emit = defineEmits<{
 
 const attrs = useAttrs();
 
-const isMenuOpen = computed(() =>
-  props.open !== undefined ? props.open : (props.isOpen ?? false),
-);
+const isMenuOpen = computed(() => (props.open !== undefined ? props.open : (props.isOpen ?? false)));
 
 /** The live item registry — a plain array, not reactive: the ordering is read imperatively. */
 const items: Array<MenuItemEntry> = [];
@@ -170,12 +162,7 @@ function handleKeydown(event: KeyboardEvent): void {
        animation ends. `FocusScope as-child` relays Presence's cloned `ref` +
        `data-state` down onto the DismissableLayer's div, which *is* the surface. -->
   <Portal>
-    <AnchoredPositioner
-      :anchor="props.anchor"
-      :placement="props.placement"
-      :offset="props.offset"
-      class="z-dropdown"
-    >
+    <AnchoredPositioner :anchor="props.anchor" :placement="props.placement" :offset="props.offset" class="z-dropdown">
       <Presence :is-present="isMenuOpen">
         <FocusScope as-child trapped loop>
           <DismissableLayer

@@ -56,10 +56,7 @@ const groups = computed<Array<AgendaGroup>>(() => {
 });
 
 function groupHeadingClass(day: Temporal.PlainDate): string {
-  return cn(
-    'mb-2 text-xs font-semibold uppercase text-muted-foreground',
-    isToday(day) && 'text-primary',
-  );
+  return cn('mb-2 text-xs font-semibold uppercase text-muted-foreground', isToday(day) && 'text-primary');
 }
 
 function groupLabel(day: Temporal.PlainDate): string {
@@ -71,16 +68,12 @@ function dotStyle(e: EventCalendarEvent): StyleValue {
 }
 
 function timeLabel(e: EventCalendarEvent): string {
-  return e.isAllDay
-    ? 'All day'
-    : `${formatZonedTime(e.start)} – ${formatZonedTime(e.end)}`;
+  return e.isAllDay ? 'All day' : `${formatZonedTime(e.start)} – ${formatZonedTime(e.end)}`;
 }
 </script>
 
 <template>
-  <div v-if="groups.length === 0" class="p-6 text-center text-sm text-muted-foreground">
-    No upcoming events.
-  </div>
+  <div v-if="groups.length === 0" class="p-6 text-center text-sm text-muted-foreground">No upcoming events.</div>
   <ul v-else class="divide-y divide-border">
     <li v-for="group in groups" :key="group.key" class="px-4 py-3">
       <div :class="groupHeadingClass(group.day)">{{ groupLabel(group.day) }}</div>
@@ -91,11 +84,7 @@ function timeLabel(e: EventCalendarEvent): string {
             class="flex w-full items-start gap-3 rounded-md p-2 text-left transition-colors hover:bg-muted"
             @click="emit('event-click', e)"
           >
-            <span
-              aria-hidden="true"
-              class="mt-1 h-2 w-2 shrink-0 rounded-full"
-              :style="dotStyle(e)"
-            />
+            <span aria-hidden="true" class="mt-1 h-2 w-2 shrink-0 rounded-full" :style="dotStyle(e)" />
             <span class="flex-1">
               <span class="block text-sm font-medium">{{ e.title ?? '(no title)' }}</span>
               <span class="block text-xs text-muted-foreground tabular-nums">

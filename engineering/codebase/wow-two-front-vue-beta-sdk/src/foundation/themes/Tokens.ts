@@ -11,14 +11,7 @@
  * ------------------------------------------------------------------------- */
 
 /** The six tone families that each carry base / -foreground / -soft / -soft-foreground. */
-export const TONE_FAMILIES = [
-  'primary',
-  'accent',
-  'destructive',
-  'info',
-  'success',
-  'warning',
-] as const;
+export const TONE_FAMILIES = ['primary', 'accent', 'destructive', 'info', 'success', 'warning'] as const;
 
 export type ToneFamilyName = (typeof TONE_FAMILIES)[number];
 
@@ -45,9 +38,7 @@ export const SURFACE_TOKENS = [
 type ToneSlotSuffix = '' | '-foreground' | '-soft' | '-soft-foreground';
 
 /** A single tone family expanded to its four token keys, e.g. `primary | primary-foreground | …`. */
-type ToneFamilyTokens<F extends string> = F extends string
-  ? `${F}${ToneSlotSuffix}`
-  : never;
+type ToneFamilyTokens<F extends string> = F extends string ? `${F}${ToneSlotSuffix}` : never;
 
 /**
  * Every semantic token key (the part after `--color-`).
@@ -55,9 +46,7 @@ type ToneFamilyTokens<F extends string> = F extends string
  * = surface/chrome tokens ∪ (each tone family × {base,-foreground,-soft,-soft-foreground}).
  * 15 surface + 6×4 tone = 39 keys total.
  */
-export type SemanticToken =
-  | (typeof SURFACE_TOKENS)[number]
-  | ToneFamilyTokens<ToneFamilyName>;
+export type SemanticToken = (typeof SURFACE_TOKENS)[number] | ToneFamilyTokens<ToneFamilyName>;
 
 /** A complete set of color values — one CSS color string per semantic token. */
 export type TokenSet = Record<SemanticToken, string>;
@@ -84,18 +73,11 @@ export interface ToneSlots {
  */
 export const SEMANTIC_TOKENS: ReadonlyArray<SemanticToken> = [
   ...SURFACE_TOKENS,
-  ...TONE_FAMILIES.flatMap(
-    (f) =>
-      [f, `${f}-foreground`, `${f}-soft`, `${f}-soft-foreground`] as SemanticToken[],
-  ),
+  ...TONE_FAMILIES.flatMap((f) => [f, `${f}-foreground`, `${f}-soft`, `${f}-soft-foreground`] as SemanticToken[]),
 ];
 
 /** Write a tone family's four slots into a partial token set under the family's keys. */
-export function applyToneSlots(
-  target: Partial<TokenSet>,
-  family: ToneFamilyName,
-  slots: ToneSlots,
-): void {
+export function applyToneSlots(target: Partial<TokenSet>, family: ToneFamilyName, slots: ToneSlots): void {
   target[family] = slots.base;
   target[`${family}-foreground`] = slots.foreground;
   target[`${family}-soft`] = slots.soft;

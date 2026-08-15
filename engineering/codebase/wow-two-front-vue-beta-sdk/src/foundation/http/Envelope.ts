@@ -33,7 +33,8 @@ export interface ResponseEnvelope {
  */
 export const wowTwoEnvelope: ResponseEnvelope = {
   unwrap: (parsed) => (isJsonObject(parsed) && 'data' in parsed ? parsed['data'] : parsed),
-  toError: (parsed, response) => new ApiError(response.status, isJsonObject(parsed) ? (parsed as ProblemDetails) : null),
+  toError: (parsed, response) =>
+    new ApiError(response.status, isJsonObject(parsed) ? (parsed as ProblemDetails) : null),
 };
 
 /**

@@ -39,11 +39,7 @@ const registeredLabel = computed<string | number>(() => props.label ?? props.val
 /* Registers only — never unregisters; items unmount on popover close and the tags still
    need the labels. `immediate` because the first registration has to happen on mount, and
    nothing in this watcher touches the DOM. */
-watch(
-  [() => props.value, registeredLabel],
-  ([value, label]) => ctx.registerLabel(value, label),
-  { immediate: true },
-);
+watch([() => props.value, registeredLabel], ([value, label]) => ctx.registerLabel(value, label), { immediate: true });
 </script>
 
 <template>

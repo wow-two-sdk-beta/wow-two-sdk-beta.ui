@@ -78,12 +78,4 @@ export {
   issuePathToString,
   resultToFieldErrors,
 } from './SchemaValidation';
-export {
-  parsePath,
-  formatPath,
-  getPath,
-  setPath,
-  hasPath,
-  type PathKey,
-  type ArrayOperation,
-} from './Paths';
+export { parsePath, formatPath, getPath, setPath, hasPath, type PathKey, type ArrayOperation } from './Paths';

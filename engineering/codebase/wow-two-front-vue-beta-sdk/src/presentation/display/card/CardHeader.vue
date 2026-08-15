@@ -17,9 +17,7 @@ defineSlots<{ default(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const classes = computed(() =>
-  cn('flex flex-col gap-1 p-4 pb-2', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('flex flex-col gap-1 p-4 pb-2', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

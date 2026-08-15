@@ -50,13 +50,9 @@ const attrs = useAttrs();
 const slots = useSlots();
 const el = useTemplateRef<InstanceType<typeof Card>>('el');
 
-const hasBody = computed(
-  () => props.description !== undefined || !!slots.description || !!slots.default,
-);
+const hasBody = computed(() => props.description !== undefined || !!slots.description || !!slots.default);
 
-const classes = computed(() =>
-  cn('relative overflow-hidden bg-card p-6', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('relative overflow-hidden bg-card p-6', attrs.class as string | undefined));
 
 const headingClasses = computed(() => cn('tracking-normal', !!slots.icon && 'mt-4'));
 
@@ -72,10 +68,7 @@ defineExpose({ el });
 <template>
   <Card ref="el" variant="outline" radius="xl" :elevation="0" v-bind="rest" :class="classes">
     <span class="absolute right-4 top-3 text-5xl font-bold text-foreground/5">{{ props.step }}</span>
-    <span
-      v-if="$slots.icon"
-      class="grid size-11 place-items-center rounded-lg bg-primary-soft text-primary"
-    >
+    <span v-if="$slots.icon" class="grid size-11 place-items-center rounded-lg bg-primary-soft text-primary">
       <slot name="icon" />
     </span>
     <Heading :level="3" size="md" :class="headingClasses">

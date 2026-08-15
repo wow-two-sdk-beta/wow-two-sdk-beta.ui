@@ -82,9 +82,7 @@ function toggle(value: string): void {
   const value_ = current.value.value;
   if (props.type === AccordionType.Multiple) {
     const list = Array.isArray(value_) ? value_ : [];
-    current.setValue(
-      list.includes(value) ? list.filter((entry) => entry !== value) : [...list, value],
-    );
+    current.setValue(list.includes(value) ? list.filter((entry) => entry !== value) : [...list, value]);
     return;
   }
   if (value_ === value) {
@@ -116,13 +114,7 @@ defineExpose({ el: computed(() => group.value?.el ?? null) });
 </script>
 
 <template>
-  <RovingFocusGroup
-    ref="group"
-    :orientation="Orientation.Vertical"
-    can-loop
-    v-bind="rest"
-    :class="classes"
-  >
+  <RovingFocusGroup ref="group" :orientation="Orientation.Vertical" can-loop v-bind="rest" :class="classes">
     <slot />
   </RovingFocusGroup>
 </template>

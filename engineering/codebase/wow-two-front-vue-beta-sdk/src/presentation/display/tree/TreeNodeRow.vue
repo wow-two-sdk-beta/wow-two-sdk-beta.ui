@@ -27,12 +27,7 @@ function focusFirstChildRow(row: HTMLElement): void {
 
 /** Row of the branch owning this row — ArrowLeft climbs to it. */
 function findParentRow(row: HTMLElement): HTMLElement | null {
-  return (
-    row
-      .closest('[role="group"]')
-      ?.closest('li')
-      ?.querySelector<HTMLElement>(':scope > [role="treeitem"]') ?? null
-  );
+  return row.closest('[role="group"]')?.closest('li')?.querySelector<HTMLElement>(':scope > [role="treeitem"]') ?? null;
 }
 </script>
 
@@ -108,10 +103,7 @@ const classes = computed(() =>
 );
 
 const chevronClasses = computed(() =>
-  cn(
-    'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
-    props.isExpanded && 'rotate-90',
-  ),
+  cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', props.isExpanded && 'rotate-90'),
 );
 </script>
 

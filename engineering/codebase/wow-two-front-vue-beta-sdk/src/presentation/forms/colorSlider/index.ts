@@ -1,5 +1,1 @@
-export {
-  default as ColorSlider,
-  ColorChannel,
-  type ColorSliderProps,
-} from './ColorSlider.vue';
+export { default as ColorSlider, ColorChannel, type ColorSliderProps } from './ColorSlider.vue';

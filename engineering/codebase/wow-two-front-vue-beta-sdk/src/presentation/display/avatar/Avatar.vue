@@ -3,13 +3,7 @@ import type { CSSProperties } from 'vue';
 import type { SizePreset, SizeUnion } from '../../../foundation/utils';
 /* The four value-sets are imported as values (not `import type`) so the one binding serves
    as both the prop type below and the runtime enum used in the auto-color guard. */
-import {
-  AvatarBackground,
-  AvatarRing,
-  AvatarShape,
-  AvatarTone,
-  type AvatarVariants,
-} from './Avatar.variants';
+import { AvatarBackground, AvatarRing, AvatarShape, AvatarTone, type AvatarVariants } from './Avatar.variants';
 
 /* Avatar supports the full canonical preset vocabulary. */
 type AvatarSizePreset = SizePreset;
@@ -20,9 +14,7 @@ type AvatarSizePreset = SizePreset;
  */
 export type AvatarSize = SizeUnion<AvatarSizePreset>;
 
-const AVATAR_SIZE_PRESETS: ReadonlySet<string> = new Set<AvatarSizePreset>([
-  'xs', 'sm', 'md', 'lg', 'xl', '2xl',
-]);
+const AVATAR_SIZE_PRESETS: ReadonlySet<string> = new Set<AvatarSizePreset>(['xs', 'sm', 'md', 'lg', 'xl', '2xl']);
 
 /* Solid palette for autoColor — 17 distinct hues, dark-mode aware. Light: bg-100/text-800. Dark: bg-900/text-100. No opacity — keeps contrast deterministic across themes. */
 const AUTO_COLOR_PALETTE = [
@@ -61,7 +53,7 @@ function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length === 0) return '';
   const first = parts[0]?.[0] ?? '';
-  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? '' : '';
+  const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : '';
   return (first + last).toUpperCase();
 }
 
@@ -154,9 +146,7 @@ watch(
 const showImage = computed(() => !!props.src && !errored.value && !props.isLoading);
 
 /* Parse union-typed `size` — preset routes to variant class, raw/object routes to inline dims. */
-const parsedSize = computed(() =>
-  CssExtensions.parseSizeUnion<AvatarSizePreset>(props.size, AVATAR_SIZE_PRESETS),
-);
+const parsedSize = computed(() => CssExtensions.parseSizeUnion<AvatarSizePreset>(props.size, AVATAR_SIZE_PRESETS));
 
 const boxStyle = computed<CSSProperties | undefined>(() =>
   parsedSize.value.box ? CssExtensions.resolveBoxSize(parsedSize.value.box) : undefined,

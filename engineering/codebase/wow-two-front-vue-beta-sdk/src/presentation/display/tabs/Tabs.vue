@@ -18,11 +18,7 @@ export interface TabsProps {
 import { computed, provide, useAttrs, useTemplateRef } from 'vue';
 import { cn, Orientation as OrientationValue } from '../../../foundation/utils';
 import { useControlled, useId } from '../../../foundation/hooks';
-import {
-  TabsActivationMode as TabsActivationModeValue,
-  TabsKey,
-  type TabsContextValue,
-} from './TabsContext';
+import { TabsActivationMode as TabsActivationModeValue, TabsKey, type TabsContextValue } from './TabsContext';
 
 /**
  * Tabs root. Owns the active value and publishes it to `TabsList` / `TabsTab` /

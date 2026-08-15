@@ -1,7 +1,2 @@
 export { default as ColorSwatch, type ColorSwatchProps } from './ColorSwatch.vue';
-export {
-  colorSwatchVariants,
-  ColorSwatchSize,
-  SwatchShape,
-  type ColorSwatchVariants,
-} from './ColorSwatch.variants';
+export { colorSwatchVariants, ColorSwatchSize, SwatchShape, type ColorSwatchVariants } from './ColorSwatch.variants';

@@ -117,10 +117,7 @@ function clamp(value: number, min: number, max: number): number {
  * below never has to branch on how the list is sized. The `estimateSize`-as-function case materializes a prefix
  * sum (O(n)) — see the `estimateSize` docs for why that path is a convenience, not a hot path.
  */
-function resolveOffsetAt(
-  options: ComputeRangeOptions,
-  itemCount: number,
-): (index: number) => number {
+function resolveOffsetAt(options: ComputeRangeOptions, itemCount: number): (index: number) => number {
   const { getOffset, estimateSize } = options;
 
   if (getOffset) {
@@ -158,9 +155,7 @@ function resolveOffsetAt(
  * combined size + `paddingEnd` always equals the list's total size.
  */
 export function computeRange(options: ComputeRangeOptions): VirtualRange {
-  const itemCount = Number.isFinite(options.itemCount)
-    ? Math.max(0, Math.floor(options.itemCount))
-    : 0;
+  const itemCount = Number.isFinite(options.itemCount) ? Math.max(0, Math.floor(options.itemCount)) : 0;
   if (itemCount === 0) return EMPTY_RANGE;
 
   const overscan = Math.max(0, Math.floor(finite(options.overscan ?? 0)));
@@ -178,9 +173,7 @@ export function computeRange(options: ComputeRangeOptions): VirtualRange {
   // The fixed path is arithmetic only when the uniform size is positive; a zero/degenerate size falls through
   // to the search so both paths still agree on the answer.
   const uniformSize =
-    !options.getOffset && typeof options.estimateSize === 'number'
-      ? Math.max(0, finite(options.estimateSize))
-      : 0;
+    !options.getOffset && typeof options.estimateSize === 'number' ? Math.max(0, finite(options.estimateSize)) : 0;
 
   let firstVisible: number;
   let lastVisible: number;
@@ -246,9 +239,7 @@ function alignedOffset(
  * @returns The offset to assign to the container, clamped to `[0, totalSize - viewportSize]`.
  */
 export function computeScrollOffset(options: ComputeScrollOffsetOptions): number {
-  const itemCount = Number.isFinite(options.itemCount)
-    ? Math.max(0, Math.floor(options.itemCount))
-    : 0;
+  const itemCount = Number.isFinite(options.itemCount) ? Math.max(0, Math.floor(options.itemCount)) : 0;
   if (itemCount === 0) return 0;
 
   const viewportSize = Math.max(0, finite(options.viewportSize));

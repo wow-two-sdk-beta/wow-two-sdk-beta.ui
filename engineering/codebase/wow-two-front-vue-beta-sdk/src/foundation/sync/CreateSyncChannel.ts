@@ -26,13 +26,7 @@
 import { Guid } from '../identifiers';
 import { localStorageStorageBroker, type StorageBroker } from '../storage';
 
-import type {
-  ResolvedSyncTransport,
-  SyncChannel,
-  SyncChannelOptions,
-  SyncEnvelope,
-  SyncListener,
-} from './SyncChannel';
+import type { ResolvedSyncTransport, SyncChannel, SyncChannelOptions, SyncEnvelope, SyncListener } from './SyncChannel';
 
 /** Namespaces the `storage` fallback's keys so one app's channels never collide with another's on a shared origin. */
 const DEFAULT_KEY_PREFIX = 'wow-two.sync';
@@ -115,11 +109,7 @@ function bindBroadcast(name: string, onEnvelope: (raw: unknown) => void): Transp
 }
 
 /** Binds the `storage`-event fallback over a `StorageBroker`, or null under SSR. */
-function bindStorage(
-  key: string,
-  broker: StorageBroker,
-  onEnvelope: (raw: unknown) => void,
-): TransportBinding | null {
+function bindStorage(key: string, broker: StorageBroker, onEnvelope: (raw: unknown) => void): TransportBinding | null {
   const view = resolveWindow();
   if (view === null) return null;
 
@@ -185,10 +175,7 @@ function bind(
  * @param options - Transport selection, storage seam, key prefix, pinned id, and clock.
  * @returns The endpoint: `post`, `subscribe`, `close`, plus its resolved identity and transport.
  */
-export function createSyncChannel<TMessage>(
-  name: string,
-  options?: SyncChannelOptions,
-): SyncChannel<TMessage> {
+export function createSyncChannel<TMessage>(name: string, options?: SyncChannelOptions): SyncChannel<TMessage> {
   // v7 rather than v4: it is time-ordered, so a lexicographic compare of two tab ids is a compare of their
   // creation times. The leader election's tie-break rides on exactly that (`LeaderElection.ts`).
   const id = options?.id ?? Guid.createV7();

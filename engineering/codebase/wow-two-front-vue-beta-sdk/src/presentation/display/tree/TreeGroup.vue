@@ -55,13 +55,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <li
-    ref="el"
-    role="presentation"
-    :data-state="isExpanded ? 'open' : 'closed'"
-    v-bind="rest"
-    :class="classes"
-  >
+  <li ref="el" role="presentation" :data-state="isExpanded ? 'open' : 'closed'" v-bind="rest" :class="classes">
     <TreeNodeRow
       :level="treeLevel.level"
       :is-selected="false"

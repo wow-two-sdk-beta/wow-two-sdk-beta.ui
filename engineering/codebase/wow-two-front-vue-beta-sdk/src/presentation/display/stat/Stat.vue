@@ -76,15 +76,10 @@ const trendUp = computed(() => (props.trend ? props.trend.value >= 0 : false));
 
 const valueSize = computed(() => VALUE_SIZE[props.size]);
 
-const classes = computed(() =>
-  cn('flex flex-col gap-1', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('flex flex-col gap-1', attrs.class as string | undefined));
 
 const trendClasses = computed(() =>
-  cn(
-    'inline-flex items-center gap-0.5 text-xs font-medium',
-    trendUp.value ? 'text-success' : 'text-destructive',
-  ),
+  cn('inline-flex items-center gap-0.5 text-xs font-medium', trendUp.value ? 'text-success' : 'text-destructive'),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -98,7 +93,9 @@ defineExpose({ el });
 
 <template>
   <div ref="el" v-bind="rest" :class="classes">
-    <Text size="sm" color="muted"><slot name="label">{{ props.label }}</slot></Text>
+    <Text size="sm" color="muted"
+      ><slot name="label">{{ props.label }}</slot></Text
+    >
     <Heading :level="3" :size="valueSize" weight="bold">
       <slot name="value">{{ props.value }}</slot>
     </Heading>

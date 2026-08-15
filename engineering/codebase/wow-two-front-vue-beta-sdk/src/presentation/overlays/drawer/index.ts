@@ -1,10 +1,6 @@
 export { default as Drawer, type DrawerProps } from './Drawer.vue';
 export { default as DrawerTrigger, type DrawerTriggerProps } from './DrawerTrigger.vue';
-export {
-  default as DrawerContent,
-  DrawerSize,
-  type DrawerContentProps,
-} from './DrawerContent.vue';
+export { default as DrawerContent, DrawerSize, type DrawerContentProps } from './DrawerContent.vue';
 
 /*
  * Shared chrome re-exported under the Drawer namespace. React attached these as

@@ -24,8 +24,7 @@ export interface CheckboxGroupContextValue {
   readonly isInvalid: () => boolean;
 }
 
-export const CheckboxGroupKey: InjectionKey<CheckboxGroupContextValue> =
-  Symbol('wow-two.checkboxGroup');
+export const CheckboxGroupKey: InjectionKey<CheckboxGroupContextValue> = Symbol('wow-two.checkboxGroup');
 
 /** Reads the surrounding `CheckboxGroup`, or `null` when the item stands alone. */
 export function useCheckboxGroup(): CheckboxGroupContextValue | null {

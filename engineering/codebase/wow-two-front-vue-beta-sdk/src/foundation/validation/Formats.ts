@@ -71,11 +71,7 @@ export function isoDate(message = 'must be a valid ISO date (YYYY-MM-DD)'): Stri
         // Round-trip through UTC: an overflowing day (`2025-02-30`) lands on a different date, so
         // comparing the parts back out is what proves the calendar date is real.
         const parsed = new Date(Date.UTC(year, month - 1, day));
-        return (
-          parsed.getUTCFullYear() === year &&
-          parsed.getUTCMonth() === month - 1 &&
-          parsed.getUTCDate() === day
-        );
+        return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
       },
       message,
       'isoDate',

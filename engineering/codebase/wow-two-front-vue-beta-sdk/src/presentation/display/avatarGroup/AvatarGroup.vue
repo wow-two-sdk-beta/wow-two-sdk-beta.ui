@@ -58,12 +58,9 @@ const overflow = computed(() => {
   return props.max ? Math.max(0, count - props.max) : 0;
 });
 
-const classes = computed(() =>
-  cn('inline-flex items-center', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('inline-flex items-center', attrs.class as string | undefined));
 
-const itemClasses = (index: number): string =>
-  cn('ring-2 ring-background rounded-full', index > 0 && props.overlap);
+const itemClasses = (index: number): string => cn('ring-2 ring-background rounded-full', index > 0 && props.overlap);
 
 const overflowClasses = computed(() => cn(props.overlap, 'ring-2 ring-background'));
 
@@ -82,11 +79,6 @@ defineExpose({ el });
       <!-- Force consistent size -->
       <component :is="child" />
     </div>
-    <Avatar
-      v-if="overflow > 0"
-      :size="props.size"
-      :fallback="`+${overflow}`"
-      :class="overflowClasses"
-    />
+    <Avatar v-if="overflow > 0" :size="props.size" :fallback="`+${overflow}`" :class="overflowClasses" />
   </div>
 </template>

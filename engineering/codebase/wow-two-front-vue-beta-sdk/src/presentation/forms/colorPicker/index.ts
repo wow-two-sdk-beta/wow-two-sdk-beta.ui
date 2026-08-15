@@ -1,5 +1,1 @@
-export {
-  default as ColorPicker,
-  ColorPickerTriggerVariant,
-  type ColorPickerProps,
-} from './ColorPicker.vue';
+export { default as ColorPicker, ColorPickerTriggerVariant, type ColorPickerProps } from './ColorPicker.vue';

@@ -119,9 +119,7 @@ function onContainerPointerMove(event: PointerEvent): void {
     const dx = (event.clientX - drag.startX) / viewport.value.zoom;
     const dy = (event.clientY - drag.startY) / viewport.value.zoom;
     const next = props.nodes.map((node) =>
-      node.id === drag.nodeId
-        ? { ...node, x: drag.nodeStartX + dx, y: drag.nodeStartY + dy }
-        : node,
+      node.id === drag.nodeId ? { ...node, x: drag.nodeStartX + dx, y: drag.nodeStartY + dy } : node,
     );
     emit('nodes-change', next);
   }
@@ -331,9 +329,7 @@ defineExpose({ el });
       </div>
     </div>
     <!-- Controls -->
-    <div
-      class="absolute bottom-3 right-3 flex flex-col gap-1 rounded-md border border-border bg-card p-1 shadow-sm"
-    >
+    <div class="absolute bottom-3 right-3 flex flex-col gap-1 rounded-md border border-border bg-card p-1 shadow-sm">
       <button
         type="button"
         aria-label="Zoom in"

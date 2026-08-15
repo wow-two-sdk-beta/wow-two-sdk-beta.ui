@@ -4,18 +4,10 @@ import type { ButtonSize } from '../button/Button.vue';
 import type { ToggleButtonProps } from '../toggleButton';
 
 /** Defines props for a single-select preset tile. */
-export interface OptionTileProps
-  extends /* @vue-ignore */ Omit<
-    ToggleButtonProps,
-    | 'isPressed'
-    | 'defaultPressed'
-    | 'onPressedChange'
-    | 'children'
-    | 'aria-label'
-    | 'title'
-    | 'variant'
-    | 'shape'
-  > {
+export interface OptionTileProps extends /* @vue-ignore */ Omit<
+  ToggleButtonProps,
+  'isPressed' | 'defaultPressed' | 'onPressedChange' | 'children' | 'aria-label' | 'title' | 'variant' | 'shape'
+> {
   /** The active-selection state of this tile. */
   selected: boolean;
 

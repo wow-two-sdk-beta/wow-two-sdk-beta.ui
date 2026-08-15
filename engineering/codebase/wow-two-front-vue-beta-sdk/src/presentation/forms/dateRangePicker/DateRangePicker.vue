@@ -73,8 +73,7 @@ defineOptions({ name: 'DateRangePicker', inheritAttrs: false });
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
   placeholder: 'Pick a range',
-  format: (d: Temporal.PlainDate) =>
-    d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
+  format: (d: Temporal.PlainDate) => d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
@@ -128,9 +127,7 @@ function onCalendarChange(next: DateRange | null): void {
 }
 
 const triggerState = computed(
-  () =>
-    props.state ??
-    (finalInvalid.value ? InputStateValue.Invalid : InputStateValue.Default),
+  () => props.state ?? (finalInvalid.value ? InputStateValue.Invalid : InputStateValue.Default),
 );
 
 const display = computed(() => {
@@ -150,9 +147,7 @@ const triggerId = computed(() => props.id ?? field?.id);
 /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
 const labelledBy = computed(() => (ariaLabel.value ? undefined : field?.labelledBy));
 const describedBy = computed(() => field?.describedBy);
-const ariaInvalid = computed(
-  () => triggerState.value === InputStateValue.Invalid || undefined,
-);
+const ariaInvalid = computed(() => triggerState.value === InputStateValue.Invalid || undefined);
 
 const defaultMonth = computed(() => range.value?.start ?? today());
 const hiddenStart = computed(() => formatISODate(range.value?.start));
@@ -164,10 +159,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const triggerClass = computed(() =>
-  cn(
-    selectTriggerVariants({ size: props.size, state: triggerState.value }),
-    attrs.class as ClassValue,
-  ),
+  cn(selectTriggerVariants({ size: props.size, state: triggerState.value }), attrs.class as ClassValue),
 );
 
 const labelClass = computed(() => cn('truncate', !display.value && 'text-muted-foreground'));

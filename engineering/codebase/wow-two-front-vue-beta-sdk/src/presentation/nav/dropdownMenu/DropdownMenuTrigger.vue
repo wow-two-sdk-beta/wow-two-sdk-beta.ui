@@ -51,12 +51,7 @@ function handleClick(event: MouseEvent): void {
 
 function handleKeydown(event: KeyboardEvent): void {
   if (event.defaultPrevented) return;
-  if (
-    event.key === 'ArrowDown' ||
-    event.key === 'ArrowUp' ||
-    event.key === 'Enter' ||
-    event.key === ' '
-  ) {
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
     // APG menu-button pattern: ArrowUp-open focuses the last item.
     context.openFocus.current = event.key === 'ArrowUp' ? 'last' : 'first';

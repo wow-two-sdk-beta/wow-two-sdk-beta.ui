@@ -32,23 +32,16 @@ defineSlots<{ placeholder?(): unknown }>();
 /* `ctx` is a live-getter object — read fields off it, never destructure. */
 const ctx = useMultiSelectContext();
 
-const isCapped = computed(
-  () => props.maxVisible !== undefined && ctx.values.length > props.maxVisible,
-);
+const isCapped = computed(() => props.maxVisible !== undefined && ctx.values.length > props.maxVisible);
 
-const visibleValues = computed(() =>
-  isCapped.value ? ctx.values.slice(0, props.maxVisible) : ctx.values,
-);
+const visibleValues = computed(() => (isCapped.value ? ctx.values.slice(0, props.maxVisible) : ctx.values));
 
 const overflowCount = computed(() => ctx.values.length - visibleValues.value.length);
 
 /* Capped: one line that clips, so the `+N` stays pinned at the end. Uncapped: the historical
    wrap, which grows the trigger (`h-auto min-h-10` there) instead of hiding anything. */
 const stripClass = computed(() =>
-  cn(
-    'flex min-w-0 flex-1 items-center gap-1',
-    isCapped.value ? 'flex-nowrap overflow-hidden' : 'flex-wrap',
-  ),
+  cn('flex min-w-0 flex-1 items-center gap-1', isCapped.value ? 'flex-nowrap overflow-hidden' : 'flex-wrap'),
 );
 
 /* Registry (rows currently mounted) → `getOptionLabel` (a value whose row has never mounted,
@@ -106,9 +99,7 @@ const CloseIcon = X;
          bare count read as the summary it is. -->
     <span v-if="overflowCount > 0" class="ml-0.5 flex shrink-0 items-center gap-1.5">
       <span aria-hidden="true" class="h-4 w-px shrink-0 bg-border" />
-      <span class="text-xs font-medium tabular-nums text-muted-foreground">
-        +{{ overflowCount }}
-      </span>
+      <span class="text-xs font-medium tabular-nums text-muted-foreground"> +{{ overflowCount }} </span>
     </span>
   </span>
 </template>

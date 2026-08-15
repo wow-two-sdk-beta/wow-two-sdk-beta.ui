@@ -37,7 +37,6 @@ import { smokeCase, type SmokeCase } from '../../../support/Smoke';
 const inChecklist = (node: VNode): VNode => h(OnboardingChecklist, null, () => node);
 const inNotificationCenter = (node: VNode): VNode => h(NotificationCenter, null, () => node);
 
-
 /**
  * Every component `@wow-two-beta/ui-vue/presentation/feedback` exports, as smoke cases.
  * Imported through the public barrel on purpose — a component missing from `index.ts` fails

@@ -20,14 +20,8 @@ export { default as ModalClose } from '../OverlayCloseButton.vue';
  * aliases are kept for one release so consumers can migrate; they are removed next.
  */
 export { default as Dialog, type ModalProps as DialogProps } from './Modal.vue';
-export {
-  default as DialogTrigger,
-  type ModalTriggerProps as DialogTriggerProps,
-} from './ModalTrigger.vue';
-export {
-  default as DialogContent,
-  type ModalContentProps as DialogContentProps,
-} from './ModalContent.vue';
+export { default as DialogTrigger, type ModalTriggerProps as DialogTriggerProps } from './ModalTrigger.vue';
+export { default as DialogContent, type ModalContentProps as DialogContentProps } from './ModalContent.vue';
 export { default as DialogHeader } from '../OverlayHeader.vue';
 export { default as DialogTitle } from '../OverlayTitle.vue';
 export { default as DialogDescription } from '../OverlayDescription.vue';

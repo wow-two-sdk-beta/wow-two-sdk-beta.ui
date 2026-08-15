@@ -2,8 +2,7 @@
 import type { ButtonHTMLAttributes } from 'vue';
 
 /* Native button attributes stay in attribute fallthrough rather than becoming runtime props. */
-export interface ToolbarButtonProps
-  extends /* @vue-ignore */ Omit<ButtonHTMLAttributes, 'children'> {
+export interface ToolbarButtonProps extends /* @vue-ignore */ Omit<ButtonHTMLAttributes, 'children'> {
   /** The as-child flag — renders as the single child element via `Primitive`'s `asChild` merge, and drops the built-in item chrome. */
   asChild?: boolean;
 }

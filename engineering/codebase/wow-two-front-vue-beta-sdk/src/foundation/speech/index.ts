@@ -58,10 +58,7 @@ export {
   type ListVoicesOptions,
 } from './ListVoices';
 
-export {
-  useSpeechSynthesis,
-  type SpeechSynthesisControls,
-} from './UseSpeechSynthesis';
+export { useSpeechSynthesis, type SpeechSynthesisControls } from './UseSpeechSynthesis';
 
 export {
   type SpeechRecognitionStatus,

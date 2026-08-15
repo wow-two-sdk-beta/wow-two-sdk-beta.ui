@@ -1,4 +1,1 @@
-export {
-  default as DisclosureButton,
-  type DisclosureButtonProps,
-} from './DisclosureButton.vue';
+export { default as DisclosureButton, type DisclosureButtonProps } from './DisclosureButton.vue';

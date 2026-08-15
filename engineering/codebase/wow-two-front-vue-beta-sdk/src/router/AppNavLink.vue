@@ -79,12 +79,7 @@ const intent = computed(() => (props.prefetch ? prefetchProps(props.prefetch) : 
 <template>
   <NavItem as-child :is-active="isActive" v-bind="attrs">
     <template v-if="$slots.icon" #icon><slot name="icon" /></template>
-    <RouterLink
-      :to="props.to"
-      :replace="props.replace"
-      :view-transition="props.viewTransition"
-      v-bind="intent"
-    >
+    <RouterLink :to="props.to" :replace="props.replace" :view-transition="props.viewTransition" v-bind="intent">
       <slot />
     </RouterLink>
     <template v-if="$slots.trailing" #trailing><slot name="trailing" /></template>

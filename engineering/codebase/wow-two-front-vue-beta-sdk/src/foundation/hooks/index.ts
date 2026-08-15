@@ -11,26 +11,12 @@ export { useMediaQuery } from './useMediaQuery';
 export { useReducedMotion } from './useReducedMotion';
 export { useClipboard, type UseClipboardOptions, type ClipboardControls } from './useClipboard';
 export { useDebounceHandler } from './useDebounceHandler';
-export {
-  useAutosave,
-  type AutosaveStatus,
-  type UseAutosaveOptions,
-  type AutosaveControls,
-} from './useAutosave';
-export {
-  useTypeahead,
-  type UseTypeaheadOptions,
-  type UseTypeaheadReturn,
-} from './useTypeahead';
+export { useAutosave, type AutosaveStatus, type UseAutosaveOptions, type AutosaveControls } from './useAutosave';
+export { useTypeahead, type UseTypeaheadOptions, type UseTypeaheadReturn } from './useTypeahead';
 export {
   usePersistentState,
   type PersistentStateOptions,
   type PersistentState,
   type SetPersistentState,
 } from './usePersistentState';
-export {
-  useRecentItems,
-  prependRecent,
-  type RecentItemsOptions,
-  type RecentItems,
-} from './useRecentItems';
+export { useRecentItems, prependRecent, type RecentItemsOptions, type RecentItems } from './useRecentItems';

@@ -44,9 +44,6 @@ const props = withDefaults(
     preserveAspectRatio="none"
     aria-hidden="true"
   >
-    <polygon
-      :points="`0,0 ${props.width},0 ${props.width / 2},${props.height}`"
-      :fill="props.fill"
-    />
+    <polygon :points="`0,0 ${props.width},0 ${props.width / 2},${props.height}`" :fill="props.fill" />
   </svg>
 </template>

@@ -97,9 +97,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const wrapperClass = computed(() =>
-  cn('inline-flex items-center gap-3', attrs.class as ClassValue),
-);
+const wrapperClass = computed(() => cn('inline-flex items-center gap-3', attrs.class as ClassValue));
 
 const buttonClass = computed(() =>
   cn(

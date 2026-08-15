@@ -92,14 +92,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <RovingFocusGroup
-    ref="el"
-    orientation="vertical"
-    can-loop
-    role="tree"
-    v-bind="rest"
-    :class="classes"
-  >
+  <RovingFocusGroup ref="el" orientation="vertical" can-loop role="tree" v-bind="rest" :class="classes">
     <slot />
   </RovingFocusGroup>
 </template>

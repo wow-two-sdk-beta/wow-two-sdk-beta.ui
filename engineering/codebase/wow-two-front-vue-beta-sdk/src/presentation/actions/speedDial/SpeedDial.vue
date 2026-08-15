@@ -20,23 +20,12 @@ export interface SpeedDialProps {
 </script>
 
 <script setup lang="ts">
-import {
-  computed,
-  provide,
-  shallowRef,
-  useAttrs,
-  useSlots,
-  useTemplateRef,
-  type VNode,
-} from 'vue';
+import { computed, provide, shallowRef, useAttrs, useSlots, useTemplateRef, type VNode } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn, Key, OverlayPosition } from '../../../foundation/utils';
 import { Presence, renderableChildren } from '../../../foundation/primitives';
 import { useControlled, useEscape, useOutsideClick } from '../../../foundation/hooks';
-import {
-  SpeedDialDirection as SpeedDialDirectionValue,
-  SpeedDialKey,
-} from './SpeedDialContext';
+import { SpeedDialDirection as SpeedDialDirectionValue, SpeedDialKey } from './SpeedDialContext';
 import SpeedDialList from './SpeedDialList.vue';
 import SpeedDialTrigger from './SpeedDialTrigger.vue';
 
@@ -100,9 +89,7 @@ const { value: open, setValue: setOpen } = useControlled<boolean>({
 const rootEl = useTemplateRef<HTMLDivElement>('rootEl');
 const triggerEl = shallowRef<HTMLElement | null>(null);
 
-const resolvedDirection = computed(
-  () => props.direction ?? POSITION_TO_DIRECTION[props.position],
-);
+const resolvedDirection = computed(() => props.direction ?? POSITION_TO_DIRECTION[props.position]);
 
 useEscape(() => {
   setOpen(false);
@@ -135,14 +122,10 @@ provide(SpeedDialKey, {
    gated behind `open`. The React original partitioned `Children.toArray` on `child.type`; the
    same split runs over the slot's vnodes, so the authoring shape is unchanged. */
 function splitChildren(keepTrigger: boolean): Array<VNode> {
-  return renderableChildren(slots.default?.()).filter(
-    (child) => (child.type === SpeedDialTrigger) === keepTrigger,
-  );
+  return renderableChildren(slots.default?.()).filter((child) => (child.type === SpeedDialTrigger) === keepTrigger);
 }
 
-const rootClass = computed(() =>
-  cn('fixed', POSITION_OFFSETS[props.position], attrs.class as ClassValue),
-);
+const rootClass = computed(() => cn('fixed', POSITION_OFFSETS[props.position], attrs.class as ClassValue));
 const stackClass = computed(() => DIRECTION_TO_STACK[resolvedDirection.value]);
 
 function handleKeydown(event: KeyboardEvent): void {
@@ -179,11 +162,7 @@ defineExpose({ el: rootEl });
          unmount. Items pop in/out off the list's `group` state (see `SpeedDialAction`),
          staggered on enter. -->
     <Presence :is-present="open">
-      <SpeedDialList
-        :data-direction="resolvedDirection"
-        :style="{ gap: `${gap}px` }"
-        :class="stackClass"
-      >
+      <SpeedDialList :data-direction="resolvedDirection" :style="{ gap: `${gap}px` }" :class="stackClass">
         <component :is="node" v-for="(node, index) in splitChildren(false)" :key="index" />
       </SpeedDialList>
     </Presence>

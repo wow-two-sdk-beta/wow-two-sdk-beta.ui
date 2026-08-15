@@ -1,11 +1,4 @@
-import {
-  computed,
-  shallowRef,
-  toValue,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-  type WritableComputedRef,
-} from 'vue';
+import { computed, shallowRef, toValue, type MaybeRefOrGetter, type ShallowRef, type WritableComputedRef } from 'vue';
 
 interface UseControlledOptions<T> {
   controlled: MaybeRefOrGetter<T | undefined>;

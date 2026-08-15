@@ -64,13 +64,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div
-    ref="el"
-    :aria-live="carousel.autoPlay ? 'off' : 'polite'"
-    v-bind="rest"
-    :class="classes"
-    :style="trackStyle"
-  >
+  <div ref="el" :aria-live="carousel.autoPlay ? 'off' : 'polite'" v-bind="rest" :class="classes" :style="trackStyle">
     <!-- The single-element `v-for` hoists the slot call into a template local, so
          the slot is invoked once per render and `length` is React's
          `childArray.length` rather than the injected count, which lags by a tick. -->

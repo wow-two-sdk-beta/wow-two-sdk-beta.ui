@@ -34,14 +34,10 @@ const el = useTemplateRef<HTMLDivElement>('el');
 const fixed = computed<CSSProperties | undefined>(() => {
   if (props.size === undefined) return undefined;
   const length = typeof props.size === 'number' ? `${props.size}px` : props.size;
-  return props.axis === Orientation.Horizontal
-    ? { width: length, flexShrink: 0 }
-    : { height: length, flexShrink: 0 };
+  return props.axis === Orientation.Horizontal ? { width: length, flexShrink: 0 } : { height: length, flexShrink: 0 };
 });
 
-const classes = computed(() =>
-  cn(props.size === undefined && 'flex-1', attrs.class as string | undefined),
-);
+const classes = computed(() => cn(props.size === undefined && 'flex-1', attrs.class as string | undefined));
 
 /** `normalizeStyle` merges left → right, so a caller's `style` lands last and wins — as React's `{ ...fixed, ...style }` did. */
 const styles = computed(() => normalizeStyle([fixed.value, attrs.style]));

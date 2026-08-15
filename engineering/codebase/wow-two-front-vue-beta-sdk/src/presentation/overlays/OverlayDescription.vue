@@ -24,9 +24,7 @@ const attrs = useAttrs();
 const context = useOverlayChromeContext();
 const el = useTemplateRef<HTMLParagraphElement>('el');
 
-const classes = computed(() =>
-  cn('text-sm text-muted-foreground', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('text-sm text-muted-foreground', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

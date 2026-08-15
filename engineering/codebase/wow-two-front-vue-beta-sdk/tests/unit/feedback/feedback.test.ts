@@ -111,8 +111,7 @@ describe('subscriber isolation', () => {
     const failures: { error: unknown; listener: unknown; title: unknown }[] = [];
     const broken = throwing();
     const bus = createFeedbackBus({
-      onError: (error, context) =>
-        failures.push({ error, listener: context.listener, title: context.notice.title }),
+      onError: (error, context) => failures.push({ error, listener: context.listener, title: context.notice.title }),
     });
     bus.subscribe(broken);
 

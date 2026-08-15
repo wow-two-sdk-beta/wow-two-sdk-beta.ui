@@ -203,7 +203,11 @@ export function remapPathMap(
 }
 
 /** Remaps every row-scoped member of a touched set through an array operation; removed-row entries drop. */
-export function remapPathSet(set: ReadonlySet<string>, arrayPath: string, operation: ArrayOperation): ReadonlySet<string> {
+export function remapPathSet(
+  set: ReadonlySet<string>,
+  arrayPath: string,
+  operation: ArrayOperation,
+): ReadonlySet<string> {
   const next = new Set<string>();
   for (const key of set) {
     const remapped = remapPathKey(key, arrayPath, operation);

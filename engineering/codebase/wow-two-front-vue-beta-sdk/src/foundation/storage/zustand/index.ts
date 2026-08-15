@@ -3,8 +3,4 @@
 // consumer opts in via `@wow-two-beta/ui-vue/foundation/storage/zustand`. No zustand dependency — the returned
 // storage is structurally compatible with zustand v5's `persist({ storage })` (see `ZustandPersist.ts`).
 
-export {
-  type StorageValue,
-  type PersistStorage,
-  brokerPersistStorage,
-} from './ZustandPersist';
+export { type StorageValue, type PersistStorage, brokerPersistStorage } from './ZustandPersist';

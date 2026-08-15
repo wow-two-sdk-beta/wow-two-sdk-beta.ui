@@ -1,11 +1,4 @@
-import {
-  defineComponent,
-  inject,
-  provide,
-  shallowRef,
-  type Component,
-  type InjectionKey,
-} from 'vue';
+import { defineComponent, inject, provide, shallowRef, type Component, type InjectionKey } from 'vue';
 
 export interface CollectionContextValue<T> {
   /** The registered items, in registration order. A live getter — read it, never destructure it. */

@@ -60,9 +60,7 @@ const markerClasses = computed(() =>
   ),
 );
 
-const labelClasses = computed(() =>
-  cn('text-sm font-medium text-foreground', props.isDone && 'line-through'),
-);
+const labelClasses = computed(() => cn('text-sm font-medium text-foreground', props.isDone && 'line-through'));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

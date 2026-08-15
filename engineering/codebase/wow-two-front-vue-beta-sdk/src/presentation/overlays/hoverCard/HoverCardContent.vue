@@ -59,12 +59,7 @@ defineExpose({ el });
     The trade: the positioner stays mounted (empty) while the card is closed.
   -->
   <Portal>
-    <AnchoredPositioner
-      :anchor="anchor"
-      :placement="placement"
-      :offset="offset"
-      class="z-dropdown"
-    >
+    <AnchoredPositioner :anchor="anchor" :placement="placement" :offset="offset" class="z-dropdown">
       <Presence :is-present="isOpen">
         <div
           ref="el"

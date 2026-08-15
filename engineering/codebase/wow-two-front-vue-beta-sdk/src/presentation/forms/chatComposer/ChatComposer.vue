@@ -135,9 +135,7 @@ onMounted(resize);
 /* React re-ran the resize effect on `value` and on `maxHeight` (a `resize` callback dep). */
 watch([text, () => props.maxHeight], () => void nextTick(resize));
 
-const isControlled = computed(
-  () => (props.value !== undefined ? props.value : props.modelValue) !== undefined,
-);
+const isControlled = computed(() => (props.value !== undefined ? props.value : props.modelValue) !== undefined);
 const isEmpty = computed(() => text.value.trim().length === 0);
 
 function submit(event?: Event): void {
@@ -174,9 +172,7 @@ const hasSendButton = computed(() => Boolean(props.sendButton) || Boolean(slots.
 /* `class` + the textarea's own class are owned; `onKeydown` is invoked by hand above. */
 const TEXTAREA_OWNED: ReadonlySet<string> = new Set(['class', 'onKeydown', 'rows']);
 const textareaPassthrough = computed(() =>
-  Object.fromEntries(
-    Object.entries(props.textareaProps ?? {}).filter(([key]) => !TEXTAREA_OWNED.has(key)),
-  ),
+  Object.fromEntries(Object.entries(props.textareaProps ?? {}).filter(([key]) => !TEXTAREA_OWNED.has(key))),
 );
 
 const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
@@ -204,9 +200,7 @@ const textareaClass = computed(() =>
 const sendButtonClass = computed(() =>
   cn(
     'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full self-end',
-    isEmpty.value
-      ? 'bg-muted text-muted-foreground'
-      : 'bg-primary text-primary-foreground hover:bg-primary/90',
+    isEmpty.value ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90',
     'disabled:cursor-not-allowed',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
   ),
@@ -239,13 +233,7 @@ defineExpose({ el: textarea });
     </div>
     <template v-if="!isSendButtonHidden">
       <slot v-if="hasSendButton" name="sendButton">{{ sendButton }}</slot>
-      <button
-        v-else
-        type="submit"
-        :disabled="isDisabled || isEmpty"
-        aria-label="Send message"
-        :class="sendButtonClass"
-      >
+      <button v-else type="submit" :disabled="isDisabled || isEmpty" aria-label="Send message" :class="sendButtonClass">
         <SendIcon class="h-4 w-4" />
       </button>
     </template>

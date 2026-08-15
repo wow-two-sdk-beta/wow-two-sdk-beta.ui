@@ -4,12 +4,11 @@
 // vue-router imports), so it ports from the React package unchanged.
 
 /** Defines the union of `:param` names inferred from a route template literal (`never` when it has none). */
-export type PathParamName<Template extends string> =
-  Template extends `${string}:${infer Param}/${infer Rest}`
-    ? Param | PathParamName<Rest>
-    : Template extends `${string}:${infer Param}`
-      ? Param
-      : never;
+export type PathParamName<Template extends string> = Template extends `${string}:${infer Param}/${infer Rest}`
+  ? Param | PathParamName<Rest>
+  : Template extends `${string}:${infer Param}`
+    ? Param
+    : never;
 
 /** Defines the params object a route template requires — one required string key per `:segment`. */
 export type PathParams<Template extends string> = {
@@ -17,10 +16,9 @@ export type PathParams<Template extends string> = {
 };
 
 /** Defines a path builder's argument tuple — empty when the template declares no `:params`, else one required params object. */
-export type PathBuilderArgs<Template extends string> =
-  [PathParamName<Template>] extends [never]
-    ? []
-    : [params: PathParams<Template>];
+export type PathBuilderArgs<Template extends string> = [PathParamName<Template>] extends [never]
+  ? []
+  : [params: PathParams<Template>];
 
 /** Defines a typed path builder — call with the template's params for the concrete href; `.pattern` is the route-table template. */
 export interface PathBuilder<Template extends string> {

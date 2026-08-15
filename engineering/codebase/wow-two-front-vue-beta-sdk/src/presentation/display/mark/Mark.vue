@@ -21,10 +21,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
 
 const classes = computed(() =>
-  cn(
-    'rounded-sm bg-warning-soft px-0.5 text-warning-soft-foreground',
-    attrs.class as string | undefined,
-  ),
+  cn('rounded-sm bg-warning-soft px-0.5 text-warning-soft-foreground', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

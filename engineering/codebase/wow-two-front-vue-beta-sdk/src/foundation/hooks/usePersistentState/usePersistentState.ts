@@ -61,8 +61,7 @@ export function usePersistentState<T>(
   const state = shallowRef(initial) as ShallowRef<T>;
 
   const setValue: SetPersistentState<T> = (next) => {
-    const resolved =
-      typeof next === 'function' ? (next as (previous: T) => T)(state.value) : (next as T);
+    const resolved = typeof next === 'function' ? (next as (previous: T) => T)(state.value) : (next as T);
     broker.write(toValue(key), resolved);
     state.value = resolved;
   };

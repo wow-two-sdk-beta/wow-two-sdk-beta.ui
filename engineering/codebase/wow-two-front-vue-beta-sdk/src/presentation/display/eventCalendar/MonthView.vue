@@ -34,9 +34,7 @@ const emit = defineEmits<{
 }>();
 
 /** Reorder weekdays per weekStart. */
-const weekdayHeaders = computed(() =>
-  Array.from({ length: 7 }, (_, i) => WEEKDAYS_SHORT[(i + props.weekStart) % 7]!),
-);
+const weekdayHeaders = computed(() => Array.from({ length: 7 }, (_, i) => WEEKDAYS_SHORT[(i + props.weekStart) % 7]!));
 
 /* Build a 42-cell grid whose first column matches weekStart so dates land
    under the right headers (buildMonthGrid is Sunday-anchored, so build here). */
@@ -51,9 +49,7 @@ const cells = computed<Array<MonthCell>>(() => {
 });
 
 function eventsForDay(day: Temporal.PlainDate): Array<EventCalendarEvent> {
-  return props.events.filter((e) =>
-    isZonedDayInRange(startOfCellInstant(day, props.timeZone), e.start, e.end),
-  );
+  return props.events.filter((e) => isZonedDayInRange(startOfCellInstant(day, props.timeZone), e.start, e.end));
 }
 
 function cellClass(cell: MonthCell): string {
@@ -125,9 +121,7 @@ const CELL_STYLE: StyleValue = { minHeight: '96px' };
         >
           {{ e.isAllDay ? '• ' : '' }}{{ e.title ?? '(no title)' }}
         </button>
-        <span
-          v-if="eventsForDay(cell.day).length > 3"
-          class="px-1 text-[10px] text-muted-foreground"
+        <span v-if="eventsForDay(cell.day).length > 3" class="px-1 text-[10px] text-muted-foreground"
           >+{{ eventsForDay(cell.day).length - 3 }} more</span
         >
       </div>

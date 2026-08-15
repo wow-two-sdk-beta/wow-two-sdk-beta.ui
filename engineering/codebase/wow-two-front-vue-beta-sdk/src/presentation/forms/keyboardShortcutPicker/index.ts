@@ -1,4 +1,1 @@
-export {
-  default as KeyboardShortcutPicker,
-  type KeyboardShortcutPickerProps,
-} from './KeyboardShortcutPicker.vue';
+export { default as KeyboardShortcutPicker, type KeyboardShortcutPickerProps } from './KeyboardShortcutPicker.vue';

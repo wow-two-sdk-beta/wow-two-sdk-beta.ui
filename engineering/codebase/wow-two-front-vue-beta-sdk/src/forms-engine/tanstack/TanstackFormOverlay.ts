@@ -112,9 +112,7 @@ export function createTanstackFormOverlay<TValues extends object>(
     clearServerErrorsAt: (path) => {
       if (!Object.prototype.hasOwnProperty.call(store.value.serverErrors, path)) return;
       patch({
-        serverErrors: Object.fromEntries(
-          Object.entries(store.value.serverErrors).filter(([key]) => key !== path),
-        ),
+        serverErrors: Object.fromEntries(Object.entries(store.value.serverErrors).filter(([key]) => key !== path)),
       });
     },
     remapForArrayOperation: (arrayPath, operation) => {

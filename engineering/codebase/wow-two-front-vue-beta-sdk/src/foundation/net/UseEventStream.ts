@@ -23,15 +23,7 @@
 // A `null` URL MEANS "NOT YET", not "broken" — the shape every real app needs while it waits for a token or a
 // route param. No stream is opened, and the state reads `closed`.
 
-import {
-  onMounted,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 import { ConnectionState } from './ConnectionState';
 import {

@@ -58,10 +58,7 @@ export interface BuildTreeOptions<T, TId> {
  * @param options The `id` / `parentId` accessors.
  * @returns A new array of root nodes.
  */
-export function buildTree<T, TId>(
-  items: readonly T[],
-  options: BuildTreeOptions<T, TId>,
-): TreeNode<T>[] {
+export function buildTree<T, TId>(items: readonly T[], options: BuildTreeOptions<T, TId>): TreeNode<T>[] {
   const { id, parentId } = options;
 
   const byId = new Map<TId, T>();
@@ -76,8 +73,7 @@ export function buildTree<T, TId>(
   const roots: T[] = [];
   for (const item of items) {
     const parent = parentId(item);
-    const isRoot =
-      parent === null || parent === undefined || !byId.has(parent) || cyclicIds.has(id(item));
+    const isRoot = parent === null || parent === undefined || !byId.has(parent) || cyclicIds.has(id(item));
     if (isRoot) {
       roots.push(item);
       continue;
@@ -140,10 +136,7 @@ function detectCyclicIds<T, TId>(
 }
 
 /** Reads a node's children under the configured key, treating anything non-array as "no children". */
-function readChildren<TNode extends object>(
-  node: TNode,
-  childrenKey: PropertyKey,
-): readonly TNode[] {
+function readChildren<TNode extends object>(node: TNode, childrenKey: PropertyKey): readonly TNode[] {
   const children = (node as Record<PropertyKey, unknown>)[childrenKey];
   return Array.isArray(children) ? (children as TNode[]) : [];
 }

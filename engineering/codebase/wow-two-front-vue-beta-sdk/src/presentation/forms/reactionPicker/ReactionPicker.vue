@@ -105,13 +105,7 @@ defineExpose({ el: root });
 </script>
 
 <template>
-  <div
-    ref="root"
-    role="toolbar"
-    aria-label="Reaction picker"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <div ref="root" role="toolbar" aria-label="Reaction picker" :class="rootClass" v-bind="passthroughAttrs">
     <button
       v-for="emoji in emojis"
       :key="emoji"
@@ -124,13 +118,7 @@ defineExpose({ el: root });
     >
       <span aria-hidden="true">{{ emoji }}</span>
     </button>
-    <button
-      v-if="isMoreShown"
-      type="button"
-      aria-label="More reactions"
-      :class="moreClass"
-      @click="props.onMore?.()"
-    >
+    <button v-if="isMoreShown" type="button" aria-label="More reactions" :class="moreClass" @click="props.onMore?.()">
       <Plus class="h-4 w-4" />
     </button>
   </div>

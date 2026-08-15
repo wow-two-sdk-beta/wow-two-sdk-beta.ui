@@ -21,17 +21,14 @@ export interface OnboardingRegistry {
   unregister: (task: OnboardingTaskRecord) => void;
 }
 
-export const onboardingContextKey: InjectionKey<OnboardingContextValue> =
-  Symbol('wow-two.onboardingChecklist');
+export const onboardingContextKey: InjectionKey<OnboardingContextValue> = Symbol('wow-two.onboardingChecklist');
 
 /**
  * Replaces React's `Children.toArray` + `isValidElement` child-walking, which
  * has no Vue counterpart: slots are functions, so the root cannot inspect its
  * children's props. Tasks register themselves instead.
  */
-export const onboardingRegistryKey: InjectionKey<OnboardingRegistry> = Symbol(
-  'wow-two.onboardingChecklist.registry',
-);
+export const onboardingRegistryKey: InjectionKey<OnboardingRegistry> = Symbol('wow-two.onboardingChecklist.registry');
 
 export interface OnboardingChecklistProps {
   /** The card heading. Rich content → the `title` slot. */
@@ -120,10 +117,7 @@ watch(
 );
 
 const classes = computed(() =>
-  cn(
-    'overflow-hidden rounded-lg border border-border bg-card shadow-sm',
-    attrs.class as string | undefined,
-  ),
+  cn('overflow-hidden rounded-lg border border-border bg-card shadow-sm', attrs.class as string | undefined),
 );
 
 const fillClasses = computed(() =>
@@ -134,9 +128,7 @@ const fillStyle = computed(() => ({
   width: total.value ? `${(done.value / total.value) * 100}%` : '0%',
 }));
 
-const chevronClasses = computed(() =>
-  cn('text-muted-foreground transition-transform', open.value && 'rotate-180'),
-);
+const chevronClasses = computed(() => cn('text-muted-foreground transition-transform', open.value && 'rotate-180'));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

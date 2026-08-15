@@ -1,5 +1,1 @@
-export {
-  default as SectionHeader,
-  SectionHeaderSize,
-  type SectionHeaderProps,
-} from './SectionHeader.vue';
+export { default as SectionHeader, SectionHeaderSize, type SectionHeaderProps } from './SectionHeader.vue';

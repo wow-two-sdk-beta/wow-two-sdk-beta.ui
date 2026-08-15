@@ -44,7 +44,8 @@ const props = defineProps<FlagsProviderProps>();
 // `setup` runs exactly once per instance, which is precisely what React's lazy `useState`
 // initializer was working around — the client must be created once for the component's life, and a
 // `computed` would be allowed to drop and re-run it.
-const ownClient = props.client ?? createFlagClient({ provider: props.provider, context: props.context, onError: props.onError });
+const ownClient =
+  props.client ?? createFlagClient({ provider: props.provider, context: props.context, onError: props.onError });
 
 // A getter, not a snapshot: a swapped `client` prop re-subscribes and reaches every consumer.
 provideFlags(() => props.client ?? ownClient);

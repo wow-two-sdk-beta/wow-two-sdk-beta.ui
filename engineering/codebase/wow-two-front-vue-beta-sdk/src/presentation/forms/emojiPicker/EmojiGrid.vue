@@ -123,9 +123,7 @@ const gridStyle = computed<CSSProperties>(() => ({
 /* Default to a slightly darker neutral than the hairline border so the bar reads clearly; any
    CSS color plugs in. Falls back to `--color-border` for themes that don't define the stronger
    token — never worse than the old bar. */
-const thumbColor = computed(
-  () => props.scrollThumbColor ?? 'var(--color-border-strong, var(--color-border))',
-);
+const thumbColor = computed(() => props.scrollThumbColor ?? 'var(--color-border-strong, var(--color-border))');
 
 const viewportStyle = computed<CSSProperties>(() => ({
   height: `${(props.viewportRows ?? 0) * (tokens.value.tile + tokens.value.gap)}px`,
@@ -150,11 +148,7 @@ const viewportStyle = computed<CSSProperties>(() => ({
     `viewportRows` is undefined, and an unconditional extra block would become a stray flex
     item in the picker's `Stack`.
   -->
-  <div
-    v-else-if="viewportRows !== undefined"
-    :class="SCROLLBAR_CLASS"
-    :style="viewportStyle"
-  >
+  <div v-else-if="viewportRows !== undefined" :class="SCROLLBAR_CLASS" :style="viewportStyle">
     <div ref="grid" role="listbox" aria-label="Emoji" :style="gridStyle" @keydown="moveFocus">
       <EmojiTile
         v-for="(entry, index) in emojis"

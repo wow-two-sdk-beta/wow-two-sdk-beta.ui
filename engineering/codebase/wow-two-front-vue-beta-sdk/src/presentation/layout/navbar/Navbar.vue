@@ -59,17 +59,13 @@ const classes = computed(() =>
   cn(
     navbarVariants({ sticky: props.sticky, height: props.height }),
     props.bordered && 'border-b border-border',
-    props.tone
-      ? surfaceVariants({ variant: 'subtle', tone: props.tone, radius: 'none' })
-      : 'bg-card',
+    props.tone ? surfaceVariants({ variant: 'subtle', tone: props.tone, radius: 'none' }) : 'bg-card',
     attrs.class as string | undefined,
   ),
 );
 
 /** Push `end` to the trailing edge when there's no centre slot to absorb the slack. */
-const endClasses = computed(() =>
-  cn('flex min-w-0 items-center gap-3', !slots.center && 'ml-auto'),
-);
+const endClasses = computed(() => cn('flex min-w-0 items-center gap-3', !slots.center && 'ml-auto'));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

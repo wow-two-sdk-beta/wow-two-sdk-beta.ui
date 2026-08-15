@@ -17,11 +17,7 @@ export interface ProgressBarProps {
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/utils';
-import {
-  progressFillVariants,
-  progressTrackVariants,
-  type ProgressBarVariants,
-} from './ProgressBar.variants';
+import { progressFillVariants, progressTrackVariants, type ProgressBarVariants } from './ProgressBar.variants';
 
 /**
  * Linear progress indicator. Set `value` (0–`max`) for determinate; omit

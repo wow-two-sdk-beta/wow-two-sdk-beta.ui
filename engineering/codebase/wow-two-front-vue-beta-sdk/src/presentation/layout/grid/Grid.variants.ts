@@ -183,9 +183,7 @@ const GAP_CLASSES: Record<GridBreakpoint, Record<GridGap, string>> = {
 const BREAKPOINT_ORDER: ReadonlyArray<GridBreakpoint> = ['base', 'sm', 'md', 'lg', 'xl'];
 
 /** Resolves a scalar-or-responsive `columns` value to its complete Tailwind class string. */
-export function resolveGridColumns(
-  value: GridColumns | GridResponsive<GridColumns> | undefined,
-): string | undefined {
+export function resolveGridColumns(value: GridColumns | GridResponsive<GridColumns> | undefined): string | undefined {
   if (value === undefined) return undefined;
   if (typeof value === 'string') return COLUMN_CLASSES.base[value];
   return BREAKPOINT_ORDER.map((bp) => {
@@ -197,9 +195,7 @@ export function resolveGridColumns(
 }
 
 /** Resolves a scalar-or-responsive `gap` value to its complete Tailwind class string. */
-export function resolveGridGap(
-  value: GridGap | GridResponsive<GridGap> | undefined,
-): string | undefined {
+export function resolveGridGap(value: GridGap | GridResponsive<GridGap> | undefined): string | undefined {
   if (value === undefined) return undefined;
   if (typeof value === 'string') return GAP_CLASSES.base[value];
   return BREAKPOINT_ORDER.map((bp) => {

@@ -6,8 +6,7 @@ export interface NavigationMenuContextValue {
   setActiveId: (id: string | null) => void;
 }
 
-export const navigationMenuContextKey: InjectionKey<NavigationMenuContextValue> =
-  Symbol('wow-two.navigationMenu');
+export const navigationMenuContextKey: InjectionKey<NavigationMenuContextValue> = Symbol('wow-two.navigationMenu');
 
 export function useNavigationMenuContext(): NavigationMenuContextValue {
   const context = inject(navigationMenuContextKey, null);
@@ -36,9 +35,7 @@ export const navigationMenuItemContextKey: InjectionKey<NavigationMenuItemContex
 export function useNavigationMenuItemContext(): NavigationMenuItemContextValue {
   const context = inject(navigationMenuItemContextKey, null);
   if (!context) {
-    throw new Error(
-      'NavigationMenuTrigger / NavigationMenuContent must be used inside <NavigationMenuItem>',
-    );
+    throw new Error('NavigationMenuTrigger / NavigationMenuContent must be used inside <NavigationMenuItem>');
   }
   return context;
 }

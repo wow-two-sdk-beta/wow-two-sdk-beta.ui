@@ -100,10 +100,13 @@ export function useTypeahead<T>(options: UseTypeaheadOptions<T>): UseTypeaheadRe
 
     /* Restart the idle window on every accepted keystroke. */
     clearTimer();
-    timer = setTimeout(() => {
-      buffer = '';
-      timer = null;
-    }, toValue(options.timeout ?? 500));
+    timer = setTimeout(
+      () => {
+        buffer = '';
+        timer = null;
+      },
+      toValue(options.timeout ?? 500),
+    );
 
     const labelOf = (item: T): string => options.getLabel(item).toLowerCase();
     const disabledOf = (item: T): boolean => (options.isDisabled ? options.isDisabled(item) : false);

@@ -21,9 +21,7 @@ export interface BottomSheetContextValue {
   snapPoints: ComputedRef<ReadonlyArray<SnapPoint>>;
 }
 
-export const bottomSheetContextKey: InjectionKey<BottomSheetContextValue> = Symbol(
-  'wow-two.bottomSheet',
-);
+export const bottomSheetContextKey: InjectionKey<BottomSheetContextValue> = Symbol('wow-two.bottomSheet');
 
 export function useBottomSheet(): BottomSheetContextValue {
   const context = inject(bottomSheetContextKey, null);
@@ -107,13 +105,7 @@ import {
 } from 'vue';
 import { cn, surfaceVariants } from '../../../foundation/utils';
 import { useControlled, useId } from '../../../foundation/hooks';
-import {
-  DismissableLayer,
-  FocusScope,
-  Portal,
-  Presence,
-  ScrollLockProvider,
-} from '../../../foundation/primitives';
+import { DismissableLayer, FocusScope, Portal, Presence, ScrollLockProvider } from '../../../foundation/primitives';
 import Backdrop from '../backdrop/Backdrop.vue';
 import { overlayChromeContextKey } from '../OverlayChrome';
 import { toHtmlElement } from '../OverlayHelpers';
@@ -174,8 +166,7 @@ let startHeight = 0;
 watch(
   () => [resolvedOpen.value, props.initialSnap, props.snapPoints.length] as const,
   () => {
-    if (resolvedOpen.value)
-      currentSnap.value = Math.min(props.initialSnap, props.snapPoints.length - 1);
+    if (resolvedOpen.value) currentSnap.value = Math.min(props.initialSnap, props.snapPoints.length - 1);
   },
 );
 
@@ -285,9 +276,7 @@ const panelStyle = computed(() =>
     {
       height: heightStyle.value,
       transition:
-        dragHeight.value === null
-          ? 'height 220ms ease-out, transform var(--duration-base) var(--ease-out)'
-          : 'none',
+        dragHeight.value === null ? 'height 220ms ease-out, transform var(--duration-base) var(--ease-out)' : 'none',
     },
     attrs.style,
   ]),
@@ -343,12 +332,7 @@ defineExpose({ el });
           and forwarded `data-state` down to the inner one. Collapsing them keeps
           every attribute of React's panel on the node `Presence` clones.
         -->
-        <FocusScope
-          as-child
-          trapped
-          loop
-          :on-mount-auto-focus="handleMountAutoFocus"
-        >
+        <FocusScope as-child trapped loop :on-mount-auto-focus="handleMountAutoFocus">
           <DismissableLayer
             ref="panel"
             :is-escape-disabled="!props.dismissOnEscape"

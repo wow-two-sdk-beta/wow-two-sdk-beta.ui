@@ -157,8 +157,7 @@ const inputClass = computed(() =>
   cn(
     inputBaseVariants({
       size: props.size,
-      state:
-        props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
+      state: props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
       border: props.border,
       ring: props.ring,
     }),

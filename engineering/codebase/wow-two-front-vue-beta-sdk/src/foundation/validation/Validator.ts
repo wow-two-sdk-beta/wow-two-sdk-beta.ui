@@ -32,18 +32,10 @@
 // promise that validation does not throw.
 
 import type { StandardSchemaV1 } from './StandardSchema';
-import {
-  invalid,
-  valid,
-  type PathSegmentKey,
-  type ValidationResult,
-} from './ValidationResult';
+import { invalid, valid, type PathSegmentKey, type ValidationResult } from './ValidationResult';
 
 /** Parses an unknown value sitting at `path` inside the validated structure. Must not throw. */
-export type ParseFn<TOutput> = (
-  value: unknown,
-  path: readonly PathSegmentKey[],
-) => ValidationResult<TOutput>;
+export type ParseFn<TOutput> = (value: unknown, path: readonly PathSegmentKey[]) => ValidationResult<TOutput>;
 
 /** The `vendor` reported by every validator's Standard Schema props. */
 export const VALIDATION_VENDOR = 'wow-two-beta';
@@ -55,9 +47,7 @@ const ROOT_PATH: readonly PathSegmentKey[] = Object.freeze([]);
 export type Infer<TValidator> = TValidator extends Validator<infer TOutput> ? TOutput : never;
 
 /** Converts a slice result into the Standard Schema result shape (`{ value }` or `{ issues }`). */
-export function toStandardResult<TOutput>(
-  result: ValidationResult<TOutput>,
-): StandardSchemaV1.Result<TOutput> {
+export function toStandardResult<TOutput>(result: ValidationResult<TOutput>): StandardSchemaV1.Result<TOutput> {
   if (result.valid) return { value: result.value };
   // Spec issues carry `message` + `path` only; `code` is ours and has no spec slot, so it is dropped
   // here rather than smuggled in — a consumer that wants codes reads `validate()` directly.
@@ -189,9 +179,7 @@ export class Validator<TOutput> implements StandardSchemaV1<TOutput, TOutput> {
       try {
         return valid(map(result.value));
       } catch {
-        return invalid([
-          { path, message: `could not be converted from ${this.typeName}`, code: 'transform' },
-        ]);
+        return invalid([{ path, message: `could not be converted from ${this.typeName}`, code: 'transform' }]);
       }
     });
   }
@@ -208,8 +196,6 @@ export class Validator<TOutput> implements StandardSchemaV1<TOutput, TOutput> {
  * this is sugar for a call site that reads better handing over a plain `{ '~standard': … }` than the
  * whole validator (and for narrowing the surface a consumer sees).
  */
-export function toStandardSchema<TOutput>(
-  validator: Validator<TOutput>,
-): StandardSchemaV1<TOutput, TOutput> {
+export function toStandardSchema<TOutput>(validator: Validator<TOutput>): StandardSchemaV1<TOutput, TOutput> {
   return { '~standard': validator['~standard'] };
 }

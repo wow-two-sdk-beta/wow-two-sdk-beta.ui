@@ -75,12 +75,7 @@ defineExpose({ el });
 <template>
   <div ref="el" v-bind="rest" :class="classes">
     <Code :variant="props.variant" class="flex-1 pr-10">{{ props.text }}</Code>
-    <button
-      type="button"
-      :aria-label="copied ? 'Copied' : 'Copy'"
-      :class="buttonClasses"
-      @click="onCopy"
-    >
+    <button type="button" :aria-label="copied ? 'Copied' : 'Copy'" :class="buttonClasses" @click="onCopy">
       <Icon :icon="copied ? CopiedIcon : CopyIcon" :size="14" />
     </button>
   </div>

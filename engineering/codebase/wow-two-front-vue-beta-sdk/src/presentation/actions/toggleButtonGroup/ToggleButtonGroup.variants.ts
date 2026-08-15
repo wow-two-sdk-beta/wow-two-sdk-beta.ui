@@ -16,8 +16,7 @@ export const ToggleButtonGroupVariant = {
   Pill: 'pill',
 } as const;
 
-export type ToggleButtonGroupVariant =
-  (typeof ToggleButtonGroupVariant)[keyof typeof ToggleButtonGroupVariant];
+export type ToggleButtonGroupVariant = (typeof ToggleButtonGroupVariant)[keyof typeof ToggleButtonGroupVariant];
 
 /** Defines the ToggleButtonGroup selection cardinality (the `type` discriminant). */
 export const ToggleMode = {

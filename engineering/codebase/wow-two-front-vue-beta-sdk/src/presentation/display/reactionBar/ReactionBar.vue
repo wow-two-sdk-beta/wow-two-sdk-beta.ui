@@ -81,9 +81,7 @@ const el = useTemplateRef<HTMLDivElement>('el');
  */
 const hasAdd = () => props.hasAddButton && Boolean(instance?.vnode.props?.onAdd);
 
-const visible = computed(() =>
-  props.hasEmpty ? props.reactions : props.reactions.filter((r) => r.count > 0),
-);
+const visible = computed(() => (props.hasEmpty ? props.reactions : props.reactions.filter((r) => r.count > 0)));
 
 /** Was React's private `ReactionChip` component — a class map is all it carried. */
 const chipClasses = (reaction: Reaction): string =>
@@ -98,9 +96,7 @@ const chipClasses = (reaction: Reaction): string =>
 const chipTitle = (reaction: Reaction): string | undefined =>
   reaction.users?.length ? reaction.users.join(', ') : undefined;
 
-const classes = computed(() =>
-  cn('inline-flex flex-wrap items-center gap-1', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('inline-flex flex-wrap items-center gap-1', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

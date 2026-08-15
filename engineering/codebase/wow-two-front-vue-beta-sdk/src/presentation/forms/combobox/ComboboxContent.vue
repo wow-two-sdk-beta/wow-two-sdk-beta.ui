@@ -44,12 +44,7 @@ export interface ComboboxContentProps {
 import { computed, ref, useAttrs, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn, surfaceVariants } from '../../../foundation/utils';
-import {
-  AnchoredPositioner,
-  DismissableLayer,
-  Portal,
-  Presence,
-} from '../../../foundation/primitives';
+import { AnchoredPositioner, DismissableLayer, Portal, Presence } from '../../../foundation/primitives';
 import { listboxVariants } from '../listbox/Listbox.variants';
 import { useComboboxContext } from './ComboboxContext';
 
@@ -92,9 +87,7 @@ watch(
 );
 
 function setRef(node: unknown): void {
-  ctx.contentEl.value = ((node as { $el?: HTMLElement } | null)?.$el ??
-    node ??
-    null) as HTMLElement | null;
+  ctx.contentEl.value = ((node as { $el?: HTMLElement } | null)?.$el ?? node ?? null) as HTMLElement | null;
 }
 
 /**
@@ -114,9 +107,7 @@ watch(
 
 const isOpen = computed(() => ctx.open);
 const anchor = computed(() => ctx.inputEl.value);
-const panelStyle = computed(() =>
-  minWidth.value != null ? { minWidth: `${minWidth.value}px` } : undefined,
-);
+const panelStyle = computed(() => (minWidth.value != null ? { minWidth: `${minWidth.value}px` } : undefined));
 
 /* Default to `xs` (p-1) so items breathe — same as Listbox. */
 const resolvedPadding = computed(() => props.padding ?? 'xs');
@@ -164,12 +155,7 @@ const panelClass = computed(() =>
   <Portal>
     <Presence :is-present="isOpen">
       <div class="group contents">
-        <AnchoredPositioner
-          :anchor="anchor"
-          :placement="placement"
-          :offset="offset"
-          class="z-dropdown"
-        >
+        <AnchoredPositioner :anchor="anchor" :placement="placement" :offset="offset" class="z-dropdown">
           <DismissableLayer
             :ref="setRef"
             :on-escape="onEscape"

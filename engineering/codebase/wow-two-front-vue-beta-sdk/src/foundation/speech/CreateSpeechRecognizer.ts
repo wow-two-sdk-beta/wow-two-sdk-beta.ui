@@ -26,7 +26,11 @@
 import { toError } from '../errors';
 
 import { speechRecognitionConstructor } from './SpeechSupport';
-import { toSpeechRecognitionFailure, type SpeechRecognitionFailure, type SpeechTranscript } from './SpeechRecognitionResult';
+import {
+  toSpeechRecognitionFailure,
+  type SpeechRecognitionFailure,
+  type SpeechTranscript,
+} from './SpeechRecognitionResult';
 import type { SpeechRecognitionEventLike, SpeechRecognitionLike } from './SpeechRecognitionTypes';
 
 /**

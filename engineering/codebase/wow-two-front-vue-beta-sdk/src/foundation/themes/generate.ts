@@ -18,27 +18,10 @@
  * it clears its WCAG AA threshold, so generated themes are "proven" by default.
  * ------------------------------------------------------------------------- */
 
-import type {
-  AccentMode,
-  NeutralTemp,
-  SurfaceStyle,
-  Theme,
-  ThemeSeed,
-} from './Theme';
+import type { AccentMode, NeutralTemp, SurfaceStyle, Theme, ThemeSeed } from './Theme';
 import { ThemeStatus } from './Theme';
-import {
-  applyToneSlots,
-  type ToneFamilyName,
-  type ToneSlots,
-  type TokenSet,
-} from './Tokens';
-import {
-  contrastRatio,
-  normalizeHue,
-  oklchToCss,
-  relativeLuminance,
-  type Oklch,
-} from './Oklch';
+import { applyToneSlots, type ToneFamilyName, type ToneSlots, type TokenSet } from './Tokens';
+import { contrastRatio, normalizeHue, oklchToCss, relativeLuminance, type Oklch } from './Oklch';
 import { AA_TEXT, AA_UI, validateTheme } from './validate';
 
 // ---------------------------------------------------------------------------
@@ -100,11 +83,7 @@ function nudgeForeground(fg: Oklch, bg: Oklch, min: number): Oklch {
  * lightness away from the foreground (darker when fg is light, lighter when fg
  * is dark) — preserving hue/chroma — until the pair passes. Returns both.
  */
-function resolveSolidPair(
-  base: Oklch,
-  fg: Oklch,
-  min: number,
-): { base: Oklch; foreground: Oklch } {
+function resolveSolidPair(base: Oklch, fg: Oklch, min: number): { base: Oklch; foreground: Oklch } {
   let curFg = nudgeForeground(fg, base, min);
   if (contrastRatio(curFg, base) >= min) return { base, foreground: curFg };
 
@@ -211,26 +190,12 @@ function buildMode(
   const foreground = nudgeForeground({ l: cfg.fgL, c: nc * 2, h: nh }, background, AA_TEXT);
   const cardFg = nudgeForeground(foreground, card, AA_TEXT);
   const popoverFg = nudgeForeground(foreground, popover, AA_TEXT);
-  const mutedFg = nudgeForeground(
-    { l: isDark ? 0.72 : 0.5, c: nc * 2.5, h: nh },
-    muted,
-    AA_TEXT,
-  );
-  const subtleFg = nudgeForeground(
-    { l: isDark ? 0.55 : 0.62, c: nc * 2, h: nh },
-    background,
-    AA_UI,
-  );
+  const mutedFg = nudgeForeground({ l: isDark ? 0.72 : 0.5, c: nc * 2.5, h: nh }, muted, AA_TEXT);
+  const subtleFg = nudgeForeground({ l: isDark ? 0.55 : 0.62, c: nc * 2, h: nh }, background, AA_UI);
 
   // Inverse = flipped surface (dark chip on light theme, light chip on dark theme).
-  const inverse: Oklch = isDark
-    ? { l: 0.96, c: nc, h: nh }
-    : { l: 0.2, c: nc * 2, h: nh };
-  const inverseFg = nudgeForeground(
-    { l: isDark ? 0.18 : 0.97, c: nc, h: nh },
-    inverse,
-    AA_TEXT,
-  );
+  const inverse: Oklch = isDark ? { l: 0.96, c: nc, h: nh } : { l: 0.2, c: nc * 2, h: nh };
+  const inverseFg = nudgeForeground({ l: isDark ? 0.18 : 0.97, c: nc, h: nh }, inverse, AA_TEXT);
 
   // ---- tone family builder ----
   const buildTone = (hue: number, chromaScale = 1): ToneSlots => {
@@ -253,11 +218,7 @@ function buildMode(
   };
 
   // Ring = primary at a vivid, mid lightness; checked as UI affordance vs bg.
-  const ring = nudgeForeground(
-    { l: isDark ? 0.7 : 0.55, c: 0.16, h: primaryHue },
-    background,
-    AA_UI,
-  );
+  const ring = nudgeForeground({ l: isDark ? 0.7 : 0.55, c: 0.16, h: primaryHue }, background, AA_UI);
 
   const set: Partial<TokenSet> = {
     background: oklchToCss(background),
@@ -338,12 +299,7 @@ export function generateTheme(seed: ThemeSeed): Theme {
 
   const meta = validateTheme({ light, dark });
 
-  const autoTags = [
-    neutralTemp,
-    accentMode,
-    surface,
-    meta.contrastAA ? 'aa' : 'aa-fail',
-  ];
+  const autoTags = [neutralTemp, accentMode, surface, meta.contrastAA ? 'aa' : 'aa-fail'];
 
   return {
     id: seed.id,

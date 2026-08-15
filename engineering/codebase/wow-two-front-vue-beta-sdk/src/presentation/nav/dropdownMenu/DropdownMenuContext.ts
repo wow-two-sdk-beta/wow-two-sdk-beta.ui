@@ -27,8 +27,7 @@ export interface DropdownMenuContextValue {
   offset: ComputedRef<number>;
 }
 
-export const dropdownMenuContextKey: InjectionKey<DropdownMenuContextValue> =
-  Symbol('wow-two.dropdownMenu');
+export const dropdownMenuContextKey: InjectionKey<DropdownMenuContextValue> = Symbol('wow-two.dropdownMenu');
 
 export function useDropdownMenuContext(): DropdownMenuContextValue {
   const context = inject(dropdownMenuContextKey, null);

@@ -99,14 +99,7 @@ defineExpose({ el });
   <!-- Roving tabindex (APG): the menubar is a single composite tab stop — one
        trigger holds tabindex 0, arrows / Home / End rove focus. `role` falls
        through and replaces the primitive's own `role="group"`. -->
-  <RovingFocusGroup
-    ref="el"
-    orientation="horizontal"
-    can-loop
-    role="menubar"
-    v-bind="rest"
-    :class="classes"
-  >
+  <RovingFocusGroup ref="el" orientation="horizontal" can-loop role="menubar" v-bind="rest" :class="classes">
     <slot />
   </RovingFocusGroup>
 </template>

@@ -296,10 +296,7 @@ defineExpose({ el });
           <Icon :icon="iconComp" :size="size" />
         </button>
       </div>
-      <div
-        v-if="filtered.length === 0"
-        class="col-span-full px-2 py-6 text-center text-xs text-muted-foreground"
-      >
+      <div v-if="filtered.length === 0" class="col-span-full px-2 py-6 text-center text-xs text-muted-foreground">
         No icons match.
       </div>
     </div>

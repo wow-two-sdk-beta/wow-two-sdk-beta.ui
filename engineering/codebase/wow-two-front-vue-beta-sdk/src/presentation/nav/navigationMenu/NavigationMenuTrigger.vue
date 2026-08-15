@@ -14,10 +14,7 @@ import { computed, shallowRef, useAttrs } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
 import { useRovingFocusItem } from '../../../foundation/primitives';
-import {
-  useNavigationMenuContext,
-  useNavigationMenuItemContext,
-} from './NavigationMenuContext';
+import { useNavigationMenuContext, useNavigationMenuItemContext } from './NavigationMenuContext';
 
 /** The button that expands an item's panel, and the panel's positioning anchor. */
 defineOptions({ name: 'NavigationMenuTrigger', inheritAttrs: false });

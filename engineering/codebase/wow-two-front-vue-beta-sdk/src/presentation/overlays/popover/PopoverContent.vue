@@ -43,13 +43,7 @@ const DEFAULT_WIDTH = 'w-72';
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import { cn, surfaceVariants } from '../../../foundation/utils';
-import {
-  AnchoredPositioner,
-  DismissableLayer,
-  FocusScope,
-  Portal,
-  Presence,
-} from '../../../foundation/primitives';
+import { AnchoredPositioner, DismissableLayer, FocusScope, Portal, Presence } from '../../../foundation/primitives';
 import { usePopoverContext } from './Popover.vue';
 
 /* The anchored, dismissable popover panel. */
@@ -131,12 +125,7 @@ function handleOutsidePointerDown(event: PointerEvent): void {
       <div class="group contents">
         <!-- z-popover (80) on the SC root (transform makes the stacking context) so a
              popover from a Modal (z-modal, 70) paints above it — both portal to body. -->
-        <AnchoredPositioner
-          :anchor="anchor"
-          :placement="placement"
-          :offset="offset"
-          class="z-popover"
-        >
+        <AnchoredPositioner :anchor="anchor" :placement="placement" :offset="offset" class="z-popover">
           <!--
             `FocusScope as-child` merges into `DismissableLayer`, whose own root div
             *is* the panel — React kept a layer div around a separate panel div. The

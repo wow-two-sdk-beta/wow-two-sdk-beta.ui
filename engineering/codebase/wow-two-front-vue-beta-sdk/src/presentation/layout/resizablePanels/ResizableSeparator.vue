@@ -81,12 +81,8 @@ function asHandler<E extends Event>(value: unknown): ((event: E) => void) | unde
  * called `preventDefault()`. Vue's own attr merge would run both unconditionally,
  * so the two are composed by hand through the house helper instead.
  */
-const onKeydown = computed(() =>
-  composeEventHandlers<KeyboardEvent>(asHandler(attrs.onKeydown), handleKeydown),
-);
-const onDblclick = computed(() =>
-  composeEventHandlers<MouseEvent>(asHandler(attrs.onDblclick), handleDblclick),
-);
+const onKeydown = computed(() => composeEventHandlers<KeyboardEvent>(asHandler(attrs.onKeydown), handleKeydown));
+const onDblclick = computed(() => composeEventHandlers<MouseEvent>(asHandler(attrs.onDblclick), handleDblclick));
 
 // Announce the panel BEFORE the separator — ArrowRight/ArrowDown grow it, so size moves with the key.
 const ariaValueNow = computed(() => Math.round(context.sizes[index.value] ?? 50));

@@ -1,11 +1,4 @@
-import {
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 // Debounced autosave. Watches a value and, after it settles for `delayMs`, calls `save` — collapsing a burst of
 // edits into a single write and exposing a `status` a consumer can surface ("Saving…"/"Saved"). Pairs naturally

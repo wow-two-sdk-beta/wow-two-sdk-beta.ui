@@ -48,9 +48,7 @@ const el = useTemplateRef<HTMLSpanElement>('el');
  */
 const hasClose = () => Boolean(instance?.vnode.props?.onClose);
 
-const classes = computed(() =>
-  cn(tagVariants({ variant: props.variant }), attrs.class as string | undefined),
-);
+const classes = computed(() => cn(tagVariants({ variant: props.variant }), attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

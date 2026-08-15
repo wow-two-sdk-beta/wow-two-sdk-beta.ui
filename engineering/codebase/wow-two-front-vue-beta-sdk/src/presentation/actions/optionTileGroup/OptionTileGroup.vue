@@ -62,13 +62,7 @@ defineExpose({ el: computed(() => root.value?.el ?? null) });
     `disabled` greys + blocks the whole group) laid out as a tile row, with the
     group's accessible name on `aria-label`.
   -->
-  <Fieldset
-    ref="root"
-    :disabled="disabled"
-    :aria-label="label"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <Fieldset ref="root" :disabled="disabled" :aria-label="label" :class="rootClass" v-bind="passthroughAttrs">
     <slot />
   </Fieldset>
 </template>

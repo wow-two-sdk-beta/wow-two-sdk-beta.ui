@@ -68,11 +68,7 @@ const classes = computed(() =>
 );
 
 const containerClasses = computed(() =>
-  cn(
-    'relative w-full overflow-x-auto border border-border',
-    WRAPPER_RADIUS[props.radius],
-    props.containerClassName,
-  ),
+  cn('relative w-full overflow-x-auto border border-border', WRAPPER_RADIUS[props.radius], props.containerClassName),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

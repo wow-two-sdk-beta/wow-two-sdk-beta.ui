@@ -11,8 +11,7 @@ import { feedbackBus, NoticeTone, type FeedbackBus, type FeedbackNotice } from '
 export function toErrorNotice(error: ApiError): FeedbackNotice {
   const isNetwork = error.status === 0;
   const title = error.problem?.title ?? (isNetwork ? 'Network error' : `Request failed (${error.status})`);
-  const description =
-    error.problem?.detail ?? (isNetwork && error.message !== title ? error.message : undefined);
+  const description = error.problem?.detail ?? (isNetwork && error.message !== title ? error.message : undefined);
 
   return { tone: NoticeTone.Danger, title, description };
 }

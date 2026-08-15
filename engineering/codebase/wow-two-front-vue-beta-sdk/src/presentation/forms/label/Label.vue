@@ -90,13 +90,7 @@ defineExpose({ el: root });
 </script>
 
 <template>
-  <label
-    ref="root"
-    :for="labelFor"
-    :id="labelId"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <label ref="root" :for="labelFor" :id="labelId" :class="rootClass" v-bind="passthroughAttrs">
     <slot />
     <span v-if="isRequired" class="ml-0.5 text-destructive" aria-hidden="true">*</span>
   </label>

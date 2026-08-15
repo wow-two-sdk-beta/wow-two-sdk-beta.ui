@@ -51,26 +51,51 @@ export const actionsCases: readonly SmokeCase[] = [
   smokeCase('GoogleSignInButton', GoogleSignInButton, {}),
 
   smokeCase('Toolbar', Toolbar, {}, { slot: true }),
-  smokeCase('ToolbarButton', ToolbarButton, {}, {
-    slot: true,
-    wrap: (node) => h(Toolbar, null, () => node),
-  }),
-  smokeCase('ToolbarLink', ToolbarLink, {}, {
-    slot: true,
-    wrap: (node) => h(Toolbar, null, () => node),
-  }),
-  smokeCase('ToolbarSeparator', ToolbarSeparator, {}, {
-    wrap: (node) => h(Toolbar, null, () => node),
-  }),
+  smokeCase(
+    'ToolbarButton',
+    ToolbarButton,
+    {},
+    {
+      slot: true,
+      wrap: (node) => h(Toolbar, null, () => node),
+    },
+  ),
+  smokeCase(
+    'ToolbarLink',
+    ToolbarLink,
+    {},
+    {
+      slot: true,
+      wrap: (node) => h(Toolbar, null, () => node),
+    },
+  ),
+  smokeCase(
+    'ToolbarSeparator',
+    ToolbarSeparator,
+    {},
+    {
+      wrap: (node) => h(Toolbar, null, () => node),
+    },
+  ),
 
   // No slot probe: SpeedDial partitions its default slot by child component type (trigger vs
   // actions) and drops anything matching neither, so a generic probe node proves nothing. The
   // two real child types are covered by the `SpeedDialTrigger` / `SpeedDialAction` cases below.
   smokeCase('SpeedDial', SpeedDial, {}),
-  smokeCase('SpeedDialTrigger', SpeedDialTrigger, {}, {
-    wrap: (node) => h(SpeedDial, null, () => node),
-  }),
-  smokeCase('SpeedDialAction', SpeedDialAction, { 'aria-label': 'Share' }, {
-    wrap: (node) => h(SpeedDial, { defaultOpen: true }, () => node),
-  }),
+  smokeCase(
+    'SpeedDialTrigger',
+    SpeedDialTrigger,
+    {},
+    {
+      wrap: (node) => h(SpeedDial, null, () => node),
+    },
+  ),
+  smokeCase(
+    'SpeedDialAction',
+    SpeedDialAction,
+    { 'aria-label': 'Share' },
+    {
+      wrap: (node) => h(SpeedDial, { defaultOpen: true }, () => node),
+    },
+  ),
 ];

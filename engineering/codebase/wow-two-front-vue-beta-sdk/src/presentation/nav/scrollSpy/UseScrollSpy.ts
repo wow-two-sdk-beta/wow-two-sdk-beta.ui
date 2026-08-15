@@ -36,18 +36,12 @@ export function useScrollSpy(
       /* `immediate: true` makes this watcher run during SSR too (Vue skips only the
          non-immediate post-flush ones), where neither `document` nor
          `IntersectionObserver` exists. */
-      if (
-        typeof document === 'undefined' ||
-        typeof IntersectionObserver === 'undefined' ||
-        idList.length === 0
-      ) {
+      if (typeof document === 'undefined' || typeof IntersectionObserver === 'undefined' || idList.length === 0) {
         return;
       }
 
       const seen = new Map<string, number>(); // id → top offset
-      const elements = idList
-        .map((id) => document.getElementById(id))
-        .filter((el): el is HTMLElement => el != null);
+      const elements = idList.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => el != null);
 
       const observer = new IntersectionObserver(
         (entries) => {

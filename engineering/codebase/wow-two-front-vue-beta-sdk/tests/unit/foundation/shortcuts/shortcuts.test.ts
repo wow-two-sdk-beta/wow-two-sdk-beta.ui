@@ -41,23 +41,19 @@ describe('matchesChord', () => {
   const chord = parseChord('mod+k', OTHER);
 
   it('matches an event carrying exactly the required modifiers', () => {
-    expect(
-      matchesChord({ key: 'k', ctrlKey: true, metaKey: false, shiftKey: false, altKey: false }, chord),
-    ).toBe(true);
+    expect(matchesChord({ key: 'k', ctrlKey: true, metaKey: false, shiftKey: false, altKey: false }, chord)).toBe(true);
   });
 
   it('rejects an event missing a required modifier', () => {
-    expect(
-      matchesChord({ key: 'k', ctrlKey: false, metaKey: false, shiftKey: false, altKey: false }, chord),
-    ).toBe(false);
+    expect(matchesChord({ key: 'k', ctrlKey: false, metaKey: false, shiftKey: false, altKey: false }, chord)).toBe(
+      false,
+    );
   });
 
   /* An EXTRA modifier is a different chord — otherwise `Ctrl+Shift+K` would fire the `Ctrl+K`
      handler as well as its own. */
   it('rejects an event carrying an extra modifier', () => {
-    expect(
-      matchesChord({ key: 'k', ctrlKey: true, metaKey: false, shiftKey: true, altKey: false }, chord),
-    ).toBe(false);
+    expect(matchesChord({ key: 'k', ctrlKey: true, metaKey: false, shiftKey: true, altKey: false }, chord)).toBe(false);
   });
 });
 

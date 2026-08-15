@@ -237,9 +237,7 @@ export function createHistoryCore<TPayload>(config: HistoryCoreConfig<TPayload>)
     const first = grouped.at(0);
     if (first === undefined) return;
 
-    const payload = grouped
-      .slice(1)
-      .reduce((merged, entry) => mergePayloads(merged, entry.payload), first.payload);
+    const payload = grouped.slice(1).reduce((merged, entry) => mergePayloads(merged, entry.payload), first.payload);
 
     commit({ label: bufferLabel ?? first.label, payload, coalesceKey: undefined });
   }

@@ -40,11 +40,7 @@ import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { Icon } from '../../../foundation/icons';
 import { MONTHS_LONG, addDays, nowZoned } from '../../forms/DateExtensions';
-import {
-  EVENT_CALENDAR_VIEWS,
-  EventCalendarView as EventCalendarViewValue,
-  startOfWeek,
-} from './EventCalendarTypes';
+import { EVENT_CALENDAR_VIEWS, EventCalendarView as EventCalendarViewValue, startOfWeek } from './EventCalendarTypes';
 import MonthView from './MonthView.vue';
 import TimeGridView from './TimeGridView.vue';
 import AgendaView from './AgendaView.vue';
@@ -185,9 +181,7 @@ const weekFirstDay = computed(() => startOfWeek(focusDay.value, props.weekStart)
 function viewButtonClass(v: EventCalendarView): string {
   return cn(
     'inline-flex h-6 items-center rounded px-2 text-xs font-medium transition-colors',
-    currentView.value === v
-      ? 'bg-primary text-primary-foreground'
-      : 'text-muted-foreground hover:text-foreground',
+    currentView.value === v ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
   );
 }
 

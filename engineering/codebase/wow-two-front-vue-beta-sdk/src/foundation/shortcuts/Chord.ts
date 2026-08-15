@@ -37,10 +37,7 @@ export interface Chord {
 }
 
 /** The `KeyboardEvent` fields a chord match reads — a structural subset satisfied by native DOM events. */
-export type KeyboardEventLike = Pick<
-  KeyboardEvent,
-  'key' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'altKey'
->;
+export type KeyboardEventLike = Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'altKey'>;
 
 /** Named-key aliases (case-insensitive) → canonical `KeyboardEvent.key`. Lets `esc`/`up`/`del` stand in for the verbose form. */
 const KEY_ALIASES: Readonly<Record<string, string>> = {

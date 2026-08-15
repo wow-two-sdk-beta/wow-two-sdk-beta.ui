@@ -20,13 +20,6 @@ defineExpose({ el });
 
 <template>
   <svg ref="el" viewBox="0 0 24 24" :width="props.size" :height="props.size" aria-hidden="true">
-    <circle
-      v-for="x in CELL_POSITIONS"
-      :key="x"
-      :cx="x + CELL_SIZE / 2"
-      :cy="12"
-      :r="2.5"
-      fill="currentColor"
-    />
+    <circle v-for="x in CELL_POSITIONS" :key="x" :cx="x + CELL_SIZE / 2" :cy="12" :r="2.5" fill="currentColor" />
   </svg>
 </template>

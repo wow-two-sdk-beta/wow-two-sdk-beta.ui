@@ -123,10 +123,7 @@ const passthroughAttrs = computed(() =>
 const rootClass = computed(() => cn(attrs.class as ClassValue));
 
 const listClass = computed(() =>
-  cn(
-    'flex gap-3',
-    props.orientation === OrientationValue.Vertical ? 'flex-col' : 'flex-row flex-wrap',
-  ),
+  cn('flex gap-3', props.orientation === OrientationValue.Vertical ? 'flex-col' : 'flex-row flex-wrap'),
 );
 
 const root = useTemplateRef<{ el: HTMLFieldSetElement | null }>('root');

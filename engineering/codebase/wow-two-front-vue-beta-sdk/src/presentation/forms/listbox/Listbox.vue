@@ -118,9 +118,7 @@ const attrs = useAttrs();
 const equals = computed<EqualityFn<unknown>>(() => props.isEqual ?? defaultEquals);
 
 const resolvedIndicator = computed(
-  () =>
-    props.indicator ??
-    (props.isMultiple ? ListboxIndicatorValue.Checkbox : ListboxIndicatorValue.Check),
+  () => props.indicator ?? (props.isMultiple ? ListboxIndicatorValue.Checkbox : ListboxIndicatorValue.Check),
 );
 
 const controlled = useControlled<unknown>({
@@ -175,9 +173,7 @@ function onItemSelect(next: unknown): void {
    by then, and it never runs on the server. */
 onMounted(() => {
   if (activeId.value) return;
-  const firstSelected = items.find(
-    (i) => !i.isDisabled && values.value.some((v) => equals.value(v, i.value)),
-  );
+  const firstSelected = items.find((i) => !i.isDisabled && values.value.some((v) => equals.value(v, i.value)));
   const firstEnabled = items.find((i) => !i.isDisabled);
   activeId.value = (firstSelected ?? firstEnabled)?.id ?? null;
 });
@@ -213,8 +209,7 @@ function moveActive(direction: 1 | -1, jump = 1): void {
    children work without threading a label prop. Disabled options are skipped by the matcher. */
 const typeahead = useTypeahead<ItemEntry>({
   items: () => items,
-  getLabel: (entry) =>
-    typeof document === 'undefined' ? '' : (document.getElementById(entry.id)?.textContent ?? ''),
+  getLabel: (entry) => (typeof document === 'undefined' ? '' : (document.getElementById(entry.id)?.textContent ?? '')),
   isDisabled: (entry) => entry.isDisabled,
   getActiveIndex: () => items.findIndex((i) => i.id === activeId.value),
   onMatch: (entry) => activateById(entry.id),

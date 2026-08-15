@@ -21,9 +21,7 @@ const RADIUS_SCALE: Record<NonNullable<Theme['radius']>, Record<string, string>>
 
 /** Render one token set as `  --color-{key}: {value};` declaration lines. */
 function declarations(set: TokenSet, indent = '  '): string {
-  return SEMANTIC_TOKENS.map((tok) => `${indent}--color-${tok}: ${set[tok]};`).join(
-    '\n',
-  );
+  return SEMANTIC_TOKENS.map((tok) => `${indent}--color-${tok}: ${set[tok]};`).join('\n');
 }
 
 /** Render the optional radius overrides as declaration lines (empty string when unset). */

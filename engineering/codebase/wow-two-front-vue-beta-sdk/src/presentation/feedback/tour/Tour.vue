@@ -215,9 +215,7 @@ const skip = () => {
 
 const placement = computed(() => step.value?.placement ?? Placement.Bottom);
 
-const tooltipCoords = computed(() =>
-  rect.value ? placementCoords(rect.value, placement.value) : null,
-);
+const tooltipCoords = computed(() => (rect.value ? placementCoords(rect.value, placement.value) : null));
 
 /** Vue does not auto-suffix numeric style values with `px` the way React does. */
 const tooltipStyle = computed(() => {
@@ -232,14 +230,10 @@ const tooltipStyle = computed(() => {
 });
 
 const announcement = computed(() =>
-  step.value?.title
-    ? `Step ${stepIndex.value + 1} of ${props.steps.length}: ${step.value.title}`
-    : '',
+  step.value?.title ? `Step ${stepIndex.value + 1} of ${props.steps.length}: ${step.value.title}` : '',
 );
 
-const bodyClasses = computed(() =>
-  cn('text-sm text-muted-foreground', step.value?.title && 'mt-1.5'),
-);
+const bodyClasses = computed(() => cn('text-sm text-muted-foreground', step.value?.title && 'mt-1.5'));
 
 /**
  * `Presence` clones `data-state` onto this node, so the pop (fade + slight
@@ -304,15 +298,9 @@ const onTooltipAnimationEnd = () => {
         <div v-if="step.title" :id="titleId" class="text-sm font-semibold">{{ step.title }}</div>
         <div v-if="step.body" :id="descId" :class="bodyClasses">{{ step.body }}</div>
         <div class="mt-3 flex items-center justify-between gap-3">
-          <span class="text-xs text-muted-foreground">
-            {{ stepIndex + 1 }} / {{ props.steps.length }}
-          </span>
+          <span class="text-xs text-muted-foreground"> {{ stepIndex + 1 }} / {{ props.steps.length }} </span>
           <div class="flex items-center gap-2">
-            <button
-              type="button"
-              class="text-xs text-muted-foreground hover:text-foreground"
-              @click="skip"
-            >
+            <button type="button" class="text-xs text-muted-foreground hover:text-foreground" @click="skip">
               Skip
             </button>
             <button

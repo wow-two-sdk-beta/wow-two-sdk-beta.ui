@@ -32,8 +32,7 @@ export const DataGridColumnAlign = {
   Center: 'center',
 } as const;
 
-export type DataGridColumnAlign =
-  (typeof DataGridColumnAlign)[keyof typeof DataGridColumnAlign];
+export type DataGridColumnAlign = (typeof DataGridColumnAlign)[keyof typeof DataGridColumnAlign];
 
 /** Defines the cursor advance after a DataGrid cell edit commits. */
 export const DataGridMove = {

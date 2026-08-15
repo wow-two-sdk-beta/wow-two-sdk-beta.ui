@@ -116,18 +116,9 @@ const _assertStackDirection: AssertExact<
   StackDirection,
   NonNullable<VariantProps<typeof stackVariants>['direction']>
 > = true;
-const _assertStackAlign: AssertExact<
-  StackAlign,
-  NonNullable<VariantProps<typeof stackVariants>['align']>
-> = true;
-const _assertStackJustify: AssertExact<
-  StackJustify,
-  NonNullable<VariantProps<typeof stackVariants>['justify']>
-> = true;
-const _assertStackWrap: AssertExact<
-  StackWrap,
-  NonNullable<VariantProps<typeof stackVariants>['wrap']>
-> = true;
+const _assertStackAlign: AssertExact<StackAlign, NonNullable<VariantProps<typeof stackVariants>['align']>> = true;
+const _assertStackJustify: AssertExact<StackJustify, NonNullable<VariantProps<typeof stackVariants>['justify']>> = true;
+const _assertStackWrap: AssertExact<StackWrap, NonNullable<VariantProps<typeof stackVariants>['wrap']>> = true;
 void _assertStackDirection;
 void _assertStackAlign;
 void _assertStackJustify;

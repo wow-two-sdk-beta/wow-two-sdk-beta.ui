@@ -75,12 +75,6 @@ export {
   differenceInYears,
 } from './Difference';
 
-export {
-  eachDayOfInterval,
-  isWithinInterval,
-  overlaps,
-  type DateInterval,
-  type OverlapOptions,
-} from './Interval';
+export { eachDayOfInterval, isWithinInterval, overlaps, type DateInterval, type OverlapOptions } from './Interval';
 
 export { isValidDate, parseIsoDate, toIsoDateString } from './IsoDate';

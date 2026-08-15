@@ -9,8 +9,7 @@ export const FileRejectionReason = {
   Count: 'count',
 } as const;
 
-export type FileRejectionReason =
-  (typeof FileRejectionReason)[keyof typeof FileRejectionReason];
+export type FileRejectionReason = (typeof FileRejectionReason)[keyof typeof FileRejectionReason];
 
 export interface FileRejection {
   file: File;
@@ -225,11 +224,7 @@ const zoneClass = computed(() =>
 );
 
 const iconClass = computed(() =>
-  cn(
-    'text-muted-foreground',
-    dragState.value === 'over' && 'text-primary',
-    showError.value && 'text-destructive',
-  ),
+  cn('text-muted-foreground', dragState.value === 'over' && 'text-primary', showError.value && 'text-destructive'),
 );
 
 const UploadIcon = UploadCloud;
@@ -256,8 +251,12 @@ defineExpose({ el: input });
       @drop="onDrop"
     >
       <Icon :icon="UploadIcon" :size="28" :class="iconClass" />
-      <div class="font-medium text-foreground"><slot name="label">{{ label }}</slot></div>
-      <div v-if="hasHint" class="text-xs"><slot name="hint">{{ hint }}</slot></div>
+      <div class="font-medium text-foreground">
+        <slot name="label">{{ label }}</slot>
+      </div>
+      <div v-if="hasHint" class="text-xs">
+        <slot name="hint">{{ hint }}</slot>
+      </div>
       <input
         ref="input"
         type="file"

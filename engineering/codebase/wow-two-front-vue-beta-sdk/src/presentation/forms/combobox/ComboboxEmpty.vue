@@ -32,13 +32,7 @@ const rootClass = computed(() => cn(listboxEmptyVariants(), attrs.class as Class
 </script>
 
 <template>
-  <div
-    role="option"
-    aria-disabled="true"
-    :aria-selected="false"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <div role="option" aria-disabled="true" :aria-selected="false" :class="rootClass" v-bind="passthroughAttrs">
     <slot />
   </div>
 </template>

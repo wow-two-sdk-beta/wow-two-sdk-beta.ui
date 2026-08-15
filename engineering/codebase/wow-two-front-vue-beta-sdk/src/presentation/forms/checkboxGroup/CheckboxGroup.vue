@@ -93,9 +93,7 @@ const context: CheckboxGroupContextValue = {
   toggle: (value) => {
     if (value === undefined) return;
     controlled.setValue(
-      selected.value.includes(value)
-        ? selected.value.filter((x) => x !== value)
-        : [...selected.value, value],
+      selected.value.includes(value) ? selected.value.filter((x) => x !== value) : [...selected.value, value],
     );
   },
   isDisabled: () => isGroupDisabled.value,
@@ -119,10 +117,7 @@ const passthroughAttrs = computed(() =>
 const rootClass = computed(() => cn(attrs.class as ClassValue));
 
 const listClass = computed(() =>
-  cn(
-    'flex gap-3',
-    props.orientation === OrientationValue.Vertical ? 'flex-col' : 'flex-row flex-wrap',
-  ),
+  cn('flex gap-3', props.orientation === OrientationValue.Vertical ? 'flex-col' : 'flex-row flex-wrap'),
 );
 
 const root = useTemplateRef<{ el: HTMLFieldSetElement | null }>('root');

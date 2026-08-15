@@ -42,9 +42,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const rootClass = computed(() =>
-  cn('text-sm text-muted-foreground', attrs.class as ClassValue),
-);
+const rootClass = computed(() => cn('text-sm text-muted-foreground', attrs.class as ClassValue));
 
 const root = useTemplateRef<HTMLParagraphElement>('root');
 

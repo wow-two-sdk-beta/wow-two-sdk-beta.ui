@@ -168,9 +168,7 @@ export interface AppFormState<TValues> {
  * contract (typed values, untyped paths), deep typed paths are the tanstack
  * adapter's escape-hatch territory.
  */
-export type AppFieldValue<TValues, TPath extends string> = TPath extends keyof TValues
-  ? TValues[TPath]
-  : unknown;
+export type AppFieldValue<TValues, TPath extends string> = TPath extends keyof TValues ? TValues[TPath] : unknown;
 
 /**
  * The path a field binds — a key of `TValues`, or any other string (`rules[0].destination`).
@@ -216,7 +214,9 @@ export interface AppFieldProps<TPath extends string = string> {
  * component's props/slots off.
  */
 export interface AppFieldComponent<TValues extends object> {
-  new <TPath extends AppFieldPath<TValues>>(props: AppFieldProps<TPath>): {
+  new <TPath extends AppFieldPath<TValues>>(
+    props: AppFieldProps<TPath>,
+  ): {
     $props: AppFieldProps<TPath> & PublicProps;
     $slots: { default?: (field: AppFieldApi<AppFieldValue<TValues, TPath>>) => VNode[] };
   };
@@ -280,10 +280,7 @@ export interface AppForm<TValues extends object, TEngine = unknown> {
    * mirroring {@link AppFieldValue}). Clears that field's server error like an in-field edit
    * and runs change-time validation under the active `validateOn`.
    */
-  readonly setValue: <TPath extends AppFieldPath<TValues>>(
-    path: TPath,
-    value: AppFieldValue<TValues, TPath>,
-  ) => void;
+  readonly setValue: <TPath extends AppFieldPath<TValues>>(path: TPath, value: AppFieldValue<TValues, TPath>) => void;
   /** Array helpers at a path — `push` / `insert` / `remove` / `swap` / `move` (R8). */
   readonly array: (path: string) => AppArrayApi;
   /** Resets to `defaultValues`, or re-seeds with `next` (edit-mode prefill — kills smart-qr's 13-setter effect). */

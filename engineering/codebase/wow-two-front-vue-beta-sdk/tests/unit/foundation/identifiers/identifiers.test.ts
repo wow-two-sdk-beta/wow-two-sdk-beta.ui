@@ -48,6 +48,11 @@ describe('parsing', () => {
 
 describe('equality', () => {
   it('compares case-insensitively', () => {
-    expect(Guid.equals(Guid.parse('0197C8F4-3E2A-7C1D-8F9A-1B2C3D4E5F60'), Guid.parse('0197c8f4-3e2a-7c1d-8f9a-1b2c3d4e5f60'))).toBe(true);
+    expect(
+      Guid.equals(
+        Guid.parse('0197C8F4-3E2A-7C1D-8F9A-1B2C3D4E5F60'),
+        Guid.parse('0197c8f4-3e2a-7c1d-8f9a-1b2c3d4e5f60'),
+      ),
+    ).toBe(true);
   });
 });

@@ -59,10 +59,7 @@ const labelStyle = computed<CSSProperties>(() => ({
 }));
 
 const classes = computed(() =>
-  cn(
-    'pointer-events-none absolute left-0 top-0 z-tooltip select-none',
-    attrs.class as string | undefined,
-  ),
+  cn('pointer-events-none absolute left-0 top-0 z-tooltip select-none', attrs.class as string | undefined),
 );
 
 /**
@@ -81,20 +78,8 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div
-    ref="el"
-    aria-hidden="true"
-    v-bind="rest"
-    :class="classes"
-    :style="[wrapperStyle, callerStyle ?? {}]"
-  >
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      class="drop-shadow-sm"
-    >
+  <div ref="el" aria-hidden="true" v-bind="rest" :class="classes" :style="[wrapperStyle, callerStyle ?? {}]">
+    <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-sm">
       <path
         d="M5 3 L5 19 L9.5 14.5 L12.5 21 L15.5 19.5 L12.5 13 L19 13 Z"
         :fill="props.color"

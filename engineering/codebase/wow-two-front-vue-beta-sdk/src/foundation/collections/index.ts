@@ -44,25 +44,10 @@ export {
 export { difference, intersection, symmetricDifference, union } from './SetOps';
 
 // Keyed collections — list to lookup, and reshaping a lookup without mutating it
-export {
-  entriesToRecord,
-  invertRecord,
-  keyBy,
-  mapValues,
-  omitKeys,
-  pickKeys,
-  recordToEntries,
-} from './Records';
+export { entriesToRecord, invertRecord, keyBy, mapValues, omitKeys, pickKeys, recordToEntries } from './Records';
 
 // Structural equality — the three memo-boundary comparisons, cheapest first
 export { arrayShallowEqual, deepEqual, shallowEqual } from './Comparison';
 
 // Trees — flat `{ id, parentId }` list to nested nodes, plus the walks over one
-export {
-  buildTree,
-  findInTree,
-  flattenTree,
-  mapTree,
-  type BuildTreeOptions,
-  type TreeNode,
-} from './Tree';
+export { buildTree, findInTree, flattenTree, mapTree, type BuildTreeOptions, type TreeNode } from './Tree';

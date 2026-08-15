@@ -177,9 +177,7 @@ const split = computed(() => {
 
 const iso = computed(() => split.value.iso);
 const national = computed(() => split.value.national);
-const country = computed(
-  () => PHONE_COUNTRIES.find((c) => c.iso === iso.value) ?? PHONE_COUNTRIES[0]!,
-);
+const country = computed(() => PHONE_COUNTRIES.find((c) => c.iso === iso.value) ?? PHONE_COUNTRIES[0]!);
 
 function setCountry(event: Event): void {
   const nextIso = (event.target as HTMLSelectElement).value;
@@ -211,10 +209,7 @@ const selectClass = cn(
   'h-10 cursor-pointer border-r border-input bg-card pl-2 pr-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring',
 );
 
-const inputClass = cn(
-  inputBaseVariants({ size: InputSize.Md }),
-  'rounded-none border-0 focus-visible:ring-0',
-);
+const inputClass = cn(inputBaseVariants({ size: InputSize.Md }), 'rounded-none border-0 focus-visible:ring-0');
 </script>
 
 <template>
@@ -227,9 +222,7 @@ const inputClass = cn(
       :style="{ minWidth: '90px' }"
       @change="setCountry"
     >
-      <option v-for="c in PHONE_COUNTRIES" :key="c.iso" :value="c.iso">
-        {{ c.flag }} {{ c.dial }}
-      </option>
+      <option v-for="c in PHONE_COUNTRIES" :key="c.iso" :value="c.iso">{{ c.flag }} {{ c.dial }}</option>
     </select>
     <input
       type="tel"

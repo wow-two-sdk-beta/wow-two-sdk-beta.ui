@@ -48,9 +48,7 @@ const anchor = context.anchor;
 /* Enter-only pop: the surface mounts when `open` flips true, so the anim fires
    once on mount. motion-safe gates it for reduced-motion. (Exit anim is owned by
    the shared `Menu`'s Presence gate.) */
-const classes = computed(() =>
-  cn('motion-safe:animate-(--animate-pop-in)', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('motion-safe:animate-(--animate-pop-in)', attrs.class as string | undefined));
 
 /** Everything but `class` — relayed to `Menu`, which lands `aria-label` on the surface. */
 const rest = computed(() => {

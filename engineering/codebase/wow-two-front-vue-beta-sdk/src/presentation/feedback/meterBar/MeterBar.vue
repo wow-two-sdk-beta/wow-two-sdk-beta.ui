@@ -47,11 +47,7 @@ const tone = computed(() => {
 const pct = computed(() => Math.min(100, Math.max(0, (props.value / props.max) * 100)));
 
 const classes = computed(() =>
-  cn(
-    'w-full overflow-hidden rounded-full bg-muted',
-    SIZE[props.size] ?? SIZE.md,
-    attrs.class as string | undefined,
-  ),
+  cn('w-full overflow-hidden rounded-full bg-muted', SIZE[props.size] ?? SIZE.md, attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -74,9 +70,6 @@ defineExpose({ el });
     v-bind="rest"
     :class="classes"
   >
-    <div
-      :class="cn('h-full rounded-full transition-[width] duration-300', tone)"
-      :style="{ width: `${pct}%` }"
-    />
+    <div :class="cn('h-full rounded-full transition-[width] duration-300', tone)" :style="{ width: `${pct}%` }" />
   </div>
 </template>

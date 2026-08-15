@@ -13,8 +13,7 @@ export const DescriptionListLayout = {
   Stacked: 'stacked',
 } as const;
 
-export type DescriptionListLayout =
-  (typeof DescriptionListLayout)[keyof typeof DescriptionListLayout];
+export type DescriptionListLayout = (typeof DescriptionListLayout)[keyof typeof DescriptionListLayout];
 
 /** Defines the DescriptionList inter-row density. */
 export const DescriptionListDensity = {
@@ -26,8 +25,7 @@ export const DescriptionListDensity = {
   Lg: 'lg',
 } as const;
 
-export type DescriptionListDensity =
-  (typeof DescriptionListDensity)[keyof typeof DescriptionListDensity];
+export type DescriptionListDensity = (typeof DescriptionListDensity)[keyof typeof DescriptionListDensity];
 
 export interface DescriptionListProps {
   items: ReadonlyArray<DescriptionListItem>;
@@ -80,9 +78,7 @@ const el = useTemplateRef<HTMLDListElement>('el');
 const classes = computed(() =>
   cn(
     'text-sm',
-    props.layout === DescriptionListLayout.Inline
-      ? 'grid grid-cols-[max-content_1fr] gap-x-4'
-      : 'flex flex-col gap-1',
+    props.layout === DescriptionListLayout.Inline ? 'grid grid-cols-[max-content_1fr] gap-x-4' : 'flex flex-col gap-1',
     ROW_GAP[props.density],
     attrs.class as string | undefined,
   ),

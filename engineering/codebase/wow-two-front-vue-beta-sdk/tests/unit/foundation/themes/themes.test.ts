@@ -40,9 +40,7 @@ describe('generateTheme', () => {
   });
 
   it('carries a contrast verdict, and the validator agrees with it', () => {
-    expect(validateTheme({ light: theme.light, dark: theme.dark }).contrastAA).toBe(
-      theme.meta.contrastAA,
-    );
+    expect(validateTheme({ light: theme.light, dark: theme.dark }).contrastAA).toBe(theme.meta.contrastAA);
   });
 });
 

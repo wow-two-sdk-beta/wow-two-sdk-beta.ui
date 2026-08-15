@@ -56,7 +56,13 @@ interface Envelope {
 
 /** Recognises a value as a version envelope (vs a legacy bare value written before versioning). */
 function isEnvelope(value: unknown): value is Envelope {
-  return typeof value === 'object' && value !== null && 'v' in value && 'data' in value && typeof (value as Envelope).v === 'number';
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'v' in value &&
+    'data' in value &&
+    typeof (value as Envelope).v === 'number'
+  );
 }
 
 /**

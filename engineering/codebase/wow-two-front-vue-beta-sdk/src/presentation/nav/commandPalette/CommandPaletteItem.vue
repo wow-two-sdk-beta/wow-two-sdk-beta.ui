@@ -71,16 +71,12 @@ onScopeDispose(() => context.unregisterItem(id));
 
 /** Hidden when the current filter excludes it — React returned `null` for the same case. */
 const matches = computed(
-  () =>
-    context.inputValue.value === '' ||
-    context.filter(resolvedSearch.value, context.inputValue.value),
+  () => context.inputValue.value === '' || context.filter(resolvedSearch.value, context.inputValue.value),
 );
 
 const isActive = computed(() => context.activeId.value === id);
 
-const state = computed(() =>
-  props.isDisabled ? 'disabled' : isActive.value ? 'active' : 'default',
-);
+const state = computed(() => (props.isDisabled ? 'disabled' : isActive.value ? 'active' : 'default'));
 
 function handleClick(event: MouseEvent): void {
   if (event.defaultPrevented || props.isDisabled) return;
@@ -92,9 +88,7 @@ function handlePointerEnter(): void {
   if (!props.isDisabled) context.setActiveId(id);
 }
 
-const classes = computed(() =>
-  cn(listboxItemVariants({ state: state.value }), attrs.class as string | undefined),
-);
+const classes = computed(() => cn(listboxItemVariants({ state: state.value }), attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

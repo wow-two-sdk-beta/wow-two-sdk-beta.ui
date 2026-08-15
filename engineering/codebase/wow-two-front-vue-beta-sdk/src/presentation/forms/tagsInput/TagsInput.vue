@@ -142,10 +142,7 @@ const ctx = useFormControl();
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
 const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
 const invalid = computed(() => props.isInvalid ?? ctx?.isInvalid);
-const finalState = computed(
-  () =>
-    props.state ?? (invalid.value ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const finalState = computed(() => props.state ?? (invalid.value ? InputStateValue.Invalid : InputStateValue.Default));
 
 function commit(raw: string): void {
   const trimmed = raw.trim();
@@ -234,16 +231,10 @@ const describedBy = computed(() => ariaDescribedBy.value ?? ctx?.describedBy);
 /* aria- (not native) required — the tag list is the value; a native `required` on the empty
    inner input would block submits even with tags committed. */
 const requiredAttr = computed(() => ariaRequired.value ?? (ctx?.isRequired || undefined));
-const inputPlaceholder = computed(() =>
-  tags.value.length === 0 ? props.placeholder : undefined,
-);
+const inputPlaceholder = computed(() => (tags.value.length === 0 ? props.placeholder : undefined));
 const hiddenValue = computed(() => tags.value.join(','));
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set([
-  'class',
-  'aria-describedby',
-  'aria-required',
-]);
+const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-describedby', 'aria-required']);
 const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );

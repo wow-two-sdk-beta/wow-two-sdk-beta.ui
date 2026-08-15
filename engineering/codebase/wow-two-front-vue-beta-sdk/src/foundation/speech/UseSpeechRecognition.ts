@@ -19,15 +19,7 @@
 // and clears `interimTranscript`, so a consumer renders `transcript + interimTranscript` and gets the natural
 // "committed text, then greyed-out live text" without tracking anything itself. `reset()` clears both.
 
-import {
-  onMounted,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 import { useLocale } from '../i18n';
 

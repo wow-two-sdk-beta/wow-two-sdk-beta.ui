@@ -118,12 +118,7 @@ const INDETERMINATE_CHECKED_CLASS: Record<
 import { computed, useAttrs, useTemplateRef, watch, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Check, Minus } from 'lucide-vue-next';
-import {
-  cn,
-  ColorExtensions,
-  CssExtensions,
-  ColorTone as ColorToneValue,
-} from '../../../foundation/utils';
+import { cn, ColorExtensions, CssExtensions, ColorTone as ColorToneValue } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives';
 import { checkboxVariants, CheckboxVariant as CheckboxVariantValue } from './Checkbox.variants';
@@ -191,30 +186,18 @@ watch(
 );
 
 /* Parse union-typed `size` — preset routes to box+icon class lookup, raw/object routes to inline dims. */
-const CHECKBOX_SIZE_PRESETS: ReadonlySet<string> = new Set<CheckboxSizePreset>([
-  'xs',
-  'sm',
-  'md',
-  'lg',
-  'xl',
-]);
+const CHECKBOX_SIZE_PRESETS: ReadonlySet<string> = new Set<CheckboxSizePreset>(['xs', 'sm', 'md', 'lg', 'xl']);
 
-const parsedSize = computed(() =>
-  CssExtensions.parseSizeUnion<CheckboxSizePreset>(props.size, CHECKBOX_SIZE_PRESETS),
-);
+const parsedSize = computed(() => CssExtensions.parseSizeUnion<CheckboxSizePreset>(props.size, CHECKBOX_SIZE_PRESETS));
 
-const boxClass = computed(() =>
-  parsedSize.value.preset ? BOX_SIZE_CLASS[parsedSize.value.preset] : undefined,
-);
+const boxClass = computed(() => (parsedSize.value.preset ? BOX_SIZE_CLASS[parsedSize.value.preset] : undefined));
 const iconClass = computed(() =>
   parsedSize.value.preset ? ICON_SIZE_CLASS[parsedSize.value.preset] : DEFAULT_ICON_CLASS,
 );
 
 /* Per-instance color override → sets CSS vars on wrapper; the visual span inherits via cascade. */
 const composedStyle = computed<StyleValue | undefined>(() => {
-  const boxStyle = parsedSize.value.box
-    ? CssExtensions.resolveBoxSize(parsedSize.value.box)
-    : undefined;
+  const boxStyle = parsedSize.value.box ? CssExtensions.resolveBoxSize(parsedSize.value.box) : undefined;
   const colorStyle = ColorExtensions.toneColorOverride(props.color, props.tone);
   return colorStyle || boxStyle ? { ...colorStyle, ...boxStyle } : undefined;
 });
@@ -231,9 +214,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const wrapperClass = computed(() =>
-  cn('relative inline-flex shrink-0', boxClass.value, attrs.class as ClassValue),
-);
+const wrapperClass = computed(() => cn('relative inline-flex shrink-0', boxClass.value, attrs.class as ClassValue));
 
 const visualClass = computed(() =>
   cn(

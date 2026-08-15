@@ -12,12 +12,7 @@ export {
   matchesAcceptType,
 } from './Accept';
 
-export {
-  type SafeFileNameOptions,
-  fileExtension,
-  fileBaseName,
-  safeFileName,
-} from './FileName';
+export { type SafeFileNameOptions, fileExtension, fileBaseName, safeFileName } from './FileName';
 
 export { readFileAsText, readFileAsDataUrl, readFileAsArrayBuffer } from './ReadFile';
 

@@ -1,12 +1,4 @@
-import {
-  computed,
-  inject,
-  provide,
-  toValue,
-  type ComputedRef,
-  type InjectionKey,
-  type MaybeRefOrGetter,
-} from 'vue';
+import { computed, inject, provide, toValue, type ComputedRef, type InjectionKey, type MaybeRefOrGetter } from 'vue';
 
 /** Defines the reading direction of a subtree. */
 export const Direction = {

@@ -60,8 +60,7 @@ const rootClass = computed(() =>
   ),
 );
 
-const ADDON_CLASS =
-  'inline-flex shrink-0 items-center border border-input bg-muted px-3 text-sm text-muted-foreground';
+const ADDON_CLASS = 'inline-flex shrink-0 items-center border border-input bg-muted px-3 text-sm text-muted-foreground';
 
 const root = useTemplateRef<HTMLDivElement>('root');
 

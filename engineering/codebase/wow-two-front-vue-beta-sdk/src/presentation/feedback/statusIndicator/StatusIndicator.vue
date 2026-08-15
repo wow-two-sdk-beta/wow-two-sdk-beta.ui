@@ -53,9 +53,7 @@ const pulseClasses = computed(() =>
   cn('absolute inset-0 inline-block rounded-full opacity-75 animate-ping', TONE[props.tone]),
 );
 
-const classes = computed(() =>
-  cn('flex items-start gap-3', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('flex items-start gap-3', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

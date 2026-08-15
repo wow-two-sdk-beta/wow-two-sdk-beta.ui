@@ -1,8 +1,4 @@
-import {
-  FLUENT_VALIDATION_CODES,
-  FLUENT_VALIDATION_PARAMS,
-  type FieldIssue,
-} from '../validation/Messages';
+import { FLUENT_VALIDATION_CODES, FLUENT_VALIDATION_PARAMS, type FieldIssue } from '../validation/Messages';
 
 import { ApiError } from './ApiError';
 

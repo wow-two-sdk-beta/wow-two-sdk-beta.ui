@@ -15,14 +15,7 @@
 // `supported` rides the same subscription rather than being computed once — one pair of listeners drives both
 // values, the same trade `foundation/device`'s `useDisplayMode` makes with its media queries.
 
-import {
-  onMounted,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onMounted, onScopeDispose, shallowRef, toValue, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 import {
   enterFullscreen,
@@ -64,9 +57,7 @@ export interface FullscreenControls {
  * @param target The element to present. Defaults to `document.documentElement` when omitted or still `null`.
  * @returns The current state plus the `enter` / `exit` / `toggle` actions.
  */
-export function useFullscreen(
-  target?: MaybeRefOrGetter<Element | null | undefined>,
-): FullscreenControls {
+export function useFullscreen(target?: MaybeRefOrGetter<Element | null | undefined>): FullscreenControls {
   const active = shallowRef(false);
   const supported = shallowRef(false);
 

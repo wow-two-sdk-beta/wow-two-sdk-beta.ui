@@ -153,9 +153,7 @@ const geometry = computed<SparklineGeometry>(() => {
   };
 });
 
-const showLast = computed(
-  () => Boolean(props.hasLast) && props.data.length > 0 && props.variant !== 'dot',
-);
+const showLast = computed(() => Boolean(props.hasLast) && props.data.length > 0 && props.variant !== 'dot');
 
 const classes = computed(() =>
   cn('inline-block overflow-visible', TONE_CLASS[props.tone], attrs.class as string | undefined),

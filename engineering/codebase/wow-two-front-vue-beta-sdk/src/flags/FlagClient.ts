@@ -83,13 +83,21 @@ export interface FlagClient {
   evaluateNumber(key: string, defaultValue: number, context?: EvaluationContext): FlagEvaluation<number>;
 
   /** Evaluates a JSON object flag, returning the full outcome. */
-  evaluateObject<TValue extends JsonObject>(key: string, defaultValue: TValue, context?: EvaluationContext): FlagEvaluation<TValue>;
+  evaluateObject<TValue extends JsonObject>(
+    key: string,
+    defaultValue: TValue,
+    context?: EvaluationContext,
+  ): FlagEvaluation<TValue>;
 
   /** Evaluates any flag, picking the typed path from the runtime type of `defaultValue` — what `useFlag` is built on. */
   getValue<TValue extends FlagValue>(key: string, defaultValue: TValue, context?: EvaluationContext): TValue;
 
   /** Evaluates any flag, picking the typed path from the runtime type of `defaultValue`, returning the full outcome. */
-  evaluate<TValue extends FlagValue>(key: string, defaultValue: TValue, context?: EvaluationContext): FlagEvaluation<TValue>;
+  evaluate<TValue extends FlagValue>(
+    key: string,
+    defaultValue: TValue,
+    context?: EvaluationContext,
+  ): FlagEvaluation<TValue>;
 
   /** Reads the current client-wide evaluation context. */
   getContext(): EvaluationContext;
@@ -111,7 +119,9 @@ function attributesEqual(left: ContextAttribute | undefined, right: ContextAttri
   if (Array.isArray(left) && Array.isArray(right)) {
     const rightEntries = right as readonly unknown[];
     const leftEntries = left as readonly unknown[];
-    return leftEntries.length === rightEntries.length && leftEntries.every((entry, index) => entry === rightEntries[index]);
+    return (
+      leftEntries.length === rightEntries.length && leftEntries.every((entry, index) => entry === rightEntries[index])
+    );
   }
   return left === right;
 }
@@ -173,7 +183,13 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
     } catch (cause) {
       const message = `provider "${provider.name ?? 'unnamed'}" threw while resolving "${key}"`;
       report(key, FlagErrorCode.ProviderError, message, cause);
-      return { key, value: defaultValue, reason: FlagReason.Error, errorCode: FlagErrorCode.ProviderError, errorMessage: message };
+      return {
+        key,
+        value: defaultValue,
+        reason: FlagReason.Error,
+        errorCode: FlagErrorCode.ProviderError,
+        errorMessage: message,
+      };
     }
 
     if (resolution === undefined) return { key, value: defaultValue, reason: FlagReason.Default };
@@ -181,7 +197,14 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
     if (resolution.errorCode !== undefined) {
       const message = resolution.errorMessage ?? `provider reported "${resolution.errorCode}" for "${key}"`;
       report(key, resolution.errorCode, message);
-      return { key, value: defaultValue, reason: FlagReason.Error, errorCode: resolution.errorCode, errorMessage: message, variant: resolution.variant };
+      return {
+        key,
+        value: defaultValue,
+        reason: FlagReason.Error,
+        errorCode: resolution.errorCode,
+        errorMessage: message,
+        variant: resolution.variant,
+      };
     }
 
     // Gated off: the flag exists but must not apply — the caller's default stands, not the stored value.
@@ -192,18 +215,31 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
     if (!isValid(resolution.value)) {
       const message = `flag "${key}" resolved to ${typeof resolution.value}, expected ${typeName}`;
       report(key, FlagErrorCode.TypeMismatch, message);
-      return { key, value: defaultValue, reason: FlagReason.Error, errorCode: FlagErrorCode.TypeMismatch, errorMessage: message, variant: resolution.variant };
+      return {
+        key,
+        value: defaultValue,
+        reason: FlagReason.Error,
+        errorCode: FlagErrorCode.TypeMismatch,
+        errorMessage: message,
+        variant: resolution.variant,
+      };
     }
 
     // The only cast in the evaluation path, and `isValid` is what earns it: the runtime type of the
     // resolved value has just been checked against the type `TValue` was inferred from.
-    return { key, value: resolution.value as TValue, reason: resolution.reason ?? FlagReason.Static, variant: resolution.variant };
+    return {
+      key,
+      value: resolution.value as TValue,
+      reason: resolution.reason ?? FlagReason.Static,
+      variant: resolution.variant,
+    };
   };
 
   const isBoolean = (value: FlagValue): boolean => typeof value === 'boolean';
   const isString = (value: FlagValue): boolean => typeof value === 'string';
   const isNumber = (value: FlagValue): boolean => typeof value === 'number' && Number.isFinite(value);
-  const isJsonObject = (value: FlagValue): boolean => typeof value === 'object' && value !== null && !Array.isArray(value);
+  const isJsonObject = (value: FlagValue): boolean =>
+    typeof value === 'object' && value !== null && !Array.isArray(value);
 
   const evaluateBoolean = (key: string, defaultValue: boolean, context?: EvaluationContext): FlagEvaluation<boolean> =>
     core(key, defaultValue, context, (k, c) => provider.resolveBoolean(k, c), isBoolean, 'boolean');
@@ -214,27 +250,50 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
   const evaluateNumber = (key: string, defaultValue: number, context?: EvaluationContext): FlagEvaluation<number> =>
     core(key, defaultValue, context, (k, c) => provider.resolveNumber(k, c), isNumber, 'number');
 
-  const evaluateObject = <TValue extends JsonObject>(key: string, defaultValue: TValue, context?: EvaluationContext): FlagEvaluation<TValue> =>
+  const evaluateObject = <TValue extends JsonObject>(
+    key: string,
+    defaultValue: TValue,
+    context?: EvaluationContext,
+  ): FlagEvaluation<TValue> =>
     core(key, defaultValue, context, (k, c) => provider.resolveObject(k, c), isJsonObject, 'object');
 
-  const evaluate = <TValue extends FlagValue>(key: string, defaultValue: TValue, context?: EvaluationContext): FlagEvaluation<TValue> => {
-    if (typeof defaultValue === 'boolean') return core(key, defaultValue, context, (k, c) => provider.resolveBoolean(k, c), isBoolean, 'boolean');
-    if (typeof defaultValue === 'string') return core(key, defaultValue, context, (k, c) => provider.resolveString(k, c), isString, 'string');
-    if (typeof defaultValue === 'number') return core(key, defaultValue, context, (k, c) => provider.resolveNumber(k, c), isNumber, 'number');
-    if (isJsonObject(defaultValue)) return core(key, defaultValue, context, (k, c) => provider.resolveObject(k, c), isJsonObject, 'object');
+  const evaluate = <TValue extends FlagValue>(
+    key: string,
+    defaultValue: TValue,
+    context?: EvaluationContext,
+  ): FlagEvaluation<TValue> => {
+    if (typeof defaultValue === 'boolean')
+      return core(key, defaultValue, context, (k, c) => provider.resolveBoolean(k, c), isBoolean, 'boolean');
+    if (typeof defaultValue === 'string')
+      return core(key, defaultValue, context, (k, c) => provider.resolveString(k, c), isString, 'string');
+    if (typeof defaultValue === 'number')
+      return core(key, defaultValue, context, (k, c) => provider.resolveNumber(k, c), isNumber, 'number');
+    if (isJsonObject(defaultValue))
+      return core(key, defaultValue, context, (k, c) => provider.resolveObject(k, c), isJsonObject, 'object');
 
     // Unreachable from TypeScript (`FlagValue` covers the four cases above) — reachable from untyped
     // JS passing `null` / an array / a function as the default. Still total: hand it straight back.
     const message = `flag "${key}" was given a ${typeof defaultValue} default, expected boolean, string, number, or object`;
     report(key, FlagErrorCode.InvalidDefault, message);
-    return { key, value: defaultValue, reason: FlagReason.Error, errorCode: FlagErrorCode.InvalidDefault, errorMessage: message };
+    return {
+      key,
+      value: defaultValue,
+      reason: FlagReason.Error,
+      errorCode: FlagErrorCode.InvalidDefault,
+      errorMessage: message,
+    };
   };
 
   const notifyProvider = (context: EvaluationContext): void => {
     const hook = provider.onContextChange;
     if (hook === undefined) return;
     const fail = (cause: unknown): void =>
-      report('', FlagErrorCode.ProviderError, `provider "${provider.name ?? 'unnamed'}" failed handling the context change`, cause);
+      report(
+        '',
+        FlagErrorCode.ProviderError,
+        `provider "${provider.name ?? 'unnamed'}" failed handling the context change`,
+        cause,
+      );
     try {
       const pending = hook.call(provider, context);
       if (pending instanceof Promise) void pending.catch(fail); // a rejected refetch must not become an unhandled rejection

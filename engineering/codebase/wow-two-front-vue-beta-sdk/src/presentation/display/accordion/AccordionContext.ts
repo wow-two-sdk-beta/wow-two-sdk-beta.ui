@@ -35,8 +35,7 @@ export interface AccordionItemContextValue {
   disabled: boolean;
 }
 
-export const AccordionItemKey: InjectionKey<AccordionItemContextValue> =
-  Symbol('wow-two.accordionItem');
+export const AccordionItemKey: InjectionKey<AccordionItemContextValue> = Symbol('wow-two.accordionItem');
 
 /** Reads the enclosing `AccordionItem` state. */
 export function useAccordionItemContext(): AccordionItemContextValue {

@@ -283,9 +283,7 @@ function onInput(event: Event): void {
   valueCtl.setValue((event.target as HTMLTextAreaElement).value);
 }
 
-const showEdit = computed(
-  () => mode.value === MarkdownEditorView.Split || mode.value === MarkdownEditorView.Edit,
-);
+const showEdit = computed(() => mode.value === MarkdownEditorView.Split || mode.value === MarkdownEditorView.Edit);
 const showPreview = computed(
   () => mode.value === MarkdownEditorView.Split || mode.value === MarkdownEditorView.Preview,
 );
@@ -324,9 +322,7 @@ const textareaClass = computed(() =>
 function viewButtonClass(v: MarkdownEditorView): string {
   return cn(
     'inline-flex h-6 items-center rounded px-2 text-xs font-medium transition-colors',
-    mode.value === v
-      ? 'bg-primary text-primary-foreground'
-      : 'text-muted-foreground hover:text-foreground',
+    mode.value === v ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
   );
 }
 

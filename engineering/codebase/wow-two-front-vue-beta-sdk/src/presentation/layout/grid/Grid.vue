@@ -42,12 +42,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
 
 const classes = computed(() =>
-  cn(
-    'grid',
-    resolveGridColumns(props.columns),
-    resolveGridGap(props.gap),
-    attrs.class as string | undefined,
-  ),
+  cn('grid', resolveGridColumns(props.columns), resolveGridGap(props.gap), attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

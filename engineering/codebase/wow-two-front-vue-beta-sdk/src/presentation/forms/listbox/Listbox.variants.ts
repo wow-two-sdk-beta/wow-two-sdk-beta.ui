@@ -51,6 +51,7 @@ export type ListboxItemVariants = VariantProps<typeof listboxItemVariants>;
 /* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
 const _assertListboxItemState: AssertExact<
-  ListboxItemState, NonNullable<VariantProps<typeof listboxItemVariants>['state']>
+  ListboxItemState,
+  NonNullable<VariantProps<typeof listboxItemVariants>['state']>
 > = true;
 void _assertListboxItemState;

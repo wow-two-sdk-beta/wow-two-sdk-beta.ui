@@ -259,9 +259,7 @@ watch(
     const current = exiting.value;
     const known = new Set(current.map((e) => e.id));
     // Add newly-gone toasts; drop any that re-entered `visible`.
-    const merged = [...current, ...gone.filter((g) => !known.has(g.id))].filter(
-      (e) => !ids.has(e.id),
-    );
+    const merged = [...current, ...gone.filter((g) => !known.has(g.id))].filter((e) => !ids.has(e.id));
     if (merged.length !== current.length || !merged.every((e, i) => e.id === current[i]?.id)) {
       exiting.value = merged;
     }

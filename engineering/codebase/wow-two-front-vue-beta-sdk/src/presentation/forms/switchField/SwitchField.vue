@@ -54,9 +54,7 @@ const generated = useId();
 const ctx = useFormControl();
 const inputId = computed(() => props.id ?? ctx?.id ?? generated);
 
-const hasDescription = computed(
-  () => Boolean(props.description) || Boolean(slots.description),
-);
+const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
 
 /* No `defineEmits`: the consumer's `v-model` listeners must stay in `useAttrs()` to reach
    the inner `Switch` — see the CheckboxField note. */
@@ -67,13 +65,7 @@ const passthroughAttrs = computed(() =>
 
 /** This component's own props must not reach the inner `Switch`. */
 const switchProps = computed(() => {
-  const {
-    label: _label,
-    description: _description,
-    side: _side,
-    wrapperClassName: _wrapperClassName,
-    ...rest
-  } = props;
+  const { label: _label, description: _description, side: _side, wrapperClassName: _wrapperClassName, ...rest } = props;
   return rest;
 });
 
@@ -95,12 +87,7 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
 
 <template>
   <label :for="inputId" :class="wrapperClass">
-    <Switch
-      ref="inner"
-      v-bind="{ ...switchProps, ...passthroughAttrs }"
-      :id="inputId"
-      :class="switchClass"
-    />
+    <Switch ref="inner" v-bind="{ ...switchProps, ...passthroughAttrs }" :id="inputId" :class="switchClass" />
     <span class="flex flex-col gap-0.5 text-sm">
       <span class="font-medium text-foreground">
         <slot name="label">{{ label }}</slot>

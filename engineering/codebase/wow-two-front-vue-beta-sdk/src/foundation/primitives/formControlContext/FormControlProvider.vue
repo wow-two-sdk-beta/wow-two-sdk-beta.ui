@@ -15,11 +15,7 @@ type ChromeCounts = Record<'label' | 'helper' | 'error', number>;
 
 <script setup lang="ts">
 import { provide, shallowRef, useId } from 'vue';
-import {
-  FormControlKey,
-  type FormControlChromeKind,
-  type FormControlContextValue,
-} from './FormControlContext';
+import { FormControlKey, type FormControlChromeKind, type FormControlContextValue } from './FormControlContext';
 
 /**
  * Wires Label ↔ control ↔ HelperText/ErrorMessage via stable IDs and shared
@@ -73,10 +69,7 @@ const context: FormControlContextValue = {
   },
   get describedBy() {
     return (
-      [
-        chrome.value.helper > 0 && `${id()}-helper`,
-        chrome.value.error > 0 && `${id()}-error`,
-      ]
+      [chrome.value.helper > 0 && `${id()}-helper`, chrome.value.error > 0 && `${id()}-error`]
         .filter(Boolean)
         .join(' ') || undefined
     );

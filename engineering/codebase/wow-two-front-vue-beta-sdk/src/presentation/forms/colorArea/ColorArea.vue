@@ -172,8 +172,7 @@ function onKeydown(event: KeyboardEvent): void {
 const trackStyle = computed<StyleValue>(() => [
   attrs.style as StyleValue,
   {
-    backgroundImage:
-      'linear-gradient(to bottom, transparent, #000), linear-gradient(to right, #fff, transparent)',
+    backgroundImage: 'linear-gradient(to bottom, transparent, #000), linear-gradient(to right, #fff, transparent)',
     backgroundColor: `hsl(${props.hue}, 100%, 50%)`,
   },
 ]);
@@ -185,12 +184,8 @@ const thumbStyle = computed<StyleValue>(() => ({
 }));
 
 const controlId = computed(() => props.id ?? ctx?.id);
-const finalAriaLabel = computed(
-  () => ariaLabel.value ?? (labelledBy.value ? undefined : 'Saturation and value'),
-);
-const valueText = computed(
-  () => `saturation ${(s.value * 100).toFixed(0)}%, value ${(v.value * 100).toFixed(0)}%`,
-);
+const finalAriaLabel = computed(() => ariaLabel.value ?? (labelledBy.value ? undefined : 'Saturation and value'));
+const valueText = computed(() => `saturation ${(s.value * 100).toFixed(0)}%, value ${(v.value * 100).toFixed(0)}%`);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 

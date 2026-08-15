@@ -197,17 +197,11 @@ const ChevronDownIcon = ChevronDown;
             @click="select(f)"
           >
             <span class="font-medium">{{ f.name }}</span>
-            <span
-              :style="{ fontFamily: f.family }"
-              class="ml-3 truncate text-xs text-muted-foreground"
-            >
+            <span :style="{ fontFamily: f.family }" class="ml-3 truncate text-xs text-muted-foreground">
               {{ f.sample ?? previewText }}
             </span>
           </button>
-          <div
-            v-if="filtered.length === 0"
-            class="px-2 py-6 text-center text-xs text-muted-foreground"
-          >
+          <div v-if="filtered.length === 0" class="px-2 py-6 text-center text-xs text-muted-foreground">
             No fonts match.
           </div>
         </div>

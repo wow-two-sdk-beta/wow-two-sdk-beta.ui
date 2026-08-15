@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  AnalyticsFailurePhase,
-  createAnalytics,
-  DefaultPageName,
-  memoryAnalyticsProvider,
-} from '@src/analytics';
+import { AnalyticsFailurePhase, createAnalytics, DefaultPageName, memoryAnalyticsProvider } from '@src/analytics';
 
 /*
  * Smoke depth, `unit` project (node). Two contracts carry the slice, and the second is the one

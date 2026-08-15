@@ -21,15 +21,7 @@
 // intended behaviour: a changed accuracy or timeout budget requires a new watch, since the platform has no way
 // to retune a live one.
 
-import {
-  onMounted,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 import { applyPositionResult, IdleGeolocationReading, type GeolocationReading } from './GeolocationReading';
 import type { PositionRequestOptions } from './PositionResult';
@@ -81,11 +73,7 @@ export function useWatchPosition(
   // separate getters rather than one returning a tuple — Vue compares each source with `Object.is`, so an
   // options object of a fresh identity carrying the same three values does not restart the watch.
   watch(
-    [
-      () => toValue(options)?.enableHighAccuracy,
-      () => toValue(options)?.timeout,
-      () => toValue(options)?.maximumAge,
-    ],
+    [() => toValue(options)?.enableHighAccuracy, () => toValue(options)?.timeout, () => toValue(options)?.maximumAge],
     start,
   );
   onScopeDispose(stop);

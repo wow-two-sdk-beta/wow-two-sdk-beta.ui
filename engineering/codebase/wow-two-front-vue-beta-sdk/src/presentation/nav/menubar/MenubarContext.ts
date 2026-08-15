@@ -43,8 +43,7 @@ export interface MenubarMenuContextValue {
   triggerEl: ShallowRef<HTMLButtonElement | null>;
 }
 
-export const menubarMenuContextKey: InjectionKey<MenubarMenuContextValue> =
-  Symbol('wow-two.menubarMenu');
+export const menubarMenuContextKey: InjectionKey<MenubarMenuContextValue> = Symbol('wow-two.menubarMenu');
 
 export function useMenubarMenuContext(): MenubarMenuContextValue {
   const context = inject(menubarMenuContextKey, null);

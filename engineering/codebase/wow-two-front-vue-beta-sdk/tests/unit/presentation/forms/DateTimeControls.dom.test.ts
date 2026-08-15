@@ -121,10 +121,7 @@ describe('DateField — popover by default, native only on request', () => {
   it('renders a typed text field, not the browser date control', () => {
     const wrapper = mount(DateField);
 
-    expect(
-      wrapper.find('input').attributes('type'),
-      'DateField still renders the native picker',
-    ).toBe('text');
+    expect(wrapper.find('input').attributes('type'), 'DateField still renders the native picker').toBe('text');
     expect(wrapper.find('button[aria-haspopup="dialog"]').exists()).toBe(true);
 
     wrapper.unmount();
@@ -185,10 +182,7 @@ describe('DateTimeField — popover by default, native only on request', () => {
   it('renders a typed text field, not the browser datetime control', () => {
     const wrapper = mount(DateTimeField);
 
-    expect(
-      wrapper.find('input').attributes('type'),
-      'DateTimeField still renders the native picker',
-    ).toBe('text');
+    expect(wrapper.find('input').attributes('type'), 'DateTimeField still renders the native picker').toBe('text');
     expect(wrapper.find('button[aria-haspopup="dialog"]').exists()).toBe(true);
 
     wrapper.unmount();
@@ -250,9 +244,7 @@ describe('day-grid hover states stay legible', () => {
     expect(cell.exists(), 'no day rendered as selected').toBe(true);
 
     const classes = classesOf(cell.element);
-    expect(classes, 'the day number flips to `foreground` on hover').toContain(
-      'hover:text-primary-foreground',
-    );
+    expect(classes, 'the day number flips to `foreground` on hover').toContain('hover:text-primary-foreground');
     expect(classes).not.toContain('hover:text-foreground');
     expect(classes).toContain('hover:bg-primary/90');
 
@@ -285,9 +277,7 @@ describe('TimePicker — the panel is ours', () => {
   it('opens a design-system panel rather than a native control', async () => {
     const wrapper = mount(TimePicker, { attachTo: document.body });
 
-    expect(wrapper.find('input[type="time"]').exists(), 'TimePicker fell back to native').toBe(
-      false,
-    );
+    expect(wrapper.find('input[type="time"]').exists(), 'TimePicker fell back to native').toBe(false);
 
     const trigger = wrapper.find('button[aria-haspopup="dialog"]');
     await trigger.trigger('click');
@@ -305,10 +295,7 @@ describe('RecurrenceEditor — design-system controls only', () => {
     expect(radios, 'the end-mode group lost its radios').toHaveLength(3);
 
     for (const radio of radios) {
-      expect(
-        classesOf(radio.element),
-        'a bare platform radio is rendering instead of `Radio`',
-      ).toContain('peer');
+      expect(classesOf(radio.element), 'a bare platform radio is rendering instead of `Radio`').toContain('peer');
       expect(radio.attributes('id'), 'radios share an id inside a Field').toBeTruthy();
     }
 
@@ -321,10 +308,7 @@ describe('RecurrenceEditor — design-system controls only', () => {
   it('picks its end date through DatePicker, not the browser date control', () => {
     const wrapper = mount(RecurrenceEditor);
 
-    expect(
-      wrapper.find('input[type="date"]').exists(),
-      'the end date still opens the native picker',
-    ).toBe(false);
+    expect(wrapper.find('input[type="date"]').exists(), 'the end date still opens the native picker').toBe(false);
     expect(wrapper.find('button[aria-label="End date"]').exists()).toBe(true);
 
     wrapper.unmount();

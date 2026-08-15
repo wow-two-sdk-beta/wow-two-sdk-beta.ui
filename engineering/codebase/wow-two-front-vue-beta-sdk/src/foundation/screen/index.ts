@@ -29,12 +29,7 @@
 // `requires-fullscreen` for the same reason. Under SSR every read returns a defined empty answer and every action
 // returns `unsupported`.
 
-export {
-  type ScreenResult,
-  type ScreenValueResult,
-  type ScreenFailure,
-  type ScreenStatus,
-} from './ScreenResult';
+export { type ScreenResult, type ScreenValueResult, type ScreenFailure, type ScreenStatus } from './ScreenResult';
 
 export {
   enterFullscreen,

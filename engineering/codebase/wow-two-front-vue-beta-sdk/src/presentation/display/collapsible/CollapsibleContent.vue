@@ -31,9 +31,7 @@ const context = useCollapsibleContext();
 const inner = useTemplateRef<ComponentPublicInstance>('inner');
 
 /** The rendered pane — the Vue stand-in for the React original's forwarded ref. */
-const el = computed<HTMLElement | null>(() =>
-  inner.value?.$el instanceof HTMLElement ? inner.value.$el : null,
-);
+const el = computed<HTMLElement | null>(() => (inner.value?.$el instanceof HTMLElement ? inner.value.$el : null));
 
 defineExpose({ el });
 </script>
@@ -49,11 +47,7 @@ defineExpose({ el });
     <slot />
   </CollapsibleContentInner>
   <Presence v-else :is-present="context.open">
-    <CollapsibleContentInner
-      ref="inner"
-      :is-force-mounted="isForceMounted"
-      v-bind="$attrs"
-    >
+    <CollapsibleContentInner ref="inner" :is-force-mounted="isForceMounted" v-bind="$attrs">
       <slot />
     </CollapsibleContentInner>
   </Presence>

@@ -90,19 +90,13 @@ const entries = computed<ReadonlyArray<readonly [string | number, unknown]>>(() 
   return Object.entries(props.value as Record<string, unknown>);
 });
 
-const keyLabel = computed(() =>
-  typeof props.keyName === 'string' ? `"${props.keyName}"` : props.keyName,
-);
+const keyLabel = computed(() => (typeof props.keyName === 'string' ? `"${props.keyName}"` : props.keyName));
 
 const summary = computed(() =>
-  Array.isArray(props.value)
-    ? `Array(${entries.value.length})`
-    : `Object(${entries.value.length})`,
+  Array.isArray(props.value) ? `Array(${entries.value.length})` : `Object(${entries.value.length})`,
 );
 
-const leafLabel = computed(() =>
-  type.value === 'string' ? `"${props.value as string}"` : String(props.value),
-);
+const leafLabel = computed(() => (type.value === 'string' ? `"${props.value as string}"` : String(props.value)));
 
 const copyLabel = computed(() => `Copy path ${pathToString(props.path) || 'root'}`);
 

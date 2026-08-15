@@ -12,12 +12,7 @@
 // `number()` ALSO REJECTS `NaN` AND `Infinity`: both are `typeof 'number'` and both poison every
 // downstream comparison, so a "valid number" that fails `x > 0` and `x <= 0` alike is not one.
 
-import {
-  describeType,
-  invalid,
-  valid,
-  type ValidationResult,
-} from './ValidationResult';
+import { describeType, invalid, valid, type ValidationResult } from './ValidationResult';
 import { Validator } from './Validator';
 
 /** A validator for `string` values, carrying the string-specific refinements. */
@@ -60,16 +55,10 @@ export class StringValidator extends Validator<string> {
    * private clone; the caller's regex is never mutated.
    */
   pattern(regex: RegExp, message?: string, code = 'pattern'): this {
-    const stateless =
-      regex.global || regex.sticky
-        ? new RegExp(regex.source, regex.flags.replace(/[gy]/g, ''))
-        : regex;
-    return this.refine(
-      (value) => stateless.test(value),
-      message ?? `must match ${String(stateless)}`,
-      code,
-      { pattern: stateless.source },
-    );
+    const stateless = regex.global || regex.sticky ? new RegExp(regex.source, regex.flags.replace(/[gy]/g, '')) : regex;
+    return this.refine((value) => stateless.test(value), message ?? `must match ${String(stateless)}`, code, {
+      pattern: stateless.source,
+    });
   }
 }
 
@@ -123,9 +112,7 @@ export function string(message?: string): StringValidator {
   return new StringValidator('string', (value, path) =>
     typeof value === 'string'
       ? valid(value)
-      : invalid([
-          { path, message: message ?? `expected string, received ${describeType(value)}`, code: 'type' },
-        ]),
+      : invalid([{ path, message: message ?? `expected string, received ${describeType(value)}`, code: 'type' }]),
   );
 }
 
@@ -134,9 +121,7 @@ export function number(message?: string): NumberValidator {
   return new NumberValidator('number', (value, path) =>
     typeof value === 'number' && Number.isFinite(value)
       ? valid(value)
-      : invalid([
-          { path, message: message ?? `expected number, received ${describeType(value)}`, code: 'type' },
-        ]),
+      : invalid([{ path, message: message ?? `expected number, received ${describeType(value)}`, code: 'type' }]),
   );
 }
 
@@ -145,9 +130,7 @@ export function boolean(message?: string): Validator<boolean> {
   return new Validator<boolean>('boolean', (value, path) =>
     typeof value === 'boolean'
       ? valid(value)
-      : invalid([
-          { path, message: message ?? `expected boolean, received ${describeType(value)}`, code: 'type' },
-        ]),
+      : invalid([{ path, message: message ?? `expected boolean, received ${describeType(value)}`, code: 'type' }]),
   );
 }
 
@@ -159,9 +142,7 @@ export function date(message?: string): DateValidator {
   return new DateValidator('Date', (value, path) =>
     value instanceof Date && !Number.isNaN(value.getTime())
       ? valid(value)
-      : invalid([
-          { path, message: message ?? `expected Date, received ${describeType(value)}`, code: 'type' },
-        ]),
+      : invalid([{ path, message: message ?? `expected Date, received ${describeType(value)}`, code: 'type' }]),
   );
 }
 
@@ -172,9 +153,7 @@ export function literal<const TValue extends string | number | boolean | null>(
 ): Validator<TValue> {
   const label = expected === null ? 'null' : JSON.stringify(expected);
   return new Validator<TValue>(`literal ${label}`, (value, path) =>
-    value === expected
-      ? valid(expected)
-      : invalid([{ path, message: message ?? `must be ${label}`, code: 'literal' }]),
+    value === expected ? valid(expected) : invalid([{ path, message: message ?? `must be ${label}`, code: 'literal' }]),
   );
 }
 

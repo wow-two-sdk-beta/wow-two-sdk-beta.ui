@@ -51,13 +51,9 @@ const props = withDefaults(defineProps<ControlGroupProps>(), {
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const styles = computed(() =>
-  controlGroupVariants({ orientation: props.orientation, divided: props.divided }),
-);
+const styles = computed(() => controlGroupVariants({ orientation: props.orientation, divided: props.divided }));
 
-const rootClasses = computed(() =>
-  cn(styles.value.root(), attrs.class as string | undefined),
-);
+const rootClasses = computed(() => cn(styles.value.root(), attrs.class as string | undefined));
 
 const labelStyle = computed<CSSProperties | undefined>(() =>
   props.labelWidth ? { flex: `0 0 ${props.labelWidth}` } : undefined,

@@ -83,9 +83,7 @@ const ids = computed(() => items.value.map((i) => i.id));
 const spyId = useScrollSpy(() => ids.value);
 const activeId = computed(() => (props.activeId !== undefined ? props.activeId : spyId.value));
 
-const classes = computed(() =>
-  cn(props.isSticky && 'sticky top-4 self-start', attrs.class as string | undefined),
-);
+const classes = computed(() => cn(props.isSticky && 'sticky top-4 self-start', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -98,19 +96,9 @@ defineExpose({ el });
 
 <template>
   <!-- React returned `null` for an empty outline; `v-if` is the same gate. -->
-  <nav
-    v-if="items.length > 0"
-    ref="el"
-    aria-label="Table of contents"
-    v-bind="rest"
-    :class="classes"
-  >
+  <nav v-if="items.length > 0" ref="el" aria-label="Table of contents" v-bind="rest" :class="classes">
     <ul class="space-y-1 text-sm">
-      <li
-        v-for="(item, i) in items"
-        :key="item.id"
-        :style="{ paddingLeft: `${(item.depth ?? 0) * 12}px` }"
-      >
+      <li v-for="(item, i) in items" :key="item.id" :style="{ paddingLeft: `${(item.depth ?? 0) * 12}px` }">
         <a
           :href="`#${item.id}`"
           :aria-current="item.id === activeId ? 'location' : undefined"

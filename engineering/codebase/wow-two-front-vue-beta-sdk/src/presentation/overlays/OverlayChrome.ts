@@ -25,15 +25,11 @@ export interface OverlayChromeContextValue {
   close: () => void;
 }
 
-export const overlayChromeContextKey: InjectionKey<OverlayChromeContextValue> = Symbol(
-  'wow-two.overlayChrome',
-);
+export const overlayChromeContextKey: InjectionKey<OverlayChromeContextValue> = Symbol('wow-two.overlayChrome');
 
 export function useOverlayChromeContext(): OverlayChromeContextValue {
   const context = inject(overlayChromeContextKey, null);
   if (!context)
-    throw new Error(
-      'Overlay chrome subcomponents must be used inside an OverlayChromeProvider (Modal / Drawer)',
-    );
+    throw new Error('Overlay chrome subcomponents must be used inside an OverlayChromeProvider (Modal / Drawer)');
   return context;
 }

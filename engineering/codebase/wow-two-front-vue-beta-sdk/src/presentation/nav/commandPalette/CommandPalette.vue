@@ -37,11 +37,7 @@ import { computed, provide, shallowRef, watch } from 'vue';
 import { useControlled, useId } from '../../../foundation/hooks';
 import { useHotkeys } from '../../../foundation/shortcuts';
 import { Modal } from '../../overlays/modal';
-import {
-  commandPaletteContextKey,
-  defaultFilter,
-  type CommandItemEntry,
-} from './CommandPaletteContext';
+import { commandPaletteContextKey, defaultFilter, type CommandItemEntry } from './CommandPaletteContext';
 
 /**
  * State owner for a CommandPalette tree — owns open state, search text and the

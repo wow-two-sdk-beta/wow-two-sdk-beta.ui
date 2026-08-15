@@ -25,6 +25,4 @@ export interface ToggleButtonGroupContextValue {
   readonly itemRole: ToggleItemRole;
 }
 
-export const ToggleButtonGroupKey: InjectionKey<ToggleButtonGroupContextValue> = Symbol(
-  'wow-two.toggleButtonGroup',
-);
+export const ToggleButtonGroupKey: InjectionKey<ToggleButtonGroupContextValue> = Symbol('wow-two.toggleButtonGroup');

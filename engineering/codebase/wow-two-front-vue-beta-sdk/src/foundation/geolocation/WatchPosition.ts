@@ -24,7 +24,12 @@
 import { toError } from '../errors';
 
 import { geolocationApi } from './CanLocate';
-import { toPositionResult, toPositionSuccess, type PositionRequestOptions, type PositionResult } from './PositionResult';
+import {
+  toPositionResult,
+  toPositionSuccess,
+  type PositionRequestOptions,
+  type PositionResult,
+} from './PositionResult';
 
 /** Receives every emission of a watch — a new fix, or a failure. Called with the same union as a one-shot read. */
 export type PositionHandler = (result: PositionResult) => void;

@@ -101,13 +101,7 @@ export interface DrawerContentProps {
 <script setup lang="ts">
 import { computed, provide, useAttrs } from 'vue';
 import { cn, surfaceVariants } from '../../../foundation/utils';
-import {
-  DismissableLayer,
-  FocusScope,
-  Portal,
-  Presence,
-  ScrollLockProvider,
-} from '../../../foundation/primitives';
+import { DismissableLayer, FocusScope, Portal, Presence, ScrollLockProvider } from '../../../foundation/primitives';
 import Backdrop from '../backdrop/Backdrop.vue';
 import { overlayChromeContextKey } from '../OverlayChrome';
 import { useDrawerContext } from './Drawer.vue';
@@ -140,9 +134,7 @@ provide(overlayChromeContextKey, {
 });
 
 const isHorizontal = computed(() => side.value === 'right' || side.value === 'left');
-const sizeClass = computed(() =>
-  isHorizontal.value ? HORIZONTAL_SIZE[props.size] : VERTICAL_SIZE[props.size],
-);
+const sizeClass = computed(() => (isHorizontal.value ? HORIZONTAL_SIZE[props.size] : VERTICAL_SIZE[props.size]));
 
 const classes = computed(() =>
   cn(

@@ -55,13 +55,7 @@ export type ListVariants = VariantProps<typeof listVariants>;
 
 /* Compile-time lock: enum values ≡ tv marker/spacing value-sets (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertListMarker: AssertExact<
-  ListMarker,
-  NonNullable<VariantProps<typeof listVariants>['marker']>
-> = true;
-const _assertListSpacing: AssertExact<
-  ListSpacing,
-  NonNullable<VariantProps<typeof listVariants>['spacing']>
-> = true;
+const _assertListMarker: AssertExact<ListMarker, NonNullable<VariantProps<typeof listVariants>['marker']>> = true;
+const _assertListSpacing: AssertExact<ListSpacing, NonNullable<VariantProps<typeof listVariants>['spacing']>> = true;
 void _assertListMarker;
 void _assertListSpacing;

@@ -24,8 +24,5 @@ export type OptionTileGroupVariants = VariantProps<typeof optionTileGroupVariant
 
 /* Compile-time lock: shared `Align` values ≡ tv `align` keys (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertOptionTileGroupAlign: AssertExact<
-  Align,
-  NonNullable<OptionTileGroupVariants['align']>
-> = true;
+const _assertOptionTileGroupAlign: AssertExact<Align, NonNullable<OptionTileGroupVariants['align']>> = true;
 void _assertOptionTileGroupAlign;

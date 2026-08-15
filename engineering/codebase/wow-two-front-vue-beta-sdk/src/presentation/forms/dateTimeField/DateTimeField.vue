@@ -204,9 +204,7 @@ const maxDate = computed(() => props.max?.toPlainDate() ?? null);
 const minValue = computed(() => formatISODateTime(props.min));
 const maxValue = computed(() => formatISODateTime(props.max));
 
-const finalState = computed(
-  () => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default),
-);
+const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
@@ -296,11 +294,7 @@ defineExpose({ el: root });
             :max="maxDate"
             @value-change="onCalendarChange"
           />
-          <TimeColumns
-            :value="timeValue"
-            :minute-step="minuteStep"
-            :on-time-change="onColumnsChange"
-          />
+          <TimeColumns :value="timeValue" :minute-step="minuteStep" :on-time-change="onColumnsChange" />
         </div>
       </PopoverContent>
     </Popover>

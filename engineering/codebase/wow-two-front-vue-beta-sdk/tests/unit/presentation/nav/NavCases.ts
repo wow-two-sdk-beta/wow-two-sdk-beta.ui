@@ -43,31 +43,23 @@ import { smokeCase, type SmokeCase } from '../../../support/Smoke';
    controlled-and-closed, and every part below it would render nothing. */
 const inMenu = (node: VNode): VNode => h(Menu, { anchor: null, isOpen: true }, () => node);
 
-const inDropdownMenu = (node: VNode): VNode =>
-  h(DropdownMenu, { defaultOpen: true }, () => node);
+const inDropdownMenu = (node: VNode): VNode => h(DropdownMenu, { defaultOpen: true }, () => node);
 
 /* ContextMenu's props are `Record<string, never>` — the root owns its open state outright and
    only a real pointer gesture on the trigger opens it, so there is no uncontrolled prop to set. */
 const inContextMenu = (node: VNode): VNode => h(ContextMenu, null, () => node);
 
 const inMenubar = (node: VNode): VNode => h(Menubar, { defaultValue: 'file' }, () => node);
-const inMenubarMenu = (node: VNode): VNode =>
-  inMenubar(h(MenubarMenu, { value: 'file' }, () => node));
+const inMenubarMenu = (node: VNode): VNode => inMenubar(h(MenubarMenu, { value: 'file' }, () => node));
 
-const inNavigationMenu = (node: VNode): VNode =>
-  h(NavigationMenu, { defaultValue: 'products' }, () => node);
-const inNavigationMenuList = (node: VNode): VNode =>
-  inNavigationMenu(h(NavigationMenuList, null, () => node));
+const inNavigationMenu = (node: VNode): VNode => h(NavigationMenu, { defaultValue: 'products' }, () => node);
+const inNavigationMenuList = (node: VNode): VNode => inNavigationMenu(h(NavigationMenuList, null, () => node));
 const inNavigationMenuItem = (node: VNode): VNode =>
   inNavigationMenuList(h(NavigationMenuItem, { value: 'products' }, () => node));
 
-const inCommandPalette = (node: VNode): VNode =>
-  h(CommandPalette, { defaultOpen: true }, () => node);
-const inCommandPaletteContent = (node: VNode): VNode =>
-  inCommandPalette(h(CommandPaletteContent, null, () => node));
-const inCommandPaletteList = (node: VNode): VNode =>
-  inCommandPaletteContent(h(CommandPaletteList, null, () => node));
-
+const inCommandPalette = (node: VNode): VNode => h(CommandPalette, { defaultOpen: true }, () => node);
+const inCommandPaletteContent = (node: VNode): VNode => inCommandPalette(h(CommandPaletteContent, null, () => node));
+const inCommandPaletteList = (node: VNode): VNode => inCommandPaletteContent(h(CommandPaletteList, null, () => node));
 
 /**
  * Every component `@wow-two-beta/ui-vue/presentation/nav` exports, as smoke cases.
@@ -97,7 +89,12 @@ export const navCases: readonly SmokeCase[] = [
   smokeCase('MenubarContent', MenubarContent, {}, { slot: true, wrap: inMenubarMenu }),
   smokeCase('NavigationMenu', NavigationMenu, {}, { slot: true }),
   smokeCase('NavigationMenuList', NavigationMenuList, {}, { slot: true, wrap: inNavigationMenu }),
-  smokeCase('NavigationMenuItem', NavigationMenuItem, { value: 'products' }, { slot: true, wrap: inNavigationMenuList }),
+  smokeCase(
+    'NavigationMenuItem',
+    NavigationMenuItem,
+    { value: 'products' },
+    { slot: true, wrap: inNavigationMenuList },
+  ),
   smokeCase('NavigationMenuTrigger', NavigationMenuTrigger, {}, { slot: true, wrap: inNavigationMenuItem }),
   smokeCase('NavigationMenuContent', NavigationMenuContent, {}, { slot: true, wrap: inNavigationMenuItem }),
   smokeCase('NavigationMenuLink', NavigationMenuLink, {}, { slot: true, wrap: inNavigationMenu }),
@@ -106,7 +103,12 @@ export const navCases: readonly SmokeCase[] = [
   smokeCase('CommandPaletteInput', CommandPaletteInput, {}, { wrap: inCommandPaletteContent }),
   smokeCase('CommandPaletteList', CommandPaletteList, {}, { slot: true, wrap: inCommandPaletteContent }),
   smokeCase('CommandPaletteGroup', CommandPaletteGroup, {}, { slot: true, wrap: inCommandPaletteList }),
-  smokeCase('CommandPaletteItem', CommandPaletteItem, { value: 'open-settings' }, { slot: true, wrap: inCommandPaletteList }),
+  smokeCase(
+    'CommandPaletteItem',
+    CommandPaletteItem,
+    { value: 'open-settings' },
+    { slot: true, wrap: inCommandPaletteList },
+  ),
   smokeCase('CommandPaletteEmpty', CommandPaletteEmpty, {}, { slot: true, wrap: inCommandPaletteList }),
   smokeCase('CommandPaletteSeparator', CommandPaletteSeparator, {}, { wrap: inCommandPaletteList }),
   smokeCase('ScrollSpy', ScrollSpy, { ids: ['intro', 'usage'] }, { slot: true }),

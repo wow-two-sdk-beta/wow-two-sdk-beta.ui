@@ -44,10 +44,7 @@ provide(ListKey, {
 });
 
 const classes = computed(() =>
-  cn(
-    listVariants({ marker: props.marker, spacing: props.spacing }),
-    attrs.class as string | undefined,
-  ),
+  cn(listVariants({ marker: props.marker, spacing: props.spacing }), attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

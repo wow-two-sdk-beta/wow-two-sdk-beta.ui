@@ -20,10 +20,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLQuoteElement>('el');
 
 const classes = computed(() =>
-  cn(
-    'border-l-4 border-border pl-4 italic text-muted-foreground',
-    attrs.class as string | undefined,
-  ),
+  cn('border-l-4 border-border pl-4 italic text-muted-foreground', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

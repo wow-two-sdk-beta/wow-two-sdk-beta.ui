@@ -135,8 +135,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
 const controlled = useControlled<boolean>({
-  controlled: () =>
-    props.isSidebarOpen !== undefined ? props.isSidebarOpen : props.sidebarOpen,
+  controlled: () => (props.isSidebarOpen !== undefined ? props.isSidebarOpen : props.sidebarOpen),
   default: () => props.defaultSidebarOpen,
   onChange: (value) => {
     emit('update:sidebarOpen', value);
@@ -144,9 +143,7 @@ const controlled = useControlled<boolean>({
   },
 });
 
-const isSidebarWide = useMediaQuery(
-  () => `(min-width: ${BREAKPOINT_PX[props.sidebarBreakpoint]}px)`,
-);
+const isSidebarWide = useMediaQuery(() => `(min-width: ${BREAKPOINT_PX[props.sidebarBreakpoint]}px)`);
 const isAsideWide = useMediaQuery(() => `(min-width: ${BREAKPOINT_PX[props.asideBreakpoint]}px)`);
 
 const isSidebarCollapsed = computed(() => !isSidebarWide.value);
@@ -169,14 +166,10 @@ const gridTemplate = computed(() =>
     : `'header header' auto 'sidebar main' 1fr 'sidebar footer' auto / ${props.sidebarWidth} 1fr`,
 );
 
-const classes = computed(() =>
-  cn('grid min-h-svh bg-background text-foreground', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('grid min-h-svh bg-background text-foreground', attrs.class as string | undefined));
 
 /** `gridTemplate` is normalized first so a caller's `style` still wins per-property. */
-const rootStyle = computed(() =>
-  normalizeStyle([{ gridTemplate: gridTemplate.value }, attrs.style]),
-);
+const rootStyle = computed(() => normalizeStyle([{ gridTemplate: gridTemplate.value }, attrs.style]));
 
 /** Everything but `class` / `style`, both re-applied above. */
 const rest = computed(() => {

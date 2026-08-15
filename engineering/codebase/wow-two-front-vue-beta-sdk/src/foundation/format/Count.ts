@@ -8,7 +8,7 @@
  * `pluralize(2, 'item')` → `"items"`; `pluralize(1, 'child', 'children')` → `"child"`.
  */
 export function pluralize(count: number, singular: string, plural?: string): string {
-  return Math.abs(count) === 1 ? singular : plural ?? `${singular}s`;
+  return Math.abs(count) === 1 ? singular : (plural ?? `${singular}s`);
 }
 
 /** Returns the English ordinal suffix for an integer — `"st"`, `"nd"`, `"rd"`, or `"th"` (11–13 are always `"th"`). */

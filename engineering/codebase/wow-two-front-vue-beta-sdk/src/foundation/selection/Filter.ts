@@ -25,13 +25,7 @@
 
 import { Temporal } from 'temporal-polyfill';
 
-import {
-  isNullish,
-  readField,
-  toText,
-  type FieldAccessors,
-  type LocaleOptions,
-} from './Field';
+import { isNullish, readField, toText, type FieldAccessors, type LocaleOptions } from './Field';
 import { compareValues } from './Sort';
 
 /** Defines the closed set of comparisons a filter may express. */
@@ -92,9 +86,7 @@ export interface InFilter<TField extends string = string> extends FilterBase<TFi
  * site instead of failing at match time.
  */
 export type FilterDescriptor<TField extends string = string> =
-  | ValueFilter<TField>
-  | BetweenFilter<TField>
-  | InFilter<TField>;
+  ValueFilter<TField> | BetweenFilter<TField> | InFilter<TField>;
 
 /** Reports whether a value is a date-like instance, which compares by value rather than identity. */
 function isDateLike(value: unknown): boolean {
@@ -115,12 +107,7 @@ function foldText(value: unknown, isCaseSensitive: boolean, locale?: string): st
 }
 
 /** The equality behind `equals` and `in` — case-folded for strings, by value for dates, else identity. */
-function valuesEqual(
-  a: unknown,
-  b: unknown,
-  isCaseSensitive: boolean,
-  locale: string | undefined,
-): boolean {
+function valuesEqual(a: unknown, b: unknown, isCaseSensitive: boolean, locale: string | undefined): boolean {
   if (isNullish(a) || isNullish(b)) return isNullish(a) && isNullish(b);
   if (typeof a === 'string' && typeof b === 'string') {
     return foldText(a, isCaseSensitive, locale) === foldText(b, isCaseSensitive, locale);
@@ -149,22 +136,16 @@ export function matchesFilter<T, TField extends string = string>(
       return valuesEqual(fieldValue, filter.value, isCaseSensitive, locale);
 
     case FilterOperator.In:
-      return filter.value.some((candidate) =>
-        valuesEqual(fieldValue, candidate, isCaseSensitive, locale),
-      );
+      return filter.value.some((candidate) => valuesEqual(fieldValue, candidate, isCaseSensitive, locale));
 
     case FilterOperator.Contains: {
       if (isNullish(fieldValue) || isNullish(filter.value)) return false;
-      return foldText(fieldValue, isCaseSensitive, locale).includes(
-        foldText(filter.value, isCaseSensitive, locale),
-      );
+      return foldText(fieldValue, isCaseSensitive, locale).includes(foldText(filter.value, isCaseSensitive, locale));
     }
 
     case FilterOperator.StartsWith: {
       if (isNullish(fieldValue) || isNullish(filter.value)) return false;
-      return foldText(fieldValue, isCaseSensitive, locale).startsWith(
-        foldText(filter.value, isCaseSensitive, locale),
-      );
+      return foldText(fieldValue, isCaseSensitive, locale).startsWith(foldText(filter.value, isCaseSensitive, locale));
     }
 
     case FilterOperator.GreaterThan: {
@@ -185,10 +166,7 @@ export function matchesFilter<T, TField extends string = string>(
       const isReversed = compareValues(first, second, { locale }) > 0;
       const low = isReversed ? second : first;
       const high = isReversed ? first : second;
-      return (
-        compareValues(fieldValue, low, { locale }) >= 0 &&
-        compareValues(fieldValue, high, { locale }) <= 0
-      );
+      return compareValues(fieldValue, low, { locale }) >= 0 && compareValues(fieldValue, high, { locale }) <= 0;
     }
   }
 

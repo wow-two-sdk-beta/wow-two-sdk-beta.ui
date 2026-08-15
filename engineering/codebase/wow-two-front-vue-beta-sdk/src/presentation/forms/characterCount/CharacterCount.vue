@@ -36,11 +36,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const rootClass = computed(() =>
-  cn(
-    'text-right text-xs',
-    isOver.value ? 'text-destructive' : 'text-muted-foreground',
-    attrs.class as ClassValue,
-  ),
+  cn('text-right text-xs', isOver.value ? 'text-destructive' : 'text-muted-foreground', attrs.class as ClassValue),
 );
 
 const root = useTemplateRef<HTMLDivElement>('root');

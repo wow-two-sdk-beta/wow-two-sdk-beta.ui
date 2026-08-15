@@ -47,9 +47,7 @@ const attrs = useAttrs();
 const slots = useSlots();
 const el = useTemplateRef<InstanceType<typeof Card>>('el');
 
-const hasBody = computed(
-  () => props.description !== undefined || !!slots.description || !!slots.default,
-);
+const hasBody = computed(() => props.description !== undefined || !!slots.description || !!slots.default);
 
 const classes = computed(() => cn('bg-card p-6', attrs.class as string | undefined));
 
@@ -66,10 +64,7 @@ defineExpose({ el });
 
 <template>
   <Card ref="el" variant="outline" radius="xl" :elevation="0" v-bind="rest" :class="classes">
-    <span
-      v-if="$slots.icon"
-      class="grid size-11 place-items-center rounded-lg bg-primary-soft text-primary"
-    >
+    <span v-if="$slots.icon" class="grid size-11 place-items-center rounded-lg bg-primary-soft text-primary">
       <slot name="icon" />
     </span>
     <Heading :level="3" size="md" :class="headingClasses">

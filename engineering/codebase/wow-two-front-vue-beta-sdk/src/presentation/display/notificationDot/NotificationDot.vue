@@ -17,8 +17,7 @@ export const NotificationDotTone = {
   Neutral: 'neutral',
 } as const;
 
-export type NotificationDotTone =
-  (typeof NotificationDotTone)[keyof typeof NotificationDotTone];
+export type NotificationDotTone = (typeof NotificationDotTone)[keyof typeof NotificationDotTone];
 
 /** Defines the NotificationDot size step. */
 export const NotificationDotSize = {
@@ -30,8 +29,7 @@ export const NotificationDotSize = {
   Md: 'md',
 } as const;
 
-export type NotificationDotSize =
-  (typeof NotificationDotSize)[keyof typeof NotificationDotSize];
+export type NotificationDotSize = (typeof NotificationDotSize)[keyof typeof NotificationDotSize];
 
 export interface NotificationDotProps {
   /** The color tone. Default `destructive`. */

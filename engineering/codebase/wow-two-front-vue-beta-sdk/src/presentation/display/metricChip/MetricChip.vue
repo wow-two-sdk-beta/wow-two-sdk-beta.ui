@@ -97,19 +97,13 @@ const el = useTemplateRef<HTMLSpanElement>('el');
 
 const size = computed(() => SIZE[props.size]);
 
-const classes = computed(() =>
-  cn('inline-flex items-center', size.value.wrapper, attrs.class as string | undefined),
-);
+const classes = computed(() => cn('inline-flex items-center', size.value.wrapper, attrs.class as string | undefined));
 
 const tone = computed(() => TONE[props.tone]);
 
-const iconClasses = computed(() =>
-  cn('inline-flex shrink-0 items-center', tone.value.icon),
-);
+const iconClasses = computed(() => cn('inline-flex shrink-0 items-center', tone.value.icon));
 
-const labelClasses = computed(() =>
-  cn('font-medium uppercase tracking-wide text-muted-foreground', size.value.label),
-);
+const labelClasses = computed(() => cn('font-medium uppercase tracking-wide text-muted-foreground', size.value.label));
 
 const valueClasses = computed(() => cn('tabular-nums', tone.value.value, size.value.value));
 
@@ -125,7 +119,11 @@ defineExpose({ el });
 <template>
   <span ref="el" v-bind="rest" :class="classes">
     <span v-if="$slots.icon" :class="iconClasses"><slot name="icon" /></span>
-    <span :class="labelClasses"><slot name="label">{{ props.label }}</slot></span>
-    <span :class="valueClasses"><slot name="value">{{ props.value }}</slot></span>
+    <span :class="labelClasses"
+      ><slot name="label">{{ props.label }}</slot></span
+    >
+    <span :class="valueClasses"
+      ><slot name="value">{{ props.value }}</slot></span
+    >
   </span>
 </template>

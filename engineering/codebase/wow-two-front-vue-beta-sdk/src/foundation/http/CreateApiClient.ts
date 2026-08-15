@@ -155,7 +155,12 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
   };
 
   /** Performs one attempt — throws `ApiError` for transport failures, rethrows aborts natively. */
-  const attempt = async <T>(url: string, init: ApiRequestInit, body: BodyInit | undefined, hasJsonBody: boolean): Promise<T> => {
+  const attempt = async <T>(
+    url: string,
+    init: ApiRequestInit,
+    body: BodyInit | undefined,
+    hasJsonBody: boolean,
+  ): Promise<T> => {
     // Outside the try: a token-delegate crash is a programmer error, not a transport failure.
     const headers = await buildHeaders(init, hasJsonBody);
     const doFetch = options.fetch ?? globalThis.fetch;
@@ -222,9 +227,12 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
   return {
     request,
     get: <T = unknown>(path: string, init?: ApiRequestInit): Promise<T> => request<T>(path, { ...init, method: 'GET' }),
-    post: <T = unknown>(path: string, init?: ApiRequestInit): Promise<T> => request<T>(path, { ...init, method: 'POST' }),
+    post: <T = unknown>(path: string, init?: ApiRequestInit): Promise<T> =>
+      request<T>(path, { ...init, method: 'POST' }),
     put: <T = unknown>(path: string, init?: ApiRequestInit): Promise<T> => request<T>(path, { ...init, method: 'PUT' }),
-    patch: <T = unknown>(path: string, init?: ApiRequestInit): Promise<T> => request<T>(path, { ...init, method: 'PATCH' }),
-    delete: <T = unknown>(path: string, init?: ApiRequestInit): Promise<T> => request<T>(path, { ...init, method: 'DELETE' }),
+    patch: <T = unknown>(path: string, init?: ApiRequestInit): Promise<T> =>
+      request<T>(path, { ...init, method: 'PATCH' }),
+    delete: <T = unknown>(path: string, init?: ApiRequestInit): Promise<T> =>
+      request<T>(path, { ...init, method: 'DELETE' }),
   };
 }

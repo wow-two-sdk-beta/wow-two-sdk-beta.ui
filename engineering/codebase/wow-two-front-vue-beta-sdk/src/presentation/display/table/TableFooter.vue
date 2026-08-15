@@ -17,12 +17,7 @@ defineSlots<{ default(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLTableSectionElement>('el');
 
-const classes = computed(() =>
-  cn(
-    'border-t border-border bg-muted/50 font-medium',
-    attrs.class as string | undefined,
-  ),
-);
+const classes = computed(() => cn('border-t border-border bg-muted/50 font-medium', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -34,5 +29,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <tfoot ref="el" v-bind="rest" :class="classes"><slot /></tfoot>
+  <tfoot ref="el" v-bind="rest" :class="classes">
+    <slot />
+  </tfoot>
 </template>

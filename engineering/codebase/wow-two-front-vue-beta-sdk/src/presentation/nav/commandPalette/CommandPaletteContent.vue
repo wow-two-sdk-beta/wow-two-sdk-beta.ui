@@ -21,9 +21,7 @@ defineSlots<{ default(): unknown }>();
 
 const attrs = useAttrs();
 
-const classes = computed(() =>
-  cn('w-full max-w-xl gap-0 overflow-hidden p-0', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('w-full max-w-xl gap-0 overflow-hidden p-0', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

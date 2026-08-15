@@ -23,9 +23,7 @@ defineSlots<{ default(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<InstanceType<typeof RovingFocusGroup>>('el');
 
-const classes = computed(() =>
-  cn('flex items-center gap-1', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('flex items-center gap-1', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -38,14 +36,7 @@ defineExpose({ el });
 
 <template>
   <!-- `role` falls through and replaces the primitive's own `role="group"`. -->
-  <RovingFocusGroup
-    ref="el"
-    orientation="horizontal"
-    can-loop
-    role="list"
-    v-bind="rest"
-    :class="classes"
-  >
+  <RovingFocusGroup ref="el" orientation="horizontal" can-loop role="list" v-bind="rest" :class="classes">
     <slot />
   </RovingFocusGroup>
 </template>

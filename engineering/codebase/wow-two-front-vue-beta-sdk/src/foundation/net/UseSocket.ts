@@ -17,15 +17,7 @@
 // HANDLERS ARE READ THROUGH `toValue` AT CALL TIME, options are read once, and a `null` URL means "not yet" —
 // same three rules as `useEventStream`, for the same reasons.
 
-import {
-  onMounted,
-  onScopeDispose,
-  shallowRef,
-  toValue,
-  watch,
-  type MaybeRefOrGetter,
-  type ShallowRef,
-} from 'vue';
+import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 import { ConnectionState } from './ConnectionState';
 import { createSocketClient, type SocketClient, type SocketClientOptions } from './CreateSocketClient';

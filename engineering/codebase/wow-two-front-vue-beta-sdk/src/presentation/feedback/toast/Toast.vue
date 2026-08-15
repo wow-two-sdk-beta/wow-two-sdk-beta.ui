@@ -62,9 +62,7 @@ const hasActions = computed(() => Boolean(props.actions) || Boolean(slots.action
 
 const classes = computed(() => cn('flex items-start gap-3', attrs.class as string | undefined));
 
-const descriptionClasses = computed(() =>
-  cn('text-sm', hasTitle.value && 'mt-0.5 text-muted-foreground'),
-);
+const descriptionClasses = computed(() => cn('text-sm', hasTitle.value && 'mt-0.5 text-muted-foreground'));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

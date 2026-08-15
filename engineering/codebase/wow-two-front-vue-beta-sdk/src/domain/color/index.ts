@@ -2,8 +2,4 @@
 
 export { GradientType } from './GradientType';
 export { Gradient } from './Gradient';
-export type {
-  GradientStop,
-  LinearGradient,
-  RadialGradient,
-} from './Gradient';
+export type { GradientStop, LinearGradient, RadialGradient } from './Gradient';

@@ -100,11 +100,27 @@ export const avatarVariants = tv({
   },
   compoundVariants: [
     // gradient × tone
-    { bgStyle: 'gradient', tone: 'neutral',  class: 'bg-gradient-to-br from-muted to-muted/40' },
-    { bgStyle: 'gradient', tone: 'primary',  class: 'bg-gradient-to-br from-primary-soft to-primary text-primary-foreground' },
-    { bgStyle: 'gradient', tone: 'danger',   class: 'bg-gradient-to-br from-destructive-soft to-destructive text-destructive-foreground' },
-    { bgStyle: 'gradient', tone: 'success',  class: 'bg-gradient-to-br from-success-soft to-success text-success-foreground' },
-    { bgStyle: 'gradient', tone: 'warning',  class: 'bg-gradient-to-br from-warning-soft to-warning text-warning-foreground' },
+    { bgStyle: 'gradient', tone: 'neutral', class: 'bg-gradient-to-br from-muted to-muted/40' },
+    {
+      bgStyle: 'gradient',
+      tone: 'primary',
+      class: 'bg-gradient-to-br from-primary-soft to-primary text-primary-foreground',
+    },
+    {
+      bgStyle: 'gradient',
+      tone: 'danger',
+      class: 'bg-gradient-to-br from-destructive-soft to-destructive text-destructive-foreground',
+    },
+    {
+      bgStyle: 'gradient',
+      tone: 'success',
+      class: 'bg-gradient-to-br from-success-soft to-success text-success-foreground',
+    },
+    {
+      bgStyle: 'gradient',
+      tone: 'warning',
+      class: 'bg-gradient-to-br from-warning-soft to-warning text-warning-foreground',
+    },
   ],
   defaultVariants: {
     size: 'md',
@@ -120,22 +136,13 @@ export type AvatarVariants = VariantProps<typeof avatarVariants>;
 
 /* Compile-time lock: enum values ≡ tv shape/tone/bgStyle/ring value-sets (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertAvatarShape: AssertExact<
-  AvatarShape,
-  NonNullable<VariantProps<typeof avatarVariants>['shape']>
-> = true;
-const _assertAvatarTone: AssertExact<
-  AvatarTone,
-  NonNullable<VariantProps<typeof avatarVariants>['tone']>
-> = true;
+const _assertAvatarShape: AssertExact<AvatarShape, NonNullable<VariantProps<typeof avatarVariants>['shape']>> = true;
+const _assertAvatarTone: AssertExact<AvatarTone, NonNullable<VariantProps<typeof avatarVariants>['tone']>> = true;
 const _assertAvatarBackground: AssertExact<
   AvatarBackground,
   NonNullable<VariantProps<typeof avatarVariants>['bgStyle']>
 > = true;
-const _assertAvatarRing: AssertExact<
-  AvatarRing,
-  NonNullable<VariantProps<typeof avatarVariants>['ring']>
-> = true;
+const _assertAvatarRing: AssertExact<AvatarRing, NonNullable<VariantProps<typeof avatarVariants>['ring']>> = true;
 void _assertAvatarShape;
 void _assertAvatarTone;
 void _assertAvatarBackground;

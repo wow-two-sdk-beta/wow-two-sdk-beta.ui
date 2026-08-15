@@ -29,8 +29,7 @@ const context = useCommandPaletteContext();
    `registryVersion` counter React needed. */
 const matchCount = computed(() => {
   const search = context.inputValue.value;
-  return context.items.value.filter((i) => search === '' || context.filter(i.searchText, search))
-    .length;
+  return context.items.value.filter((i) => search === '' || context.filter(i.searchText, search)).length;
 });
 
 const classes = computed(() => cn(listboxEmptyVariants(), attrs.class as string | undefined));

@@ -47,21 +47,13 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const stripClass = computed(() =>
-  cn('flex items-center gap-2 overflow-x-auto', attrs.class as ClassValue),
-);
+const stripClass = computed(() => cn('flex items-center gap-2 overflow-x-auto', attrs.class as ClassValue));
 
 defineExpose({ el });
 </script>
 
 <template>
-  <div
-    ref="el"
-    role="tablist"
-    aria-label="Wizard steps"
-    :class="stripClass"
-    v-bind="passthroughAttrs"
-  >
+  <div ref="el" role="tablist" aria-label="Wizard steps" :class="stripClass" v-bind="passthroughAttrs">
     <button
       v-for="(step, i) in ctx.steps"
       :key="step.id"

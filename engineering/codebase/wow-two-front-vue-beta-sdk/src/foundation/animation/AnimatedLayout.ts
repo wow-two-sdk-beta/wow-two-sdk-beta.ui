@@ -144,9 +144,7 @@ export const AnimatedLayout = defineComponent({
       return h(
         'div',
         { ref: container },
-        children.map((child, index) =>
-          cloneVNode(child, { [FLIP_KEY_ATTRIBUTE]: String(child.key ?? index) }),
-        ),
+        children.map((child, index) => cloneVNode(child, { [FLIP_KEY_ATTRIBUTE]: String(child.key ?? index) })),
       );
     };
   },

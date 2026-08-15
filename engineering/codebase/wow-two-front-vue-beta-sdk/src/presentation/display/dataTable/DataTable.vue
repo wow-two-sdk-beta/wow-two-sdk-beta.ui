@@ -23,8 +23,7 @@ export const DataTableColumnAlign = {
   Right: 'right',
 } as const;
 
-export type DataTableColumnAlign =
-  (typeof DataTableColumnAlign)[keyof typeof DataTableColumnAlign];
+export type DataTableColumnAlign = (typeof DataTableColumnAlign)[keyof typeof DataTableColumnAlign];
 
 export interface DataTableSort {
   columnKey: string;
@@ -77,10 +76,8 @@ function defaultCompare(a: unknown, b: unknown): number {
   if (a === null || a === undefined) return 1;
   if (b === null || b === undefined) return -1;
   if (typeof a === 'number' && typeof b === 'number') return a - b;
-  if (a instanceof Temporal.PlainDate && b instanceof Temporal.PlainDate)
-    return Temporal.PlainDate.compare(a, b);
-  if (a instanceof Temporal.PlainTime && b instanceof Temporal.PlainTime)
-    return Temporal.PlainTime.compare(a, b);
+  if (a instanceof Temporal.PlainDate && b instanceof Temporal.PlainDate) return Temporal.PlainDate.compare(a, b);
+  if (a instanceof Temporal.PlainTime && b instanceof Temporal.PlainTime) return Temporal.PlainTime.compare(a, b);
   if (a instanceof Temporal.PlainDateTime && b instanceof Temporal.PlainDateTime)
     return Temporal.PlainDateTime.compare(a, b);
   if (a instanceof Temporal.ZonedDateTime && b instanceof Temporal.ZonedDateTime)
@@ -201,9 +198,7 @@ const rows = computed(() =>
     row,
     index,
     /* `onClick` only exists when a handler was supplied — React's `onClick={onRowClick ? … : undefined}`. */
-    attrs: props.onRowClick
-      ? { onClick: (): void => props.onRowClick?.(row, index) }
-      : ({} as Record<string, never>),
+    attrs: props.onRowClick ? { onClick: (): void => props.onRowClick?.(row, index) } : ({} as Record<string, never>),
     class: cn(props.onRowClick && 'cursor-pointer'),
   })),
 );
@@ -220,12 +215,7 @@ const SORT_BUTTON_CLASS =
 </script>
 
 <template>
-  <Table
-    :is-striped="isStriped"
-    :is-hoverable="resolvedHoverable"
-    :density="density"
-    :is-bare="isBare"
-  >
+  <Table :is-striped="isStriped" :is-hoverable="resolvedHoverable" :density="density" :is-bare="isBare">
     <TableHead>
       <TableRow>
         <TableHeaderCell
@@ -235,12 +225,7 @@ const SORT_BUTTON_CLASS =
           :style="cell.style"
           :class="cell.class"
         >
-          <button
-            v-if="cell.column.isSortable"
-            type="button"
-            :class="SORT_BUTTON_CLASS"
-            @click="cycleSort(cell.key)"
-          >
+          <button v-if="cell.column.isSortable" type="button" :class="SORT_BUTTON_CLASS" @click="cycleSort(cell.key)">
             <span>
               <slot name="header" :column="cell.column">{{ cell.column.header }}</slot>
             </span>
@@ -255,10 +240,7 @@ const SORT_BUTTON_CLASS =
     <TableBody>
       <template v-if="rows.length === 0">
         <TableRow>
-          <TableCell
-            :colspan="columns.length"
-            class="py-8 text-center text-muted-foreground"
-          >
+          <TableCell :colspan="columns.length" class="py-8 text-center text-muted-foreground">
             <slot name="emptyContent">{{ emptyContent }}</slot>
           </TableCell>
         </TableRow>

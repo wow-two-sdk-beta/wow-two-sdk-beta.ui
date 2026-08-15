@@ -29,10 +29,7 @@ import { Equality, type EqualityComparer } from '../utils/Equality';
  * @param keyFn Optional key extractor receiving the item and its index.
  * @returns A new array holding the first item per distinct key.
  */
-export function unique<T, TKey = T>(
-  items: readonly T[],
-  keyFn?: (item: T, index: number) => TKey,
-): T[] {
+export function unique<T, TKey = T>(items: readonly T[], keyFn?: (item: T, index: number) => TKey): T[] {
   const seen = new Set<TKey | T>();
   const result: T[] = [];
   items.forEach((item, index) => {
@@ -55,10 +52,7 @@ export function unique<T, TKey = T>(
  * @param keyFn Extracts the group key from an item and its index.
  * @returns A new `Map` of key to a new array of that key's items, both in first-seen order.
  */
-export function groupBy<T, TKey>(
-  items: readonly T[],
-  keyFn: (item: T, index: number) => TKey,
-): Map<TKey, T[]> {
+export function groupBy<T, TKey>(items: readonly T[], keyFn: (item: T, index: number) => TKey): Map<TKey, T[]> {
   const groups = new Map<TKey, T[]>();
   items.forEach((item, index) => {
     const key = keyFn(item, index);
@@ -76,10 +70,7 @@ export function groupBy<T, TKey>(
  * @param predicate Decides whether an item belongs to the first half.
  * @returns A `[matched, rest]` tuple of two new arrays.
  */
-export function partition<T>(
-  items: readonly T[],
-  predicate: (item: T, index: number) => boolean,
-): [T[], T[]] {
+export function partition<T>(items: readonly T[], predicate: (item: T, index: number) => boolean): [T[], T[]] {
   const matched: T[] = [];
   const rest: T[] = [];
   items.forEach((item, index) => {
@@ -213,10 +204,7 @@ export function toggleItem<T>(
  * @param second The list supplying each pair's second slot.
  * @returns A new array of `[first, second]` tuples, `min(first.length, second.length)` long.
  */
-export function zip<TFirst, TSecond>(
-  first: readonly TFirst[],
-  second: readonly TSecond[],
-): Array<[TFirst, TSecond]> {
+export function zip<TFirst, TSecond>(first: readonly TFirst[], second: readonly TSecond[]): Array<[TFirst, TSecond]> {
   const length = Math.min(first.length, second.length);
   const result: Array<[TFirst, TSecond]> = [];
   for (let index = 0; index < length; index += 1) {
@@ -231,9 +219,7 @@ export function zip<TFirst, TSecond>(
  * @param pairs The tuples to split.
  * @returns A `[firsts, seconds]` tuple of two new arrays, each as long as `pairs`.
  */
-export function unzip<TFirst, TSecond>(
-  pairs: readonly (readonly [TFirst, TSecond])[],
-): [TFirst[], TSecond[]] {
+export function unzip<TFirst, TSecond>(pairs: readonly (readonly [TFirst, TSecond])[]): [TFirst[], TSecond[]] {
   const first: TFirst[] = [];
   const second: TSecond[] = [];
   for (const pair of pairs) {
@@ -258,9 +244,7 @@ export function unzip<TFirst, TSecond>(
  */
 export function range(start: number, end: number, step = 1): number[] {
   if (!Number.isFinite(start) || !Number.isFinite(end)) {
-    throw new RangeError(
-      `range: start and end must be finite, received ${String(start)}..${String(end)}`,
-    );
+    throw new RangeError(`range: start and end must be finite, received ${String(start)}..${String(end)}`);
   }
   if (step === 0 || !Number.isFinite(step)) {
     throw new RangeError(`range: step must be a non-zero finite number, received ${String(step)}`);

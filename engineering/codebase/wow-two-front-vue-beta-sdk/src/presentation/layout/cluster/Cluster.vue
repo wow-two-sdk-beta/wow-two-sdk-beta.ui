@@ -12,7 +12,11 @@ export interface ClusterProps {
 }
 
 const GAP: Record<NonNullable<ClusterProps['gap']>, string> = {
-  '2': 'gap-2', '3': 'gap-3', '4': 'gap-4', '6': 'gap-6', '8': 'gap-8',
+  '2': 'gap-2',
+  '3': 'gap-3',
+  '4': 'gap-4',
+  '6': 'gap-6',
+  '8': 'gap-8',
 };
 const JUSTIFY: Record<NonNullable<ClusterProps['justify']>, string> = {
   start: 'justify-start',
@@ -37,12 +41,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
 const classes = computed(() =>
-  cn(
-    'flex flex-wrap items-center',
-    GAP[props.gap],
-    JUSTIFY[props.justify],
-    attrs.class as string | undefined,
-  ),
+  cn('flex flex-wrap items-center', GAP[props.gap], JUSTIFY[props.justify], attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

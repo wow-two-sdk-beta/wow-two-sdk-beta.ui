@@ -1,6 +1,1 @@
-export {
-  default as FontPicker,
-  BUILT_IN_FONTS,
-  type FontOption,
-  type FontPickerProps,
-} from './FontPicker.vue';
+export { default as FontPicker, BUILT_IN_FONTS, type FontOption, type FontPickerProps } from './FontPicker.vue';

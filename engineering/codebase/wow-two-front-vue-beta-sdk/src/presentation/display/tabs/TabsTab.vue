@@ -80,9 +80,7 @@ const rest = computed(() => {
  * keeps them tracked, so `tabindex` still follows the group's tab stop.
  * `item.ref` is overridden by the explicit `:ref` below, which composes it.
  */
-const bindings = computed(() =>
-  mergeProps(rest.value, item as unknown as Record<string, unknown>),
-);
+const bindings = computed(() => mergeProps(rest.value, item as unknown as Record<string, unknown>));
 
 defineExpose({ el });
 </script>

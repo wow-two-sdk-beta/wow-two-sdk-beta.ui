@@ -27,8 +27,5 @@ export type CodeVariants = VariantProps<typeof codeVariants>;
 
 /* Compile-time lock: enum values ≡ tv variant value-set (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertCodeVariant: AssertExact<
-  CodeVariant,
-  NonNullable<VariantProps<typeof codeVariants>['variant']>
-> = true;
+const _assertCodeVariant: AssertExact<CodeVariant, NonNullable<VariantProps<typeof codeVariants>['variant']>> = true;
 void _assertCodeVariant;

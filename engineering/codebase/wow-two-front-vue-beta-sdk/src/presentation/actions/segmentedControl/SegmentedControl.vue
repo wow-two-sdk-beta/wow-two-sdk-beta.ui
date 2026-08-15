@@ -1,10 +1,7 @@
 <script lang="ts">
 import type { ToggleButtonGroupProps } from '../toggleButtonGroup';
 
-export type SegmentedControlProps<T extends string = string> = Omit<
-  ToggleButtonGroupProps<T>,
-  'variant'
->;
+export type SegmentedControlProps<T extends string = string> = Omit<ToggleButtonGroupProps<T>, 'variant'>;
 </script>
 
 <script setup lang="ts" generic="T extends string = string">

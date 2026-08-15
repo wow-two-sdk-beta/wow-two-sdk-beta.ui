@@ -1,11 +1,7 @@
 <script lang="ts">
 import type { HTMLAttributes } from 'vue';
 import type { Orientation } from '../../../foundation/utils';
-import type {
-  ToggleButtonGroupVariant,
-  ToggleItemRole,
-  ToggleMode,
-} from './ToggleButtonGroup.variants';
+import type { ToggleButtonGroupVariant, ToggleItemRole, ToggleMode } from './ToggleButtonGroup.variants';
 
 /**
  * Props for the group, generic over the value type `T`.
@@ -21,8 +17,10 @@ import type {
  * `value` / `defaultValue` carry both shapes and the mode still decides which is
  * live at runtime.
  */
-export interface ToggleButtonGroupProps<T extends string = string>
-  extends /* @vue-ignore */ Omit<HTMLAttributes, 'defaultValue' | 'onChange'> {
+export interface ToggleButtonGroupProps<T extends string = string> extends /* @vue-ignore */ Omit<
+  HTMLAttributes,
+  'defaultValue' | 'onChange'
+> {
   /** The selection cardinality — omit or `ToggleMode.Single` for at-most-one, `ToggleMode.Multi` for any-number-active. */
   type?: ToggleMode;
 
@@ -101,26 +99,18 @@ const emit = defineEmits<{
 
 const attrs = useAttrs();
 
-const mode = computed(() =>
-  props.type === ToggleModeValue.Multi ? ToggleModeValue.Multi : ToggleModeValue.Single,
-);
+const mode = computed(() => (props.type === ToggleModeValue.Multi ? ToggleModeValue.Multi : ToggleModeValue.Single));
 const isSegmented = computed(() => props.variant === ToggleButtonGroupVariantValue.Segmented);
 const isPill = computed(() => props.variant === ToggleButtonGroupVariantValue.Pill);
 const isTablist = computed(() => props.itemRole === ToggleItemRoleValue.Tab);
 const isHorizontal = computed(() => props.orientation === OrientationValue.Horizontal);
 // Segmented is inherently an attached pill row — the muted track only reads as one control when its
 // segments touch. Pill is the inverse — always detached chips, never attached.
-const attached = computed(() =>
-  isPill.value ? false : isSegmented.value || props.isAttached,
-);
+const attached = computed(() => (isPill.value ? false : isSegmented.value || props.isAttached));
 
 const { value: singleValue, setValue: setSingleValue } = useControlled<string | null>({
-  controlled: () =>
-    mode.value === ToggleModeValue.Single ? (props.value as string | null | undefined) : undefined,
-  default:
-    props.type !== ToggleModeValue.Multi
-      ? ((props.defaultValue as string | null | undefined) ?? null)
-      : null,
+  controlled: () => (mode.value === ToggleModeValue.Single ? (props.value as string | null | undefined) : undefined),
+  default: props.type !== ToggleModeValue.Multi ? ((props.defaultValue as string | null | undefined) ?? null) : null,
   onChange: (next) => {
     if (mode.value === ToggleModeValue.Single) emit('value-change', next as T | null);
   },
@@ -128,13 +118,9 @@ const { value: singleValue, setValue: setSingleValue } = useControlled<string | 
 
 const { value: multiValue, setValue: setMultiValue } = useControlled<ReadonlyArray<string>>({
   controlled: () =>
-    mode.value === ToggleModeValue.Multi
-      ? (props.value as ReadonlyArray<string> | undefined)
-      : undefined,
+    mode.value === ToggleModeValue.Multi ? (props.value as ReadonlyArray<string> | undefined) : undefined,
   default:
-    props.type === ToggleModeValue.Multi
-      ? ((props.defaultValue as ReadonlyArray<string> | undefined) ?? [])
-      : [],
+    props.type === ToggleModeValue.Multi ? ((props.defaultValue as ReadonlyArray<string> | undefined) ?? []) : [],
   onChange: (next) => {
     if (mode.value === ToggleModeValue.Multi) emit('value-change', next);
   },

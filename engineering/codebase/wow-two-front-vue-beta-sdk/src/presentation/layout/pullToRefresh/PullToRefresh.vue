@@ -114,9 +114,7 @@ watch(pull, (value, _previous, onCleanup) => {
   });
 });
 
-const classes = computed(() =>
-  cn('relative h-full overflow-y-auto', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('relative h-full overflow-y-auto', attrs.class as string | undefined));
 
 /**
  * Vue does not append `px` to a numeric `:style` value the way React does, so

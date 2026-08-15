@@ -11,8 +11,7 @@ export const NavigationProgressVariant = {
   Heartbeat: 'heartbeat',
 } as const;
 
-export type NavigationProgressVariant =
-  (typeof NavigationProgressVariant)[keyof typeof NavigationProgressVariant];
+export type NavigationProgressVariant = (typeof NavigationProgressVariant)[keyof typeof NavigationProgressVariant];
 
 /** Defines which busy sources drive the indicator — route navigation, manual spans, or both. */
 export const NavigationProgressMode = {
@@ -24,5 +23,4 @@ export const NavigationProgressMode = {
   Both: 'both',
 } as const;
 
-export type NavigationProgressMode =
-  (typeof NavigationProgressMode)[keyof typeof NavigationProgressMode];
+export type NavigationProgressMode = (typeof NavigationProgressMode)[keyof typeof NavigationProgressMode];

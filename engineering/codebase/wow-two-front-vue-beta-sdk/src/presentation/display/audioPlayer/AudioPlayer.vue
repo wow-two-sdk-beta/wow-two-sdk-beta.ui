@@ -257,11 +257,9 @@ defineExpose({ el });
         @input="onRangeInput"
       />
     </div>
-    <span
-      class="shrink-0 text-xs tabular-nums text-muted-foreground"
-      :style="DURATION_STYLE"
-      >{{ formatTime(duration) }}</span
-    >
+    <span class="shrink-0 text-xs tabular-nums text-muted-foreground" :style="DURATION_STYLE">{{
+      formatTime(duration)
+    }}</span>
     <button
       type="button"
       :aria-label="muted ? 'Unmute' : 'Mute'"

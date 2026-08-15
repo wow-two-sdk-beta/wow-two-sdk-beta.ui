@@ -30,9 +30,7 @@ const props = withDefaults(defineProps<ColorModeProviderProps>(), {
 const mode = shallowRef<ColorMode>(
   (() => {
     if (typeof window === 'undefined') return ColorMode.Light;
-    const stored = props.storageKey
-      ? (localStorage.getItem(props.storageKey) as ColorMode | null)
-      : null;
+    const stored = props.storageKey ? (localStorage.getItem(props.storageKey) as ColorMode | null) : null;
     if (stored === ColorMode.Light || stored === ColorMode.Dark) return stored;
     return props.defaultMode === 'system' ? systemMode() : props.defaultMode;
   })(),

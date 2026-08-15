@@ -49,9 +49,7 @@ watch(
 
 function visibleItems(): ReadonlyArray<CommandItemEntry> {
   const search = context.inputValue.value;
-  return context.items.value.filter(
-    (i) => !i.disabled && (search === '' || context.filter(i.searchText, search)),
-  );
+  return context.items.value.filter((i) => !i.disabled && (search === '' || context.filter(i.searchText, search)));
 }
 
 // Auto-set first match when the filter or the item registry changes.
@@ -119,9 +117,7 @@ function handleInput(event: Event): void {
   context.setInputValue((event.target as HTMLInputElement).value);
 }
 
-const placeholder = computed(
-  () => (attrs.placeholder as string | undefined) ?? DEFAULT_PLACEHOLDER,
-);
+const placeholder = computed(() => (attrs.placeholder as string | undefined) ?? DEFAULT_PLACEHOLDER);
 
 const classes = computed(() =>
   cn(

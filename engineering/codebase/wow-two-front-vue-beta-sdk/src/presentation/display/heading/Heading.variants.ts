@@ -83,18 +83,12 @@ export type HeadingVariants = VariantProps<typeof headingVariants>;
 
 /* Compile-time lock: enum values ≡ tv size/weight/align value-sets (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertHeadingSize: AssertExact<
-  HeadingSize,
-  NonNullable<VariantProps<typeof headingVariants>['size']>
-> = true;
+const _assertHeadingSize: AssertExact<HeadingSize, NonNullable<VariantProps<typeof headingVariants>['size']>> = true;
 const _assertHeadingWeight: AssertExact<
   HeadingWeight,
   NonNullable<VariantProps<typeof headingVariants>['weight']>
 > = true;
-const _assertHeadingAlign: AssertExact<
-  HeadingAlign,
-  NonNullable<VariantProps<typeof headingVariants>['align']>
-> = true;
+const _assertHeadingAlign: AssertExact<HeadingAlign, NonNullable<VariantProps<typeof headingVariants>['align']>> = true;
 void _assertHeadingSize;
 void _assertHeadingWeight;
 void _assertHeadingAlign;

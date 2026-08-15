@@ -56,14 +56,9 @@ describe('overlays — open state', () => {
     ['Modal', Modal, ModalContent],
     ['Drawer', Drawer, DrawerContent],
     ['Popover', Popover, PopoverContent],
-  ] as const)('%s opens through its uncontrolled path with no open prop passed', async (
-    _name,
-    Root,
-    Content,
-  ) => {
+  ] as const)('%s opens through its uncontrolled path with no open prop passed', async (_name, Root, Content) => {
     const wrapper = mount({
-      render: () =>
-        h(Root, { defaultOpen: true }, () => h(Content, null, () => h('p', { [BODY_MARKER]: '' }))),
+      render: () => h(Root, { defaultOpen: true }, () => h(Content, null, () => h('p', { [BODY_MARKER]: '' }))),
     });
     await nextTick();
 
@@ -93,10 +88,7 @@ describe('overlays — open state', () => {
               open.value = next;
             },
           },
-          () => [
-            h(Trigger, null, () => 'open it'),
-            h(Content, null, () => h('p', { [BODY_MARKER]: '' })),
-          ],
+          () => [h(Trigger, null, () => 'open it'), h(Content, null, () => h('p', { [BODY_MARKER]: '' }))],
         ),
     });
     await nextTick();
@@ -118,8 +110,7 @@ describe('overlays — a11y', () => {
     ['Drawer', Drawer, DrawerContent],
   ] as const)('%s content is a modal dialog', async (name, Root, Content) => {
     const wrapper = mount({
-      render: () =>
-        h(Root, { defaultOpen: true }, () => h(Content, null, () => h('p', { [BODY_MARKER]: '' }))),
+      render: () => h(Root, { defaultOpen: true }, () => h(Content, null, () => h('p', { [BODY_MARKER]: '' }))),
     });
     await nextTick();
 

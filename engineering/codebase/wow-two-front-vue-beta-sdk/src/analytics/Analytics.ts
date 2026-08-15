@@ -95,7 +95,12 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
   let enabled = options.enabled ?? true;
 
   /** Routes a sink failure to `onError` — an `onError` that itself throws is swallowed, since there is nowhere left to report. */
-  const report = (error: unknown, provider: AnalyticsProvider, phase: AnalyticsFailurePhase, call?: AnalyticsCall): void => {
+  const report = (
+    error: unknown,
+    provider: AnalyticsProvider,
+    phase: AnalyticsFailurePhase,
+    call?: AnalyticsCall,
+  ): void => {
     if (!onError) return;
     try {
       onError(error, { provider, phase, call });

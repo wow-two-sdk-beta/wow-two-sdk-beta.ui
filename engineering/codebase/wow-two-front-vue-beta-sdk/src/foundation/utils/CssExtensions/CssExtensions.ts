@@ -87,8 +87,7 @@ export const AbsolutePositionPreset = {
   Center: 'center',
 } as const;
 
-export type AbsolutePositionPreset =
-  (typeof AbsolutePositionPreset)[keyof typeof AbsolutePositionPreset];
+export type AbsolutePositionPreset = (typeof AbsolutePositionPreset)[keyof typeof AbsolutePositionPreset];
 
 export interface AbsoluteInsetOverrides {
   top?: SizeValue;
@@ -158,8 +157,7 @@ function resolveRadius(radius: RadiusProp | undefined): CSSProperties | undefine
   if (radius === 'full') return { borderRadius: '9999px' };
   if (radius in RADIUS_TOKEN_TO_CSS) {
     return {
-      borderRadius:
-        RADIUS_TOKEN_TO_CSS[radius as Exclude<RadiusToken, 'none' | 'full'>],
+      borderRadius: RADIUS_TOKEN_TO_CSS[radius as Exclude<RadiusToken, 'none' | 'full'>],
     };
   }
   return { borderRadius: radius };

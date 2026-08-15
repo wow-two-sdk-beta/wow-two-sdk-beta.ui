@@ -67,16 +67,10 @@ const el = useTemplateRef<HTMLSpanElement>('el');
 const size = computed(() => SIZE[props.size]);
 
 const classes = computed(() =>
-  cn(
-    'inline-flex items-center text-foreground',
-    size.value.wrapper,
-    attrs.class as string | undefined,
-  ),
+  cn('inline-flex items-center text-foreground', size.value.wrapper, attrs.class as string | undefined),
 );
 
-const dotClasses = computed(() =>
-  cn('inline-block rounded-full', size.value.dot, TONE[props.tone]),
-);
+const dotClasses = computed(() => cn('inline-block rounded-full', size.value.dot, TONE[props.tone]));
 
 const pulseClasses = computed(() =>
   cn('absolute inset-0 inline-block rounded-full opacity-75 animate-ping', TONE[props.tone]),

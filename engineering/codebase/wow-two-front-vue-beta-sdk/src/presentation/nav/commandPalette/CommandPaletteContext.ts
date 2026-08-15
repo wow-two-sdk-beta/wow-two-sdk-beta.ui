@@ -44,8 +44,7 @@ export interface CommandPaletteContextValue {
   inputEl: ShallowRef<HTMLInputElement | null>;
 }
 
-export const commandPaletteContextKey: InjectionKey<CommandPaletteContextValue> =
-  Symbol('wow-two.commandPalette');
+export const commandPaletteContextKey: InjectionKey<CommandPaletteContextValue> = Symbol('wow-two.commandPalette');
 
 export function useCommandPaletteContext(): CommandPaletteContextValue {
   const context = inject(commandPaletteContextKey, null);

@@ -22,9 +22,7 @@ defineSlots<{ default?(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const classes = computed(() =>
-  cn('flex-1 overflow-y-auto p-6', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('flex-1 overflow-y-auto p-6', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

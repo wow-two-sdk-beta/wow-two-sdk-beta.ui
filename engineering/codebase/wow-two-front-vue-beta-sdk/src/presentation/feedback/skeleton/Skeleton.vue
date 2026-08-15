@@ -23,9 +23,7 @@ const props = defineProps<SkeletonProps>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const classes = computed(() =>
-  cn(skeletonVariants({ shape: props.shape }), attrs.class as string | undefined),
-);
+const classes = computed(() => cn(skeletonVariants({ shape: props.shape }), attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

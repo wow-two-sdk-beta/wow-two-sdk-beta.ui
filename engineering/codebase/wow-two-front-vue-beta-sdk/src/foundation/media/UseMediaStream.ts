@@ -74,9 +74,7 @@ const DefaultConstraints: MediaStreamConstraints = { video: true };
  * @param options Default constraints for `start()`. A ref or getter is read at call time.
  * @returns The state machine plus the two lifecycle callbacks.
  */
-export function useMediaStream(
-  options?: MaybeRefOrGetter<UseMediaStreamOptions | undefined>,
-): MediaStreamControls {
+export function useMediaStream(options?: MaybeRefOrGetter<UseMediaStreamOptions | undefined>): MediaStreamControls {
   const status = shallowRef<MediaStreamState>('idle');
   const stream = shallowRef<MediaStream | null>(null);
   const error = shallowRef<Error | null>(null);
@@ -109,9 +107,7 @@ export function useMediaStream(
       status.value = 'pending';
     }
 
-    const result = await requestMediaStream(
-      constraints ?? toValue(options)?.constraints ?? DefaultConstraints,
-    );
+    const result = await requestMediaStream(constraints ?? toValue(options)?.constraints ?? DefaultConstraints);
 
     if (disposed) {
       // Torn down while the prompt was open. The stream arrived for a component that no longer exists; nothing

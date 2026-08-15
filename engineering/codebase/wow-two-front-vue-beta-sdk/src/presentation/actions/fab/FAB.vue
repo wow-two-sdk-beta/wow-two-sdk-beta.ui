@@ -11,8 +11,7 @@ type FABAttributes = ButtonHTMLAttributes & { 'aria-label': string };
    fallthrough, and `FABVariants` resolves through `typeof fabVariants`, which the SFC prop
    compiler cannot walk. */
 export interface FABProps
-  extends /* @vue-ignore */ FABAttributes,
-    /* @vue-ignore */ Omit<FABVariants, 'variant' | 'size' | 'position'> {
+  extends /* @vue-ignore */ FABAttributes, /* @vue-ignore */ Omit<FABVariants, 'variant' | 'size' | 'position'> {
   /** The visual surface style. */
   variant?: FabVariant;
   /** The button diameter. */
@@ -48,10 +47,7 @@ const passthroughAttrs = computed(() =>
 );
 
 const rootClass = computed(() =>
-  cn(
-    fabVariants({ variant: props.variant, size: props.size, position: props.position }),
-    attrs.class as ClassValue,
-  ),
+  cn(fabVariants({ variant: props.variant, size: props.size, position: props.position }), attrs.class as ClassValue),
 );
 
 const root = useTemplateRef<HTMLButtonElement>('root');
@@ -62,12 +58,7 @@ defineExpose({ el: root });
 
 <template>
   <!-- Floating Action Button — fixed-position circular button with shadow. -->
-  <button
-    ref="root"
-    :type="type"
-    :class="rootClass"
-    v-bind="passthroughAttrs"
-  >
+  <button ref="root" :type="type" :class="rootClass" v-bind="passthroughAttrs">
     <slot />
   </button>
 </template>

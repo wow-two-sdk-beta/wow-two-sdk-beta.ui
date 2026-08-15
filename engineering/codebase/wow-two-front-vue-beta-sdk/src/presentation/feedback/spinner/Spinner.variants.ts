@@ -41,13 +41,7 @@ export type SpinnerVariants = VariantProps<typeof spinnerVariants>;
 
 /* Compile-time lock: adopted/local enum values ≡ tv axis keys (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertSpinnerSize: AssertExact<
-  Size,
-  NonNullable<VariantProps<typeof spinnerVariants>['size']>
-> = true;
+const _assertSpinnerSize: AssertExact<Size, NonNullable<VariantProps<typeof spinnerVariants>['size']>> = true;
 void _assertSpinnerSize;
-const _assertSpinnerTone: AssertExact<
-  SpinnerTone,
-  NonNullable<VariantProps<typeof spinnerVariants>['tone']>
-> = true;
+const _assertSpinnerTone: AssertExact<SpinnerTone, NonNullable<VariantProps<typeof spinnerVariants>['tone']>> = true;
 void _assertSpinnerTone;

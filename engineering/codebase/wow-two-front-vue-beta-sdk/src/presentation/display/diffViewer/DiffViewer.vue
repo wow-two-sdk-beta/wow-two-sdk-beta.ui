@@ -167,8 +167,7 @@ const isSplit = computed(() => props.view === DiffView.Split);
 const toCell = (row: DiffRow | undefined, index: number, side: DiffSide): DiffCell => {
   if (!row) return { key: index, op: null, num: null, text: '', rowClass: '' };
   const isChanged =
-    (side === DiffSide.Left && row.op === DiffOp.Removed) ||
-    (side === DiffSide.Right && row.op === DiffOp.Added);
+    (side === DiffSide.Left && row.op === DiffOp.Removed) || (side === DiffSide.Right && row.op === DiffOp.Added);
   return {
     key: index,
     op: row.op,
@@ -219,11 +218,7 @@ const unifiedRows = computed<ReadonlyArray<UnifiedCell>>(() =>
     rightNum: r.rightNum,
     sign: r.op === DiffOp.Added ? '+' : r.op === DiffOp.Removed ? '−' : ' ',
     text: r.text,
-    rowClass: cn(
-      'flex',
-      r.op === DiffOp.Added && 'bg-success-soft',
-      r.op === DiffOp.Removed && 'bg-destructive-soft',
-    ),
+    rowClass: cn('flex', r.op === DiffOp.Added && 'bg-success-soft', r.op === DiffOp.Removed && 'bg-destructive-soft'),
   })),
 );
 
@@ -263,9 +258,7 @@ defineExpose({ el });
       <div v-for="(column, columnIndex) in splitColumns" :key="columnIndex" class="overflow-x-auto">
         <template v-for="cell in column" :key="cell.key">
           <div v-if="cell.op === null" class="flex bg-muted/30">
-            <span class="select-none w-10 shrink-0 px-2 py-0.5 text-right text-muted-foreground"
-              >·</span
-            >
+            <span class="select-none w-10 shrink-0 px-2 py-0.5 text-right text-muted-foreground">·</span>
             <span class="flex-1 whitespace-pre px-2 py-0.5">&nbsp;</span>
           </div>
           <div v-else :data-state="cell.op" :class="cell.rowClass">
@@ -289,9 +282,7 @@ defineExpose({ el });
           class="select-none w-10 shrink-0 border-r border-border px-2 py-0.5 text-right text-muted-foreground tabular-nums"
           >{{ row.rightNum ?? '' }}</span
         >
-        <span class="w-5 shrink-0 px-1 py-0.5 text-center text-muted-foreground">{{
-          row.sign
-        }}</span>
+        <span class="w-5 shrink-0 px-1 py-0.5 text-center text-muted-foreground">{{ row.sign }}</span>
         <span class="flex-1 whitespace-pre px-2 py-0.5">{{ row.text || ' ' }}</span>
       </div>
     </div>

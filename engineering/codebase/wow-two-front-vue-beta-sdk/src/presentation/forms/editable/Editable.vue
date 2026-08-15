@@ -178,9 +178,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
 );
 
-const rootClass = computed(() =>
-  cn('inline-flex items-center gap-1.5', attrs.class as ClassValue),
-);
+const rootClass = computed(() => cn('inline-flex items-center gap-1.5', attrs.class as ClassValue));
 </script>
 
 <template>

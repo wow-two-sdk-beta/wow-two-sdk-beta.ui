@@ -53,9 +53,7 @@ describe('search', () => {
   it('ranks a label hit ahead of a tag-only hit', () => {
     const results = EmojiCatalog.search('smile');
     const firstLabelHit = results.findIndex((entry) => entry.label.toLowerCase().includes('smile'));
-    const firstTagOnlyHit = results.findIndex(
-      (entry) => !entry.label.toLowerCase().includes('smile'),
-    );
+    const firstTagOnlyHit = results.findIndex((entry) => !entry.label.toLowerCase().includes('smile'));
 
     expect(firstLabelHit).toBe(0);
     if (firstTagOnlyHit !== -1) expect(firstLabelHit).toBeLessThan(firstTagOnlyHit);

@@ -26,9 +26,7 @@ export type PropsOf<C> = C extends abstract new (...args: never[]) => { $props: 
     : never;
 
 /** The subset of an SFC default export's type that `smokeCase` needs to read props off. */
-type ComponentLike =
-  | (abstract new (...args: never[]) => { $props: object })
-  | ((...args: never[]) => unknown);
+type ComponentLike = (abstract new (...args: never[]) => { $props: object }) | ((...args: never[]) => unknown);
 
 /** Marks the probe node handed to a component's default slot, so the assertion can find it. */
 export const SLOT_PROBE_ATTR = 'data-smoke-slot-probe';
@@ -137,11 +135,7 @@ function fatalOnly(messages: readonly string[]): readonly string[] {
 
 /** The case's own vnode, with a slot probe when the case declares a default slot. */
 function caseNode(testCase: SmokeCase, withProbe: boolean): VNode {
-  return h(
-    testCase.component,
-    testCase.props,
-    withProbe ? { default: () => slotProbe() } : undefined,
-  );
+  return h(testCase.component, testCase.props, withProbe ? { default: () => slotProbe() } : undefined);
 }
 
 /** The case's vnode inside its required parents, as a mountable component. */
@@ -180,8 +174,7 @@ export async function assertRendersDefaultSlot(testCase: SmokeCase): Promise<voi
   // content lands one tick after mount.
   await nextTick();
   const selector = `[${SLOT_PROBE_ATTR}]`;
-  const rendered =
-    wrapper.find(selector).exists() || document.body.querySelector(selector) !== null;
+  const rendered = wrapper.find(selector).exists() || document.body.querySelector(selector) !== null;
   expect(rendered, `${testCase.name} did not render its default slot`).toBe(true);
   wrapper.unmount();
 }
@@ -215,9 +208,7 @@ export function describeMountTier(
     if (testCase.skipMount !== undefined) continue;
     register(`${testCase.name} mounts`, () => assertMounts(testCase));
     if (testCase.slot === true) {
-      register(`${testCase.name} renders its default slot`, () =>
-        assertRendersDefaultSlot(testCase),
-      );
+      register(`${testCase.name} renders its default slot`, () => assertRendersDefaultSlot(testCase));
     }
   }
 }

@@ -24,12 +24,7 @@
 //    an element measured mid-unmount, a collapsed flex child. Dividing by it yields `Infinity`, which becomes
 //    `scale(Infinity)`, which WAAPI rejects. Every ratio here falls back to `1` unless it is finite.
 
-import {
-  animate,
-  noopAnimationHandle,
-  type AnimateOptions,
-  type AnimationHandle,
-} from './Animate';
+import { animate, noopAnimationHandle, type AnimateOptions, type AnimationHandle } from './Animate';
 
 /**
  * A geometry snapshot — the fields of a `DOMRect` this slice actually uses. Deliberately a plain readonly

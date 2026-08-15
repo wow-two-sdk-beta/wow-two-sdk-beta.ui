@@ -105,10 +105,7 @@ const routeErrorComponent = computed<Component | undefined>(() => {
   <slot v-if="error === null" />
   <slot v-else-if="$slots.fallback" name="fallback" :error="error" :reset="reset" />
   <component :is="routeErrorComponent" v-else-if="routeErrorComponent" :error="error" :reset="reset" />
-  <div
-    v-else
-    class="flex min-h-svh flex-col items-center justify-center gap-3 bg-background p-8 text-center"
-  >
+  <div v-else class="flex min-h-svh flex-col items-center justify-center gap-3 bg-background p-8 text-center">
     <p v-if="status !== undefined" class="font-mono text-sm text-muted-foreground">{{ status }}</p>
     <h1 class="text-lg font-semibold text-foreground">Something went wrong</h1>
     <p class="max-w-md text-sm text-muted-foreground">{{ message }}</p>

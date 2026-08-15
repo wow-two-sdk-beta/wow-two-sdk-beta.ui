@@ -21,15 +21,7 @@ export interface MessageListProps {
 </script>
 
 <script setup lang="ts">
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  onUpdated,
-  ref,
-  useAttrs,
-  useTemplateRef,
-} from 'vue';
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useAttrs, useTemplateRef } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
 
@@ -119,9 +111,7 @@ onUpdated(() => {
   if (props.isSticky && nearBottom) scrollToBottom('auto');
 });
 
-const classes = computed(() =>
-  cn('relative flex h-full min-h-0 flex-col', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('relative flex h-full min-h-0 flex-col', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

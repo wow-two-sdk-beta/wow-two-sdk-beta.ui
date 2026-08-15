@@ -30,10 +30,7 @@ describe('feedback — Tour open state', () => {
       });
       await nextTick();
 
-      expect(
-        document.body.textContent,
-        'Tour rendered nothing — isOpen was cast to false',
-      ).toContain('Step one');
+      expect(document.body.textContent, 'Tour rendered nothing — isOpen was cast to false').toContain('Step one');
 
       wrapper.unmount();
     });

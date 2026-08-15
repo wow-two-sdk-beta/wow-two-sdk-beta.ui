@@ -55,9 +55,7 @@ const el = useTemplateRef<HTMLDivElement>('el');
 const classes = computed(() =>
   cn(
     'flex text-sm',
-    props.layout === InfoRowLayout.Inline
-      ? 'items-center justify-between gap-3'
-      : 'flex-col gap-0.5',
+    props.layout === InfoRowLayout.Inline ? 'items-center justify-between gap-3' : 'flex-col gap-0.5',
     attrs.class as string | undefined,
   ),
 );

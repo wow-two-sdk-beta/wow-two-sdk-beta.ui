@@ -23,9 +23,7 @@ const props = defineProps<DaySeparatorProps>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const classes = computed(() =>
-  cn('flex items-center gap-3 py-2', attrs.class as string | undefined),
-);
+const classes = computed(() => cn('flex items-center gap-3 py-2', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

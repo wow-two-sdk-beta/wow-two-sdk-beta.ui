@@ -99,9 +99,7 @@ export interface UndoHistoryControls {
  *
  * @param options History configuration. `limit` / `coalesceMs` are read once; `onError` / `now` stay live.
  */
-export function useUndoHistory(
-  options?: MaybeRefOrGetter<HistoryOptions | undefined>,
-): UndoHistoryControls {
+export function useUndoHistory(options?: MaybeRefOrGetter<HistoryOptions | undefined>): UndoHistoryControls {
   const history = createUndoHistory(scopeOptions(options));
   const version = useHistoryVersion(history);
 

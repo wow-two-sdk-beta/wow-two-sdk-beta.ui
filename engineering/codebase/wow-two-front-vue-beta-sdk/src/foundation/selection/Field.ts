@@ -18,9 +18,7 @@ export type FieldAccessor<T> = (item: T) => unknown;
  * Represents the field-name → accessor registry handed to {@link readField}, `applySort`, and `applyFilters`.
  * Every entry is optional; a field with no entry falls back to a plain property read.
  */
-export type FieldAccessors<T, TField extends string = string> = Partial<
-  Readonly<Record<TField, FieldAccessor<T>>>
->;
+export type FieldAccessors<T, TField extends string = string> = Partial<Readonly<Record<TField, FieldAccessor<T>>>>;
 
 /**
  * Reads one field off an item: the registered accessor when present, otherwise the item's own property of

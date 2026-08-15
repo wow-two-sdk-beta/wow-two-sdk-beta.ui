@@ -119,13 +119,11 @@ defineExpose({ el });
       <slot name="tagline">{{ props.tagline }}</slot>
     </Text>
     <ul class="mt-5 flex flex-1 flex-col gap-2.5">
-      <li
-        v-for="(feature, index) in props.features"
-        :key="index"
-        class="flex items-start gap-2 text-sm"
-      >
+      <li v-for="(feature, index) in props.features" :key="index" class="flex items-start gap-2 text-sm">
         <Icon :icon="Check" :size="16" class="mt-0.5 text-primary" />
-        <span><slot name="feature" :feature="feature" :index="index">{{ feature }}</slot></span>
+        <span
+          ><slot name="feature" :feature="feature" :index="index">{{ feature }}</slot></span
+        >
       </li>
     </ul>
     <div v-if="$slots.default" class="mt-6"><slot /></div>

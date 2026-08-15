@@ -39,14 +39,7 @@
  * - `failed` — anything else, including an unreadable event.
  */
 export type SpeechRecognitionStatus =
-  | 'denied'
-  | 'unavailable'
-  | 'no-speech'
-  | 'network'
-  | 'aborted'
-  | 'language-unsupported'
-  | 'unsupported'
-  | 'failed';
+  'denied' | 'unavailable' | 'no-speech' | 'network' | 'aborted' | 'language-unsupported' | 'unsupported' | 'failed';
 
 /** A recognition failure: the classified status plus a normalized `Error` for logs and telemetry. */
 export interface SpeechRecognitionFailure {

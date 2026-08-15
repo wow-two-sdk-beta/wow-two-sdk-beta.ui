@@ -9,9 +9,5 @@ export { default as CarouselPrev } from './CarouselPrev.vue';
 export { default as CarouselNext } from './CarouselNext.vue';
 export { default as CarouselDots, type CarouselDotsProps } from './CarouselDots.vue';
 export { default as CarouselDot, type CarouselDotProps } from './CarouselDot.vue';
-export {
-  useCarouselContext,
-  type CarouselContextValue,
-  type CarouselNavButtonProps,
-} from './CarouselContext';
+export { useCarouselContext, type CarouselContextValue, type CarouselNavButtonProps } from './CarouselContext';
 export { default } from './Carousel.vue';

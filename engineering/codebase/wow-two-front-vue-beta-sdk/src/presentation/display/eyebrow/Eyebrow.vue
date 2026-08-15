@@ -54,11 +54,7 @@ const el = useTemplateRef<HTMLHeadingElement>('el');
 const tag = computed(() => `h${props.level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6');
 
 const classes = computed(() =>
-  cn(
-    'text-[10px] font-semibold uppercase tracking-wider',
-    TONE[props.tone],
-    attrs.class as string | undefined,
-  ),
+  cn('text-[10px] font-semibold uppercase tracking-wider', TONE[props.tone], attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

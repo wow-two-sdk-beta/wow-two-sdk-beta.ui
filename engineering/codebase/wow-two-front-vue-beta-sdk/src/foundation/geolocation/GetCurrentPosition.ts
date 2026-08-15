@@ -20,7 +20,12 @@
 import { toError } from '../errors';
 
 import { geolocationApi } from './CanLocate';
-import { toPositionResult, toPositionSuccess, type PositionRequestOptions, type PositionResult } from './PositionResult';
+import {
+  toPositionResult,
+  toPositionSuccess,
+  type PositionRequestOptions,
+  type PositionResult,
+} from './PositionResult';
 
 /**
  * Reads the device's current position once.

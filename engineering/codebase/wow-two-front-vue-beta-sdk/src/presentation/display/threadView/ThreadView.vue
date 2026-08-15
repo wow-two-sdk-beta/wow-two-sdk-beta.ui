@@ -95,10 +95,7 @@ const defaultReplyCount = (): string => {
 const hasSubtitle = computed(() => props.subtitle != null || Boolean(slots.subtitle));
 
 const classes = computed(() =>
-  cn(
-    'flex h-full min-h-0 flex-col rounded-md border border-border bg-card',
-    attrs.class as string | undefined,
-  ),
+  cn('flex h-full min-h-0 flex-col rounded-md border border-border bg-card', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -112,9 +109,7 @@ defineExpose({ el });
 
 <template>
   <div ref="el" role="complementary" aria-label="Thread" v-bind="rest" :class="classes">
-    <header
-      class="flex items-start justify-between gap-2 border-b border-border px-4 py-3"
-    >
+    <header class="flex items-start justify-between gap-2 border-b border-border px-4 py-3">
       <div class="min-w-0">
         <div class="text-sm font-semibold text-foreground">
           <slot name="title">{{ props.title }}</slot>

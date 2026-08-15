@@ -65,16 +65,13 @@ export function compareValues(a: unknown, b: unknown, options: LocaleOptions = {
   if (typeof a === 'number' && typeof b === 'number') return a - b;
   if (typeof a === 'bigint' && typeof b === 'bigint') return a < b ? -1 : a > b ? 1 : 0;
   if (typeof a === 'boolean' && typeof b === 'boolean') return Number(a) - Number(b);
-  if (a instanceof Temporal.PlainDate && b instanceof Temporal.PlainDate)
-    return Temporal.PlainDate.compare(a, b);
-  if (a instanceof Temporal.PlainTime && b instanceof Temporal.PlainTime)
-    return Temporal.PlainTime.compare(a, b);
+  if (a instanceof Temporal.PlainDate && b instanceof Temporal.PlainDate) return Temporal.PlainDate.compare(a, b);
+  if (a instanceof Temporal.PlainTime && b instanceof Temporal.PlainTime) return Temporal.PlainTime.compare(a, b);
   if (a instanceof Temporal.PlainDateTime && b instanceof Temporal.PlainDateTime)
     return Temporal.PlainDateTime.compare(a, b);
   if (a instanceof Temporal.ZonedDateTime && b instanceof Temporal.ZonedDateTime)
     return Temporal.ZonedDateTime.compare(a, b);
-  if (a instanceof Temporal.Instant && b instanceof Temporal.Instant)
-    return Temporal.Instant.compare(a, b);
+  if (a instanceof Temporal.Instant && b instanceof Temporal.Instant) return Temporal.Instant.compare(a, b);
   // Native `Date` stays supported: a consumer's row data is arbitrary, and a `Date` in a column must not
   // silently degrade to a string comparison of its locale form.
   if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();

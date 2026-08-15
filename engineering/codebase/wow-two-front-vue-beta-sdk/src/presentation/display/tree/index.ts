@@ -3,9 +3,4 @@ export { default as Tree, type TreeProps } from './Tree.vue';
    generated default export cannot carry statics cleanly, so they ship as siblings. */
 export { default as TreeGroup, type TreeGroupProps } from './TreeGroup.vue';
 export { default as TreeItem, type TreeItemProps } from './TreeItem.vue';
-export {
-  useTreeContext,
-  useTreeLevel,
-  type TreeContextValue,
-  type TreeLevelValue,
-} from './TreeContext';
+export { useTreeContext, useTreeLevel, type TreeContextValue, type TreeLevelValue } from './TreeContext';

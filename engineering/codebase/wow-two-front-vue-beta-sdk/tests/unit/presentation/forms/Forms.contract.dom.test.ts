@@ -69,9 +69,7 @@ describe('forms — control a11y wiring', () => {
       ?.split(/\s+/)
       .map((id) => wrapper.find(`#${id}`))
       .find((found) => found.exists());
-    expect(description?.text(), 'aria-describedby points at no rendered text').toContain(
-      'Enter a valid email',
-    );
+    expect(description?.text(), 'aria-describedby points at no rendered text').toContain('Enter a valid email');
 
     wrapper.unmount();
   });

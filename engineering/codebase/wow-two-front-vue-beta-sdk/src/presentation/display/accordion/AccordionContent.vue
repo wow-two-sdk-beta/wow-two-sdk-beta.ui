@@ -49,14 +49,7 @@ defineExpose({ el });
       (and the ref) are injected by Presence so the exit transition can play
       before unmount. Motion-safe-gated; reduced-motion gets an instant snap.
     -->
-    <div
-      ref="el"
-      :id="item.contentId"
-      role="region"
-      :aria-labelledby="item.triggerId"
-      v-bind="rest"
-      :class="classes"
-    >
+    <div ref="el" :id="item.contentId" role="region" :aria-labelledby="item.triggerId" v-bind="rest" :class="classes">
       <!-- Content padding is consumer-owned (no default) — wrap the slot with your own
            padding so each panel sets any value; it collapses cleanly inside this clip. -->
       <div class="min-h-0 overflow-hidden"><slot /></div>

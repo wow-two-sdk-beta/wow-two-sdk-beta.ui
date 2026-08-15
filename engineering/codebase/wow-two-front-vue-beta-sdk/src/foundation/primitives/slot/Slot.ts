@@ -82,9 +82,7 @@ export function renderableChildren(nodes: VNodeArrayChildren | undefined): Array
     }
     const vnode = node as VNode;
     if (vnode.type === Fragment) {
-      flattened.push(
-        ...renderableChildren(Array.isArray(vnode.children) ? vnode.children : undefined),
-      );
+      flattened.push(...renderableChildren(Array.isArray(vnode.children) ? vnode.children : undefined));
       continue;
     }
     if (vnode.type === Comment || isBlankText(vnode)) continue;
@@ -158,15 +156,9 @@ export function renderSlotClone(slotProps: AnyProps, slots: Slots): VNode | null
     // target's original children — so the surrounding nodes compose inside the
     // rebuilt target: [before…, …targetChildren, …after].
     const targetChildren = ownChildren(target);
-    const newChildren = children.flatMap((child) =>
-      child === slottable ? targetChildren : [child],
-    );
+    const newChildren = children.flatMap((child) => (child === slottable ? targetChildren : [child]));
     const merged = mergeProps(slotProps, (target.props ?? {}) as AnyProps);
-    return rebuild(
-      target,
-      merged,
-      isComponentVNode(target) ? { default: () => newChildren } : newChildren,
-    );
+    return rebuild(target, merged, isComponentVNode(target) ? { default: () => newChildren } : newChildren);
   }
 
   const child = children[0];

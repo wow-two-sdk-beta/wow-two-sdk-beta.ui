@@ -42,7 +42,9 @@ export function capitalize(text: string): string {
 export function titleCase(text: string): string {
   return text
     .split(/(\s+)/)
-    .map((part) => (/\s/.test(part) || part.length === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()))
+    .map((part) =>
+      /\s/.test(part) || part.length === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase(),
+    )
     .join('');
 }
 
@@ -80,7 +82,10 @@ export interface InitialsOptions {
  */
 export function initials(name: string, options?: InitialsOptions): string {
   const max = Math.max(1, options?.max ?? 2);
-  const words = name.trim().split(/\s+/).filter((word) => word.length > 0);
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0);
   if (words.length === 0) return '';
 
   // First `max-1` words plus the last word — so a long name yields "first…last" initials, not the first N.

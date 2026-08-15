@@ -18,11 +18,6 @@ export { canShare } from './CanShare';
 
 export { share, type ShareResult, type ShareStatus, type ShareOptions } from './Share';
 
-export {
-  shareOrCopy,
-  type ShareOrCopyResult,
-  type ShareOrCopyStatus,
-  type ShareOrCopyOptions,
-} from './ShareOrCopy';
+export { shareOrCopy, type ShareOrCopyResult, type ShareOrCopyStatus, type ShareOrCopyOptions } from './ShareOrCopy';
 
 export { useShare, type ShareControls, type ShareState } from './UseShare';

@@ -25,9 +25,7 @@ const props = withDefaults(defineProps<ContainerProps>(), { as: 'div' });
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
 
-const classes = computed(() =>
-  cn(containerVariants({ size: props.size }), attrs.class as string | undefined),
-);
+const classes = computed(() => cn(containerVariants({ size: props.size }), attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

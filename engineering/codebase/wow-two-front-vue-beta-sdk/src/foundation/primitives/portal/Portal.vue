@@ -28,9 +28,7 @@ onMounted(() => {
   isMounted.value = true;
 });
 
-const target = computed<HTMLElement | null>(() =>
-  isMounted.value ? (props.container ?? document.body) : null,
-);
+const target = computed<HTMLElement | null>(() => (isMounted.value ? (props.container ?? document.body) : null));
 </script>
 
 <template>

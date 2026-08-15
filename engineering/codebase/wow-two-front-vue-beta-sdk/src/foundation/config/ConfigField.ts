@@ -63,7 +63,7 @@ function createField<T>(
     hasDefault,
     defaultValue: hasDefault ? options.default : undefined,
     // A field is required unless it carries a default or is explicitly opted out.
-    required: hasDefault ? false : options?.required ?? true,
+    required: hasDefault ? false : (options?.required ?? true),
     secret: options?.secret ?? false,
   };
 }
@@ -111,10 +111,10 @@ export function bool<const O extends ConfigFieldOptions<boolean> = ConfigFieldOp
 }
 
 /** An enum field — the value must be one of `values`; the output type narrows to that literal union. */
-export function oneOf<const V extends readonly string[], const O extends ConfigFieldOptions<V[number]> = ConfigFieldOptions<V[number]>>(
-  values: V,
-  options?: O,
-): ConfigField<V[number], Optionality<O>> {
+export function oneOf<
+  const V extends readonly string[],
+  const O extends ConfigFieldOptions<V[number]> = ConfigFieldOptions<V[number]>,
+>(values: V, options?: O): ConfigField<V[number], Optionality<O>> {
   return createField(
     `one of [${values.join(', ')}]`,
     (raw) => {

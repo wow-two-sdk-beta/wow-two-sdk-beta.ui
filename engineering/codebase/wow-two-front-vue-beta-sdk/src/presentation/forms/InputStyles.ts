@@ -101,18 +101,13 @@ export type InputRing = (typeof InputRing)[keyof typeof InputRing];
 
 /* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertInputSize: AssertExact<
-  InputSize, NonNullable<VariantProps<typeof inputBaseVariants>['size']>
-> = true;
-const _assertInputState: AssertExact<
-  InputState, NonNullable<VariantProps<typeof inputBaseVariants>['state']>
-> = true;
+const _assertInputSize: AssertExact<InputSize, NonNullable<VariantProps<typeof inputBaseVariants>['size']>> = true;
+const _assertInputState: AssertExact<InputState, NonNullable<VariantProps<typeof inputBaseVariants>['state']>> = true;
 const _assertInputBorder: AssertExact<
-  InputBorder, NonNullable<VariantProps<typeof inputBaseVariants>['border']>
+  InputBorder,
+  NonNullable<VariantProps<typeof inputBaseVariants>['border']>
 > = true;
-const _assertInputRing: AssertExact<
-  InputRing, NonNullable<VariantProps<typeof inputBaseVariants>['ring']>
-> = true;
+const _assertInputRing: AssertExact<InputRing, NonNullable<VariantProps<typeof inputBaseVariants>['ring']>> = true;
 void _assertInputSize;
 void _assertInputState;
 void _assertInputBorder;

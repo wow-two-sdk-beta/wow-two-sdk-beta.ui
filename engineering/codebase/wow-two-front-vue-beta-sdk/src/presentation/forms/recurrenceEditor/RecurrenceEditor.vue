@@ -125,10 +125,7 @@ function serializeRule(r: RecurrenceRule): string {
   return `RRULE:${parts.join(';')}`;
 }
 
-function nextOccurrence(
-  rule: RecurrenceRule,
-  prev: Temporal.PlainDate,
-): Temporal.PlainDate | null {
+function nextOccurrence(rule: RecurrenceRule, prev: Temporal.PlainDate): Temporal.PlainDate | null {
   switch (rule.freq) {
     case RecurrenceFreq.Daily:
       return addDays(prev, rule.interval);
@@ -265,11 +262,7 @@ function update(patch: Partial<RecurrenceRule>): void {
 }
 
 const endMode = computed<RecurrenceEndMode>(() =>
-  rule.value.count
-    ? RecurrenceEndMode.Count
-    : rule.value.until
-      ? RecurrenceEndMode.Until
-      : RecurrenceEndMode.Never,
+  rule.value.count ? RecurrenceEndMode.Count : rule.value.until ? RecurrenceEndMode.Until : RecurrenceEndMode.Never,
 );
 
 function onIntervalInput(event: Event): void {

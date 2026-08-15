@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  allSettledValues,
-  deferred,
-  pLimit,
-  sequential,
-  TimeoutError,
-  withTimeout,
-} from '@src/foundation/async';
+import { allSettledValues, deferred, pLimit, sequential, TimeoutError, withTimeout } from '@src/foundation/async';
 
 /*
  * Smoke depth, `unit` project (node). Real timers, tiny delays — the assertions are about which
@@ -52,13 +45,7 @@ describe('pLimit', () => {
       running -= 1;
     };
 
-    await Promise.all([
-      limit.run(task),
-      limit.run(task),
-      limit.run(task),
-      limit.run(task),
-      limit.run(task),
-    ]);
+    await Promise.all([limit.run(task), limit.run(task), limit.run(task), limit.run(task), limit.run(task)]);
 
     expect(peak).toBeLessThanOrEqual(2);
     expect(limit.activeCount()).toBe(0);

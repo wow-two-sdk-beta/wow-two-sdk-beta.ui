@@ -26,7 +26,10 @@ export interface CreateCookieStrategyOptions<TUser, TSignInInput = unknown> {
   readonly isAnonymous?: (user: TUser) => boolean;
 
   /** A custom sign-in exchange (guest creation, password post, Google ID-token swap) — return the user to authenticate immediately. */
-  readonly signIn?: (input: TSignInInput, context: CookieSignInContext) => Promise<TUser | null | void> | TUser | null | void;
+  readonly signIn?: (
+    input: TSignInInput,
+    context: CookieSignInContext,
+  ) => Promise<TUser | null | void> | TUser | null | void;
 }
 
 /**

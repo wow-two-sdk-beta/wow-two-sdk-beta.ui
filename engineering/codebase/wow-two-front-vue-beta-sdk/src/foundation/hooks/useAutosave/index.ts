@@ -1,6 +1,1 @@
-export {
-  useAutosave,
-  type AutosaveStatus,
-  type UseAutosaveOptions,
-  type AutosaveControls,
-} from './useAutosave';
+export { useAutosave, type AutosaveStatus, type UseAutosaveOptions, type AutosaveControls } from './useAutosave';

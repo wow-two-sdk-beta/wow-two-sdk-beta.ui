@@ -50,12 +50,7 @@ const pct = computed(() =>
 const offset = computed(() => circumference.value - (pct.value / 100) * circumference.value);
 
 const classes = computed(() =>
-  cn(
-    'inline-block',
-    !determinate.value && 'animate-spin',
-    TONE_CLASS[props.tone],
-    attrs.class as string | undefined,
-  ),
+  cn('inline-block', !determinate.value && 'animate-spin', TONE_CLASS[props.tone], attrs.class as string | undefined),
 );
 
 /**

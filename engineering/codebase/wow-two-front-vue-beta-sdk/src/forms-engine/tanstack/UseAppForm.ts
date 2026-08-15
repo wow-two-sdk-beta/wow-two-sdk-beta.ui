@@ -16,21 +16,12 @@ import type { ResolveValidationMessage } from '../../foundation/validation';
 
 import type { AppFieldApi, AppForm, AppFormOptions, AppFormOptionsSource, AppFormState } from '../AppForm';
 import { deepEqual } from '../DeepEqual';
-import {
-  createFieldApi,
-  createFieldComponent,
-  createFormStateView,
-  createUseFormState,
-} from '../FormGlue';
+import { createFieldApi, createFieldComponent, createFormStateView, createUseFormState } from '../FormGlue';
 import { getPath, hasPath } from '../Paths';
 import { createOptionsMessageResolver, runStandardSchema } from '../SchemaValidation';
 import { defaultMapFieldPath, resolveSubmitFailure } from '../SubmitErrors';
 
-import {
-  createTanstackFormOverlay,
-  type TanstackFormOverlay,
-  type TanstackOverlayState,
-} from './TanstackFormOverlay';
+import { createTanstackFormOverlay, type TanstackFormOverlay, type TanstackOverlayState } from './TanstackFormOverlay';
 
 /*
  * The tanstack adapter — the facade contract over `@tanstack/vue-form` (optional peer).

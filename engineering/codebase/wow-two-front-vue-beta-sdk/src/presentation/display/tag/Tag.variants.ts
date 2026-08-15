@@ -39,8 +39,5 @@ export type TagVariants = VariantProps<typeof tagVariants>;
 
 /* Compile-time lock: enum values ≡ tv variant value-set (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertTagVariant: AssertExact<
-  TagVariant,
-  NonNullable<VariantProps<typeof tagVariants>['variant']>
-> = true;
+const _assertTagVariant: AssertExact<TagVariant, NonNullable<VariantProps<typeof tagVariants>['variant']>> = true;
 void _assertTagVariant;

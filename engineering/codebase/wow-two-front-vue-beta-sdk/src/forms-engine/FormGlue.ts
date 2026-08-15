@@ -132,7 +132,7 @@ export function createFormStateView<TValues extends object>(
  * would otherwise hand every downstream effect a fresh object on every store commit.
  */
 export function createUseFormState<TValues extends object>(getFormState: () => AppFormState<TValues>) {
-  return <TSlice,>(
+  return <TSlice>(
     selector: (state: AppFormState<TValues>) => TSlice,
     isEqual?: (a: TSlice, b: TSlice) => boolean,
   ): Readonly<Ref<TSlice>> => {
