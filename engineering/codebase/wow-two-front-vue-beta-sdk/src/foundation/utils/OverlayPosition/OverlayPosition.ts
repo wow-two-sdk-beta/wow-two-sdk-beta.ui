@@ -1,4 +1,4 @@
-/* Provides the shared overlay-anchor vocabulary — the four corners plus top/bottom center (toaster / undoBar; FAB / BackToTop / SpeedDial). */
+/* Provides the shared overlay-anchor vocabulary — the four corners plus top/bottom center (toastHost / undoBar; Fab / BackToTop / SpeedDial). */
 
 /** Defines the anchor position of a floating overlay — the four corners plus top/bottom center. */
 export const OverlayPosition = {

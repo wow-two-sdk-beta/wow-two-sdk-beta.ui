@@ -7,7 +7,7 @@ export type ToastSeverity = NonNullable<ToastSimpleVariants['severity']>;
 
 /**
  * A renderable slice of a toast. React's `ReactNode` becomes `string | VNode`:
- * these travel through the imperative `toaster.toast()` payload, not through a
+ * these travel through the imperative `toastHost.toast()` payload, not through a
  * slot, so a caller who wants markup builds it with `h()`.
  */
 export type ToastNode = string | VNode;
@@ -17,7 +17,7 @@ export interface ToastOptions {
   description?: ToastNode;
   icon?: ToastNode;
   severity?: ToastSeverity;
-  /** ms before auto-dismiss. Default: Toaster's `defaultDuration`. `Infinity` = sticky. */
+  /** ms before auto-dismiss. Default: ToastHost's `defaultDuration`. `Infinity` = sticky. */
   duration?: number;
   action?: ToastNode;
   /** Fully custom body — replaces the default `Toast` chrome (icon/title/description/close). The toast still animates + auto-dismisses; the content owns its own close via the returned id. */
@@ -28,15 +28,15 @@ export interface ToastOptions {
   key?: string;
 }
 
-/** Content for a `toaster.promise` phase — a title string, or a full partial options object. */
+/** Content for a `toastHost.promise` phase — a title string, or a full partial options object. */
 export type ToastContent = string | Partial<ToastOptions>;
 
-/** Options for `toaster.promise` — loading / success / error content (success + error may be a fn of the settled value). */
+/** Options for `toastHost.promise` — loading / success / error content (success + error may be a fn of the settled value). */
 export interface ToastPromiseOptions<T> {
   loading: ToastContent;
   success: ToastContent | ((value: T) => ToastContent);
   error: ToastContent | ((err: unknown) => ToastContent);
-  /** Auto-dismiss (ms) for the settled toast; defaults to the Toaster's `defaultDuration`. */
+  /** Auto-dismiss (ms) for the settled toast; defaults to the ToastHost's `defaultDuration`. */
   duration?: number;
 }
 
@@ -52,7 +52,7 @@ interface ToastEntry extends ToastOptions {
 
 type Listener = (toasts: ReadonlyArray<ToastEntry>) => void;
 
-class ToasterStore {
+class ToastHostStore {
   private items: ReadonlyArray<ToastEntry> = [];
   private listeners = new Set<Listener>();
   private idSeq = 0;
@@ -116,20 +116,20 @@ class ToasterStore {
   }
 }
 
-export const toaster = new ToasterStore();
+export const toastHost = new ToastHostStore();
 
 /**
  * The imperative toast API, bound to the app-wide store. Plain object rather
  * than React's `useMemo` — the store is a module singleton, so there is nothing
  * per-instance to memoize.
  */
-export function useToaster() {
+export function useToastHost() {
   return {
-    toast: (opts: ToastOptions) => toaster.toast(opts),
-    update: (id: string, patch: Partial<ToastOptions>) => toaster.update(id, patch),
-    promise: <T,>(promise: Promise<T>, opts: ToastPromiseOptions<T>) => toaster.promise(promise, opts),
-    dismiss: (id: string) => toaster.dismiss(id),
-    dismissAll: () => toaster.dismissAll(),
+    toast: (opts: ToastOptions) => toastHost.toast(opts),
+    update: (id: string, patch: Partial<ToastOptions>) => toastHost.update(id, patch),
+    promise: <T,>(promise: Promise<T>, opts: ToastPromiseOptions<T>) => toastHost.promise(promise, opts),
+    dismiss: (id: string) => toastHost.dismiss(id),
+    dismissAll: () => toastHost.dismissAll(),
   };
 }
 
@@ -163,7 +163,7 @@ const MOTION_CLASSES: Record<OverlayPosition, string> = {
     'motion-safe:data-[state=open]:animate-(--animate-slide-in-bottom) motion-safe:data-[state=closed]:animate-(--animate-slide-out-bottom) motion-reduce:animate-none',
 };
 
-export interface ToasterProps {
+export interface ToastHostProps {
   position?: OverlayPosition;
   max?: number;
   /** The default auto-dismiss delay in ms; per-toast `duration` overrides. Default 5000. `Infinity` to disable. */
@@ -201,15 +201,15 @@ const ToastNodeView = defineComponent({
 });
 
 /**
- * Viewport that subscribes to the global `toaster` store and renders toasts
+ * Viewport that subscribes to the global `toastHost` store and renders toasts
  * via the L4 `Toast` molecule. Mount once, per app.
  *
  * React's `className` arrives as the ordinary `class` attr and lands on the
  * stack container, the same node it landed on in React.
  */
-defineOptions({ name: 'Toaster', inheritAttrs: false });
+defineOptions({ name: 'ToastHost', inheritAttrs: false });
 
-const props = withDefaults(defineProps<ToasterProps>(), {
+const props = withDefaults(defineProps<ToastHostProps>(), {
   position: OverlayPositionToken.BottomRight,
   max: 5,
   defaultDuration: 5000,
@@ -230,7 +230,7 @@ const nonces = new Map<string, number>();
 
 let unsubscribe: (() => void) | undefined;
 onMounted(() => {
-  unsubscribe = toaster.subscribe((next) => {
+  unsubscribe = toastHost.subscribe((next) => {
     items.value = next;
   });
 });
@@ -319,7 +319,7 @@ watch(
       if (timers.has(v.id)) continue;
       const left = remaining.get(v.id) ?? v.resolvedDuration;
       const handle = window.setTimeout(() => {
-        toaster.dismiss(v.id);
+        toastHost.dismiss(v.id);
       }, left);
       timers.set(v.id, handle);
       startedAt.set(v.id, Date.now());
@@ -389,7 +389,7 @@ const stackStyle = computed(() => ({ gap: `${props.gap}px` }));
         -->
         <div :class="itemClasses" @vue:unmounted="t.present ? undefined : removeExiting(t.id)">
           <ToastNodeView v-if="t.content" :node="t.content" />
-          <Toast v-else :severity="t.severity" @close="toaster.dismiss(t.id)">
+          <Toast v-else :severity="t.severity" @close="toastHost.dismiss(t.id)">
             <template v-if="t.icon" #icon><ToastNodeView :node="t.icon" /></template>
             <template v-if="t.title" #title><ToastNodeView :node="t.title" /></template>
             <template v-if="t.description" #description>

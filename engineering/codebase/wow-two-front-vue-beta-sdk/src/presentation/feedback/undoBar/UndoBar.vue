@@ -31,7 +31,7 @@ const POSITION: Record<OverlayPosition, string> = {
 /**
  * Snackbar with a single "Undo" action. Auto-dismisses after `duration`;
  * pause-on-hover preserves remaining time. For multi-toast queues use the L5
- * `Toaster` instead.
+ * `ToastHost` instead.
  *
  * React's `className` arrives as the ordinary `class` attr and is merged onto
  * the panel, not the positioning wrapper — the same node it landed on in React.

@@ -124,7 +124,7 @@ const overlayOn = ref(false);
         </div>
       </Demo>
 
-      <Demo name="Toast / ToastSimple" note="rendered inline, not through the Toaster">
+      <Demo name="Toast / ToastSimple" note="rendered inline, not through the ToastHost">
         <div class="space-y-2">
           <Toast
             v-for="s in SEVERITIES"

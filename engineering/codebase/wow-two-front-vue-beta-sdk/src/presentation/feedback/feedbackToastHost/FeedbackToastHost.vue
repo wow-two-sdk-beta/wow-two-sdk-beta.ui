@@ -1,17 +1,17 @@
 <script lang="ts">
 import type { FeedbackBus, PublishedNotice } from '../../../feedback';
-import type { ToasterProps, ToastOptions } from '../toaster';
+import type { ToastHostProps, ToastOptions } from '../toastHost';
 
 /**
- * The prop surface of `FeedbackToasts` — `bus`, plus every `Toaster` prop.
+ * The prop surface of `FeedbackToastHost` — `bus`, plus every `ToastHost` prop.
  *
- * The `ToasterProps` heritage is marked `@vue-ignore` so only `bus` becomes a
+ * The `ToastHostProps` heritage is marked `@vue-ignore` so only `bus` becomes a
  * runtime prop and the rest arrive as attrs; the template hands those to
- * `<Toaster>`, which declares them and resolves them back into props. Consumers
+ * `<ToastHost>`, which declares them and resolves them back into props. Consumers
  * still get the full checked surface, because the heritage is real to
  * TypeScript — it is only the SFC compiler's runtime-props pass that skips it.
  */
-export interface FeedbackToastsProps extends /* @vue-ignore */ ToasterProps {
+export interface FeedbackToastHostProps extends /* @vue-ignore */ ToastHostProps {
   /** The bus to render. Default: the app-wide `feedbackBus` singleton (what `notify()` publishes on). */
   bus?: FeedbackBus;
 }
@@ -31,19 +31,19 @@ function toToastOptions(notice: PublishedNotice): ToastOptions {
 <script setup lang="ts">
 import { computed, useAttrs, watch } from 'vue';
 import { feedbackBus } from '../../../feedback';
-import Toaster from '../toaster/Toaster.vue';
-import { toaster } from '../toaster';
+import ToastHost from '../toastHost/ToastHost.vue';
+import { toastHost } from '../toastHost';
 
 /**
- * The `/feedback` bus → `Toaster` adapter: subscribes to the bus and forwards every notice into
- * the imperative `toaster.toast()` API, rendering the toast viewport itself (all `ToasterProps`
- * pass through). Mount once per app **in place of** a bare `<Toaster/>` — mounting both would
+ * The `/feedback` bus → `ToastHost` adapter: subscribes to the bus and forwards every notice into
+ * the imperative `toastHost.toast()` API, rendering the toast viewport itself (all `ToastHostProps`
+ * pass through). Mount once per app **in place of** a bare `<ToastHost/>` — mounting both would
  * render every toast twice. Explicit opt-in wiring: nothing toasts until this (or another
  * subscriber) is mounted; notices published before mount are dropped, so mount it at the app root.
  */
-defineOptions({ name: 'FeedbackToasts', inheritAttrs: false });
+defineOptions({ name: 'FeedbackToastHost', inheritAttrs: false });
 
-const props = defineProps<FeedbackToastsProps>();
+const props = defineProps<FeedbackToastHostProps>();
 
 const attrs = useAttrs();
 
@@ -62,7 +62,7 @@ watch(
     if (typeof document === 'undefined') return;
     onCleanup(
       current.subscribe((notice) => {
-        toaster.toast(toToastOptions(notice));
+        toastHost.toast(toToastOptions(notice));
       }),
     );
   },
@@ -71,6 +71,6 @@ watch(
 </script>
 
 <template>
-  <!-- Every non-`bus` attr is a `Toaster` prop by construction — see `FeedbackToastsProps`. -->
-  <Toaster v-bind="attrs" />
+  <!-- Every non-`bus` attr is a `ToastHost` prop by construction — see `FeedbackToastHostProps`. -->
+  <ToastHost v-bind="attrs" />
 </template>

@@ -1,14 +1,14 @@
-# Toaster
+# ToastHost
 
 ## Purpose
-Queue + viewport for transient notifications. Wraps the L4 `Toast` molecule. One mount per app (typically at the root); messages pushed via the singleton `toaster` API or the `useToaster()` hook.
+Queue + viewport for transient notifications. Wraps the L4 `Toast` molecule. One mount per app (typically at the root); messages pushed via the singleton `toastHost` API or the `useToastHost()` hook.
 
 ## Anatomy
 ```
-<Toaster>                  ← viewport (fixed corner)
+<ToastHost>                  ← viewport (fixed corner)
   ├── <Toast/>             ← per active item
   └── <Announce/>          ← screen-reader live region
-</Toaster>
+</ToastHost>
 ```
 
 ## Required behaviors
@@ -21,7 +21,7 @@ Queue + viewport for transient notifications. Wraps the L4 `Toast` molecule. One
 ## Visual states
 `stack` (multiple visible toasts) · `single` · `paused` (hover) · `transitioning`
 
-## Props (Toaster)
+## Props (ToastHost)
 | Name | Type | Default | Why |
 |---|---|---|---|
 | `position` | `'top-right' \| 'top-left' \| 'top-center' \| 'bottom-right' \| 'bottom-left' \| 'bottom-center'` | `'bottom-right'` | |
@@ -32,17 +32,17 @@ Queue + viewport for transient notifications. Wraps the L4 `Toast` molecule. One
 
 ## API
 ```ts
-toaster.toast({ title, description, severity, duration, action }): id
-toaster.dismiss(id)
-toaster.dismissAll()
+toastHost.toast({ title, description, severity, duration, action }): id
+toastHost.dismiss(id)
+toastHost.dismissAll()
 
-const { toast, dismiss, dismissAll } = useToaster();   // hook variant — same surface
+const { toast, dismiss, dismissAll } = useToastHost();   // hook variant — same surface
 ```
 
 `severity`: `info | success | warning | danger | neutral` — passes through to `Toast`'s underlying `ToastSimple`.
 
 ## Composition model
-External store (singleton) + `Toaster` component subscribes. Components anywhere in the tree call `toaster.toast(…)` without prop drilling.
+External store (singleton) + `ToastHost` component subscribes. Components anywhere in the tree call `toastHost.toast(…)` without prop drilling.
 
 ## Accessibility
 - Each toast: `role="status"` (polite) — already on `ToastSimple`.

@@ -1,7 +1,7 @@
 # Announce
 
 ## Purpose
-Visually-hidden ARIA live region for screen-reader announcements. Used by Toaster (and any component that needs to announce a transient state change without visible feedback).
+Visually-hidden ARIA live region for screen-reader announcements. Used by ToastHost (and any component that needs to announce a transient state change without visible feedback).
 
 ## Props
 | Name | Type | Default | Why |

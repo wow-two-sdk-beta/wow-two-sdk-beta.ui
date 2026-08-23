@@ -18,7 +18,7 @@ export type NoticeTone = (typeof NoticeTone)[keyof typeof NoticeTone];
 
 /**
  * A renderable slice of a notice. React's `ReactNode` becomes `string | VNode`
- * for the same reason the `Toaster` payload did: notices travel as data through
+ * for the same reason the `ToastHost` payload did: notices travel as data through
  * `notify()`, not through a slot, so a caller who wants markup builds it with
  * `h()`. Structurally identical to `presentation/feedback`'s `ToastNode` — the
  * adapter's assignment is what keeps the two from drifting, and this module
@@ -27,7 +27,7 @@ export type NoticeTone = (typeof NoticeTone)[keyof typeof NoticeTone];
  */
 export type NoticeNode = string | VNode;
 
-/** Defines a feedback notice published on the bus — the headless payload a presentation adapter renders (toast, banner, notification center…). */
+/** Defines a notice published on the bus — the headless payload a presentation adapter renders. */
 export interface FeedbackNotice {
   /** The semantic tone — maps 1:1 onto the toast `severity` vocabulary. */
   readonly tone: NoticeTone;
@@ -41,7 +41,7 @@ export interface FeedbackNotice {
   /** An optional action slot (e.g. a retry button) — passed through to the rendering surface. */
   readonly action?: NoticeNode;
 
-  /** An optional stable identity — assigned by the bus (`n_<seq>`) when omitted; callers set it for future dedupe / notification-center use. */
+  /** An optional stable identity, assigned by the bus (`n_<seq>`) when omitted. Set it to dedupe later. */
   readonly id?: string;
 
   /** ms before the rendering surface auto-dismisses. Surface default when omitted; `Infinity` = sticky. */
@@ -65,32 +65,32 @@ export interface FeedbackErrorContext {
   readonly notice: PublishedNotice;
 }
 
-/** Defines the subscriber-failure handler — publishing must never break the publisher, so every listener throw lands here instead of propagating. */
+/** Defines the subscriber-failure handler; publishing never breaks the publisher, so a listener throw lands here. */
 export type FeedbackErrorHandler = (error: unknown, context: FeedbackErrorContext) => void;
 
 /** Defines the options for {@link createFeedbackBus}. */
 export interface FeedbackBusOptions {
-  /** Receives every subscriber failure. Omitted means failures are swallowed — a broken subscriber is never worth an app crash. */
+  /** Receives every subscriber failure. Omitted swallows them — a broken subscriber is not worth a crash. */
   readonly onError?: FeedbackErrorHandler;
 }
 
 /**
  * Defines the module-scope feedback hub wiring app code to whatever surface renders notices.
  * Fire-and-forget pub/sub (no replay): a notice published with no subscriber is dropped, so mount
- * the adapter (`<FeedbackToasts/>`) before publishing. Nothing subscribes automatically — GWDNBM,
+ * the adapter (`<FeedbackToastHost/>`) before publishing. Nothing subscribes automatically — GWDNBM,
  * every wire is explicit:
  *
  * - **Notices in** — `notify({ tone, title })` from anywhere (composables, api client code, stores);
  *   `feedbackQueryErrors(bus)` plugs a `/query` global error seam in.
- * - **Toasts out** — `<FeedbackToasts/>` (`/presentation/feedback`) subscribes and forwards each
- *   notice into the imperative `toaster.toast()` API.
+ * - **Toasts out** — `<FeedbackToastHost/>` (`/presentation/feedback`) subscribes and forwards each
+ *   notice into the imperative `toastHost.toast()` API.
  *
  * Plain module state rather than a Vue plugin / `provide`: the bus is publisher-agnostic, and a
  * publisher is rarely inside a component's `setup()` (an interceptor, a store action). The
  * `bus` prop on the adapter is the isolation seam an app needs instead.
  */
 export interface FeedbackBus {
-  /** Publishes a notice to all subscribers — safe to call with none mounted (no-op), and never throws whatever a subscriber does; returns the notice id. */
+  /** Publishes a notice to all subscribers and returns its id. A no-op with none mounted, and never throws. */
   notify(notice: FeedbackNotice): string;
 
   /** Subscribes to published notices; returns an unsubscribe. */
@@ -107,7 +107,7 @@ export function createFeedbackBus(options: FeedbackBusOptions = {}): FeedbackBus
   const listeners = new Set<NoticeListener>();
   let idSeq = 0;
 
-  /** Routes a subscriber failure to `onError` — a handler that itself throws is swallowed, since there is nowhere left to report. */
+  /** Routes a subscriber failure to `onError`; a handler that throws is swallowed, having nowhere to report. */
   const report = (error: unknown, listener: NoticeListener, notice: PublishedNotice): void => {
     if (!onError) return;
     try {
@@ -147,7 +147,7 @@ export function createFeedbackBus(options: FeedbackBusOptions = {}): FeedbackBus
 /** The default app-wide bus — what `notify` and the adapters bind to unless handed an explicit bus. */
 export const feedbackBus: FeedbackBus = createFeedbackBus();
 
-/** Publishes a notice on the default {@link feedbackBus} — the everyday `notify({ tone: 'success', title: 'Saved' })` entry point. */
+/** Publishes a notice on the default {@link feedbackBus} — the `notify({ tone, title })` entry point. */
 export function notify(notice: FeedbackNotice): string {
   return feedbackBus.notify(notice);
 }

@@ -28,7 +28,7 @@ Snackbar-style notification with a single "Undo" action. Common after destructiv
 | `undoLabel` | `string` | `'Undo'` | |
 | `duration` | `number` (ms) | `5000` | Auto-dismiss; `Infinity` = sticky |
 | `canPauseOnHover` | `boolean` | `true` | |
-| `position` | same union as Toaster | `'bottom-center'` | |
+| `position` | same union as ToastHost | `'bottom-center'` | |
 | `hasCountdown` | `boolean` | `false` | Render shrinking bar |
 
 ## Accessibility
@@ -36,4 +36,4 @@ Snackbar-style notification with a single "Undo" action. Common after destructiv
 - Undo button: real `<button>` with the action verb.
 
 ## Dependencies
-Foundation: `utils`, `primitives/Portal`. Same domain: nothing — does not wrap Toaster (different lifecycle, different shape).
+Foundation: `utils`, `primitives/Portal`. Same domain: nothing — does not wrap ToastHost (different lifecycle, different shape).

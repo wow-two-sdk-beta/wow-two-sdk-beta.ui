@@ -10,8 +10,8 @@
 // prompt, drawn by the operating system outside the page. Nothing in this slice renders anything in the
 // document.
 //   - In-app notices (the headless bus a component publishes to) → `@wow-two-beta/ui-vue/feedback` (`src/feedback/`).
-//   - The in-app toast UI that renders them → `presentation/feedback`'s `Toaster`
-//     (`src/presentation/feedback/toaster/`).
+//   - The in-app toast UI that renders them → `presentation/feedback`'s `ToastHost`
+//     (`src/presentation/feedback/toastHost/`).
 //   - The in-page notification list / bell → `presentation/feedback`'s `NotificationCenter`. Named the closest
 //     to this slice and related to it least: it is a rendered component, not a platform API.
 // The two are complementary, not alternatives: an in-app toast is invisible to a user who is not looking at the

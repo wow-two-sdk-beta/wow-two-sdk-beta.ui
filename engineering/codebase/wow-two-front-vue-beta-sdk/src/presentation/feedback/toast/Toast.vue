@@ -28,7 +28,7 @@ const CloseIcon = X;
 
 /**
  * Slotted toast — visual only (no queue / portal / lifecycle, those land
- * with `Toaster` at L5). Pair: `ToastSimple` (atomic) + `Toast` (molecule).
+ * with `ToastHost` at L5). Pair: `ToastSimple` (atomic) + `Toast` (molecule).
  *
  * Each of React's four `ReactNode` props keeps its string form and gains a
  * same-named slot for rich content; the slot wins when both are supplied.
