@@ -1,5 +1,5 @@
 <script lang="ts">
-// Shared hour/minute column pair for TimePicker, TimeField and DateTimeField.
+// Shared hour/minute column pair for TimePicker, TimeInput and DateTimeInput.
 // Co-located in `forms/` as a domain-internal helper, exactly like `MonthGrid.vue`.
 // Owns:
 //   - the two scrollable listboxes (24 hours × `minuteStep` minutes)

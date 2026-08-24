@@ -1,4 +1,4 @@
-# TimeField
+# TimeInput
 
 ## Purpose
 Atomic time input — a typed `HH:MM` field with a design-system popover on its trailing clock button. Accepts and emits `Temporal.PlainTime`. `TimePicker` is the trigger-shaped peer; this one keeps the text field.

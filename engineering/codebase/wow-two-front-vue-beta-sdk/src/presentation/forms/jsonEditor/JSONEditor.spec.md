@@ -1,16 +1,16 @@
-# JSONEditor
+# JsonEditor
 
 ## Purpose
 Edit JSON either as raw text (with parse-validation) or via a collapsible tree view. Single source of truth: a JS value (`unknown`); both modes serialize/deserialize on commit.
 
 ## Anatomy
 ```
-<JSONEditor>
+<JsonEditor>
   ├── ModeToggle (Tree | Text)
   └── Body
        ├── Tree mode: nested rows with type icons, expand/collapse, copy-path
        └── Text mode: <textarea> with validation gutter
-</JSONEditor>
+</JsonEditor>
 ```
 
 ## Required behaviors

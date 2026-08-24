@@ -45,7 +45,7 @@ export interface TanstackOverlayState<TValues extends object> {
 
 /** The overlay store the tanstack adapter combines with the TanStack form store. */
 export interface TanstackFormOverlay<TValues extends object> {
-  /** The reactive seam — reading `state.value` subscribes, the way `subscribe` + `useSyncExternalStore` did in React. */
+  /** The reactive seam; reading `state.value` subscribes. */
   readonly state: Readonly<ShallowRef<TanstackOverlayState<TValues>>>;
   readonly getState: () => TanstackOverlayState<TValues>;
   /** Marks a field touched (wired onto the control's blur). */
@@ -54,9 +54,9 @@ export interface TanstackFormOverlay<TValues extends object> {
   readonly clearServerErrorsAt: (path: string) => void;
   /** Row-scoped server errors + touched marks follow their rows through array ops. */
   readonly remapForArrayOperation: (arrayPath: string, operation: ArrayOperation) => void;
-  /** A new attempt clears the previous server errors + submitError, re-arms the verdict, and counts as touching everything. */
+  /** A new attempt clears prior server errors, re-arms the verdict, and counts as touching every field. */
   readonly beginSubmitAttempt: () => void;
-  /** Marks every field touched (`submitCount > 0`) WITHOUT clearing errors or the verdict — `validate()`'s display gate. */
+  /** Marks every field touched without clearing errors or the verdict — `validate()`'s display gate. */
   readonly touchAll: () => void;
   /** Brackets the app's `onSubmit` call — the contract's `isSubmitting` window. */
   readonly setSubmitting: (isSubmitting: boolean) => void;

@@ -1,4 +1,4 @@
-# DateField
+# DateInput
 
 ## Purpose
 Atomic date input — a typed `YYYY-MM-DD` field with a design-system `Calendar` popover on its trailing button. Accepts and emits `Temporal.PlainDate`. `DatePicker` is the trigger-shaped peer; this one keeps the text field, so reach for it when the user should be able to TYPE the date.

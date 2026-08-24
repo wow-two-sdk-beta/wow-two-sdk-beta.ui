@@ -12,7 +12,7 @@ export const Layer = {
   Docked: 20,
   /** Anchors a page-level sticky header or footer. */
   Sticky: 30,
-  /** Hosts system banners — cookie notice, status banner, persistent FAB. */
+  /** Hosts system banners — cookie notice, status banner, persistent Fab. */
   Banner: 40,
   /** Hosts dropdowns, popovers, comboboxes, menus, hover-cards anchored to a trigger. */
   Dropdown: 50,

@@ -63,9 +63,9 @@ const {
   RangeCalendar,
   DatePicker,
   DateRangePicker,
-  DateField,
-  DateTimeField,
-  TimeField,
+  DateInput,
+  DateTimeInput,
+  TimeInput,
   TimePicker,
   RecurrenceEditor,
   ColorSwatch,
@@ -142,9 +142,9 @@ const covered = [
   'RangeCalendar',
   'DatePicker',
   'DateRangePicker',
-  'DateField',
-  'DateTimeField',
-  'TimeField',
+  'DateInput',
+  'DateTimeInput',
+  'TimeInput',
   'TimePicker',
   'RecurrenceEditor',
   'ColorSwatch',
@@ -576,31 +576,31 @@ const stamp = ref<Temporal.PlainDateTime | null>(
       <!-- The three below are the ex-native-picker family. All of them now open OUR popover;
            `native` is the documented opt-in that hands the panel back to the browser. Both
            variants are shown so the difference is one glance apart. -->
-      <Demo name="DateField" note="typed YYYY-MM-DD + Calendar popover — `native` is the opt-out">
+      <Demo name="DateInput" note="typed YYYY-MM-DD + Calendar popover — `native` is the opt-out">
         <div class="space-y-2">
-          <DateField v-model="day" class="w-44" />
-          <DateField native class="w-44" />
+          <DateInput v-model="day" class="w-44" />
+          <DateInput native class="w-44" />
           <p class="text-xs text-subtle-foreground">{{ day?.toString() ?? 'null' }}</p>
         </div>
       </Demo>
 
-      <Demo name="TimeField" note="typed HH:MM + our popover — `native` is the opt-out">
+      <Demo name="TimeInput" note="typed HH:MM + our popover — `native` is the opt-out">
         <div class="space-y-2">
-          <TimeField v-model="clock" class="w-40" />
-          <TimeField native class="w-40" />
+          <TimeInput v-model="clock" class="w-40" />
+          <TimeInput native class="w-40" />
           <p class="text-xs text-subtle-foreground">{{ clock?.toString() ?? 'null' }}</p>
         </div>
       </Demo>
 
-      <Demo name="DateTimeField" note="typed date + time with a Calendar/columns popover">
+      <Demo name="DateTimeInput" note="typed date + time with a Calendar/columns popover">
         <div class="space-y-2">
-          <DateTimeField v-model="stamp" class="w-60" />
-          <DateTimeField native class="w-60" />
+          <DateTimeInput v-model="stamp" class="w-60" />
+          <DateTimeInput native class="w-60" />
           <p class="text-xs text-subtle-foreground">{{ stamp?.toString() ?? 'null' }}</p>
         </div>
       </Demo>
 
-      <Demo name="TimePicker" note="trigger + hour/minute columns, shared with TimeField">
+      <Demo name="TimePicker" note="trigger + hour/minute columns, shared with TimeInput">
         <TimePicker v-model="clock" placeholder="Pick a time" />
       </Demo>
 

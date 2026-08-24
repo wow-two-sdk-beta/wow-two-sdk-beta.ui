@@ -1,6 +1,5 @@
 # Button
 
-> **Behavioral contract:** [`Button.standard.md`](./Button.standard.md)
 
 ## Anatomy
 
@@ -16,7 +15,7 @@ When `loading=true`: the spinner replaces the **leading** slot (or appears at th
 
 ## Style axes
 
-Two independent axes — `variant × tone`. Pattern borrowed from Mantine and Radix Themes; computed from theme tokens, not enumerated. See [Standard rules 6–8, 16](./Button.standard.md#composition).
+Two independent axes — `variant × tone`. Pattern borrowed from Mantine and Radix Themes; computed from theme tokens, not enumerated..
 
 **`variant`** — visual treatment:
 
@@ -57,7 +56,7 @@ Three independent props — preset OR custom value — so consumers stay in the 
 | `lg` | 48px (3rem) | 24px (1.5rem) | `text-base` | `rounded-lg` |
 | `xl` | 56px (3.5rem) | 32px (2rem) | `text-base` | `rounded-lg` |
 
-**Density CSS-var hook** ([Standard rule 21](./Button.standard.md#motion)) — height and padding utilities are expressed via `calc()` so a future `<DensityProvider>` can scale all components by overriding `--ui-density-scale`:
+**Density CSS-var hook** (Standard rule 21) — height and padding utilities are expressed via `calc()` so a future `<DensityProvider>` can scale all components by overriding `--ui-density-scale`:
 
 ```ts
 // md baseline becomes:
@@ -97,7 +96,7 @@ type RadiusToken = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
 |---|---|
 | `default` (default) | Rectangular, padding from `size`/`padding` |
 | `square` | 1:1 aspect ratio (icon-only, square edges) |
-| `circle` | 1:1 + `radius='full'` (FAB-style) |
+| `circle` | 1:1 + `radius='full'` (Fab-style) |
 
 Note: rectangular icon-only buttons in dense layouts (e.g. card actions) keep `shape='default'` and rely on rectangular padding — no auto-detection.
 
@@ -127,7 +126,7 @@ Content stays centered via the base `justify-center` regardless of which mode is
 
 **`children`** — arbitrary `ReactNode`. Per HTML spec, `<button>` may contain phrasing content but NOT interactive content — no nested `<a>`, `<button>`, `<input>`, `<select>`, `<textarea>`, `<details>`, `<label>`. Library does not enforce this; consumer's responsibility.
 
-**`leadingSlot` / `trailingSlot`** — slot props (`ReactNode`) for the common "icon + text + caret" composition. When provided, layout arranges them with consistent gap from `size`. Positioned via logical CSS properties ([Standard rule 18](./Button.standard.md#internationalization)) — slot ORDER is start → end, not left → right.
+**`leadingSlot` / `trailingSlot`** — slot props (`ReactNode`) for the common "icon + text + caret" composition. When provided, layout arranges them with consistent gap from `size`. Positioned via logical CSS properties (Standard rule 18) — slot ORDER is start → end, not left → right.
 
 **`isMultiline`** — `boolean`, default `false`. Long-label behavior:
 
@@ -150,23 +149,23 @@ Default is truncate because buttons appear in dense UIs (toolbars, cards, tables
 | `isLoading` | spinner replaces leading slot; `loadingText` may replace children (else `children` kept `sr-only`); `forced-colors` border preserved | Click blocked, `aria-busy=true` + `aria-disabled=true`, focus retained (NOT native-disabled) | `isLoading` |
 | `isSkeleton` | All children + slots `visibility: hidden` (preserves box dimensions); bg becomes `bg-muted` with shimmer animation overlay | Click blocked (`pointer-events-none`), `aria-busy=true` + `aria-disabled=true`, removed from tab order (`tabindex=-1`) | `isSkeleton` |
 
-`data-state` is the observable-state attribute ([Standard rule 10](./Button.standard.md#states)) — analytics, integration tests, and CSS attribute selectors target it without prop drilling.
+`data-state` is the observable-state attribute (Standard rule 10) — analytics, integration tests, and CSS attribute selectors target it without prop drilling.
 
-**`isLoading` vs `isSkeleton`** — distinct semantics ([Standard rule 9](./Button.standard.md#states)):
+**`isLoading` vs `isSkeleton`** — distinct semantics (Standard rule 9):
 - `isLoading` = user's *action* is being processed; label remains meaningful (the action verb).
 - `isSkeleton` = button's *definition* is awaiting backend data; label not yet meaningful (often a fetched user-name, label-from-server, etc.).
 Mutually exclusive — if both are set, `isSkeleton` takes precedence + a dev-mode warning is emitted.
 
 ## Behavior
 
-- **`type`** — defaults to `'button'`, NOT browser-default `'submit'` ([Standard rule 2](./Button.standard.md#behavior)).
+- **`type`** — defaults to `'button'`, NOT browser-default `'submit'` (Standard rule 2).
 - **Keyboard** — Enter and Space activate (native).
 - **`isDisabled`** — forwarded to the native `disabled` attribute. Removes from focus order, suppresses click events. Sets `data-state="disabled"`. When the prop is omitted, the value is **inherited from an enclosing `FormField`** via `useFormControl()` (reads its `isDisabled`; falls back to standalone `false` when there is no surrounding context).
-- **`isLoading`** — non-native. Sets `aria-busy=true` AND `aria-disabled=true`, blocks `onClick`, replaces leading slot with inlined spinner SVG, sets `data-state="loading"`. **Does NOT set native `disabled`** — the button stays focusable and SR-addressable so the loading state is announced ([Standard rule 4](./Button.standard.md#behavior)). When `loadingText` is omitted, the original `children` are retained in an `sr-only` span so the accessible name survives (the spinner is `aria-hidden`).
-- **`loadingText`** — optional. When present + `loading=true`, replaces `children` (e.g., `"Saving…"`). No default value — consumer always supplies (i18n discipline; [Standard rule 19](./Button.standard.md#internationalization)).
+- **`isLoading`** — non-native. Sets `aria-busy=true` AND `aria-disabled=true`, blocks `onClick`, replaces leading slot with inlined spinner SVG, sets `data-state="loading"`. **Does NOT set native `disabled`** — the button stays focusable and SR-addressable so the loading state is announced (Standard rule 4). When `loadingText` is omitted, the original `children` are retained in an `sr-only` span so the accessible name survives (the spinner is `aria-hidden`).
+- **`loadingText`** — optional. When present + `loading=true`, replaces `children` (e.g., `"Saving…"`). No default value — consumer always supplies (i18n discipline; Standard rule 19).
 - **`isSkeleton`** — non-native. Content-loading state — signals the button's *label* is awaiting backend data, distinct from `isLoading` (which signals the user's *action* is in flight). When `true`: children + leading + trailing all become `visibility: hidden` (preserves intrinsic box dimensions so the button doesn't shift layout when real content arrives), bg becomes `bg-muted` with shimmer overlay, sets `aria-busy=true`, blocks clicks via `pointer-events-none`, removes from tab order via `tabindex=-1`, sets `data-state="skeleton"`. Mutually exclusive with `isLoading` — if both, `isSkeleton` wins + dev-mode warns.
-- **Form association** — native `form` attribute forwarded ([Standard rule 5](./Button.standard.md#behavior)).
-- **`prefers-reduced-motion`** — press transforms (scale/translate) disabled when the media query matches; color-shift retained ([Standard rule 20](./Button.standard.md#motion)).
+- **Form association** — native `form` attribute forwarded (Standard rule 5).
+- **`prefers-reduced-motion`** — press transforms (scale/translate) disabled when the media query matches; color-shift retained (Standard rule 20).
 
 ### Press detection
 
@@ -212,12 +211,12 @@ A long-press-suppressed click does NOT advance the throttle window (the gate hap
 ## Accessibility
 
 - Renders native `<button>` (or any element via `asChild`) — keyboard, focus, role, ARIA inherited.
-- **`aria-label` REQUIRED when there is no visible text** (icon-only). Library does not auto-generate ([Standard rule 12](./Button.standard.md#accessibility)). A **dev-mode `console.warn`** fires when an icon-only button (no text `children`) carries neither `aria-label` nor `aria-labelledby` (guarded on `process.env.NODE_ENV !== 'production'`).
+- **`aria-label` REQUIRED when there is no visible text** (icon-only). Library does not auto-generate (Standard rule 12). A **dev-mode `console.warn`** fires when an icon-only button (no text `children`) carries neither `aria-label` nor `aria-labelledby` (guarded on `process.env.NODE_ENV !== 'production'`).
 - `aria-busy` set automatically when `isLoading=true`. `aria-disabled` is **also** set while `isLoading` or `isSkeleton` so the inert-while-loading state is announced — the button is deliberately NOT native-`disabled`, so it stays focusable / SR-addressable.
-- Focus ring meets WCAG AA contrast on every variant × tone combo at the default theme ([Standard rule 16](./Button.standard.md#accessibility)).
-- Min hit target 24×24 — `xs` meets this exactly, with a `min-h-6 min-w-6` floor so a `--ui-density-scale < 1` cannot shrink it below 24×24. Touch contexts SHOULD use `sm`+ ([Standard rules 13–14](./Button.standard.md#accessibility)).
-- **`forced-colors` mode**: every variant carries a `border` (1px transparent for borderless variants); `system-color` keywords preserve user color choices ([Standard rule 15](./Button.standard.md#accessibility)).
-- **`ghost` and `link` on touch**: `:active` provides press feedback (touch fires `:active` on tap) ([Standard rule 17](./Button.standard.md#pointer-types)).
+- Focus ring meets WCAG AA contrast on every variant × tone combo at the default theme (Standard rule 16).
+- Min hit target 24×24 — `xs` meets this exactly, with a `min-h-6 min-w-6` floor so a `--ui-density-scale < 1` cannot shrink it below 24×24. Touch contexts SHOULD use `sm`+.
+- **`forced-colors` mode**: every variant carries a `border` (1px transparent for borderless variants); `system-color` keywords preserve user color choices (Standard rule 15).
+- **`ghost` and `link` on touch**: `:active` provides press feedback (touch fires `:active` on tap) (Standard rule 17).
 
 ## Composition
 
@@ -284,7 +283,7 @@ Not built-in (would force the hook on every Button instance and lock us to React
 
 No JS needed; browser handles the toggle. Falls through `...rest`.
 
-**ButtonGroup** — composition rules deferred to `ButtonGroup.standard.md` / `ButtonGroup.spec.md`.
+**ButtonGroup** — composition rules deferred to `ButtonGroup.spec.md`.
 
 ## Props summary
 
@@ -355,4 +354,3 @@ Pseudo-state coverage (`:hover` / `:focus-visible` / `:active`) is driven by the
 
 ---
 
-*Inline citations point at specific rule URLs. See [`Button.standard.md` — Related](./Button.standard.md#related) for broad references.*

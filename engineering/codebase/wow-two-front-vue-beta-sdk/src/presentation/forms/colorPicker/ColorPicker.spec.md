@@ -11,7 +11,7 @@ Full color picker — a trigger swatch that opens a popover containing a saturat
         ├── <ColorArea>
         ├── <ColorSlider channel="hue">
         ├── <ColorSlider channel="alpha"> (optional)
-        ├── <ColorField>
+        ├── <ColorInput>
         └── <ColorSwatchPicker> (optional, when `presets` provided)
 </ColorPicker>
 ```
@@ -35,7 +35,7 @@ Full color picker — a trigger swatch that opens a popover containing a saturat
 
 ## Composition
 - Cross-domain: imports `Popover` from `overlays/` (allowed under the revised cross-domain rule).
-- Same-domain: uses `ColorSwatch`, `ColorArea`, `ColorSlider`, `ColorField`, `ColorSwatchPicker`, `ColorExtensions`.
+- Same-domain: uses `ColorSwatch`, `ColorArea`, `ColorSlider`, `ColorInput`, `ColorSwatchPicker`, `ColorExtensions`.
 
 ## Accessibility
 - Each sub-control carries its own slider semantics.

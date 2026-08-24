@@ -2,7 +2,7 @@
 import type { Temporal } from 'temporal-polyfill';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface DateFieldProps {
+export interface DateInputProps {
   /** The control size. */
   size?: InputSize;
   /** The validity surface. */
@@ -72,9 +72,9 @@ import Calendar from '../calendar/Calendar.vue';
  */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
-defineOptions({ name: 'DateField', inheritAttrs: false });
+defineOptions({ name: 'DateInput', inheritAttrs: false });
 
-const props = withDefaults(defineProps<DateFieldProps>(), {
+const props = withDefaults(defineProps<DateInputProps>(), {
   native: false,
   placeholder: 'YYYY-MM-DD',
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
@@ -120,7 +120,7 @@ watch(displayValue, (next) => {
   draft.value = next;
 });
 
-/** Commits the draft; an unparseable draft reverts to the committed value (ColorField parity). */
+/** Commits the draft; an unparseable draft reverts to the committed value (ColorInput parity). */
 function commit(): void {
   if (!draft.value.trim()) {
     controlled.setValue(null);
@@ -159,7 +159,7 @@ function onNativeInput(event: Event): void {
 }
 
 /* A day is the whole value here, so the pick closes the panel — `DatePicker` parity, and
-   unlike `DateTimeField`, where the time half still has to be chosen. */
+   unlike `DateTimeInput`, where the time half still has to be chosen. */
 function onCalendarChange(next: Temporal.PlainDate | null): void {
   controlled.setValue(next);
   open.value = false;

@@ -22,7 +22,7 @@ export type SubmitFieldEntry = string | FieldIssue;
 /** What a `mapSubmitError` returns — server path → its failures. */
 export type SubmitErrorMap = Record<string, readonly SubmitFieldEntry[]>;
 
-/** Rewrites a server error path onto a form path — camelCase per property segment (`Rules[0].Destination` → `rules[0].destination`). */
+/** Rewrites a server error path onto a form path, camelCasing each property segment. */
 export function defaultMapFieldPath(serverPath: string): string {
   const segments = parsePath(serverPath).map((segment) =>
     typeof segment === 'string' && segment.length > 0 ? segment.charAt(0).toLowerCase() + segment.slice(1) : segment,
@@ -46,7 +46,7 @@ export function toApiError(error: unknown, fallbackMessage = 'Unknown error'): A
 export interface SubmitFailureResolution {
   /** Mapped messages whose form path matched a field — apply as the server-error overlay. */
   readonly fieldErrors: Record<string, string[]>;
-  /** The coerced failure when it was not fully represented on fields (no or partial path matches); `null` when every mapped path landed. */
+  /** The coerced failure when fields did not fully represent it; `null` when every mapped path landed. */
   readonly submitError: ApiError | null;
 }
 

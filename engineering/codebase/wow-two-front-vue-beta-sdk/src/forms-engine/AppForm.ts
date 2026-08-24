@@ -25,13 +25,13 @@ import type { SubmitErrorMap } from './SubmitErrors';
 
 /** Defines the options every engine adapter accepts. */
 export interface AppFormOptions<TValues extends object> {
-  /** The initial values. Async prefill (edit screens) stays on `/query` — render the form once loaded, or `reset(data)`. */
+  /** The initial values. Async prefill stays on `/query` — render once loaded, or call `reset(data)`. */
   readonly defaultValues: TValues;
   /** The whole-form validator — any Standard Schema (zod / valibot / arktype). Sync or async. */
   readonly schema?: StandardSchemaV1<TValues>;
 
   // ── validation-config cluster ───────────────────────────────────────────────
-  /** When client validation runs. `'submit'` (default) re-validates touched fields on change after the first attempt. */
+  /** When client validation runs. `'submit'` re-validates touched fields on change after the first attempt. */
   readonly validateOn?: 'change' | 'blur' | 'submit';
   /**
    * Validate once on mount — seeds `isValid` / field errors before any interaction (edit-screen
@@ -63,7 +63,7 @@ export interface AppFormOptions<TValues extends object> {
    * a `validateOn` value.
    */
   readonly submitOn?: 'change' | 'blur' | 'manual';
-  /** Debounce (ms, trailing) for `submitOn: 'change'` — coalesces a change burst into one submit. Default `0`. Ignored for `'blur'` / `'manual'`. */
+  /** Trailing debounce in ms for `submitOn: 'change'`, coalescing a burst into one submit. Default `0`. */
   readonly submitDebounceMs?: number;
 
   /**
@@ -79,7 +79,7 @@ export interface AppFormOptions<TValues extends object> {
    * still valid — those render as-is.
    */
   readonly mapSubmitError?: (error: unknown) => SubmitErrorMap;
-  /** Rewrites a server error path onto a form path. Default: camelCase per segment (`Rules[0].Destination` → `rules[0].destination`). */
+  /** Rewrites a server error path onto a form path; camelCase per segment by default. */
   readonly mapFieldPath?: (serverPath: string) => string;
   /**
    * The message used when a submit failure is neither an `ApiError`, an `Error`, nor a
@@ -122,7 +122,7 @@ export interface AppFormOptions<TValues extends object> {
  */
 export type AppFormOptionsSource<TValues extends object> = MaybeRefOrGetter<AppFormOptions<TValues>>;
 
-/** The per-field API a `<form.Field>` slot receives. Every member is a LIVE getter — destructuring takes a snapshot, bind to the object. */
+/** The per-field API a `<form.Field>` slot receives. Every member is a live getter, so bind to the object. */
 export interface AppFieldApi<TValue> {
   /**
    * The field's value. Writable — assigning runs the same path as {@link setValue}, so a control
@@ -285,7 +285,7 @@ export interface AppForm<TValues extends object, TEngine = unknown> {
   readonly array: (path: string) => AppArrayApi;
   /** Resets to `defaultValues`, or re-seeds with `next` (edit-mode prefill — kills smart-qr's 13-setter effect). */
   readonly reset: (next?: TValues) => void;
-  /** Applies server field errors outside the submit pipeline (e.g. a deferred backend check). Replaces the current server-error overlay. */
+  /** Applies server field errors outside the submit pipeline, replacing the current server-error overlay. */
   readonly setFieldErrors: (errors: Record<string, string[]>) => void;
   /** Clears the form-level `submitError` (a dismissible error banner's reset) — leaves field errors untouched. */
   readonly clearSubmitError: () => void;

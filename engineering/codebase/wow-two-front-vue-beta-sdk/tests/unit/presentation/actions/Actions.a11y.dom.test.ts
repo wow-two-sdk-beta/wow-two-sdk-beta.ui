@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 import { Check } from 'lucide-vue-next';
-import { CopyButton, FAB, ToggleButton } from '@src/presentation/actions';
+import { CopyButton, Fab, ToggleButton } from '@src/presentation/actions';
 import { Icon } from '@src/foundation/icons';
 import { assertAriaLabelReachesDom } from '../../../support/Contract';
 
@@ -14,8 +14,8 @@ import { assertAriaLabelReachesDom } from '../../../support/Contract';
  * `attrs` instead; these assertions are what stop that from being quietly undone.
  */
 describe('actions — aria-label passthrough', () => {
-  it('FAB carries its aria-label', () => {
-    assertAriaLabelReachesDom('FAB', FAB, {}, { default: () => 'plus' });
+  it('Fab carries its aria-label', () => {
+    assertAriaLabelReachesDom('Fab', Fab, {}, { default: () => 'plus' });
   });
 
   it('CopyButton carries its aria-label', () => {

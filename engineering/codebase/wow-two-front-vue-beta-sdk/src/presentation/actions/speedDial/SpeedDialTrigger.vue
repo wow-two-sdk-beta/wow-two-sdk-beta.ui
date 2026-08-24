@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ButtonHTMLAttributes, VNodeChild } from 'vue';
-import type { FabVariant, FabSize } from '../fab/FAB.variants';
+import type { FabVariant, FabSize } from '../fab/Fab.variants';
 
 /* Native button attributes stay in attribute fallthrough rather than becoming runtime props. */
 export interface SpeedDialTriggerProps extends /* @vue-ignore */ Omit<ButtonHTMLAttributes, 'children'> {
@@ -10,10 +10,10 @@ export interface SpeedDialTriggerProps extends /* @vue-ignore */ Omit<ButtonHTML
   /** The glyph shown while open. Defaults to an `X` icon. Prefer the `open-icon` named slot. */
   openIcon?: VNodeChild;
 
-  /** The FAB surface style. */
+  /** The Fab surface style. */
   variant?: FabVariant;
 
-  /** The FAB diameter. */
+  /** The Fab diameter. */
   size?: FabSize;
 }
 </script>
@@ -24,7 +24,7 @@ import type { ClassValue } from 'clsx';
 import { Plus, X } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
-import FAB from '../fab/FAB.vue';
+import Fab from '../fab/Fab.vue';
 import { useSpeedDialContext } from './SpeedDialContext';
 
 defineOptions({ name: 'SpeedDialTrigger', inheritAttrs: false });
@@ -77,7 +77,7 @@ function handleClick(event: MouseEvent): void {
 </script>
 
 <template>
-  <FAB
+  <Fab
     ref="fab"
     v-bind="passthroughAttrs"
     :aria-label="ariaLabel"
@@ -101,5 +101,5 @@ function handleClick(event: MouseEvent): void {
         <Icon v-else :icon="Plus" :size="20" />
       </slot>
     </template>
-  </FAB>
+  </Fab>
 </template>

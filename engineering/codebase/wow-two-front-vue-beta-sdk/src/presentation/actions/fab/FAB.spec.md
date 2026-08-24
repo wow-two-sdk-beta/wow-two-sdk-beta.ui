@@ -1,4 +1,4 @@
-# FAB
+# Fab
 
 ## Purpose
 Floating Action Button — fixed-position circular shadowed button. Material/Mobile pattern for the most prominent action on a screen.

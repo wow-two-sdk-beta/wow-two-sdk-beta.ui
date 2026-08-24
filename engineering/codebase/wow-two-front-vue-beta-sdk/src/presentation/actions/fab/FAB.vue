@@ -1,17 +1,17 @@
 <script lang="ts">
 import type { ButtonHTMLAttributes } from 'vue';
 import type { OverlayPosition } from '../../../foundation/utils';
-import type { FABVariants, FabVariant, FabSize } from './FAB.variants';
+import type { FabVariants, FabVariant, FabSize } from './Fab.variants';
 
-/* The required accessible label rides on the ignored heritage rather than the body — FAB content
+/* The required accessible label rides on the ignored heritage rather than the body — Fab content
    is typically icon-only, so the name is mandatory, but it must reach the DOM as an attribute. */
-type FABAttributes = ButtonHTMLAttributes & { 'aria-label': string };
+type FabAttributes = ButtonHTMLAttributes & { 'aria-label': string };
 
 /* Both heritage types are `@vue-ignore`d — native button attributes belong in attribute
-   fallthrough, and `FABVariants` resolves through `typeof fabVariants`, which the SFC prop
+   fallthrough, and `FabVariants` resolves through `typeof fabVariants`, which the SFC prop
    compiler cannot walk. */
-export interface FABProps
-  extends /* @vue-ignore */ FABAttributes, /* @vue-ignore */ Omit<FABVariants, 'variant' | 'size' | 'position'> {
+export interface FabProps
+  extends /* @vue-ignore */ FabAttributes, /* @vue-ignore */ Omit<FabVariants, 'variant' | 'size' | 'position'> {
   /** The visual surface style. */
   variant?: FabVariant;
   /** The button diameter. */
@@ -27,17 +27,17 @@ export interface FABProps
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { ButtonType, cn } from '../../../foundation/utils';
-import { fabVariants } from './FAB.variants';
+import { fabVariants } from './Fab.variants';
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
-defineOptions({ name: 'FAB', inheritAttrs: false });
+defineOptions({ name: 'Fab', inheritAttrs: false });
 
 /* `aria-label` is deliberately NOT a declared prop: Vue camelizes prop keys, so a declared
    `'aria-label'` would arrive as `props.ariaLabel` and never render. It stays a fallthrough attr;
    the interface keeps the requirement through the `@vue-ignore`d heritage. */
 /* `children` has no prop counterpart — it is the default slot. */
-const props = withDefaults(defineProps<FABProps>(), { type: ButtonType.Button });
+const props = withDefaults(defineProps<FabProps>(), { type: ButtonType.Button });
 
 const attrs = useAttrs();
 

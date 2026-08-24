@@ -33,7 +33,7 @@ function search(keyword: string): readonly EmojiCatalogEntry[] {
 
   const ranked: { entry: EmojiCatalogEntry; rank: number; order: number }[] = [];
   for (let order = 0; order < emojiCatalogData.length; order++) {
-    // `noUncheckedIndexedAccess` widens the element to `… | undefined`; the loop is length-bound, so this never trips at runtime.
+    // `noUncheckedIndexedAccess` widens the element; the loop is length-bound, so this never trips.
     const entry = emojiCatalogData[order];
     if (entry === undefined) continue;
     const label = entry.label.toLowerCase();
@@ -51,7 +51,7 @@ function search(keyword: string): readonly EmojiCatalogEntry[] {
   return ranked.map((hit) => hit.entry);
 }
 
-/** Provides the standard emoji set (base emoji only) plus its category + search lookups — the companion to `EmojiCatalogEntry`. */
+/** Provides the standard emoji set, base only, plus its category and search lookups. */
 export const EmojiCatalog = {
   /** Every catalog emoji, in display order. */
   all: emojiCatalogData,

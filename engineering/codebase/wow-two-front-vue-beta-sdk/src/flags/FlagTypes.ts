@@ -34,7 +34,7 @@ export interface JsonObject {
 /** Defines every value a flag can evaluate to — the four supported flag types. */
 export type FlagValue = boolean | string | number | JsonObject;
 
-/** Defines an attribute value carried by an {@link EvaluationContext} — comparable scalars, plus a list for multi-value attributes (roles, groups). */
+/** Defines an attribute value on an {@link EvaluationContext} — a scalar, or a list for roles and groups. */
 export type ContextAttribute = string | number | boolean | null | readonly (string | number | boolean)[];
 
 /**
@@ -59,9 +59,9 @@ export const FlagReason = {
   Static: 'static',
   /** Refers to a value chosen by a targeting rule matching the evaluation context. */
   Targeting: 'targeting',
-  /** Refers to the caller's `defaultValue` standing in because the flag is not configured — the normal pre-rollout state, not a fault. */
+  /** Refers to `defaultValue` standing in for an unconfigured flag — the pre-rollout state, not a fault. */
   Default: 'default',
-  /** Refers to the caller's `defaultValue` standing in after a fault (wrong type on the wire, throwing provider) — see `errorCode`. */
+  /** Refers to `defaultValue` standing in after a fault, such as a wrong wire type — see `errorCode`. */
   Error: 'error',
   /** Refers to the caller's `defaultValue` standing in because the flag exists but is switched off. */
   Disabled: 'disabled',
@@ -71,7 +71,7 @@ export type FlagReason = (typeof FlagReason)[keyof typeof FlagReason];
 
 /** Defines what went wrong on an evaluation with `reason: 'error'`. */
 export const FlagErrorCode = {
-  /** Refers to a resolved value whose runtime type is not the type asked for (a `string` for `getBoolean`, a non-finite `number`, an array for an object flag). */
+  /** Refers to a resolved value whose runtime type is not the one asked for — a `string` for `getBoolean`. */
   TypeMismatch: 'type-mismatch',
   /** Refers to a provider that threw, rejected, or reported its own failure. */
   ProviderError: 'provider-error',
@@ -105,7 +105,7 @@ export interface FlagEvaluation<TValue extends FlagValue> {
   readonly errorMessage?: string;
 }
 
-/** Defines the fault handed to `createFlagClient({ onError })` — evaluation itself has already fallen back, this is the reporting channel. */
+/** Defines the fault handed to `createFlagClient({ onError })`; evaluation has already fallen back. */
 export interface FlagErrorInfo {
   /** The flag key being evaluated when the fault occurred. */
   readonly key: string;

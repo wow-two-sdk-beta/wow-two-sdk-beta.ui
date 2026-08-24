@@ -220,8 +220,8 @@ name and meaning are unchanged, so those re-declarations are not listed below.
 | Component | React | Vue | Reason |
 |---|---|---|---|
 | `Tour` · `UndoBar` | `onOpenChange` | `@open-change` | |
-| `Toaster` | `className` | `class` | Fallthrough. |
-| `FeedbackToasts` | forwards into `toast()` | forwards into `toaster.toast()` | The imperative handle is namespaced. |
+| `ToastHost` | `className` | `class` | Fallthrough. |
+| `FeedbackToastHost` | forwards into `toast()` | forwards into `toastHost.toast()` | The imperative handle is namespaced. |
 
 ### forms (74)
 
@@ -636,7 +636,7 @@ controlled: () => (props.value !== undefined ? props.value : props.modelValue)
 
 The `!== undefined` check is load-bearing, not style: `null` is a meaningful *"nothing selected"*
 for the pickers, selects and colour controls, and `??` swallows it and falls through to the other
-prop. `DateField` and `TimeField` with `:value="null"` alongside a `v-model` holding a real date
+prop. `DateInput` and `TimeInput` with `:value="null"` alongside a `v-model` holding a real date
 rendered the date under `??`; they render empty now.
 
 The rule holds across all six alias pairs — `value`/`modelValue`, `open`/`isOpen`,

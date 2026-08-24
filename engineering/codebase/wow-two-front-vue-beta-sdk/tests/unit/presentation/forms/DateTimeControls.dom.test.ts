@@ -4,11 +4,11 @@ import { mount } from '@vue/test-utils';
 import { Temporal } from 'temporal-polyfill';
 import {
   Calendar,
-  DateField,
-  DateTimeField,
+  DateInput,
+  DateTimeInput,
   RangeCalendar,
   RecurrenceEditor,
-  TimeField,
+  TimeInput,
   TimePicker,
 } from '@src/presentation/forms';
 
@@ -32,21 +32,21 @@ function classesOf(element: Element): string[] {
   return element.className.split(/\s+/).filter(Boolean);
 }
 
-describe('TimeField — popover by default, native only on request', () => {
+describe('TimeInput — popover by default, native only on request', () => {
   it('renders a typed text field, not the browser time control', () => {
-    const wrapper = mount(TimeField);
+    const wrapper = mount(TimeInput);
 
     const input = wrapper.find('input');
-    expect(input.attributes('type'), 'TimeField still renders the native picker').toBe('text');
+    expect(input.attributes('type'), 'TimeInput still renders the native picker').toBe('text');
 
     wrapper.unmount();
   });
 
   it('opens its own popover from the trailing trigger', async () => {
-    const wrapper = mount(TimeField, { attachTo: document.body });
+    const wrapper = mount(TimeInput, { attachTo: document.body });
 
     const trigger = wrapper.find('button[aria-haspopup="dialog"]');
-    expect(trigger.exists(), 'TimeField renders no popover trigger').toBe(true);
+    expect(trigger.exists(), 'TimeInput renders no popover trigger').toBe(true);
     expect(trigger.attributes('aria-expanded')).toBe('false');
 
     await trigger.trigger('click');
@@ -56,7 +56,7 @@ describe('TimeField — popover by default, native only on request', () => {
   });
 
   it('keeps the native control behind the `native` opt-in', () => {
-    const wrapper = mount(TimeField, { props: { native: true } });
+    const wrapper = mount(TimeInput, { props: { native: true } });
 
     expect(wrapper.find('input').attributes('type')).toBe('time');
     expect(wrapper.find('button[aria-haspopup="dialog"]').exists()).toBe(false);
@@ -71,7 +71,7 @@ describe('TimeField — popover by default, native only on request', () => {
     ['9', 9, 0],
   ])('commits the typed draft %s on blur', async (typed, hour, minute) => {
     const seen: Array<Temporal.PlainTime | null> = [];
-    const wrapper = mount(TimeField, { props: { onValueChange: (v: never) => seen.push(v) } });
+    const wrapper = mount(TimeInput, { props: { onValueChange: (v: never) => seen.push(v) } });
 
     const input = wrapper.find('input');
     await input.setValue(typed);
@@ -84,7 +84,7 @@ describe('TimeField — popover by default, native only on request', () => {
   });
 
   it('reverts an unparseable draft to the committed value', async () => {
-    const wrapper = mount(TimeField, {
+    const wrapper = mount(TimeInput, {
       props: { value: Temporal.PlainTime.from('08:15') },
     });
 
@@ -100,7 +100,7 @@ describe('TimeField — popover by default, native only on request', () => {
 
   it('clears on an emptied draft', async () => {
     const seen: Array<Temporal.PlainTime | null> = [];
-    const wrapper = mount(TimeField, {
+    const wrapper = mount(TimeInput, {
       props: {
         value: Temporal.PlainTime.from('08:15'),
         onValueChange: (v: never) => seen.push(v),
@@ -117,18 +117,18 @@ describe('TimeField — popover by default, native only on request', () => {
   });
 });
 
-describe('DateField — popover by default, native only on request', () => {
+describe('DateInput — popover by default, native only on request', () => {
   it('renders a typed text field, not the browser date control', () => {
-    const wrapper = mount(DateField);
+    const wrapper = mount(DateInput);
 
-    expect(wrapper.find('input').attributes('type'), 'DateField still renders the native picker').toBe('text');
+    expect(wrapper.find('input').attributes('type'), 'DateInput still renders the native picker').toBe('text');
     expect(wrapper.find('button[aria-haspopup="dialog"]').exists()).toBe(true);
 
     wrapper.unmount();
   });
 
   it('keeps the native control behind the `native` opt-in', () => {
-    const wrapper = mount(DateField, { props: { native: true } });
+    const wrapper = mount(DateInput, { props: { native: true } });
 
     expect(wrapper.find('input').attributes('type')).toBe('date');
     expect(wrapper.find('button[aria-haspopup="dialog"]').exists()).toBe(false);
@@ -138,7 +138,7 @@ describe('DateField — popover by default, native only on request', () => {
 
   it('commits a typed ISO date and reverts anything else', async () => {
     const seen: Array<Temporal.PlainDate | null> = [];
-    const wrapper = mount(DateField, {
+    const wrapper = mount(DateInput, {
       props: {
         value: Temporal.PlainDate.from('2026-03-04'),
         onValueChange: (v: never) => seen.push(v),
@@ -161,7 +161,7 @@ describe('DateField — popover by default, native only on request', () => {
 
   it('clears on an emptied draft', async () => {
     const seen: Array<Temporal.PlainDate | null> = [];
-    const wrapper = mount(DateField, {
+    const wrapper = mount(DateInput, {
       props: {
         value: Temporal.PlainDate.from('2026-03-04'),
         onValueChange: (v: never) => seen.push(v),
@@ -178,18 +178,18 @@ describe('DateField — popover by default, native only on request', () => {
   });
 });
 
-describe('DateTimeField — popover by default, native only on request', () => {
+describe('DateTimeInput — popover by default, native only on request', () => {
   it('renders a typed text field, not the browser datetime control', () => {
-    const wrapper = mount(DateTimeField);
+    const wrapper = mount(DateTimeInput);
 
-    expect(wrapper.find('input').attributes('type'), 'DateTimeField still renders the native picker').toBe('text');
+    expect(wrapper.find('input').attributes('type'), 'DateTimeInput still renders the native picker').toBe('text');
     expect(wrapper.find('button[aria-haspopup="dialog"]').exists()).toBe(true);
 
     wrapper.unmount();
   });
 
   it('keeps the native control behind the `native` opt-in', () => {
-    const wrapper = mount(DateTimeField, { props: { native: true } });
+    const wrapper = mount(DateTimeInput, { props: { native: true } });
 
     expect(wrapper.find('input').attributes('type')).toBe('datetime-local');
     expect(wrapper.find('button[aria-haspopup="dialog"]').exists()).toBe(false);
@@ -199,7 +199,7 @@ describe('DateTimeField — popover by default, native only on request', () => {
 
   it('commits a typed date + time, and a bare date as midnight', async () => {
     const seen: Array<Temporal.PlainDateTime | null> = [];
-    const wrapper = mount(DateTimeField, { props: { onValueChange: (v: never) => seen.push(v) } });
+    const wrapper = mount(DateTimeInput, { props: { onValueChange: (v: never) => seen.push(v) } });
 
     const input = wrapper.find('input');
     await input.setValue('2026-03-04 07:45');
@@ -214,7 +214,7 @@ describe('DateTimeField — popover by default, native only on request', () => {
   });
 
   it('ships the ISO value in a hidden input when named', () => {
-    const wrapper = mount(DateTimeField, {
+    const wrapper = mount(DateTimeInput, {
       props: { name: 'starts', value: Temporal.PlainDateTime.from('2026-03-04T07:45') },
     });
 
@@ -317,9 +317,9 @@ describe('RecurrenceEditor — design-system controls only', () => {
 
 describe('date/time controls stay wired to Field', () => {
   it.each([
-    ['DateField', DateField],
-    ['TimeField', TimeField],
-    ['DateTimeField', DateTimeField],
+    ['DateInput', DateInput],
+    ['TimeInput', TimeInput],
+    ['DateTimeInput', DateTimeInput],
   ] as const)('%s puts the context id on its own input', async (name, component) => {
     const wrapper = mount(component, { props: { id: 'explicit-id' } });
     await nextTick();
@@ -334,9 +334,9 @@ describe('date/time controls stay wired to Field', () => {
    * asking for it is the exact regression the developer filed — this is the net under it.
    */
   it.each([
-    ['DateField', DateField],
-    ['TimeField', TimeField],
-    ['DateTimeField', DateTimeField],
+    ['DateInput', DateInput],
+    ['TimeInput', TimeInput],
+    ['DateTimeInput', DateTimeInput],
   ] as const)('%s opens no OS picker unless `native` is set', (name, component) => {
     const wrapper = mount(component);
 
@@ -347,12 +347,12 @@ describe('date/time controls stay wired to Field', () => {
   });
 });
 
-describe('DateTimeField — the popover writes both halves', () => {
+describe('DateTimeInput — the popover writes both halves', () => {
   it('keeps the time when the calendar changes the date', async () => {
     const seen: Array<Temporal.PlainDateTime | null> = [];
     const wrapper = mount({
       render: () =>
-        h(DateTimeField, {
+        h(DateTimeInput, {
           value: Temporal.PlainDateTime.from('2026-03-04T07:45'),
           onValueChange: (v: Temporal.PlainDateTime | null) => seen.push(v),
         }),

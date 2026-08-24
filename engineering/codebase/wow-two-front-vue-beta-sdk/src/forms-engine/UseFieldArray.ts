@@ -141,7 +141,7 @@ function buildKeys(length: number, seq: { current: number }): string[] {
   return keys;
 }
 
-/** Reconciles a key list to `length` the ops didn't cause (external `reset(data)` / whole-array `setValue`): keep the prefix, grow with fresh keys, shrink by truncation. */
+/** Reconciles a key list to a `length` the ops did not cause: keep the prefix, grow fresh, shrink by truncation. */
 function reconcileKeys(current: readonly string[], length: number, seq: { current: number }): string[] {
   const keys = current.slice(0, length);
   while (keys.length < length) keys.push(makeKey(seq));

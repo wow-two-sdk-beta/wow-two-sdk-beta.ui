@@ -1,4 +1,4 @@
-// Shared date helpers for Calendar / DatePicker / DateField / RangeCalendar.
+// Shared date helpers for Calendar / DatePicker / DateInput / RangeCalendar.
 // Co-located in `forms/` so imports stay within-domain.
 //
 // Temporal-based — the ecosystem standardizes on the Temporal API (dates =

@@ -5,7 +5,7 @@ import {
   ButtonGroup,
   CopyButton,
   DisclosureButton,
-  FAB,
+  Fab,
   GoogleSignInButton,
   Link,
   OptionTile,
@@ -37,9 +37,9 @@ export const actionsCases: readonly SmokeCase[] = [
   smokeCase('OptionTile', OptionTile, { selected: false, label: 'Option' }, { slot: true }),
   smokeCase('OptionTileGroup', OptionTileGroup, { label: 'Tiles' }, { slot: true }),
   smokeCase('SegmentedControl', SegmentedControl, {}, { slot: true }),
-  // `aria-label` is required through FAB's `@vue-ignore`d heritage and reaches the DOM as a
+  // `aria-label` is required through Fab's `@vue-ignore`d heritage and reaches the DOM as a
   // fallthrough attr — never as a declared prop. `Actions.a11y.dom.test.ts` pins that it lands.
-  smokeCase('FAB', FAB, { 'aria-label': 'Create' }, { slot: true }),
+  smokeCase('Fab', Fab, { 'aria-label': 'Create' }, { slot: true }),
   smokeCase('CopyButton', CopyButton, { text: 'copied', 'aria-label': 'Copy' }, { slot: true }),
   smokeCase('DisclosureButton', DisclosureButton, {}, { slot: true }),
   smokeCase('BackToTopButton', BackToTopButton, {}),

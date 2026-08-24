@@ -1,6 +1,6 @@
 import { tv, OverlayPosition, type VariantProps } from '../../../foundation/utils';
 
-/** Defines the FAB's visual surface style. */
+/** Defines the Fab's visual surface style. */
 export const FabVariant = {
   /** Refers to the primary brand-filled surface. */
   Primary: 'primary',
@@ -12,7 +12,7 @@ export const FabVariant = {
 
 export type FabVariant = (typeof FabVariant)[keyof typeof FabVariant];
 
-/** Defines the FAB's diameter. */
+/** Defines the Fab's diameter. */
 export const FabSize = {
   /** Refers to the small (2.5rem) diameter. */
   Sm: 'sm',
@@ -53,13 +53,13 @@ export const fabVariants = tv({
   },
 });
 
-export type FABVariants = VariantProps<typeof fabVariants>;
+export type FabVariants = VariantProps<typeof fabVariants>;
 
 /* Compile-time lock: enum values ≡ tv axis keys (drift = type error). */
 type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never;
-const _assertFabVariant: AssertExact<FabVariant, NonNullable<FABVariants['variant']>> = true;
-const _assertFabSize: AssertExact<FabSize, NonNullable<FABVariants['size']>> = true;
-const _assertFabPosition: AssertExact<OverlayPosition, NonNullable<FABVariants['position']>> = true;
+const _assertFabVariant: AssertExact<FabVariant, NonNullable<FabVariants['variant']>> = true;
+const _assertFabSize: AssertExact<FabSize, NonNullable<FabVariants['size']>> = true;
+const _assertFabPosition: AssertExact<OverlayPosition, NonNullable<FabVariants['position']>> = true;
 void _assertFabVariant;
 void _assertFabSize;
 void _assertFabPosition;

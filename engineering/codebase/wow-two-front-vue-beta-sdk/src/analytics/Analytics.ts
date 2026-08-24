@@ -43,7 +43,7 @@ export interface AnalyticsOptions {
   /** The initial super-properties merged into every event. */
   readonly context?: AnalyticsProperties;
 
-  /** The max calls buffered while no provider is registered — the oldest is dropped past it. Default `100`; `0` disables buffering. */
+  /** The calls buffered while no provider is registered; the oldest drops past it. Default `100`, `0` disables. */
   readonly maxQueueSize?: number;
 
   /** Receives every sink failure. Omitted means failures are swallowed — analytics is never worth an app crash. */
@@ -86,7 +86,7 @@ export interface Analytics {
   flush(): Promise<void>;
 }
 
-/** Creates an {@link Analytics} client — one per app, shared by every caller. Apps that don't need isolation use the default {@link analytics}. */
+/** Creates an {@link Analytics} client — one per app. Without isolation, use the default {@link analytics}. */
 export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
   const { maxQueueSize = 100, onError, now = Date.now } = options;
   const providers = new Set<AnalyticsProvider>(options.providers ?? []);
@@ -94,7 +94,7 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
   let context: AnalyticsProperties = { ...options.context };
   let enabled = options.enabled ?? true;
 
-  /** Routes a sink failure to `onError` — an `onError` that itself throws is swallowed, since there is nowhere left to report. */
+  /** Routes a sink failure to `onError`; an `onError` that throws is swallowed, having nowhere left to report. */
   const report = (
     error: unknown,
     provider: AnalyticsProvider,
@@ -109,7 +109,7 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
     }
   };
 
-  /** Invokes one sink method under full isolation — a synchronous throw and a rejected promise both land in `report`. */
+  /** Invokes one sink method isolated — a throw and a rejected promise both land in `report`. */
   const invoke = (
     provider: AnalyticsProvider,
     phase: AnalyticsFailurePhase,
@@ -221,7 +221,7 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
 /** The default app-wide client — what the bare {@link track} / {@link identify} / {@link page} helpers bind to. */
 export const analytics: Analytics = createAnalytics();
 
-/** Records a named event on the default {@link analytics} client — the everyday `track('signup_completed')` entry point. */
+/** Records a named event on the default {@link analytics} client — the `track('signup_completed')` entry point. */
 export function track(name: string, properties?: AnalyticsProperties): void {
   analytics.track(name, properties);
 }

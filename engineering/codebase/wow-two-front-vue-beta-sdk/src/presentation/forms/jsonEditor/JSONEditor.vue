@@ -1,7 +1,7 @@
 <script lang="ts">
-import type { JSONEditorMode } from './JSONEditorContext';
+import type { JsonEditorMode } from './JsonEditorContext';
 
-export interface JSONEditorProps {
+export interface JsonEditorProps {
   /** The document, controlled — React's spelling, which wins when both are set. */
   value?: unknown;
 
@@ -12,10 +12,10 @@ export interface JSONEditorProps {
   defaultValue?: unknown;
 
   /** The render mode, controlled. The `v-model:mode` binding target. */
-  mode?: JSONEditorMode;
+  mode?: JsonEditorMode;
 
   /** The initial render mode when uncontrolled. Default `tree`. */
-  defaultMode?: JSONEditorMode;
+  defaultMode?: JsonEditorMode;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   isDisabled?: boolean;
@@ -40,10 +40,10 @@ import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives';
-import { JSONEditorKey, JSONEditorMode as JSONEditorModeValue, type JSONEditorContextValue } from './JSONEditorContext';
-import { setAtPath, type JsonPath } from './JSONEditorHelpers';
-import JSONEditorTreeView from './JSONEditorTreeView.vue';
-import JSONEditorTextView from './JSONEditorTextView.vue';
+import { JsonEditorKey, JsonEditorMode as JsonEditorModeValue, type JsonEditorContextValue } from './JsonEditorContext';
+import { setAtPath, type JsonPath } from './JsonEditorHelpers';
+import JsonEditorTreeView from './JsonEditorTreeView.vue';
+import JsonEditorTextView from './JsonEditorTextView.vue';
 
 /**
  * JSON editor with tree-view and raw-text modes. Tree mode supports inline
@@ -52,9 +52,9 @@ import JSONEditorTextView from './JSONEditorTextView.vue';
  */
 /* `inheritAttrs: false` so `class` folds into the surface's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
-defineOptions({ name: 'JSONEditor', inheritAttrs: false });
+defineOptions({ name: 'JsonEditor', inheritAttrs: false });
 
-const props = withDefaults(defineProps<JSONEditorProps>(), {
+const props = withDefaults(defineProps<JsonEditorProps>(), {
   indent: 2,
   minHeight: '14rem',
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
@@ -75,9 +75,9 @@ const emit = defineEmits<{
   /** Replaces React's `onValueChange`. */
   'value-change': [value: unknown];
   /** The `v-model:mode` half. */
-  'update:mode': [mode: JSONEditorMode];
+  'update:mode': [mode: JsonEditorMode];
   /** Replaces React's `onModeChange`. */
-  'mode-change': [mode: JSONEditorMode];
+  'mode-change': [mode: JsonEditorMode];
 }>();
 
 const attrs = useAttrs();
@@ -92,9 +92,9 @@ const valueCtl = useControlled<unknown>({
   },
 });
 
-const modeCtl = useControlled<JSONEditorMode>({
+const modeCtl = useControlled<JsonEditorMode>({
   controlled: () => props.mode,
-  default: () => props.defaultMode ?? JSONEditorModeValue.Tree,
+  default: () => props.defaultMode ?? JsonEditorModeValue.Tree,
   onChange: (next) => {
     emit('update:mode', next);
     emit('mode-change', next);
@@ -119,7 +119,7 @@ function updateAt(path: JsonPath, next: unknown): void {
 }
 
 /* Live getters, not a snapshot — a flag change on the root has to reach every tree node. */
-provide<JSONEditorContextValue>(JSONEditorKey, {
+provide<JsonEditorContextValue>(JsonEditorKey, {
   updateAt,
   get isDisabled() {
     return finalDisabled.value;
@@ -134,9 +134,9 @@ provide<JSONEditorContextValue>(JSONEditorKey, {
 
 /* `Object.values` hoisted out of the template — the runtime template compiler resolves plain
    identifiers, not arbitrary global calls. */
-const modes = Object.values(JSONEditorModeValue);
+const modes = Object.values(JsonEditorModeValue);
 
-function modeButtonClass(m: JSONEditorMode): string {
+function modeButtonClass(m: JsonEditorMode): string {
   return cn(
     'inline-flex h-6 items-center rounded px-2 text-xs font-medium transition-colors',
     renderMode.value === m ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
@@ -189,8 +189,8 @@ defineExpose({ el });
       </div>
     </div>
     <div class="flex-1 overflow-auto" :style="{ minHeight: 0 }">
-      <JSONEditorTreeView v-if="renderMode === 'tree'" :value="document" />
-      <JSONEditorTextView v-else :value="document" :indent="indent" @commit="valueCtl.setValue" />
+      <JsonEditorTreeView v-if="renderMode === 'tree'" :value="document" />
+      <JsonEditorTextView v-else :value="document" :indent="indent" @commit="valueCtl.setValue" />
     </div>
   </div>
 </template>

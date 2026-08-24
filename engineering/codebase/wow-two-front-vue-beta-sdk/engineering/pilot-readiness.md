@@ -73,7 +73,7 @@ presentation/display   Accordion, AccordionType, Badge, BadgeVariant, Card, Cell
                        PricingCard, RadiusGlyph, Separator, Sortable, StepCard, Table, TableBody,
                        TableCell, TableHead, TableHeaderCell, TableRow, Text, VerticalBarsGlyph
 presentation/feedback  Alert, Banner, MeterBar, Spinner
-presentation/forms     CategoryNavVariant*, ColorPicker, DateTimeField, DefaultEmojiSize, EmailInput,
+presentation/forms     CategoryNavVariant*, ColorPicker, DateTimeInput, DefaultEmojiSize, EmailInput,
                        EmojiPicker, EmojiPickerSizeInput*, EmojiSizeControl, EmojiTileShape*, Field,
                        NumberInput, SearchInput, Select, TelInput, TextAreaInput, TextInput, UrlInput
 presentation/layout    Center, Container, ContainerSize, ControlGroup, Divider, Grid, HStack, Navbar,
@@ -285,7 +285,7 @@ through `cn()`, so consumer classes still win over variant classes.
 | `ColorPicker` `onValueChange` | `@value-change` | 4 |
 | `OptionTile` `onSelect` | `@select` | 4 |
 | `ToggleButtonGroup` `onValueChange` | `@value-change` | 2 |
-| `DateTimeField` `onValueChange` | `@value-change` | 2 |
+| `DateTimeInput` `onValueChange` | `@value-change` | 2 |
 | `Banner` `onClose` | `@close` | 2 |
 | `Select` `onValueChange` | `@value-change` | 1 |
 | `SearchInput` `onClear` | `@clear` | 1 |

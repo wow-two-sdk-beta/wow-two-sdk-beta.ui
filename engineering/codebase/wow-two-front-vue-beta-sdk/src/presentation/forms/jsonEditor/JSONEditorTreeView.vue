@@ -1,6 +1,6 @@
 <script lang="ts">
-/** Internal — the tree pane of `JSONEditor`. Not exported from the folder barrel. */
-export interface JSONEditorTreeViewProps {
+/** Internal — the tree pane of `JsonEditor`. Not exported from the folder barrel. */
+export interface JsonEditorTreeViewProps {
   /** The document rendered as a tree. */
   value: unknown;
 }
@@ -8,17 +8,17 @@ export interface JSONEditorTreeViewProps {
 
 <script setup lang="ts">
 import { useFormControl } from '../../../foundation/primitives';
-import { useJSONEditorContext } from './JSONEditorContext';
-import JSONEditorTreeNode from './JSONEditorTreeNode.vue';
+import { useJsonEditorContext } from './JsonEditorContext';
+import JsonEditorTreeNode from './JsonEditorTreeNode.vue';
 
-defineOptions({ name: 'JSONEditorTreeView' });
+defineOptions({ name: 'JsonEditorTreeView' });
 
-defineProps<JSONEditorTreeViewProps>();
+defineProps<JsonEditorTreeViewProps>();
 
 /* In tree mode the tree IS the editing surface — it carries the context id
    (label anchor) and is named/described by the Field chrome. */
 const ctx = useFormControl();
-const editor = useJSONEditorContext();
+const editor = useJsonEditorContext();
 </script>
 
 <template>
@@ -30,6 +30,6 @@ const editor = useJSONEditorContext();
     :aria-invalid="editor.isInvalid || undefined"
     class="font-mono text-sm"
   >
-    <JSONEditorTreeNode :key-name="null" :value="value" :path="[]" :depth="0" />
+    <JsonEditorTreeNode :key-name="null" :value="value" :path="[]" :depth="0" />
   </ul>
 </template>

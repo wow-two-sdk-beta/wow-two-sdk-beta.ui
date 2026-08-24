@@ -21,7 +21,7 @@ Re-measure before starting an item — other lanes move the numbers.
 | 6 | Bare string-literal unions where a `const` object is required | 15, all in `foundation/` | review only |
 | 7 | Components sitting in a group whose gate they fail | 2 of the 7 in `display/` survive re-verdict — `tooltip` → `overlays`, `emptyState` → `state`; `characterCount`, `passwordStrength`, `ColorSwatch` in `forms/` are untested | review only |
 | 8 | `.spec.md` coverage | 198 of 378 components carry none | review only |
-| 9 | `forwardRef` — banned by `react/react.md` | 324 sites · 233 files, React package | review only |
+| 9 | pre-19 React spellings — `forwardRef` banned by `react/react.md` | 324 `forwardRef` sites · 233 files · 164 `ComponentPropsWithoutRef` · 46 `<Context.Provider>` across 41 files | review only |
 | 10 | `SpeedDialTrigger.vue:68` uses the v3 `!px-0` important spelling | 5 classes | none — silently emits nothing |
 | 11 | `*Screen` retired in favour of `*Page` | 4 components, smart-qr | typecheck after rename |
 | 12 | `Result<TSuccess, TFailure>` carrier absent | 17 unions to fold in | typecheck |
@@ -87,8 +87,8 @@ string `provide()` keys · emit-name casing.
 
 ## Rule conflicts
 
-Contradictions inside the conventions themselves live in `wow-two-ws/fe-conventions-conflicts.md` — 17 open.
-Each needs a verdict, not a sweep, and a rule that contradicts another cannot gate the code below.
+The conventions themselves carry no open contradictions — all 25 were closed or refuted on 2026-08-24,
+so every row below gates against a settled rule.
 
 ---
 

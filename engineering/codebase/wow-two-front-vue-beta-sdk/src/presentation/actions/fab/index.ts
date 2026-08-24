@@ -1,2 +1,2 @@
-export { default as FAB, type FABProps } from './FAB.vue';
-export { fabVariants, FabVariant, FabSize, type FABVariants } from './FAB.variants';
+export { default as Fab, type FabProps } from './Fab.vue';
+export { fabVariants, FabVariant, FabSize, type FabVariants } from './Fab.variants';

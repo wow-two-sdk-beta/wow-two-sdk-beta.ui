@@ -16,7 +16,7 @@ Single floating button (icon + optional label). Default position bottom-right.
 |---|---|---|---|
 | `threshold` | `number` (px) | `400` | When to reveal |
 | `scrollContainer` | `HTMLElement \| null` | `window` | Scope to a specific scrollable region |
-| `position` | same union as FAB | `'bottom-right'` | Reuses FAB position variant |
+| `position` | same union as Fab | `'bottom-right'` | Reuses Fab position variant |
 | `label` | `ReactNode` | hidden — `aria-label="Back to top"` | Accessible by default |
 
 ## Composition

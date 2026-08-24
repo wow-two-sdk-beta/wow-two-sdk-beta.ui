@@ -1,6 +1,5 @@
 # CopyButton
 
-> **Behavioral contract:** [`CopyButton.standard.md`](./CopyButton.standard.md)
 
 ## Anatomy
 
@@ -21,7 +20,7 @@ CopyButton inherits `variant × tone × size × shape × padding × radius` from
 
 | Prop | CopyButton default | Button default | Why |
 |---|---|---|---|
-| `variant` | `'ghost'` | `'solid'` | Copy buttons sit alongside content as secondary affordances; ghost is the conventional lowest-weight treatment ([Standard rule 6](./CopyButton.standard.md#composition)). |
+| `variant` | `'ghost'` | `'solid'` | Copy buttons sit alongside content as secondary affordances; ghost is the conventional lowest-weight treatment (Standard rule 6). |
 
 All other Button props are forwarded unchanged via `{...rest}`.
 
@@ -51,7 +50,7 @@ Inherited from Button — `size`, `padding`, `radius`, `width`, `height`, `minWi
 | Copied | `Check` icon (or render-prop output) | `"true"` | `copiedAriaLabel ?? aria-label` | Click during this window kicks off another copy + restarts the reset timer |
 | Errored | Idle visual (or render-prop output) | absent | `aria-label` | `onError(err)` fires once on the transition; component remains interactive |
 
-**Observability:** `data-copied="true"` is the canonical CopyButton signal ([Standard rule 8](./CopyButton.standard.md#states)). Test selectors and CSS overlays target `[data-copied]`. Distinct from Button's `data-state` which continues to reflect Button's lifecycle states (loading, skeleton, disabled) — both attributes can be present simultaneously when relevant ([Standard rule 9](./CopyButton.standard.md#states)).
+**Observability:** `data-copied="true"` is the canonical CopyButton signal (Standard rule 8). Test selectors and CSS overlays target `[data-copied]`. Distinct from Button's `data-state` which continues to reflect Button's lifecycle states (loading, skeleton, disabled) — both attributes can be present simultaneously when relevant (Standard rule 9).
 
 ## Behavior
 
@@ -64,8 +63,8 @@ Inherited from Button — `size`, `padding`, `radius`, `width`, `height`, `minWi
 
 ## Accessibility
 
-- **`aria-label` REQUIRED at the type level.** Compile fails without it ([Standard rule 11](./CopyButton.standard.md#accessibility)).
-- **`copiedAriaLabel`** — optional override applied while `copied=true`. When omitted, `aria-label` stays stable across the state transition. Library does NOT bake any English defaults ([Standard rule 13](./CopyButton.standard.md#accessibility)).
+- **`aria-label` REQUIRED at the type level.** Compile fails without it (Standard rule 11).
+- **`copiedAriaLabel`** — optional override applied while `copied=true`. When omitted, `aria-label` stays stable across the state transition. Library does NOT bake any English defaults (Standard rule 13).
 - **Hit target / focus / forced-colors** — inherited from Button.
 - **State announcement** — when `copiedAriaLabel` is provided, the change in accessible name is announced by most screen readers on the next focus / re-read. For deterministic announcement, consumers MAY pair CopyButton with their own `aria-live="polite"` region.
 
@@ -148,4 +147,3 @@ Inherited from Button — `size`, `padding`, `radius`, `width`, `height`, `minWi
 
 ---
 
-*Inline citations point at specific rule URLs. See [`CopyButton.standard.md` — Related](./CopyButton.standard.md#related) for broad references.*

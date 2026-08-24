@@ -47,7 +47,7 @@ export function resultToFieldErrors(result: StandardSchemaV1.Result<unknown>): R
   return errors;
 }
 
-/** The vendor every `foundation/validation` validator reports — mirrored, not imported, to keep this file runtime-free of that slice. */
+/** The vendor every `foundation/validation` validator reports, mirrored to keep this file runtime-free. */
 const HOUSE_VENDOR = 'wow-two-beta';
 
 /** The native surface a house validator adds to the spec — the un-erased, code-carrying result. */

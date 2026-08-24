@@ -130,7 +130,7 @@ export function createHouseFormEngine<TValues extends object>(
   /** The generation the caches below belong to — swapped lazily on the first read after a commit. */
   let generation: InternalState<TValues> | null = null;
   let formState: AppFormState<TValues> | null = null;
-  /** Per-path field slices for the CURRENT generation — rebuilt lazily, reusing the previous generation's identity when unchanged. */
+  /** Per-path field slices for the current generation, rebuilt lazily and reusing identity when unchanged. */
   let fieldCache = new Map<string, HouseFieldState>();
   let previousFieldCache = new Map<string, HouseFieldState>();
   /** Monotonic guard: only the newest validation run may apply its result (async schemas). */

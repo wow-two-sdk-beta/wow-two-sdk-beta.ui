@@ -67,7 +67,7 @@ import { ColorSwatchSize as ColorSwatchSizeValue } from '../colorSwatch';
 import ColorSwatch from '../colorSwatch/ColorSwatch.vue';
 import ColorArea from '../colorArea/ColorArea.vue';
 import ColorSlider, { ColorChannel } from '../colorSlider/ColorSlider.vue';
-import ColorField from '../colorField/ColorField.vue';
+import ColorInput from '../colorInput/ColorInput.vue';
 import ColorSwatchPicker from '../colorSwatchPicker/ColorSwatchPicker.vue';
 
 /**
@@ -282,7 +282,7 @@ defineExpose({ el: computed(() => trigger.value?.el ?? null) });
         />
       </FormControlProvider>
       <FormControlProvider>
-        <ColorField aria-label="Hex color" :value="hex" :has-alpha="hasAlpha" @value-change="onHexChange" />
+        <ColorInput aria-label="Hex color" :value="hex" :has-alpha="hasAlpha" @value-change="onHexChange" />
       </FormControlProvider>
       <FormControlProvider v-if="hasPresets">
         <ColorSwatchPicker :colors="presets ?? []" :value="hex" swatch-size="sm" @value-change="onPresetChange" />

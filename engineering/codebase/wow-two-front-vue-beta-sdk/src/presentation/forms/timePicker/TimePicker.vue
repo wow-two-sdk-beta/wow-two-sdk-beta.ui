@@ -108,8 +108,8 @@ const triggerState = computed(
   () => props.state ?? (finalInvalid.value ? InputStateValue.Invalid : InputStateValue.Default),
 );
 
-/* The columns live in the shared `TimeColumns` — the same panel `TimeField` and
-   `DateTimeField` open, so the three cannot drift. */
+/* The columns live in the shared `TimeColumns` — the same panel `TimeInput` and
+   `DateTimeInput` open, so the three cannot drift. */
 function onColumnsChange(next: Temporal.PlainTime): void {
   controlled.setValue(next);
 }

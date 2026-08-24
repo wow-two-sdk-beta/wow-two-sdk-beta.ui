@@ -1,14 +1,14 @@
-# PDFViewer
+# PdfViewer
 
 ## Purpose
 View a PDF inline. **First-generation** uses an `<iframe>` pointing at the PDF; the browser's built-in viewer renders it. URL hash params (`#page=N&zoom=Z`) drive page/zoom state. Real per-page rendering, thumbnails, search, annotations are deferred to a future iteration that wraps PDF.js.
 
 ## Anatomy
 ```
-<PDFViewer src page? zoom?>
+<PdfViewer src page? zoom?>
   ├── toolbar (page nav + zoom + download)
   └── iframe (browser-native PDF viewer)
-</PDFViewer>
+</PdfViewer>
 ```
 
 ## Required behaviors
@@ -29,7 +29,7 @@ View a PDF inline. **First-generation** uses an `<iframe>` pointing at the PDF; 
 | `height` | `string` | `'70vh'` | |
 
 ## Composition
-Single component. Real PDF.js wrap will be a separate `<PDFViewer.PdfJsEngine>` slot or a sibling component (`PDFViewer.Advanced`?) — TBD when PDF.js is added.
+Single component. Real PDF.js wrap will be a separate `<PdfViewer.PdfJsEngine>` slot or a sibling component (`PdfViewer.Advanced`?) — TBD when PDF.js is added.
 
 ## Accessibility
 - iframe `title` attribute required.

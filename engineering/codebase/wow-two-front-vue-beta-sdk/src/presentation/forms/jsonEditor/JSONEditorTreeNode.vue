@@ -1,8 +1,8 @@
 <script lang="ts">
-import type { JsonPath } from './JSONEditorHelpers';
+import type { JsonPath } from './JsonEditorHelpers';
 
-/** Internal — one row of `JSONEditor`'s tree pane. Not exported from the folder barrel. */
-export interface JSONEditorTreeNodeProps {
+/** Internal — one row of `JsonEditor`'s tree pane. Not exported from the folder barrel. */
+export interface JsonEditorTreeNodeProps {
   /** The key this node sits under; `null` at the document root. */
   keyName: string | number | null;
 
@@ -23,17 +23,17 @@ import { ChevronRight, Copy } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives';
-import { useJSONEditorContext } from './JSONEditorContext';
-import { describeType, pathToString } from './JSONEditorHelpers';
+import { useJsonEditorContext } from './JsonEditorContext';
+import { describeType, pathToString } from './JsonEditorHelpers';
 
-defineOptions({ name: 'JSONEditorTreeNode' });
+defineOptions({ name: 'JsonEditorTreeNode' });
 
-const props = defineProps<JSONEditorTreeNodeProps>();
+const props = defineProps<JsonEditorTreeNodeProps>();
 
 /* The transient leaf editor is a real editing surface — the Field's helper/error
    description follows it (the input keeps its own action name). */
 const ctx = useFormControl();
-const editor = useJSONEditorContext();
+const editor = useJsonEditorContext();
 
 const type = computed(() => describeType(props.value));
 const isObject = computed(() => type.value === 'object' || type.value === 'array');
@@ -160,7 +160,7 @@ const CopyIcon = Copy;
     </div>
     <!-- Recursion by implicit self-reference: an SFC may name itself by its filename. -->
     <ul v-if="isObject && open" role="group">
-      <JSONEditorTreeNode
+      <JsonEditorTreeNode
         v-for="[k, v] in entries"
         :key="String(k)"
         :key-name="k"

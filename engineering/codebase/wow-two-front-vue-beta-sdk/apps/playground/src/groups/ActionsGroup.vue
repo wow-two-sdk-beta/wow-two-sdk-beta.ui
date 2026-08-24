@@ -15,7 +15,7 @@ const {
   OptionTile,
   OptionTileGroup,
   SegmentedControl,
-  FAB,
+  Fab,
   CopyButton,
   DisclosureButton,
   Toolbar,
@@ -38,7 +38,7 @@ const covered = [
   'OptionTile',
   'OptionTileGroup',
   'SegmentedControl',
-  'FAB',
+  'Fab',
   'CopyButton',
   'DisclosureButton',
   'Toolbar',
@@ -288,18 +288,18 @@ const tile = ref('b');
         </Toolbar>
       </Demo>
 
-      <Demo name="FAB" note="variant × size — positioned absolute inside the frame">
+      <Demo name="Fab" note="variant × size — positioned absolute inside the frame">
         <div class="relative h-32 rounded-md bg-muted">
-          <FAB
+          <Fab
             v-for="(v, i) in ['primary', 'secondary', 'destructive']"
             :key="v"
             :variant="v as never"
             :position="(['bottom-right', 'bottom-left', 'bottom-center'] as const)[i]"
-            :aria-label="`FAB ${v}`"
+            :aria-label="`Fab ${v}`"
             class="absolute"
           >
             <Plus :size="18" />
-          </FAB>
+          </Fab>
         </div>
       </Demo>
 

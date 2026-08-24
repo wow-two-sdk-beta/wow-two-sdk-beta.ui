@@ -56,5 +56,5 @@ export interface AnalyticsErrorContext {
   readonly call?: AnalyticsCall;
 }
 
-/** Defines the sink-failure handler — analytics must never break the caller, so every provider throw lands here instead. */
+/** Defines the sink-failure handler; analytics never breaks the caller, so a provider throw lands here. */
 export type AnalyticsErrorHandler = (error: unknown, context: AnalyticsErrorContext) => void;

@@ -1,7 +1,7 @@
 # TimePicker
 
 ## Purpose
-Time input with a popover containing hour and minute lists. Use when a unified custom UI matters (cross-browser consistency over native `TimeField`'s browser-specific picker).
+Time input with a popover containing hour and minute lists. Use when a unified custom UI matters (cross-browser consistency over native `TimeInput`'s browser-specific picker).
 
 ## Anatomy
 ```

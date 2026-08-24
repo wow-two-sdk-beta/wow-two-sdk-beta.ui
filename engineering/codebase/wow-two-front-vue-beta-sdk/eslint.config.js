@@ -63,6 +63,11 @@ export default tseslint.config(
     files: ['**/*.{ts,vue}'],
     rules: {
       'vue/multi-word-component-names': 'off',
+      // Off, measured: the rule flags 45 sites and 42 are the read-once seed of an uncontrolled
+      // component (`ref(props.defaultOpen)`, `useControlled`'s `default:` option), which it cannot
+      // tell apart from a genuine loss. The ban it would guard — reactive props destructure — has 0
+      // sites, so review carries it. See macros.md § *Reading a prop*.
+      'vue/no-setup-props-reactivity-loss': 'off',
     },
   },
   {
@@ -111,7 +116,7 @@ export default tseslint.config(
         { type: 'auth', pattern: 'src/auth/**' },
         // Feedback = standalone top-level subpath notice bus; peer-free, composes
         // foundation only (Severity vocabulary, ApiError type) — NEVER presentation.
-        // Presentation adapters (FeedbackToasts) import it, not the other way round.
+        // Presentation adapters (FeedbackToastHost) import it, not the other way round.
         { type: 'feedback', pattern: 'src/feedback/**' },
         // Forms-engine = standalone top-level subpath forms facade (contract + engine
         // adapters); composes foundation only (FormControl provide/inject, http error

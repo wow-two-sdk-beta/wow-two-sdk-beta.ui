@@ -1,14 +1,14 @@
-# ColorField
+# ColorInput
 
 ## Purpose
 Text input for hex colors with a leading swatch preview. Validates on blur — accepts `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`. Use as a standalone input or as part of `ColorPicker`.
 
 ## Anatomy
 ```
-<ColorField>
+<ColorInput>
   ├── leading <ColorSwatch> (preview of current value)
   └── <input type="text"> (hex string)
-</ColorField>
+</ColorInput>
 ```
 
 ## Required behaviors

@@ -2,7 +2,7 @@
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 import type { SwatchShape } from '../colorSwatch';
 
-export interface ColorFieldProps {
+export interface ColorInputProps {
   /** The control size. */
   size?: InputSize;
   /** The validity surface. */
@@ -55,9 +55,9 @@ import { SwatchShape as SwatchShapeValue } from '../colorSwatch';
  */
 /* `inheritAttrs: false` so `class` folds into the input's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
-defineOptions({ name: 'ColorField', inheritAttrs: false });
+defineOptions({ name: 'ColorInput', inheritAttrs: false });
 
-const props = withDefaults(defineProps<ColorFieldProps>(), {
+const props = withDefaults(defineProps<ColorInputProps>(), {
   swatchShape: SwatchShapeValue.Square,
   hasAlpha: false,
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control

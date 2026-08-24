@@ -49,7 +49,7 @@ export interface StaticFlagDefinition<TValue extends FlagValue> {
   /** The variant name reported alongside `value`. */
   readonly variant?: string;
 
-  /** Whether the flag is switched off — every evaluation returns the CALLER's default with `reason: 'disabled'`, rules skipped. */
+  /** Whether the flag is off; every evaluation returns the caller's default, `reason: 'disabled'`, rules skipped. */
   readonly disabled?: boolean;
 
   /** The targeting rules, evaluated top-down; the first match wins. */
@@ -67,7 +67,7 @@ export type StaticFlagEntry = boolean | string | number | JsonObject | StaticFla
 /** Defines the `key → flag` map backing a {@link staticFlagProvider}. */
 export type StaticFlags = Readonly<Record<string, StaticFlagEntry>>;
 
-/** Reports whether one context attribute satisfies one expected value — an expected array means "is one of", an actual array means "contains". */
+/** Reports whether one attribute satisfies one expected value — expected array is "one of", actual is "contains". */
 function attributeMatches(
   actual: ContextAttribute | undefined,
   expected: ContextAttribute | readonly ContextAttribute[],
@@ -81,7 +81,7 @@ function attributeMatches(
   return actual === expected;
 }
 
-/** Reports whether an evaluation context satisfies a condition — every attribute must match, or the predicate must return `true`. */
+/** Reports whether a context satisfies a condition — every attribute matches, or the predicate returns `true`. */
 function conditionMatches(condition: StaticFlagCondition, context: EvaluationContext): boolean {
   if (typeof condition === 'function') return condition(context);
   return Object.entries(condition).every(([attribute, expected]) => attributeMatches(context[attribute], expected));
@@ -96,13 +96,7 @@ function isDefinition(entry: StaticFlagEntry): entry is StaticFlagDefinition<Fla
  * Creates an in-memory {@link FlagProvider} over a `key → flag` map — the test double, the
  * local-dev default, and the fallback used when a client is created without a provider.
  *
- * ```ts
- * const provider = staticFlagProvider({
- *   newNav: true,                                        // bare value
- *   theme: { value: 'light', variant: 'control', rules: [{ when: { plan: ['pro', 'team'] }, value: 'dark', variant: 'treatment' }] },
- *   legacyExport: { value: true, disabled: true },        // gated off → callers get their own default
- * });
- * ```
+ * An entry is a bare value or a {@link StaticFlagDefinition}; a disabled one hands back the caller's default.
  */
 export function staticFlagProvider(flags: StaticFlags = {}): FlagProvider {
   const resolve = (key: string, context: EvaluationContext): FlagResolution<FlagValue> | undefined => {

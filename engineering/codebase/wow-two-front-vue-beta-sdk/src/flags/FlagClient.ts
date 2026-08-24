@@ -46,7 +46,7 @@ export interface CreateFlagClientOptions {
   /** The initial evaluation context (targeting subject + attributes). */
   readonly context?: EvaluationContext;
 
-  /** Receives every evaluation fault (type mismatch, provider error). Misses and disabled flags are not faults and never arrive here. */
+  /** Receives every evaluation fault. A miss or a disabled flag is not a fault and never arrives here. */
   readonly onError?: FlagErrorListener;
 }
 
@@ -70,7 +70,7 @@ export interface FlagClient {
   /** Evaluates a number flag, returning its value. */
   getNumber(key: string, defaultValue: number, context?: EvaluationContext): number;
 
-  /** Evaluates a JSON object flag, returning its payload. Object-ness is verified at runtime; the payload's inner shape is the caller's assertion. */
+  /** Evaluates a JSON object flag. Object-ness is checked at runtime; the inner shape is the caller's assertion. */
   getObject<TValue extends JsonObject>(key: string, defaultValue: TValue, context?: EvaluationContext): TValue;
 
   /** Evaluates a boolean flag, returning the full outcome. */
@@ -89,7 +89,7 @@ export interface FlagClient {
     context?: EvaluationContext,
   ): FlagEvaluation<TValue>;
 
-  /** Evaluates any flag, picking the typed path from the runtime type of `defaultValue` — what `useFlag` is built on. */
+  /** Evaluates any flag, picking the typed path from `defaultValue`'s runtime type. `useFlag` builds on it. */
   getValue<TValue extends FlagValue>(key: string, defaultValue: TValue, context?: EvaluationContext): TValue;
 
   /** Evaluates any flag, picking the typed path from the runtime type of `defaultValue`, returning the full outcome. */
@@ -296,7 +296,8 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
       );
     try {
       const pending = hook.call(provider, context);
-      if (pending instanceof Promise) void pending.catch(fail); // a rejected refetch must not become an unhandled rejection
+      // a rejected refetch must not become an unhandled rejection
+      if (pending instanceof Promise) void pending.catch(fail);
     } catch (cause) {
       fail(cause);
     }

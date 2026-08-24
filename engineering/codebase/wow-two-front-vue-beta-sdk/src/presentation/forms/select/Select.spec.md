@@ -1,6 +1,5 @@
 # Select
 
-> **Behavioral contract:** [`Select.standard.md`](./Select.standard.md)
 
 Single-select dropdown — a button trigger that opens a floating `role="listbox"`. Generic over `<K, V>`: `K` is the selection key (drives equality, serialization, ARIA), `V` is the rich payload returned to the consumer (defaults to `K`). Use when the option set is enumerable and small-to-medium and no free-text entry is needed; for type-against-a-large-set or user-supplied values use `Combobox`; for multi-pick use a future `MultiSelect`.
 
@@ -193,4 +192,3 @@ The trigger's appearance is the cross of two axes; both derive from the shared `
 
 ---
 
-*Inline citations point at specific rule URLs. See [`Select.standard.md`](./Select.standard.md) `Related` for broad references.*

@@ -22,16 +22,16 @@ import type { EvaluationContext, FlagErrorCode, FlagReason, FlagValue, JsonObjec
 
 /** Defines what a provider hands back for one flag — the spec's "resolution details". */
 export interface FlagResolution<TValue extends FlagValue> {
-  /** The resolved value. Re-checked at runtime by the client; a wrong type falls back to the caller's default with `reason: 'error'`. */
+  /** The resolved value, re-checked by the client. A wrong type falls back to the default, `reason: 'error'`. */
   readonly value: TValue;
 
-  /** Why this value was produced. Defaults to `static` when omitted; report `targeting` when a rule matched, `disabled` to gate the flag off. */
+  /** Why this value was produced. `static` when omitted, `targeting` on a rule match, `disabled` to gate off. */
   readonly reason?: FlagReason;
 
   /** The name of the matched variant — surfaced on the evaluation for analytics/exposure logging. */
   readonly variant?: string;
 
-  /** A non-throwing failure channel — set it and the client falls back to the caller's default with `reason: 'error'` and reports to `onError`. */
+  /** A non-throwing failure channel; the client falls back to the default, `reason: 'error'`, and reports it. */
   readonly errorCode?: FlagErrorCode;
 
   /** A human-readable description accompanying `errorCode`. */

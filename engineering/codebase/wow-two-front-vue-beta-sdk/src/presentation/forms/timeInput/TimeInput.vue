@@ -2,7 +2,7 @@
 import type { Temporal } from 'temporal-polyfill';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface DateTimeFieldProps {
+export interface TimeInputProps {
   /** The control size. */
   size?: InputSize;
   /** The validity surface. */
@@ -13,26 +13,20 @@ export interface DateTimeFieldProps {
   ring?: InputRing;
 
   /** The value, controlled. The `v-model` binding target. `null` is the cleared state. */
-  modelValue?: Temporal.PlainDateTime | null;
+  modelValue?: Temporal.PlainTime | null;
 
   /** The value, controlled — React's spelling of `modelValue`, which wins when both are set. */
-  value?: Temporal.PlainDateTime | null;
+  value?: Temporal.PlainTime | null;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: Temporal.PlainDateTime | null;
-
-  /** The earliest selectable wall-clock instant. */
-  min?: Temporal.PlainDateTime | null;
-
-  /** The latest selectable wall-clock instant. */
-  max?: Temporal.PlainDateTime | null;
+  defaultValue?: Temporal.PlainTime | null;
 
   /**
-   * Renders a bare `<input type="datetime-local">` and drops the popover.
+   * Renders a bare `<input type="time">` and drops the popover.
    *
    * Opt-in only. The browser owns that control's picker panel — it cannot be themed, so it
    * lands a system-chrome popup in the middle of a design-system form. Reach for it when the
-   * platform picker is the point (a mobile-first form wanting the OS wheels, for instance).
+   * platform picker is the point (a mobile-first form wanting the OS wheel, for instance).
    */
   native?: boolean;
 
@@ -41,9 +35,6 @@ export interface DateTimeFieldProps {
 
   /** The empty-state text. Ignored when `native` — that control renders its own mask. */
   placeholder?: string;
-
-  /** The hidden input name; when set, a hidden input ships the ISO value with form submission. */
-  name?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   id?: string;
@@ -54,37 +45,39 @@ export interface DateTimeFieldProps {
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
   required?: boolean;
 }
+
+/** Accepts `9`, `09`, `930`, `9:30`, `09:30` — hour alone, or hour + 2-digit minute. */
+const TIME_TEXT = /^(\d{1,2})(?::?(\d{2}))?$/;
 </script>
 
 <script setup lang="ts">
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
-import { CalendarClock } from 'lucide-vue-next';
+import { Temporal as TemporalValue } from 'temporal-polyfill';
+import { Clock } from 'lucide-vue-next';
 import { cn } from '../../../foundation/utils';
 import { useControlled } from '../../../foundation/hooks';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
-import { formatISODateTime, parseISODate, parseISODateTime, today } from '../DateExtensions';
-import Calendar from '../calendar/Calendar.vue';
+import { formatISOTime } from '../DateExtensions';
 import TimeColumns from '../TimeColumns.vue';
 
 /**
- * Atomic datetime input — a typed `YYYY-MM-DD HH:MM` field with a design-system popover
- * (`Calendar` + hour/minute columns) on the trailing button. Accepts and emits
- * `Temporal.PlainDateTime` (calendar wall-clock, no zone).
+ * Atomic time input — a typed `HH:MM` field with a design-system popover on the trailing
+ * clock button. Accepts and emits `Temporal.PlainTime`.
  *
- * The popover is ours, not the browser's: an `<input type="datetime-local">` opens an
- * unstylable system panel, which is what `native` is for.
+ * The popover is ours (`TimeColumns` inside `overlays/popover`), not the browser's: an
+ * `<input type="time">` opens an unstylable system panel, which is what `native` is for.
  */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
-defineOptions({ name: 'DateTimeField', inheritAttrs: false });
+defineOptions({ name: 'TimeInput', inheritAttrs: false });
 
-const props = withDefaults(defineProps<DateTimeFieldProps>(), {
+const props = withDefaults(defineProps<TimeInputProps>(), {
   native: false,
   minuteStep: 5,
-  placeholder: 'YYYY-MM-DD HH:MM',
+  placeholder: '--:--',
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required". */
@@ -94,9 +87,9 @@ const props = withDefaults(defineProps<DateTimeFieldProps>(), {
 
 const emit = defineEmits<{
   /** The `v-model` half. */
-  'update:modelValue': [value: Temporal.PlainDateTime | null];
+  'update:modelValue': [value: Temporal.PlainTime | null];
   /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
-  'value-change': [value: Temporal.PlainDateTime | null];
+  'value-change': [value: Temporal.PlainTime | null];
 }>();
 
 const attrs = useAttrs();
@@ -104,7 +97,7 @@ const attrs = useAttrs();
 /* `ctx` is a live-getter object — read fields off it, never destructure. */
 const ctx = useFormControl();
 
-const controlled = useControlled<Temporal.PlainDateTime | null>({
+const controlled = useControlled<Temporal.PlainTime | null>({
   controlled: () => (props.value !== undefined ? props.value : props.modelValue),
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
@@ -117,42 +110,36 @@ const committed = controlled.value;
 
 const open = ref(false);
 
-/** The ISO form the native control and form submission both speak. */
-const isoValue = computed(() => formatISODateTime(committed.value));
-
-/** The typed form — the same ISO with the `T` softened to a space. */
-const displayText = computed(() => isoValue.value.replace('T', ' '));
-
 /** The in-flight text — free-form while typing, reconciled with `committed` on commit. */
-const draft = ref<string>(displayText.value);
+const draft = ref<string>(formatISOTime(committed.value));
 
 /* Syncs the draft when the committed value changes from the outside (or from the popover). */
-watch(displayText, (next) => {
-  draft.value = next;
+watch(committed, (next) => {
+  draft.value = formatISOTime(next);
 });
 
-/** Accepts `YYYY-MM-DD HH:MM`, its `T` spelling, and a bare `YYYY-MM-DD` (→ midnight). */
-function parseDateTimeText(text: string): Temporal.PlainDateTime | null {
-  const normalised = text.trim().replace(/\s+/, 'T');
-  const full = parseISODateTime(normalised);
-  if (full) return full;
-  const dateOnly = parseISODate(normalised);
-  return dateOnly ? dateOnly.toPlainDateTime() : null;
+function parseTimeText(text: string): Temporal.PlainTime | null {
+  const match = TIME_TEXT.exec(text.trim());
+  if (!match) return null;
+  const hour = Number(match[1]);
+  const minute = match[2] === undefined ? 0 : Number(match[2]);
+  if (hour > 23 || minute > 59) return null;
+  return new TemporalValue.PlainTime(hour, minute);
 }
 
-/** Commits the draft; an unparseable draft reverts to the committed value (ColorField parity). */
+/** Commits the draft; an unparseable draft reverts to the committed value (ColorInput parity). */
 function commit(): void {
   if (!draft.value.trim()) {
     controlled.setValue(null);
     draft.value = '';
     return;
   }
-  const next = parseDateTimeText(draft.value);
+  const next = parseTimeText(draft.value);
   if (next) {
     controlled.setValue(next);
-    draft.value = formatISODateTime(next).replace('T', ' ');
+    draft.value = formatISOTime(next);
   } else {
-    draft.value = displayText.value;
+    draft.value = formatISOTime(committed.value);
   }
 }
 
@@ -173,36 +160,17 @@ function onKeydown(event: KeyboardEvent): void {
   }
 }
 
-/** The `native` path keeps the original ISO-string round trip. */
+/** The `native` path keeps the original `HH:MM`-string round trip. */
 function onNativeInput(event: Event): void {
-  controlled.setValue(parseISODateTime((event.target as HTMLInputElement).value));
+  const raw = (event.target as HTMLInputElement).value;
+  controlled.setValue(raw ? parseTimeText(raw) : null);
 }
 
-/* A date pick keeps the time that was already set; a time pick keeps the date. Neither
-   closes the popover — the other half still has to be chosen. */
-function onCalendarChange(date: Temporal.PlainDate | null): void {
-  if (!date) {
-    controlled.setValue(null);
-    return;
-  }
-  controlled.setValue(date.toPlainDateTime(committed.value?.toPlainTime()));
+function onColumnsChange(next: Temporal.PlainTime): void {
+  controlled.setValue(next);
 }
 
-function onColumnsChange(time: Temporal.PlainTime): void {
-  const date = committed.value?.toPlainDate() ?? today();
-  controlled.setValue(date.toPlainDateTime(time));
-}
-
-const calendarValue = computed(() => committed.value?.toPlainDate() ?? null);
-const calendarMonth = computed(() => calendarValue.value ?? today());
-const timeValue = computed(() => committed.value?.toPlainTime() ?? null);
-
-/* The day bounds the calendar can express — the hour half of `min`/`max` stays the typed
-   field's business, exactly as it was under the native control. */
-const minDate = computed(() => props.min?.toPlainDate() ?? null);
-const maxDate = computed(() => props.max?.toPlainDate() ?? null);
-const minValue = computed(() => formatISODateTime(props.min));
-const maxValue = computed(() => formatISODateTime(props.max));
+const displayValue = computed(() => formatISOTime(committed.value));
 
 const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
@@ -245,11 +213,9 @@ defineExpose({ el: root });
     <input
       v-if="native"
       ref="root"
-      type="datetime-local"
+      type="time"
       :id="inputId"
-      :value="isoValue"
-      :min="minValue"
-      :max="maxValue"
+      :value="displayValue"
       :disabled="isDisabled"
       :required="isRequired"
       :aria-invalid="isInvalid"
@@ -263,6 +229,7 @@ defineExpose({ el: root });
       <input
         ref="root"
         type="text"
+        inputmode="numeric"
         autocomplete="off"
         :spellcheck="false"
         :id="inputId"
@@ -279,26 +246,15 @@ defineExpose({ el: root });
         @keydown="onKeydown"
       />
       <PopoverTrigger
-        aria-label="Choose date and time"
+        aria-label="Choose time"
         :disabled="isDisabled"
         class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
-        <CalendarClock class="h-4 w-4" />
+        <Clock class="h-4 w-4" />
       </PopoverTrigger>
       <PopoverContent is-bare>
-        <div class="flex items-start gap-2">
-          <Calendar
-            :value="calendarValue"
-            :default-month="calendarMonth"
-            :min="minDate"
-            :max="maxDate"
-            @value-change="onCalendarChange"
-          />
-          <TimeColumns :value="timeValue" :minute-step="minuteStep" :on-time-change="onColumnsChange" />
-        </div>
+        <TimeColumns :value="committed" :minute-step="minuteStep" :on-time-change="onColumnsChange" />
       </PopoverContent>
     </Popover>
-
-    <input v-if="name" type="hidden" :name="name" :value="isoValue" />
   </div>
 </template>

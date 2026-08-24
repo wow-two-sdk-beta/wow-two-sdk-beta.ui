@@ -1,5 +1,5 @@
 <script lang="ts">
-export interface PDFViewerProps {
+export interface PdfViewerProps {
   /** The PDF URL. */
   src: string;
   /** The controlled page number (1-based). */
@@ -36,9 +36,9 @@ import { Icon } from '../../../foundation/icons';
  * thumbnails, search, annotations all need a PDF.js wrap — deferred to a
  * follow-up that slots into this contract.
  */
-defineOptions({ name: 'PDFViewer', inheritAttrs: false });
+defineOptions({ name: 'PdfViewer', inheritAttrs: false });
 
-const props = withDefaults(defineProps<PDFViewerProps>(), {
+const props = withDefaults(defineProps<PdfViewerProps>(), {
   page: undefined,
   defaultPage: 1,
   zoom: undefined,

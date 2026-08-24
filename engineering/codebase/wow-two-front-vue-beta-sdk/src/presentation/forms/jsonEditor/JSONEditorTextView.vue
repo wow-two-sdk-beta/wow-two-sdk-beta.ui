@@ -1,6 +1,6 @@
 <script lang="ts">
-/** Internal — the raw-text pane of `JSONEditor`. Not exported from the folder barrel. */
-export interface JSONEditorTextViewProps {
+/** Internal — the raw-text pane of `JsonEditor`. Not exported from the folder barrel. */
+export interface JsonEditorTextViewProps {
   /** The document rendered as pretty-printed JSON. */
   value: unknown;
 
@@ -13,12 +13,12 @@ export interface JSONEditorTextViewProps {
 import { computed, ref, watch } from 'vue';
 import { cn } from '../../../foundation/utils';
 import { useFormControl } from '../../../foundation/primitives';
-import { useJSONEditorContext } from './JSONEditorContext';
-import { safeStringify } from './JSONEditorHelpers';
+import { useJsonEditorContext } from './JsonEditorContext';
+import { safeStringify } from './JsonEditorHelpers';
 
-defineOptions({ name: 'JSONEditorTextView' });
+defineOptions({ name: 'JsonEditorTextView' });
 
-const props = defineProps<JSONEditorTextViewProps>();
+const props = defineProps<JsonEditorTextViewProps>();
 
 const emit = defineEmits<{
   /** Fires with the parsed document when the draft commits. */
@@ -28,7 +28,7 @@ const emit = defineEmits<{
 /* In text mode the raw textarea is the editing surface — it takes the context id
    (Label `for` target) and the Field label overrides the generic fallback name. */
 const ctx = useFormControl();
-const editor = useJSONEditorContext();
+const editor = useJsonEditorContext();
 
 const initial = computed(() => safeStringify(props.value, props.indent));
 

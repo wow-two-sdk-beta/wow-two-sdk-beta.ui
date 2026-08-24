@@ -1,5 +1,5 @@
 /* Internal helpers for the JSON editor subviews — not exported from the folder barrel,
-   exactly as they were module-private functions inside React's single `JSONEditor.tsx`. */
+   exactly as they were module-private functions inside React's single `JsonEditor.tsx`. */
 
 /** Addresses a node inside the edited document. */
 export type JsonPath = Array<string | number>;

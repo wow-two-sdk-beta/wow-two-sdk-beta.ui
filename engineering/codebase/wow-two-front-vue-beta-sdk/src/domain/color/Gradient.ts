@@ -42,7 +42,7 @@ function withStop(gradient: Gradient, index: number, color: string): Gradient {
   return { ...gradient, stops };
 }
 
-/** Returns the gradient with its stop colors mirrored end-to-end, each offset kept — a symmetric flip for any stop count. */
+/** Returns the gradient with its stop colors mirrored end-to-end, each offset kept, at any stop count. */
 function reverseStops(gradient: Gradient): Gradient {
   const last = gradient.stops.length - 1;
   const stops = gradient.stops.map((stop, i) => ({ ...stop, color: gradient.stops[last - i]!.color }));
@@ -59,7 +59,7 @@ function withRadius(gradient: Gradient, radius: number): Gradient {
   return gradient.type === GradientType.Radial ? { ...gradient, radius } : gradient;
 }
 
-/** Returns the gradient switched to `type` (keeping stops; the target's own field seeds from `defaults`); a no-op if already that type. */
+/** Returns the gradient switched to `type`, keeping stops and seeding the target's field from `defaults`. */
 function withType(gradient: Gradient, type: GradientType, defaults: { angle: number; radius: number }): Gradient {
   if (gradient.type === type) return gradient;
   return type === GradientType.Linear

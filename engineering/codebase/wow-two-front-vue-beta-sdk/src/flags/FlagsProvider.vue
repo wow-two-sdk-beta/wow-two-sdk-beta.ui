@@ -5,7 +5,7 @@ import type { EvaluationContext } from './FlagTypes';
 
 /** Defines the props for {@link FlagsProvider}. */
 export interface FlagsProviderProps {
-  /** An existing client to serve — the app-wide instance shared with non-Vue callers. Takes precedence over `provider` / `onError`. */
+  /** An existing client to serve, shared with non-Vue callers. Takes precedence over `provider` / `onError`. */
   client?: FlagClient;
 
   /** The flag source to build a client around, when no `client` is passed. Read once, at setup. */

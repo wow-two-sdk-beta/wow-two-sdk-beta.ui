@@ -1,7 +1,7 @@
 # DatePicker
 
 ## Purpose
-Date input with a calendar popover — click the trigger to open a `Calendar` for selection. Use when a unified custom UI matters (cross-browser consistency over native `DateField`'s browser-specific picker).
+Date input with a calendar popover — click the trigger to open a `Calendar` for selection. Use when a unified custom UI matters (cross-browser consistency over native `DateInput`'s browser-specific picker).
 
 ## Anatomy
 ```
@@ -41,7 +41,7 @@ Wraps `Calendar` (same domain). Floating panel built inline via primitives (no c
 - Title-less popover: trigger's accessible name labels the dialog.
 
 ## Known limitations
-- No keyboard typing into the trigger (use `DateField` if typing matters more than the calendar UI).
+- No keyboard typing into the trigger (use `DateInput` if typing matters more than the calendar UI).
 - Single-month calendar.
 
 ## Inspirations

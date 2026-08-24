@@ -1,6 +1,5 @@
 # Overlay
 
-> **Behavioral contract:** [`Overlay.standard.md`](./Overlay.standard.md)
 
 Layout primitive that absolutely-positions a child within its nearest positioned ancestor, with optional reveal-on-hover/focus and mount/unmount transitions. Intentionally presentational — applies to any component (Button, Badge, Avatar, Icon, Image label, anything).
 
@@ -113,7 +112,7 @@ CSS timing function string. Default `'ease-out'`. Set on inline `style.transitio
 | `isOpen={true}` | Mounted, `data-state="open"` | Visible (opacity 1, transform identity) |
 | `isOpen={false}` | Mounted briefly during exit transition, then unmounts | `data-state="closed"` (opacity 0, transform offset) |
 
-`data-state` is the observable handle ([Standard rule 7](./Overlay.standard.md#states)) for analytics, integration tests, and consumer CSS.
+`data-state` is the observable handle (Standard rule 7) for analytics, integration tests, and consumer CSS.
 
 ## Behavior
 
@@ -126,8 +125,8 @@ CSS timing function string. Default `'ease-out'`. Set on inline `style.transitio
 
 ## Accessibility
 
-- **No imposed roles or `aria-*`** ([Standard rule 10](./Overlay.standard.md#accessibility)). Overlay is presentational; the child (Button, Badge, Icon, etc.) carries its own a11y semantics.
-- **Required parent class** — `appearOn="hover"` and `appearOn="focus-within"` rely on Tailwind's `group` selector. Parent MUST have `className="group"` for the trigger to fire ([Standard rule 11](./Overlay.standard.md#accessibility)). Detection at runtime is not currently implemented.
+- **No imposed roles or `aria-*`** (Standard rule 10). Overlay is presentational; the child (Button, Badge, Icon, etc.) carries its own a11y semantics.
+- **Required parent class** — `appearOn="hover"` and `appearOn="focus-within"` rely on Tailwind's `group` selector. Parent MUST have `className="group"` for the trigger to fire (Standard rule 11). Detection at runtime is not currently implemented.
 - **Keyboard reveal** — `appearOn="hover"` includes `group-focus-within:opacity-100` so keyboard users see the reveal when focus lands on a focusable child of the parent group; `appearOn="focus-within"` is the focus-only variant for cases where hover reveal isn't desired.
 
 ## Composition
@@ -220,4 +219,3 @@ CSS timing function string. Default `'ease-out'`. Set on inline `style.transitio
 
 ---
 
-*Inline citations point at specific rule URLs. See [`Overlay.standard.md` — Related](./Overlay.standard.md#related) for broad references.*
