@@ -1,8 +1,8 @@
-import { BackoffStrategy } from './BackoffStrategy';
-import { JitterStrategy } from './JitterStrategy';
+import { BackoffStrategy } from './enums/BackoffStrategy';
+import { JitterStrategy } from './enums/JitterStrategy';
 
 /** Provides the HTTP statuses treated as transient by default — network (`0`) plus the standard transient set. */
-export const DefaultTransientStatuses: readonly number[] = [0, 408, 429, 500, 502, 503, 504];
+export const DefaultTransientStatuses: ReadonlyArray<number> = [0, 408, 429, 500, 502, 503, 504];
 
 /** Defines the context passed to a retry's `onRetry` hook. */
 export interface RetryContext {
@@ -19,7 +19,7 @@ export interface RetryContext {
   readonly delayMs: number;
 }
 
-/** Defines a retry policy — how many times, how the delay backs off, whether to jitter, and which failures are transient. */
+/** Defines a retry policy — attempt count, backoff growth, jitter, and which failures count as transient. */
 export interface RetryPolicy {
   /** The max retry attempts after the first failure. */
   readonly maxRetries: number;
@@ -37,13 +37,13 @@ export interface RetryPolicy {
   readonly jitter?: JitterStrategy;
 
   /** The HTTP statuses treated as transient (retryable). Default `DefaultTransientStatuses`. */
-  readonly retryableStatuses?: readonly number[];
+  readonly retryableStatuses?: ReadonlyArray<number>;
 
   /** Fires before each retry — logging / metrics. */
   readonly onRetry?: (context: RetryContext) => void;
 }
 
-/** Provides the default retry policy — 2 exponential retries with full jitter (base 1s, cap 30s) over the transient statuses. */
+/** Provides the default retry policy — 2 exponential retries, full jitter, base 1s, cap 30s, transient statuses. */
 export const DefaultRetryPolicy: RetryPolicy = {
   maxRetries: 2,
   backoff: BackoffStrategy.Exponential,

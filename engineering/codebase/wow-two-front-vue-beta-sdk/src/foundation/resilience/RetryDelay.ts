@@ -1,5 +1,5 @@
-import { BackoffStrategy } from './BackoffStrategy';
-import { JitterStrategy } from './JitterStrategy';
+import { BackoffStrategy } from './enums/BackoffStrategy';
+import { JitterStrategy } from './enums/JitterStrategy';
 import { DefaultTransientStatuses, type RetryPolicy } from './RetryPolicy';
 
 /** Computes the raw (pre-jitter) backoff delay for an attempt, capped at `maxDelayMs`. */
@@ -30,7 +30,10 @@ function applyJitter(policy: RetryPolicy, delay: number, previousDelayMs: number
   }
 }
 
-/** Computes the delay (ms) to wait before a retry attempt (1-based), per the policy's backoff + jitter — `random` is injectable for deterministic tests. */
+/**
+ * Computes the delay (ms) to wait before a retry attempt (1-based), per the policy's backoff + jitter.
+ * `random` is injectable for deterministic tests.
+ */
 export function computeRetryDelay(
   policy: RetryPolicy,
   attempt: number,
