@@ -18,7 +18,7 @@
 export type JsonPrimitive = string | number | boolean | null;
 
 /** Defines any JSON-serialisable value inside an object flag's payload. */
-export type JsonValue = JsonPrimitive | readonly JsonValue[] | JsonObject;
+export type JsonValue = JsonPrimitive | ReadonlyArray<JsonValue> | JsonObject;
 
 /**
  * Defines the payload of an object flag — a JSON object.

@@ -27,7 +27,8 @@ import {
  * `{ plan: 'pro' }` · `{ plan: ['pro', 'team'], region: 'eu' }` · `(ctx) => ctx.seats > 50`
  */
 export type StaticFlagCondition =
-  Readonly<Record<string, ContextAttribute | readonly ContextAttribute[]>> | ((context: EvaluationContext) => boolean);
+  | Readonly<Record<string, ContextAttribute | ReadonlyArray<ContextAttribute>>>
+  | ((context: EvaluationContext) => boolean);
 
 /** Defines one targeting rule of a static flag — the value served to contexts matching `when`. */
 export interface StaticFlagRule<TValue extends FlagValue> {
@@ -53,7 +54,7 @@ export interface StaticFlagDefinition<TValue extends FlagValue> {
   readonly disabled?: boolean;
 
   /** The targeting rules, evaluated top-down; the first match wins. */
-  readonly rules?: readonly StaticFlagRule<TValue>[];
+  readonly rules?: ReadonlyArray<StaticFlagRule<TValue>>;
 }
 
 /**
@@ -70,13 +71,13 @@ export type StaticFlags = Readonly<Record<string, StaticFlagEntry>>;
 /** Reports whether one attribute satisfies one expected value — expected array is "one of", actual is "contains". */
 function attributeMatches(
   actual: ContextAttribute | undefined,
-  expected: ContextAttribute | readonly ContextAttribute[],
+  expected: ContextAttribute | ReadonlyArray<ContextAttribute>,
 ): boolean {
   if (Array.isArray(expected)) {
-    return (expected as readonly ContextAttribute[]).some((candidate) => attributeMatches(actual, candidate));
+    return (expected as ReadonlyArray<ContextAttribute>).some((candidate) => attributeMatches(actual, candidate));
   }
   if (Array.isArray(actual)) {
-    return (actual as readonly (string | number | boolean)[]).some((entry) => entry === expected);
+    return (actual as ReadonlyArray<string | number | boolean>).some((entry) => entry === expected);
   }
   return actual === expected;
 }

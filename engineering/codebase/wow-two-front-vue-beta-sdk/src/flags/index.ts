@@ -58,5 +58,5 @@ export {
 } from './FlagClient';
 
 // Vue seam — provider component + composables
-export { default as FlagsProvider, type FlagsProviderProps } from './FlagsProvider.vue';
-export { useFlag, useFlags } from './FlagsContext';
+export { default as FlagsProvider, type FlagsProviderProps } from './providers/FlagsProvider.vue';
+export { useFlag, useFlags } from './providers/FlagsContext';

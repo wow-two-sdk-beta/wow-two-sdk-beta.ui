@@ -1,43 +1,41 @@
 <script lang="ts">
-import type { FlagClient, FlagErrorListener } from './FlagClient';
-import type { FlagProvider } from './FlagProvider';
-import type { EvaluationContext } from './FlagTypes';
+import type { FlagClient, FlagErrorListener } from '../FlagClient';
+import type { FlagProvider } from '../FlagProvider';
+import type { EvaluationContext } from '../FlagTypes';
 
 /** Defines the props for {@link FlagsProvider}. */
 export interface FlagsProviderProps {
   /** An existing client to serve, shared with non-Vue callers. Takes precedence over `provider` / `onError`. */
-  client?: FlagClient;
+  readonly client?: FlagClient;
 
   /** The flag source to build a client around, when no `client` is passed. Read once, at setup. */
-  provider?: FlagProvider;
+  readonly provider?: FlagProvider;
 
   /** The evaluation context. Kept in sync on every change — a fresh object literal per render is safe. */
-  context?: EvaluationContext;
+  readonly context?: EvaluationContext;
 
   /** Receives evaluation faults, when no `client` is passed. Read once, at setup. */
-  onError?: FlagErrorListener;
+  readonly onError?: FlagErrorListener;
 }
 </script>
 
 <script setup lang="ts">
 import { watch } from 'vue';
 
-import { createFlagClient } from './FlagClient';
+import { createFlagClient } from '../FlagClient';
 import { provideFlags } from './FlagsContext';
 
 /**
- * Provides flag evaluation to every descendant and re-evaluates them whenever the evaluation context
- * changes — including changes made imperatively through `client.setContext(…)` outside Vue.
- *
- * ```vue
- * <FlagsProvider :client="flags" :context="{ targetingKey: user.id, plan: user.plan }">
- *   <App />
- * </FlagsProvider>
- * ```
- *
- * Renders no element of its own — the slot passes straight through, matching `DirectionProvider`.
+ * Renders no element of its own — the slot passes straight through, matching `DirectionProvider` — while
+ * providing flag evaluation to every descendant and re-evaluating them whenever the evaluation context
+ * changes, including changes made imperatively through `client.setContext(…)` outside Vue.
  */
 defineOptions({ name: 'FlagsProvider' });
+
+defineSlots<{
+  /** The subtree whose flag evaluations read this client. */
+  default(): unknown;
+}>();
 
 const props = defineProps<FlagsProviderProps>();
 

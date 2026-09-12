@@ -117,8 +117,8 @@ export interface FlagClient {
 /** Reports whether two attribute values are equal — element-wise for lists, so a re-created array is not a change. */
 function attributesEqual(left: ContextAttribute | undefined, right: ContextAttribute | undefined): boolean {
   if (Array.isArray(left) && Array.isArray(right)) {
-    const rightEntries = right as readonly unknown[];
-    const leftEntries = left as readonly unknown[];
+    const rightEntries = right as ReadonlyArray<unknown>;
+    const leftEntries = left as ReadonlyArray<unknown>;
     return (
       leftEntries.length === rightEntries.length && leftEntries.every((entry, index) => entry === rightEntries[index])
     );
@@ -139,7 +139,11 @@ function mergeContext(base: EvaluationContext, patch: EvaluationContext): Evalua
   for (const key of Object.keys(merged)) {
     if (merged[key] === undefined) delete merged[key];
   }
-  return merged;
+  for (const key of Object.keys(merged)) {
+    const value = merged[key];
+    if (Array.isArray(value)) merged[key] = Object.freeze([...value]);
+  }
+  return Object.freeze(merged);
 }
 
 /**
@@ -195,8 +199,8 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
     if (resolution === undefined) return { key, value: defaultValue, reason: FlagReason.Default };
 
     if (resolution.errorCode !== undefined) {
-      const message = resolution.errorMessage ?? `provider reported "${resolution.errorCode}" for "${key}"`;
-      report(key, resolution.errorCode, message);
+      const message = `provider reported "${resolution.errorCode}" for "${key}"`;
+      report(key, resolution.errorCode, message, resolution.errorMessage);
       return {
         key,
         value: defaultValue,
@@ -297,7 +301,14 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
     try {
       const pending = hook.call(provider, context);
       // a rejected refetch must not become an unhandled rejection
-      if (pending instanceof Promise) void pending.catch(fail);
+      if (pending !== undefined)
+        void Promise.resolve(pending)
+          .then(() => {
+            if (currentContext === context) {
+              for (const listener of [...listeners]) listener(context);
+            }
+          }, fail)
+          .catch(fail);
     } catch (cause) {
       fail(cause);
     }
@@ -332,8 +343,11 @@ export function createFlagClient(options: CreateFlagClientOptions = {}): FlagCli
       const next = mergeContext(currentContext, context);
       if (contextsEqual(currentContext, next)) return; // no-op merge — a per-render context literal costs nothing
       currentContext = next;
-      notifyProvider(next);
-      for (const listener of [...listeners]) listener(next);
+      try {
+        notifyProvider(next);
+      } finally {
+        for (const listener of [...listeners]) listener(next);
+      }
     },
 
     subscribe(listener: FlagContextListener): () => void {

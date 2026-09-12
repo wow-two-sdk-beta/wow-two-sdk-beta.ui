@@ -80,3 +80,29 @@ describe('the never-surprise contract', () => {
     expect(typed.getValue('beta', false)).toBe(true);
   });
 });
+
+it('isolates targeting array snapshots from caller mutation', () => {
+  const roles = ['reader'];
+  const flags = createFlagClient({ context: { roles } });
+  roles.push('admin');
+  expect(flags.getContext().roles).toEqual(['reader']);
+  expect(Object.isFrozen(flags.getContext())).toBe(true);
+});
+it('notifies evaluations when the current async provider refresh finishes', async () => {
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const provider = { ...staticFlagProvider(), onContextChange: () => pending };
+  const flags = createFlagClient({ provider });
+  let notifications = 0;
+  flags.subscribe(() => {
+    notifications += 1;
+  });
+  flags.setContext({ user: 'a' });
+  expect(notifications).toBe(1);
+  release();
+  await pending;
+  await Promise.resolve();
+  expect(notifications).toBe(2);
+});
