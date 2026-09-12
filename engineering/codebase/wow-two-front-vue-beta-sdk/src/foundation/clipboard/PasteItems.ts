@@ -1,31 +1,13 @@
-// Extracting a paste — the clipboard path that needs NO permission at all, and the right answer for most
-// "let the user paste an image" features.
-//
-// WHY THIS IS THE DEFAULT AND `readText` IS NOT. When the user presses Ctrl+V they have already authorized the
-// transfer; the browser hands the payload to the page on the `paste` event with no prompt, no gesture check, and
-// no engine carve-outs — this works in Firefox, where `navigator.clipboard.readText` does not exist. Any feature
-// framed as "the user pastes something" should be built here. Reading the clipboard directly is for the narrow
-// case of looking WITHOUT a paste.
-//
-// EVERY READ IS GUARDED. `clipboardData` is nullable in the DOM's own types, `getData` throws in some engines
-// when called outside the event's dispatch, and a synthetic event (a test double, a virtual-DOM shim) may carry
-// a partial `DataTransfer`. A paste handler that throws on a malformed event breaks the user's paste entirely,
-// so every access falls back to "this representation is absent".
-//
-// Files come from `items` first and `files` second. `DataTransferItemList` is what carries an image pasted from
-// the OS screenshot tool, where `files` is sometimes empty; `files` is the reliable one for a file copied out of
-// a file manager. Reading `items` first and only falling back avoids reporting the same file twice.
-
 /** What a paste carried, normalized to the three representations a consumer acts on. */
 export interface PasteItems {
   /** The `text/plain` representation, or `undefined` when the paste carried none (a bare image paste). */
   readonly text: string | undefined;
 
-  /** The `text/html` representation, or `undefined`. Present when copying from a rich source — sanitize before rendering. */
+  /** The `text/html` representation, or `undefined`. Present from a rich source — sanitize before rendering. */
   readonly html: string | undefined;
 
   /** Files on the paste — a screenshot, an image, a document. Empty when the paste was text only. */
-  readonly files: readonly File[];
+  readonly files: ReadonlyArray<File>;
 }
 
 /** Reads a member off an object, guarded — a throwing getter reads as `undefined`. */

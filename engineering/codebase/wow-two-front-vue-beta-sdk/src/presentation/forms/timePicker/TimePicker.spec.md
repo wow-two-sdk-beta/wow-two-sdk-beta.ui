@@ -1,48 +1,51 @@
 # TimePicker
 
-## Purpose
-Time input with a popover containing hour and minute lists. Use when a unified custom UI matters (cross-browser consistency over native `TimeInput`'s browser-specific picker).
+Renders a trigger button that opens popover hour and minute columns and shows the picked time.
 
-## Anatomy
-```
-<TimePicker>
-  ├── trigger button (shows formatted time or placeholder)
-  └── popover
-        ├── hour column (00–23, scrollable)
-        └── minute column (00, 05, ..., 55 by default, scrollable)
-</TimePicker>
-```
+Source: [TimePicker.vue](TimePicker.vue).
 
-## Required behaviors
-- Click trigger toggles popover. Outside click / Escape closes.
-- Click an hour: updates hours portion. Click a minute: updates minutes portion. Popover stays open until dismissed.
-- Selected hour/minute is highlighted and auto-scrolled into view on open.
-- ARIA: trigger has `aria-haspopup="dialog"`. Lists have `role="listbox"`; cells have `role="option"`.
+Public import: `import { TimePicker } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `{ hours, minutes } \| null` | — | no | Controlled. |
-| `defaultValue` | same | `null` | no | Uncontrolled. |
-| `onValueChange` | `(t) => void` | — | no | Selection callback. |
-| `minuteStep` | `number` | `5` | no | Minute interval. |
-| `placeholder` | `string` | `'Pick a time'` | no | Trigger text when no value. |
-| `format` | `(t) => string` | `HH:MM` | no | Custom display formatter. |
-| `disabled`, `name`, `invalid` | — | — | no | Standard input shape. |
+| `modelValue` | `Temporal.PlainTime \| null` | no | — | The selected time, controlled. The `v-model` binding target. |
+| `defaultValue` | `Temporal.PlainTime \| null` | no | — | The uncontrolled initial selection. |
+| `minuteStep` | `number` | no | `5` | The minute interval. Default 5. |
+| `placeholder` | `string` | no | `'Pick a time'` | The empty-state text on the trigger. |
+| `format` | `(time: Temporal.PlainTime) => string` | no | `(t: Temporal.PlainTime) => t.toString({ smallestUnit: 'minute' })` | The trigger's time formatter. Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do. |
+| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
+| `name` | `string` | no | — | The hidden input name; when set, a hidden input ships the value with form submission. |
+| `size` | `SelectPickerSize` | no | — | The trigger size. |
+| `state` | `InputState` | no | — | The validity surface. |
+| `id` | `string` | no | — | The trigger's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
 
-## Composition
-Compound shape via internal popover (built inline using primitives — no cross-domain `Popover` import).
+## Emits
 
-## Accessibility
-- Hour/minute lists keyboard-navigable: ↑/↓ moves selection.
-- Trigger announces current time to screen readers.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [time: Temporal.PlainTime \| null];` | Fires when the reader picks an hour or a minute in the popover. The `v-model` half. |
 
-## Known limitations
-- 24-hour display only (P6: locale-aware AM/PM).
-- No seconds (most cases don't need them).
-- Lists are simple buttons — for very long ranges (e.g. minute step 1), virtualization would help (deferred).
+## Slots
 
-## Inspirations
-- iOS time picker (two-column wheel).
-- Mantine `TimeInput`.
-- React Aria `TimeField` (wider feature set than ours).
+None declared.
+
+## Exposed handle
+
+`{ el: computed(() => trigger.value?.el ?? null) }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [DateTimeControls.dom.test.ts](../../../../tests/unit/presentation/forms/DateTimeControls.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

@@ -1,4 +1,4 @@
-import { Size, tv, type VariantProps } from '../../../foundation/utils';
+import { Size, tv, type VariantProps } from '../../../foundation/styles';
 
 /** Defines the Spinner color tone. */
 export const SpinnerTone = {

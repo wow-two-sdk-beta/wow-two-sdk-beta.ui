@@ -52,7 +52,7 @@ export {
   type EventStreamSourceFactory,
 } from './CreateEventStream';
 
-export { useEventStream, type EventStreamHandle } from './UseEventStream';
+export { useEventStream, type EventStreamHandle } from './hooks/UseEventStream';
 
 export {
   createSocketClient,
@@ -63,10 +63,10 @@ export {
   type SocketHeartbeatOptions,
 } from './CreateSocketClient';
 
-export { useSocket, type SocketHandle } from './UseSocket';
+export { useSocket, type SocketHandle } from './hooks/UseSocket';
 
 export { PollerState, createPoller, type PollFn, type Poller, type PollerOptions } from './CreatePoller';
 
-export { usePolling, type PollingHandle } from './UsePolling';
+export { usePolling, type PollingHandle } from './hooks/UsePolling';
 
 export { readOnlineStatus, subscribeOnline, waitForOnline, type WaitForOnlineOptions } from './Liveness';

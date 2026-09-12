@@ -14,8 +14,8 @@ import { onScopeDispose, provide, shallowRef } from 'vue';
 import { contextMenuContextKey } from './ContextMenuContext';
 
 /**
- * State owner for a ContextMenu tree. Renders only its slot — React returned a
- * bare context Provider, which has no element of its own.
+ * Renders only its slot, owning the open state and anchor point of the ContextMenu tree below.
+ * React returned a bare context Provider, which has no element of its own.
  */
 defineOptions({ name: 'ContextMenu', inheritAttrs: false });
 

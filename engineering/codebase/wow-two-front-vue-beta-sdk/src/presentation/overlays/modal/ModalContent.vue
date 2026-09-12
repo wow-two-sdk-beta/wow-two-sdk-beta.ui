@@ -5,50 +5,50 @@ import type {
   SurfaceRadius,
   SurfaceTone,
   SurfaceVariant,
-} from '../../../foundation/utils';
+} from '../../../foundation/styles';
 
 /**
  * Represents the prop surface of `ModalContent`.
  *
- * React declared the surface axes by `extends SurfaceVariants`; they are
+ * React declared the surface axes by `extends SurfaceLayoutVariants`; they are
  * spelled out here because the SFC compiler's type resolver cannot follow a
  * `VariantProps<typeof …>` base and fails the build on it. The aliases below
- * are the canonical ones from `foundation/utils`, already locked against the
+ * are the canonical ones from `foundation/styles`, already locked against the
  * `surfaceVariants` config there, so the two cannot drift.
  */
 export interface ModalContentProps {
   /** The backdrop-hide toggle — disables the default backdrop when true. */
-  hideBackdrop?: boolean;
+  readonly hideBackdrop?: boolean;
 
   /** The backdrop-blur toggle. */
-  isBlurred?: boolean;
+  readonly isBlurred?: boolean;
 
   /** The visual recipe. Default `elevated`. */
-  variant?: SurfaceVariant;
+  readonly variant?: SurfaceVariant;
 
   /** The color tone the recipe is tinted with. */
-  tone?: SurfaceTone;
+  readonly tone?: SurfaceTone;
 
   /** The corner rounding. Default `lg`. */
-  radius?: SurfaceRadius;
+  readonly radius?: SurfaceRadius;
 
   /** The inner spacing step. Default `xl`. */
-  padding?: SurfacePadding;
+  readonly padding?: SurfacePadding;
 
   /** The shadow depth. */
-  elevation?: SurfaceElevation;
+  readonly elevation?: SurfaceElevation;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, provide, useAttrs, useTemplateRef } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
+import { cn, surfaceVariants } from '../../../foundation/styles';
 import { DismissableLayer, FocusScope, Portal, Presence, ScrollLockProvider } from '../../../foundation/primitives';
-import Backdrop from '../backdrop/Backdrop.vue';
+import BackdropOverlay from '../backdropOverlay/BackdropOverlay.vue';
 import { overlayChromeContextKey } from '../OverlayChrome';
 import { useModalContext } from './Modal.vue';
 
-/* The portalled dialog surface — scrim, focus trap, scroll lock, and the panel that carries the a11y contract. */
+/** Renders the portalled dialog surface — scrim, focus trap, scroll lock, and the a11y panel. */
 defineOptions({ name: 'ModalContent', inheritAttrs: false });
 
 /** The panel content — chrome subcomponents and the dialog body. React's `children`. */
@@ -114,11 +114,11 @@ defineExpose({ el });
   <Portal>
     <!-- Lock follows open state, not mount — Content can mount closed. -->
     <ScrollLockProvider :is-enabled="isOpen">
-      <!-- The scrim runs on `Backdrop`'s own `Presence` (its `isOpen` prop) so the
+      <!-- The scrim runs on `BackdropOverlay`'s own `Presence` (its `isOpen` prop) so the
            fade-out plays before it unmounts. React wrapped it in a second, outer
            `Presence`, whose injected `data-state` the inner one then overwrote —
            passing the state straight in is the same intent without the masking. -->
-      <Backdrop v-if="!props.hideBackdrop" is-inline :is-open="isOpen" :is-blurred="props.isBlurred" />
+      <BackdropOverlay v-if="!props.hideBackdrop" is-inline :is-open="isOpen" :is-blurred="props.isBlurred" />
       <!-- Outside-click dismissal lives on the centering wrapper (it covers the
            backdrop): a click on the padding (`.self`) = outside. The wrapper is the
            Presence-animated node — `Presence` injects `data-state` + `ref` onto it and
@@ -137,7 +137,7 @@ defineExpose({ el });
           "
           @click.self="handleOutsideClick"
         >
-          <FocusScope as-child trapped loop>
+          <FocusScope as-child trapped loop modal>
             <DismissableLayer
               :is-escape-disabled="!dismissOnEscape"
               is-outside-click-disabled

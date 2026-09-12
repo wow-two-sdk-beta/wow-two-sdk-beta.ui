@@ -1,30 +1,13 @@
-// The graceful-degradation half of the share vector. Web Share is mobile-first — most desktop browsers have no
-// sheet at all — so a share button wired only to `share` is dead UI for a large share of traffic. The fallback
-// puts the payload's text on the clipboard instead, which is what the user reaches for next anyway.
-//
-// Only `unsupported` falls back, and the exclusions are the whole point:
-//   - `dismissed` must NOT copy. The user opened the sheet and closed it; that is a decision not to share.
-//     Writing to their clipboard anyway overrides that decision and clobbers whatever they had on it.
-//   - `failed` must NOT copy either — the platform tried and broke, and a copy would report success for a
-//     share that did not happen.
-//
-// Clipboard writing: `foundation/hooks`' `useClipboard` owns the Vue-side copy (transient `copied` flag,
-// auto-reset), but it is a composable and cannot be called from this async, setup-free path — and its `copy`
-// resolves either way, folding failure into reactive state that a framework-free caller cannot read. So the
-// write here goes
-// straight to `navigator.clipboard.writeText`, guarded exactly as the rest of the slice guards `navigator`.
-// Consumers wanting the transient flag compose `useClipboard` themselves, or read `useShare().copied`.
+import type { ShareSendOrCopyResult } from './models/ShareSendOrCopyResult';
 
 import { toError } from '../errors';
 
-import { reportShareError, share, type ShareOptions, type ShareResult } from './Share';
+import { reportShareError, share, type ShareOptions, type ShareFailure } from './Share';
 import { shareFallbackText, type ShareData } from './ShareData';
+export type { ShareSendOrCopyResult } from './models/ShareSendOrCopyResult';
 
-/** A {@link ShareResult} widened with the clipboard-fallback outcome. */
-export type ShareOrCopyResult = ShareResult | { readonly status: 'copied' };
-
-/** The `status` discriminant of a {@link ShareOrCopyResult}. */
-export type ShareOrCopyStatus = ShareOrCopyResult['status'];
+/** The `status` discriminant of a {@link ShareSendOrCopyResult}. */
+export type ShareOrCopyStatus = 'shared' | 'copied' | ShareFailure['status'];
 
 /** Tunes a share-with-fallback attempt. */
 export interface ShareOrCopyOptions extends ShareOptions {
@@ -36,20 +19,20 @@ export interface ShareOrCopyOptions extends ShareOptions {
 }
 
 /** Writes `text` to the system clipboard, mapping the outcome onto the share result vocabulary. Never throws. */
-async function copyToClipboard(text: string, options?: ShareOptions): Promise<ShareOrCopyResult> {
+async function copyToClipboard(text: string, options?: ShareOptions): Promise<ShareSendOrCopyResult> {
   try {
     if (typeof navigator === 'undefined' || typeof navigator.clipboard?.writeText !== 'function') {
-      return { status: 'unsupported' };
+      return { ok: false, failure: { status: 'unsupported' } };
     }
 
     await navigator.clipboard.writeText(text);
-    return { status: 'copied' };
+    return { ok: true, value: 'copied' };
   } catch (error) {
     // A rejected write is a real failure (denied permission, insecure context): the user asked to share and
     // nothing reached them. Reported rather than quietly downgraded to `unsupported`.
     const failure = toError(error);
     reportShareError(options?.onError, failure);
-    return { status: 'failed', error: failure };
+    return { ok: false, failure: { status: 'failed', error: failure } };
   }
 }
 
@@ -63,9 +46,10 @@ async function copyToClipboard(text: string, options?: ShareOptions): Promise<Sh
  *
  * Never throws, never rejects.
  */
-export async function shareOrCopy(data: ShareData, options?: ShareOrCopyOptions): Promise<ShareOrCopyResult> {
+export async function shareOrCopy(data: ShareData, options?: ShareOrCopyOptions): Promise<ShareSendOrCopyResult> {
   const result = await share(data, options);
-  if (result.status !== 'unsupported') return result;
+  if (result.ok) return { ok: true, value: 'shared' };
+  if (result.failure.status !== 'unsupported') return result;
   if (options?.fallbackToCopy === false) return result;
 
   const text = shareFallbackText(data);

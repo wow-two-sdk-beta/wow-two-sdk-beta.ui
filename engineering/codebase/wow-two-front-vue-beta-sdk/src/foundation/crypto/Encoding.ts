@@ -21,30 +21,36 @@
 //    a caller rendering a payload expects. It also makes UTF-8 a lossy round-trip for arbitrary binary by
 //    definition — hash bytes must go through hex or base64, never through this.
 
-/** Precomputed byte -> 2-char lowercase hex, so `bytesToHex` is a table lookup rather than a per-byte `toString(16).padStart`. */
-const HEX_BY_BYTE = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, '0'));
+/**
+ * Precomputed byte -> 2-char lowercase hex, so `bytesToHex` is a table lookup rather than a per-byte
+ * `toString(16).padStart`.
+ */
+const HexByByte = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, '0'));
 
 /** Matches an even-length run of hex digits (either case), including the empty string. */
-const HEX_STRING = /^(?:[0-9a-fA-F]{2})*$/;
+const HexString = /^(?:[0-9a-fA-F]{2})*$/;
 
 /**
  * Matches canonical standard base64: whole 4-char groups, then an optional 2- or 3-char tail with correct
  * padding. Rejects a lone trailing char (`{4}n+1` is not a reachable length), over-padding (`YQ===`), and
  * any character outside the standard alphabet — including whitespace and the base64url `-_`.
  */
-const BASE64_STRING = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}(?:==)?|[A-Za-z0-9+/]{3}=?)?$/;
+const Base64String = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}(?:==)?|[A-Za-z0-9+/]{3}=?)?$/;
 
-/** The base64url counterpart of {@link BASE64_STRING} — `-_` in place of `+/`. Padding is tolerated on input though never emitted. */
-const BASE64URL_STRING = /^(?:[A-Za-z0-9_-]{4})*(?:[A-Za-z0-9_-]{2}(?:==)?|[A-Za-z0-9_-]{3}=?)?$/;
+/** The base64url counterpart of {@link Base64String} — `-_` for `+/`. Padding tolerated on input, never emitted. */
+const Base64UrlString = /^(?:[A-Za-z0-9_-]{4})*(?:[A-Za-z0-9_-]{2}(?:==)?|[A-Za-z0-9_-]{3}=?)?$/;
 
-/** Largest slice fed to `String.fromCharCode(...)` at once — keeps the spread well under the engine argument limit. */
-const FROM_CHAR_CODE_CHUNK = 0x8000;
+/** Largest slice fed to `String.fromCharCode(...)` at once — keeps the spread under the engine argument limit. */
+const FromCharCodeChunk = 0x8000;
 
-/** Shared UTF-8 encoder. `TextEncoder` is part of the Encoding standard, present in every target runtime (including SSR), so module-scope construction is safe. */
-const UTF8_ENCODER = new TextEncoder();
+/**
+ * Shared UTF-8 encoder. `TextEncoder` is part of the Encoding standard, present in every target runtime
+ * (including SSR), so module-scope construction is safe.
+ */
+const Utf8Encoder = new TextEncoder();
 
 /** Shared UTF-8 decoder, lenient by default — see the file header on why `fatal` is not set. */
-const UTF8_DECODER = new TextDecoder();
+const Utf8Decoder = new TextDecoder();
 
 /**
  * Renders bytes as a lowercase hex string (2 chars per byte, no separator) — the canonical way to show a
@@ -52,7 +58,7 @@ const UTF8_DECODER = new TextDecoder();
  */
 export function bytesToHex(bytes: Uint8Array): string {
   let hex = '';
-  for (const byte of bytes) hex += HEX_BY_BYTE[byte]!;
+  for (const byte of bytes) hex += HexByByte[byte]!;
   return hex;
 }
 
@@ -62,7 +68,7 @@ export function bytesToHex(bytes: Uint8Array): string {
  * {@link bytesToHex}.
  */
 export function hexToBytes(hex: string): Uint8Array {
-  if (!HEX_STRING.test(hex)) {
+  if (!HexString.test(hex)) {
     throw new TypeError(
       `hexToBytes: expected an even-length string of hex digits, got "${hex}" (length ${hex.length}).`,
     );
@@ -83,8 +89,8 @@ export function hexToBytes(hex: string): Uint8Array {
  */
 export function bytesToBase64(bytes: Uint8Array): string {
   let binary = '';
-  for (let offset = 0; offset < bytes.length; offset += FROM_CHAR_CODE_CHUNK) {
-    binary += String.fromCharCode(...bytes.subarray(offset, offset + FROM_CHAR_CODE_CHUNK));
+  for (let offset = 0; offset < bytes.length; offset += FromCharCodeChunk) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + FromCharCodeChunk));
   }
 
   return btoa(binary);
@@ -96,7 +102,7 @@ export function bytesToBase64(bytes: Uint8Array): string {
  * `-_` included), on over-padding, and on an impossible length. Inverse of {@link bytesToBase64}.
  */
 export function base64ToBytes(base64: string): Uint8Array {
-  if (!BASE64_STRING.test(base64)) {
+  if (!Base64String.test(base64)) {
     throw new TypeError(
       `base64ToBytes: expected a canonical standard-base64 string (alphabet A-Za-z0-9+/ with optional ` +
         `= padding), got "${base64}".`,
@@ -125,7 +131,7 @@ export function bytesToBase64Url(bytes: Uint8Array): string {
  * standard-base64 `+` and `/`, which signal that {@link base64ToBytes} was the intended decoder.
  */
 export function base64UrlToBytes(base64Url: string): Uint8Array {
-  if (!BASE64URL_STRING.test(base64Url)) {
+  if (!Base64UrlString.test(base64Url)) {
     throw new TypeError(
       `base64UrlToBytes: expected a base64url string (alphabet A-Za-z0-9-_ with optional = padding), got ` +
         `"${base64Url}".`,
@@ -141,9 +147,12 @@ export function base64UrlToBytes(base64Url: string): Uint8Array {
   return base64ToBytes(standard + padding);
 }
 
-/** Encodes a string to its UTF-8 bytes — the normalization every digest of a string goes through. Inverse of {@link bytesToUtf8}. */
+/**
+ * Encodes a string to its UTF-8 bytes — the normalization every digest of a string goes through.
+ * Inverse of {@link bytesToUtf8}.
+ */
 export function utf8ToBytes(text: string): Uint8Array {
-  return UTF8_ENCODER.encode(text);
+  return Utf8Encoder.encode(text);
 }
 
 /**
@@ -152,5 +161,5 @@ export function utf8ToBytes(text: string): Uint8Array {
  * {@link bytesToBase64} instead. Inverse of {@link utf8ToBytes} for any real text.
  */
 export function bytesToUtf8(bytes: Uint8Array): string {
-  return UTF8_DECODER.decode(bytes);
+  return Utf8Decoder.decode(bytes);
 }

@@ -1,58 +1,60 @@
 <script lang="ts">
 export interface CodeEditorProps {
-  /** The source text, controlled — React's spelling, which wins when both are set. */
-  value?: string;
-
   /** The source text, controlled. The `v-model` binding target. */
-  modelValue?: string;
+  readonly modelValue?: string;
 
   /** The initial source text when uncontrolled. */
-  defaultValue?: string;
+  readonly defaultValue?: string;
 
   /** The forward-compat hint; unused by this first-gen component. */
-  language?: string;
+  readonly language?: string;
 
   /** The number of spaces one indent step inserts. Default `2`. */
-  tabSize?: number;
+  readonly tabSize?: number;
 
   /** Whether indenting inserts a tab character instead of `tabSize` spaces. Default `false`. */
-  isTabIndented?: boolean;
+  readonly isTabIndented?: boolean;
+
+  /** Whether Tab indents. Escape then Tab leaves the editor. Default true. */
+  readonly canIndentOnTab?: boolean;
+
+  /** The localized keyboard-exit instruction shown below the editor. */
+  readonly keyboardExitLabel?: string;
 
   /** The invalid surface override. Falls back to the surrounding form control's `isInvalid`. */
-  isInvalid?: boolean;
+  readonly isInvalid?: boolean;
 
   /** The CSS minHeight on the surface (default `12rem`). */
-  minHeight?: string;
+  readonly minHeight?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
-  readOnly?: boolean;
+  readonly readOnly?: boolean;
 
-  /** The DOM spelling of {@link CodeEditorProps.readOnly}, which wins when both are set. */
-  readonly?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly readonly?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, nextTick, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
+import { useId } from '../../../foundation/identifiers';
 import { useFormControl } from '../../../foundation/primitives';
 
-/**
- * First-generation code editor — styled `<textarea>` + line-number gutter +
- * Tab/Shift-Tab indent handling. **No syntax highlighting** (deferred to a
- * follow-up wrapping Monaco / CodeMirror inside this contract).
- */
+/** Renders a source-code textarea with a synced line-number gutter and Tab/Shift-Tab indenting, unhighlighted. */
 /* `inheritAttrs: false` so `class` folds into the surface's own `cn()` call, and so the rest
    of the attrs land on the inner `<textarea>` rather than the surface. */
 defineOptions({ name: 'CodeEditor', inheritAttrs: false });
@@ -60,10 +62,11 @@ defineOptions({ name: 'CodeEditor', inheritAttrs: false });
 const props = withDefaults(defineProps<CodeEditorProps>(), {
   tabSize: 2,
   isTabIndented: false,
+  canIndentOnTab: true,
+  keyboardExitLabel: 'Press Escape, then Tab to leave the editor.',
   minHeight: '12rem',
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
-  value: undefined,
   modelValue: undefined,
   isInvalid: undefined,
   disabled: undefined,
@@ -73,20 +76,17 @@ const props = withDefaults(defineProps<CodeEditorProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader types or re-indents the source — the `v-model` half. */
   'update:modelValue': [value: string];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [value: string];
 }>();
 
 const attrs = useAttrs();
 
 const controlled = useControlled<string>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -100,6 +100,8 @@ const finalInvalid = computed(() => props.isInvalid ?? ctx?.isInvalid);
 
 const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
 const scrollTop = ref(0);
+const keyboardExitArmed = ref(false);
+const keyboardHintId = useId();
 
 const lineCount = computed(() => source.value.split('\n').length);
 const indentChar = computed(() => (props.isTabIndented ? '\t' : ' '.repeat(props.tabSize)));
@@ -133,8 +135,23 @@ function restoreSelection(start: number, end: number): void {
 /* Runs after any caller-supplied `@keydown` (declared after `v-bind`), exactly as React's
    `onKeyDown?.(e)` ran before this body. */
 function onKeydown(event: KeyboardEvent): void {
+  if (event.isComposing) return;
   if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) return;
-  if (event.key !== 'Tab') return;
+  if (!props.canIndentOnTab) return;
+  if (event.key === 'Escape') {
+    keyboardExitArmed.value = true;
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+  if (event.key !== 'Tab') {
+    keyboardExitArmed.value = false;
+    return;
+  }
+  if (keyboardExitArmed.value) {
+    keyboardExitArmed.value = false;
+    return;
+  }
 
   const ta = event.currentTarget as HTMLTextAreaElement;
   const start = ta.selectionStart;
@@ -199,6 +216,7 @@ function onKeydown(event: KeyboardEvent): void {
 }
 
 function onInput(event: Event): void {
+  if ((event as InputEvent).isComposing) return;
   controlled.setValue((event.target as HTMLTextAreaElement).value);
 }
 
@@ -210,15 +228,20 @@ const state = computed(() => (finalInvalid.value ? 'invalid' : 'default'));
 
 /* Never a declared prop — a declared `'aria-describedby'` would arrive as
    `props.ariaDescribedby` and stop reaching the DOM. */
-const ariaDescribedBy = computed(() => attrs['aria-describedby'] as string | undefined);
+const ariaDescribedBy = computed(() => attrs[AriaAttribute.DescribedBy] as string | undefined);
 
 const textareaId = computed(() => props.id ?? ctx?.id);
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
-const describedBy = computed(() => ariaDescribedBy.value ?? ctx?.describedBy);
+const describedBy = computed(
+  () =>
+    [ariaDescribedBy.value ?? ctx?.describedBy, props.canIndentOnTab ? keyboardHintId : undefined]
+      .filter(Boolean)
+      .join(' ') || undefined,
+);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-describedby']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.DescribedBy]);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const surfaceClass = computed(() =>
@@ -234,6 +257,10 @@ const surfaceClass = computed(() =>
 const gutterStyle = computed(() => ({ transform: `translateY(${-scrollTop.value}px)` }));
 
 /** The rendered `<textarea>` — the Vue stand-in for the React original's forwarded ref. */
+useNativeFormReset(textarea, controlled.reset, () => {
+  if (textarea.value) textarea.value.value = String(source.value ?? '');
+});
+
 defineExpose({ el: textarea });
 </script>
 
@@ -263,11 +290,15 @@ defineExpose({ el: textarea });
       :spellcheck="false"
       :aria-invalid="finalInvalid || undefined"
       :aria-describedby="describedBy"
-      class="block flex-1 resize-none whitespace-pre overflow-auto bg-transparent px-3 py-2 outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed"
+      class="block flex-1 resize-none whitespace-pre overflow-auto bg-transparent px-3 py-2 outline-hidden placeholder:text-subtle-foreground disabled:cursor-not-allowed"
       v-bind="passthroughAttrs"
       @input="onInput"
+      @compositionend="onInput"
       @keydown="onKeydown"
       @scroll="onScroll"
     />
   </div>
+  <p v-if="props.canIndentOnTab" :id="keyboardHintId" class="mt-1 text-xs text-muted-foreground">
+    {{ props.keyboardExitLabel }}
+  </p>
 </template>

@@ -1,6 +1,7 @@
+import type { AppError, Result } from '../foundation/results';
 /** Defines the lifecycle phase of the app session state machine. */
 export const AuthStatus = {
-  /** Refers to a session not yet examined — the provider mounted with `resolveOnMount: false` and no action has run yet. */
+  /** Refers to a session not yet examined — provider mounted with `resolveOnMount: false`, no action run yet. */
   Unknown: 'unknown',
   /** Refers to an in-flight me-resolve — render a splash/spinner, not the login gate. */
   Resolving: 'resolving',
@@ -35,14 +36,23 @@ export interface AuthResolveContext {
  * contract works — write delegates directly for bespoke flows.
  */
 export interface AuthStrategy<TUser = unknown, TSignInInput = unknown> {
-  /** Resolves the current user — `null` means signed out; a throw also settles anonymous (reported via the provider's `onResolveError`). */
-  resolveUser(context: AuthResolveContext): Promise<TUser | null>;
+  /**
+   * Resolves the current user — a successful `null` means signed out; an expected failure settles anonymous
+   * (reported via the provider's `onResolveError`).
+   */
+  resolveUser(context: AuthResolveContext): Promise<Result<TUser | null, AppError>>;
 
-  /** Establishes a session. Return the user to authenticate immediately; return `null`/`void` to leave state unchanged (redirect flows navigate away instead). */
-  signIn?(input: TSignInInput, context: AuthResolveContext): Promise<TUser | null | void> | TUser | null | void;
+  /**
+   * Establishes a session. Return a successful user to authenticate immediately; return successful `null`/`void`
+   * to leave state unchanged (redirect flows navigate away instead).
+   */
+  signIn?(
+    input: TSignInInput,
+    context: AuthResolveContext,
+  ): Promise<Result<TUser | null | void, AppError>> | Result<TUser | null | void, AppError>;
 
-  /** Tears the session down (server sign-out, token revoke) — local state flips to anonymous regardless of the outcome. */
-  signOut?(context: AuthResolveContext): Promise<void> | void;
+  /** Tears the session down (server sign-out, token revoke) — state flips to anonymous regardless. */
+  signOut?(context: AuthResolveContext): Promise<Result<void, AppError>> | Result<void, AppError>;
 
   /** Reacts to a bridged 401 (e.g. clears a stored bearer token) just before the session flips to anonymous. */
   onUnauthorized?(): void;

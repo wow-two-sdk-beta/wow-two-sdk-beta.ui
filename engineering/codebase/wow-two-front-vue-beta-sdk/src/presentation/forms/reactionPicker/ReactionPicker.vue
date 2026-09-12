@@ -1,12 +1,12 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 
 export interface ReactionPickerProps {
   /** The list of emoji shortcuts shown as quick-pick buttons. */
-  emojis?: ReadonlyArray<string>;
+  readonly emojis?: ReadonlyArray<string>;
 
   /** The currently active emoji keys (highlighted). */
-  selected?: ReadonlyArray<string>;
+  readonly selected?: ReadonlyArray<string>;
 
   /**
    * Fires when the trailing "more" button is clicked (open full picker).
@@ -15,19 +15,19 @@ export interface ReactionPickerProps {
    * strips a declared emit's listener out of `useAttrs()` — an emit could never be
    * detected, so the button would either always or never render.
    */
-  onMore?: () => void;
+  readonly onMore?: () => void;
 
   /** The hidden state for the trailing "more" button. */
-  isMoreHidden?: boolean;
+  readonly isMoreHidden?: boolean;
 
   /** The compact button size. */
-  size?: Size;
+  readonly size?: Size;
 }
 
-const DEFAULT_REACTIONS = ['👍', '❤️', '😂', '🎉', '😮', '😢', '🚀'];
+const DefaultReactions = ['👍', '❤️', '😂', '🎉', '😮', '😢', '🚀'];
 
 /* Sizes not listed fall back to the `md` row at the call site. */
-const SIZE: Partial<Record<Size, string>> = {
+const SizeClass: Partial<Record<Size, string>> = {
   sm: 'h-7 w-7 text-base',
   md: 'h-8 w-8 text-lg',
 };
@@ -37,19 +37,15 @@ const SIZE: Partial<Record<Size, string>> = {
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Plus } from 'lucide-vue-next';
-import { cn, Size as SizeValue } from '../../../foundation/utils';
+import { cn, Size as SizeValue } from '../../../foundation/styles';
 
-/**
- * Quick-pick row of common emoji reactions. Pair with `overlays/Popover`
- * to surface as a hover/long-press affordance on a `ChatBubble`. Click
- * `+` to fall through to a fuller `forms/EmojiPicker`.
- */
+/** Renders a quick-pick row of common emoji reactions, plus a `+` that hands off to a fuller picker. */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'ReactionPicker', inheritAttrs: false });
 
 const props = withDefaults(defineProps<ReactionPickerProps>(), {
-  emojis: () => DEFAULT_REACTIONS,
+  emojis: () => DefaultReactions,
   size: SizeValue.Md,
   /* Explicit `undefined` default: Vue casts an absent `boolean` prop to `false`, keeping the
      prop a genuine tri-state for consumers reading it. */
@@ -57,7 +53,7 @@ const props = withDefaults(defineProps<ReactionPickerProps>(), {
 });
 
 const emit = defineEmits<{
-  /** Fires when an emoji is picked. Replaces React's `onSelect`. */
+  /** Fires when the reader picks one of the reactions, carrying that emoji. */
   select: [emoji: string];
 }>();
 
@@ -70,25 +66,25 @@ function isActive(emoji: string): boolean {
 function emojiClass(emoji: string): string {
   return cn(
     'inline-flex items-center justify-center rounded-full leading-none transition-transform',
-    'hover:scale-125 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'hover:scale-125 hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     isActive(emoji) && 'bg-primary-soft',
-    SIZE[props.size] ?? SIZE.md,
+    SizeClass[props.size] ?? SizeClass.md,
   );
 }
 
 const moreClass = computed(() =>
   cn(
     'inline-flex items-center justify-center rounded-full text-muted-foreground transition-colors',
-    'hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-    SIZE[props.size],
+    'hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
+    SizeClass[props.size],
   ),
 );
 
 const isMoreShown = computed(() => !props.isMoreHidden && Boolean(props.onMore));
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>

@@ -1,16 +1,28 @@
-import type { ProblemDetails } from './ProblemDetails';
+import { ApiFailureFactory, type ApiFailure } from './ApiFailure';
 
-/** Defines a typed transport error thrown on a non-2xx response (or network status `0`), carrying the HTTP status and parsed problem body. */
+/** Exception bridge for third-party APIs whose protocol requires rejection. */
 export class ApiError extends Error {
+  readonly failure: ApiFailure;
   readonly status: number;
-  readonly problem: ProblemDetails | null;
+  /** Unvalidated response diagnostics; numeric values follow the configured JSON codec. */
+  readonly problem: Readonly<Record<string, unknown>> | null;
 
-  constructor(status: number, problem: ProblemDetails | null, message?: string) {
-    super(message ?? problem?.title ?? problem?.detail ?? `Request failed with status ${status}`);
+  constructor(failure: ApiFailure);
+  constructor(status: number, problem: Readonly<Record<string, unknown>> | null);
+  constructor(input: ApiFailure | number, problem: Readonly<Record<string, unknown>> | null = null) {
+    const failure =
+      typeof input === 'number'
+        ? ApiFailureFactory.create(
+            input === 0 ? 'transport' : 'http',
+            { status: input, headers: new Headers() },
+            problem,
+          )
+        : input;
+    super(failure.message);
     this.name = 'ApiError';
-    this.status = status;
-    this.problem = problem;
-    // Restore prototype chain — required when subclassing built-ins under transpiled targets.
+    this.failure = failure;
+    this.status = failure.status;
+    this.problem = failure.problem;
     Object.setPrototypeOf(this, ApiError.prototype);
   }
 }

@@ -48,7 +48,7 @@ export function useTimelineContext(): TimelineContextValue | null {
   return inject(TimelineKey, null);
 }
 
-export const STATUS_BG: Record<TimelineStatus, string> = {
+export const StatusBackground: Record<TimelineStatus, string> = {
   default: 'bg-muted text-muted-foreground border-border',
   primary: 'bg-primary text-primary-foreground border-primary',
   success: 'bg-success text-success-foreground border-success',

@@ -1,30 +1,4 @@
-// Great-circle distance between two points — the one piece of this slice with no platform dependency at all.
-//
-// WHY HAVERSINE. It is the standard trade for UI distance: exact on a sphere, ~0.5% worst-case error against
-// the real ellipsoid (Vincenty's inverse formula closes that gap at maybe 40× the code and an iterative solve
-// that can fail to converge on near-antipodal pairs). For "2.3 km away" on a card, 0.5% is 11 metres. It is
-// also numerically well-behaved for SMALL separations, which is the case a UI actually hits — the older
-// spherical law of cosines is algebraically equivalent but loses catastrophic precision under ~1 km, where
-// `acos` of a value that has rounded to exactly 1 collapses to 0.
-//
-// THE ANTIMERIDIAN IS HANDLED BY THE FORMULA, NOT BY A SPECIAL CASE. The longitude term is `sin²(Δλ/2)`, and
-// sin² is periodic with period π in its argument — so a Δλ of 359° and one of −1° produce the identical term.
-// A pair straddling the 180th meridian therefore comes out as the ~111 km it really is, with no normalization,
-// no `Δλ > 180 → Δλ − 360` correction, and no branch to get wrong. Anything computed on raw degree deltas
-// (`Math.abs(b.longitude - a.longitude) * 111_000`, the naive Euclidean version) reports ~39,900 km for that
-// same pair. This is the reason the module exists rather than a one-line helper per consumer.
-//
-// `atan2(√a, √(1−a))` rather than `asin(√a)`: identical for small `a`, but numerically stable for
-// near-antipodal points where `a` approaches 1 and `asin`'s derivative goes to infinity.
-//
-// RADIUS. 6,371,008.8 m — the IUGG mean radius (R₁) of the WGS-84 ellipsoid, the same constant every mapping
-// library uses. The Earth is not a sphere, so the choice of a single radius, not the formula, is the dominant
-// error term: 6,371,000 vs 6,378,137 (equatorial) shifts every result by ~0.1%.
-//
-// NEVER THROWS. Non-finite input yields `NaN` — a value that propagates visibly and compares false against
-// every threshold — rather than an exception or a plausible-looking wrong number.
-
-import type { LatLng } from './Coordinates';
+import type { LatLng } from './models/Coordinates';
 
 /** IUGG mean Earth radius (R₁), in metres. The sphere the haversine result is measured on. */
 export const EarthRadiusMetres = 6_371_008.8;

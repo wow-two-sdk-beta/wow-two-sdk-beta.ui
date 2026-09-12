@@ -20,7 +20,7 @@
 // function usable outside Vue (an imperative controller, a node test) and leaves exactly one place — the
 // composable layer — that reads the media query. See `UseFlip.ts` for the Vue side that wires the two together.
 
-import { TransitionExtensions } from '../utils';
+import { TransitionExtensions } from './TransitionExtensions';
 
 /** A keyframe list (`[{ opacity: '0' }, { opacity: '1' }]`) or a property-indexed map (`{ opacity: ['0', '1'] }`). */
 export type AnimationKeyframes = Keyframe[] | PropertyIndexedKeyframes;
@@ -73,7 +73,7 @@ export interface AnimationHandle {
  * `easing` mirrors Tailwind's `ease-out` (the curve `ScrollViewport` already animates with); there is no
  * easing token in `foundation/themes` to consume, so this is the slice's declaration of one.
  */
-export const ANIMATION_DEFAULTS = {
+export const AnimationDefaults = {
   /** Default run length in milliseconds. */
   duration: TransitionExtensions.duration.default,
   /** Default easing curve — Tailwind `ease-out`. */
@@ -81,7 +81,7 @@ export const ANIMATION_DEFAULTS = {
 } as const;
 
 /** Keyframe keys that configure the frame rather than name a CSS property — never written to `style`. */
-const NON_STYLE_KEYFRAME_KEYS: ReadonlySet<string> = new Set(['offset', 'easing', 'composite']);
+const NonStyleKeyframeKeys: ReadonlySet<string> = new Set(['offset', 'easing', 'composite']);
 
 const noop = (): void => {};
 
@@ -130,14 +130,14 @@ export function applyFinalKeyframe(element: Element, keyframes: AnimationKeyfram
     const last = keyframes.at(-1);
     if (!last) return;
     for (const [property, value] of Object.entries(last)) {
-      if (NON_STYLE_KEYFRAME_KEYS.has(property) || value === null || value === undefined) continue;
+      if (NonStyleKeyframeKeys.has(property) || value === null || value === undefined) continue;
       setStyleProperty(style, property, String(value));
     }
     return;
   }
 
   for (const [property, value] of Object.entries(keyframes)) {
-    if (NON_STYLE_KEYFRAME_KEYS.has(property)) continue;
+    if (NonStyleKeyframeKeys.has(property)) continue;
     const resolved = lastValueOf(value);
     if (resolved === null || resolved === undefined) continue;
     setStyleProperty(style, property, String(resolved));
@@ -163,8 +163,8 @@ export function animate(
   if (!element) return noopAnimationHandle();
 
   const {
-    duration = ANIMATION_DEFAULTS.duration,
-    easing = ANIMATION_DEFAULTS.easing,
+    duration = AnimationDefaults.duration,
+    easing = AnimationDefaults.easing,
     delay = 0,
     fill = 'none',
     iterations = 1,

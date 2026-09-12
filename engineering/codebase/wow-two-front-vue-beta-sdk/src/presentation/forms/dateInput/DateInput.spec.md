@@ -1,44 +1,52 @@
 # DateInput
 
-## Purpose
-Atomic date input — a typed `YYYY-MM-DD` field with a design-system `Calendar` popover on its trailing button. Accepts and emits `Temporal.PlainDate`. `DatePicker` is the trigger-shaped peer; this one keeps the text field, so reach for it when the user should be able to TYPE the date.
+Renders a typed `YYYY-MM-DD` field with a design-system `CalendarPicker` popover on the trailing button.
 
-## Anatomy
-Styled text `<input>` + trailing `PopoverTrigger` → `Popover` holding a `Calendar`. Under `native`, a single styled `<input type="date">` and no popover.
+Source: [DateInput.vue](DateInput.vue).
 
-## Required behaviors
-- The popover is OURS, not the browser's. `<input type="date">` opens an OS panel that cannot be themed; that path is the `native` opt-in only.
-- Typed draft commits on blur / Enter; an unparseable draft reverts, an emptied one clears to `null`.
-- Picking a day closes the popover — the day IS the whole value.
-- ISO `YYYY-MM-DD` on the wire; the component does the `Temporal.PlainDate` conversion.
-- `min` / `max` bound the calendar's selectable days, and map to the native attributes under `native`.
+Public import: `import { DateInput } from '@wow-two-beta/ui-vue/presentation/forms';`.
 
-## Visual states
-Same as `forms/InputStyles` `inputBaseVariants`: `default` · `hover` · `focus-visible` · `invalid` · `disabled`.
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the state owner and restores the resulting DOM representation; a cancelled reset changes nothing.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `Date \| null` | — | no | Controlled. |
-| `defaultValue` | `Date \| null` | `null` | no | Uncontrolled. |
-| `onChange` | `(d) => void` | — | no | Selection callback. |
-| `min` / `max` | `Date \| null` | — | no | Selectable bounds. |
-| `native` | `boolean` | `false` | no | Hands the panel back to the browser. Opt-in — the OS popup cannot be themed. |
-| `placeholder` | `string` | `'YYYY-MM-DD'` | no | Empty-state text. Ignored under `native`. |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | no | From `inputBaseVariants`. |
-| `state` | `'default' \| 'invalid'` | `'default'` | no | From `inputBaseVariants`. |
+| `size` | `InputSize` | no | — | The control size. |
+| `state` | `InputState` | no | — | The validity surface. |
+| `border` | `InputBorder` | no | — | The border weight. |
+| `ring` | `InputRing` | no | — | The focus-ring weight. |
+| `modelValue` | `Temporal.PlainDate \| null` | no | — | The value, controlled. The `v-model` binding target. `null` is the cleared state. |
+| `defaultValue` | `Temporal.PlainDate \| null` | no | — | The initial value when uncontrolled. |
+| `min` | `Temporal.PlainDate \| null` | no | — | The earliest selectable date. |
+| `max` | `Temporal.PlainDate \| null` | no | — | The latest selectable date. |
+| `native` | `boolean` | no | `false` | Renders a bare `<input type="date">` and drops the popover. Opt-in only. The browser owns that control's picker panel — it cannot be themed, so it lands a system-chrome popup in the middle of a design-system form. Reach for it when the platform picker is the point (a mobile-first form wanting the OS wheels, for instance). |
+| `placeholder` | `string` | no | `'YYYY-MM-DD'` | The empty-state text. Ignored when `native` — that control renders its own mask. |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
 
-## Composition
-Single element. Works inside `FormField`.
+## Emits
 
-## Dependencies
-Foundation: `utils/cn`, `hooks/useControlled`, `primitives/useFormControl`. Same-domain: `InputStyles`, `DateExtensions`, `Calendar`. Sibling group: `overlays/popover`.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: Temporal.PlainDate \| null];` | Fires when the reader types a date or picks one in the calendar — the `v-model` half. |
 
-## Known limitations
-- Typed entry is ISO-only — no locale-aware parsing (`04/03/2026` is rejected, not guessed).
-- Under `native`, picker UI varies across browsers and display format is the browser's call.
-- For a trigger-shaped control with no text field, use `DatePicker` (L5).
+## Slots
 
-## Inspirations
-- React Aria `DateField` (segmented input — our P6 upgrade target).
-- shadcn/ui `Input type="date"`.
+None declared.
+
+## Exposed handle
+
+`{ el: root }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [DateTimeControls.dom.test.ts](../../../../tests/unit/presentation/forms/DateTimeControls.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

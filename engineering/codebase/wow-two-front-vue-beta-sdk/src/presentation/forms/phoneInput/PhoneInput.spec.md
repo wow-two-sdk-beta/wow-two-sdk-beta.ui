@@ -1,42 +1,47 @@
 # PhoneInput
 
-## Purpose
-International phone input. Country dial-code dropdown + national-number text input. Output: E.164-shaped string (`+<country><number>`). First-gen ships a hand-curated country list; full `libphonenumber` formatting/validation is deferred to a follow-up.
+Renders a country dial-code select beside a national-number field, emitting one E.164 string.
 
-## Anatomy
-```
-<PhoneInput>
-  ├── country select (with dial code, flag emoji)
-  └── number input
-</PhoneInput>
-```
+Source: [PhoneInput.vue](PhoneInput.vue).
 
-## Required behaviors
-- Country selection updates the dial-code prefix.
-- Number input strips non-digits.
-- `value` is the full E.164 string. Internally tracks country + national number.
-- On country change, national number stays.
+Public import: `import { PhoneInput } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `value` / `defaultValue` / `onValueChange` | `string` (E.164) | controlled / uncontrolled | |
-| `defaultCountry` | ISO-2 code | `'US'` | |
-| `disabled` / `readOnly` | `boolean` | `false` | |
-| `invalid` | `boolean` | `false` | |
-| `placeholder` | `string` | `'(555) 555-5555'` | |
-| `name` | `string` | — | Hidden input emits E.164 |
 
-## Accessibility
-- Native `<select>` for country (labeled "Country").
-- Native `<input type="tel">` for number.
-- Composite role: surrounding container labeled by external `<label>` consumer attaches.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `modelValue` | `string` | no | `undefined` | The E.164 value, controlled. The `v-model` binding target. |
+| `defaultValue` | `string` | no | — | The initial E.164 value when uncontrolled. |
+| `defaultCountry` | `string` | no | `'US'` | The ISO code selected before the value carries a recognisable dial prefix. Default `US`. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `isReadOnly` | `boolean` | no | `undefined` | The read-only state. Falls back to the surrounding form control's `isReadOnly`. |
+| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
+| `placeholder` | `string` | no | `'(555) 555-5555'` | The national-number placeholder. |
+| `name` | `string` | no | — | The hidden input name; the hidden input emits the full E.164 value. |
 
-## Dependencies
-Foundation: `utils`. Same domain: `forms/InputStyles`.
+## Emits
 
-## Known limitations (deferred)
-- No per-country format mask (e.g. US grouping `(555) 555-5555`).
-- No length validation.
-- Country list is ~50 most-common; not exhaustive.
-- No `libphonenumber` integration.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [e164: string];` | Fires when the reader edits the number or switches country — the `v-model` half. |
+
+## Slots
+
+None declared.
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

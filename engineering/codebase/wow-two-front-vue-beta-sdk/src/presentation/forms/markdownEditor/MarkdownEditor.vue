@@ -1,6 +1,15 @@
 <script lang="ts">
 import { Marked } from 'marked';
-import { Bold, Code, Heading1, Heading2, Italic, Link2, List, Quote } from 'lucide-vue-next';
+import {
+  Bold,
+  Code as CodeText,
+  Heading1,
+  Heading2,
+  Italic,
+  Link2,
+  List as ListGroup,
+  Quote as QuoteText,
+} from 'lucide-vue-next';
 import type { IconAdapter } from '../../../foundation/icons';
 
 /** Defines the pane layout of a markdown editor. */
@@ -16,41 +25,38 @@ export const MarkdownEditorView = {
 export type MarkdownEditorView = (typeof MarkdownEditorView)[keyof typeof MarkdownEditorView];
 
 export interface MarkdownEditorProps {
-  /** The markdown source, controlled — React's spelling, which wins when both are set. */
-  value?: string;
-
   /** The markdown source, controlled. The `v-model` binding target. */
-  modelValue?: string;
+  readonly modelValue?: string;
 
   /** The initial markdown source when uncontrolled. */
-  defaultValue?: string;
+  readonly defaultValue?: string;
 
   /** The pane layout, controlled. The `v-model:view` binding target. */
-  view?: MarkdownEditorView;
+  readonly view?: MarkdownEditorView;
 
   /** The initial pane layout when uncontrolled. Default `split`. */
-  defaultView?: MarkdownEditorView;
+  readonly defaultView?: MarkdownEditorView;
 
   /** The invalid surface override. Falls back to the surrounding form control's `isInvalid`. */
-  isInvalid?: boolean;
+  readonly isInvalid?: boolean;
 
   /** The CSS minHeight on the surface (default `18rem`). */
-  minHeight?: string;
+  readonly minHeight?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
-  readOnly?: boolean;
+  readonly readOnly?: boolean;
 
-  /** The DOM spelling of {@link MarkdownEditorProps.readOnly}, which wins when both are set. */
-  readonly?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly readonly?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 }
 
 /** Describes the selection a toolbar action operates on. */
@@ -110,9 +116,6 @@ const escapeHtml = (html: string) =>
 
 // Only protocols a markdown link/image may navigate to from the preview;
 // anything else (javascript:, data:, vbscript:, …) is dropped.
-const SAFE_URL = /^(?:https?:|mailto:|tel:|[^a-z0-9.+-]|[a-z0-9.+-]*$)/i;
-
-const safeUrl = (href: string) => (SAFE_URL.test(href.trim()) ? href : null);
 
 // Local marked instance whose raw-HTML tokens render as escaped text, so
 // embedded HTML (e.g. `<img onerror=…>`) is inert in the default preview,
@@ -125,35 +128,35 @@ const previewMarked = new Marked({
       return escapeHtml(text);
     },
     link({ href, title, tokens }) {
-      const url = safeUrl(href);
+      const url = UrlExtensions.safeNavigation(href);
       const text = this.parser.parseInline(tokens);
-      if (url === null) return text;
+      if (url === undefined) return text;
       const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
       return `<a href="${escapeHtml(url)}"${titleAttr}>${text}</a>`;
     },
     image({ href, title, text }) {
-      const url = safeUrl(href);
-      if (url === null) return escapeHtml(text);
+      const url = UrlExtensions.safeResource(href);
+      if (url === undefined) return escapeHtml(text);
       const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
       return `<img src="${escapeHtml(url)}" alt="${escapeHtml(text)}"${titleAttr}>`;
     },
   },
 });
 
-const ACTIONS: ReadonlyArray<ToolbarAction> = [
+const ToolbarActions: ReadonlyArray<ToolbarAction> = [
   { key: 'h1', label: 'Heading 1', icon: Heading1, apply: linePrefix('# ') },
   { key: 'h2', label: 'Heading 2', icon: Heading2, apply: linePrefix('## ') },
   { key: 'bold', label: 'Bold', icon: Bold, apply: wrap('**', '**') },
   { key: 'italic', label: 'Italic', icon: Italic, apply: wrap('*', '*') },
-  { key: 'code', label: 'Inline code', icon: Code, apply: wrap('`', '`') },
-  { key: 'link', label: 'Link', icon: Link2, apply: wrap('[', '](https://)') },
-  { key: 'list', label: 'List', icon: List, apply: linePrefix('- ') },
-  { key: 'quote', label: 'Blockquote', icon: Quote, apply: linePrefix('> ') },
+  { key: 'code', label: 'InlineLayout code', icon: CodeText, apply: wrap('`', '`') },
+  { key: 'link', label: 'LinkItem', icon: Link2, apply: wrap('[', '](https://)') },
+  { key: 'list', label: 'ListGroup', icon: ListGroup, apply: linePrefix('- ') },
+  { key: 'quote', label: 'Blockquote', icon: QuoteText, apply: linePrefix('> ') },
 ];
 
 /* Hoisted out of the template — the runtime template compiler resolves plain identifiers,
    not array literals built from an imported enum. */
-const VIEW_ORDER: ReadonlyArray<MarkdownEditorView> = [
+const ViewOrder: ReadonlyArray<MarkdownEditorView> = [
   MarkdownEditorView.Edit,
   MarkdownEditorView.Split,
   MarkdownEditorView.Preview,
@@ -161,21 +164,19 @@ const VIEW_ORDER: ReadonlyArray<MarkdownEditorView> = [
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
+import { UrlExtensions } from '../../../foundation/dom';
 import { computed, nextTick, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled, useId } from '../../../foundation/hooks';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
+import { useId } from '../../../foundation/identifiers';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives';
 import { InputState } from '../InputStyles';
 
-/**
- * Markdown input + live preview. Toolbar wraps selection with syntax;
- * preview pane renders via `marked` with raw HTML escaped to inert text
- * (XSS-safe by default). Fill the `preview` slot to opt out — the consumer
- * is then responsible for sanitizing. Three view modes: `split` / `edit` /
- * `preview`.
- */
+/** Renders a markdown pane, a formatting toolbar and a sanitized live preview, in split, edit or preview view. */
 /* `inheritAttrs: false` so `class` folds into the surface's own `cn()` call, and so the rest
    of the attrs land on the inner `<textarea>` rather than the surface. */
 defineOptions({ name: 'MarkdownEditor', inheritAttrs: false });
@@ -184,7 +185,6 @@ const props = withDefaults(defineProps<MarkdownEditorProps>(), {
   minHeight: '18rem',
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
-  value: undefined,
   modelValue: undefined,
   view: undefined,
   defaultView: undefined,
@@ -196,14 +196,10 @@ const props = withDefaults(defineProps<MarkdownEditorProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader edits the markdown, by typing or via a toolbar action — the `v-model` half. */
   'update:modelValue': [value: string];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [value: string];
-  /** The `v-model:view` half. */
+  /** Fires when the reader picks a different pane layout — the `v-model:view` half. */
   'update:view': [view: MarkdownEditorView];
-  /** Replaces React's `onViewChange`. */
-  'view-change': [view: MarkdownEditorView];
 }>();
 
 defineSlots<{
@@ -216,11 +212,10 @@ const attrs = useAttrs();
 const slots = useSlots();
 
 const valueCtl = useControlled<string>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -229,11 +224,10 @@ const viewCtl = useControlled<MarkdownEditorView>({
   default: () => props.defaultView ?? MarkdownEditorView.Split,
   onChange: (next) => {
     emit('update:view', next);
-    emit('view-change', next);
   },
 });
 
-/* Named `markdown` / `mode`, not `value` / `view`: a setup const sharing a prop's name
+/* Named `markdown` / `mode`, not `modelValue` / `view`: a setup const sharing a prop's name
    collides with it in the template scope (`vue/no-dupe-keys`). */
 const markdown = valueCtl.value;
 const mode = viewCtl.value;
@@ -280,6 +274,7 @@ function applyAction(action: ToolbarAction): void {
 }
 
 function onInput(event: Event): void {
+  if ((event as InputEvent).isComposing) return;
   valueCtl.setValue((event.target as HTMLTextAreaElement).value);
 }
 
@@ -292,15 +287,15 @@ const state = computed(() => (finalInvalid.value ? InputState.Invalid : InputSta
 
 /* Never a declared prop — a declared `'aria-describedby'` would arrive as
    `props.ariaDescribedby` and stop reaching the DOM. */
-const ariaDescribedBy = computed(() => attrs['aria-describedby'] as string | undefined);
+const ariaDescribedBy = computed(() => attrs[AriaAttribute.DescribedBy] as string | undefined);
 
 const textareaId = computed(() => props.id ?? ctx?.id ?? generatedId);
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const describedBy = computed(() => ariaDescribedBy.value ?? ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-describedby']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.DescribedBy]);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const surfaceClass = computed(() =>
@@ -314,7 +309,7 @@ const surfaceClass = computed(() =>
 
 const textareaClass = computed(() =>
   cn(
-    'flex-1 resize-none whitespace-pre-wrap break-words bg-transparent p-3 font-mono text-sm outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed',
+    'flex-1 resize-none whitespace-pre-wrap break-words bg-transparent p-3 font-mono text-sm outline-hidden placeholder:text-subtle-foreground disabled:cursor-not-allowed',
     showPreview.value && 'border-r-0',
   ),
 );
@@ -328,19 +323,25 @@ function viewButtonClass(v: MarkdownEditorView): string {
 
 /** The rendered `<textarea>` — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: textarea });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  valueCtl.reset();
+  viewCtl.reset();
+});
 </script>
 
 <template>
-  <div :data-state="state" :class="surfaceClass" :style="{ minHeight }">
+  <div :key="formResetRevision" :data-state="state" :class="surfaceClass" :style="{ minHeight }">
     <div class="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1">
       <div role="toolbar" aria-label="Markdown formatting" class="flex items-center gap-0.5">
         <button
-          v-for="a in ACTIONS"
+          v-for="a in ToolbarActions"
           :key="a.key"
           type="button"
           :aria-label="a.label"
           :disabled="finalDisabled || finalReadOnly"
-          class="inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          class="inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           @click="applyAction(a)"
         >
           <Icon :icon="a.icon" :size="14" />
@@ -352,7 +353,7 @@ defineExpose({ el: textarea });
         class="ml-auto flex items-center gap-0.5 rounded-md bg-card p-0.5 ring-1 ring-border"
       >
         <button
-          v-for="v in VIEW_ORDER"
+          v-for="v in ViewOrder"
           :key="v"
           type="button"
           role="radio"
@@ -379,6 +380,7 @@ defineExpose({ el: textarea });
         :class="textareaClass"
         v-bind="passthroughAttrs"
         @input="onInput"
+        @compositionend="onInput"
       />
       <!--
         `group` role: aria-label is prohibited on a bare (generic) div —
@@ -398,5 +400,11 @@ defineExpose({ el: textarea });
         <div v-else v-html="previewHtml ?? ''" />
       </div>
     </div>
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </div>
 </template>

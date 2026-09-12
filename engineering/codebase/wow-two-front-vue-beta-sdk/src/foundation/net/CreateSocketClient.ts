@@ -68,14 +68,14 @@ export interface SocketConnection {
 }
 
 /** Builds the underlying socket — injectable so tests and polyfills need no global. */
-export type SocketFactory = (url: string, protocols?: string | readonly string[]) => SocketConnection;
+export type SocketFactory = (url: string, protocols?: string | ReadonlyArray<string>) => SocketConnection;
 
 /** Configures the liveness heartbeat that detects a half-open socket. */
 export interface SocketHeartbeatOptions {
   /** The interval (ms) between pings. */
   readonly intervalMs: number;
 
-  /** The silence (ms) tolerated after a ping before the socket is declared dead and reconnected. Default: the interval. */
+  /** The silence (ms) after a ping before the socket is declared dead and reconnected. Default: the interval. */
   readonly timeoutMs?: number;
 
   /** Builds the ping frame. Default `{"type":"ping"}`. Return the exact text your server expects. */
@@ -85,9 +85,9 @@ export interface SocketHeartbeatOptions {
 /** Configures a {@link createSocketClient} call. Every member is optional. */
 export interface SocketClientOptions<TIn = unknown, TOut = unknown> {
   /** The subprotocols offered during the handshake. */
-  readonly protocols?: string | readonly string[];
+  readonly protocols?: string | ReadonlyArray<string>;
 
-  /** Receives every decoded inbound message. Frames that fail to decode go to {@link SocketClientOptions.onError} instead. */
+  /** Receives every decoded inbound message. Frames that fail to decode go to {@link SocketClientOptions.onError}. */
   readonly onMessage?: (message: TIn, event: MessageEvent) => void;
 
   /** Fires each time the socket opens, including after every reconnect and BEFORE the queue is flushed. */
@@ -146,7 +146,7 @@ export interface SocketClient<TOut = unknown> {
    */
   send(message: TOut): boolean;
 
-  /** Closes the socket, cancels reconnection permanently, clears the heartbeat, and detaches every listener. Idempotent. */
+  /** Closes the socket, cancels reconnection permanently, clears the heartbeat, detaches all listeners. Idempotent. */
   close(code?: number, reason?: string): void;
 }
 
@@ -289,7 +289,7 @@ export function createSocketClient<TIn = unknown, TOut = unknown>(
     }, intervalMs);
   };
 
-  /** Writes every buffered frame in order, on open. A frame the socket rejects is reported and dropped, not re-queued. */
+  /** Writes every buffered frame in order on open. A rejected frame is reported and dropped, never re-queued. */
   const flushQueue = (target: SocketConnection): void => {
     const pending = queue.splice(0, queue.length);
     for (const frame of pending) {

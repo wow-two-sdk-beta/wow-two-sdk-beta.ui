@@ -1,7 +1,19 @@
 import { inject, toValue, watch, type InjectionKey, type MaybeRefOrGetter } from 'vue';
 
 /** The chrome slots a form control can be described/named by. */
-export type FormControlChromeKind = 'label' | 'helper' | 'error';
+export const FormControlChromeKind = {
+  /** Names the control — its rendered id joins `aria-labelledby`. */
+  Label: 'label',
+
+  /** Describes the control in the resting case — its id joins `aria-describedby`. */
+  Helper: 'helper',
+
+  /** Describes the control's validation failure — its id joins `aria-describedby` and wins over the helper. */
+  Error: 'error',
+} as const;
+
+/** The chrome slots a form control can be described/named by. */
+export type FormControlChromeKind = (typeof FormControlChromeKind)[keyof typeof FormControlChromeKind];
 
 export interface FormControlContextValue {
   readonly id: string;
@@ -26,12 +38,12 @@ export interface FormControlContextValue {
    * forms-engine `Field` glue so error chrome (`FormErrorMessage`) renders them
    * without hand-wiring. `undefined` outside an engine-driven field.
    */
-  readonly errors?: readonly string[];
+  readonly errors?: ReadonlyArray<string>;
   readonly isInvalid: boolean;
   readonly isDisabled: boolean;
   readonly isRequired: boolean;
   readonly isReadOnly: boolean;
-  /** Registers a mounted chrome node (label/helper/error); returns the unregister. Chrome uses {@link useFormControlChrome}. */
+  /** Registers a chrome node (label/helper/error); returns the unregister. Called by {@link useFormControlChrome}. */
   registerChrome: (kind: FormControlChromeKind) => () => void;
 }
 

@@ -20,9 +20,9 @@ export const ConnectionState = {
   Connecting: 'connecting',
   /** Refers to an established connection that is passing traffic. */
   Open: 'open',
-  /** Refers to a dropped connection with a retry pending or in flight — the distinction the wire ready-state cannot express. */
+  /** Refers to a dropped connection with a retry pending or in flight — what the wire ready-state cannot express. */
   Reconnecting: 'reconnecting',
-  /** Refers to a connection that is down and not coming back — closed by the caller, unsupported, or out of retries. */
+  /** Refers to a connection down for good — closed by the caller, unsupported, or out of retries. */
   Closed: 'closed',
 } as const;
 
@@ -42,7 +42,10 @@ export const EventSourceReadyState = {
   Closed: 2,
 } as const;
 
-/** Provides the `WebSocket.readyState` values from the WHATWG spec — note `Closing` occupies `2`, where `EventSource` puts `Closed`. */
+/**
+ * Provides the `WebSocket.readyState` values from the WHATWG spec — `Closing` occupies `2`, where
+ * `EventSource` puts `Closed`.
+ */
 export const SocketReadyState = {
   /** Refers to a handshake in progress; `send()` throws here, which is why this slice queues instead. */
   Connecting: 0,

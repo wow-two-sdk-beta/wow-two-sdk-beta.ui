@@ -5,48 +5,48 @@ import type {
   SurfaceRadius,
   SurfaceTone,
   SurfaceVariant,
-} from '../../../foundation/utils';
+} from '../../../foundation/styles';
 
 /**
  * Represents the prop surface of `PopoverContent`.
  *
- * React declared the surface axes by `extends SurfaceVariants`; they are
+ * React declared the surface axes by `extends SurfaceLayoutVariants`; they are
  * spelled out here because the SFC compiler's type resolver cannot follow a
  * `VariantProps<typeof …>` base and fails the build on it. The aliases below
- * are the canonical ones from `foundation/utils`, already locked against the
+ * are the canonical ones from `foundation/styles`, already locked against the
  * `surfaceVariants` config there, so the two cannot drift.
  */
 export interface PopoverContentProps {
   /** The bare toggle — skips the surface chrome (bg/border/shadow); keeps only z-index + animation. */
-  isBare?: boolean;
+  readonly isBare?: boolean;
 
   /** The visual recipe. */
-  variant?: SurfaceVariant;
+  readonly variant?: SurfaceVariant;
 
   /** The color tone the recipe is tinted with. */
-  tone?: SurfaceTone;
+  readonly tone?: SurfaceTone;
 
   /** The corner rounding. */
-  radius?: SurfaceRadius;
+  readonly radius?: SurfaceRadius;
 
   /** The inner spacing step. Defaults to `lg` with chrome on, `none` when bare. */
-  padding?: SurfacePadding;
+  readonly padding?: SurfacePadding;
 
   /** The shadow depth. */
-  elevation?: SurfaceElevation;
+  readonly elevation?: SurfaceElevation;
 }
 
 /** Contains the default chrome width that preserves the historical look. */
-const DEFAULT_WIDTH = 'w-72';
+const DefaultWidth = 'w-72';
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
+import { cn, surfaceVariants } from '../../../foundation/styles';
 import { AnchoredPositioner, DismissableLayer, FocusScope, Portal, Presence } from '../../../foundation/primitives';
 import { usePopoverContext } from './Popover.vue';
 
-/* The anchored, dismissable popover panel. */
+/** Renders the anchored, dismissable popover panel. */
 defineOptions({ name: 'PopoverContent', inheritAttrs: false });
 
 /** The panel content — React's `children`. */
@@ -61,6 +61,7 @@ const context = usePopoverContext();
 const isOpen = context.open;
 const placement = context.placement;
 const offset = context.offset;
+const isModal = context.isModal;
 const dismissOnEscape = context.dismissOnEscape;
 const dismissOnOutsideClick = context.dismissOnOutsideClick;
 
@@ -73,12 +74,12 @@ const classes = computed(() =>
   cn(
     /* pop (fade+scale) gated on the portal-root data-state + motion-safe
        so reduced-motion users get no movement. */
-    'outline-none',
+    'outline-hidden',
     'motion-safe:group-data-[state=open]:animate-(--animate-pop-in)',
     'motion-safe:group-data-[state=closed]:animate-(--animate-pop-out) motion-reduce:animate-none',
     !props.isBare &&
       cn(
-        DEFAULT_WIDTH,
+        DefaultWidth,
         surfaceVariants({
           variant: props.variant,
           tone: props.tone,
@@ -132,13 +133,14 @@ function handleOutsidePointerDown(event: PointerEvent): void {
             two share a box, and collapsing them puts `role`, the surface classes and
             the outside-click boundary on one node.
           -->
-          <FocusScope as-child trapped loop>
+          <FocusScope as-child :trapped="isModal" :loop="isModal" :modal="isModal">
             <DismissableLayer
               :is-escape-disabled="!dismissOnEscape"
               :is-outside-click-disabled="!dismissOnOutsideClick"
               :on-escape="handleEscape"
               :on-outside-pointer-down="handleOutsidePointerDown"
               role="dialog"
+              :aria-modal="isModal || undefined"
               v-bind="rest"
               :class="classes"
             >

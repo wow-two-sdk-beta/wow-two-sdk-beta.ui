@@ -1,14 +1,17 @@
 import type { Temporal } from 'temporal-polyfill';
 
-/** Defines a branded alias for a raw RFC-9562 GUID string (`0197c8f4-3e2a-7c1d-8f9a-1b2c3d4e5f60`) — wire-identical to a .NET `System.Guid`. */
+/**
+ * Defines a branded alias for a raw RFC-9562 GUID string (`0197c8f4-3e2a-7c1d-8f9a-1b2c3d4e5f60`) —
+ * wire-identical to a .NET `System.Guid`.
+ */
 export type Guid = string & { readonly __brand: 'Guid' };
 
-const HYPHEN_D = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const HEX = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, '0'));
+const HyphenD = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const HexByte = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, '0'));
 
 /** Formats 16 bytes as a lowercase hyphenated `D`-string. */
 function format(b: Uint8Array): string {
-  const h = (i: number): string => HEX[b[i]!]!;
+  const h = (i: number): string => HexByte[b[i]!]!;
   return `${h(0)}${h(1)}${h(2)}${h(3)}-${h(4)}${h(5)}-${h(6)}${h(7)}-${h(8)}${h(9)}-${h(10)}${h(11)}${h(12)}${h(13)}${h(14)}${h(15)}`;
 }
 
@@ -36,7 +39,7 @@ function createV7(timestamp?: number | Temporal.Instant): Guid {
   return format(b) as Guid;
 }
 
-/** Creates a random **UUIDv4** (RFC 9562 §4.4) — the .NET `Guid.NewGuid()` parallel (there is no `CreateVersion4`). */
+/** Creates a random **UUIDv4** (RFC 9562 §4.4) — the .NET `Guid.NewGuid()` parallel (no `CreateVersion4`). */
 function createV4(): Guid {
   const b = new Uint8Array(16);
   crypto.getRandomValues(b);
@@ -50,18 +53,18 @@ const empty = '00000000-0000-0000-0000-000000000000' as Guid;
 
 /** Narrows a `string` to `Guid` when it is a legal hyphenated GUID (any version — permissive, like `Guid.Parse`). */
 function isGuid(s: string): s is Guid {
-  return HYPHEN_D.test(s);
+  return HyphenD.test(s);
 }
 
 /** Validates + brands (lowercased); **throws** on a non-GUID string — the `Guid.Parse` parallel. */
 function parse(s: string): Guid {
-  if (!HYPHEN_D.test(s)) throw new TypeError(`Invalid GUID: "${s}"`);
+  if (!HyphenD.test(s)) throw new TypeError(`Invalid GUID: "${s}"`);
   return s.toLowerCase() as Guid;
 }
 
 /** Validates + brands (lowercased); returns `undefined` on failure — the `Guid.TryParse` parallel. */
 function tryParse(s: string): Guid | undefined {
-  return HYPHEN_D.test(s) ? (s.toLowerCase() as Guid) : undefined;
+  return HyphenD.test(s) ? (s.toLowerCase() as Guid) : undefined;
 }
 
 /** Case-insensitive value equality — the `Guid.Equals` parallel. */
@@ -69,7 +72,7 @@ function equals(a: Guid, b: Guid): boolean {
   return a.toLowerCase() === b.toLowerCase();
 }
 
-/** Lexical compare of the lowercased strings; for v7 values this is creation-time order — the `Guid.CompareTo` parallel. */
+/** Lexical compare of the lowercased strings; for v7 values, creation-time order — the `Guid.CompareTo` parallel. */
 function compare(a: Guid, b: Guid): number {
   const x = a.toLowerCase();
   const y = b.toLowerCase();
@@ -78,7 +81,7 @@ function compare(a: Guid, b: Guid): number {
 
 /** Reads the version nibble (`7`, `4`, …); `undefined` if not a GUID — the `Guid.Version` parallel. */
 function version(s: string): number | undefined {
-  return HYPHEN_D.test(s) ? parseInt(s[14]!, 16) : undefined;
+  return HyphenD.test(s) ? parseInt(s[14]!, 16) : undefined;
 }
 
 /** Identity — a `Guid` already is its `D`-string; kept for .NET `ToString("D")` symmetry. */

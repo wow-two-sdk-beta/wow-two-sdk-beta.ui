@@ -6,7 +6,7 @@ export type { GlyphProps };
 
 <script setup lang="ts">
 import { useTemplateRef } from 'vue';
-import { CELL_POSITIONS, CELL_SIZE } from './ModuleGlyphs';
+import { CellPositions, CellSize } from './ModuleGlyphs';
 
 /** Renders a three-dot glyph. */
 defineOptions({ name: 'DotsGlyph' });
@@ -20,6 +20,6 @@ defineExpose({ el });
 
 <template>
   <svg ref="el" viewBox="0 0 24 24" :width="props.size" :height="props.size" aria-hidden="true">
-    <circle v-for="x in CELL_POSITIONS" :key="x" :cx="x + CELL_SIZE / 2" :cy="12" :r="2.5" fill="currentColor" />
+    <circle v-for="x in CellPositions" :key="x" :cx="x + CellSize / 2" :cy="12" :r="2.5" fill="currentColor" />
   </svg>
 </template>

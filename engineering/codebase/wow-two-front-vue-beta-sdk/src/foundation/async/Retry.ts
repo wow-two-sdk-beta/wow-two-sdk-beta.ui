@@ -92,7 +92,7 @@ export interface RetryAsyncOptions {
   /** The policy driving the decision and the delays. Defaults to `DefaultRetryPolicy` from `foundation/resilience`. */
   readonly policy?: RetryPolicy;
 
-  /** Cancels the retry loop, including mid-backoff. Rejects with an `AbortError`; an in-flight attempt is not recalled. */
+  /** Cancels the retry loop, even mid-backoff. Rejects with an `AbortError`; an in-flight attempt is not recalled. */
   readonly signal?: AbortSignal;
 }
 

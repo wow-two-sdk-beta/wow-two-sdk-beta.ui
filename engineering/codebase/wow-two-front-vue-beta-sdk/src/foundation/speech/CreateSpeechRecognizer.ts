@@ -1,29 +1,7 @@
-// The recognition instance, wrapped so a consumer never touches the prefixed global, never gets a raw event, and
-// never has a call throw at it.
-//
-// DEFINING CONTRACT: NOTHING HERE THROWS. That matters more here than anywhere else in the slice, because the
-// native `start()` throws `InvalidStateError` for the most ordinary mistake there is — pressing the mic button
-// twice. `start()` returns `already-started` for that, and every other call is guarded.
-//
-// STATE IS TRACKED IN THREE VALUES, not two. `starting` exists because `start()` returns long before the engine
-// is listening: the `start` event arrives after the browser has (possibly) prompted for the microphone and opened
-// the audio device. A two-state flag would report `idle` during that window and let a second `start()` through,
-// straight into the `InvalidStateError` this wrapper exists to prevent.
-//
-// EVERY CONSUMER CALLBACK IS INVOKED THROUGH `report`, which swallows a throw. These callbacks run inside the
-// browser's own event dispatch, where an exception becomes an unhandled error in the page with no relation to the
-// code that caused it — the same reason `foundation/share`'s `reportShareError` exists.
-//
-// NO AUTO-RESTART, deliberately. With `continuous: true` Chrome still ends the session after a stretch of
-// silence, and the obvious fix is restarting inside `onend`. That loop is a trap: it re-opens the microphone
-// indefinitely, keeps Chrome streaming audio to a remote service, and turns a `denied` into a hot loop of denials.
-// The session ends, `onEnd` fires, and the consumer decides.
-//
-// PRIVACY, stated plainly because a wrapper this convenient hides it: in Chrome, recognition is NOT on-device.
-// Audio is sent to a Google server and the transcript comes back. Anything spoken into this API leaves the
-// machine. Safari's implementation differs, and Firefox has none at all.
+import type { RecognizerStartResult } from './models/RecognizerStartResult';
 
 import { toError } from '../errors';
+import { ResultExtensions } from '../results';
 
 import { speechRecognitionConstructor } from './SpeechSupport';
 import {
@@ -32,24 +10,12 @@ import {
   type SpeechTranscript,
 } from './SpeechRecognitionResult';
 import type { SpeechRecognitionEventLike, SpeechRecognitionLike } from './SpeechRecognitionTypes';
-
-/**
- * The outcome of a {@link SpeechRecognizer.start} call.
- *
- * - `started` — the engine accepted the request. Listening begins later, at the `onStart` callback.
- * - `already-started` — a session is running or starting. The native call would have thrown here.
- * - `unsupported` — no recognition API (SSR, Firefox).
- * - `failed` — the engine refused, carrying the normalized `Error`.
- */
-export type RecognizerStartResult =
-  | { readonly status: 'started' }
-  | { readonly status: 'already-started' }
-  | { readonly status: 'unsupported' }
-  | { readonly status: 'failed'; readonly error: Error };
+export type { RecognizerStartFailure } from './models/RecognizerStartFailure';
+export type { RecognizerStartResult } from './models/RecognizerStartResult';
 
 /** Configuration and callbacks for a recognizer. Applied once, at creation — see {@link createSpeechRecognizer}. */
 export interface SpeechRecognizerOptions {
-  /** BCP-47 tag to transcribe (`en-US`, `uz`). Same vocabulary as `foundation/i18n`'s locale. Defaults to the engine's. */
+  /** BCP-47 tag to transcribe (`en-US`, `uz`). Same vocabulary as `foundation/i18n`. Defaults to the engine's. */
   readonly lang?: string;
 
   /** Keep listening past the first phrase. Defaults to `false`. Chrome still ends the session on long silence. */
@@ -88,7 +54,7 @@ export interface SpeechRecognizer {
   /** Whether the engine is listening right now — `false` during the gap between `start()` and the `start` event. */
   readonly listening: boolean;
 
-  /** Begins a session. Safe to call twice: the second call answers `already-started` instead of throwing. */
+  /** Begins a session. Repeated calls succeed without restarting a session that is starting or listening. */
   readonly start: () => RecognizerStartResult;
 
   /** Ends the session, keeping results the engine has already recognized. A no-op when idle. */
@@ -143,7 +109,7 @@ function inertRecognizer(start: () => RecognizerStartResult): SpeechRecognizer {
  */
 export function createSpeechRecognizer(options?: SpeechRecognizerOptions): SpeechRecognizer {
   const Recognition = speechRecognitionConstructor();
-  if (Recognition === undefined) return inertRecognizer(() => ({ status: 'unsupported' }));
+  if (Recognition === undefined) return inertRecognizer(() => ResultExtensions.fail({ status: 'unsupported' }));
 
   let instance: SpeechRecognitionLike;
   try {
@@ -153,7 +119,7 @@ export function createSpeechRecognizer(options?: SpeechRecognizerOptions): Speec
     // `supported` reports false because nothing can be started — but `start()` hands back the REAL error rather
     // than a soothing `unsupported`, which would send a developer hunting for a browser that already has the API.
     const error = toError(cause);
-    return inertRecognizer(() => ({ status: 'failed', error }));
+    return inertRecognizer(() => ResultExtensions.fail({ status: 'failed', error }));
   }
 
   try {
@@ -230,17 +196,17 @@ export function createSpeechRecognizer(options?: SpeechRecognizerOptions): Speec
 
     start: (): RecognizerStartResult => {
       // Pre-empts the native `InvalidStateError` — including during `starting`, the window a two-state flag misses.
-      if (state !== 'idle') return { status: 'already-started' };
+      if (state !== 'idle') return ResultExtensions.ok(undefined);
 
       try {
         instance.start();
         state = 'starting';
-        return { status: 'started' };
+        return ResultExtensions.ok(undefined);
       } catch (cause) {
         // The engine still considers a previous session open (an `abort` whose `end` has not arrived), or the
         // page has no microphone permission to hand over.
         state = 'idle';
-        return { status: 'failed', error: toError(cause) };
+        return ResultExtensions.fail({ status: 'failed', error: toError(cause) });
       }
     },
 

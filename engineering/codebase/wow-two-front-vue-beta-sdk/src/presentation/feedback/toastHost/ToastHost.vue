@@ -1,14 +1,14 @@
 <script lang="ts">
 import type { VNode } from 'vue';
-import type { OverlayPosition } from '../../../foundation/utils';
+import type { OverlayPosition } from '../../../foundation/styles';
 import type { ToastSimpleVariants } from '../toastSimple/ToastSimple.variants';
 
 export type ToastSeverity = NonNullable<ToastSimpleVariants['severity']>;
 
 /**
- * A renderable slice of a toast. React's `ReactNode` becomes `string | VNode`:
- * these travel through the imperative `toastHost.toast()` payload, not through a
- * slot, so a caller who wants markup builds it with `h()`.
+ * A renderable slice of a toast. These travel through the imperative
+ * `toastHost.toast()` payload, not through a slot, so a caller who wants
+ * markup builds it with `h()`.
  */
 export type ToastNode = string | VNode;
 
@@ -20,18 +20,30 @@ export interface ToastOptions {
   /** ms before auto-dismiss. Default: ToastHost's `defaultDuration`. `Infinity` = sticky. */
   duration?: number;
   action?: ToastNode;
-  /** Fully custom body — replaces the default `Toast` chrome (icon/title/description/close). The toast still animates + auto-dismisses; the content owns its own close via the returned id. */
+  /**
+   * Fully custom body — replaces the default `Toast` chrome (icon/title/description/close).
+   * Still animates + auto-dismisses; the content owns its close via the returned id.
+   */
   content?: ToastNode;
-  /** Fired when the toast is removed — auto-dismiss, close button, `dismiss(id)`, or `dismissAll()` (NOT on a dedup-update). For undo cleanup / analytics. */
+  /**
+   * Fired when the toast is removed — auto-dismiss, close button, `dismiss(id)`, or `dismissAll()`.
+   * Not fired on a dedup-update. For undo cleanup / analytics.
+   */
   onDismiss?: () => void;
-  /** Dedup key — a `toast` whose `key` is already showing updates that toast in place (refreshing its timer) instead of stacking a duplicate. */
+  /**
+   * Dedup key — a `toast` whose `key` is already showing updates that toast in place,
+   * refreshing its timer instead of stacking a duplicate.
+   */
   key?: string;
 }
 
 /** Content for a `toastHost.promise` phase — a title string, or a full partial options object. */
 export type ToastContent = string | Partial<ToastOptions>;
 
-/** Options for `toastHost.promise` — loading / success / error content (success + error may be a fn of the settled value). */
+/**
+ * Options for `toastHost.promise` — loading / success / error content
+ * (success + error may be a fn of the settled value).
+ */
 export interface ToastPromiseOptions<T> {
   loading: ToastContent;
   success: ToastContent | ((value: T) => ToastContent);
@@ -77,7 +89,7 @@ class ToastHostStore {
     this.emit();
   }
 
-  /** Shows a sticky loading toast, then updates it in place to success / error when `promise` settles. Returns `promise`. */
+  /** Shows a sticky loading toast, updated in place to success / error when `promise` settles. Returns `promise`. */
   promise<T>(promise: Promise<T>, opts: ToastPromiseOptions<T>): Promise<T> {
     const id = this.toast({ ...normalizeContent(opts.loading), severity: 'info', duration: Infinity });
     const settle = (content: ToastContent, severity: ToastSeverity) =>
@@ -119,9 +131,8 @@ class ToastHostStore {
 export const toastHost = new ToastHostStore();
 
 /**
- * The imperative toast API, bound to the app-wide store. Plain object rather
- * than React's `useMemo` — the store is a module singleton, so there is nothing
- * per-instance to memoize.
+ * The imperative toast API, bound to the app-wide store. A plain object — the
+ * store is a module singleton, so there is nothing per-instance to memoize.
  */
 export function useToastHost() {
   return {
@@ -133,7 +144,7 @@ export function useToastHost() {
   };
 }
 
-const POSITION_CLASSES: Record<OverlayPosition, string> = {
+const PositionClasses: Record<OverlayPosition, string> = {
   'top-right': 'top-4 right-4 items-end',
   'top-left': 'top-4 left-4 items-start',
   'top-center': 'top-4 left-1/2 -translate-x-1/2 items-center',
@@ -148,7 +159,7 @@ const POSITION_CLASSES: Record<OverlayPosition, string> = {
  * toasts slide along their horizontal edge; centered toasts slide along the
  * vertical axis they're anchored to. Exit anims are shorter (`--duration-fast`).
  */
-const MOTION_CLASSES: Record<OverlayPosition, string> = {
+const MotionClasses: Record<OverlayPosition, string> = {
   'top-right':
     'motion-safe:data-[state=open]:animate-(--animate-slide-in-right) motion-safe:data-[state=closed]:animate-(--animate-slide-out-right) motion-reduce:animate-none',
   'top-left':
@@ -164,12 +175,12 @@ const MOTION_CLASSES: Record<OverlayPosition, string> = {
 };
 
 export interface ToastHostProps {
-  position?: OverlayPosition;
-  max?: number;
+  readonly position?: OverlayPosition;
+  readonly max?: number;
   /** The default auto-dismiss delay in ms; per-toast `duration` overrides. Default 5000. `Infinity` to disable. */
-  defaultDuration?: number;
-  canPauseOnHover?: boolean;
-  gap?: number;
+  readonly defaultDuration?: number;
+  readonly canPauseOnHover?: boolean;
+  readonly gap?: number;
 }
 
 interface VisibleToast extends ToastEntry {
@@ -189,7 +200,7 @@ import {
   watch,
   type PropType,
 } from 'vue';
-import { cn, OverlayPosition as OverlayPositionToken } from '../../../foundation/utils';
+import { cn, OverlayPosition as OverlayPositionToken } from '../../../foundation/styles';
 import { Announce, Portal, Presence } from '../../../foundation/primitives';
 import Toast from '../toast/Toast.vue';
 
@@ -201,11 +212,10 @@ const ToastNodeView = defineComponent({
 });
 
 /**
- * Viewport that subscribes to the global `toastHost` store and renders toasts
- * via the L4 `Toast` molecule. Mount once, per app.
+ * Renders the toast viewport — subscribes to the global `toastHost` store and stacks `Toast` cards.
+ * Mount once, per app.
  *
- * React's `className` arrives as the ordinary `class` attr and lands on the
- * stack container, the same node it landed on in React.
+ * A caller's `class` attr lands on the stack container.
  */
 defineOptions({ name: 'ToastHost', inheritAttrs: false });
 
@@ -222,7 +232,7 @@ const attrs = useAttrs();
 const items = shallowRef<ReadonlyArray<ToastEntry>>([]);
 const paused = ref(false);
 
-/* `useRef` counterparts — mutated across ticks, never rendered. */
+/* Non-reactive state — mutated across ticks, never rendered. */
 const timers = new Map<string, number>();
 const remaining = new Map<string, number>();
 const startedAt = new Map<string, number>();
@@ -357,14 +367,14 @@ const handleResume = () => {
 const stackClasses = computed(() =>
   cn(
     'pointer-events-none fixed z-toast flex flex-col',
-    POSITION_CLASSES[props.position],
+    PositionClasses[props.position],
     attrs.class as string | undefined,
   ),
 );
 
-const itemClasses = computed(() => cn('pointer-events-auto w-80', MOTION_CLASSES[props.position]));
+const itemClasses = computed(() => cn('pointer-events-auto w-80', MotionClasses[props.position]));
 
-/** Vue does not auto-suffix numeric style values with `px` the way React does. */
+/** Vue does not auto-suffix numeric style values with `px`. */
 const stackStyle = computed(() => ({ gap: `${props.gap}px` }));
 </script>
 
@@ -385,7 +395,7 @@ const stackStyle = computed(() => ({ gap: `${props.gap}px` }));
           `Presence` clones `data-state` onto this node and keeps it mounted
           until the exit animation ends; the `@vue:unmounted` hook is that
           "exit finished" signal (the read-only `Presence` API exposes no
-          callback), replacing React's unmount-only `onRemoved` effect.
+          callback).
         -->
         <div :class="itemClasses" @vue:unmounted="t.present ? undefined : removeExiting(t.id)">
           <ToastNodeView v-if="t.content" :node="t.content" />

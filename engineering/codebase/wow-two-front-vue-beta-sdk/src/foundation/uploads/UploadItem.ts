@@ -18,7 +18,7 @@
 export const UploadStatus = {
   /** Refers to an accepted file waiting for a free concurrency slot. */
   Queued: 'queued',
-  /** Refers to an upload on the wire — including the backoff wait between retry attempts, which still holds its slot. */
+  /** Refers to an upload on the wire — including the backoff wait between retries, which still holds its slot. */
   Uploading: 'uploading',
   /** Refers to an upload the transport completed; `result` carries its value. */
   Succeeded: 'succeeded',
@@ -57,13 +57,13 @@ export interface UploadItem<TResult = unknown> {
   /** Bytes of `file` uploaded so far. Resets to `0` at the start of each attempt — a retry re-sends from scratch. */
   readonly bytesUploaded: number;
 
-  /** How many attempts have been STARTED for this item: `0` while queued, `1` on the first upload, `2` after one retry. */
+  /** How many attempts have been STARTED: `0` while queued, `1` on the first upload, `2` after one retry. */
   readonly attempt: number;
 
   /** The normalized failure (via `foundation/errors`' `toError`) for a `failed` item; absent otherwise. */
   readonly error?: Error;
 
-  /** Why the file was rejected up front. Present only on a `failed` item that was never sent — a retry cannot help it. */
+  /** Why the file was rejected up front. Present only on a `failed` item never sent — a retry cannot help it. */
   readonly rejection?: UploadRejectionReason;
 
   /** The transport's return value for a `succeeded` item; absent otherwise. */

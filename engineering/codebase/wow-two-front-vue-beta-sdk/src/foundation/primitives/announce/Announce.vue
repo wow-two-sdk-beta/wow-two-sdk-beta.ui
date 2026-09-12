@@ -13,16 +13,16 @@ export type Politeness = (typeof Politeness)[keyof typeof Politeness];
 
 export interface AnnounceProps extends /* @vue-ignore */ HTMLAttributes {
   /** The live-region urgency — `polite` → `role="status"`, `assertive` → `role="alert"`. Default `polite`. */
-  politeness?: Politeness;
+  readonly politeness?: Politeness;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import { cn } from '../../utils/cn';
+import { cn } from '../../styles/Cn';
 
 /**
- * Visually-hidden ARIA live region. Slot content is announced by screen readers
+ * Renders a visually-hidden ARIA live region wrapping the slot, so screen readers announce its content
  * whenever it changes. Pair with a stable mount + swappable content for
  * lightweight transient announcements (status updates, toast messages, etc.).
  */
@@ -31,6 +31,11 @@ defineOptions({ name: 'Announce', inheritAttrs: false });
 const props = withDefaults(defineProps<{ politeness?: Politeness }>(), {
   politeness: Politeness.Polite,
 });
+
+defineSlots<{
+  /** The live-region content, announced whenever it changes. */
+  default(): unknown;
+}>();
 
 const attrs = useAttrs();
 

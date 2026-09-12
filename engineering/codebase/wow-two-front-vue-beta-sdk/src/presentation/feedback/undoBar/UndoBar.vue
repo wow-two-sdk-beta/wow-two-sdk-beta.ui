@@ -1,25 +1,25 @@
 <script lang="ts">
-import type { OverlayPosition } from '../../../foundation/utils';
+import type { OverlayPosition } from '../../../foundation/styles';
 
 export interface UndoBarProps {
-  isOpen: boolean;
-  /** The snackbar copy. Rich content → the `message` slot. Required in React; optional here so the slot form is usable — supply one or the other. */
-  message?: string;
-  undoLabel?: string;
+  readonly open: boolean;
+  /** The snackbar copy. Rich content → the `message` slot. Supply this or the slot. */
+  readonly message?: string;
+  readonly undoLabel?: string;
   /** The auto-dismiss delay in ms; `Infinity` = sticky. Default 5000. */
-  duration?: number;
-  canPauseOnHover?: boolean;
-  position?: OverlayPosition;
-  hasCountdown?: boolean;
+  readonly duration?: number;
+  readonly canPauseOnHover?: boolean;
+  readonly position?: OverlayPosition;
+  readonly hasCountdown?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, onUnmounted, ref, useAttrs, watch } from 'vue';
-import { cn, OverlayPosition as OverlayPositionToken, surfaceVariants } from '../../../foundation/utils';
+import { cn, OverlayPosition as OverlayPositionToken, surfaceVariants } from '../../../foundation/styles';
 import { Portal, Presence } from '../../../foundation/primitives';
 
-const POSITION: Record<OverlayPosition, string> = {
+const PositionClass: Record<OverlayPosition, string> = {
   'top-right': 'top-4 right-4',
   'top-left': 'top-4 left-4',
   'top-center': 'top-4 left-1/2 -translate-x-1/2',
@@ -29,9 +29,9 @@ const POSITION: Record<OverlayPosition, string> = {
 };
 
 /**
- * Snackbar with a single "Undo" action. Auto-dismisses after `duration`;
- * pause-on-hover preserves remaining time. For multi-toast queues use the L5
- * `ToastHost` instead.
+ * Renders a snackbar carrying one message and a single "Undo" action.
+ * Auto-dismisses after `duration`; pause-on-hover preserves remaining time. For multi-toast queues
+ * use the L5 `ToastHost` instead.
  *
  * React's `className` arrives as the ordinary `class` attr and is merged onto
  * the panel, not the positioning wrapper — the same node it landed on in React.
@@ -47,10 +47,15 @@ const props = withDefaults(defineProps<UndoBarProps>(), {
 });
 
 const emit = defineEmits<{
-  /** Replaces React's `onOpenChange`. Fires with `false` on auto-dismiss and after undo. */
-  'open-change': [open: boolean];
-  /** Replaces React's `onUndo`; omitting `@undo` omits the undo button. */
+  /** Fires when the bar opens or closes — it closes on auto-dismiss and right after Undo. */
+  'update:open': [open: boolean];
+  /** Fires when the reader presses Undo; omitting `@undo` omits the button. */
   undo: [];
+}>();
+
+defineSlots<{
+  /** The snackbar message. Falls back to the `message` prop. */
+  message?(): unknown;
 }>();
 
 const attrs = useAttrs();
@@ -77,7 +82,7 @@ let raf: number | null = null;
  * teardown that banks the elapsed time back into `remaining`.
  */
 watch(
-  [() => props.isOpen, () => props.duration, paused, () => props.hasCountdown],
+  [() => props.open, () => props.duration, paused, () => props.hasCountdown],
   ([isOpen, duration, isPaused, hasCountdown], _previous, onCleanup) => {
     if (!isOpen) {
       remaining = duration;
@@ -98,7 +103,7 @@ watch(
     if (!hasCountdown) {
       // No visible countdown — a single timeout, no per-frame re-renders.
       const handle = window.setTimeout(() => {
-        emit('open-change', false);
+        emit('update:open', false);
       }, remaining);
       onCleanup(() => {
         window.clearTimeout(handle);
@@ -112,7 +117,7 @@ watch(
       const left = Math.max(0, remaining - elapsed);
       progress.value = left / duration;
       if (left <= 0) {
-        emit('open-change', false);
+        emit('update:open', false);
         return;
       }
       raf = requestAnimationFrame(tick);
@@ -137,10 +142,10 @@ const setPaused = (value: boolean) => {
 
 const onUndoClick = () => {
   emit('undo');
-  emit('open-change', false);
+  emit('update:open', false);
 };
 
-const wrapperClasses = computed(() => cn('fixed z-toast', POSITION[props.position]));
+const wrapperClasses = computed(() => cn('fixed z-toast', PositionClass[props.position]));
 
 /**
  * `Presence` clones `data-state` onto this node, and the enter/exit tokens are
@@ -173,7 +178,7 @@ const showCountdown = computed(() => props.hasCountdown && props.duration !== In
   -->
   <Portal>
     <div :class="wrapperClasses">
-      <Presence :is-present="props.isOpen">
+      <Presence :is-present="props.open">
         <div
           role="status"
           aria-live="polite"
@@ -189,7 +194,7 @@ const showCountdown = computed(() => props.hasCountdown && props.duration !== In
           <button
             v-if="hasUndo()"
             type="button"
-            class="font-medium text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-1"
+            class="font-medium text-primary transition-colors hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-1"
             @click="onUndoClick"
           >
             {{ props.undoLabel }}

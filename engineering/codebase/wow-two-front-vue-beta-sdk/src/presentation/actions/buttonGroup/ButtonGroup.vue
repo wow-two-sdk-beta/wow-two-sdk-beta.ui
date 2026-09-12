@@ -1,24 +1,25 @@
 <script lang="ts">
 import type { HTMLAttributes } from 'vue';
-import type { Orientation } from '../../../foundation/utils';
+import type { Orientation } from '../../../foundation/styles';
 
 /* Native div attributes stay in attribute fallthrough rather than becoming runtime props. */
 export interface ButtonGroupProps extends /* @vue-ignore */ HTMLAttributes {
   /** The visual orientation. Default `horizontal`. */
-  orientation?: Orientation;
+  readonly orientation?: Orientation;
 
   /** The attached state — groups children with collapsed inner radii (connected look). Default `true`. */
-  isAttached?: boolean;
+  readonly isAttached?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn, Orientation as OrientationValue } from '../../../foundation/utils';
+import { cn, Orientation as OrientationValue } from '../../../foundation/styles';
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
+/** Renders a row or column of related buttons, collapsing their inner radii into one connected control. */
 defineOptions({ name: 'ButtonGroup', inheritAttrs: false });
 
 const props = withDefaults(defineProps<ButtonGroupProps>(), {
@@ -26,11 +27,16 @@ const props = withDefaults(defineProps<ButtonGroupProps>(), {
   isAttached: true,
 });
 
+defineSlots<{
+  /** The buttons the group lays out and joins into one connected control. */
+  default(): unknown;
+}>();
+
 const attrs = useAttrs();
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const isHorizontal = computed(() => props.orientation === OrientationValue.Horizontal);

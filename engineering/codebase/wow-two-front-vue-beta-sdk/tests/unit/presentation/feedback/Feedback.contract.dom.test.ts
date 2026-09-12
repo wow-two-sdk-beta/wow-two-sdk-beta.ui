@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
-import { Tour } from '@src/presentation/feedback';
+import { TourPopover } from '@src/presentation/overlays';
 
 const steps = [{ target: '#tour-anchor', title: 'Step one', body: 'Here is the thing.' }];
 
@@ -15,22 +15,22 @@ function withAnchor(run: () => Promise<void>): Promise<void> {
   });
 }
 
-describe('feedback — Tour open state', () => {
+describe('feedback — TourPopover open state', () => {
   /*
-   * The exact bug the port shipped: `Tour.isOpen` is an optional plain `boolean`, and Vue casts
+   * The exact bug the port shipped: `TourPopover.open` is an optional plain `boolean`, and Vue casts
    * an absent one to `false` unless the declaration owns an explicit `undefined` default. With
    * that default missing the tour read as controlled-and-closed no matter what, and could never
-   * open. Passing NO `isOpen` at all is the only shape that reproduces it — any test that hands
+   * open. Passing NO `open` at all is the only shape that reproduces it — any test that hands
    * the component an open prop passes either way.
    */
-  it('opens through defaultOpen with no isOpen passed', async () => {
+  it('opens through defaultOpen with no open passed', async () => {
     await withAnchor(async () => {
       const wrapper = mount({
-        render: () => h(Tour, { steps, defaultOpen: true }),
+        render: () => h(TourPopover, { steps, defaultOpen: true }),
       });
       await nextTick();
 
-      expect(document.body.textContent, 'Tour rendered nothing — isOpen was cast to false').toContain('Step one');
+      expect(document.body.textContent, 'TourPopover rendered nothing — open was cast to false').toContain('Step one');
 
       wrapper.unmount();
     });
@@ -38,7 +38,7 @@ describe('feedback — Tour open state', () => {
 
   it('stays closed when defaultOpen is not passed either', async () => {
     await withAnchor(async () => {
-      const wrapper = mount({ render: () => h(Tour, { steps }) });
+      const wrapper = mount({ render: () => h(TourPopover, { steps }) });
       await nextTick();
 
       expect(document.body.textContent).not.toContain('Step one');
@@ -46,9 +46,9 @@ describe('feedback — Tour open state', () => {
     });
   });
 
-  it('honours the controlled isOpen prop', async () => {
+  it('honours the controlled open prop', async () => {
     await withAnchor(async () => {
-      const wrapper = mount({ render: () => h(Tour, { steps, isOpen: true }) });
+      const wrapper = mount({ render: () => h(TourPopover, { steps, open: true }) });
       await nextTick();
 
       expect(document.body.textContent).toContain('Step one');

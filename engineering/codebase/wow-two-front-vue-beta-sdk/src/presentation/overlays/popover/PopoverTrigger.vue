@@ -7,17 +7,17 @@
  */
 export interface PopoverTriggerProps {
   /** Merge onto the single slot child instead of rendering a `<button>`. */
-  asChild?: boolean;
+  readonly asChild?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef, watch, type ComponentPublicInstance } from 'vue';
-import { toHtmlElement } from '../OverlayHelpers';
+import { OverlayExtensions } from '../OverlayExtensions';
 import { Primitive } from '../../../foundation/primitives';
 import { usePopoverContext } from './Popover.vue';
 
-/* Toggles the enclosing `Popover` and doubles as its positioning anchor. */
+/** Renders the control that toggles the enclosing `Popover` and anchors its panel. */
 defineOptions({ name: 'PopoverTrigger', inheritAttrs: false });
 
 /** The trigger content — React's `children`. */
@@ -32,11 +32,10 @@ const inner = useTemplateRef<ComponentPublicInstance>('inner');
 /* Lifted to a setup const so the template auto-unwraps it (a plain injected object does not). */
 const isOpen = context.open;
 
-/* React memoized a composed callback ref to keep the anchor node from thrashing; a post-flush watch is the equivalent. */
 watch(
   inner,
   (instance) => {
-    context.triggerEl.value = toHtmlElement(instance?.$el);
+    context.triggerEl.value = OverlayExtensions.toHtmlElement(instance?.$el);
   },
   { immediate: true, flush: 'post' },
 );

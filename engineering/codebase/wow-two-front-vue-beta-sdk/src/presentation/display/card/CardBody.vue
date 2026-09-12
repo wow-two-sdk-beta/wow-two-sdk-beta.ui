@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The main content region of a `Card`. */
+/** Renders the main content region of a `Card`, padded to match its header and footer. */
 defineOptions({ name: 'CardBody', inheritAttrs: false });
 
 /** The body content — React's `children`. */

@@ -1,45 +1,44 @@
 # GradientPicker
 
-## Purpose
-Visual editor for CSS gradients. Manage color stops (color + position 0–100%), gradient kind (`linear` / `radial` / `conic`), and angle. Outputs a CSS gradient string.
+Renders a live gradient preview over editors for its kind, angle and colour stops.
 
-## Anatomy
-```
-<GradientPicker>
-  ├── kind toggle (linear / radial / conic)
-  ├── angle slider (linear/conic only)
-  ├── preview bar
-  ├── stops list (color input + position number + remove)
-  ├── add-stop button
-  └── output field (CSS string, read-only)
-</GradientPicker>
-```
+Source: [GradientPicker.vue](GradientPicker.vue).
 
-## Required behaviors
-- Add / remove / reorder stops.
-- Edit color (HTML color input) + position (number 0–100).
-- Output: CSS gradient string (`linear-gradient(90deg, #abc 0%, #def 100%)`).
+Public import: `import { GradientPicker } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `value` / `defaultValue` / `onValueChange` | `Gradient` | controlled / uncontrolled | Object with `kind / angle / stops` |
-| `disabled` | `boolean` | `false` | |
-| `name` | `string` | — | Hidden input emits CSS string |
 
-## Output object
-```ts
-type Gradient = {
-  kind: 'linear' | 'radial' | 'conic';
-  angle: number;
-  stops: Array<{ color: string; position: number }>;
-};
-```
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `modelValue` | `Gradient` | no | `undefined` | The gradient, controlled. The `v-model` binding target. |
+| `defaultValue` | `Gradient` | no | `undefined` | The initial gradient when uncontrolled. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `name` | `string` | no | — | The hidden input name; the hidden input emits the CSS string. |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
 
-## Accessibility
-- Stop list = `<ul>`; each row a stop.
-- Color inputs are native `<input type="color">`.
-- Position inputs are number `<input>`.
+## Emits
 
-## Dependencies
-Foundation: `utils`, `icons`. Same domain: `forms/InputStyles`.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: Gradient];` | Fires when the reader edits the kind, angle or any stop — the `v-model` half. |
+
+## Slots
+
+None declared.
+
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

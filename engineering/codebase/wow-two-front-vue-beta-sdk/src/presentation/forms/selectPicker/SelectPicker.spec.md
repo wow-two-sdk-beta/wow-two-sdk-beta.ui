@@ -1,0 +1,60 @@
+# SelectPicker
+
+Renders a single-choice dropdown — the popover hosting trigger and panel, plus the hidden key input.
+
+Source: [SelectPicker.vue](SelectPicker.vue).
+
+Public import: `import { SelectPicker } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- The primary model and `update:modelValue` payload are the selected key (or null on clear). Resolve any associated option data from the caller’s options by key.
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
+
+## Props
+
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `modelValue` | `K \| null` | no | — | The selected key, controlled — the `v-model` target. `null` = explicit clear, `undefined` = uncontrolled. |
+| `defaultValue` | `K \| null` | no | — | The initial selected key for uncontrolled use. |
+| `keyEquals` | `EqualityComparer<K>` | no | — | The equality comparer for keys; defaults to `Equality.strictEquals`. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state, blocking interaction when true. |
+| `isLoading` | `boolean` | no | `false` | The loading state, showing a spinner in the trigger and blocking interaction. |
+| `loadingLabel` | `string` | no | `'Loading options…'` | The label for the loading state on the polite live region + in-list row; defaults to `'Loading options…'`. |
+| `isClearable` | `boolean` | no | `false` | The clearable state, rendering a clear (×) button in the trigger when a value is set. |
+| `clearLabel` | `string` | no | `'Clear selection'` | The label for the clear (×) button for assistive tech; defaults to `'Clear selection'`. |
+| `name` | `string` | no | — | The name of the hidden form input that ships the serialized key. |
+| `serializeKey` | `(key: K) => string` | no | — | The key serializer for the hidden form input; defaults to `String(key)`. |
+| `getOptionLabel` | `(key: K) => string \| number \| null` | no | — | The label resolver for a `modelValue`/`defaultValue` before items register (the trigger otherwise shows the raw serialized key until the first open). |
+| `options` | `ReadonlyArray<SelectPickerOption<K, V>>` | no | — | The option set seeded eagerly into the item registry + label cache on mount — before the popover ever opens. Lets `SelectPickerValue` resolve the selected label and closed-trigger typeahead work without a first open, so `getOptionLabel` is unnecessary. Compound `<SelectPickerItem>` children still render the list and remain fully supported; `options` is an alternative/supplement. When both supply the same key, the mounted child wins (deduped via `keyEquals`). Each entry mirrors what a `SelectPickerItem` registers. |
+| `isInvalid` | `boolean` | no | `undefined` | The invalid state, styling the trigger as invalid (red border, error ring). |
+| `defaultOpen` | `boolean` | no | `false` | The initial open state of the dropdown when uncontrolled. |
+| `open` | `boolean` | no | `undefined` | The dropdown open state, controlled. The `v-model:open` binding target. |
+| `placement` | `Placement` | no | `'bottom'` | The floating placement of the dropdown. |
+
+## Emits
+
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [key: K \| null];` | Fires when the reader picks an option or clears it — the `v-model` half, carrying the key. |
+| `update:open` | `'update:open': [open: boolean];` | Fires when the reader opens or dismisses the dropdown — the `v-model:open` half. |
+
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [Forms.regression.dom.test.ts](../../../../tests/unit/presentation/forms/Forms.regression.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

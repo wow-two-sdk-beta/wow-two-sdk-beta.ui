@@ -1,5 +1,5 @@
-// Color parsing + conversion helpers for ColorPicker, ColorArea, ColorWheel,
-// ColorSlider, ColorSwatch, ColorInput. Co-located in `forms/` so imports
+// Color parsing + conversion helpers for ColorPicker, ColorArea, ColorWheelInput,
+// ColorSliderInput, ColorSwatchPreview, ColorInput. Co-located in `forms/` so imports
 // stay within-domain.
 //
 // Canonical representation: HSV (hue 0–360, saturation 0–1, value 0–1) plus

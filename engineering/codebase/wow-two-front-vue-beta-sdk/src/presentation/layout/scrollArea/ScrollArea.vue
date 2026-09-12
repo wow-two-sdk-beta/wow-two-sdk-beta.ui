@@ -16,22 +16,27 @@ export type ScrollAxis = (typeof ScrollAxis)[keyof typeof ScrollAxis];
 
 export interface ScrollAreaProps {
   /** The scroll axis. Default `vertical`. */
-  axis?: ScrollAxis;
+  readonly axis?: ScrollAxis;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
 /**
- * Native scrollable container with stable visuals. For custom-styled
+ * Renders a native scrollable container with stable visuals. For custom-styled
  * scrollbars (track + thumb separately animated) use the L5 ScrollArea
  * organism. This atom exists for the common case.
  */
 defineOptions({ name: 'ScrollArea', inheritAttrs: false });
 
 const props = withDefaults(defineProps<ScrollAreaProps>(), { axis: ScrollAxis.Vertical });
+
+defineSlots<{
+  /** The scrollable content. */
+  default?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');

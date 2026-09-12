@@ -7,11 +7,11 @@
  * cannot hold, so the plain-value mirror is spelled out instead.
  */
 export interface ScrollSpyProps {
-  ids: ReadonlyArray<string>;
-  rootMargin?: string;
-  threshold?: number | number[];
+  readonly ids: ReadonlyArray<string>;
+  readonly rootMargin?: string;
+  readonly threshold?: number | ReadonlyArray<number>;
   /** Element to observe within. Defaults to viewport. */
-  root?: Element | Document | null;
+  readonly root?: Element | Document | null;
 }
 </script>
 
@@ -20,8 +20,8 @@ import { watch } from 'vue';
 import { useScrollSpy } from './UseScrollSpy';
 
 /**
- * Scoped-slot variant of `useScrollSpy`. Emits `activeId` via `active-change`
- * or the default slot. Renders nothing by default.
+ * Renders nothing by default — hands the topmost in-view section's id to its default slot.
+ * The scoped-slot variant of `useScrollSpy`; the id also leaves through `active-change`.
  */
 defineOptions({ name: 'ScrollSpy' });
 
@@ -33,7 +33,7 @@ defineSlots<{
 const props = defineProps<ScrollSpyProps>();
 
 const emit = defineEmits<{
-  /** Replaces React's `onActiveChange`. Fires once on mount with the initial value, as the effect did. */
+  /** Fires when a different section becomes the topmost in view; fires once on mount as well. */
   'active-change': [id: string | null];
 }>();
 

@@ -6,15 +6,15 @@ import type {
   SurfaceRadius,
   SurfaceTone,
   SurfaceVariant,
-} from '../../../foundation/utils';
+} from '../../../foundation/styles';
 
 /**
  * Represents the prop surface of `Menu`.
  *
- * React declared the surface axes by `extends SurfaceVariants`; they are
+ * React declared the surface axes by `extends SurfaceLayoutVariants`; they are
  * spelled out here because the SFC compiler's type resolver cannot follow a
  * `VariantProps<typeof …>` base and fails the build on it. The aliases below
- * are the canonical ones from `foundation/utils`, already locked against the
+ * are the canonical ones from `foundation/styles`, already locked against the
  * `surfaceVariants` config there, so the two cannot drift. `placement` is
  * `Placement` for the same reason — React read it back off `AnchoredPositioner`
  * with an indexed access, which the resolver cannot follow either.
@@ -24,55 +24,51 @@ import type {
  * the menu surface through `v-bind="rest"` below.
  */
 export interface MenuProps {
-  /** The open state, controlled. The React name; `isOpen` is the house spelling and `open` wins when both are set. */
-  open?: boolean;
-
-  /** The open state, controlled — the house spelling of `open`. */
-  isOpen?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly open?: boolean;
 
   /** The element the surface anchors to. */
-  anchor: HTMLElement | null;
+  readonly anchor: HTMLElement | null;
 
   /** The Floating UI placement. Default `bottom-start`. */
-  placement?: Placement;
+  readonly placement?: Placement;
 
   /** The distance between anchor and surface in px. Default 6. */
-  offset?: number;
+  readonly offset?: number;
 
   /** The visual recipe. Default `surface`. */
-  variant?: SurfaceVariant;
+  readonly variant?: SurfaceVariant;
 
   /** The color tone the recipe is tinted with. */
-  tone?: SurfaceTone;
+  readonly tone?: SurfaceTone;
 
   /** The corner rounding. Default `md`. */
-  radius?: SurfaceRadius;
+  readonly radius?: SurfaceRadius;
 
   /** The inner spacing step. Default `xs`. */
-  padding?: SurfacePadding;
+  readonly padding?: SurfacePadding;
 
   /** The shadow depth. */
-  elevation?: SurfaceElevation;
+  readonly elevation?: SurfaceElevation;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, provide, useAttrs } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
+import { cn, surfaceVariants } from '../../../foundation/styles';
 import { AnchoredPositioner, DismissableLayer, FocusScope, Portal, Presence } from '../../../foundation/primitives';
 import { MenuKey, type MenuItemEntry } from './MenuContext';
 import { menuVariants } from './Menu.variants';
 
-/** The anchored, focus-trapped menu surface. */
+/** Renders the anchored, focus-trapped menu surface the arrow keys walk. */
 defineOptions({ name: 'Menu', inheritAttrs: false });
 
 /** The menu contents — `MenuItem` / `MenuGroup` / `MenuLabel` / `MenuSeparator`. React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-/** `open` / `isOpen` default to `undefined` so an absent prop cannot read as an explicit `false`. */
+/** `open` default to `undefined` so an absent prop cannot read as an explicit `false`. */
 const props = withDefaults(defineProps<MenuProps>(), {
   open: undefined,
-  isOpen: undefined,
   placement: 'bottom-start',
   offset: 6,
   variant: undefined,
@@ -83,20 +79,19 @@ const props = withDefaults(defineProps<MenuProps>(), {
 });
 
 const emit = defineEmits<{
-  /** Replaces React's `onClose` — Escape, an outside pointerdown, Tab, or an item selection. */
-  close: [];
+  /** Fires when the menu should update:open — Escape, an outside pointerdown, Tab, or a selection. */
+  'update:open': [open: boolean];
 
   /**
-   * Replaces React's `onKeyDown` — fires for every keydown on the menu container,
-   * ahead of the menu's own Tab handling, so a wrapper (Menubar) can add navigation
-   * and opt out with `preventDefault()`.
+   * Fires when a key goes down on the menu container, ahead of the menu's own Tab
+   * handling, so a wrapper (Menubar) can add navigation and opt out with `preventDefault()`.
    */
   keydown: [event: KeyboardEvent];
 }>();
 
 const attrs = useAttrs();
 
-const isMenuOpen = computed(() => (props.open !== undefined ? props.open : (props.isOpen ?? false)));
+const isMenuOpen = computed(() => props.open ?? false);
 
 /** The live item registry — a plain array, not reactive: the ordering is read imperatively. */
 const items: Array<MenuItemEntry> = [];
@@ -112,7 +107,7 @@ function unregisterItem(id: string): void {
   if (index >= 0) items.splice(index, 1);
 }
 
-provide(MenuKey, { registerItem, unregisterItem, items, close: () => emit('close') });
+provide(MenuKey, { registerItem, unregisterItem, items, close: () => emit('update:open', false) });
 
 const classes = computed(() =>
   cn(
@@ -138,12 +133,12 @@ const rest = computed(() => {
 });
 
 function handleEscape(): void {
-  emit('close');
+  emit('update:open', false);
 }
 
 function handleOutsidePointerDown(event: PointerEvent): void {
   if (props.anchor?.contains(event.target as Node)) return;
-  emit('close');
+  emit('update:open', false);
 }
 
 function handleKeydown(event: KeyboardEvent): void {
@@ -151,7 +146,7 @@ function handleKeydown(event: KeyboardEvent): void {
   if (event.defaultPrevented) return;
   if (event.key === 'Tab') {
     event.preventDefault();
-    emit('close');
+    emit('update:open', false);
   }
 }
 </script>

@@ -16,7 +16,7 @@
 // row objects, so `difference(next, previous, (row) => row.id)` is the real-world call, not the identity one.
 
 /** Indexes a list by its comparison key — the shared internal step of every relation below. */
-function toKeySet<T, TKey>(items: readonly T[], keyFn?: (item: T) => TKey): Set<TKey | T> {
+function toKeySet<T, TKey>(items: ReadonlyArray<T>, keyFn?: (item: T) => TKey): Set<TKey | T> {
   const keys = new Set<TKey | T>();
   for (const item of items) keys.add(keyFn ? keyFn(item) : item);
   return keys;
@@ -34,7 +34,7 @@ function toKeySet<T, TKey>(items: readonly T[], keyFn?: (item: T) => TKey): Set<
  * @param keyFn Optional key extractor; defaults to the item itself (SameValueZero).
  * @returns A new array; neither input is mutated.
  */
-export function union<T, TKey = T>(first: readonly T[], second: readonly T[], keyFn?: (item: T) => TKey): T[] {
+export function union<T, TKey = T>(first: ReadonlyArray<T>, second: ReadonlyArray<T>, keyFn?: (item: T) => TKey): T[] {
   const seen = new Set<TKey | T>();
   const result: T[] = [];
   for (const item of first) {
@@ -61,7 +61,11 @@ export function union<T, TKey = T>(first: readonly T[], second: readonly T[], ke
  * @param keyFn Optional key extractor; defaults to the item itself (SameValueZero).
  * @returns A new array; neither input is mutated.
  */
-export function intersection<T, TKey = T>(first: readonly T[], second: readonly T[], keyFn?: (item: T) => TKey): T[] {
+export function intersection<T, TKey = T>(
+  first: ReadonlyArray<T>,
+  second: ReadonlyArray<T>,
+  keyFn?: (item: T) => TKey,
+): T[] {
   const other = toKeySet(second, keyFn);
   const seen = new Set<TKey | T>();
   const result: T[] = [];
@@ -85,7 +89,11 @@ export function intersection<T, TKey = T>(first: readonly T[], second: readonly 
  * @param keyFn Optional key extractor; defaults to the item itself (SameValueZero).
  * @returns A new array; neither input is mutated.
  */
-export function difference<T, TKey = T>(first: readonly T[], second: readonly T[], keyFn?: (item: T) => TKey): T[] {
+export function difference<T, TKey = T>(
+  first: ReadonlyArray<T>,
+  second: ReadonlyArray<T>,
+  keyFn?: (item: T) => TKey,
+): T[] {
   const other = toKeySet(second, keyFn);
   const seen = new Set<TKey | T>();
   const result: T[] = [];
@@ -108,8 +116,8 @@ export function difference<T, TKey = T>(first: readonly T[], second: readonly T[
  * @returns A new array; neither input is mutated.
  */
 export function symmetricDifference<T, TKey = T>(
-  first: readonly T[],
-  second: readonly T[],
+  first: ReadonlyArray<T>,
+  second: ReadonlyArray<T>,
   keyFn?: (item: T) => TKey,
 ): T[] {
   return [...difference(first, second, keyFn), ...difference(second, first, keyFn)];

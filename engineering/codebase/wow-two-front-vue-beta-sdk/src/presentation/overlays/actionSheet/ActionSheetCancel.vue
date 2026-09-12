@@ -10,10 +10,10 @@ export type ActionSheetCancelProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useActionSheetContext } from './ActionSheet.vue';
 
-/* The separated dismiss row of an `ActionSheet`. */
+/** Renders the separated dismiss row of an `ActionSheet`. */
 defineOptions({ name: 'ActionSheetCancel', inheritAttrs: false });
 
 /** The row label — React's `children`, which defaulted to `Cancel`. */
@@ -25,7 +25,7 @@ const el = useTemplateRef<HTMLButtonElement>('el');
 
 const classes = computed(() =>
   cn(
-    'mt-2 flex h-12 w-full items-center justify-center rounded-lg bg-card text-base font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'mt-2 flex h-12 w-full items-center justify-center rounded-lg bg-card text-base font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     attrs.class as string | undefined,
   ),
 );

@@ -6,10 +6,10 @@ export interface TableHeaderCellProps {}
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { DENSITY_CELL, useTableContext } from './TableContext';
+import { cn } from '../../../foundation/styles';
+import { DensityCell, useTableContext } from './TableContext';
 
-/** A `th` column header in a `Table` — padding follows the root's density. */
+/** Renders a `th` column header in a `Table`, padded to the root density. */
 defineOptions({ name: 'TableHeaderCell', inheritAttrs: false });
 
 /** The header cell content — React's `children`. */
@@ -20,7 +20,7 @@ const el = useTemplateRef<HTMLTableCellElement>('el');
 const table = useTableContext();
 
 const classes = computed(() =>
-  cn(DENSITY_CELL[table.density], 'font-semibold text-foreground', attrs.class as string | undefined),
+  cn(DensityCell[table.density], 'font-semibold text-foreground', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

@@ -1,44 +1,15 @@
-// One call, four outcomes, no throw — the speaking half of the vector.
-//
-// DEFINING CONTRACT: NOTHING HERE THROWS. `speak` is called straight from a click handler, where a rejection is
-// an unhandled error in the consumer's app and the user hears nothing and sees nothing. Every path — missing API,
-// a cancel, an engine failure, a hostile option object — settles to a `SpeakResult` the caller switches on.
-//
-// THE RETURN IS BOTH A RESULT AND A HANDLE. `await speak(text)` gives the `SpeakResult`; keeping the return value
-// gives `cancel` / `pause` / `resume` for speech that is still running. One object does both because the two are
-// wanted at different moments by the same caller, and a separate `speakWithHandle` would duplicate the module.
-// The handle is a `PromiseLike`, not a `Promise` subclass — awaiting is all a consumer needs, and `.spoken` is
-// there for anyone who wants the real promise.
-//
-// The handle's controls are HONESTLY GLOBAL: the platform has no per-utterance cancel, so `handle.cancel()` is
-// `cancelSpeech()` and clears the whole queue. Naming it on the handle is a convenience, not a narrowing.
-//
-// TWO ENGINE BUGS THIS MODULE ABSORBS:
-//  - Utterance garbage collection. Chrome and WebKit have collected a `SpeechSynthesisUtterance` whose only
-//    reference was the engine's own queue, and the utterance then falls silent with NO `end` event — a promise
-//    that never settles. A module-level `Set` holds every in-flight utterance until it settles, which is the
-//    known workaround and costs one reference per active utterance.
-//  - Out-of-range `rate` / `pitch` / `volume`. The spec has the setter throw; engines disagree on whether they
-//    throw or clamp. Values are clamped here BEFORE assignment, and a non-finite value is dropped rather than
-//    clamped — `NaN` means the caller computed something wrong, and the engine default is a better answer than
-//    an arbitrary pick from either end of the range.
-//
-// NOT worked around: Chrome stops synthesis after roughly 15 seconds of continuous speech. The known fix is a
-// `pause()`/`resume()` heartbeat on a timer, which interferes with the global queue every consumer shares. Long
-// text should be split into sentence-sized utterances by the caller instead.
-
 import { toError } from '../errors';
 
-import { cancelGeneration, cancelSpeech, pauseSpeech, resumeSpeech } from './SpeechControls';
+import { cancelGeneration, cancelSpeech, onSpeechCancelled, pauseSpeech, resumeSpeech } from './SpeechControls';
 import { speechSynthesisWith, utteranceConstructor } from './SpeechSupport';
-import { toSpeakFailure, type SpeakResult } from './SpeechResult';
+import { toSpeakFailure, type SpeechSpeakResult } from './SpeechResult';
 
 /** Tunes one utterance. Every field is optional; an omitted one leaves the engine's own default in place. */
 export interface SpeakOptions {
   /** The voice to speak with — an entry from `listVoices()`. Omitted means the engine's default for `lang`. */
   readonly voice?: SpeechSynthesisVoice;
 
-  /** BCP-47 language tag (`en-US`, `de`). Same vocabulary as `foundation/i18n`'s locale, which `useSpeechSynthesis` defaults it to. */
+  /** BCP-47 tag (`en-US`, `de`). Same vocabulary as `foundation/i18n`, which `useSpeechSynthesis` defaults it to. */
   readonly lang?: string;
 
   /** Speed, `0.1`–`10`, default `1`. Clamped to that range; a non-finite value is ignored. */
@@ -57,9 +28,9 @@ export interface SpeakOptions {
  * All three controls are GLOBAL — the platform exposes no per-utterance cancel or pause, so they act on the
  * document's whole utterance queue.
  */
-export interface SpeechHandle extends PromiseLike<SpeakResult> {
+export interface SpeechHandle extends PromiseLike<SpeechSpeakResult> {
   /** The underlying promise, for a caller that wants to store or pass it. Never rejects. */
-  readonly spoken: Promise<SpeakResult>;
+  readonly spoken: Promise<SpeechSpeakResult>;
 
   /** Stops this utterance — and every other queued one. Settles the handle as `cancelled`. */
   readonly cancel: () => void;
@@ -106,14 +77,14 @@ function configure(utterance: SpeechSynthesisUtterance, options: SpeakOptions | 
 }
 
 /** Wraps a promise and a set of controls into the awaitable handle. */
-function toHandle(spoken: Promise<SpeakResult>, controls: Omit<SpeechHandle, 'spoken' | 'then'>): SpeechHandle {
+function toHandle(spoken: Promise<SpeechSpeakResult>, controls: Omit<SpeechHandle, 'spoken' | 'then'>): SpeechHandle {
   return {
     spoken,
     cancel: controls.cancel,
     pause: controls.pause,
     resume: controls.resume,
-    then: <TResult1 = SpeakResult, TResult2 = never>(
-      onFulfilled?: ((value: SpeakResult) => TResult1 | PromiseLike<TResult1>) | null,
+    then: <TResult1 = SpeechSpeakResult, TResult2 = never>(
+      onFulfilled?: ((value: SpeechSpeakResult) => TResult1 | PromiseLike<TResult1>) | null,
       onRejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null,
     ): PromiseLike<TResult1 | TResult2> => spoken.then(onFulfilled, onRejected),
   };
@@ -132,7 +103,7 @@ function inertControls(): Omit<SpeechHandle, 'spoken' | 'then'> {
  *
  * ```ts
  * const result = await speak('Order confirmed', { lang: 'en-GB', rate: 1.1 });
- * if (result.status === 'unsupported') showTextInstead();
+ * if (!result.ok && result.failure.status === 'unsupported') showTextInstead();
  *
  * const handle = speak(longArticle);
  * stopButton.onclick = () => handle.cancel(); // settles as `cancelled`
@@ -143,22 +114,22 @@ function inertControls(): Omit<SpeechHandle, 'spoken' | 'then'> {
  *
  * Never throws, never rejects.
  *
- * @param text The text to speak. Empty text is handed to the engine unchanged — engines differ on whether they
- *   fire `end` for it, which is exactly the kind of thing a caller should not have to guess about mid-sentence.
+ * @param text The text to speak. Empty text completes immediately without waiting for a browser event.
  * @param options Voice, language, and prosody. Out-of-range prosody is clamped; see {@link SpeakOptions}.
  * @returns The awaitable handle — `spoken` / `cancelled` / `unsupported` / `failed`, plus the live controls.
  */
 export function speak(text: string, options?: SpeakOptions): SpeechHandle {
+  if (text.length === 0) return toHandle(Promise.resolve({ ok: true, value: undefined }), inertControls());
   const synth = speechSynthesisWith('speak');
   const Utterance = utteranceConstructor();
 
   // Both globals or nothing: an engine with no `SpeechSynthesisUtterance` cannot be given anything to say.
   if (synth === undefined || Utterance === undefined) {
-    return toHandle(Promise.resolve({ status: 'unsupported' }), inertControls());
+    return toHandle(Promise.resolve({ ok: false, failure: { status: 'unsupported' } }), inertControls());
   }
 
-  let settle!: (result: SpeakResult) => void;
-  const spoken = new Promise<SpeakResult>((resolve) => {
+  let settle!: (result: SpeechSpeakResult) => void;
+  const spoken = new Promise<SpeechSpeakResult>((resolve) => {
     settle = resolve;
   });
 
@@ -166,9 +137,10 @@ export function speak(text: string, options?: SpeakOptions): SpeechHandle {
   let utterance: SpeechSynthesisUtterance | undefined;
 
   /** Settles once and drops the GC-guard reference. Engines fire both `end` and `error` in some cancel paths. */
-  const finish = (result: SpeakResult): void => {
+  const finish = (result: SpeechSpeakResult): void => {
     if (settled) return;
     settled = true;
+    unsubscribeCancel?.();
     if (utterance !== undefined) inFlight.delete(utterance);
     settle(result);
   };
@@ -178,7 +150,10 @@ export function speak(text: string, options?: SpeakOptions): SpeechHandle {
   } catch (cause) {
     // A constructor that refused the text (a hostile value, a stripped polyfill) is a failure of this call, not
     // an absence of the feature — `unsupported` would send the caller looking for the wrong fix.
-    return toHandle(Promise.resolve({ status: 'failed', error: toError(cause) }), inertControls());
+    return toHandle(
+      Promise.resolve({ ok: false, failure: { status: 'failed', error: toError(cause) } }),
+      inertControls(),
+    );
   }
 
   configure(utterance, options);
@@ -187,15 +162,16 @@ export function speak(text: string, options?: SpeakOptions): SpeechHandle {
   // the ending arrives. See `SpeechControls` for why an `end` event alone cannot answer this.
   const generation = cancelGeneration();
   const wasCancelled = (): boolean => cancelGeneration() !== generation;
+  const unsubscribeCancel = onSpeechCancelled(() => finish({ ok: false, failure: { status: 'cancelled' } }));
 
   utterance.onend = (): void => {
-    finish(wasCancelled() ? { status: 'cancelled' } : { status: 'spoken' });
+    finish(wasCancelled() ? { ok: false, failure: { status: 'cancelled' } } : { ok: true, value: undefined });
   };
 
   utterance.onerror = (event): void => {
     // A cancel we already know about wins over the code: engines disagree on which code a cancelled utterance
     // carries (`canceled`, `interrupted`, and Safari has shipped others), and the counter is not a guess.
-    finish(wasCancelled() ? { status: 'cancelled' } : toSpeakFailure(event));
+    finish(wasCancelled() ? { ok: false, failure: { status: 'cancelled' } } : toSpeakFailure(event));
   };
 
   inFlight.add(utterance);
@@ -203,7 +179,7 @@ export function speak(text: string, options?: SpeakOptions): SpeechHandle {
   try {
     synth.speak(utterance);
   } catch (cause) {
-    finish({ status: 'failed', error: toError(cause) });
+    finish({ ok: false, failure: { status: 'failed', error: toError(cause) } });
   }
 
   return toHandle(spoken, {

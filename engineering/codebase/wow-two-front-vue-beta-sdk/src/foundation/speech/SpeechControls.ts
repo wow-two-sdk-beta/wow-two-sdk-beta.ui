@@ -1,30 +1,14 @@
-// The queue-level controls of the synthesis half — and the CANCEL GENERATION that lets `speak` tell "the engine
-// reached the end of the text" from "something stopped it".
-//
-// WHY A COUNTER EXISTS AT ALL: the platform has no per-utterance cancel. `speechSynthesis.cancel()` clears the
-// WHOLE queue, and what an interrupted utterance receives afterwards is engine-dependent — Chrome fires `end`
-// (byte-for-byte indistinguishable from a natural finish), Firefox fires `error` with `canceled`. An
-// `end`-means-spoken reading therefore reports success for a sentence the user cut off. Every `speak` records the
-// counter before speaking and re-reads it on settle: a bump in between means a cancel reached it, whoever called
-// it — this component's unmount, another component's button, or the handle's own `cancel()`.
-//
-// The bump happens BEFORE the platform call, not after. An engine (or a test double) that dispatches `end`
-// synchronously from inside `cancel()` would otherwise run the handler while the counter still held its old
-// value, and the utterance would report `spoken` for speech that was just cut off. Ordering the bump first makes
-// the observation correct for both dispatch timings; the cost is that a `cancel()` which throws still counts as
-// an intent to cancel, which is the right way round.
-//
-// EVERY CONTROL IS GLOBAL, and that is the platform's design, not a shortcut here: there is one utterance queue
-// per document. `cancelSpeech()` from one component silences another component's speech. Components that must
-// not interfere cannot be fixed at this layer — they have to coordinate above it.
-//
-// Platform caveat worth knowing before shipping a pause button: on Chrome for Android, `pause()` behaves like
-// `cancel()` — the utterance does not resume. `pauseSpeech` reports only that the call was made.
-
 import { speechSynthesisWith } from './SpeechSupport';
 
 /** Bumped by every cancel that reaches a real engine. Read by `speak` to classify its own ending. */
 let cancels = 0;
+const cancellationListeners = new Set<() => void>();
+
+/** Registers an internal settlement callback for queue-wide cancellation. */
+export function onSpeechCancelled(listener: () => void): () => void {
+  cancellationListeners.add(listener);
+  return () => cancellationListeners.delete(listener);
+}
 
 /**
  * The current cancel generation.
@@ -53,6 +37,7 @@ export function cancelSpeech(): boolean {
   if (synth === undefined) return false;
 
   cancels += 1;
+  for (const listener of [...cancellationListeners]) listener();
   try {
     synth.cancel();
     return true;

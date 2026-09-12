@@ -15,11 +15,11 @@
 // `FilterDescriptor`s, `applySort`, `compareValues` — the thing a data table's headers drive. This slice is
 // strictly below it: raw array/map/set/tree shape operations with no notion of a field name, a direction,
 // or a locale. Consequently this slice EXPOSES NO SORT HELPER at all. Ordering has exactly one home: use
-// `applySort` for descriptor-driven sorts and `foundation/utils`' `compareStrings` (the one cached,
+// `applySort` for descriptor-driven sorts and `foundation/i18n`' `compareStrings` (the one cached,
 // numeric-aware `Intl.Collator`) for ad-hoc text ordering. A second comparator here would let a tree order
 // its rows differently from the table beside it, which is precisely the drift the SDK exists to prevent.
 //
-// BOUNDARY WITH `foundation/utils`' `Equality`. That helper owns the comparer VOCABULARY (`strictEquals`,
+// BOUNDARY WITH `foundation/collections`' `Equality`. That helper owns the comparer VOCABULARY (`strictEquals`,
 // `byKey`, `shallowEquals` over a record) and is reused here rather than re-implemented — `toggleItem`
 // defaults to `Equality.strictEquals`, and `shallowEqual`'s plain-object case delegates to
 // `Equality.shallowEquals`. What this slice adds is the array dispatch and the deep walk.
@@ -51,3 +51,5 @@ export { arrayShallowEqual, deepEqual, shallowEqual } from './Comparison';
 
 // Trees — flat `{ id, parentId }` list to nested nodes, plus the walks over one
 export { buildTree, findInTree, flattenTree, mapTree, type BuildTreeOptions, type TreeNode } from './Tree';
+
+export { Equality, type EqualityComparer } from './Equality';

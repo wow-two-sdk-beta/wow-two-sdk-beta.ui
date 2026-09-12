@@ -17,7 +17,7 @@ export const Breakpoint = {
 
 export type Breakpoint = (typeof Breakpoint)[keyof typeof Breakpoint];
 
-const BREAKPOINT_PX: Record<Breakpoint, number> = {
+const BreakpointPx: Record<Breakpoint, number> = {
   sm: 640,
   md: 768,
   lg: 1024,
@@ -58,48 +58,36 @@ export function useAppShell(): AppShellContextValue {
   return useAppShellContext();
 }
 
-/**
- * The prop surface of `AppShell`.
- *
- * `sidebarOpen` and `isSidebarOpen` are the same controlled state under two
- * names: `sidebarOpen` is the `v-model:sidebarOpen` binding target,
- * `isSidebarOpen` React's spelling. `isSidebarOpen` wins when both are set —
- * React's name always resolves first, so an explicit binding is never
- * swallowed by a `v-model` that is also present.
- * React's `onSidebarOpenChange` is the `sidebar-open-change` emit;
- * `update:sidebarOpen` fires alongside it so `v-model` works.
- */
+/** Controlled axes use their canonical Vue model names; each update event requests caller state. */
 export interface AppShellProps {
   /** The sidebar column width, any CSS length. Default `240px`. */
-  sidebarWidth?: string;
+  readonly sidebarWidth?: string;
 
   /** The aside rail width, any CSS length. Default `280px`. */
-  asideWidth?: string;
+  readonly asideWidth?: string;
 
   /** The sidebar collapses below this breakpoint. Default `lg`. */
-  sidebarBreakpoint?: Breakpoint;
+  readonly sidebarBreakpoint?: Breakpoint;
 
   /** The aside hides below this breakpoint. Default `xl`. */
-  asideBreakpoint?: Breakpoint;
+  readonly asideBreakpoint?: Breakpoint;
 
   /** The mobile-sidebar open state, controlled. The `v-model:sidebarOpen` binding target. */
-  sidebarOpen?: boolean;
-
-  /** The mobile-sidebar open state, controlled — React's spelling, which wins when both are set. */
-  isSidebarOpen?: boolean;
+  readonly sidebarOpen?: boolean;
 
   /** The initial mobile-sidebar state when uncontrolled. Default `false`. */
-  defaultSidebarOpen?: boolean;
+  readonly defaultSidebarOpen?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, normalizeStyle, provide, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { useControlled, useMediaQuery } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
+import { useMediaQuery } from '../../../foundation/device';
 
 /**
- * Top-level page frame. Children: `AppShellHeader` / `AppShellSidebar` /
+ * Renders the top-level page frame. Children: `AppShellHeader` / `AppShellSidebar` /
  * `AppShellMain` / `AppShellAside` / `AppShellFooter`. CSS-grid layout; the
  * sidebar collapses to a `Drawer` below `sidebarBreakpoint`.
  */
@@ -109,7 +97,7 @@ defineOptions({ name: 'AppShell', inheritAttrs: false });
 defineSlots<{ default(): unknown }>();
 
 /**
- * `sidebarOpen: undefined` / `isSidebarOpen: undefined` are load-bearing: Vue
+ * `sidebarOpen: undefined` / `sidebarOpen: undefined` are load-bearing: Vue
  * coerces an absent `Boolean` prop to `false` unless the declaration *owns* a
  * `default` key, which would strand the uncontrolled path behind a
  * permanently-closed controlled one.
@@ -120,31 +108,27 @@ const props = withDefaults(defineProps<AppShellProps>(), {
   sidebarBreakpoint: 'lg',
   asideBreakpoint: 'xl',
   sidebarOpen: undefined,
-  isSidebarOpen: undefined,
   defaultSidebarOpen: false,
 });
 
 const emit = defineEmits<{
-  /** The `v-model:sidebarOpen` half. */
+  /** Fires when the mobile sidebar opens or closes — the `v-model:sidebarOpen` half. */
   'update:sidebarOpen': [open: boolean];
-  /** Replaces React's `onSidebarOpenChange`. */
-  'sidebar-open-change': [open: boolean];
 }>();
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
 const controlled = useControlled<boolean>({
-  controlled: () => (props.isSidebarOpen !== undefined ? props.isSidebarOpen : props.sidebarOpen),
+  controlled: () => props.sidebarOpen,
   default: () => props.defaultSidebarOpen,
   onChange: (value) => {
     emit('update:sidebarOpen', value);
-    emit('sidebar-open-change', value);
   },
 });
 
-const isSidebarWide = useMediaQuery(() => `(min-width: ${BREAKPOINT_PX[props.sidebarBreakpoint]}px)`);
-const isAsideWide = useMediaQuery(() => `(min-width: ${BREAKPOINT_PX[props.asideBreakpoint]}px)`);
+const isSidebarWide = useMediaQuery(() => `(min-width: ${BreakpointPx[props.sidebarBreakpoint]}px)`);
+const isAsideWide = useMediaQuery(() => `(min-width: ${BreakpointPx[props.asideBreakpoint]}px)`);
 
 const isSidebarCollapsed = computed(() => !isSidebarWide.value);
 const isAsideHidden = computed(() => !isAsideWide.value);

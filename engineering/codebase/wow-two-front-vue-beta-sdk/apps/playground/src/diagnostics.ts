@@ -39,9 +39,7 @@ export function record(kind: Diagnostic['kind'], message: string, component: str
  */
 export function componentName(instance: unknown, trace?: string): string {
   const vm = instance as
-    | { $?: { type?: { name?: string; __name?: string } }; $options?: { name?: string } }
-    | null
-    | undefined;
+    { $?: { type?: { name?: string; __name?: string } }; $options?: { name?: string } } | null | undefined;
   const name = vm?.$?.type?.name ?? vm?.$?.type?.__name ?? vm?.$options?.name;
   if (name) return name;
   const frame = trace?.match(/<([A-Za-z][\w.]*)/)?.[1];

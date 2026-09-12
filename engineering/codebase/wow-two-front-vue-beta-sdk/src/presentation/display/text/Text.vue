@@ -1,33 +1,31 @@
 <script lang="ts">
-import type { ElementType, Size } from '../../../foundation/utils';
+import type { ElementType } from '../../../foundation/dom';
+import type { Size } from '../../../foundation/styles';
 import type { TextAlign, TextColor, TextWeight } from './Text.variants';
 
 export interface TextProps {
-  as?: ElementType;
+  readonly as?: ElementType;
   /** The font size step. */
-  size?: Size;
+  readonly size?: Size;
   /** The font weight. */
-  weight?: TextWeight;
+  readonly weight?: TextWeight;
   /** The color role. */
-  color?: TextColor;
+  readonly color?: TextColor;
   /** The text alignment. */
-  align?: TextAlign;
+  readonly align?: TextAlign;
   /** The single-line truncation with an ellipsis. */
-  isTruncated?: boolean;
+  readonly isTruncated?: boolean;
   /** The tabular (fixed-width) figures treatment. */
-  isTabular?: boolean;
+  readonly isTabular?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { textVariants } from './Text.variants';
 
-/**
- * Body text. Renders as `<p>` by default; pass `as="span"` (or any element)
- * to keep semantics consistent with the surrounding markup.
- */
+/** Renders body text as a `<p>`, or as any element given to `as` to match surrounding semantics. */
 defineOptions({ name: 'Text', inheritAttrs: false });
 
 /** The text content — React's `children`. */

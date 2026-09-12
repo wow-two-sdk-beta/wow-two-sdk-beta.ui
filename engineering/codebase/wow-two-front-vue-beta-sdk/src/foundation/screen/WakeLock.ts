@@ -1,32 +1,7 @@
-// The Screen Wake Lock API — keeping the display awake — in two layers: `requestWakeLock` for one lock, and
-// `holdWakeLock` for a lock that STAYS held.
-//
-// THE WHOLE DIFFICULTY OF THIS API: the platform releases the lock the moment the page stops being visible, and
-// it does not give it back. Switch tabs, answer a call, let the phone lock — the sentinel is released and every
-// later read of it says so. Nothing re-acquires on return. A recipe app that requests a lock on mount and calls
-// it done therefore works exactly until the user glances at a message, after which the screen sleeps mid-recipe
-// and the feature silently no longer exists. That is the bug this module is written to prevent, and it is why
-// `holdWakeLock` — not `requestWakeLock` — is what a consumer normally wants.
-//
-// So `holdWakeLock` subscribes to `visibilitychange` and re-requests when the page comes back visible and the
-// caller still wants the lock. Re-acquiring is guarded three ways: not when disposed, not when a request is
-// already in flight (visibility can flap faster than the request settles), and not when the current handle is
-// still live (a `visible` → `visible` notification must not stack a second lock).
-//
-// WHY THIS IS NOT A COMPOSABLE. The re-acquire cycle is the part most worth testing, and as a composable it
-// would only be testable through a renderer — with the timing of a watcher, a `nextTick` boundary, and a fake
-// `document` layered on top of the behaviour under test. As a plain function it is directly testable in node,
-// and `useWakeLock` becomes a thin binding with nothing of its own to get wrong. The same split
-// `foundation/share` makes between `share` and `useShare`.
-//
-// `denied` covers both of the spec's `NotAllowedError` cases — a permissions-policy block and a document that is
-// not visible — because they are the same answer to the consumer: the platform said no to this request, and
-// repeating it right now changes nothing.
-
 import { toError } from '../errors';
 
 import { getDocument, getNavigator, isFunction, readMember } from './ScreenEnvironment';
-import type { ScreenFailure, ScreenStatus, ScreenValueResult } from './ScreenResult';
+import type { ScreenFailure, ScreenStatus, ScreenRequestResult } from './ScreenOutcome';
 
 /** The kinds of wake lock the platform defines. Only `screen` exists; the spec keeps the axis open. */
 export const WakeLockKind = {
@@ -145,19 +120,19 @@ function toWakeLockHandle(sentinel: unknown, type: WakeLockKind): WakeLockHandle
  */
 export async function requestWakeLock(
   type: WakeLockKind = WakeLockKind.Screen,
-): Promise<ScreenValueResult<WakeLockHandle>> {
+): Promise<ScreenRequestResult<WakeLockHandle>> {
   const nav = getNavigator();
-  if (nav === undefined) return { status: 'unsupported' };
+  if (nav === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   const wakeLock = readMember(nav, 'wakeLock');
   const request = readMember(wakeLock, 'request') as WakeLockRequest | undefined;
-  if (!isFunction(request) || request === undefined) return { status: 'unsupported' };
+  if (!isFunction(request) || request === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   try {
     const sentinel = await request.call(wakeLock, type);
-    return { status: 'ok', value: toWakeLockHandle(sentinel, type) };
+    return { ok: true, value: toWakeLockHandle(sentinel, type) };
   } catch (error) {
-    return classifyWakeLockRejection(error);
+    return { ok: false, failure: classifyWakeLockRejection(error) };
   }
 }
 
@@ -209,11 +184,11 @@ export function holdWakeLock(options?: WakeLockHoldOptions): WakeLockHold {
       if (disposed) {
         // Released while the request was in flight. Nothing is watching the state any more, but the lock itself
         // is real and would otherwise outlive the hold that owns it.
-        if (result.status === 'ok') void result.value.release();
+        if (result.ok) void result.value.release();
         return;
       }
 
-      if (result.status === 'ok') {
+      if (result.ok) {
         handle = result.value;
         publish({ held: true, status: 'ok', error: null });
         return;
@@ -222,8 +197,8 @@ export function holdWakeLock(options?: WakeLockHoldOptions): WakeLockHold {
       handle = null;
       publish({
         held: false,
-        status: result.status,
-        error: result.status === 'unsupported' ? null : result.error,
+        status: result.failure.status,
+        error: result.failure.status === 'unsupported' ? null : result.failure.error,
       });
     } finally {
       acquiring = false;

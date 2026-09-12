@@ -21,7 +21,7 @@ export {
 
 export {
   type ConfigSource,
-  DEFAULT_RUNTIME_CONFIG_KEY,
+  DefaultRuntimeConfigKey,
   importMetaEnvSource,
   windowConfigSource,
   staticSource,
@@ -37,3 +37,5 @@ export {
   ConfigError,
   defineConfig,
 } from './DefineConfig';
+
+export { Environment, IsDevelopment, IsProduction } from './Environment';

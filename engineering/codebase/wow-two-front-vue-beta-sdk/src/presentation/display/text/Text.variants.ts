@@ -1,4 +1,4 @@
-import { tv, Size, type VariantProps } from '../../../foundation/utils';
+import { tv, Size, type VariantProps } from '../../../foundation/styles';
 
 /** Defines the Text font weight. */
 export const TextWeight = {

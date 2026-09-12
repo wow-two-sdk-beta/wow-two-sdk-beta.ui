@@ -1,22 +1,6 @@
-// Front / back camera selection, and the two mistakes it invites.
-//
-// MISTAKE 1 — `exact`. `facingMode: { exact: 'environment' }` rejects with `OverconstrainedError` on every
-// device without a rear camera: all desktops, all laptops, most external webcams. Those devices do not report
-// `facingMode` at all, so `exact` is not "prefer the back camera", it is "fail unless there is one". `ideal` is
-// the default here for that reason — it picks the rear camera on a phone and degrades to the only camera on a
-// laptop. `exact` stays available for the case that genuinely needs it (a document scanner where the selfie cam
-// is useless), where failing loudly beats capturing the wrong thing.
-//
-// MISTAKE 2 — switching by acquiring first. The natural "get the new stream, then stop the old one" ordering
-// breaks on mobile: most phones cannot open both cameras at once, so the second `getUserMedia` fails with
-// `NotReadableError` while the first camera is still held — a flip button that works on a laptop and never on a
-// phone. `switchCamera` therefore stops FIRST. The trade-off is deliberate and visible: a failed acquisition
-// leaves the caller with no stream at all, which is the honest outcome (the old stream's device is already
-// released) and is reported as an ordinary failure arm.
-
 import { requestCameraStream } from './RequestMediaStream';
 import { stopMediaStream } from './StopMediaStream';
-import type { MediaStreamResult } from './MediaStreamResult';
+import type { MediaStreamRequestResult } from './MediaStreamMapping';
 
 /**
  * Which camera to prefer.
@@ -24,7 +8,16 @@ import type { MediaStreamResult } from './MediaStreamResult';
  * - `user` — front / selfie camera, facing the user.
  * - `environment` — rear camera, facing away. What a scanner or a document capture wants.
  */
-export type FacingMode = 'user' | 'environment';
+export const FacingMode = {
+  /** Prefers the front / selfie camera, facing the user. */
+  User: 'user',
+
+  /** Prefers the rear camera, facing away — what a scanner or a document capture wants. */
+  Environment: 'environment',
+} as const;
+
+/** Which camera to prefer. */
+export type FacingMode = (typeof FacingMode)[keyof typeof FacingMode];
 
 /** Tunes how a facing-mode preference is expressed as constraints. */
 export interface FacingModeOptions {
@@ -35,7 +28,7 @@ export interface FacingModeOptions {
    */
   readonly exact?: boolean;
 
-  /** Extra video track constraints to merge — resolution, frame rate, `deviceId`. A `facingMode` here is overwritten. */
+  /** Extra video constraints to merge — resolution, frame rate, `deviceId`. A `facingMode` here is overwritten. */
   readonly video?: MediaTrackConstraints;
 }
 
@@ -76,7 +69,7 @@ export function switchCamera(
   current: MediaStream | null | undefined,
   facingMode: FacingMode,
   options?: FacingModeOptions,
-): Promise<MediaStreamResult> {
+): Promise<MediaStreamRequestResult> {
   stopMediaStream(current);
   return requestCameraStream(facingModeConstraints(facingMode, options));
 }

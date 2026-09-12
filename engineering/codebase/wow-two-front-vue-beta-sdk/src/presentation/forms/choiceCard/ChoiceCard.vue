@@ -1,19 +1,19 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
-import type { RadioProps } from '../radio';
+import type { Size } from '../../../foundation/styles';
+import type { RadioInputProps } from '../radioInput';
 
-export interface ChoiceCardProps extends Omit<RadioProps, 'size'> {
+export interface ChoiceCardProps extends Omit<RadioInputProps, 'size'> {
   /** The card title. Fill the `label` slot instead for richer content. */
-  label?: string | number;
+  readonly label?: string | number;
 
   /** The description under the title. Fill the `description` slot for richer content. */
-  description?: string | number;
+  readonly description?: string | number;
 
   /** The optional icon rendered beside the label. Fill the `icon` slot with the icon element. */
-  icon?: string | number;
+  readonly icon?: string | number;
 
   /** The card size. Default `md`. */
-  size?: Size;
+  readonly size?: Size;
 
   /**
    * The key this item contributes to a surrounding `RadioGroup`'s selection.
@@ -21,11 +21,11 @@ export interface ChoiceCardProps extends Omit<RadioProps, 'size'> {
    * React read it off the cloned child (`ChildLike.value`); here the group provides a
    * context and this prop is what the item registers under. Ignored outside a group.
    */
-  value?: string;
+  readonly value?: string;
 }
 
 /* Sizes not listed fall back to the `md` row at the call site. */
-const SIZE: Partial<Record<Size, string>> = {
+const SizeClass: Partial<Record<Size, string>> = {
   sm: 'p-3 text-xs',
   md: 'p-4 text-sm',
   lg: 'p-5 text-base',
@@ -35,22 +35,24 @@ const SIZE: Partial<Record<Size, string>> = {
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn, Size as SizeValue } from '../../../foundation/utils';
-import { useId } from '../../../foundation/hooks';
+import { cn, Size as SizeValue } from '../../../foundation/styles';
+import { useId } from '../../../foundation/identifiers';
 import { FormControlProvider, useFormControl } from '../../../foundation/primitives';
 import { useRadioGroup } from '../radioGroup/RadioGroupContext';
-import Radio from '../radio/Radio.vue';
+import RadioInput from '../radioInput/RadioInput.vue';
 
-/**
- * Radio styled as a clickable card with title + description + optional
- * icon. Common for plan/option pickers. Compose inside `RadioGroup` for
- * mutex selection.
- */
+/** Renders a radio as a whole clickable card carrying a title, description and optional icon. */
 /* `inheritAttrs: false` so `class` folds into the card's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'ChoiceCard', inheritAttrs: false });
 
-const props = withDefaults(defineProps<ChoiceCardProps>(), { size: SizeValue.Md });
+const props = withDefaults(defineProps<ChoiceCardProps>(), {
+  size: SizeValue.Md,
+  modelValue: undefined,
+  defaultValue: undefined,
+  disabled: undefined,
+  required: undefined,
+});
 
 defineSlots<{
   label?(): unknown;
@@ -63,7 +65,7 @@ const slots = useSlots();
 
 const generated = useId();
 /* Context id wins over the generated fallback (see CheckboxField) — inside a
-   `Field`/`form.Field` the surrounding Label's `htmlFor` targets `ctx.id`, so the card's
+   `Field`/`form.Field` the surrounding LabelText's `htmlFor` targets `ctx.id`, so the card's
    radio must carry it. Inside a `RadioGroup` the per-item context supplies a unique id. */
 const ctx = useFormControl();
 const group = useRadioGroup();
@@ -85,13 +87,13 @@ const hasIcon = computed(() => Boolean(props.icon) || Boolean(slots.icon));
 const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
 
 /* No `defineEmits`: the consumer's `v-model` listeners must stay in `useAttrs()` to reach
-   the inner `Radio` — see the CheckboxField note. */
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+   the inner `RadioInput` — see the CheckboxField note. */
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
-/** This component's own props must not reach the inner `Radio`. */
+/** This component's own props must not reach the inner `RadioInput`. */
 const radioProps = computed(() => {
   const { label: _label, description: _description, icon: _icon, size: _size, value: _value, ...rest } = props;
   return rest;
@@ -102,7 +104,7 @@ const rootClass = computed(() =>
     'group relative block cursor-pointer rounded-lg border border-input bg-card text-card-foreground transition-colors',
     'hover:border-border-strong has-[:checked]:border-primary has-[:checked]:bg-primary-soft/30',
     'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
-    SIZE[props.size] ?? SIZE.md,
+    SizeClass[props.size] ?? SizeClass.md,
     attrs.class as ClassValue,
   ),
 );
@@ -119,17 +121,17 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
          one so siblings never adopt the surrounding Field's id or `describedBy`, while the
          group's disabled/invalid flags still cascade. -->
     <FormControlProvider v-if="isInGroup" :is-disabled="groupDisabled" :is-invalid="groupInvalid">
-      <Radio
+      <RadioInput
         ref="inner"
         v-bind="{ ...radioProps, ...passthroughAttrs }"
         :id="inputId"
         :name="groupName"
-        :checked="groupChecked"
+        :model-value="groupChecked"
         class="absolute right-3 top-3"
         @change="onGroupChange"
       />
     </FormControlProvider>
-    <Radio
+    <RadioInput
       v-else
       ref="inner"
       v-bind="{ ...radioProps, ...passthroughAttrs }"

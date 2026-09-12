@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The `h3` title line of a `Card`. */
+/** Renders the `h3` title line of a `Card`, at heading weight and tight leading. */
 defineOptions({ name: 'CardTitle', inheritAttrs: false });
 
 /** The title copy — React's `children`. */

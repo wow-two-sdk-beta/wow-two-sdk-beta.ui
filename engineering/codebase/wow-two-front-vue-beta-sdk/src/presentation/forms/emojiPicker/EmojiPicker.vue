@@ -8,9 +8,6 @@ export interface EmojiPickerProps {
   /** The current emoji catalog entry, or `null` for none. The `v-model` binding target. */
   readonly modelValue?: EmojiCatalogEntry | null;
 
-  /** The current emoji catalog entry — React's spelling of `modelValue`, which wins when both are set. */
-  readonly value?: EmojiCatalogEntry | null;
-
   /**
    * The persistence contract backing the "recently used" list — required, so the picker stays pure and
    * storage-agnostic. Plug `localStorageStorageBroker` for browser persistence, `memoryStorageBroker()` for a
@@ -33,7 +30,7 @@ export interface EmojiPickerProps {
   /** The heading rendered above the picker. Default `Emoji`. */
   readonly label?: string;
 
-  /** When `true` and no emoji has been used yet, opens on the first real category instead of the empty recents bucket. Default `false`. */
+  /** With recents still empty, opens on the first real category instead of the recents bucket. Default `false`. */
   readonly showFirstCategoryWhenRecentsEmpty?: boolean;
 
   /** The scrollbar thumb color for the tile viewport — any CSS color. Default `var(--color-border-strong)`. */
@@ -42,15 +39,17 @@ export interface EmojiPickerProps {
 </script>
 
 <script setup lang="ts">
+import { useTemplateRef } from 'vue';
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed } from 'vue';
-import { ColorTone, SizePreset } from '../../../foundation/utils';
+import { ColorTone, SizePreset } from '../../../foundation/styles';
 import { Button, ButtonVariant } from '../../actions';
-import { Stack } from '../../layout';
+import { StackLayout } from '../../layout';
 import SearchInput from '../searchInput/SearchInput.vue';
 
 import CategoryNav from './CategoryNav.vue';
 import EmojiGrid from './EmojiGrid.vue';
-import { useEmojiPicker } from './useEmojiPicker';
+import { useEmojiPicker } from './UseEmojiPicker';
 import {
   CategoryNavVariant as CategoryNavVariantValue,
   DefaultPickerSize,
@@ -61,13 +60,11 @@ import {
   resolveElementSize,
 } from './EmojiPicker.variants';
 
-/**
- * Emoji picker — search + recents + a swappable category nav over the full bundled emoji catalog.
- * `value = null` means no emoji. Fully controlled: it emits the picked `EmojiCatalogEntry` (or `null`) via
- * `@value-change` / `v-model` — consumers read whatever field they need (`entry.glyph`, `entry.label`, …) —
- * and reads its recents through the injected `storage` broker. Size is a separate concern — compose
- * `EmojiSizeControl` (passing `entry.glyph`) when a host needs a per-emoji scale.
- */
+/** Renders a searchable emoji catalog with a recents bucket and a swappable category nav over the bundled set. */
+/* Fully controlled: `value = null` means no emoji, and the picked `EmojiCatalogEntry` (or `null`) leaves via
+   `@update:modelValue` / `v-model` — consumers read whatever field they need (`entry.glyph`, `entry.label`, …).
+   Recents are read through the injected `storage` broker. Size is a separate concern — compose
+   `EmojiSizePicker` (passing `entry.glyph`) when a host needs a per-emoji scale. */
 defineOptions({ name: 'EmojiPicker' });
 
 const props = withDefaults(defineProps<EmojiPickerProps>(), {
@@ -79,17 +76,14 @@ const props = withDefaults(defineProps<EmojiPickerProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader picks an emoji or clears the selection — the `v-model` half. */
   'update:modelValue': [entry: EmojiCatalogEntry | null];
-  /** Replaces React's `onChange`. Carries the picked entry, or `null` on clear. */
-  'value-change': [entry: EmojiCatalogEntry | null];
 }>();
 
-const currentValue = computed(() => (props.value !== undefined ? props.value : (props.modelValue ?? null)));
+const currentValue = computed(() => props.modelValue ?? null);
 
 function onChange(entry: EmojiCatalogEntry | null): void {
   emit('update:modelValue', entry);
-  emit('value-change', entry);
 }
 
 const picker = useEmojiPicker({
@@ -113,10 +107,15 @@ const emptyLabel = computed(() => {
   if (picker.showSearch.value) return EmojiEmptyLabels.search;
   return picker.activeCategory.value === RecentCategory ? EmojiEmptyLabels.recents : EmojiEmptyLabels.category;
 });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  if (currentValue.value !== null) onChange(null);
+});
 </script>
 
 <template>
-  <Stack gap="3">
+  <StackLayout :key="formResetRevision" gap="3">
     <div class="flex items-center justify-between">
       <span class="text-sm font-medium">{{ label }}</span>
       <Button
@@ -138,7 +137,7 @@ const emptyLabel = computed(() => {
       @clear="picker.searchKeyword.value = ''"
     />
 
-    <Stack gap="2">
+    <StackLayout gap="2">
       <CategoryNav
         v-if="!picker.showSearch.value"
         :variant="categoryNavVariant"
@@ -157,6 +156,12 @@ const emptyLabel = computed(() => {
         :empty-label="emptyLabel"
         @select="picker.selectEmoji($event)"
       />
-    </Stack>
-  </Stack>
+    </StackLayout>
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
+  </StackLayout>
 </template>

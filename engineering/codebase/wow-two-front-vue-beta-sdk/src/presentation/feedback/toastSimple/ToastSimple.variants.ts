@@ -1,4 +1,4 @@
-import { Severity, tv, type VariantProps } from '../../../foundation/utils';
+import { Severity, tv, type VariantProps } from '../../../foundation/styles';
 
 export const toastSimpleVariants = tv({
   base: 'pointer-events-auto rounded-md border bg-popover text-popover-foreground shadow-lg px-4 py-3 text-sm',

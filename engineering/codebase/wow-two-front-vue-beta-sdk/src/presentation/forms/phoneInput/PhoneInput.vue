@@ -7,7 +7,7 @@ export interface PhoneCountry {
   flag: string; // emoji
 }
 
-export const PHONE_COUNTRIES: ReadonlyArray<PhoneCountry> = [
+export const PhoneCountries: ReadonlyArray<PhoneCountry> = [
   { iso: 'US', name: 'United States', dial: '+1', flag: '🇺🇸' },
   { iso: 'CA', name: 'Canada', dial: '+1', flag: '🇨🇦' },
   { iso: 'GB', name: 'United Kingdom', dial: '+44', flag: '🇬🇧' },
@@ -62,38 +62,35 @@ export const PHONE_COUNTRIES: ReadonlyArray<PhoneCountry> = [
 ];
 
 export interface PhoneInputProps {
-  /** The E.164 value, controlled — React's spelling, which wins when both are set. */
-  value?: string;
-
   /** The E.164 value, controlled. The `v-model` binding target. */
-  modelValue?: string;
+  readonly modelValue?: string;
 
   /** The initial E.164 value when uncontrolled. */
-  defaultValue?: string;
+  readonly defaultValue?: string;
 
   /** The ISO code selected before the value carries a recognisable dial prefix. Default `US`. */
-  defaultCountry?: string;
+  readonly defaultCountry?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The read-only state. Falls back to the surrounding form control's `isReadOnly`. */
-  isReadOnly?: boolean;
+  readonly isReadOnly?: boolean;
 
   /** The invalid surface override. Falls back to the surrounding form control's `isInvalid`. */
-  isInvalid?: boolean;
+  readonly isInvalid?: boolean;
 
   /** The national-number placeholder. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /** The hidden input name; the hidden input emits the full E.164 value. */
-  name?: string;
+  readonly name?: string;
 }
 
 function splitE164(value: string, defaultIso: string): { iso: string; national: string } {
   if (!value) return { iso: defaultIso, national: '' };
   // Match the longest dial code prefix.
-  const sorted = [...PHONE_COUNTRIES].sort((a, b) => b.dial.length - a.dial.length);
+  const sorted = [...PhoneCountries].sort((a, b) => b.dial.length - a.dial.length);
   for (const c of sorted) {
     if (value.startsWith(c.dial)) {
       return { iso: c.iso, national: value.slice(c.dial.length).replace(/\D/g, '') };
@@ -104,17 +101,19 @@ function splitE164(value: string, defaultIso: string): { iso: string; national: 
 </script>
 
 <script setup lang="ts">
+import { useTemplateRef } from 'vue';
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputSize } from '../InputStyles';
 
 /**
- * International phone input — country dial-code select + national-number
- * input. Output is E.164 (`+<country><number>`). First-gen list; full
- * `libphonenumber` validation/format deferred.
+ * Renders a country dial-code select beside a national-number field, emitting one E.164 string.
+ *
+ * First-generation country list; full `libphonenumber` validation and formatting stays deferred.
  */
 /* `inheritAttrs: false` so `class` folds into the root's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
@@ -125,7 +124,6 @@ const props = withDefaults(defineProps<PhoneInputProps>(), {
   placeholder: '(555) 555-5555',
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
-  value: undefined,
   modelValue: undefined,
   isDisabled: undefined,
   isReadOnly: undefined,
@@ -133,20 +131,17 @@ const props = withDefaults(defineProps<PhoneInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half — carries the full E.164 string. */
+  /** Fires when the reader edits the number or switches country — the `v-model` half. */
   'update:modelValue': [e164: string];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [e164: string];
 }>();
 
 const attrs = useAttrs();
 
 const controlled = useControlled<string>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -165,7 +160,7 @@ const invalid = computed(() => props.isInvalid ?? ctx?.isInvalid);
 const selectedIso = ref(props.defaultCountry);
 
 const split = computed(() => {
-  const selected = PHONE_COUNTRIES.find((c) => c.iso === selectedIso.value);
+  const selected = PhoneCountries.find((c) => c.iso === selectedIso.value);
   if (selected && (!e164.value || e164.value.startsWith(selected.dial))) {
     return {
       iso: selected.iso,
@@ -177,11 +172,11 @@ const split = computed(() => {
 
 const iso = computed(() => split.value.iso);
 const national = computed(() => split.value.national);
-const country = computed(() => PHONE_COUNTRIES.find((c) => c.iso === iso.value) ?? PHONE_COUNTRIES[0]!);
+const country = computed(() => PhoneCountries.find((c) => c.iso === iso.value) ?? PhoneCountries[0]!);
 
 function setCountry(event: Event): void {
   const nextIso = (event.target as HTMLSelectElement).value;
-  const next = PHONE_COUNTRIES.find((c) => c.iso === nextIso) ?? country.value;
+  const next = PhoneCountries.find((c) => c.iso === nextIso) ?? country.value;
   selectedIso.value = next.iso;
   controlled.setValue(`${next.dial}${national.value}`);
 }
@@ -191,9 +186,9 @@ function setNational(event: Event): void {
   controlled.setValue(`${country.value.dial}${digits}`);
 }
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
@@ -206,14 +201,19 @@ const rootClass = computed(() =>
 );
 
 const selectClass = cn(
-  'h-10 cursor-pointer border-r border-input bg-card pl-2 pr-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring',
+  'h-10 cursor-pointer border-r border-input bg-card pl-2 pr-1 text-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
 );
 
 const inputClass = cn(inputBaseVariants({ size: InputSize.Md }), 'rounded-none border-0 focus-visible:ring-0');
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
-  <div :class="rootClass" v-bind="passthroughAttrs">
+  <div :key="formResetRevision" :class="rootClass" v-bind="passthroughAttrs">
     <select
       aria-label="Country"
       :value="iso"
@@ -222,7 +222,7 @@ const inputClass = cn(inputBaseVariants({ size: InputSize.Md }), 'rounded-none b
       :style="{ minWidth: '90px' }"
       @change="setCountry"
     >
-      <option v-for="c in PHONE_COUNTRIES" :key="c.iso" :value="c.iso">{{ c.flag }} {{ c.dial }}</option>
+      <option v-for="c in PhoneCountries" :key="c.iso" :value="c.iso">{{ c.flag }} {{ c.dial }}</option>
     </select>
     <input
       type="tel"
@@ -240,5 +240,11 @@ const inputClass = cn(inputBaseVariants({ size: InputSize.Md }), 'rounded-none b
       @input="setNational"
     />
     <input v-if="name" type="hidden" :name="name" :value="e164" />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Temporal } from 'temporal-polyfill';
-import { compareStrings } from '../../../foundation/utils';
+import { compareStrings } from '../../../foundation/i18n';
 import type { TableDensity } from '../table';
 
 /** Defines the sort order of a DataTable column. */
@@ -26,33 +26,33 @@ export const DataTableColumnAlign = {
 export type DataTableColumnAlign = (typeof DataTableColumnAlign)[keyof typeof DataTableColumnAlign];
 
 export interface DataTableSort {
-  columnKey: string;
-  direction: SortDirection;
+  readonly columnKey: string;
+  readonly direction: SortDirection;
 }
 
 export interface DataTableColumn<T> {
-  key: string;
+  readonly key: string;
   /**
    * The header label. React took a `ReactNode`; a column is an array entry and
    * cannot become its own slot, so the scalar stays here and the `header`
    * scoped slot is the rich override.
    */
-  header: string | number;
-  accessor?: (row: T) => unknown;
+  readonly header: string | number;
+  readonly accessor?: (row: T) => unknown;
   /**
    * The per-cell renderer. Returns a value rendered as text; for rich markup
    * use the `cell` scoped slot, which receives `{ row, column, index }`.
    */
-  cell?: (row: T, index: number) => unknown;
-  isSortable?: boolean;
-  align?: DataTableColumnAlign;
-  width?: string;
+  readonly cell?: (row: T, index: number) => unknown;
+  readonly isSortable?: boolean;
+  readonly align?: DataTableColumnAlign;
+  readonly width?: string;
 }
 
 export interface DataTableProps<T> {
-  columns: ReadonlyArray<DataTableColumn<T>>;
-  data: ReadonlyArray<T>;
-  rowKey?: (row: T, index: number) => string | number;
+  readonly columns: ReadonlyArray<DataTableColumn<T>>;
+  readonly data: ReadonlyArray<T>;
+  readonly rowKey?: (row: T, index: number) => string | number;
   /**
    * Fires with the clicked row and its index.
    *
@@ -60,15 +60,15 @@ export interface DataTableProps<T> {
    * seeds `isHoverable` and the `cursor-pointer` class, and Vue strips declared
    * emit listeners out of `useAttrs()`.
    */
-  onRowClick?: (row: T, index: number) => void;
-  sortBy?: DataTableSort | null;
-  defaultSortBy?: DataTableSort | null;
-  isStriped?: boolean;
-  isHoverable?: boolean;
-  density?: TableDensity;
-  isBare?: boolean;
+  readonly onRowClick?: (row: T, index: number) => void;
+  readonly sortBy?: DataTableSort | null;
+  readonly defaultSortBy?: DataTableSort | null;
+  readonly isStriped?: boolean;
+  readonly isHoverable?: boolean;
+  readonly density?: TableDensity;
+  readonly isBare?: boolean;
   /** The empty-state text. Default `No results.`; override richly via the `emptyContent` slot. */
-  emptyContent?: string | number;
+  readonly emptyContent?: string | number;
 }
 
 function defaultCompare(a: unknown, b: unknown): number {
@@ -93,14 +93,15 @@ function defaultCompare(a: unknown, b: unknown): number {
 <script setup lang="ts" generic="T">
 import { computed } from 'vue';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from '../table';
 
 /**
- * Sortable data table driven by a `columns` descriptor. Wraps the `Table`
- * primitives; `class` and `aria-label` reach the inner `<table>` by fallthrough,
- * which is why this component keeps `inheritAttrs` on.
+ * Renders a sortable table from a `columns` descriptor, wrapping the `Table` primitives.
+ *
+ * `class` and `aria-label` reach the inner `<table>` by fallthrough, which is why this component keeps `inheritAttrs`
+ * on.
  */
 defineOptions({ name: 'DataTable' });
 
@@ -119,8 +120,8 @@ const props = withDefaults(defineProps<DataTableProps<T>>(), {
 });
 
 const emit = defineEmits<{
-  /** Fires with the next sort, or `null` once the cycle clears it. */
-  'sort-change': [sort: DataTableSort | null];
+  /** Fires when the reader clicks a sortable header, with the next sort or `null` once cleared. */
+  'update:sortBy': [sort: DataTableSort | null];
 }>();
 
 defineSlots<{
@@ -135,7 +136,7 @@ defineSlots<{
 const { value: sort, setValue: setSort } = useControlled<DataTableSort | null>({
   controlled: () => props.sortBy,
   default: props.defaultSortBy ?? null,
-  onChange: (next) => emit('sort-change', next),
+  onChange: (next) => emit('update:sortBy', next),
 });
 
 /** React seeded `isHoverable` from `!!onRowClick`; kept as an explicit fallback. */
@@ -210,8 +211,8 @@ function renderCell(column: DataTableColumn<T>, row: T, index: number): unknown 
   return null;
 }
 
-const SORT_BUTTON_CLASS =
-  'inline-flex items-center gap-1 rounded-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+const SortButtonClass =
+  'inline-flex items-center gap-1 rounded-sm transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring';
 </script>
 
 <template>
@@ -225,7 +226,7 @@ const SORT_BUTTON_CLASS =
           :style="cell.style"
           :class="cell.class"
         >
-          <button v-if="cell.column.isSortable" type="button" :class="SORT_BUTTON_CLASS" @click="cycleSort(cell.key)">
+          <button v-if="cell.column.isSortable" type="button" :class="SortButtonClass" @click="cycleSort(cell.key)">
             <span>
               <slot name="header" :column="cell.column">{{ cell.column.header }}</slot>
             </span>

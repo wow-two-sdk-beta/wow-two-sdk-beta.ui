@@ -1,70 +1,62 @@
 <script lang="ts">
-// Shared month-grid renderer for Calendar and RangeCalendar. Co-located in
+// Shared month-grid renderer for CalendarPicker and RangeCalendarPicker. Co-located in
 // `forms/` as a domain-internal helper. Owns:
 //   - the 42-cell visual layout (header + weekday row + 6×7 grid)
 //   - keyboard navigation (arrows / Home/End / PgUp/PgDn / Shift+PgUp/PgDn)
 //   - focused-cell management (autofocus on focusedDate change)
 //   - month nav buttons
 //
-// Consumers (Calendar, RangeCalendar) provide:
+// Consumers (CalendarPicker, RangeCalendarPicker) provide:
 //   - their own selection state via `dayProps(date)` returning extra attrs
 //   - `onDayActivate(date)` callback for click/Enter/Space
 //
 // Not exported from `forms/index.ts` — internal only.
 
 import type { Temporal } from 'temporal-polyfill';
+import { AriaAttribute } from '../../foundation/dom';
 
-export interface MonthGridDayProps {
-  class?: string;
-  'aria-selected'?: boolean;
-  onPointerenter?: (event: PointerEvent) => void;
-  onPointerleave?: (event: PointerEvent) => void;
+/** @internal An attribute name this component derives or requires. */
+type DayAttribute = typeof AriaAttribute.Selected;
+
+export interface MonthGridDayProps extends Readonly<Partial<Record<DayAttribute, boolean>>> {
+  readonly class?: string;
+  readonly onPointerenter?: (event: PointerEvent) => void;
+  readonly onPointerleave?: (event: PointerEvent) => void;
   /** The extra `data-*` attributes (data-selected, data-range-start, etc.). */
   [key: `data-${string}`]: string | boolean | undefined;
 }
 
-/**
- * Every callback here stays a PROP rather than an emit: each is invoked as a plain
- * function during render or navigation (and `dayProps` / `isDayDisabled` RETURN a value,
- * which an emit cannot do). `MonthGrid` is folder-internal, so the prop shape never
- * reaches a consumer.
- */
+/** Query callbacks return values; state updates emit canonical named model requests. */
 export interface MonthGridProps {
   /** The first day of the visible month (use `startOfMonth(date)`). */
-  viewMonth: Temporal.PlainDate;
-
-  /** Emits the new visible month when prev/next steps it. */
-  onViewMonthChange: (date: Temporal.PlainDate) => void;
+  readonly viewMonth: Temporal.PlainDate;
 
   /** The currently focused day (cell tabindex=0). */
-  focusedDate: Temporal.PlainDate;
-
-  /** Emits the newly focused day from keyboard navigation. */
-  onFocusedDateChange: (date: Temporal.PlainDate) => void;
+  readonly focusedDate: Temporal.PlainDate;
 
   /** The predicate marking a day as disabled. */
-  isDayDisabled?: (date: Temporal.PlainDate) => boolean;
+  readonly isDayDisabled?: (date: Temporal.PlainDate) => boolean;
 
   /** Emits the activated day on click / Enter / Space. */
-  onDayActivate?: (date: Temporal.PlainDate, meta: { outOfMonth: boolean }) => void;
+  readonly onDayActivate?: (date: Temporal.PlainDate, meta: { outOfMonth: boolean }) => void;
 
   /** The extra per-day attributes for selection styling and hover handlers. */
-  dayProps?: (date: Temporal.PlainDate, meta: { outOfMonth: boolean }) => MonthGridDayProps | undefined;
+  readonly dayProps?: (date: Temporal.PlainDate, meta: { outOfMonth: boolean }) => MonthGridDayProps | undefined;
 }
 
 // Upper bound when scanning past disabled days — covers a Shift+PageUp/PageDown
 // year jump (≤366 days) with margin.
-const MAX_DISABLED_SKIP = 400;
+const MaxDisabledSkip = 400;
 </script>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
-import { cn } from '../../foundation/utils';
+import { cn } from '../../foundation/styles';
 import {
-  MONTHS_LONG,
-  WEEKDAYS_SHORT,
+  MonthLabelsLong,
+  WeekdayLabelsShort,
   addDays,
   addMonths,
   buildMonthGrid,
@@ -74,11 +66,17 @@ import {
   sundayIndex,
 } from './DateExtensions';
 
+/** Renders the shared 42-cell month grid — month nav, weekday row, keyboard-navigable day cells. */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'MonthGrid', inheritAttrs: false });
 
 const props = defineProps<MonthGridProps>();
+
+const emit = defineEmits<{
+  'update:viewMonth': [date: Temporal.PlainDate];
+  'update:focusedDate': [date: Temporal.PlainDate];
+}>();
 
 const attrs = useAttrs();
 
@@ -86,15 +84,15 @@ const root = useTemplateRef<HTMLDivElement>('root');
 const grid = useTemplateRef<HTMLDivElement>('grid');
 
 /* Tracks keyboard/click interaction so the focus watcher below never steals page focus
-   when a standalone Calendar mounts. */
+   when a standalone CalendarPicker mounts. */
 let interacted = false;
 
 /*
  * Re-focus the active day cell when `focusedDate` changes (keyboard nav).
  *
  * NOT `immediate` — an immediate watcher runs during setup, which happens on the SERVER
- * too, and `querySelector` on a null ref would be the least of it. The React original's
- * mount run was a no-op behind the `interacted` guard anyway.
+ * too, and `querySelector` on a null ref would be the least of it. A mount run would be
+ * a no-op behind the `interacted` guard anyway.
  */
 watch(
   () => props.focusedDate,
@@ -130,7 +128,7 @@ function moveFocus(next: Temporal.PlainDate, dir: 1 | -1): void {
   if (props.isDayDisabled) {
     // Skip disabled days in the movement direction…
     let steps = 0;
-    while (props.isDayDisabled(target) && steps < MAX_DISABLED_SKIP) {
+    while (props.isDayDisabled(target) && steps < MaxDisabledSkip) {
       target = addDays(target, dir);
       steps += 1;
     }
@@ -138,7 +136,7 @@ function moveFocus(next: Temporal.PlainDate, dir: 1 | -1): void {
     if (props.isDayDisabled(target)) {
       target = next;
       steps = 0;
-      while (props.isDayDisabled(target) && steps < MAX_DISABLED_SKIP) {
+      while (props.isDayDisabled(target) && steps < MaxDisabledSkip) {
         target = addDays(target, -dir);
         steps += 1;
       }
@@ -147,9 +145,9 @@ function moveFocus(next: Temporal.PlainDate, dir: 1 | -1): void {
   }
   interacted = true;
   if (target.month !== props.viewMonth.month || target.year !== props.viewMonth.year) {
-    props.onViewMonthChange(startOfMonth(target));
+    emit('update:viewMonth', startOfMonth(target));
   }
-  props.onFocusedDateChange(target);
+  emit('update:focusedDate', target);
 }
 
 function onCellKeydown(event: KeyboardEvent, date: Temporal.PlainDate, outOfMonth: boolean): void {
@@ -202,7 +200,13 @@ function dayDisabled(date: Temporal.PlainDate): boolean {
 
 const cells = computed(() => buildMonthGrid(props.viewMonth.year, props.viewMonth.month));
 
-const weeks = computed(() => Array.from({ length: 6 }, (_, w) => cells.value.slice(w * 7, w * 7 + 7)));
+/* Each row carries the date it starts on: a positional index would reuse the wrong row on a month change. */
+const weeks = computed(() =>
+  Array.from({ length: 6 }, (_, w) => cells.value.slice(w * 7, w * 7 + 7)).map((week) => ({
+    key: week[0]?.date.toString() ?? '',
+    cells: week,
+  })),
+);
 
 /* Roving tab stop — the focused date unless it's disabled (e.g. today before `min`); then
    the first enabled cell so the grid stays Tab-reachable. */
@@ -217,8 +221,8 @@ function onCellClick(date: Temporal.PlainDate, outOfMonth: boolean): void {
   if (dayDisabled(date)) return;
   interacted = true;
   props.onDayActivate?.(date, { outOfMonth });
-  props.onFocusedDateChange(date);
-  if (outOfMonth) props.onViewMonthChange(startOfMonth(date));
+  emit('update:focusedDate', date);
+  if (outOfMonth) emit('update:viewMonth', startOfMonth(date));
 }
 
 /** The consumer's per-day attrs minus `class`, which is folded into the cell's own `cn()`. */
@@ -245,7 +249,7 @@ function cellClass(date: Temporal.PlainDate, outOfMonth: boolean): string {
   return cn(
     'grid h-9 w-9 place-items-center text-sm transition-colors',
     'hover:bg-primary/10 hover:text-foreground',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     outOfMonth && 'text-muted-foreground/60',
     dayDisabled(date) && 'pointer-events-none opacity-40',
     consumer?.class,
@@ -254,9 +258,9 @@ function cellClass(date: Temporal.PlainDate, outOfMonth: boolean): string {
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel` and
    stop reaching the DOM. It is read off the attrs so it can be relocated onto the grid. */
-const ariaLabel = computed(() => (attrs['aria-label'] as string | undefined) ?? 'Calendar');
+const ariaLabel = computed(() => (attrs[AriaAttribute.Label] as string | undefined) ?? 'Calendar');
 
-const monthLabel = computed(() => `${MONTHS_LONG[props.viewMonth.month - 1]} ${props.viewMonth.year}`);
+const monthLabel = computed(() => `${MonthLabelsLong[props.viewMonth.month - 1]} ${props.viewMonth.year}`);
 
 const rootClass = computed(() =>
   cn(
@@ -265,7 +269,7 @@ const rootClass = computed(() =>
   ),
 );
 
-const WEEKDAYS = WEEKDAYS_SHORT;
+const WeekdayLabels = WeekdayLabelsShort;
 const ChevronLeftIcon = ChevronLeft;
 const ChevronRightIcon = ChevronRight;
 
@@ -279,8 +283,8 @@ defineExpose({ el: root });
       <button
         type="button"
         aria-label="Previous month"
-        class="grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        @click="props.onViewMonthChange(addMonths(viewMonth, -1))"
+        class="grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+        @click="emit('update:viewMonth', addMonths(viewMonth, -1))"
       >
         <ChevronLeftIcon class="h-4 w-4" />
       </button>
@@ -288,8 +292,8 @@ defineExpose({ el: root });
       <button
         type="button"
         aria-label="Next month"
-        class="grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        @click="props.onViewMonthChange(addMonths(viewMonth, 1))"
+        class="grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+        @click="emit('update:viewMonth', addMonths(viewMonth, 1))"
       >
         <ChevronRightIcon class="h-4 w-4" />
       </button>
@@ -298,7 +302,7 @@ defineExpose({ el: root });
     <!-- Weekday row -->
     <div class="grid grid-cols-7 gap-0 px-1">
       <div
-        v-for="w in WEEKDAYS"
+        v-for="w in WeekdayLabels"
         :key="w"
         class="grid h-7 w-9 place-items-center text-xs font-medium text-muted-foreground"
       >
@@ -308,9 +312,9 @@ defineExpose({ el: root });
 
     <!-- Day grid -->
     <div ref="grid" role="grid" :aria-label="ariaLabel" class="px-1">
-      <div v-for="(week, weekIndex) in weeks" :key="weekIndex" role="row" class="grid grid-cols-7 gap-0">
+      <div v-for="week in weeks" :key="week.key" role="row" class="grid grid-cols-7 gap-0">
         <button
-          v-for="cell in week"
+          v-for="cell in week.cells"
           :key="cell.date.toString()"
           type="button"
           role="gridcell"

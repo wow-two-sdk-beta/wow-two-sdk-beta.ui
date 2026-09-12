@@ -4,22 +4,19 @@ import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyl
 
 export interface TimeInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
   /** The border weight. */
-  border?: InputBorder;
+  readonly border?: InputBorder;
   /** The focus-ring weight. */
-  ring?: InputRing;
+  readonly ring?: InputRing;
 
   /** The value, controlled. The `v-model` binding target. `null` is the cleared state. */
-  modelValue?: Temporal.PlainTime | null;
-
-  /** The value, controlled — React's spelling of `modelValue`, which wins when both are set. */
-  value?: Temporal.PlainTime | null;
+  readonly modelValue?: Temporal.PlainTime | null;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: Temporal.PlainTime | null;
+  readonly defaultValue?: Temporal.PlainTime | null;
 
   /**
    * Renders a bare `<input type="time">` and drops the popover.
@@ -28,35 +25,36 @@ export interface TimeInputProps {
    * lands a system-chrome popup in the middle of a design-system form. Reach for it when the
    * platform picker is the point (a mobile-first form wanting the OS wheel, for instance).
    */
-  native?: boolean;
+  readonly native?: boolean;
 
   /** The minute interval offered in the popover. Default 5. Ignored when `native`. */
-  minuteStep?: number;
+  readonly minuteStep?: number;
 
   /** The empty-state text. Ignored when `native` — that control renders its own mask. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 }
 
 /** Accepts `9`, `09`, `930`, `9:30`, `09:30` — hour alone, or hour + 2-digit minute. */
-const TIME_TEXT = /^(\d{1,2})(?::?(\d{2}))?$/;
+const TimeText = /^(\d{1,2})(?::?(\d{2}))?$/;
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Temporal as TemporalValue } from 'temporal-polyfill';
 import { Clock } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
@@ -64,8 +62,8 @@ import { formatISOTime } from '../DateExtensions';
 import TimeColumns from '../TimeColumns.vue';
 
 /**
- * Atomic time input — a typed `HH:MM` field with a design-system popover on the trailing
- * clock button. Accepts and emits `Temporal.PlainTime`.
+ * Renders a typed `HH:MM` field with a design-system popover on the trailing clock button.
+ * Accepts and emits `Temporal.PlainTime`.
  *
  * The popover is ours (`TimeColumns` inside `overlays/popover`), not the browser's: an
  * `<input type="time">` opens an unstylable system panel, which is what `native` is for.
@@ -86,10 +84,8 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader types a time or picks one in the popover — the `v-model` half. */
   'update:modelValue': [value: Temporal.PlainTime | null];
-  /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
-  'value-change': [value: Temporal.PlainTime | null];
 }>();
 
 const attrs = useAttrs();
@@ -98,11 +94,10 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<Temporal.PlainTime | null>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -119,7 +114,7 @@ watch(committed, (next) => {
 });
 
 function parseTimeText(text: string): Temporal.PlainTime | null {
-  const match = TIME_TEXT.exec(text.trim());
+  const match = TimeText.exec(text.trim());
   if (!match) return null;
   const hour = Number(match[1]);
   const minute = match[2] === undefined ? 0 : Number(match[2]);
@@ -153,6 +148,7 @@ function onBlur(): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
+  if (event.isComposing) return;
   if (event.defaultPrevented) return;
   if (event.key === 'Enter') {
     event.preventDefault();
@@ -180,9 +176,9 @@ const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'value']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 /* The caller's `class` sizes the field and the input keeps `w-full` from the variants —
@@ -204,6 +200,10 @@ const inputClass = computed(() =>
 const root = useTemplateRef<HTMLInputElement>('root');
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+useNativeFormReset(root, controlled.reset, () => {
+  if (root.value) root.value.value = String(displayValue.value ?? '');
+});
+
 defineExpose({ el: root });
 </script>
 
@@ -248,12 +248,12 @@ defineExpose({ el: root });
       <PopoverTrigger
         aria-label="Choose time"
         :disabled="isDisabled"
-        class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <Clock class="h-4 w-4" />
       </PopoverTrigger>
       <PopoverContent is-bare>
-        <TimeColumns :value="committed" :minute-step="minuteStep" :on-time-change="onColumnsChange" />
+        <TimeColumns :model-value="committed" :minute-step="minuteStep" @update:modelValue="onColumnsChange" />
       </PopoverContent>
     </Popover>
   </div>

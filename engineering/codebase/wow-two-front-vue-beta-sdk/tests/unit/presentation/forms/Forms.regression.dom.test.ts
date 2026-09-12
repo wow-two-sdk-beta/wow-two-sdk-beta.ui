@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
-import { MultiSelect, MultiSelectTrigger } from '@src/presentation/forms';
+import { MultiSelectPicker, MultiSelectPickerTrigger } from '@src/presentation/forms';
 import { applyMask } from '@src/presentation/forms/maskedInput/MaskedInput.vue';
 
 /*
@@ -29,7 +29,7 @@ describe('MaskedInput — applyMask', () => {
   });
 });
 
-describe('MultiSelectTags', () => {
+describe('MultiSelectPickerTags', () => {
   const OPTIONS: Record<string, string> = {
     a: 'Alpha',
     b: 'Beta',
@@ -41,8 +41,8 @@ describe('MultiSelectTags', () => {
   function mountTrigger(values: string[], maxVisibleTags?: number) {
     return mount({
       render: () =>
-        h(MultiSelect, { modelValue: values, getOptionLabel: (v: string) => OPTIONS[v] ?? null }, () =>
-          h(MultiSelectTrigger, { maxVisibleTags }),
+        h(MultiSelectPicker, { modelValue: values, getOptionLabel: (v: string) => OPTIONS[v] ?? null }, () =>
+          h(MultiSelectPickerTrigger, { maxVisibleTags }),
         ),
     });
   }

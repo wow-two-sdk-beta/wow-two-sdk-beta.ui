@@ -1,25 +1,25 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 
 export interface FilePickerProps {
   /** The button label. Default `"Choose file"`. Fill the `label` slot for richer content. */
-  label?: string | number;
+  readonly label?: string | number;
 
   /** The filename(s) preview rendered next to the button. Fill the `preview` slot for richer content. */
-  preview?: string | number;
+  readonly preview?: string | number;
 
   /** The visual size of the button. Default `md`. */
-  size?: Size;
+  readonly size?: Size;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 }
 
 /* Sizes not listed fall back to the `md` row at the call site. */
-const SIZE: Partial<Record<Size, string>> = {
+const SizeClass: Partial<Record<Size, string>> = {
   sm: 'h-8 px-3 text-sm',
   md: 'h-10 px-4 text-sm',
   lg: 'h-12 px-6 text-base',
@@ -30,15 +30,11 @@ const SIZE: Partial<Record<Size, string>> = {
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Upload } from 'lucide-vue-next';
-import { cn, Size as SizeValue } from '../../../foundation/utils';
+import { cn, Size as SizeValue } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives';
 
-/**
- * Basic file picker — styled trigger button + visually-hidden native
- * `<input type="file">`. For drag-drop / preview / progress, use the L5
- * `Dropzone` organism (planned).
- */
+/** Renders a styled trigger button over a visually-hidden native `<input type="file">`. */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'FilePicker', inheritAttrs: false });
@@ -52,7 +48,7 @@ const props = withDefaults(defineProps<FilePickerProps>(), {
 });
 
 const emit = defineEmits<{
-  /** Emits the chosen FileList when files are picked. Replaces React's `onFilesChange`. */
+  /** Fires when the reader picks files in the system dialog, carrying the chosen `FileList`. */
   'files-change': [files: FileList | null];
 }>();
 
@@ -92,17 +88,17 @@ function onChange(event: Event): void {
   target.value = '';
 }
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const wrapperClass = computed(() => cn('inline-flex items-center gap-3', attrs.class as ClassValue));
 
 const buttonClass = computed(() =>
   cn(
-    'inline-flex items-center gap-2 rounded-md border border-input bg-background font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
-    SIZE[props.size] ?? SIZE.md,
+    'inline-flex items-center gap-2 rounded-md border border-input bg-background font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+    SizeClass[props.size] ?? SizeClass.md,
   ),
 );
 

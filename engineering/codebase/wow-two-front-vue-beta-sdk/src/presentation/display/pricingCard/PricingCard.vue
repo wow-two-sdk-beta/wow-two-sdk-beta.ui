@@ -6,32 +6,33 @@ export interface PricingCardProps {
    * override. The same pairing applies to `price` / `cadence` / `tagline` /
    * `badgeLabel` below.
    */
-  name: string | number;
+  readonly name: string | number;
 
   /** The headline price (e.g. "$9"). */
-  price: string | number;
+  readonly price: string | number;
 
   /** The billing cadence beside the price (e.g. "/mo"). */
-  cadence?: string | number;
+  readonly cadence?: string | number;
 
   /** The short positioning line below the price. */
-  tagline?: string | number;
+  readonly tagline?: string | number;
 
-  /** The feature bullets — each rendered with a leading `Check`. Override a row's rendering with the scoped `feature` slot. */
-  features: ReadonlyArray<string | number>;
+  /** The feature bullets — each rendered with a leading `Check`. The scoped `feature` slot overrides a row. */
+  readonly features: ReadonlyArray<string | number>;
 
   /** The featured state — highlights this tier with a primary border + shadow + a badge. */
-  featured?: boolean;
+  readonly featured?: boolean;
 
   /** The badge label shown when `featured`. Default "Most popular". */
-  badgeLabel?: string | number;
+  readonly badgeLabel?: string | number;
 }
 </script>
 
 <script setup lang="ts">
+import type { ComponentElement } from '../../../foundation/primitives';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { Check } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import Badge from '../badge/Badge.vue';
 import Card from '../card/Card.vue';
@@ -39,9 +40,10 @@ import Heading from '../heading/Heading.vue';
 import Text from '../text/Text.vue';
 
 /**
- * Pricing tier card — name + price baseline + tagline + checked feature list +
- * bottom-pinned CTA slot. Content-only: the CTA is the default slot, never baked
- * routing. `featured` adds a primary border, shadow, and "Most popular" badge.
+ * Renders a pricing tier: name, price baseline, tagline, checked feature list, bottom-pinned CTA.
+ *
+ * Content-only — the CTA is the default slot, never baked routing. `featured` adds a primary border, a shadow, and a
+ * "Most popular" badge.
  */
 defineOptions({ name: 'PricingCard', inheritAttrs: false });
 
@@ -75,7 +77,7 @@ const props = withDefaults(defineProps<PricingCardProps>(), {
 });
 
 const attrs = useAttrs();
-const el = useTemplateRef<InstanceType<typeof Card>>('el');
+const el = useTemplateRef<ComponentElement>('el');
 
 const classes = computed(() =>
   cn(
@@ -91,7 +93,14 @@ const rest = computed(() => {
   return others;
 });
 
-defineExpose({ el });
+/** Exposes the child's documented DOM handle, never its component instance. */
+const rootElement = computed<HTMLElement | null>(() => {
+  const node = el.value?.el;
+  const elementType = node?.ownerDocument.defaultView?.HTMLElement;
+  return elementType && node instanceof elementType ? node : null;
+});
+
+defineExpose({ el: rootElement });
 </script>
 
 <template>
@@ -119,7 +128,7 @@ defineExpose({ el });
       <slot name="tagline">{{ props.tagline }}</slot>
     </Text>
     <ul class="mt-5 flex flex-1 flex-col gap-2.5">
-      <li v-for="(feature, index) in props.features" :key="index" class="flex items-start gap-2 text-sm">
+      <li v-for="(feature, index) in props.features" :key="feature" class="flex items-start gap-2 text-sm">
         <Icon :icon="Check" :size="16" class="mt-0.5 text-primary" />
         <span
           ><slot name="feature" :feature="feature" :index="index">{{ feature }}</slot></span

@@ -1,57 +1,39 @@
 # ToastHost
 
-## Purpose
-Queue + viewport for transient notifications. Wraps the L4 `Toast` molecule. One mount per app (typically at the root); messages pushed via the singleton `toastHost` API or the `useToastHost()` hook.
+Renders a `ToastNode` — either a plain string or a caller-built VNode.
 
-## Anatomy
-```
-<ToastHost>                  ← viewport (fixed corner)
-  ├── <Toast/>             ← per active item
-  └── <Announce/>          ← screen-reader live region
-</ToastHost>
-```
+Source: [ToastHost.vue](ToastHost.vue).
 
-## Required behaviors
-- New toast → enters viewport, runs visual animation, auto-dismisses after `duration`.
-- Pause-on-hover (configurable) — duration timer halts while pointer is over the viewport.
-- Dismiss button on each toast.
-- Limit on visible items (`max`); excess wait in queue, advance as slots free.
-- Each new message updates the SR live region (via `Announce`).
+Public import: `import { ToastHost } from '@wow-two-beta/ui-vue/presentation/feedback';`.
 
-## Visual states
-`stack` (multiple visible toasts) · `single` · `paused` (hover) · `transitioning`
+## Contract
 
-## Props (ToastHost)
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `position` | `'top-right' \| 'top-left' \| 'top-center' \| 'bottom-right' \| 'bottom-left' \| 'bottom-center'` | `'bottom-right'` | |
-| `max` | `number` | `5` | |
-| `defaultDuration` | `number` (ms) | `5000` | Per-toast `duration` overrides this. |
-| `canPauseOnHover` | `boolean` | `true` | |
-| `gap` | `number` (px) | `8` | |
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
-## API
-```ts
-toastHost.toast({ title, description, severity, duration, action }): id
-toastHost.dismiss(id)
-toastHost.dismissAll()
+## Props
 
-const { toast, dismiss, dismissAll } = useToastHost();   // hook variant — same surface
-```
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `position` | `OverlayPosition` | no | `OverlayPositionToken.BottomRight` | Declared by the source contract. |
+| `max` | `number` | no | `5` | Declared by the source contract. |
+| `defaultDuration` | `number` | no | `5000` | The default auto-dismiss delay in ms; per-toast `duration` overrides. Default 5000. `Infinity` to disable. |
+| `canPauseOnHover` | `boolean` | no | `true` | Declared by the source contract. |
+| `gap` | `number` | no | `8` | Declared by the source contract. |
 
-`severity`: `info | success | warning | danger | neutral` — passes through to `Toast`'s underlying `ToastSimple`.
+## Emits
 
-## Composition model
-External store (singleton) + `ToastHost` component subscribes. Components anywhere in the tree call `toastHost.toast(…)` without prop drilling.
+None declared.
 
-## Accessibility
-- Each toast: `role="status"` (polite) — already on `ToastSimple`.
-- Wrapping viewport: `<Announce>` mirrors the latest toast title for SR fallback.
-- Dismiss button: `aria-label` (already on `Toast`).
-- Pointer-over pauses auto-dismiss → keyboard focus likewise pauses.
+## Slots
 
-## Dependencies
-Foundation: `utils`, `primitives/Portal`, `primitives/Announce`. Same domain: `Toast`.
+None declared.
 
-## Inspirations
-Sonner, react-hot-toast, Mantine `Notifications`. Ours: Sonner-style external store + Mantine-style positions, no extra deps.
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [FeedbackExamples.ts](../../../../apps/playground/src/gallery/fixtures/FeedbackExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

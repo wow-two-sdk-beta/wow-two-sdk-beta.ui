@@ -3,35 +3,32 @@ import type { InputSize, InputState } from '../InputStyles';
 
 export interface MaskedInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
   /** The mask pattern. `#` = digit, `A` = alpha, `*` = alphanumeric, anything else = literal. */
-  mask: string;
-
-  /** The value, controlled — React's spelling, which wins when both are set. */
-  value?: string;
+  readonly mask: string;
 
   /** The value, controlled. The `v-model` binding target. */
-  modelValue?: string;
+  readonly modelValue?: string;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: string;
+  readonly defaultValue?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 
   /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
-  readOnly?: boolean;
+  readonly readOnly?: boolean;
 
-  /** The DOM spelling of {@link MaskedInputProps.readOnly}, which wins when both are set. */
-  readonly?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly readonly?: boolean;
 }
 
 export function applyMask(raw: string, mask: string): string {
@@ -81,16 +78,18 @@ export function applyMask(raw: string, mask: string): string {
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 
 /**
- * Text input with a simple character-class mask. Tokens: `#` digit, `A`
- * letter, `*` alphanumeric. Anything else is a literal that's auto-inserted.
+ * Renders a text input that reformats typing against a mask — `#` digit, `A` letter, `*` alphanumeric.
+ *
+ * Anything else in the mask is a literal that gets auto-inserted as the reader types.
  *
  * Examples: `"###-###-####"` (US phone), `"##/##/####"` (date), `"AAA-####"`.
  */
@@ -108,10 +107,8 @@ const props = withDefaults(defineProps<MaskedInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader types and the masked text changes — the `v-model` half. */
   'update:modelValue': [value: string];
-  /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
-  'value-change': [value: string];
 }>();
 
 const attrs = useAttrs();
@@ -120,17 +117,17 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<string>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
 const currentValue = controlled.value;
 
 function onInput(event: Event): void {
+  if ((event as InputEvent).isComposing) return;
   controlled.setValue(applyMask((event.target as HTMLInputElement).value, props.mask));
 }
 
@@ -141,9 +138,9 @@ const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isRea
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'value']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
@@ -159,6 +156,10 @@ const rootClass = computed(() =>
 const root = useTemplateRef<HTMLInputElement>('root');
 
 /** The rendered element — the Vue stand-in for the React original's forwarded ref. */
+useNativeFormReset(root, controlled.reset, () => {
+  if (root.value) root.value.value = String(currentValue.value ?? '');
+});
+
 defineExpose({ el: root });
 </script>
 
@@ -176,5 +177,6 @@ defineExpose({ el: root });
     :class="rootClass"
     v-bind="passthroughAttrs"
     @input="onInput"
+    @compositionend="onInput"
   />
 </template>

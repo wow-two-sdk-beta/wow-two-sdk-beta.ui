@@ -6,7 +6,7 @@
 import type { StorageBroker } from './StorageBroker';
 
 /** The separator between a namespace and the caller's key. */
-const NAMESPACE_SEPARATOR = ':';
+const NamespaceSeparator = ':';
 
 /**
  * Wraps `inner` so every key is transparently prefixed with `namespace` (joined by `:`). Reads, writes, and
@@ -14,7 +14,7 @@ const NAMESPACE_SEPARATOR = ':';
  * never observe each other's values. Delegates JSON handling and failure-tolerance to `inner` unchanged.
  */
 export function namespacedBroker(inner: StorageBroker, namespace: string): StorageBroker {
-  const scope = (key: string): string => `${namespace}${NAMESPACE_SEPARATOR}${key}`;
+  const scope = (key: string): string => `${namespace}${NamespaceSeparator}${key}`;
 
   return {
     read<T>(key: string): T | null {

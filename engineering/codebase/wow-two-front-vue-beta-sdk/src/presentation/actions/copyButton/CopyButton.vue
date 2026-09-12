@@ -1,5 +1,5 @@
 <script lang="ts">
-import { AriaAttribute, DomEvent, type HandlerProp } from '../../../foundation/utils';
+import { AriaAttribute, DomEvent, type HandlerProp } from '../../../foundation/dom';
 import type { ButtonProps } from '../button';
 
 /** @internal The attributes this component renders itself rather than forwarding. */
@@ -17,16 +17,16 @@ type CopyButtonAttributes = Omit<ButtonProps, ReplacedButtonProp | OwnedAttribut
 /** Defines props for the clipboard-copy button. */
 export interface CopyButtonProps extends /* @vue-ignore */ CopyButtonAttributes {
   /** The text to copy when the button is activated. */
-  text: string;
+  readonly text: string;
 
   /** The reset window for the `copied` state in ms. Default 2000. Set 0 to hold `copied` until the next mount. */
-  resetAfter?: number;
+  readonly resetAfter?: number;
 
   /** The accessible name to announce while `copied` is true. Falls back to `aria-label` when omitted. */
-  copiedAriaLabel?: string;
+  readonly copiedAriaLabel?: string;
 
   /** The visual surface style. Default `ghost`. */
-  variant?: ButtonVariant;
+  readonly variant?: ButtonVariant;
 }
 </script>
 
@@ -35,8 +35,9 @@ import { computed, useAttrs, watch } from 'vue';
 import { Check, Copy } from 'lucide-vue-next';
 
 import { Icon } from '../../../foundation/icons';
-import { useClipboard } from '../../../foundation/hooks';
-import { AttributeValue, OptionalExtensions } from '../../../foundation/utils';
+import { useClipboard } from '../../../foundation/clipboard';
+import { AttributeValue } from '../../../foundation/dom';
+import { OptionalExtensions } from '../../../foundation/optionals';
 import Button from '../button/Button.vue';
 import { ButtonVariant } from '../button';
 

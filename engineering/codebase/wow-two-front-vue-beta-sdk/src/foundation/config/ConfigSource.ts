@@ -8,7 +8,7 @@
 export type ConfigSource = Readonly<Record<string, string | undefined>>;
 
 /** The default runtime-config global — `window.__APP_CONFIG__`, injected per-environment ahead of build-time env. */
-export const DEFAULT_RUNTIME_CONFIG_KEY = '__APP_CONFIG__';
+export const DefaultRuntimeConfigKey = '__APP_CONFIG__';
 
 /**
  * The build-time source — Vite's `import.meta.env`, inlined at build. Returns `{}` outside a bundler context
@@ -27,7 +27,7 @@ export function importMetaEnvSource(): ConfigSource {
  * The runtime source — a global object (default `window.__APP_CONFIG__`) a deployment injects before the app
  * boots. Returns `{}` when there is no `window` (SSR / Node) or the global is absent or not an object.
  */
-export function windowConfigSource(globalKey: string = DEFAULT_RUNTIME_CONFIG_KEY): ConfigSource {
+export function windowConfigSource(globalKey: string = DefaultRuntimeConfigKey): ConfigSource {
   if (typeof window === 'undefined') return {};
   const raw = (window as unknown as Record<string, unknown>)[globalKey];
   return raw !== null && typeof raw === 'object' ? (raw as ConfigSource) : {};
@@ -39,7 +39,7 @@ export function staticSource(values: Record<string, string | undefined>): Config
 }
 
 /** The default source order: runtime `window.__APP_CONFIG__` layered ahead of build-time `import.meta.env`. */
-export function defaultSources(): readonly ConfigSource[] {
+export function defaultSources(): ReadonlyArray<ConfigSource> {
   return [windowConfigSource(), importMetaEnvSource()];
 }
 
@@ -48,7 +48,7 @@ export function defaultSources(): readonly ConfigSource[] {
  * A non-string hit (e.g. `import.meta.env.DEV` is a boolean) is coerced to its string form; an empty string is
  * treated as absent so an unset-but-declared env var falls through to the next source or the field default.
  */
-export function resolveRaw(sources: readonly ConfigSource[], key: string): string | undefined {
+export function resolveRaw(sources: ReadonlyArray<ConfigSource>, key: string): string | undefined {
   for (const source of sources) {
     const hit = (source as Record<string, unknown>)[key];
     if (hit === undefined || hit === null) continue;

@@ -6,18 +6,23 @@ export type VisuallyHiddenProps = HTMLAttributes;
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import { cn } from '../../utils/cn';
+import { cn } from '../../styles/Cn';
 
 /**
- * Visually hidden span — content removed from the visual layout but still
- * announced to screen readers. Use for accessible labels on icon-only
- * affordances and live-region announcements.
+ * Renders the slot in a visually hidden span — content removed from the visual
+ * layout but still announced to screen readers. Use for accessible labels on
+ * icon-only affordances and live-region announcements.
  *
  * `inheritAttrs: false` so a caller's `class` goes through `cn` (tailwind-merge
  * resolves the conflict) instead of being blindly concatenated by Vue's
  * automatic class fallthrough — a caller's `p-2` must be able to beat `p-0`.
  */
 defineOptions({ name: 'VisuallyHidden', inheritAttrs: false });
+
+defineSlots<{
+  /** The content announced to screen readers but hidden from view. */
+  default(): unknown;
+}>();
 
 const attrs = useAttrs();
 

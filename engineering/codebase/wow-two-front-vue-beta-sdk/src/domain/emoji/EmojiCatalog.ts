@@ -10,14 +10,14 @@ export interface EmojiCatalogEntry {
   label: string;
 
   /** The lowercase keywords the search matches against. */
-  tags: readonly string[];
+  tags: ReadonlyArray<string>;
 
   /** The top-level category the entry is grouped under. */
   category: EmojiCategory;
 }
 
 /** Returns every catalog emoji in `category`, preserving display order. */
-function byCategory(category: EmojiCategory): readonly EmojiCatalogEntry[] {
+function byCategory(category: EmojiCategory): ReadonlyArray<EmojiCatalogEntry> {
   return emojiCatalogData.filter((entry) => entry.category === category);
 }
 
@@ -27,7 +27,7 @@ function byCategory(category: EmojiCategory): readonly EmojiCatalogEntry[] {
  * label-prefix hit above a label-substring hit. Ties keep display order. A blank
  * keyword returns the whole catalog.
  */
-function search(keyword: string): readonly EmojiCatalogEntry[] {
+function search(keyword: string): ReadonlyArray<EmojiCatalogEntry> {
   const needle = keyword.trim().toLowerCase();
   if (!needle) return emojiCatalogData;
 

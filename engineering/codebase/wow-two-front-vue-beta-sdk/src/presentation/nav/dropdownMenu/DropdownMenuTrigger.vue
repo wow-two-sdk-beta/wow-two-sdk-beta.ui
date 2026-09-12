@@ -7,17 +7,17 @@
  */
 export interface DropdownMenuTriggerProps {
   /** The as-child toggle — renders the trigger as its single slot child (e.g. `<Button>`). */
-  asChild?: boolean;
+  readonly asChild?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef, watch, type ComponentPublicInstance } from 'vue';
 import { Primitive } from '../../../foundation/primitives';
-import { toHtmlElement } from '../NavHelpers';
+import { NavExtensions } from '../NavExtensions';
 import { useDropdownMenuContext } from './DropdownMenuContext';
 
-/** Toggles the enclosing `DropdownMenu` and doubles as its positioning anchor. */
+/** Renders the button that toggles the enclosing `DropdownMenu` and anchors its panel. */
 defineOptions({ name: 'DropdownMenuTrigger', inheritAttrs: false });
 
 /** The trigger content — React's `children`. */
@@ -34,11 +34,10 @@ const inner = useTemplateRef<ComponentPublicInstance>('inner');
 /* Lifted to a setup const so the template auto-unwraps it (a plain injected object does not). */
 const isOpen = context.open;
 
-/* React memoized a composed callback ref to keep the anchor node from thrashing; a post-flush watch is the equivalent. */
 watch(
   inner,
   (instance) => {
-    context.triggerEl.value = toHtmlElement(instance?.$el);
+    context.triggerEl.value = NavExtensions.toHtmlElement(instance?.$el);
   },
   { immediate: true, flush: 'post' },
 );

@@ -1,3 +1,4 @@
+import { AppErrorFactory, ResultExtensions, type AppError, type Result } from '../foundation/results';
 import type { AuthStrategy } from './AuthSession';
 import { createCookieStrategy, type CreateCookieStrategyOptions } from './CookieStrategy';
 
@@ -6,7 +7,7 @@ export interface CreateRedirectStrategyOptions<TUser> extends Omit<
   CreateCookieStrategyOptions<TUser, never>,
   'signIn'
 > {
-  /** The sign-in challenge endpoint the browser navigates to. Default `/api/identity/sign-in` — the backend SDK identity baseline. */
+  /** The sign-in challenge endpoint the browser navigates to. Default `/api/identity/sign-in` (SDK baseline). */
   readonly signInPath?: string;
 
   /** The query param carrying the post-login return path. Default `returnUrl` (the drydock shape). */
@@ -15,7 +16,7 @@ export interface CreateRedirectStrategyOptions<TUser> extends Omit<
   /** Builds the full challenge URL from the return path — overrides `signInPath` + `returnUrlParam` entirely. */
   readonly buildSignInUrl?: (returnUrl: string) => string;
 
-  /** Performs the navigation. Default `window.location.assign` — injectable for tests, and the seam that keeps this strategy testable without a DOM. */
+  /** Navigates. Default `window.location.assign` — inject to drive the strategy without a DOM in tests. */
   readonly navigate?: (url: string) => void;
 }
 
@@ -75,8 +76,19 @@ export function createRedirectStrategy<TUser>(
     signOut: base.signOut,
 
     // Returns void on purpose: the session state stays as-is while the browser navigates away.
-    signIn(returnUrl?: string): void {
-      doNavigate(buildUrl(returnUrl ?? currentPath()));
+    signIn(returnUrl?: string): Result<void, AppError> {
+      const target = returnUrl ?? currentPath();
+      if (
+        !buildSignInUrl &&
+        (!target.startsWith('/') ||
+          target.startsWith('//') ||
+          [...target].some((character) => character === '\\' || character.charCodeAt(0) < 32))
+      ) {
+        return ResultExtensions.fail(AppErrorFactory.validation());
+      }
+      if (!navigate && typeof window === 'undefined') return ResultExtensions.fail(AppErrorFactory.unavailable());
+      doNavigate(buildUrl(target));
+      return ResultExtensions.ok(undefined);
     },
   };
 }

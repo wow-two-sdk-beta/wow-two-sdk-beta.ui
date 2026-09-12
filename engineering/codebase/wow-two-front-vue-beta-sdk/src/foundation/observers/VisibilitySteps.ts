@@ -16,13 +16,13 @@
 // Rounding to 4 decimals is far below any threshold the browser can distinguish and makes the output stable.
 
 /** Fewest steps that still describes a range — `[0, 1]`, i.e. "empty or full". */
-const MIN_STEPS = 1;
+const MinSteps = 1;
 
 /** Most steps allowed; see the header — beyond this the ladder costs more than the precision is worth. */
-const MAX_STEPS = 100;
+const MaxSteps = 100;
 
 /** Decimal places each threshold is rounded to, killing float noise well below observer precision. */
-const PRECISION = 4;
+const DecimalPlaces = 4;
 
 /**
  * Builds an evenly spaced threshold ladder for `IntersectionObserver`.
@@ -37,10 +37,10 @@ const PRECISION = 4;
  * @param steps How many intervals to divide `0`–`1` into. `steps: 4` ⇒ `[0, 0.25, 0.5, 0.75, 1]`.
  * @returns A frozen ascending ladder of `steps + 1` thresholds, first `0` and last `1`.
  */
-export function visibilityThresholds(steps: number): readonly number[] {
-  const count = Number.isFinite(steps) ? Math.min(Math.max(Math.round(steps), MIN_STEPS), MAX_STEPS) : MIN_STEPS;
+export function visibilityThresholds(steps: number): ReadonlyArray<number> {
+  const count = Number.isFinite(steps) ? Math.min(Math.max(Math.round(steps), MinSteps), MaxSteps) : MinSteps;
 
-  const factor = 10 ** PRECISION;
+  const factor = 10 ** DecimalPlaces;
   const ladder: number[] = [];
   for (let index = 0; index <= count; index += 1) {
     ladder.push(Math.round((index / count) * factor) / factor);

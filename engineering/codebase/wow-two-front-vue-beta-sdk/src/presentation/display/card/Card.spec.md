@@ -1,12 +1,41 @@
 # Card
 
-## Purpose
-Raised surface for grouped content. Compound API — `<Card.Header>` / `<Card.Title>` / `<Card.Description>` / `<Card.Body>` / `<Card.Footer>` slots — for structured cards. Or just `<Card padding="md">…</Card>` for the simplest case.
+Renders a raised surface that groups content, padded to frame its header, body, and footer.
+
+Source: [Card.vue](Card.vue).
+
+Public import: `import { Card } from '@wow-two-beta/ui-vue/presentation/display';`.
+
+## Contract
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default |
-|---|---|---|
-| `padding` | `'none' \| 'sm' \| 'md' \| 'lg'` | `'none'` (use slots) |
 
-## Dependencies
-Foundation: `utils/cn`. Uses semantic tokens `card`, `card-foreground`, `border`.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `variant` | `SurfaceVariant` | no | — | The visual recipe — solid · soft · surface · outline · glass · elevated · flat · subtle. |
+| `tone` | `SurfaceTone` | no | — | The color tone the recipe is tinted with. |
+| `radius` | `SurfaceRadius` | no | — | The corner rounding. |
+| `padding` | `SurfacePadding` | no | — | The inner spacing step. |
+| `elevation` | `SurfaceElevation` | no | — | The shadow depth. |
+
+## Emits
+
+None declared.
+
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [DisplayExamples.ts](../../../../apps/playground/src/gallery/fixtures/DisplayExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

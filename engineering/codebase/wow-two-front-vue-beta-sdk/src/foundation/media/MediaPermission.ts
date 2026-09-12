@@ -1,18 +1,3 @@
-// Permission reads for the two capture devices — two one-line delegations to `foundation/notifications`'
-// `queryPermission`, and no second Permissions API wrapper.
-//
-// That slice owns the generic `navigator.permissions.query` seam (its name is about where it was first needed,
-// not what it covers): the guarded `navigator.permissions` read, the off-spec-state handling, and the
-// synchronous-throw case all already live there and are already tested. Re-implementing them here would produce
-// a second thing to keep correct and a second place to fix a browser quirk. These functions exist only to pin
-// the two permission names so a consumer cannot typo `'microfone'` into an `unsupported` it will never explain.
-//
-// WHY THIS IS NOT THE GRANT CHECK. `queryPermission('camera')` answers `prompt` in the ordinary case, and on
-// Firefox answers `unsupported` for both names — Firefox throws a `TypeError` for camera / microphone rather
-// than resolving. So it can tell you the user has already BLOCKED the camera (worth rendering: re-prompting is
-// futile, the fix is in site settings), and it can never tell you a request will succeed. The authoritative
-// answer is `requestCameraStream`'s own result. Treat this as a hint that improves copy, never as a gate.
-
 import { queryPermission, type PermissionQueryState } from '../notifications';
 
 /**

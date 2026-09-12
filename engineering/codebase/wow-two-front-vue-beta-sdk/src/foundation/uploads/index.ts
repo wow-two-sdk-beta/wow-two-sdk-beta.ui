@@ -11,7 +11,7 @@
 // resilience` (`shouldRetry` + `computeRetryDelay` — the same primitives the HTTP client and `/query` use, so an
 // upload backs off exactly like every other request), accept-matching and name sanitizing are `foundation/files`,
 // failure normalization and cancellation detection are `foundation/errors`, and human-readable sizes are
-// `foundation/format`.
+// `foundation/formatters`.
 //
 // Contract worth knowing before you wire a UI: NOTHING THROWS AT THE CALLER. A rejecting transport, a cancelled
 // attempt, and a file that fails validation are all normal outcomes carried on an item's `status`, and the pool
@@ -46,5 +46,5 @@ export {
   useUploadQueue,
   useUploadQueueSnapshot,
   useUploadQueueVersion,
-  type UseUploadQueueResult,
+  type UseUploadQueueControls,
 } from './UseUploadQueue';

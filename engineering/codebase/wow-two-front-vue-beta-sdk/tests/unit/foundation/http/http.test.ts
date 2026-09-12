@@ -1,65 +1,109 @@
-import { describe, expect, it } from 'vitest';
-import { Temporal } from 'temporal-polyfill';
-import { ApiError, fieldErrors, parseJson, temporalReviver } from '@src/foundation/http';
+import { describe, expect, it, vi } from 'vitest';
+import { ApiError, ApiFailureFactory, createApiClient, fieldErrors, rawEnvelope } from '@src/foundation/http';
+import { DefaultRetryPolicy } from '@src/foundation/resilience';
+import { ResultExtensions } from '@src/foundation/results';
 
-/*
- * Smoke depth, `unit` project (node). The slice's defining contract is the wire seam: an
- * ISO-shaped string arrives as a `Temporal.*` value, everything else arrives untouched, and an
- * ISO-SHAPED-BUT-INVALID string falls back to the raw string instead of throwing — the last of
- * those is what keeps one bad server field from taking down a whole response parse.
- */
-
-describe('temporalReviver', () => {
-  it('upgrades each ISO shape to its Temporal kind', () => {
-    expect(temporalReviver('k', '2026-08-13T10:30:00Z')).toBeInstanceOf(Temporal.Instant);
-    expect(temporalReviver('k', '2026-08-13')).toBeInstanceOf(Temporal.PlainDate);
-    expect(temporalReviver('k', '10:30:00')).toBeInstanceOf(Temporal.PlainTime);
-    expect(temporalReviver('k', 'PT1H30M')).toBeInstanceOf(Temporal.Duration);
+const json = (value: unknown, status = 200) =>
+  new Response(JSON.stringify(value), {
+    status,
+    headers: { 'Content-Type': 'application/json', 'X-Request-Id': 'r1' },
   });
+const clientFor = (response: Response) => createApiClient({ fetch: vi.fn().mockResolvedValue(response) });
 
-  it('leaves a non-matching string and every non-string value alone', () => {
-    expect(temporalReviver('k', 'not a date')).toBe('not a date');
-    expect(temporalReviver('k', 42)).toBe(42);
-    expect(temporalReviver('k', null)).toBeNull();
+describe('HTTP outcomes', () => {
+  it('preserves wire strings without guessing Temporal or numeric encodings', async () => {
+    expect(await clientFor(json({ data: { date: '2026-09-09', id: '9007199254740993' } })).get('/x')).toEqual({
+      ok: true,
+      value: { date: '2026-09-09', id: '9007199254740993' },
+    });
   });
-
-  it('falls back to the raw string for an ISO-shaped but invalid value', () => {
-    expect(temporalReviver('k', '2026-13-40')).toBe('2026-13-40');
+  it('requires decoding for typed values and returns schema failure', async () => {
+    const decode = (value: unknown) =>
+      typeof value === 'string'
+        ? ResultExtensions.ok(value.length)
+        : ResultExtensions.fail(ApiFailureFactory.create('validation'));
+    expect(await clientFor(json({ data: 'abc' })).get('/x', { decode })).toEqual({ ok: true, value: 3 });
+    expect(await clientFor(json({ data: 4 })).get('/x', { decode })).toMatchObject({
+      ok: false,
+      failure: { code: 'validation' },
+    });
   });
-});
-
-describe('parseJson', () => {
-  it('revives date fields inside a parsed payload', () => {
-    const parsed = parseJson<{ id: number; createdAt: Temporal.PlainDate; name: string }>(
-      '{"id":1,"createdAt":"2026-08-13","name":"widget"}',
-    );
-
-    expect(parsed.createdAt).toBeInstanceOf(Temporal.PlainDate);
-    expect(parsed.createdAt.toString()).toBe('2026-08-13');
-    expect(parsed.name).toBe('widget');
+  it('keeps decoder programmer errors exceptional', async () => {
+    await expect(
+      clientFor(json({ data: 1 })).get('/x', {
+        decode: () => {
+          throw new Error('decoder bug');
+        },
+      }),
+    ).rejects.toThrow('decoder bug');
   });
-});
-
-describe('fieldErrors', () => {
-  /* Total by contract: anything that is not a field-carrying failure yields an empty map rather
-     than throwing, so a caller can render it unconditionally. */
-  it('returns an empty map for a value carrying no field errors', () => {
-    expect(fieldErrors(new Error('boom'))).toEqual({});
-    expect(fieldErrors(undefined)).toEqual({});
+  it('treats empty success as void only when declared', async () => {
+    expect(await clientFor(new Response(null, { status: 204 })).delete('/x', { response: 'empty' })).toEqual({
+      ok: true,
+      value: undefined,
+    });
+    expect(await clientFor(new Response(null, { status: 204 })).get('/x')).toMatchObject({
+      ok: false,
+      failure: { code: 'protocol' },
+    });
+    expect(await clientFor(json({ data: 1 })).get('/x', { response: 'empty' })).toMatchObject({
+      ok: false,
+      failure: { code: 'protocol' },
+    });
   });
-});
-
-describe('ApiError', () => {
-  it('is an Error, so an unaware catch block still reads its message', () => {
-    const error = new ApiError(404, { title: 'Not found' });
-    expect(error).toBeInstanceOf(Error);
-    expect(error.status).toBe(404);
-    expect(error.message).toBe('Not found');
+  it('rejects malformed JSON, wrong content types, and missing envelopes', async () => {
+    for (const response of [
+      new Response('{', { headers: { 'Content-Type': 'application/json' } }),
+      new Response('hi'),
+      json({ other: 1 }),
+    ]) {
+      expect(await clientFor(response).get('/x')).toMatchObject({ ok: false, failure: { code: 'protocol' } });
+    }
+    expect(
+      await createApiClient({ envelope: rawEnvelope, fetch: vi.fn().mockResolvedValue(json(null)) }).get('/x'),
+    ).toEqual({ ok: true, value: null });
   });
-
-  /* No message and no problem body still has to read as something — a bare `Error: undefined`
-     in a toast is the failure mode this guards. */
-  it('falls back to a status message when handed neither', () => {
-    expect(new ApiError(500, null).message).toBe('Request failed with status 500');
+  it('separates safe display text from problem diagnostics and headers', async () => {
+    const onUnauthorized = vi.fn();
+    const outcome = await createApiClient({
+      fetch: vi.fn().mockResolvedValue(json({ detail: 'secret', errors: { name: ['Required'] } }, 401)),
+      onUnauthorized,
+    }).get('/x');
+    expect(outcome).toMatchObject({
+      ok: false,
+      failure: {
+        code: 'http',
+        status: 401,
+        message: 'Sign in to continue.',
+        headers: { 'x-request-id': 'r1' },
+        problem: { detail: 'secret' },
+      },
+    });
+    expect(onUnauthorized).toHaveBeenCalledOnce();
+    if (!outcome.ok) expect(fieldErrors(outcome.failure)).toEqual({ name: ['Required'] });
+  });
+  it('distinguishes network, caller cancellation, and timeout', async () => {
+    expect(
+      await createApiClient({ fetch: vi.fn().mockRejectedValue(new TypeError('network')) }).get('/x'),
+    ).toMatchObject({ ok: false, failure: { code: 'transport' } });
+    for (const [name, code] of [
+      ['AbortError', 'cancelled'],
+      ['TimeoutError', 'timeout'],
+    ]) {
+      const controller = new AbortController();
+      controller.abort(new DOMException('stop', name));
+      const fetch = vi.fn();
+      expect(await createApiClient({ fetch }).get('/x', { signal: controller.signal })).toMatchObject({
+        ok: false,
+        failure: { code },
+      });
+      expect(fetch).not.toHaveBeenCalled();
+    }
+  });
+  it('never retries mutations and never leaks problem titles through ApiError', async () => {
+    const fetch = vi.fn().mockResolvedValue(json({ title: 'private server text' }, 503));
+    const outcome = await createApiClient({ fetch, retry: { ...DefaultRetryPolicy, maxRetries: 2 } }).post('/x');
+    expect(fetch).toHaveBeenCalledOnce();
+    if (!outcome.ok) expect(new ApiError(outcome.failure).message).not.toContain('private');
   });
 });

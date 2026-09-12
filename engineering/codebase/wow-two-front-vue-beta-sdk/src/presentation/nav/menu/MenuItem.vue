@@ -10,21 +10,22 @@ import type { MenuItemState } from './Menu.variants';
  */
 export interface MenuItemProps {
   /** The visual state of the item. */
-  state?: MenuItemState;
+  readonly state?: MenuItemState;
 
   /** The disabled state — blocks activation. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, onScopeDispose, shallowRef, useAttrs, watch } from 'vue';
-import { cn, dataAttr } from '../../../foundation/utils';
-import { useId } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { dataAttr } from '../../../foundation/dom';
+import { useId } from '../../../foundation/identifiers';
 import { useMenuContext } from './MenuContext';
 import { MenuItemState as MenuItemStateToken, menuItemVariants } from './Menu.variants';
 
-/** A single activatable menu row. Arrow keys walk the enabled siblings. */
+/** Renders one activatable menu row; the arrow keys walk the enabled siblings. */
 defineOptions({ name: 'MenuItem', inheritAttrs: false });
 
 /** The row content — React's `children`. */
@@ -37,7 +38,7 @@ const props = withDefaults(defineProps<MenuItemProps>(), {
 });
 
 const emit = defineEmits<{
-  /** Replaces React's `onSelect` — the item was activated (Enter / Space / click). The menu closes after. */
+  /** Fires when the reader activates the row with Enter, Space, or a click; the menu closes after. */
   select: [];
 }>();
 

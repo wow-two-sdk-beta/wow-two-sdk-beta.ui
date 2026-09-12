@@ -1,22 +1,3 @@
-// Reading the clipboard — the most restricted operation in the slice, and usually the wrong one to reach for.
-//
-// READ THIS BEFORE USING EITHER FUNCTION. Reading the clipboard is reading a user's data, so browsers gate it far
-// harder than writing:
-//  - it requires a user gesture, and outside one the platform refuses (`denied`);
-//  - Chromium shows an explicit "Allow the site to see text and images on the clipboard?" prompt, and a
-//    dismissal is a `denied` — a decision by the user, not a bug to retry;
-//  - Firefox does not expose `readText` / `read` to page script at ALL. Only extensions get them. That surfaces
-//    here as `unsupported` rather than a generic `failed`, because the two need different UI: `failed` invites a
-//    retry, `unsupported` means stop asking and render the manual affordance instead.
-//
-// IF YOU WANT WHAT THE USER JUST PASTED, DO NOT READ. Handle the `paste` event and call `getPasteItems` — the
-// payload arrives on the event, no permission, no prompt, no gesture check, and it works in every engine
-// including Firefox. Reading is for the narrow case of pulling the clipboard WITHOUT a paste, like a "detect a
-// copied invite code on focus" affordance. That case is rare and worth questioning.
-//
-// An empty clipboard reads as `''` / `[]` and is a successful read of nothing, not a failure — a consumer
-// distinguishes "nothing to paste" from "we could not look" by the status, not by the payload's emptiness.
-
 import {
   reportClipboardOutcome,
   toClipboardFailure,
@@ -37,7 +18,7 @@ import { clipboardMethod } from './ClipboardSupport';
 async function flattenItem(item: ClipboardItem): Promise<ClipboardReadItem[]> {
   const flattened: ClipboardReadItem[] = [];
 
-  let types: readonly string[];
+  let types: ReadonlyArray<string>;
   try {
     const declared: unknown = item.types;
     if (!Array.isArray(declared)) return flattened;
@@ -63,8 +44,7 @@ async function flattenItem(item: ClipboardItem): Promise<ClipboardReadItem[]> {
  * Reads the clipboard's plain text.
  *
  * Requires a user gesture and, in Chromium, an explicit permission prompt the user can dismiss — a dismissal is
- * `denied`. Resolves to `unsupported` under SSR and in Firefox, which withholds clipboard reading from page
- * script entirely.
+ * `denied`. Resolves to `unsupported` when the runtime lacks the method, including under SSR.
  *
  * Prefer `getPasteItems` on a `paste` event wherever the flow is "the user pastes something": that path needs no
  * permission and works everywhere.
@@ -76,20 +56,23 @@ async function flattenItem(item: ClipboardItem): Promise<ClipboardReadItem[]> {
 export async function readText(options?: ClipboardReadOptions): Promise<ClipboardReadTextResult> {
   try {
     const read = clipboardMethod('readText');
-    if (read === undefined) return { status: 'unsupported' };
+    if (read === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
     const text = await read();
     return typeof text === 'string'
-      ? { status: 'read', text }
+      ? { ok: true, value: text }
       : reportClipboardOutcome(
           {
-            status: 'failed',
-            error: new TypeError('navigator.clipboard.readText resolved with a non-string.'),
+            ok: false,
+            failure: {
+              status: 'failed',
+              error: new TypeError('navigator.clipboard.readText resolved with a non-string.'),
+            },
           } as const,
           options?.onError,
         );
   } catch (error) {
-    return reportClipboardOutcome(toClipboardFailure(error), options?.onError);
+    return reportClipboardOutcome({ ok: false, failure: toClipboardFailure(error) }, options?.onError);
   }
 }
 
@@ -108,12 +91,15 @@ export async function readText(options?: ClipboardReadOptions): Promise<Clipboar
 export async function readItems(options?: ClipboardReadOptions): Promise<ClipboardReadItemsResult> {
   try {
     const read = clipboardMethod('read');
-    if (read === undefined) return { status: 'unsupported' };
+    if (read === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
     const raw: unknown = await read();
     if (!Array.isArray(raw)) {
       return reportClipboardOutcome(
-        { status: 'failed', error: new TypeError('navigator.clipboard.read resolved with a non-array.') } as const,
+        {
+          ok: false,
+          failure: { status: 'failed', error: new TypeError('navigator.clipboard.read resolved with a non-array.') },
+        } as const,
         options?.onError,
       );
     }
@@ -124,8 +110,8 @@ export async function readItems(options?: ClipboardReadOptions): Promise<Clipboa
       items.push(...(await flattenItem(entry)));
     }
 
-    return { status: 'read', items };
+    return { ok: true, value: items };
   } catch (error) {
-    return reportClipboardOutcome(toClipboardFailure(error), options?.onError);
+    return reportClipboardOutcome({ ok: false, failure: toClipboardFailure(error) }, options?.onError);
   }
 }

@@ -11,10 +11,10 @@ export type NavigationMenuLinkProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, shallowRef, useAttrs } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useRovingFocusItem } from '../../../foundation/primitives';
 
-/** A plain link that joins the strip's roving tab stop. */
+/** Renders a plain link that joins the strip's roving tab stop. */
 defineOptions({ name: 'NavigationMenuLink', inheritAttrs: false });
 
 /** The link content — React's `children`. */
@@ -43,7 +43,7 @@ function handleKeydown(event: KeyboardEvent): void {
 
 const classes = computed(() =>
   cn(
-    'inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:underline-offset-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     attrs.class as string | undefined,
   ),
 );

@@ -29,7 +29,7 @@ import { createWorkerClient, type WorkerApiOf, type WorkerClient, type WorkerCli
 import { isWorkerSupported } from './WorkerSupport';
 
 /** What {@link useWorker} returns. */
-export interface UseWorkerResult<TApi extends WorkerApiOf<TApi>> {
+export interface UseWorkerControls<TApi extends WorkerApiOf<TApi>> {
   /**
    * The typed client, or `null` before mount and in any runtime without `Worker`.
    *
@@ -48,17 +48,12 @@ export interface UseWorkerResult<TApi extends WorkerApiOf<TApi>> {
 /**
  * Owns a worker for the lifetime of the calling scope: created on mount, terminated on disposal.
  *
- * ```ts
- * const { client } = useWorker<MathApi>(() => new Worker(new URL('./math.worker.ts', import.meta.url), { type: 'module' }));
- * const sum = await client.value?.call('add', 2, 3);
- * ```
- *
  * The factory is invoked once per mount, so an inline arrow is the expected call shape.
  */
 export function useWorker<TApi extends WorkerApiOf<TApi>>(
   factory: () => Worker,
   options?: WorkerClientOptions,
-): UseWorkerResult<TApi> {
+): UseWorkerControls<TApi> {
   const client = shallowRef<WorkerClient<TApi> | null>(null);
   const supported = shallowRef(false);
 

@@ -2,7 +2,7 @@
 import type { Direction } from './DirectionContext';
 
 export interface DirectionProviderProps {
-  dir: Direction;
+  readonly dir: Direction;
 }
 </script>
 
@@ -10,14 +10,18 @@ export interface DirectionProviderProps {
 import { provideDirection } from './DirectionContext';
 
 /**
- * Provide reading direction to descendants. Components that mirror in RTL
- * (Tabs arrow keys, Slider, Carousel, etc.) read this via `useDirection()`.
- *
- * Renders no element of its own — the slot passes straight through.
+ * Renders no element of its own — the slot passes straight through — while providing reading direction to
+ * descendants. Components that mirror in RTL (Tabs arrow keys, Slider, Carousel, etc.) read this via
+ * `useDirection()`.
  */
 defineOptions({ name: 'DirectionProvider' });
 
 const props = defineProps<DirectionProviderProps>();
+
+defineSlots<{
+  /** The subtree that reads the provided reading direction. */
+  default(): unknown;
+}>();
 
 provideDirection(() => props.dir);
 </script>

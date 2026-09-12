@@ -6,10 +6,10 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useTableContext } from './TableContext';
 
-/** The `tbody` section of a `Table` — picks up striping / hover from the root. */
+/** Renders the `tbody` of a `Table`, picking up striping and hover from the root. */
 defineOptions({ name: 'TableBody', inheritAttrs: false });
 
 /** The body rows — React's `children`. */

@@ -8,16 +8,16 @@
  */
 export interface ActionSheetActionProps {
   /** The destructive tone — renders the label in the danger color. */
-  isDestructive?: boolean;
+  readonly isDestructive?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useActionSheetContext } from './ActionSheet.vue';
 
-/* One action row of an `ActionSheet` — fires `select`, then closes the sheet. */
+/** Renders one action row of an `ActionSheet`; it fires `select`, then closes the sheet. */
 defineOptions({ name: 'ActionSheetAction', inheritAttrs: false });
 
 /** The row label — React's `children`. */
@@ -26,7 +26,7 @@ defineSlots<{ default(): unknown }>();
 const props = withDefaults(defineProps<ActionSheetActionProps>(), { isDestructive: false });
 
 const emit = defineEmits<{
-  /** Replaces React's `onSelect`. Fires before the sheet closes. */
+  /** Fires when the reader picks this row, just before the sheet closes. */
   select: [];
 }>();
 
@@ -36,7 +36,7 @@ const el = useTemplateRef<HTMLButtonElement>('el');
 
 const classes = computed(() =>
   cn(
-    'flex h-12 w-full items-center justify-center bg-card px-4 text-base font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+    'flex h-12 w-full items-center justify-center bg-card px-4 text-base font-medium transition-colors hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
     props.isDestructive ? 'text-destructive' : 'text-foreground',
     attrs.class as string | undefined,
   ),

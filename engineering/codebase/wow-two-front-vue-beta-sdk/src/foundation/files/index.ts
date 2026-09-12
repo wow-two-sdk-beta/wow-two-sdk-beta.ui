@@ -2,7 +2,7 @@
 // `File`, `matchesAcceptType` for the advisory pre-drop check), file-name parsing (`fileExtension`/`fileBaseName`/
 // `safeFileName`), promise-wrapped `FileReader` reads, and object-URL downloads that always revoke. No Vue —
 // the `FileUpload` / `FilePicker` components are consumers, not owners, of these rules. Pair with
-// `foundation/format`'s `formatBytes` to render sizes.
+// `foundation/formatters`'s `formatBytes` to render sizes.
 
 export {
   type FileLike,

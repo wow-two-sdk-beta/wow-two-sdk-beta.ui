@@ -23,8 +23,23 @@ import { requireSubtle } from './WebCrypto';
 /** Accepted digest input: a UTF-8-encoded string, a raw `ArrayBuffer`, or an existing byte view. */
 export type BinaryInput = string | ArrayBuffer | Uint8Array;
 
-/** A hash algorithm `crypto.subtle.digest` implements. SHA-256 is the default choice; SHA-1 is checksum/interop only. */
-export type DigestAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512';
+/** A hash algorithm `crypto.subtle.digest` implements. SHA-256 is the default; SHA-1 is checksum/interop only. */
+export const DigestAlgorithm = {
+  /** Names the 160-bit SHA-1 digest — broken for signatures, correct for checksums and git-style interop. */
+  Sha1: 'SHA-1',
+
+  /** Names the 256-bit SHA-2 digest — the default for cache keys, content hashes, and ETags. */
+  Sha256: 'SHA-256',
+
+  /** Names the 384-bit SHA-2 digest — a truncated SHA-512, for callers pinned to a 48-byte width. */
+  Sha384: 'SHA-384',
+
+  /** Names the 512-bit SHA-2 digest — the widest the platform implements. */
+  Sha512: 'SHA-512',
+} as const;
+
+/** A hash algorithm `crypto.subtle.digest` implements. SHA-256 is the default; SHA-1 is checksum/interop only. */
+export type DigestAlgorithm = (typeof DigestAlgorithm)[keyof typeof DigestAlgorithm];
 
 /** Normalizes any {@link BinaryInput} to bytes; strings become UTF-8. Internal — not exported from the barrel. */
 export function toBytes(data: BinaryInput): Uint8Array {
@@ -49,9 +64,9 @@ export async function digest(algorithm: DigestAlgorithm, data: BinaryInput): Pro
   return new Uint8Array(hashed);
 }
 
-/** Computes the SHA-256 digest of `data` (32 bytes) — the default hash for cache keys, ETags, and content addressing. */
+/** Computes the SHA-256 digest of `data` (32 bytes) — the default hash for cache keys, ETags, content addressing. */
 export function sha256(data: BinaryInput): Promise<Uint8Array> {
-  return digest('SHA-256', data);
+  return digest(DigestAlgorithm.Sha256, data);
 }
 
 /**
@@ -60,20 +75,23 @@ export function sha256(data: BinaryInput): Promise<Uint8Array> {
  * Reach for {@link sha256} everywhere else.
  */
 export function sha1(data: BinaryInput): Promise<Uint8Array> {
-  return digest('SHA-1', data);
+  return digest(DigestAlgorithm.Sha1, data);
 }
 
 /** Computes the SHA-384 digest of `data` (48 bytes) — the truncated SHA-512 variant used by subresource integrity. */
 export function sha384(data: BinaryInput): Promise<Uint8Array> {
-  return digest('SHA-384', data);
+  return digest(DigestAlgorithm.Sha384, data);
 }
 
 /** Computes the SHA-512 digest of `data` (64 bytes) — wider margin than SHA-256, and faster on 64-bit hardware. */
 export function sha512(data: BinaryInput): Promise<Uint8Array> {
-  return digest('SHA-512', data);
+  return digest(DigestAlgorithm.Sha512, data);
 }
 
-/** Computes the SHA-256 digest of `data` as a lowercase 64-char hex string — the ready-to-print form for an ETag or cache key. */
+/**
+ * Computes the SHA-256 digest of `data` as a lowercase 64-char hex string — the ready-to-print form for an ETag
+ * or cache key.
+ */
 export async function sha256Hex(data: BinaryInput): Promise<string> {
   return bytesToHex(await sha256(data));
 }

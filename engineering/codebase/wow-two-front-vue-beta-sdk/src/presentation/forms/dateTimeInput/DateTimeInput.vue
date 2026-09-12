@@ -4,28 +4,25 @@ import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyl
 
 export interface DateTimeInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
   /** The border weight. */
-  border?: InputBorder;
+  readonly border?: InputBorder;
   /** The focus-ring weight. */
-  ring?: InputRing;
+  readonly ring?: InputRing;
 
   /** The value, controlled. The `v-model` binding target. `null` is the cleared state. */
-  modelValue?: Temporal.PlainDateTime | null;
-
-  /** The value, controlled — React's spelling of `modelValue`, which wins when both are set. */
-  value?: Temporal.PlainDateTime | null;
+  readonly modelValue?: Temporal.PlainDateTime | null;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: Temporal.PlainDateTime | null;
+  readonly defaultValue?: Temporal.PlainDateTime | null;
 
   /** The earliest selectable wall-clock instant. */
-  min?: Temporal.PlainDateTime | null;
+  readonly min?: Temporal.PlainDateTime | null;
 
   /** The latest selectable wall-clock instant. */
-  max?: Temporal.PlainDateTime | null;
+  readonly max?: Temporal.PlainDateTime | null;
 
   /**
    * Renders a bare `<input type="datetime-local">` and drops the popover.
@@ -34,45 +31,45 @@ export interface DateTimeInputProps {
    * lands a system-chrome popup in the middle of a design-system form. Reach for it when the
    * platform picker is the point (a mobile-first form wanting the OS wheels, for instance).
    */
-  native?: boolean;
+  readonly native?: boolean;
 
   /** The minute interval offered in the popover. Default 5. Ignored when `native`. */
-  minuteStep?: number;
+  readonly minuteStep?: number;
 
   /** The empty-state text. Ignored when `native` — that control renders its own mask. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /** The hidden input name; when set, a hidden input ships the ISO value with form submission. */
-  name?: string;
+  readonly name?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { CalendarClock } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 import { formatISODateTime, parseISODate, parseISODateTime, today } from '../DateExtensions';
-import Calendar from '../calendar/Calendar.vue';
+import CalendarPicker from '../calendarPicker/CalendarPicker.vue';
 import TimeColumns from '../TimeColumns.vue';
 
 /**
- * Atomic datetime input — a typed `YYYY-MM-DD HH:MM` field with a design-system popover
- * (`Calendar` + hour/minute columns) on the trailing button. Accepts and emits
- * `Temporal.PlainDateTime` (calendar wall-clock, no zone).
+ * Renders a typed `YYYY-MM-DD HH:MM` field with a `CalendarPicker` plus hour/minute popover on its button.
+ * Accepts and emits `Temporal.PlainDateTime` (calendar wall-clock, no zone).
  *
  * The popover is ours, not the browser's: an `<input type="datetime-local">` opens an
  * unstylable system panel, which is what `native` is for.
@@ -93,10 +90,8 @@ const props = withDefaults(defineProps<DateTimeInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader types or picks a date and time — the `v-model` half. */
   'update:modelValue': [value: Temporal.PlainDateTime | null];
-  /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
-  'value-change': [value: Temporal.PlainDateTime | null];
 }>();
 
 const attrs = useAttrs();
@@ -105,11 +100,10 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<Temporal.PlainDateTime | null>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -166,6 +160,7 @@ function onBlur(): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
+  if (event.isComposing) return;
   if (event.defaultPrevented) return;
   if (event.key === 'Enter') {
     event.preventDefault();
@@ -212,9 +207,9 @@ const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'value']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 /* The caller's `class` sizes the field and the input keeps `w-full` from the variants —
@@ -236,6 +231,10 @@ const inputClass = computed(() =>
 const root = useTemplateRef<HTMLInputElement>('root');
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+useNativeFormReset(root, controlled.reset, () => {
+  if (root.value) root.value.value = String(isoValue.value ?? '');
+});
+
 defineExpose({ el: root });
 </script>
 
@@ -281,20 +280,20 @@ defineExpose({ el: root });
       <PopoverTrigger
         aria-label="Choose date and time"
         :disabled="isDisabled"
-        class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <CalendarClock class="h-4 w-4" />
       </PopoverTrigger>
       <PopoverContent is-bare>
         <div class="flex items-start gap-2">
-          <Calendar
-            :value="calendarValue"
+          <CalendarPicker
+            :model-value="calendarValue"
             :default-month="calendarMonth"
             :min="minDate"
             :max="maxDate"
-            @value-change="onCalendarChange"
+            @update:modelValue="onCalendarChange"
           />
-          <TimeColumns :value="timeValue" :minute-step="minuteStep" :on-time-change="onColumnsChange" />
+          <TimeColumns :model-value="timeValue" :minute-step="minuteStep" @update:modelValue="onColumnsChange" />
         </div>
       </PopoverContent>
     </Popover>

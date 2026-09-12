@@ -12,11 +12,11 @@ export type NavigationMenuTriggerProps = Record<string, never>;
 <script setup lang="ts">
 import { computed, shallowRef, useAttrs } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useRovingFocusItem } from '../../../foundation/primitives';
 import { useNavigationMenuContext, useNavigationMenuItemContext } from './NavigationMenuContext';
 
-/** The button that expands an item's panel, and the panel's positioning anchor. */
+/** Renders the button that expands an item's panel, and anchors the panel's position. */
 defineOptions({ name: 'NavigationMenuTrigger', inheritAttrs: false });
 
 /** The trigger label — React's `children`. */
@@ -83,7 +83,7 @@ function handleKeydown(event: KeyboardEvent): void {
 
 const classes = computed(() =>
   cn(
-    'inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted',
+    'inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted',
     attrs.class as string | undefined,
   ),
 );

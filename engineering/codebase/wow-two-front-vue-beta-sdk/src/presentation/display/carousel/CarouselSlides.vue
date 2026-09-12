@@ -1,23 +1,20 @@
 <script lang="ts">
 /* eslint-disable-next-line @typescript-eslint/no-empty-object-type -- kept as an
-   exported name: React declared `CarouselSlidesProps` and consumers import it. Its
-   only member was `children`, which is the default slot here. */
+   exported name that consumers import; the slides arrive through the default
+   slot, so the interface carries no members. */
 export interface CarouselSlidesProps {}
 </script>
 
 <script setup lang="ts">
 import { computed, onMounted, onUpdated, useAttrs, useSlots, useTemplateRef, type VNode } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { renderableChildren } from '../../../foundation/primitives';
 import { useCarouselContext } from './CarouselContext';
 
-/**
- * The sliding track. Each child is wrapped in its own `role="group"` slide frame,
- * exactly as React's `Children.toArray(children).filter(isValidElement)` did.
- */
+/** Renders the sliding track, wrapping each child in its own `role="group"` slide frame. */
 defineOptions({ name: 'CarouselSlides', inheritAttrs: false });
 
-/** The slides — React's required `children`. */
+/** The slides. */
 defineSlots<{ default(): unknown }>();
 
 const attrs = useAttrs();
@@ -35,10 +32,9 @@ function slideChildren(): Array<VNode> {
 }
 
 /**
- * React published the count from `useEffect([childArray.length])`. Vue has no
- * children array to depend on, so the count is re-read after every render of
- * this component — which is precisely when the slot content can have changed.
- * Writing an unchanged count is a no-op on a ref, so this cannot loop.
+ * No children array exists to depend on, so the count is re-read after every
+ * render of this component — which is precisely when the slot content can have
+ * changed. Writing an unchanged count is a no-op on a ref, so this cannot loop.
  */
 function syncCount(): void {
   carousel.setCount(slideChildren().length);
@@ -51,7 +47,7 @@ const classes = computed(() =>
   cn('flex transition-transform duration-300 ease-out', attrs.class as string | undefined),
 );
 
-/** Vue does not append units to a numeric `:style` value the way React does — spelled out. */
+/** Vue does not append units to a numeric `:style` value — spelled out. */
 const trackStyle = computed(() => ({ transform: `translateX(-${carousel.index * 100}%)` }));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -66,12 +62,12 @@ defineExpose({ el });
 <template>
   <div ref="el" :aria-live="carousel.autoPlay ? 'off' : 'polite'" v-bind="rest" :class="classes" :style="trackStyle">
     <!-- The single-element `v-for` hoists the slot call into a template local, so
-         the slot is invoked once per render and `length` is React's
-         `childArray.length` rather than the injected count, which lags by a tick. -->
+         the slot is invoked once per render and `length` is the live child count
+         rather than the injected count, which lags by a tick. -->
     <template v-for="(children, hoist) in [slideChildren()]" :key="hoist">
       <div
         v-for="(child, slideIndex) in children"
-        :key="slideIndex"
+        :key="child.key ?? slideIndex"
         role="group"
         aria-roledescription="slide"
         :aria-label="`${slideIndex + 1} of ${children.length}`"

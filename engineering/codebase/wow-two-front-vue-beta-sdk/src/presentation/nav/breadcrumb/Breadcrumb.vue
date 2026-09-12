@@ -1,26 +1,27 @@
 <script lang="ts">
 export interface BreadcrumbItem {
-  /** React typed this `ReactNode`; the scalar form is what an array item can carry — the `#label` scoped slot is the rich override. */
-  label: string | number;
+  /** The item's label — scalar; an array item carries no rich content. The `#label` slot is the rich override. */
+  readonly label: string | number;
 
   /** Make this item a link. Last item is typically rendered as plain text. */
-  href?: string;
+  readonly href?: string;
 }
 
 export interface BreadcrumbProps {
-  items: ReadonlyArray<BreadcrumbItem>;
+  readonly items: ReadonlyArray<BreadcrumbItem>;
 }
 </script>
 
 <script setup lang="ts">
+import { UrlExtensions } from '../../../foundation/dom';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { ChevronRight } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 
 /**
- * Linear position trail — list of links + separators. The last item is
- * always rendered as `aria-current="page"` and not a link. Use the L5
+ * Renders a linear trail of links and separators marking where the reader stands.
+ * The last item is always rendered as `aria-current="page"` and not a link. Use the L5
  * collapsing version when the chain gets long.
  */
 defineOptions({ name: 'Breadcrumb', inheritAttrs: false });
@@ -56,12 +57,12 @@ defineExpose({ el });
        the precedence React got from spreading `{...props}` after it. -->
   <nav ref="el" aria-label="Breadcrumb" v-bind="rest" :class="classes">
     <ol class="flex flex-wrap items-center gap-1.5">
-      <template v-for="(item, i) in props.items" :key="i">
+      <template v-for="(item, i) in props.items" :key="item.href ?? item.label">
         <li>
           <a
             v-if="item.href && i !== lastIndex"
-            :href="item.href"
-            class="text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            :href="UrlExtensions.safeNavigation(item.href)"
+            class="text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
           >
             <slot name="label" :item="item" :index="i">{{ item.label }}</slot>
           </a>

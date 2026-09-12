@@ -68,6 +68,8 @@ export {
   type WorkerTransfer,
 } from './WorkerHost';
 
-export { useWorker, type UseWorkerResult } from './UseWorker';
+export { useWorker, type UseWorkerControls } from './UseWorker';
 
-export { runInWorker, type RunInWorkerResult, type RunInWorkerOptions } from './RunInWorker';
+export { runInWorker, type WorkerRunFailure, type WorkerRunResult, type RunInWorkerOptions } from './RunInWorker';
+
+export { WorkerRunFailureCode } from './WorkerRunFailureCode';

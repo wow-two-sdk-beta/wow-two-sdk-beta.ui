@@ -153,33 +153,17 @@ describe('subscriber isolation', () => {
   });
 });
 
-describe('toErrorNotice', () => {
-  it('titles from the problem body and describes from its detail', () => {
-    const notice = toErrorNotice(new ApiError(422, { title: 'Invalid', detail: 'Name is required' }));
-
-    expect(notice.tone).toBe(NoticeTone.Danger);
-    expect(notice.title).toBe('Invalid');
-    expect(notice.description).toBe('Name is required');
+describe('safe query feedback', () => {
+  it('uses only display-safe catalog text, excluding backend diagnostics', () => {
+    const failure = new ApiError(422, { title: 'private', detail: 'secret' }).failure;
+    expect(toErrorNotice(failure)).toEqual({ tone: NoticeTone.Danger, title: failure.message });
   });
-
-  it('falls back to a status-shaped title when there is no problem body', () => {
-    expect(toErrorNotice(new ApiError(500, null)).title).toBe('Request failed (500)');
-  });
-
-  it('names status 0 a network error rather than "Request failed (0)"', () => {
-    expect(toErrorNotice(new ApiError(0, null, 'fetch failed')).title).toBe('Network error');
-  });
-});
-
-describe('feedbackQueryErrors', () => {
-  it('routes a coerced ApiError onto the bus it was handed', () => {
+  it('publishes ordinary failures and suppresses cancellation', () => {
     const bus = createFeedbackBus();
-    const seen = publishedTo();
-    bus.subscribe(seen.listener);
-
-    feedbackQueryErrors(bus)(new ApiError(404, { title: 'Not found' }));
-
-    expect(seen.received).toHaveLength(1);
-    expect(seen.received[0]?.tone).toBe(NoticeTone.Danger);
+    const seen: PublishedNotice[] = [];
+    bus.subscribe((notice) => seen.push(notice));
+    feedbackQueryErrors(bus)(new ApiError(404, null).failure);
+    feedbackQueryErrors(bus)({ type: 'cancelled', message: 'Cancelled.' });
+    expect(seen).toHaveLength(1);
   });
 });

@@ -72,7 +72,7 @@ export interface EventStreamErrorContext {
   /** Whoever is retrying this failure. See {@link ReconnectOwner}. */
   readonly owner: ReconnectOwner;
 
-  /** The wrapper's consecutive attempt count; `0` while the browser owns the retry, since the wrapper has armed nothing. */
+  /** The wrapper's consecutive attempt count; `0` while the browser owns the retry, since nothing is armed yet. */
   readonly attempt: number;
 
   /** The connection state after this failure was handled. */
@@ -92,7 +92,7 @@ export type EventStreamHandlers<TEvents extends EventStreamPayloads> = {
 
 /** Configures a {@link createEventStream} call. Every member is optional. */
 export interface EventStreamOptions<TEvents extends EventStreamPayloads = EventStreamPayloads> {
-  /** Handlers for server-NAMED events (`event: order-updated`). These never reach {@link EventStreamOptions.onMessage}. */
+  /** Handlers for server-NAMED events (`event: order-updated`). Never reach {@link EventStreamOptions.onMessage}. */
   readonly events?: EventStreamHandlers<TEvents>;
 
   /** Handles unnamed events only — the default `message` type. */
@@ -117,7 +117,10 @@ export interface EventStreamOptions<TEvents extends EventStreamPayloads = EventS
    */
   readonly parse?: (raw: string) => unknown;
 
-  /** The reconnect policy for failures the browser abandons, or `false` to never reconnect. Default `DefaultReconnectPolicy`. */
+  /**
+   * The reconnect policy for failures the browser abandons, or `false` to never reconnect.
+   * Default `DefaultReconnectPolicy`.
+   */
   readonly retry?: RetryPolicy | false;
 
   /** The randomness feeding backoff jitter — injectable for deterministic tests. Default `Math.random`. */
@@ -138,7 +141,10 @@ export interface EventStream {
   /** The wrapper's consecutive reconnect attempts, zeroed on every successful open. */
   readonly attempts: number;
 
-  /** Closes the stream, cancels any pending reconnect, and detaches every listener. Idempotent; suppresses all further reconnection. */
+  /**
+   * Closes the stream, cancels any pending reconnect, and detaches every listener. Idempotent; suppresses all
+   * further reconnection.
+   */
   close(): void;
 }
 
@@ -158,7 +164,7 @@ function frameTextOf(event: Event): { text: string; message: MessageEvent<string
   return { text: typeof data === 'string' ? data : String(data), message };
 }
 
-/** Resolves the source factory: the injected one, else the global `EventSource`, else `undefined` (SSR / unsupported). */
+/** Resolves the source factory: the injected one, else global `EventSource`, else `undefined` (SSR / unsupported). */
 function resolveSourceFactory(injected?: EventStreamSourceFactory): EventStreamSourceFactory | undefined {
   if (injected !== undefined) return injected;
   if (typeof EventSource === 'undefined') return undefined;
@@ -286,7 +292,7 @@ export function createEventStream<TEvents extends EventStreamPayloads = EventStr
     detach = bind(opened);
   };
 
-  /** The double-reconnect guard itself: branch on the wire ready-state, and never retry what the browser is already retrying. */
+  /** The double-reconnect guard: branch on the wire ready-state, never retry what the browser is already retrying. */
   function handleError(target: EventStreamSource): void {
     if (closed) return;
 

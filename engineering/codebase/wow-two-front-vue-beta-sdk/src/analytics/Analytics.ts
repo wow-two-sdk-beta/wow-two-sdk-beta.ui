@@ -35,7 +35,7 @@ function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
 /** Defines the options for {@link createAnalytics}. */
 export interface AnalyticsOptions {
   /** The sinks registered up front; more may join later via `register`. */
-  readonly providers?: readonly AnalyticsProvider[];
+  readonly providers?: ReadonlyArray<AnalyticsProvider>;
 
   /** Whether calls dispatch at all. Default `true`; flip at runtime with `setEnabled` for consent / Do-Not-Track. */
   readonly enabled?: boolean;
@@ -82,7 +82,7 @@ export interface Analytics {
   /** Reports whether dispatch is currently on. */
   isEnabled(): boolean;
 
-  /** Awaits every registered sink's optional `flush` — for page unload and test drainage. */
+  /** Awaits dispatched calls, then every registered sink's optional `flush` — for page unload and test drainage. */
   flush(): Promise<void>;
 }
 
@@ -91,6 +91,7 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
   const { maxQueueSize = 100, onError, now = Date.now } = options;
   const providers = new Set<AnalyticsProvider>(options.providers ?? []);
   const queue: AnalyticsCall[] = [];
+  const pendingDeliveries = new Set<Promise<void>>();
   let context: AnalyticsProperties = { ...options.context };
   let enabled = options.enabled ?? true;
 
@@ -131,7 +132,7 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
   };
 
   /** Delivers one call to one sink, picking the matching method — an absent method is simply skipped. */
-  const deliver = (provider: AnalyticsProvider, call: AnalyticsCall): Promise<void> => {
+  const deliverNow = (provider: AnalyticsProvider, call: AnalyticsCall): Promise<void> => {
     switch (call.kind) {
       case AnalyticsCallKind.Track:
         return invoke(provider, AnalyticsFailurePhase.Track, call, () => provider.track?.(call.event));
@@ -140,6 +141,13 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
       case AnalyticsCallKind.Page:
         return invoke(provider, AnalyticsFailurePhase.Page, call, () => provider.page?.(call.event));
     }
+  };
+
+  const deliver = (provider: AnalyticsProvider, call: AnalyticsCall): Promise<void> => {
+    const pending = deliverNow(provider, call);
+    pendingDeliveries.add(pending);
+    void pending.finally(() => pendingDeliveries.delete(pending));
+    return pending;
   };
 
   /** Fans one call out to every registered sink, or buffers it while none has registered yet. */
@@ -210,6 +218,7 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
     },
 
     async flush(): Promise<void> {
+      await Promise.all([...pendingDeliveries]);
       const drains = [...providers].map((provider) =>
         invoke(provider, AnalyticsFailurePhase.Flush, undefined, () => provider.flush?.()),
       );

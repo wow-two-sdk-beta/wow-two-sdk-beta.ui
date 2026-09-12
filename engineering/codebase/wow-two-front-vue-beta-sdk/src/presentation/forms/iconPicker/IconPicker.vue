@@ -3,13 +3,13 @@ import type { IconAdapter } from '../../../foundation/icons';
 import {
   Bell,
   Bookmark,
-  Calendar,
+  Calendar as CalendarPicker,
   Camera,
   Check,
   ChevronDown,
   Clock,
   Cloud,
-  Code,
+  Code as CodeText,
   Coffee,
   Compass,
   Download,
@@ -21,7 +21,7 @@ import {
   Globe,
   Heart,
   Home,
-  Image,
+  Image as ImagePreview,
   Inbox,
   Info,
   Layers,
@@ -57,16 +57,16 @@ import {
 } from 'lucide-vue-next';
 
 /* Module-private in React too — the built-in set is not part of the public surface. */
-const BUILT_IN_ICONS: Record<string, IconAdapter> = {
+const BuiltInIcons: Record<string, IconAdapter> = {
   bell: Bell,
   bookmark: Bookmark,
-  calendar: Calendar,
+  calendar: CalendarPicker,
   camera: Camera,
   check: Check,
   'chevron-down': ChevronDown,
   clock: Clock,
   cloud: Cloud,
-  code: Code,
+  code: CodeText,
   coffee: Coffee,
   compass: Compass,
   download: Download,
@@ -78,7 +78,7 @@ const BUILT_IN_ICONS: Record<string, IconAdapter> = {
   globe: Globe,
   heart: Heart,
   home: Home,
-  image: Image,
+  image: ImagePreview,
   inbox: Inbox,
   info: Info,
   layers: Layers,
@@ -114,82 +114,74 @@ const BUILT_IN_ICONS: Record<string, IconAdapter> = {
 };
 
 export interface IconPickerProps {
-  /** The selected icon key, controlled — React's spelling, which wins when both are set. */
-  value?: string;
-
   /** The selected icon key, controlled. The `v-model` binding target. */
-  modelValue?: string;
+  readonly modelValue?: string;
 
   /** The initial icon key when uncontrolled. */
-  defaultValue?: string;
+  readonly defaultValue?: string;
 
   /** The icon set, keyed by the name the picker emits. Defaults to the built-in lucide subset. */
-  icons?: Record<string, IconAdapter>;
+  readonly icons?: Record<string, IconAdapter>;
 
   /** The number of grid columns. Default `8`. */
-  columns?: number;
+  readonly columns?: number;
 
   /** The glyph pixel size. Default `20`. */
-  size?: number;
+  readonly size?: number;
 
   /** The pixel size of each icon button. Default `36`. */
-  iconButtonSize?: number;
+  readonly iconButtonSize?: number;
 
   /** The search-field placeholder. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The hidden input name; the hidden input emits the selected icon key. */
-  name?: string;
+  readonly name?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputSize } from '../InputStyles';
 
-/**
- * Searchable icon-picker grid. Built-in 50+ icon subset from `lucide-vue-next`;
- * pass your own `icons` map to override.
- */
+/** Renders a searchable grid of icons — a 50+ `lucide-vue-next` subset, or your own `icons` map. */
 /* `inheritAttrs: false` so `class` folds into the panel's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'IconPicker', inheritAttrs: false });
 
 const props = withDefaults(defineProps<IconPickerProps>(), {
-  icons: () => BUILT_IN_ICONS,
+  icons: () => BuiltInIcons,
   columns: 8,
   size: 20,
   iconButtonSize: 36,
   placeholder: 'Search icons…',
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
-  value: undefined,
   modelValue: undefined,
   isDisabled: undefined,
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half — carries the icon key. */
+  /** Fires when the reader picks an icon from the grid — the `v-model` half. */
   'update:modelValue': [name: string];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [name: string];
 }>();
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-/* Inline panel (no popover trigger) — the `role="group"` grid is the control:
+/* InlineLayout panel (no popover trigger) — the `role="group"` grid is the control:
    it takes the context id (so a Field label's `for` resolves), is named via
    `aria-labelledby`, and described via `aria-describedby`. `aria-invalid` is not
    valid on `group`; invalid state surfaces through the describedby swap to the
@@ -199,11 +191,10 @@ const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled);
 const labelledBy = computed(() => field?.labelledBy);
 
 const controlled = useControlled<string>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -223,7 +214,7 @@ function onQueryInput(event: Event): void {
 
 function buttonClass(key: string): string {
   return cn(
-    'inline-flex items-center justify-center rounded-md border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'inline-flex items-center justify-center rounded-md border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     selected.value === key
       ? 'border-primary bg-primary text-primary-foreground hover:bg-primary'
       : 'border-transparent',
@@ -242,9 +233,9 @@ const buttonStyle = computed(() => ({
 
 const gridId = computed(() => props.id ?? field?.id);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const panelClass = computed(() =>
@@ -258,10 +249,15 @@ const searchClass = cn(inputBaseVariants({ size: InputSize.Sm }));
 
 /** The rendered root `<div>` — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
-  <div ref="el" :class="panelClass" v-bind="passthroughAttrs">
+  <div :key="formResetRevision" ref="el" :class="panelClass" v-bind="passthroughAttrs">
     <input
       type="search"
       :value="query"
@@ -301,5 +297,11 @@ defineExpose({ el });
       </div>
     </div>
     <input v-if="name" type="hidden" :name="name" :value="selected" />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </div>
 </template>

@@ -30,10 +30,10 @@ import { requireCrypto } from './WebCrypto';
  * Default alphabet: URL-safe base62 (`A-Z`, `a-z`, `0-9`). No `+/=~`, so a generated string is safe in a
  * path segment, a query value, a filename, and an HTML attribute without escaping.
  */
-export const URL_SAFE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+export const UrlSafeAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 /** `getRandomValues` rejects a view longer than 65536 bytes, so larger requests are filled in passes. */
-const MAX_BYTES_PER_CALL = 65_536;
+const MaxBytesPerCall = 65_536;
 
 /**
  * Returns the exclusive upper bound for an unbiased byte: the largest multiple of `size` that fits in 256.
@@ -56,9 +56,9 @@ export function randomBytes(length: number): Uint8Array {
   const source = requireCrypto();
   const bytes = new Uint8Array(length);
 
-  for (let offset = 0; offset < length; offset += MAX_BYTES_PER_CALL) {
+  for (let offset = 0; offset < length; offset += MaxBytesPerCall) {
     // `subarray` is a view over the same buffer, so each pass fills `bytes` in place.
-    source.getRandomValues(bytes.subarray(offset, Math.min(offset + MAX_BYTES_PER_CALL, length)));
+    source.getRandomValues(bytes.subarray(offset, Math.min(offset + MaxBytesPerCall, length)));
   }
 
   return bytes;
@@ -71,7 +71,7 @@ export function randomBytes(length: number): Uint8Array {
  */
 export function randomStringFrom(
   length: number,
-  chars: readonly string[],
+  chars: ReadonlyArray<string>,
   nextBytes: (count: number) => Uint8Array,
 ): string {
   if (!Number.isInteger(length) || length < 0) {
@@ -112,13 +112,13 @@ export function randomStringFrom(
 
 /**
  * Generates a random string of `length` characters, drawn uniformly from `alphabet` (default
- * {@link URL_SAFE_ALPHABET}) with rejection sampling — no modulo bias. Use it for opaque tokens, nonces, and
+ * {@link UrlSafeAlphabet}) with rejection sampling — no modulo bias. Use it for opaque tokens, nonces, and
  * collision-resistant suffixes; use `Guid` from `foundation/identifiers` for entity identifiers.
  *
  * The alphabet is split by code point, so an emoji or astral-plane character counts as one character and is
  * never torn into surrogate halves. It must hold 1..256 code points; duplicated characters skew the result
  * proportionally and are the caller's responsibility.
  */
-export function randomString(length: number, alphabet: string = URL_SAFE_ALPHABET): string {
+export function randomString(length: number, alphabet: string = UrlSafeAlphabet): string {
   return randomStringFrom(length, [...alphabet], randomBytes);
 }

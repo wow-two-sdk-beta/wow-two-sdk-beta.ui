@@ -16,7 +16,9 @@ export {
 } from './Chord';
 
 // Re-exported so `foundation/shortcuts` is the single entry for keyboard constants (the map itself lives in
-// `foundation/utils/KeyboardExtensions`).
-export { Key } from '../utils/KeyboardExtensions';
+// `foundation/dom/keyboardExtensions`).
+export { Key } from '../dom/enums/Key';
 
-export { useHotkeys, useHotkeyMap, type HotkeyOptions } from './UseHotkeys';
+export { useHotkeys, useHotkeyMap, type HotkeyOptions } from './hooks/UseHotkeys';
+
+export * from './hooks/UseEscape';

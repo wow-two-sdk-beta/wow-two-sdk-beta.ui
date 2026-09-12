@@ -1,4 +1,4 @@
-import { ProgressTone, Size, tv, type VariantProps } from '../../../foundation/utils';
+import { ProgressTone, Size, tv, type VariantProps } from '../../../foundation/styles';
 
 export const progressTrackVariants = tv({
   base: 'h-2 w-full overflow-hidden rounded-full bg-muted',

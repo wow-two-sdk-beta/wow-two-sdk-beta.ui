@@ -8,29 +8,29 @@ import type { Temporal } from 'temporal-polyfill';
 // `until`) via the shared, Temporal-based `DateExtensions`.
 
 export interface ScheduleResource {
-  id: string;
+  readonly id: string;
   /** The row label. React took a `ReactNode`; richer content goes through the `resource` slot. */
-  label: string | number;
-  color?: string;
+  readonly label: string | number;
+  readonly color?: string;
 }
 
 export interface ScheduleBooking {
-  id: string;
-  resourceId: string;
-  start: Temporal.ZonedDateTime;
-  end: Temporal.ZonedDateTime;
+  readonly id: string;
+  readonly resourceId: string;
+  readonly start: Temporal.ZonedDateTime;
+  readonly end: Temporal.ZonedDateTime;
   /** The booking label. React took a `ReactNode`; richer content goes through the `booking` slot. */
-  label?: string | number;
-  color?: string;
+  readonly label?: string | number;
+  readonly color?: string;
 }
 
 export interface ScheduleViewProps {
-  resources: ReadonlyArray<ScheduleResource>;
-  bookings: ReadonlyArray<ScheduleBooking>;
+  readonly resources: ReadonlyArray<ScheduleResource>;
+  readonly bookings: ReadonlyArray<ScheduleBooking>;
   /** The day to render; its calendar date + time zone anchor the grid. */
-  date?: Temporal.ZonedDateTime;
-  hourRange?: [number, number];
-  slotMinutes?: number;
+  readonly date?: Temporal.ZonedDateTime;
+  readonly hourRange?: [number, number];
+  readonly slotMinutes?: number;
   /**
    * Handles a click on an empty slot.
    *
@@ -38,22 +38,23 @@ export interface ScheduleViewProps {
    * all, and Vue strips a declared emit's listener out of `useAttrs()` — an emit could
    * never be detected, so the overlay would either always or never render.
    */
-  onSlotClick?: (resourceId: string, time: Temporal.ZonedDateTime) => void;
+  readonly onSlotClick?: (resourceId: string, time: Temporal.ZonedDateTime) => void;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { formatZonedTime, minutesBetween, nowZoned, zonedAtHour } from '../../forms/DateExtensions';
 
-/**
- * Multi-resource single-day schedule. Resources × hours grid; bookings
- * positioned absolutely within each row's timeline by minute offset.
- */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
+/**
+ * Renders a single day of a multi-resource schedule — one row per resource across an hours grid.
+ *
+ * Bookings sit absolutely within each row's timeline, placed by minute offset.
+ */
 defineOptions({ name: 'ScheduleView', inheritAttrs: false });
 
 const props = withDefaults(defineProps<ScheduleViewProps>(), {
@@ -156,16 +157,16 @@ function bookingStyle(resource: ScheduleResource, booking: ScheduleBooking): Sty
 function bookingClass(resource: ScheduleResource, booking: ScheduleBooking): string {
   const color = booking.color ?? resource.color;
   return cn(
-    'absolute overflow-hidden rounded-md border border-border/60 px-2 py-1 text-left text-xs font-medium transition-colors hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'absolute overflow-hidden rounded-md border border-border/60 px-2 py-1 text-left text-xs font-medium transition-colors hover:brightness-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     !color && 'bg-primary-soft text-primary-soft-foreground',
   );
 }
 
-const ROW_STYLE: StyleValue = { height: '56px' };
+const RowStyle: StyleValue = { height: '56px' };
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
@@ -202,7 +203,7 @@ defineExpose({ el: root });
       <div class="w-32 shrink-0 border-r border-border bg-muted/20 px-3 py-2 text-xs font-medium">
         <slot name="resource" :resource="resource">{{ resource.label }}</slot>
       </div>
-      <div class="relative flex-1" :style="ROW_STYLE">
+      <div class="relative flex-1" :style="RowStyle">
         <!-- Vertical hour gridlines -->
         <div aria-hidden="true" class="absolute inset-0 grid pointer-events-none" :style="hourColumns">
           <div v-for="i in hourCount" :key="i" class="border-l border-border" />

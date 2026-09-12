@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The muted supporting line under a `CardTitle`. */
+/** Renders the muted supporting line under a `CardTitle`, at body-text scale. */
 defineOptions({ name: 'CardDescription', inheritAttrs: false });
 
 /** The description copy — React's `children`. */

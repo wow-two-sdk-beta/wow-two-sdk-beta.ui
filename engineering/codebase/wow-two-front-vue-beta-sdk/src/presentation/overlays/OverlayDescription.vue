@@ -11,10 +11,10 @@ export type OverlayDescriptionProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../foundation/utils';
+import { cn } from '../../foundation/styles';
 import { useOverlayChromeContext } from './OverlayChrome';
 
-/* The accessible description of the enclosing dialog — carries the `id` its `aria-describedby` points at. */
+/** Renders the enclosing dialog's accessible description, carrying the `id` `aria-describedby` names. */
 defineOptions({ name: 'OverlayDescription', inheritAttrs: false });
 
 /** The description text — React's `children`. */

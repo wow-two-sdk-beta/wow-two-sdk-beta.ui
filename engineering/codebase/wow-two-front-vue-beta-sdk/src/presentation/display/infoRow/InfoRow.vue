@@ -15,24 +15,24 @@ export interface InfoRowProps {
    * form is the prop and the same-named slot is the rich override, so it is
    * optional — a consumer filling `#label` need not also pass the prop.
    */
-  label?: string | number;
+  readonly label?: string | number;
 
   /** The value copy. Optional for the same reason as `label`. */
-  value?: string | number;
+  readonly value?: string | number;
 
   /** The layout: `inline` puts label-value on one line; `stacked` puts value below. Default `inline`. */
-  layout?: InfoRowLayout;
+  readonly layout?: InfoRowLayout;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
 /**
- * Single row of label + value, with optional leading icon. Reach for this
- * when you have one or two pairs to show (e.g. inside a Card row); use
- * `DescriptionList` for many pairs.
+ * Renders one label-value row with an optional leading icon.
+ *
+ * Reach for this at one or two pairs, e.g. inside a card row; use `DescriptionGroup` for many.
  */
 defineOptions({ name: 'InfoRow', inheritAttrs: false });
 

@@ -12,16 +12,16 @@ import type { AnalyticsProvider } from './AnalyticsProvider';
 /** Defines the in-memory sink returned by {@link memoryAnalyticsProvider} — a provider plus the capture it records. */
 export interface MemoryAnalyticsProvider extends AnalyticsProvider {
   /** Every call received, in dispatch order across all three kinds. */
-  readonly calls: readonly AnalyticsCall[];
+  readonly calls: ReadonlyArray<AnalyticsCall>;
 
   /** The `track` events received, in order. */
-  readonly events: readonly AnalyticsEvent[];
+  readonly events: ReadonlyArray<AnalyticsEvent>;
 
   /** The `page` events received, in order. */
-  readonly pages: readonly AnalyticsEvent[];
+  readonly pages: ReadonlyArray<AnalyticsEvent>;
 
   /** The `identify` payloads received, in order. */
-  readonly identities: readonly AnalyticsIdentity[];
+  readonly identities: ReadonlyArray<AnalyticsIdentity>;
 
   /** How many times `flush` was invoked. */
   readonly flushCount: number;

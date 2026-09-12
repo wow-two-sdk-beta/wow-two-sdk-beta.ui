@@ -12,37 +12,34 @@ export const GradientKind = {
 export type GradientKind = (typeof GradientKind)[keyof typeof GradientKind];
 
 export interface GradientStop {
-  color: string;
-  position: number;
+  readonly color: string;
+  readonly position: number;
 }
 
 export interface Gradient {
-  kind: GradientKind;
-  angle: number;
-  stops: ReadonlyArray<GradientStop>;
+  readonly kind: GradientKind;
+  readonly angle: number;
+  readonly stops: ReadonlyArray<GradientStop>;
 }
 
 export interface GradientPickerProps {
-  /** The gradient, controlled — React's spelling, which wins when both are set. */
-  value?: Gradient;
-
   /** The gradient, controlled. The `v-model` binding target. */
-  modelValue?: Gradient;
+  readonly modelValue?: Gradient;
 
   /** The initial gradient when uncontrolled. */
-  defaultValue?: Gradient;
+  readonly defaultValue?: Gradient;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The hidden input name; the hidden input emits the CSS string. */
-  name?: string;
+  readonly name?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 }
 
-const DEFAULT_GRADIENT: Gradient = {
+const DefaultGradient: Gradient = {
   kind: GradientKind.Linear,
   angle: 90,
   stops: [
@@ -61,18 +58,20 @@ export function gradientToCss(g: Gradient): string {
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Plus, Trash } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputSize } from '../InputStyles';
 
 /**
- * Visual gradient editor — kind / angle / stops. Output `Gradient` object via
- * `update:modelValue` / `value-change`; `name` emits the CSS string for forms.
+ * Renders a live gradient preview over editors for its kind, angle and colour stops.
+ *
+ * Emits a `Gradient` object; giving it a `name` also writes the CSS string into a hidden input.
  *
  * Form-aware at GROUP level: inside a `Field`/`form.Field` the root (`role="group"`)
  * takes the context id + `aria-labelledby`/`aria-describedby`/`aria-invalid`, and
@@ -85,17 +84,14 @@ defineOptions({ name: 'GradientPicker', inheritAttrs: false });
 const props = withDefaults(defineProps<GradientPickerProps>(), {
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
-  value: undefined,
   modelValue: undefined,
   defaultValue: undefined,
   isDisabled: undefined,
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader edits the kind, angle or any stop — the `v-model` half. */
   'update:modelValue': [value: Gradient];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [value: Gradient];
 }>();
 
 const attrs = useAttrs();
@@ -105,11 +101,10 @@ const ctx = useFormControl();
 const isDisabled = computed(() => props.isDisabled ?? ctx?.isDisabled);
 
 const controlled = useControlled<Gradient>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
-  default: () => props.defaultValue ?? DEFAULT_GRADIENT,
+  controlled: () => props.modelValue,
+  default: () => props.defaultValue ?? DefaultGradient,
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -172,9 +167,9 @@ function kindClass(kind: GradientKind): string {
 
 const rootId = computed(() => props.id ?? ctx?.id);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
@@ -194,10 +189,16 @@ const TrashIcon = Trash;
 
 /** The rendered root `<div>` — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
   <div
+    :key="formResetRevision"
     ref="el"
     role="group"
     :id="rootId"
@@ -247,6 +248,7 @@ defineExpose({ el });
 
     <!-- Stops -->
     <ul class="flex flex-col gap-2">
+      <!-- Keyed on the index: `GradientStop` has no id, and keying on the edited colour drops focus. -->
       <li v-for="(stop, i) in gradient.stops" :key="i" class="flex items-center gap-2">
         <input
           type="color"
@@ -301,5 +303,11 @@ defineExpose({ el });
       {{ css }}
     </code>
     <input v-if="name" type="hidden" :name="name" :value="css" />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </div>
 </template>

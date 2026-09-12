@@ -1,16 +1,3 @@
-// Release. The single most-forgotten call in camera code, and the reason this module exists at its own file:
-// dropping the last reference to a `MediaStream` does NOT stop it. The tracks stay live, the camera indicator
-// light stays on, the microphone keeps listening, and the device stays locked against every other application —
-// until the tab is closed. Garbage collection is irrelevant; only `track.stop()` releases the hardware.
-//
-// Per-track, not per-stream: `MediaStream` has no `stop()`. A stream is a bag of tracks and each one holds its
-// own device handle, so a camera+mic stream needs two stops. Stopping only the first is a partial release that
-// looks correct (the light goes off) while the microphone is still recording.
-//
-// Each `stop()` gets its own `try`. One uncooperative track — an already-ended track from an engine that throws,
-// a test double, a track from a detached document — must not strand the tracks after it in the loop. Skipping
-// the rest is exactly the leak this function exists to prevent, so the loop always completes.
-
 /**
  * Stops every track on a stream, releasing the underlying camera / microphone.
  *
@@ -23,7 +10,7 @@
 export function stopMediaStream(stream: MediaStream | null | undefined): void {
   if (stream === null || stream === undefined) return;
 
-  let tracks: readonly MediaStreamTrack[] = [];
+  let tracks: ReadonlyArray<MediaStreamTrack> = [];
   try {
     const result: unknown = stream.getTracks();
     if (!Array.isArray(result)) return;

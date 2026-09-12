@@ -1,26 +1,42 @@
 # ScrollSpy
 
-## Purpose
-Observe a list of section elements and emit which one is currently in view. Building block for `TableOfContents` and any scroll-driven highlight UI.
+Renders nothing by default — hands the topmost in-view section's id to its default slot.
 
-## Anatomy
-Headless / hook-shaped. Renders nothing by default; an optional `children` render prop receives `{ activeId }`.
+Source: [ScrollSpy.vue](ScrollSpy.vue).
 
-## Required behaviors
-- Watches the provided IDs via `IntersectionObserver`.
-- Emits the topmost intersecting section as `activeId`.
-- Updates on scroll/resize.
+Public import: `import { ScrollSpy } from '@wow-two-beta/ui-vue/presentation/nav';`.
+
+## Contract
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Undeclared attributes follow Vue fallthrough to the rendered root when the component has a single element root.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `ids` | `string[]` | — | Element IDs to observe. |
-| `rootMargin` | `string` | `'0px 0px -60% 0px'` | Bias the "active" zone toward the top of the viewport. |
-| `threshold` | `number \| number[]` | `0` | IO threshold. |
-| `onActiveChange` | `(id: string \| null) => void` | — | Imperative subscription. |
-| `children` | `(ctx: { activeId: string \| null }) => ReactNode` | — | Render-prop variant. |
 
-Hook variant: `useScrollSpy(ids, opts)` returns `activeId`.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `ids` | `ReadonlyArray<string>` | yes | — | Declared by the source contract. |
+| `rootMargin` | `string` | no | — | Declared by the source contract. |
+| `threshold` | `number \| ReadonlyArray<number>` | no | — | Declared by the source contract. |
+| `root` | `Element \| Document \| null` | no | — | Element to observe within. Defaults to viewport. |
 
-## Dependencies
-Foundation only. No cross-domain.
+## Emits
+
+| Event | Signature | Meaning |
+|---|---|---|
+| `active-change` | `'active-change': [id: string \| null];` | Fires when a different section becomes the topmost in view; fires once on mount as well. |
+
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default?(props: { activeId: string \| null }): unknown;` | the legacy render-prop `children` — receives the currently-active section id. |
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [NavExamples.ts](../../../../apps/playground/src/gallery/fixtures/NavExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

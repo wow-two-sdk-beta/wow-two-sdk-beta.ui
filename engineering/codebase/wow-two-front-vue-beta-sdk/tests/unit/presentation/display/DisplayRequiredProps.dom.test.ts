@@ -2,18 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { h, type Component } from 'vue';
 import { mount } from '@vue/test-utils';
 import {
-  AudioWaveform,
+  AudioWaveformPreview,
   CellsGlyph,
-  DataGrid,
   DiffViewer,
-  EventCalendar,
+  EventCalendarViewer,
   FrameGlyph,
-  Gantt,
-  HeatmapCalendar,
+  GanttTimeline,
+  HeatmapCalendarGrid,
   RadiusGlyph,
   ReactionBar,
 } from '@src/presentation/display';
-import { Tour } from '@src/presentation/feedback';
+import { DataGridEditor } from '@src/presentation/forms';
+import { TourPopover } from '@src/presentation/overlays';
 
 /*
  * Degrade-don't-crash, for the components whose required prop is a collection.
@@ -50,7 +50,7 @@ interface GuardCase {
 /**
  * Declares one case.
  *
- * The cast is not laziness. `vue-tsc` compiles a `generic="T"` SFC (`DataGrid`) to a generic
+ * The cast is not laziness. `vue-tsc` compiles a `generic="T"` SFC (`DataGridEditor`) to a generic
  * FUNCTION whose `__VLS_ctx.slots` is required, which no plain `Component` satisfies — the
  * same split `tests/support/Smoke.ts` documents on `PropsOf`. Nothing here reads the prop
  * types anyway: omitting the required prop is the whole point, so a typed surface would only
@@ -61,14 +61,14 @@ function guardCase(name: string, component: unknown, omits: string, props?: Reco
 }
 
 const cases: readonly GuardCase[] = [
-  guardCase('AudioWaveform', AudioWaveform, 'peaks'),
-  guardCase('DataGrid', DataGrid, 'rows'),
+  guardCase('AudioWaveformPreview', AudioWaveformPreview, 'peaks'),
+  guardCase('DataGridEditor', DataGridEditor, 'rows'),
   guardCase('DiffViewer', DiffViewer, 'left'),
-  guardCase('EventCalendar', EventCalendar, 'events'),
-  guardCase('Gantt', Gantt, 'tasks'),
-  guardCase('HeatmapCalendar', HeatmapCalendar, 'values'),
+  guardCase('EventCalendarViewer', EventCalendarViewer, 'events'),
+  guardCase('GanttTimeline', GanttTimeline, 'tasks'),
+  guardCase('HeatmapCalendarGrid', HeatmapCalendarGrid, 'values'),
   guardCase('ReactionBar', ReactionBar, 'reactions'),
-  guardCase('Tour', Tour, 'steps'),
+  guardCase('TourPopover', TourPopover, 'steps'),
   /* The same defect in numeric clothing: an absent number reached an SVG geometry
      attribute as `NaN`, which the browser rejects outright ( `rx="NaN"` ). */
   guardCase('CellsGlyph', CellsGlyph, 'cornerRx'),

@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import {
-  Checkbox,
+  CheckboxInput,
   EmailInput,
   Field,
   SearchInput,
-  Switch,
+  SwitchInput,
   TelInput,
   TextAreaInput,
   TextInput,
@@ -36,8 +36,8 @@ describe('forms — v-model round-trips', () => {
   });
 
   it.each([
-    ['Checkbox', Checkbox],
-    ['Switch', Switch],
+    ['CheckboxInput', CheckboxInput],
+    ['SwitchInput', SwitchInput],
   ] as const)('%s round-trips v-model', async (name, component) => {
     await assertBooleanVModel(name, component);
   });

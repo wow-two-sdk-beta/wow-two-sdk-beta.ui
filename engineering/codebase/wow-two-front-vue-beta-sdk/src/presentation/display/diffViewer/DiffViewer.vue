@@ -39,14 +39,14 @@ interface DiffRow {
 }
 
 export interface DiffViewerProps {
-  left: string;
-  right: string;
-  view?: DiffView;
+  readonly left: string;
+  readonly right: string;
+  readonly view?: DiffView;
   /** The label for the original text. Default `"Before"`. Rich content → the `leftLabel` slot. */
-  leftLabel?: string | number;
+  readonly leftLabel?: string | number;
   /** The label for the modified text. Default `"After"`. Rich content → the `rightLabel` slot. */
-  rightLabel?: string | number;
-  hasStats?: boolean;
+  readonly rightLabel?: string | number;
+  readonly hasStats?: boolean;
 }
 
 /**
@@ -94,16 +94,15 @@ function computeDiff(left: string, right: string): ReadonlyArray<DiffRow> {
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
 /**
- * Line-level diff viewer (split / unified). Own LCS implementation; no
- * external diff dep. For intra-line word highlighting, install `diff` and
- * post-process — deferred.
+ * Renders a line-level diff in split or unified columns, from its own LCS pass.
  *
- * React's private `SplitView` / `UnifiedView` / `DiffColumn` components render
- * inline here: they held no state and were never exported, so a computed cell
- * model plus two template branches replaces them.
+ * No external diff dep. Intra-line word highlighting needs the `diff` package and a post-process — deferred.
+ *
+ * React's private `SplitView` / `UnifiedView` / `DiffColumn` components render inline here: they held no state and
+ * were never exported, so a computed cell model plus two template branches replaces them.
  */
 defineOptions({ name: 'DiffViewer', inheritAttrs: false });
 
@@ -185,7 +184,7 @@ const toCell = (row: DiffRow | undefined, index: number, side: DiffSide): DiffCe
  * Pair removed/added rows row-by-row when possible to align them.
  * Simple alignment: walk, when we hit "removed" followed by "added", pair them.
  */
-const splitColumns = computed<ReadonlyArray<ReadonlyArray<DiffCell>>>(() => {
+const splitColumns = computed<ReadonlyArray<{ side: DiffSide; cells: ReadonlyArray<DiffCell> }>>(() => {
   const pairs: Array<{ left?: DiffRow; right?: DiffRow }> = [];
   const source = rows.value;
   for (let i = 0; i < source.length; i++) {
@@ -205,8 +204,8 @@ const splitColumns = computed<ReadonlyArray<ReadonlyArray<DiffCell>>>(() => {
     }
   }
   return [
-    pairs.map((p, i) => toCell(p.left, i, DiffSide.Left)),
-    pairs.map((p, i) => toCell(p.right, i, DiffSide.Right)),
+    { side: DiffSide.Left, cells: pairs.map((p, i) => toCell(p.left, i, DiffSide.Left)) },
+    { side: DiffSide.Right, cells: pairs.map((p, i) => toCell(p.right, i, DiffSide.Right)) },
   ];
 });
 
@@ -255,8 +254,8 @@ defineExpose({ el });
     </div>
 
     <div v-if="isSplit" class="grid grid-cols-2 divide-x divide-border">
-      <div v-for="(column, columnIndex) in splitColumns" :key="columnIndex" class="overflow-x-auto">
-        <template v-for="cell in column" :key="cell.key">
+      <div v-for="column in splitColumns" :key="column.side" class="overflow-x-auto">
+        <template v-for="cell in column.cells" :key="cell.key">
           <div v-if="cell.op === null" class="flex bg-muted/30">
             <span class="select-none w-10 shrink-0 px-2 py-0.5 text-right text-muted-foreground">·</span>
             <span class="flex-1 whitespace-pre px-2 py-0.5">&nbsp;</span>

@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The `tfoot` section of a `Table`. */
+/** Renders the `tfoot` section of a `Table`, for summary rows under the body. */
 defineOptions({ name: 'TableFooter', inheritAttrs: false });
 
 /** The footer rows — React's `children`. */

@@ -5,38 +5,38 @@ import type {
   SurfaceRadius,
   SurfaceTone,
   SurfaceVariant,
-} from '../../../foundation/utils';
+} from '../../../foundation/styles';
 
 /**
  * Represents the prop surface of `Card`.
  *
- * React declared these by `extends SurfaceVariants`; spelled out here because
+ * React declared these by `extends SurfaceLayoutVariants`; spelled out here because
  * `defineProps<T>()` needs a type the SFC compiler can resolve to a runtime
  * declaration, and `VariantProps<typeof surfaceVariants>` is opaque to it.
  */
 export interface CardProps {
   /** The visual recipe — solid · soft · surface · outline · glass · elevated · flat · subtle. */
-  variant?: SurfaceVariant;
+  readonly variant?: SurfaceVariant;
   /** The color tone the recipe is tinted with. */
-  tone?: SurfaceTone;
+  readonly tone?: SurfaceTone;
   /** The corner rounding. */
-  radius?: SurfaceRadius;
+  readonly radius?: SurfaceRadius;
   /** The inner spacing step. */
-  padding?: SurfacePadding;
+  readonly padding?: SurfacePadding;
   /** The shadow depth. */
-  elevation?: SurfaceElevation;
+  readonly elevation?: SurfaceElevation;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
+import { cn, surfaceVariants } from '../../../foundation/styles';
 
 /**
- * Raised surface for grouped content. The sub-components ship as siblings —
- * `CardHeader` / `CardTitle` / `CardDescription` / `CardBody` / `CardFooter` —
- * rather than statics on this component, since an SFC's default export cannot
- * carry them cleanly.
+ * Renders a raised surface that groups content, padded to frame its header, body, and footer.
+ *
+ * The sub-components ship as siblings — `CardHeader` / `CardTitle` / `CardDescription` / `CardBody` / `CardFooter` —
+ * rather than statics on this component, since an SFC's default export cannot carry them cleanly.
  */
 defineOptions({ name: 'Card', inheritAttrs: false });
 

@@ -3,19 +3,18 @@ import type { SVGAttributes } from 'vue';
 
 export interface OverlayArrowProps extends /* @vue-ignore */ SVGAttributes {
   /** The arrow width in px. Default 12. */
-  width?: number;
+  readonly width?: number;
 
   /** The arrow height in px. Default 6. */
-  height?: number;
+  readonly height?: number;
 }
 </script>
 
 <script setup lang="ts">
 /**
- * Tip-arrow primitive for floating overlays (Tooltip, Popover, HoverCard).
- *
- * Renders a minimal SVG triangle with `fill="currentColor"` — color follows
- * the consuming overlay's background via Tailwind's `text-*` utilities.
+ * Renders the tip arrow of a floating overlay (Tooltip, Popover, HoverCard) — a
+ * minimal SVG triangle with `fill="currentColor"`, so color follows the consuming
+ * overlay's background via Tailwind's `text-*` utilities.
  *
  * Pair with Floating UI's `arrow()` middleware to position. The middleware
  * exposes the arrow's `x` / `y` offset on the resolved data; consumers apply

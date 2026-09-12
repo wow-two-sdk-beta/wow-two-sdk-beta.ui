@@ -1,5 +1,5 @@
 import { inject, type InjectionKey } from 'vue';
-import type { Orientation } from '../../../foundation/utils';
+import type { Orientation } from '../../../foundation/styles';
 
 export interface ToolbarContextValue {
   /** The toolbar's layout axis. Live getter — read it, don't destructure it. */

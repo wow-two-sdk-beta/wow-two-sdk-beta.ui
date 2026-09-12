@@ -6,10 +6,10 @@ export interface TableCellProps {}
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { DENSITY_CELL, useTableContext } from './TableContext';
+import { cn } from '../../../foundation/styles';
+import { DensityCell, useTableContext } from './TableContext';
 
-/** A `td` in a `Table` — padding follows the root's density. */
+/** Renders a `td` in a `Table`, padded to the root density. */
 defineOptions({ name: 'TableCell', inheritAttrs: false });
 
 /** The cell content — React's `children`. */
@@ -19,7 +19,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLTableCellElement>('el');
 const table = useTableContext();
 
-const classes = computed(() => cn(DENSITY_CELL[table.density], 'align-middle', attrs.class as string | undefined));
+const classes = computed(() => cn(DensityCell[table.density], 'align-middle', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

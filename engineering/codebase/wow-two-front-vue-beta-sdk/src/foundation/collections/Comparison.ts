@@ -6,7 +6,7 @@
 // `deepEqual` walks the whole structure — correct, and the one you must not put on a hot path over a large
 // payload without meaning to.
 //
-// `shallowEqual` DELEGATES its plain-object case to `foundation/utils`' `Equality.shallowEquals` rather
+// `shallowEqual` DELEGATES its plain-object case to `foundation/collections`' `Equality.shallowEquals` rather
 // than re-deriving it; this file only adds the array dispatch and the deep walk, which that helper
 // deliberately does not do.
 //
@@ -24,7 +24,7 @@
 // knowing: `+0` and `-0` differ in bits, so they compare UNEQUAL inside a `Float64Array` while comparing
 // equal as plain numbers. Bit-equality is the right reading for a buffer.
 
-import { Equality } from '../utils/Equality';
+import { Equality } from './Equality';
 
 /**
  * Compares two arrays element-by-element with `Object.is` — no recursion, no allocation.
@@ -37,7 +37,7 @@ import { Equality } from '../utils/Equality';
  * @param second The right array.
  * @returns `true` when both have the same length and every index holds the same value.
  */
-export function arrayShallowEqual<T>(first: readonly T[], second: readonly T[]): boolean {
+export function arrayShallowEqual<T>(first: ReadonlyArray<T>, second: ReadonlyArray<T>): boolean {
   if (first === second) return true;
   if (first.length !== second.length) return false;
   return first.every((item, index) => Object.is(item, second[index]));

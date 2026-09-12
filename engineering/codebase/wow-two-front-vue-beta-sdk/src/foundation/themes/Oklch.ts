@@ -191,16 +191,41 @@ export function contrastRatioCss(a: string, b: string): number {
   return contrastRatio(ca, cb);
 }
 
+/** Contrast against a translucent token composited over an opaque sRGB surface. */
+export function contrastRatioCompositeCss(
+  foreground: string,
+  overlay: string,
+  backdrop: string,
+  opacity: number,
+): number {
+  const toRgb = (value: string): Srgb | null => {
+    if (value.startsWith('#')) return parseHex(value);
+    const parsed = parseColor(value);
+    return parsed === null ? null : linearRgbToSrgb(oklchToLinearRgb(clampChromaToGamut(parsed)));
+  };
+  const fg = toRgb(foreground);
+  const top = toRgb(overlay);
+  const bottom = toRgb(backdrop);
+  if (fg === null || top === null || bottom === null) return 1;
+  const alpha = clamp01(opacity);
+  const composite = {
+    r: top.r * alpha + bottom.r * (1 - alpha),
+    g: top.g * alpha + bottom.g * (1 - alpha),
+    b: top.b * alpha + bottom.b * (1 - alpha),
+  };
+  return contrastFromLuminances(relativeLuminanceFromSrgb(fg), relativeLuminanceFromSrgb(composite));
+}
+
 // ---------------------------------------------------------------------------
 // Parsing back from emitted token strings (for the validator)
 // ---------------------------------------------------------------------------
 
-const OKLCH_RE = /^oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)\s*\)$/i;
+const OklchRegex = /^oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)\s*\)$/i;
 
 /** Parse a token color string (`oklch(L% C H)` or hex) back into OKLCH. Returns null if unparseable. */
 export function parseColor(value: string): Oklch | null {
   const v = value.trim();
-  const m = OKLCH_RE.exec(v);
+  const m = OklchRegex.exec(v);
   if (m && m[1] && m[2] && m[3]) {
     const lRaw = parseFloat(m[1]);
     // L written as a percent (e.g. `62.5%`) or a 0–1 number.

@@ -79,7 +79,7 @@ export interface WorkerCallOptions {
    * `byteLength === 0` and reading it throws. This is the single most surprising thing about the API and
    * is the price of the move — see the `withTransfer` docs for the full note.
    */
-  readonly transfer?: readonly Transferable[];
+  readonly transfer?: ReadonlyArray<Transferable>;
 }
 
 /** Tunes a client. */
@@ -106,7 +106,10 @@ export interface WorkerClient<TApi extends WorkerApiOf<TApi>> {
     ...args: Parameters<TApi[TMethod]>
   ): Promise<Awaited<ReturnType<TApi[TMethod]>>>;
 
-  /** Calls `method` with per-call options — a deadline, a transfer list, or both. Otherwise identical to {@link WorkerClient.call}. */
+  /**
+   * Calls `method` with per-call options — a deadline, a transfer list, or both. Otherwise identical to
+   * {@link WorkerClient.call}.
+   */
   callWith<TMethod extends keyof TApi & string>(
     options: WorkerCallOptions,
     method: TMethod,
@@ -116,7 +119,7 @@ export interface WorkerClient<TApi extends WorkerApiOf<TApi>> {
   /** The number of calls awaiting a reply — the observable that proves an exit path cleaned up after itself. */
   readonly pendingCount: number;
 
-  /** Whether {@link WorkerClient.terminate} has run. A terminated client rejects every further call rather than hanging. */
+  /** Whether {@link WorkerClient.terminate} has run. A terminated client rejects further calls rather than hanging. */
   readonly terminated: boolean;
 
   /**
@@ -155,12 +158,6 @@ function createTimeoutError(method: string, timeoutMs: number): Error {
  *
  * The worker must run {@link exposeWorkerApi} (or speak the same envelope). `TApi` is the shared contract:
  * declare it once, use it here and to type the handler map on the worker side.
- *
- * ```ts
- * interface MathApi { add(a: number, b: number): number }
- * const client = createWorkerClient<MathApi>(new Worker(new URL('./math.worker.ts', import.meta.url), { type: 'module' }));
- * await client.call('add', 2, 3); // 5
- * ```
  *
  * Takes an already-constructed `Worker` rather than a factory so it stays usable with any worker the
  * consumer's bundler produced, and so nothing in this module ever touches the `Worker` constructor — which
@@ -237,8 +234,8 @@ export function createWorkerClient<TApi extends WorkerApiOf<TApi>>(
   worker.addEventListener('error', handleError);
   worker.addEventListener('messageerror', handleMessageError);
 
-  /** Posts one request and returns the promise its reply will settle. Untyped at this level — the wire has no types. */
-  function invoke(callOptions: WorkerCallOptions, method: string, args: readonly unknown[]): Promise<unknown> {
+  /** Posts one request and returns the promise its reply will settle. Untyped — the wire has no types. */
+  function invoke(callOptions: WorkerCallOptions, method: string, args: ReadonlyArray<unknown>): Promise<unknown> {
     if (terminated) {
       return Promise.reject(new Error(`Worker call \`${method}\` rejected: the client is terminated`));
     }

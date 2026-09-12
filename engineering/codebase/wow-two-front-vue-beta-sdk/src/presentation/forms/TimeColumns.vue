@@ -6,7 +6,7 @@
 //   - the selected-cell styling and its hover ladder
 //   - scrolling the selected cells into view on mount (i.e. each time a popover opens)
 //
-// Consumers provide the current `value` and an `onTimeChange` callback; the merge of the
+// Consumers provide the current `modelValue` and an `update:modelValue` listener; the merge of the
 // untouched column with the picked one happens here, so every consumer gets it identically.
 //
 // Not exported from `forms/index.ts` — internal only.
@@ -15,35 +15,29 @@ import type { Temporal } from 'temporal-polyfill';
 
 export interface TimeColumnsProps {
   /** The selected time. `null` renders both columns with nothing selected. */
-  value: Temporal.PlainTime | null;
+  readonly modelValue: Temporal.PlainTime | null;
 
   /** The minute interval between rows. Default 5. */
-  minuteStep?: number;
-
-  /**
-   * Emits the time rebuilt from the column the user picked.
-   *
-   * Kept a PROP rather than an emit, like every `MonthGrid` callback: this component is
-   * folder-internal, so the prop shape never reaches a consumer, and each callback is
-   * invoked as a plain function.
-   */
-  onTimeChange: (time: Temporal.PlainTime) => void;
+  readonly minuteStep?: number;
 }
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const HoursOfDay = Array.from({ length: 24 }, (_, i) => i);
 </script>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Temporal as TemporalValue } from 'temporal-polyfill';
-import { cn } from '../../foundation/utils';
+import { cn } from '../../foundation/styles';
 
+/** Renders the paired hour and minute listboxes, scrolling the selected rows into view when opened. */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'TimeColumns', inheritAttrs: false });
 
 const props = withDefaults(defineProps<TimeColumnsProps>(), { minuteStep: 5 });
+
+const emit = defineEmits<{ 'update:modelValue': [value: Temporal.PlainTime] }>();
 
 const attrs = useAttrs();
 
@@ -77,10 +71,11 @@ onBeforeUnmount(() => {
 });
 
 function update(next: { hour?: number; minute?: number }): void {
-  props.onTimeChange(
+  emit(
+    'update:modelValue',
     TemporalValue.PlainTime.from({
-      hour: next.hour ?? props.value?.hour ?? 0,
-      minute: next.minute ?? props.value?.minute ?? 0,
+      hour: next.hour ?? props.modelValue?.hour ?? 0,
+      minute: next.minute ?? props.modelValue?.minute ?? 0,
     }),
   );
 }
@@ -103,9 +98,9 @@ function pad(n: number): string {
   return String(n).padStart(2, '0');
 }
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
@@ -115,7 +110,7 @@ const rootClass = computed(() =>
   ),
 );
 
-const HOUR_LIST = HOURS;
+const HourList = HoursOfDay;
 
 const root = useTemplateRef<HTMLDivElement>('root');
 
@@ -126,13 +121,13 @@ defineExpose({ el: root });
   <div ref="root" :class="rootClass" v-bind="passthroughAttrs">
     <div ref="hoursEl" role="listbox" aria-label="Hours" class="flex max-h-56 flex-col gap-0.5 overflow-y-auto pr-1">
       <button
-        v-for="h in HOUR_LIST"
+        v-for="h in HourList"
         :key="h"
         type="button"
         role="option"
-        :aria-selected="props.value?.hour === h"
-        :data-selected="props.value?.hour === h ? '' : undefined"
-        :class="cellClass(props.value?.hour === h)"
+        :aria-selected="props.modelValue?.hour === h"
+        :data-selected="props.modelValue?.hour === h ? '' : undefined"
+        :class="cellClass(props.modelValue?.hour === h)"
         @click="update({ hour: h })"
       >
         {{ pad(h) }}
@@ -150,9 +145,9 @@ defineExpose({ el: root });
         :key="m"
         type="button"
         role="option"
-        :aria-selected="props.value?.minute === m"
-        :data-selected="props.value?.minute === m ? '' : undefined"
-        :class="cellClass(props.value?.minute === m)"
+        :aria-selected="props.modelValue?.minute === m"
+        :data-selected="props.modelValue?.minute === m ? '' : undefined"
+        :class="cellClass(props.modelValue?.minute === m)"
         @click="update({ minute: m })"
       >
         {{ pad(m) }}

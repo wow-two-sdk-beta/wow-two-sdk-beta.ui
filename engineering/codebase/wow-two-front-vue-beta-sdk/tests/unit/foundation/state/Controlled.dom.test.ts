@@ -1,0 +1,33 @@
+import { ref } from 'vue';
+import { expect, it, vi } from 'vitest';
+import { useControlled } from '@src/foundation/state/hooks/UseControlled';
+it('fixes uncontrolled ownership and seeds defaults exactly once', () => {
+  const controlled = ref<string | undefined>(undefined);
+  const seed = ref('initial');
+  const onChange = vi.fn();
+  const state = useControlled({ controlled, default: seed, onChange });
+  seed.value = 'later';
+  controlled.value = 'external';
+  expect(state.value.value).toBe('initial');
+  state.setValue('edited');
+  state.setValue('edited');
+  expect(onChange).toHaveBeenCalledTimes(1);
+  state.reset();
+  expect(state.value.value).toBe('initial');
+});
+it('keeps controlled writes as requests and restores fixed ownership after invalid removal', () => {
+  const controlled = ref<string | undefined>('parent');
+  const onChange = vi.fn();
+  const state = useControlled({ controlled, default: 'seed', onChange });
+  state.setValue('requested');
+  expect(state.value.value).toBe('parent');
+  expect(onChange).toHaveBeenCalledWith('requested');
+  controlled.value = 'accepted';
+  expect(state.value.value).toBe('accepted');
+  state.reset();
+  expect(onChange).toHaveBeenLastCalledWith('seed');
+  expect(state.value.value).toBe('accepted');
+  controlled.value = undefined;
+  expect(state.isControlled).toBe(true);
+  expect(state.value.value).toBe('parent');
+});

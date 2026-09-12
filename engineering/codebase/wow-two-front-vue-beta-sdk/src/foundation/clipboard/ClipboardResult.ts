@@ -1,49 +1,12 @@
-// The vocabulary every entry point in this slice answers in — the result unions, the options, and the helpers
-// that build a result from a caught value.
-//
-// WHY A DISCRIMINATED RESULT AND NOT A PROMISE THAT REJECTS. A clipboard write fails for four reasons that a UI
-// must render differently: the API is absent (render a manual "select and press Ctrl+C" affordance), the user or
-// the platform refused (explain the permission), the platform broke (a toast), or it worked. Collapsing those
-// into "rejected" throws away the distinction, and collapsing them into reactive state — what
-// `foundation/hooks`' `useClipboard` does — makes the outcome unreadable to any caller that is not a component.
-// So every entry point resolves to one of these unions and NOTHING in the slice throws.
-//
-// The three non-success arms are ONE type ({@link ClipboardFailure}) shared by the write and both read results,
-// not three parallel copies. Reading and writing fail for exactly the same reasons, so a consumer writes one
-// error renderer, and the helpers below build a value assignable to every result union.
-//
-// `denied` is split out from `failed` on the error's `name`, not its message: `NotAllowedError` is what the
-// platform raises when the permission was refused or there was no transient activation, and `SecurityError` is
-// what some engines raise for the same call in a non-secure context. Both mean "the platform refused", which is
-// a different repair for the user (grant the permission / use HTTPS) than "the platform broke".
-//
-// Matching on `name` rather than `instanceof DOMException` is deliberate, for the same reason
-// `foundation/errors`' recognizers do it: the check has to hold for a `DOMException` from another realm, for
-// environments with no `DOMException` global, and for the plain `{ name: 'NotAllowedError' }` a test double
-// throws.
+import type { ClipboardFailure } from './models/ClipboardFailure';
+import type { Result } from '../results';
 
 import { toError } from '../errors';
-
-/**
- * The ways a clipboard operation ends without producing a payload. Shared by {@link ClipboardWriteResult} and
- * both read results, so one `switch` renders every error path in the slice.
- *
- * - `denied` — the platform refused: permission not granted, the paste prompt dismissed, or no user gesture
- *   behind the call.
- * - `unsupported` — no Clipboard API here: SSR, a non-secure context, or an engine without the method. A
- *   capability fact, not a failure — nothing went wrong, the road is simply not there.
- * - `failed` — anything else, carrying the normalized `Error`.
- */
-export type ClipboardFailure =
-  | { readonly status: 'denied'; readonly error: Error }
-  | { readonly status: 'unsupported' }
-  | { readonly status: 'failed'; readonly error: Error };
-
-/** The outcome of a clipboard write — `copied` on success, otherwise a {@link ClipboardFailure}. */
-export type ClipboardWriteResult = { readonly status: 'copied' } | ClipboardFailure;
+export type { ClipboardFailure } from './models/ClipboardFailure';
+export type { ClipboardWriteResult } from './models/ClipboardWriteResult';
 
 /** The `status` discriminant of a {@link ClipboardWriteResult} — for a consumer's own switch or status→copy map. */
-export type ClipboardWriteStatus = ClipboardWriteResult['status'];
+export type ClipboardWriteStatus = 'copied' | ClipboardFailure['status'];
 
 /** One MIME-typed payload read off the system clipboard. */
 export interface ClipboardReadItem {
@@ -53,19 +16,11 @@ export interface ClipboardReadItem {
   /** The payload itself. Read it with `blob.text()` for textual types, or hand it to `URL.createObjectURL`. */
   readonly blob: Blob;
 }
-
-/**
- * The outcome of a clipboard text read. `read` carries the text — an empty clipboard reads as `''`, which is a
- * successful read of nothing rather than a failure.
- */
-export type ClipboardReadTextResult = { readonly status: 'read'; readonly text: string } | ClipboardFailure;
-
-/** The outcome of a multi-format clipboard read. `read` carries one entry per MIME type the platform offered. */
-export type ClipboardReadItemsResult =
-  { readonly status: 'read'; readonly items: readonly ClipboardReadItem[] } | ClipboardFailure;
+export type { ClipboardReadTextResult } from './models/ClipboardReadTextResult';
+export type { ClipboardReadItemsResult } from './models/ClipboardReadItemsResult';
 
 /** The `status` discriminant shared by both read results. */
-export type ClipboardReadStatus = ClipboardReadTextResult['status'];
+export type ClipboardReadStatus = 'read' | ClipboardFailure['status'];
 
 /** Tunes a clipboard read. */
 export interface ClipboardReadOptions {
@@ -91,7 +46,7 @@ export interface ClipboardCopyOptions extends ClipboardReadOptions {
 }
 
 /** The shape every result family shares, so one reporter can serve every entry point. */
-type ClipboardOutcome = { readonly status: string; readonly error?: Error };
+type ClipboardOutcome = Result<unknown, ClipboardFailure>;
 
 /** Reads a caught value's `name` as a string. Guarded, so a throwing getter reads as absent. */
 function nameOf(value: unknown): string | undefined {
@@ -144,10 +99,10 @@ export function reportClipboardOutcome<TResult extends ClipboardOutcome>(
   onError: ((error: Error) => void) | undefined,
 ): TResult {
   if (onError === undefined) return result;
-  if (result.error === undefined) return result;
+  if (result.ok || !('error' in result.failure)) return result;
 
   try {
-    onError(result.error);
+    onError(result.failure.error);
   } catch {
     // The consumer's own reporter failed. There is nothing useful left to do with that — the result still
     // reaches the caller, which is the guarantee that matters.

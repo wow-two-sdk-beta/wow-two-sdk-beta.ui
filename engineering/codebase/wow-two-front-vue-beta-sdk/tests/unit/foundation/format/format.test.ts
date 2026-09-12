@@ -10,7 +10,7 @@ import {
   slugify,
   titleCase,
   truncate,
-} from '@src/foundation/format';
+} from '@src/foundation/formatters';
 
 /*
  * Smoke depth, `unit` project (node). Every helper here is pure and locale-free by design —

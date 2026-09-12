@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { CornerPosition, Size } from '../../../foundation/utils';
+import type { CornerPosition, Size } from '../../../foundation/styles';
 
 /** Defines a person's presence state. */
 export const PresenceStatus = {
@@ -18,26 +18,26 @@ export const PresenceStatus = {
 export type PresenceStatus = (typeof PresenceStatus)[keyof typeof PresenceStatus];
 
 export interface PresenceIndicatorProps {
-  status?: PresenceStatus;
+  readonly status?: PresenceStatus;
   /** The dot diameter. */
-  size?: Size;
+  readonly size?: Size;
 
   /** The pulsing-ring toggle (only meaningful for `online`). */
-  hasPulse?: boolean;
+  readonly hasPulse?: boolean;
 
   /** The corner position on a parent (use inside an Avatar wrapper). */
-  position?: CornerPosition;
+  readonly position?: CornerPosition;
 
   /** The accessible-label override. Defaults to status name. */
-  label?: string;
+  readonly label?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn, Size as SizeToken } from '../../../foundation/utils';
+import { cn, Size as SizeToken } from '../../../foundation/styles';
 
-const STATUS_BG: Record<PresenceStatus, string> = {
+const StatusBackground: Record<PresenceStatus, string> = {
   online: 'bg-success',
   idle: 'bg-warning',
   busy: 'bg-destructive',
@@ -46,21 +46,21 @@ const STATUS_BG: Record<PresenceStatus, string> = {
 };
 
 /* Only xs/sm/md/lg carry a dot size; other `Size` members fall through to `sm`. */
-const SIZE: Partial<Record<Size, string>> = {
+const SizeDot: Partial<Record<Size, string>> = {
   xs: 'h-1.5 w-1.5',
   sm: 'h-2 w-2',
   md: 'h-2.5 w-2.5',
   lg: 'h-3 w-3',
 };
 
-const POS: Record<CornerPosition, string> = {
+const PositionClass: Record<CornerPosition, string> = {
   'top-right': 'absolute top-0 right-0',
   'top-left': 'absolute top-0 left-0',
   'bottom-right': 'absolute bottom-0 right-0',
   'bottom-left': 'absolute bottom-0 left-0',
 };
 
-const STATUS_LABEL: Record<PresenceStatus, string> = {
+const StatusLabel: Record<PresenceStatus, string> = {
   online: 'Online',
   idle: 'Idle',
   busy: 'Busy',
@@ -69,9 +69,9 @@ const STATUS_LABEL: Record<PresenceStatus, string> = {
 };
 
 /**
- * Colored dot encoding a person's presence (online / idle / busy / offline /
- * invisible). Includes a `ring-background` so it pops cleanly when overlaid
- * on an `Avatar`. Pass `position` to absolutely place on a positioned parent.
+ * Renders a colored dot encoding a person's presence — online / idle / busy / offline / invisible.
+ * Includes a `ring-background` so it pops cleanly when overlaid on an `Avatar`.
+ * Pass `position` to absolutely place it on a positioned parent.
  */
 defineOptions({ name: 'PresenceIndicator', inheritAttrs: false });
 
@@ -88,9 +88,9 @@ const showPulse = computed(() => Boolean(props.hasPulse) && props.status === Pre
 const classes = computed(() =>
   cn(
     'inline-flex rounded-full ring-2 ring-background',
-    STATUS_BG[props.status],
-    SIZE[props.size] ?? SIZE.sm,
-    props.position && POS[props.position],
+    StatusBackground[props.status],
+    SizeDot[props.size] ?? SizeDot.sm,
+    props.position && PositionClass[props.position],
     'relative',
     attrs.class as string | undefined,
   ),
@@ -109,7 +109,7 @@ defineExpose({ el });
   <span
     ref="el"
     role="status"
-    :aria-label="props.label ?? STATUS_LABEL[props.status]"
+    :aria-label="props.label ?? StatusLabel[props.status]"
     :data-status="props.status"
     v-bind="rest"
     :class="classes"
@@ -117,7 +117,7 @@ defineExpose({ el });
     <span
       v-if="showPulse"
       aria-hidden="true"
-      :class="cn('absolute inset-0 rounded-full opacity-75 motion-safe:animate-ping', STATUS_BG.online)"
+      :class="cn('absolute inset-0 rounded-full opacity-75 motion-safe:animate-ping', StatusBackground.online)"
     />
   </span>
 </template>

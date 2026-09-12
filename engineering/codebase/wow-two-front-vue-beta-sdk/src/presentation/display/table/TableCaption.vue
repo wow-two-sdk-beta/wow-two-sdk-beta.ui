@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The `caption` of a `Table`, rendered below the grid. */
+/** Renders the `caption` of a `Table`, placed below the grid. */
 defineOptions({ name: 'TableCaption', inheritAttrs: false });
 
 /** The caption copy — React's `children`. */

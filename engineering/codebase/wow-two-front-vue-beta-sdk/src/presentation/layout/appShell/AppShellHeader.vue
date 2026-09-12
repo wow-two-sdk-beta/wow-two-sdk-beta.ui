@@ -11,9 +11,9 @@ export type AppShellHeaderProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/* Sticky top bar of the shell — the `header` grid area. */
+/** Renders the shell's sticky top bar into the `header` grid area. */
 defineOptions({ name: 'AppShellHeader', inheritAttrs: false });
 
 /** The header content — React's `children`. */

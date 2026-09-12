@@ -27,18 +27,18 @@
 //    write a style that silently disables page scroll on someone else's element.
 //  - Motion. Nothing here animates, so nothing here reads `useReducedMotion` — a reported delta is a fact, not a
 //    preference. A consumer that TWEENS one (spring-back, momentum, snap) owns that call and should consult
-//    `foundation/hooks`' `useReducedMotion` at its own layer.
+//    `foundation/device`' `useReducedMotion` at its own layer.
 //
 // NOT HERE, on purpose:
-//  - `PressExtensions.longPressDelay` stays in `foundation/utils` and is NOT re-exported. `useLongPress` clamps
+//  - `PressExtensions.longPressDelay` stays in `foundation/dom` and is NOT re-exported. `useLongPress` clamps
 //    against it via `clampLongPressDelay` so a hold configured on a component and a hold configured through this
 //    slice can never disagree; a second delay constant here would be the drift it exists to prevent.
 //  - Pointer capability questions (`is this a coarse pointer`, `can it hover`) belong to `foundation/device`.
 //    This slice asks what a pointer DID, never what the device IS.
 
 // Vocabulary — the values a consumer switches on, Vue-free
-export { SwipeDirection } from './SwipeDirection';
-export { GestureAxis } from './GestureAxis';
+export { SwipeDirection } from './enums/SwipeDirection';
+export { GestureAxis } from './enums/GestureAxis';
 
 // Pure core — the whole of the recognition arithmetic, independently testable
 export {
@@ -61,13 +61,13 @@ export {
 } from './GestureMath';
 
 // Single-pointer drag — the engine `useSwipe` is built on
-export { useDrag, type DragPayload, type DragHandlers, type DragOptions } from './UseDrag';
+export { useDrag, type DragPayload, type DragHandlers, type DragOptions } from './hooks/UseDrag';
 
 // Directional flick — distance AND velocity, over the drag core
-export { useSwipe, type SwipePayload, type SwipeHandlers, type SwipeOptions } from './UseSwipe';
+export { useSwipe, type SwipePayload, type SwipeHandlers, type SwipeOptions } from './hooks/UseSwipe';
 
 // Hold — delay bounded by the shared `PressExtensions.longPressDelay`
-export { useLongPress, type LongPressPayload, type LongPressOptions } from './UseLongPress';
+export { useLongPress, type LongPressPayload, type LongPressOptions } from './hooks/UseLongPress';
 
 // Two-pointer scale + rotate
-export { usePinch, type PinchPayload, type PinchHandlers, type PinchOptions } from './UsePinch';
+export { usePinch, type PinchPayload, type PinchHandlers, type PinchOptions } from './hooks/UsePinch';

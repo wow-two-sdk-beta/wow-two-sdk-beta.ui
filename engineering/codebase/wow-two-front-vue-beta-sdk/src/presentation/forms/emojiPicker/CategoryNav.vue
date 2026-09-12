@@ -19,13 +19,7 @@ export interface CategoryNavProps {
 
 <script setup lang="ts">
 import { computed, type CSSProperties } from 'vue';
-import {
-  ToggleButton,
-  ToggleButtonGroup,
-  ToggleButtonGroupVariant,
-  ToggleButtonVariant,
-  ToggleMode,
-} from '../../actions';
+import { ToggleInput, ToggleGroup, ToggleGroupVariant, ToggleInputVariant, ToggleMode } from '..';
 import {
   CategoryDisplays,
   CategoryNavVariant as CategoryNavVariantValue,
@@ -33,13 +27,13 @@ import {
   EmojiPickerSizes,
 } from './EmojiPicker.variants';
 
-/** Renders the category picker as a single-select `ToggleButtonGroup` — a segmented icon strip or a labelled pill row. */
+/** Renders the category picker as a single-select `ToggleGroup` — segmented icon strip or labelled pill row. */
 defineOptions({ name: 'CategoryNav' });
 
 const props = defineProps<CategoryNavProps>();
 
 const emit = defineEmits<{
-  /** Replaces React's `onSelect`. Carries the chosen category. */
+  /** Fires when the reader picks a category from the nav, carrying its key. Replaces React's `onSelect`. */
   select: [category: CategoryKey];
 }>();
 
@@ -63,36 +57,36 @@ function selectCategory(key: CategoryKey | null | ReadonlyArray<string>): void {
 </script>
 
 <template>
-  <ToggleButtonGroup
+  <ToggleGroup
     v-if="isPills"
     :type="ToggleMode.Single"
     :is-attached="false"
-    :value="active"
+    :model-value="active"
     aria-label="Emoji categories"
     class="flex-wrap"
-    @value-change="selectCategory"
+    @update:modelValue="selectCategory"
   >
-    <ToggleButton
+    <ToggleInput
       v-for="category in categories"
       :key="category.key"
       :value="category.key"
-      :variant="ToggleButtonVariant.Outline"
+      :variant="ToggleInputVariant.Outline"
       :size="size"
     >
       {{ category.label }}
-    </ToggleButton>
-  </ToggleButtonGroup>
+    </ToggleInput>
+  </ToggleGroup>
 
-  <ToggleButtonGroup
+  <ToggleGroup
     v-else
     :type="ToggleMode.Single"
-    :variant="ToggleButtonGroupVariant.Segmented"
-    :value="active"
+    :variant="ToggleGroupVariant.Segmented"
+    :model-value="active"
     aria-label="Emoji categories"
     class="w-full"
-    @value-change="selectCategory"
+    @update:modelValue="selectCategory"
   >
-    <ToggleButton
+    <ToggleInput
       v-for="category in categories"
       :key="category.key"
       :value="category.key"
@@ -102,6 +96,6 @@ function selectCategory(key: CategoryKey | null | ReadonlyArray<string>): void {
       :style="stripItemStyle"
     >
       <component :is="category.icon" :size="stripIconSize" class="shrink-0" aria-hidden="true" />
-    </ToggleButton>
-  </ToggleButtonGroup>
+    </ToggleInput>
+  </ToggleGroup>
 </template>

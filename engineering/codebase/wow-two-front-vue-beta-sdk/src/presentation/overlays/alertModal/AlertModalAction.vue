@@ -11,17 +11,17 @@ export type AlertModalActionProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef, type ComponentPublicInstance } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import OverlayCloseButton from '../OverlayCloseButton.vue';
 
-/* The confirming button of an `AlertModal` — fires `action`, then closes the dialog. */
+/** Renders the confirming button of an `AlertModal`; it fires `action`, then closes the dialog. */
 defineOptions({ name: 'AlertModalAction', inheritAttrs: false });
 
 /** The button label — React's `children`. */
 defineSlots<{ default(): unknown }>();
 
 const emit = defineEmits<{
-  /** Replaces React's `onAction`. Fires when the action is confirmed, before the dialog closes. */
+  /** Fires when the reader confirms the action, just before the dialog closes. */
   action: [];
 }>();
 
@@ -34,7 +34,7 @@ const inner = useTemplateRef<ComponentPublicInstance & { el?: unknown }>('inner'
  */
 const classes = computed(() =>
   cn(
-    'inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     attrs.class as string | undefined,
   ),
 );

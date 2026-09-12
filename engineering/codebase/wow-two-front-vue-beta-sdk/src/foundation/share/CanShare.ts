@@ -1,14 +1,6 @@
-// Feature detection for the share vector. Two conditions, kept deliberately separate: `navigator.share` must
-// exist at all, and — only when the payload carries files — `navigator.canShare` must accept it. File sharing is
-// supported far more narrowly than text / url sharing, and is the one case the platform itself can veto.
-//
-// Every read is guarded. `navigator` is absent under SSR, the members are absent on most desktop browsers, and a
-// property read can in principle throw (a polyfill's getter). A detector that throws defeats its own purpose, so
-// the answer is always a boolean.
-
 import { toNativeSharePayload, type ShareData } from './ShareData';
 
-/** Whether the environment exposes `navigator.share`. False under SSR (no `navigator`) and on non-supporting browsers. */
+/** Whether `navigator.share` exists. False under SSR (no `navigator`) and on non-supporting browsers. */
 function hasNativeShare(): boolean {
   try {
     return typeof navigator !== 'undefined' && typeof navigator.share === 'function';

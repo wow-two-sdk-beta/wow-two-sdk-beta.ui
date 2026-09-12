@@ -2,19 +2,19 @@
 /** The prop surface of `PopoverArrow` — the `OverlayArrow` primitive's, unchanged. */
 export interface PopoverArrowProps {
   /** The arrow width in px. Default 12. */
-  width?: number;
+  readonly width?: number;
 
   /** The arrow height in px. Default 6. */
-  height?: number;
+  readonly height?: number;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { OverlayArrow } from '../../../foundation/primitives';
 
-/* Tip arrow tinted to the popover surface. Pair with Floating UI's `arrow()` middleware to position. */
+/** Renders a tip arrow tinted to the popover surface; pair with Floating UI's `arrow()` to place it. */
 defineOptions({ name: 'PopoverArrow', inheritAttrs: false });
 
 const props = defineProps<PopoverArrowProps>();

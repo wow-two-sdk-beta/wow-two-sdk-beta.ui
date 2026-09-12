@@ -1,41 +1,52 @@
 # DateRangePicker
 
-## Purpose
-Date-range input with a `RangeCalendar` popover. Shows "May 1 → May 7" in the trigger; opens a calendar to select start + end days.
+Renders a trigger button that opens a popover `RangeCalendarPicker` and closes once both ends are set.
 
-## Anatomy
-```
-<DateRangePicker>
-  ├── trigger button (shows formatted range or placeholder)
-  └── popover
-        └── <RangeCalendar>
-</DateRangePicker>
-```
+Source: [DateRangePicker.vue](DateRangePicker.vue).
 
-## Required behaviors
-- Click trigger toggles popover.
-- Selecting first day in calendar marks start; second click finalizes end.
-- Auto-closes when both ends picked. Outside click / Escape closes too.
+Public import: `import { DateRangePicker } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `{ start, end } \| null` | — | no | Controlled. |
-| `defaultValue` | same | `null` | no | Uncontrolled. |
-| `onValueChange` | `(range) => void` | — | no | Selection callback. |
-| `placeholder` | `string` | `'Pick a range'` | no | Trigger text. |
-| `format` | `(d) => string` | locale short date | no | Per-end formatter. |
-| `min` / `max` | `Date \| null` | — | no | Forwarded to RangeCalendar. |
-| `isDisabled` | `(d) => boolean` | — | no | Forwarded. |
-| `disabled`, `name`, `invalid` | — | — | no | Standard. |
+| `modelValue` | `DateRange \| null` | no | — | The selected range, controlled. The `v-model` binding target. |
+| `defaultValue` | `DateRange \| null` | no | — | The uncontrolled initial selection. |
+| `placeholder` | `string` | no | `'Pick a range'` | The empty-state text on the trigger. |
+| `format` | `(date: Temporal.PlainDate) => string` | no | `(d: Temporal.PlainDate) => d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })` | The trigger's date formatter. Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do. |
+| `min` | `Temporal.PlainDate \| null` | no | — | The minimum selectable date. |
+| `max` | `Temporal.PlainDate \| null` | no | — | The maximum selectable date. |
+| `isDisabled` | `(date: Temporal.PlainDate) => boolean` | no | — | The custom per-day disable predicate. Also a returning prop. |
+| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
+| `name` | `string` | no | — | The hidden input name; when set, two hidden inputs (`{name}_start`, `{name}_end`) ship the ISO values. |
+| `size` | `SelectPickerSize` | no | — | The trigger size. |
+| `state` | `InputState` | no | — | The validity surface. |
+| `id` | `string` | no | — | The trigger's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
 
-## Composition
-Wraps `RangeCalendar` (same domain). Floating panel built inline via primitives.
+## Emits
 
-## Known limitations
-- Single-month calendar (most range pickers show two months — deferred).
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [range: DateRange \| null];` | Fires when a click in the popover completes or clears the range. The `v-model` half. |
 
-## Inspirations
-- Mantine `DatePickerInput type="range"`.
-- shadcn/ui range calendar example.
-- React Aria `DateRangePicker`.
+## Slots
+
+None declared.
+
+## Exposed handle
+
+`{ el: computed(() => trigger.value?.el ?? null) }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

@@ -4,31 +4,31 @@ import type { GoogleButtonOptions } from '../../../foundation/oauth';
 /** Defines the props for {@link GoogleSignInButton}. */
 export interface GoogleSignInButtonProps {
   /** The OAuth client id. Empty renders nothing, so an app without one configured stays guest-only. */
-  clientId?: string;
+  readonly clientId?: string;
 
   /** The button surface. Default `outline`. */
-  theme?: GoogleButtonOptions['theme'];
+  readonly theme?: GoogleButtonOptions['theme'];
 
   /** The button height band. Default `large`. */
-  size?: GoogleButtonOptions['size'];
+  readonly size?: GoogleButtonOptions['size'];
 
   /** The label wording. Default `signin_with`. */
-  text?: GoogleButtonOptions['text'];
+  readonly text?: GoogleButtonOptions['text'];
 
   /** The button outline. Default `rectangular`. */
-  shape?: GoogleButtonOptions['shape'];
+  readonly shape?: GoogleButtonOptions['shape'];
 
   /** The rendered width in px. GIS caps this at 400; omit to size to the host element. */
-  width?: number;
+  readonly width?: number;
 
   /** The logo placement. Default `left`. */
-  logoAlignment?: GoogleButtonOptions['logo_alignment'];
+  readonly logoAlignment?: GoogleButtonOptions['logo_alignment'];
 
   /** The BCP-47 locale for the button copy. Defaults to the browser's. */
-  locale?: string;
+  readonly locale?: string;
 
   /** Whether GIS may sign a returning user in without a click. Default `false`. */
-  autoSelect?: boolean;
+  readonly autoSelect?: boolean;
 }
 </script>
 
@@ -47,10 +47,6 @@ import { GoogleIdentityStatus, useGoogleIdentity, type GoogleCredentialResponse 
  *
  * The emitted `credential` is a signed JWT ID token, and it is **not** a session. Post it to the
  * product's identity endpoint for server-side verification, and let the response drive `AuthProvider`.
- *
- * ```vue
- * <GoogleSignInButton :client-id="clientId" @credential="signIn" @error="show" />
- * ```
  */
 defineOptions({ name: 'GoogleSignInButton', inheritAttrs: false });
 
@@ -64,10 +60,10 @@ const props = withDefaults(defineProps<GoogleSignInButtonProps>(), {
 });
 
 const emit = defineEmits<{
-  /** Emits the signed ID token on a successful sign-in, with the raw GIS response alongside. */
+  /** Fires when the reader completes Google sign-in — carries the signed ID token and the raw GIS response. */
   credential: [credential: string, response: GoogleCredentialResponse];
 
-  /** Emits a script-load or initialize failure. The button renders nothing once this fires. */
+  /** Fires when the GIS script fails to load or initialize. The button renders nothing once this fires. */
   error: [error: Error];
 }>();
 

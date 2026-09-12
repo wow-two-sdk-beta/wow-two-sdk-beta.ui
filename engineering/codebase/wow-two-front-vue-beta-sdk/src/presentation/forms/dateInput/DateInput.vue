@@ -4,28 +4,25 @@ import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyl
 
 export interface DateInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
   /** The border weight. */
-  border?: InputBorder;
+  readonly border?: InputBorder;
   /** The focus-ring weight. */
-  ring?: InputRing;
+  readonly ring?: InputRing;
 
   /** The value, controlled. The `v-model` binding target. `null` is the cleared state. */
-  modelValue?: Temporal.PlainDate | null;
-
-  /** The value, controlled — React's spelling of `modelValue`, which wins when both are set. */
-  value?: Temporal.PlainDate | null;
+  readonly modelValue?: Temporal.PlainDate | null;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: Temporal.PlainDate | null;
+  readonly defaultValue?: Temporal.PlainDate | null;
 
   /** The earliest selectable date. */
-  min?: Temporal.PlainDate | null;
+  readonly min?: Temporal.PlainDate | null;
 
   /** The latest selectable date. */
-  max?: Temporal.PlainDate | null;
+  readonly max?: Temporal.PlainDate | null;
 
   /**
    * Renders a bare `<input type="date">` and drops the popover.
@@ -34,37 +31,38 @@ export interface DateInputProps {
    * lands a system-chrome popup in the middle of a design-system form. Reach for it when the
    * platform picker is the point (a mobile-first form wanting the OS wheels, for instance).
    */
-  native?: boolean;
+  readonly native?: boolean;
 
   /** The empty-state text. Ignored when `native` — that control renders its own mask. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Calendar as CalendarIcon } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 import { formatISODate, parseISODate, today } from '../DateExtensions';
-import Calendar from '../calendar/Calendar.vue';
+import CalendarPicker from '../calendarPicker/CalendarPicker.vue';
 
 /**
- * Atomic date input — a typed `YYYY-MM-DD` field with a design-system `Calendar` popover on
- * the trailing button. Accepts and emits `Temporal.PlainDate`.
+ * Renders a typed `YYYY-MM-DD` field with a design-system `CalendarPicker` popover on the trailing button.
+ * Accepts and emits `Temporal.PlainDate`.
  *
  * The popover is ours, not the browser's: an `<input type="date">` opens an unstylable system
  * panel, which is what `native` is for. `DatePicker` is the trigger-shaped peer — reach for
@@ -85,10 +83,8 @@ const props = withDefaults(defineProps<DateInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader types a date or picks one in the calendar — the `v-model` half. */
   'update:modelValue': [value: Temporal.PlainDate | null];
-  /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
-  'value-change': [value: Temporal.PlainDate | null];
 }>();
 
 const attrs = useAttrs();
@@ -97,11 +93,10 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<Temporal.PlainDate | null>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -146,6 +141,7 @@ function onBlur(): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
+  if (event.isComposing) return;
   if (event.defaultPrevented) return;
   if (event.key === 'Enter') {
     event.preventDefault();
@@ -177,9 +173,9 @@ const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'value']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 /* The caller's `class` sizes the field and the input keeps `w-full` from the variants —
@@ -201,6 +197,10 @@ const inputClass = computed(() =>
 const root = useTemplateRef<HTMLInputElement>('root');
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+useNativeFormReset(root, controlled.reset, () => {
+  if (root.value) root.value.value = String(displayValue.value ?? '');
+});
+
 defineExpose({ el: root });
 </script>
 
@@ -246,17 +246,17 @@ defineExpose({ el: root });
       <PopoverTrigger
         aria-label="Choose date"
         :disabled="isDisabled"
-        class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <CalendarIcon class="h-4 w-4" />
       </PopoverTrigger>
       <PopoverContent is-bare>
-        <Calendar
-          :value="committed"
+        <CalendarPicker
+          :model-value="committed"
           :default-month="calendarMonth"
           :min="min"
           :max="max"
-          @value-change="onCalendarChange"
+          @update:modelValue="onCalendarChange"
         />
       </PopoverContent>
     </Popover>

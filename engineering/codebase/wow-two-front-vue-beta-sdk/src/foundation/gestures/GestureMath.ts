@@ -22,10 +22,10 @@
 // no direction) rather than an exception or a `NaN` that poisons a transform downstream. A gesture recognizer
 // firing mid-interaction has no caller in a position to catch anything.
 
-import { PressExtensions } from '../utils/PressExtensions';
+import { PressExtensions } from '../dom/PressExtensions';
 
-import { GestureAxis } from './GestureAxis';
-import { SwipeDirection } from './SwipeDirection';
+import { GestureAxis } from './enums/GestureAxis';
+import { SwipeDirection } from './enums/SwipeDirection';
 
 /** A point in screen coordinates — `clientX` / `clientY` as reported by a pointer event. */
 export interface GesturePoint {
@@ -42,7 +42,7 @@ export interface GestureSample extends GesturePoint {
 }
 
 /** Radians-per-degree conversion, hoisted so the trig helpers don't recompute it per call. */
-const DEGREES_PER_RADIAN = 180 / Math.PI;
+const DegreesPerRadian = 180 / Math.PI;
 
 /** Guards a coordinate/delta against `NaN` and `Infinity`, which a synthetic event can carry in. */
 function finiteOrZero(value: number): number {
@@ -86,7 +86,7 @@ export function gestureVelocity(delta: number, elapsedMs: number): number {
  * @returns Signed px/ms on each axis; both `0` when fewer than two samples exist or the pointer had come to rest.
  */
 export function windowedVelocity(
-  samples: readonly GestureSample[],
+  samples: ReadonlyArray<GestureSample>,
   windowMs: number,
 ): { readonly velocityX: number; readonly velocityY: number } {
   const still = { velocityX: 0, velocityY: 0 };
@@ -177,7 +177,7 @@ export function pointerDistance(a: GesturePoint, b: GesturePoint): number {
 export function pointerAngle(a: GesturePoint, b: GesturePoint): number {
   const dx = finiteOrZero(b.x) - finiteOrZero(a.x);
   const dy = finiteOrZero(b.y) - finiteOrZero(a.y);
-  return Math.atan2(dy, dx) * DEGREES_PER_RADIAN;
+  return Math.atan2(dy, dx) * DegreesPerRadian;
 }
 
 /**
@@ -307,7 +307,7 @@ export function withinTolerance(dx: number, dy: number, tolerance: number): bool
  * @param allowed The allowlist, or `undefined` for no filtering.
  * @returns `true` when this pointer may drive the gesture.
  */
-export function acceptsPointerType(pointerType: string, allowed: readonly string[] | undefined): boolean {
+export function acceptsPointerType(pointerType: string, allowed: ReadonlyArray<string> | undefined): boolean {
   if (allowed === undefined) return true;
   return allowed.includes(pointerType);
 }

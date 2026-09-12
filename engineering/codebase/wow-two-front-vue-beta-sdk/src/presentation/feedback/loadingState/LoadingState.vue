@@ -1,26 +1,26 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 
 export interface LoadingStateProps {
   /** The heading copy. Default `"Loading…"`. Rich content → the `title` slot. */
-  title?: string;
+  readonly title?: string;
 
   /** The body text below the title. Rich content → the `description` slot. */
-  description?: string;
+  readonly description?: string;
 
   /** The size of the spinner. Default `lg`. */
-  size?: Size;
+  readonly size?: Size;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
-import { cn, Size as SizeToken } from '../../../foundation/utils';
+import { cn, Size as SizeToken } from '../../../foundation/styles';
 import Spinner from '../spinner/Spinner.vue';
 
 /**
- * Centered loading affordance for full sections / pages — Spinner + title +
- * description stacked. Use inline `InlineSpinner` for in-row loading.
+ * Renders a centered spinner, title, and description filling a whole section or page.
+ * Use `InlineSpinner` for in-row loading.
  *
  * `role="status"` is the live-region contract; bound before `v-bind="rest"`
  * so a caller-supplied `role` still wins.
@@ -31,6 +31,13 @@ const props = withDefaults(defineProps<LoadingStateProps>(), {
   title: 'Loading…',
   size: SizeToken.Lg,
 });
+
+defineSlots<{
+  /** The heading line under the spinner. Falls back to the `title` prop. */
+  title?(): unknown;
+  /** The body text under the title. Falls back to the `description` prop. */
+  description?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const slots = useSlots();

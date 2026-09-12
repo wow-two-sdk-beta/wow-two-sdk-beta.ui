@@ -1,13 +1,13 @@
 <script lang="ts">
 export interface FormControlProviderProps {
   /** The id override for the auto-generated id (also used as control's `id`). */
-  id?: string;
+  readonly id?: string;
   /** The field's error messages — exposed to chrome via context. */
-  errors?: readonly string[];
-  isInvalid?: boolean;
-  isDisabled?: boolean;
-  isRequired?: boolean;
-  isReadOnly?: boolean;
+  readonly errors?: ReadonlyArray<string>;
+  readonly isInvalid?: boolean;
+  readonly isDisabled?: boolean;
+  readonly isRequired?: boolean;
+  readonly isReadOnly?: boolean;
 }
 
 type ChromeCounts = Record<'label' | 'helper' | 'error', number>;
@@ -18,11 +18,12 @@ import { provide, shallowRef, useId } from 'vue';
 import { FormControlKey, type FormControlChromeKind, type FormControlContextValue } from './FormControlContext';
 
 /**
- * Wires Label ↔ control ↔ HelperText/ErrorMessage via stable IDs and shared
- * state flags. Used by `Field` (L4) and the forms-engine `Field` glue — atoms
- * (Input, Label, etc.) read via `useFormControl()` to get the right
- * `id`/`for`/`aria-describedby`. Chrome nodes self-register on mount, so
- * `labelledBy`/`describedBy` only ever reference ids that exist in the DOM.
+ * Renders no element of its own — the slot passes straight through — while wiring
+ * Label ↔ control ↔ HelperText/ErrorMessage via stable IDs and shared state flags.
+ * Used by `Field` (L4) and the forms-engine `Field` glue — atoms (Input, Label,
+ * etc.) read via `useFormControl()` to get the right `id`/`for`/`aria-describedby`.
+ * Chrome nodes self-register on mount, so `labelledBy`/`describedBy` only ever
+ * reference ids that exist in the DOM.
  */
 defineOptions({ name: 'FormControlProvider' });
 
@@ -32,6 +33,11 @@ const props = withDefaults(defineProps<FormControlProviderProps>(), {
   isRequired: false,
   isReadOnly: false,
 });
+
+defineSlots<{
+  /** The field subtree — the control plus its label, helper, and error chrome. */
+  default(): unknown;
+}>();
 
 // Vue 3.5's own `useId` — SSR-stable and hydration-safe, the same guarantee
 // React's `useId` gave. The React package wrapped it in `hooks/useId` only to

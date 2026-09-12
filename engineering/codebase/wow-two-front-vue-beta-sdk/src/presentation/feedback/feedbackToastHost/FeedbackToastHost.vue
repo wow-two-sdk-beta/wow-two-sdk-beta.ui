@@ -13,10 +13,13 @@ import type { ToastHostProps, ToastOptions } from '../toastHost';
  */
 export interface FeedbackToastHostProps extends /* @vue-ignore */ ToastHostProps {
   /** The bus to render. Default: the app-wide `feedbackBus` singleton (what `notify()` publishes on). */
-  bus?: FeedbackBus;
+  readonly bus?: FeedbackBus;
 }
 
-/** Maps a bus notice onto the imperative toast payload. `NoticeTone` is a subset of the toast `Severity` vocabulary, and `NoticeNode` is `ToastNode` — drift in either is a compile error. */
+/**
+ * Maps a bus notice onto the imperative toast payload. `NoticeTone` is a subset of the toast
+ * `Severity` vocabulary and `NoticeNode` is `ToastNode` — drift in either is a compile error.
+ */
 function toToastOptions(notice: PublishedNotice): ToastOptions {
   return {
     title: notice.title,
@@ -35,11 +38,10 @@ import ToastHost from '../toastHost/ToastHost.vue';
 import { toastHost } from '../toastHost';
 
 /**
- * The `/feedback` bus → `ToastHost` adapter: subscribes to the bus and forwards every notice into
- * the imperative `toastHost.toast()` API, rendering the toast viewport itself (all `ToastHostProps`
- * pass through). Mount once per app **in place of** a bare `<ToastHost/>` — mounting both would
- * render every toast twice. Explicit opt-in wiring: nothing toasts until this (or another
- * subscriber) is mounted; notices published before mount are dropped, so mount it at the app root.
+ * Renders the toast viewport and forwards every `/feedback` bus notice into `toastHost.toast()`.
+ * All `ToastHostProps` pass through. Mount once per app **in place of** a bare `<ToastHost/>` —
+ * mounting both would render every toast twice. Nothing toasts until this (or another subscriber)
+ * is mounted; notices published before mount are dropped, so mount it at the app root.
  */
 defineOptions({ name: 'FeedbackToastHost', inheritAttrs: false });
 
@@ -47,7 +49,7 @@ const props = defineProps<FeedbackToastHostProps>();
 
 const attrs = useAttrs();
 
-/** React defaulted this in the destructure; a `computed` keeps the fallback reactive so a swapped `bus` re-subscribes. */
+/** A `computed` keeps the fallback reactive, so a swapped `bus` re-subscribes. */
 const bus = computed(() => props.bus ?? feedbackBus);
 
 /*

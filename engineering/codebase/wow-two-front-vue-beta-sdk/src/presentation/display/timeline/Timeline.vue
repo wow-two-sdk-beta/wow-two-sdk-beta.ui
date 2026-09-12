@@ -5,20 +5,17 @@ import { TimelineAlign } from './TimelineContext';
 
 export interface TimelineProps {
   /** The side the rail sits on. Default `left`. */
-  align?: TimelineAlign;
+  readonly align?: TimelineAlign;
 }
 </script>
 
 <script setup lang="ts">
 import { cloneVNode, computed, provide, useAttrs, useSlots, useTemplateRef, type VNode } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { renderableChildren } from '../../../foundation/primitives';
 import { TimelineKey } from './TimelineContext';
 
-/**
- * Vertical event rail — an ordered list of `TimelineItem` nodes joined by a
- * connector line. The last item's connector is suppressed.
- */
+/** Renders a vertical rail of `TimelineItem` nodes joined by connectors, suppressed on the last. */
 defineOptions({ name: 'Timeline', inheritAttrs: false });
 
 /** The `TimelineItem` nodes — React's required `children`. */
@@ -33,7 +30,7 @@ const el = useTemplateRef<HTMLOListElement>('el');
 const total = computed(() => renderableChildren(slots.default?.()).length);
 
 /**
- * Mark the last item so the connector line is suppressed. React rebuilt the child's props
+ * MarkText the last item so the connector line is suppressed. React rebuilt the child's props
  * object; a Vue slot hands over vnodes, so the flag is cloned onto the last one — it lands
  * in the item's fallthrough attrs exactly as `data-last` did in React.
  *
@@ -70,6 +67,6 @@ defineExpose({ el });
 
 <template>
   <ol ref="el" v-bind="rest" :class="classes">
-    <component :is="node" v-for="(node, index) in items()" :key="index" />
+    <component :is="node" v-for="(node, index) in items()" :key="node.key ?? index" />
   </ol>
 </template>

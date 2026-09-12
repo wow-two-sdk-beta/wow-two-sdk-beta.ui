@@ -6,7 +6,7 @@ export type { GlyphProps };
 
 <script setup lang="ts">
 import { useTemplateRef } from 'vue';
-import { BAR_CORNER_RX, CELL_POSITIONS, CELL_SIZE } from './ModuleGlyphs';
+import { BarCornerRx, CellPositions, CellSize } from './ModuleGlyphs';
 
 /** Renders a three-horizontal-bar glyph. */
 defineOptions({ name: 'HorizontalBarsGlyph' });
@@ -21,13 +21,13 @@ defineExpose({ el });
 <template>
   <svg ref="el" viewBox="0 0 24 24" :width="props.size" :height="props.size" aria-hidden="true">
     <rect
-      v-for="y in CELL_POSITIONS"
+      v-for="y in CellPositions"
       :key="y"
       :x="4"
       :y="y"
       :width="16"
-      :height="CELL_SIZE"
-      :rx="BAR_CORNER_RX"
+      :height="CellSize"
+      :rx="BarCornerRx"
       fill="currentColor"
     />
   </svg>

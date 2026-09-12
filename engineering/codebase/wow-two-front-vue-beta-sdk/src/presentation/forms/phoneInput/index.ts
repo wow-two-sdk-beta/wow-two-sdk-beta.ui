@@ -1,1 +1,1 @@
-export { default as PhoneInput, PHONE_COUNTRIES, type PhoneCountry, type PhoneInputProps } from './PhoneInput.vue';
+export { default as PhoneInput, PhoneCountries, type PhoneCountry, type PhoneInputProps } from './PhoneInput.vue';

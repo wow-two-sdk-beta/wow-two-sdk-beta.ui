@@ -3,10 +3,10 @@
 // share one module scope, so re-importing the type here would duplicate it.
 export interface ColorModeProviderProps {
   /** The mode used when nothing is persisted. `'system'` follows the OS preference. Default `'system'`. */
-  defaultMode?: ColorMode | 'system';
+  readonly defaultMode?: ColorMode | 'system';
 
   /** The `localStorage` key for persistence; pass `null` to disable. Default `'wow-color-mode'`. */
-  storageKey?: string | null;
+  readonly storageKey?: string | null;
 }
 </script>
 
@@ -15,9 +15,10 @@ import { provide, shallowRef, watchEffect } from 'vue';
 import { ColorMode, ColorModeKey, systemMode, type ColorModeContextValue } from './ColorModeContext';
 
 /**
- * Owns the app's light/dark mode: toggles the `dark` class on `<html>` (which flips every semantic
- * token) + sets `color-scheme`, persists the choice, and falls back to the OS preference. Wrap the
- * app once; read via `useColorMode()`. This is the canonical `.dark` mechanism for the design tokens.
+ * Renders no element of its own — the slot passes straight through — while owning the app's light/dark mode:
+ * toggles the `dark` class on `<html>` (which flips every semantic token) + sets `color-scheme`, persists the
+ * choice, and falls back to the OS preference. Wrap the app once; read via `useColorMode()`. This is the
+ * canonical `.dark` mechanism for the design tokens.
  */
 defineOptions({ name: 'ColorModeProvider' });
 
@@ -25,6 +26,11 @@ const props = withDefaults(defineProps<ColorModeProviderProps>(), {
   defaultMode: 'system',
   storageKey: 'wow-color-mode',
 });
+
+defineSlots<{
+  /** The subtree that reads the active color mode. */
+  default(): unknown;
+}>();
 
 /** Resolved once at setup, the same way React resolved it in the `useState` initializer. */
 const mode = shallowRef<ColorMode>(

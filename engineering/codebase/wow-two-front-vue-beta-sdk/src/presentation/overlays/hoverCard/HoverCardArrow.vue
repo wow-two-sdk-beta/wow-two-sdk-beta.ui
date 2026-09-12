@@ -2,19 +2,19 @@
 /** The prop surface of `HoverCardArrow` — the `OverlayArrow` primitive's, unchanged. */
 export interface HoverCardArrowProps {
   /** The arrow width in px. Default 12. */
-  width?: number;
+  readonly width?: number;
 
   /** The arrow height in px. Default 6. */
-  height?: number;
+  readonly height?: number;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { OverlayArrow } from '../../../foundation/primitives';
 
-/* Tip arrow tinted to the popover surface. Pair with Floating UI's `arrow()` middleware to position. */
+/** Renders a tip arrow tinted to the card surface; pair with Floating UI's `arrow()` to position it. */
 defineOptions({ name: 'HoverCardArrow', inheritAttrs: false });
 
 const props = defineProps<HoverCardArrowProps>();

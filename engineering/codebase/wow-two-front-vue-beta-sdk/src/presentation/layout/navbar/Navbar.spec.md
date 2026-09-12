@@ -1,28 +1,44 @@
 # Navbar
 
-## Purpose
-Lightweight header band (`<header>`) with `start` / `center` / `end` slots laid out in a row inside a centered `Container`. The everyday "navbar + centered content" need that `AppShell` (a 5-slot dashboard grid with sidebar) overshoots.
+Renders a lightweight header band (`<header>`) with `start` / `center` / `end` slots laid out in a row inside a centered `ContainerLayout`.
+
+Source: [Navbar.vue](Navbar.vue).
+
+Public import: `import { Navbar } from '@wow-two-beta/ui-vue/presentation/layout';`.
+
+## Contract
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default |
+
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `containerSize` | `ContainerLayoutProps['size']` | no | — | The max-width of the inner centered `ContainerLayout`. Passthrough to `ContainerLayout.size`. Default `lg`. |
+| `height` | `NavbarHeight` | no | — | The band height. Default `md`. |
+| `sticky` | `boolean` | no | `false` | The sticky pinning of the bar to the top of the scroll container. Default `false` (non-sticky). |
+| `tone` | `SurfaceTone` | no | — | The tinted background tone for the band — applies the shadow-less `subtle` surface treatment. Omit for a transparent bar (relies on `bordered` / page bg). |
+| `bordered` | `boolean` | no | `true` | The bottom border under the bar. Default `true`. |
+
+## Emits
+
+None declared.
+
+## Slots
+
+| Slot | Signature | Meaning |
 |---|---|---|
-| `start` | `ReactNode` | — |
-| `center` | `ReactNode` | — |
-| `end` | `ReactNode` | — |
-| `children` | `ReactNode` (replaces the slot layout) | — |
-| `containerSize` | `ContainerProps['size']` (`'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl' \| 'full'`) | `'lg'` |
-| `height` | `'sm' \| 'md' \| 'lg'` | `'md'` |
-| `sticky` | `boolean` | `false` |
-| `tone` | `SurfaceTone` (`'neutral' \| 'primary' \| 'danger' \| 'success' \| 'warning' \| 'info'`) | — |
-| `bordered` | `boolean` | `true` |
+| `start` | `start?(): unknown;` | The leading slot — laid out at the start of the row (brand / logo / nav links). |
+| `center` | `center?(): unknown;` | The centre slot — laid out in the middle of the row (search / primary nav). |
+| `end` | `end?(): unknown;` | The trailing slot — laid out at the end of the row (actions / avatar / CTA). |
+| `default` | `default?(): unknown;` | The raw row content — replaces the `start` / `center` / `end` slot layout when provided. Use for fully custom bars. |
 
-- Default (non-sticky); `sticky` pins to top with `z-sticky`.
-- `tone` set → band fills with the shadow-less `subtle` Surface treatment; omitted → `bg-card`.
-- `children` set → bypasses `start`/`center`/`end` for a fully custom row.
-- With no `center` slot, `end` is pushed to the trailing edge (`ml-auto`).
+## Exposed handle
 
-## Anatomy
-`<header>` (band: height + optional sticky + border + bg) → `<Container size={containerSize}>` (centered, flex row) → `start` · `center` (grows) · `end`.
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
 
-## Dependencies
-Foundation: `utils/cn`, `utils/surfaceVariants`, `tailwind-variants`. Domain (layout): `Container`.
+## Verification
+
+- Public render fixture: [LayoutExamples.ts](../../../../apps/playground/src/gallery/fixtures/LayoutExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

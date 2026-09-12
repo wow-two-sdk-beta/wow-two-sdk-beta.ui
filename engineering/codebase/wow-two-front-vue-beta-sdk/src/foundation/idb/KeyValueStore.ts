@@ -72,7 +72,7 @@ export interface KeyValueStore<TValue, TKey extends IDBValidKey = string> {
   get(key: TKey): Promise<TValue | undefined>;
 
   /** Reads several keys in one transaction, resolving values positionally — `undefined` for each miss. */
-  getMany(keys: readonly TKey[]): Promise<(TValue | undefined)[]>;
+  getMany(keys: ReadonlyArray<TKey>): Promise<(TValue | undefined)[]>;
 
   /** Writes `value` under `key`, replacing any existing record; resolves once the transaction commits. */
   set(key: TKey, value: TValue): Promise<void>;
@@ -84,7 +84,7 @@ export interface KeyValueStore<TValue, TKey extends IDBValidKey = string> {
   delete(key: TKey): Promise<void>;
 
   /** Removes every listed key in one transaction. */
-  deleteMany(keys: readonly TKey[]): Promise<void>;
+  deleteMany(keys: ReadonlyArray<TKey>): Promise<void>;
 
   /** Removes every record in the store. */
   clear(): Promise<void>;
@@ -101,7 +101,7 @@ export interface KeyValueStore<TValue, TKey extends IDBValidKey = string> {
   /** Reads every value, in ascending key order. Materializes the store — prefer {@link iterateEntries} when large. */
   values(): Promise<TValue[]>;
 
-  /** Reads every key/value pair, in ascending key order. Materializes the store — prefer {@link iterateEntries} when large. */
+  /** Reads every entry, in ascending key order. Materializes the store — prefer {@link iterateEntries} when large. */
   entries(): Promise<[TKey, TValue][]>;
 
   /**
@@ -197,7 +197,7 @@ export function createKeyValueStore<TValue, TKey extends IDBValidKey = string>(
       return run('readonly', (store) => requestToPromise(store.get(key) as IDBRequest<TValue | undefined>));
     },
 
-    async getMany(keys: readonly TKey[]): Promise<(TValue | undefined)[]> {
+    async getMany(keys: ReadonlyArray<TKey>): Promise<(TValue | undefined)[]> {
       return run('readonly', (store) => {
         // Every request is issued synchronously in the map, BEFORE the first await — that is what keeps the
         // transaction alive across the `Promise.all`.
@@ -221,7 +221,7 @@ export function createKeyValueStore<TValue, TKey extends IDBValidKey = string>(
       await run('readwrite', (store) => requestToPromise(store.delete(key)));
     },
 
-    async deleteMany(keys: readonly TKey[]): Promise<void> {
+    async deleteMany(keys: ReadonlyArray<TKey>): Promise<void> {
       await run('readwrite', (store) => {
         const removals = keys.map((key) => requestToPromise(store.delete(key)));
         return Promise.all(removals);

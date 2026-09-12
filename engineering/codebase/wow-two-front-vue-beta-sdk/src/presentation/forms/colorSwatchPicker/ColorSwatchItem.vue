@@ -1,32 +1,32 @@
 <script lang="ts">
-import type { ColorSwatchSize, SwatchShape } from '../colorSwatch';
+import type { ColorSwatchPreviewSize, SwatchShape } from '../../display/colorSwatchPreview';
 
 /**
  * Defines props for the internal `ColorSwatchItem`.
  *
- * `size` / `shape` are the NAMED axis types, not `ColorSwatchVariants['size']` as the React
- * original spelled them — the SFC prop resolver cannot follow an indexed access into an
- * imported interface, and the build fails on it while `vue-tsc` stays green.
+ * `size` / `shape` are the NAMED axis types, not `ColorSwatchPreviewVariants['size']` — the SFC
+ * prop resolver cannot follow an indexed access into an imported interface, and the build
+ * fails on it while `vue-tsc` stays green.
  */
 export interface ColorSwatchItemProps {
   /** The swatch color. */
-  color: string;
+  readonly color: string;
   /** The selected state. */
-  isSelected: boolean;
+  readonly isSelected: boolean;
   /** The disabled state. */
-  isDisabled: boolean;
+  readonly isDisabled: boolean;
   /** The swatch size step. */
-  size?: ColorSwatchSize;
+  readonly size?: ColorSwatchPreviewSize;
   /** The swatch outline shape. */
-  shape?: SwatchShape;
+  readonly shape?: SwatchShape;
 }
 </script>
 
 <script setup lang="ts">
 import { useRovingFocusItem } from '../../../foundation/primitives';
-import ColorSwatch from '../colorSwatch/ColorSwatch.vue';
+import ColorSwatchPreview from '../../display/colorSwatchPreview/ColorSwatchPreview.vue';
 
-/* One roving-focus stop in a `ColorSwatchPicker`. Internal — never exported from the folder. */
+/** Renders one roving-focus swatch stop inside a `ColorSwatchPicker`. Internal — never exported. */
 defineOptions({ name: 'ColorSwatchItem' });
 
 const props = defineProps<ColorSwatchItemProps>();
@@ -41,8 +41,9 @@ const emit = defineEmits<{
 const roving = useRovingFocusItem();
 
 /* Roving navigation runs first and may `preventDefault()` an arrow key; Enter / Space only
-   select when it did not — the React original's exact order. */
+   select when it did not. */
 function handleKeydown(event: KeyboardEvent): void {
+  if (event.isComposing) return;
   roving.onKeydown(event);
   if (event.defaultPrevented) return;
   if (event.key === 'Enter' || event.key === ' ') {
@@ -53,7 +54,7 @@ function handleKeydown(event: KeyboardEvent): void {
 </script>
 
 <template>
-  <ColorSwatch
+  <ColorSwatchPreview
     :ref="roving.ref"
     :color="color"
     :size="size"

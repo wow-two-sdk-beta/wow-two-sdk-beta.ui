@@ -1,19 +1,5 @@
-<script lang="ts">
-/**
- * Matches the contract guard every compound part raises when it is mounted without
- * its parent — `"Tabs.* must be used inside <Tabs>"`, `"Sortable.Handle must be
- * rendered inside <Sortable.Item>."`, `"Overlay chrome subcomponents must be used
- * inside an OverlayChromeProvider"`.
- *
- * The auto-mounted tail bare-mounts every uncurated export, so these fire by design.
- * Rendering them in the same red as a real crash made ~20 working components read as
- * broken; matching them lets the card say "this is the guard doing its job" instead.
- */
-const GUARD_MESSAGE = /must be (?:used|rendered) inside/i;
-</script>
-
 <script setup lang="ts">
-import { computed, onErrorCaptured, ref } from 'vue';
+import { onErrorCaptured, ref } from 'vue';
 
 /**
  * Wraps one component's demo in a labelled card with a render-error boundary.
@@ -43,9 +29,6 @@ defineProps<{
 const message = ref<string | null>(null);
 const stack = ref<string | null>(null);
 
-/** True when the caught error is a compound part's contract guard, not a crash. */
-const isGuard = computed(() => message.value !== null && GUARD_MESSAGE.test(message.value));
-
 /*
  * Keeps the FIRST error, not the last.
  *
@@ -71,19 +54,8 @@ onErrorCaptured((err) => {
       <p v-if="note" class="truncate text-[11px] text-subtle-foreground">{{ note }}</p>
     </header>
 
-    <!-- Guard: expected, and the message IS the demo. No stack — there is no bug to trace. -->
     <div
-      v-if="message !== null && isGuard"
-      class="px-3 py-2 text-[11px] text-subtle-foreground"
-      data-demo-guard
-    >
-      <span class="font-medium text-foreground">contract guard — expected.</span>
-      Bare-mounted without its parent.
-      <span class="mt-1 block font-mono text-[11px]">{{ message }}</span>
-    </div>
-
-    <div
-      v-else-if="message !== null"
+      v-if="message !== null"
       class="whitespace-pre-wrap px-3 py-2 font-mono text-[11px] text-destructive"
       data-demo-error
     >

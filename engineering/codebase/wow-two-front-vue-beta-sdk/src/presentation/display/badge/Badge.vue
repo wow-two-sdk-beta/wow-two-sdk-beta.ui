@@ -1,23 +1,24 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 import type { BadgeVariant } from './Badge.variants';
 
 export interface BadgeProps {
   /** The color treatment. */
-  variant?: BadgeVariant;
+  readonly variant?: BadgeVariant;
   /** The size step. */
-  size?: Size;
+  readonly size?: Size;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { badgeVariants, type BadgeVariants } from './Badge.variants';
 
 /**
- * Pill-shaped status / category indicator. Non-interactive — for clickable
- * use `Tag`. For severity-tinted callouts at message scale, use `Alert*`.
+ * Renders a non-interactive pill marking a status or category.
+ *
+ * Use `Tag` for the clickable pill, `Alert*` for severity-tinted callouts at message scale.
  */
 defineOptions({ name: 'Badge', inheritAttrs: false });
 

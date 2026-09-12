@@ -15,7 +15,7 @@ export interface StorageBroker {
   remove(key: string): void;
 }
 
-/** Resolves the ambient `Storage` (browser `localStorage`), or null when unavailable — SSR, private-mode, or a security exception. */
+/** Resolves the ambient `localStorage`, or null when unavailable — SSR, private mode, security exception. */
 function resolveLocalStorage(): Storage | null {
   // `typeof window === 'undefined'` guards SSR; the try/catch guards a `localStorage` getter that throws
   // (Safari private mode, sandboxed iframes) rather than merely being absent.
@@ -69,7 +69,7 @@ export const localStorageStorageBroker: StorageBroker = {
   },
 };
 
-/** Builds an isolated in-memory `StorageBroker` backed by a `Map` — the test double, with no cross-tab sync and no DOM. */
+/** Builds an isolated in-memory `StorageBroker` backed by a `Map` — the test double: no cross-tab sync, no DOM. */
 export function memoryStorageBroker(): StorageBroker {
   const store = new Map<string, string>();
 

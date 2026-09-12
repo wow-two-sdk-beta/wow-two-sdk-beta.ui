@@ -33,17 +33,17 @@
 
 import { isAbortError, toError } from '../errors';
 import { fileExtension, matchesAccept, safeFileName } from '../files';
-import { formatBytes } from '../format';
+import { formatBytes } from '../formatters';
 import { Guid } from '../identifiers';
 import { DefaultRetryPolicy, computeRetryDelay, shouldRetry, type RetryPolicy } from '../resilience';
 
 import { UploadRejectionReason, UploadStatus, isUploadTerminal, type UploadItem } from './UploadItem';
 import { readUploadErrorStatus, type UploadTransport } from './UploadTransport';
 
-/** The default number of uploads in flight at once — enough to saturate a connection without starving the rest of the app. */
+/** The default number of uploads in flight — enough to saturate a connection without starving the rest of the app. */
 export const DefaultUploadConcurrency = 3;
 
-/** Notified after any queue mutation — admission, status change, progress, removal. Carries no payload; re-read the queue. */
+/** Notified after a queue mutation — admission, status change, progress, removal. No payload; re-read the queue. */
 export type UploadQueueListener = () => void;
 
 /** Configures a queue at creation. Only `transport` is required. */
@@ -95,7 +95,7 @@ export interface UploadQueue<TResult = unknown> {
    * for a single file. A file failing `accept` / `maxSize` still gets an id — as a `failed` item carrying a
    * `rejection` — so the caller can render why. Never throws.
    */
-  readonly add: (input: File | readonly File[]) => readonly string[];
+  readonly add: (input: File | ReadonlyArray<File>) => ReadonlyArray<string>;
 
   /**
    * Aborts an item. A queued item flips to `cancelled` immediately; an uploading one is aborted through its
@@ -184,7 +184,7 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
     notify();
   }
 
-  /** Describes a file's type for a rejection message — the MIME type, or the extension when the browser left it blank. */
+  /** Names a file's type for a rejection message — the MIME type, or the extension when the browser gave none. */
   function describeFileType(file: File): string {
     if (file.type !== '') return file.type;
     const extension = fileExtension(file.name);
@@ -198,7 +198,7 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
     return undefined;
   }
 
-  /** Builds the user-facing reason for a rejection. The name is sanitized — it is attacker-controlled text headed for a UI. */
+  /** Builds the user-facing rejection reason. The name is sanitized — attacker-controlled text headed for a UI. */
   function rejectionError(file: File, reason: UploadRejectionReason): Error {
     const name = safeFileName(file.name);
     if (reason === UploadRejectionReason.Size) {
@@ -365,7 +365,7 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
   }
 
   return {
-    add(input: File | readonly File[]): readonly string[] {
+    add(input: File | ReadonlyArray<File>): ReadonlyArray<string> {
       const files = input instanceof File ? [input] : input;
       const created = files.map(createItem);
       for (const item of created) entries.set(item.id, item);
@@ -415,7 +415,7 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
       notify();
     },
 
-    items(): readonly UploadItem<TResult>[] {
+    items(): ReadonlyArray<UploadItem<TResult>> {
       return [...entries.values()];
     },
 

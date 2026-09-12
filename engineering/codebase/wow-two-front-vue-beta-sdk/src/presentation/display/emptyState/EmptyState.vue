@@ -16,16 +16,16 @@ export interface EmptyStateProps {
    * The heading copy. React typed this `ReactNode`; a scalar stays a prop so it
    * remains the discriminator, and the same-named slot is the rich override.
    */
-  title: string | number;
+  readonly title: string | number;
 
   /** The body copy below the title. Same prop-plus-slot pairing as `title`. */
-  description?: string | number;
+  readonly description?: string | number;
 
   /** The visual size. Default `md`. */
-  size?: EmptyStateSize;
+  readonly size?: EmptyStateSize;
 }
 
-const SIZE: Record<EmptyStateSize, { wrap: string; iconBox: string }> = {
+const SizeClasses: Record<EmptyStateSize, { wrap: string; iconBox: string }> = {
   sm: { wrap: 'gap-2 py-6', iconBox: 'h-10 w-10' },
   md: { wrap: 'gap-3 py-10', iconBox: 'h-14 w-14' },
   lg: { wrap: 'gap-4 py-16', iconBox: 'h-20 w-20' },
@@ -34,14 +34,11 @@ const SIZE: Record<EmptyStateSize, { wrap: string; iconBox: string }> = {
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import Heading from '../heading/Heading.vue';
 import Text from '../text/Text.vue';
 
-/**
- * Empty-list / no-results affordance: icon + title + description + actions.
- * Pass any subset; the component centers everything vertically.
- */
+/** Renders a centred no-results affordance — icon, title, description, actions — from any subset of them. */
 defineOptions({ name: 'EmptyState', inheritAttrs: false });
 
 /**
@@ -69,7 +66,7 @@ const attrs = useAttrs();
 const slots = useSlots();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const sizing = computed(() => SIZE[props.size]);
+const sizing = computed(() => SizeClasses[props.size]);
 
 const headingSize = computed(() =>
   props.size === EmptyStateSize.Sm ? 'md' : props.size === EmptyStateSize.Lg ? 'xl' : 'lg',

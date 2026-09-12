@@ -1,20 +1,3 @@
-// Hand-written types for the Web Speech RECOGNITION half, because TypeScript ships none. `lib.dom.d.ts` carries
-// the entire synthesis half (`SpeechSynthesis`, `SpeechSynthesisUtterance`, `SpeechSynthesisVoice`) and NOTHING
-// for recognition: the interface never reached a standard, is exposed as `webkitSpeechRecognition` in Chrome and
-// Safari, and does not exist in Firefox at all. Without these declarations every recognition call site would be
-// an `any` — which the repo bans — or a cast per property read.
-//
-// Structural, and deliberately NOT extending `Event` / `EventTarget`. The objects a consumer meets at runtime are
-// the browser's own and satisfy far more than is named here; the objects a TEST meets are plain literals handed
-// straight to a handler. Requiring a real `Event` would force `dispatchEvent` ceremony into every test and buy no
-// safety, since only `error`, `results`, and `resultIndex` are ever read.
-//
-// The shapes are the intersection of what Chrome and Safari actually implement AND what this slice actually
-// touches — not the full historical draft (`grammars`, `serviceURI`, `onaudiostart`, `onsoundend`, …), most of
-// which no engine implements consistently and no consumer here needs. Everything is typed as the platform
-// behaves, not as the draft promises: handlers are nullable properties (assignment is how every engine wires
-// them) rather than `addEventListener` overloads.
-
 /** One candidate transcription of a recognized phrase. `maxAlternatives` decides how many a result carries. */
 export interface SpeechRecognitionAlternativeLike {
   /** The recognized text. May be empty for a result the engine could not resolve. */

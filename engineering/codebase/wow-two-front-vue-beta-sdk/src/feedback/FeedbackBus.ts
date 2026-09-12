@@ -1,6 +1,6 @@
 import type { VNode } from 'vue';
 
-import { Severity } from '../foundation/utils';
+import { Severity } from '../foundation/styles';
 
 /** Defines the tone of a notice — the house `Severity` vocabulary minus `neutral` (a notice always carries intent). */
 export const NoticeTone = {

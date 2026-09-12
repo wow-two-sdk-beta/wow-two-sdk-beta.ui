@@ -1,42 +1,43 @@
 <script lang="ts">
 export interface FieldProps {
   /** The label text. Fill the `label` slot instead for richer content (e.g. label + tooltip). */
-  label?: string | number;
+  readonly label?: string | number;
 
   /** The helper / hint shown beneath the control. Hidden while errors show. */
-  helper?: string | number;
+  readonly helper?: string | number;
 
   /**
    * The error text — renders only when truthy. Sets `isInvalid` on the form context.
    * Inside a forms-engine `Field` this is an OVERRIDE: leave it unset and the
    * field's own errors (client + server, all of them) render automatically.
    */
-  error?: string | number;
+  readonly error?: string | number;
 
   /** The required state (also exposes `isRequired` to the control via context). */
-  isRequired?: boolean;
+  readonly isRequired?: boolean;
 
   /** The disabled state (also exposes `isDisabled` to the control). */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The read-only state (also exposes `isReadOnly` to the control). */
-  isReadOnly?: boolean;
+  readonly isReadOnly?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { FormControlProvider, useFormControl } from '../../../foundation/primitives';
-import Label from '../label/Label.vue';
-import FormHelperText from '../formHelperText/FormHelperText.vue';
-import FormErrorMessage from '../formErrorMessage/FormErrorMessage.vue';
+import LabelText from '../../display/labelText/LabelText.vue';
+import FieldHelperText from '../../display/fieldHelperText/FieldHelperText.vue';
+import FieldErrorCallout from '../../feedback/fieldErrorCallout/FieldErrorCallout.vue';
 
 /**
- * One-stop label + control + helper + error wrapper. Wraps the default slot in a
- * `FormControlProvider` so the inner control auto-wires `id`, `aria-describedby`,
- * `aria-invalid`, `disabled`, `required`, `readOnly`.
+ * Renders label, control, helper and error as one block, wiring the control through form-control context.
+ *
+ * Wraps the default slot in a `FormControlProvider` so the inner control auto-wires `id`,
+ * `aria-describedby`, `aria-invalid`, `disabled`, `required`, `readOnly`.
  *
  * Form-aware: composed inside a forms-engine `Field` it ADOPTS the glue's context
  * instead of shadowing it — same ids, inherited `isInvalid`/flags, and the field's
@@ -59,7 +60,7 @@ const props = withDefaults(defineProps<FieldProps>(), {
   isReadOnly: undefined,
 });
 
-/** The single form control (TextInput, Select, …) — receives wired id/aria via context. */
+/** The single form control (TextInput, SelectPicker, …) — receives wired id/aria via context. */
 defineSlots<{
   default(): unknown;
   label?(): unknown;
@@ -77,7 +78,7 @@ const hasLabel = computed(() => Boolean(props.label) || Boolean(slots.label));
 const hasHelper = computed(() => Boolean(props.helper) || Boolean(slots.helper));
 const hasOwnError = computed(() => Boolean(props.error) || Boolean(slots.error));
 
-/* Mirrors FormErrorMessage's visibility so the helper never hides behind an error
+/* Mirrors FieldErrorCallout's visibility so the helper never hides behind an error
    that won't render. */
 const showError = computed(
   () => hasOwnError.value || ((parent?.errors?.length ?? 0) > 0 && (parent?.isInvalid ?? false)),
@@ -90,9 +91,9 @@ const isRequired = computed(() => props.isRequired ?? parent?.isRequired);
 const isDisabled = computed(() => props.isDisabled ?? parent?.isDisabled);
 const isReadOnly = computed(() => props.isReadOnly ?? parent?.isReadOnly);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() => cn('flex flex-col gap-1.5', attrs.class as ClassValue));
@@ -113,22 +114,22 @@ defineExpose({ el: root });
     :is-read-only="isReadOnly"
   >
     <div ref="root" :class="rootClass" v-bind="passthroughAttrs">
-      <Label v-if="hasLabel">
+      <LabelText v-if="hasLabel">
         <slot name="label">{{ label }}</slot>
-      </Label>
+      </LabelText>
 
       <slot />
 
-      <FormErrorMessage v-if="showError" :message="hasOwnError ? error : undefined">
+      <FieldErrorCallout v-if="showError" :message="hasOwnError ? error : undefined">
         <!-- Passed only when this Field owns the error: an always-present default slot
              would read as an override and suppress the context's own `errors`. -->
         <template v-if="hasOwnError && $slots.error" #default>
           <slot name="error" />
         </template>
-      </FormErrorMessage>
-      <FormHelperText v-else-if="hasHelper">
+      </FieldErrorCallout>
+      <FieldHelperText v-else-if="hasHelper">
         <slot name="helper">{{ helper }}</slot>
-      </FormHelperText>
+      </FieldHelperText>
     </div>
   </FormControlProvider>
 </template>

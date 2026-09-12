@@ -9,10 +9,11 @@ export interface CarouselViewportProps {}
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
 import { useCarouselContext } from './CarouselContext';
 
-/** The clipping frame. Owns the arrow-key seam; React shipped it as `Carousel.Viewport`. */
+/** Renders the clipping frame and owns the arrow-key seam; React shipped it as `Carousel.Viewport`. */
 defineOptions({ name: 'CarouselViewport', inheritAttrs: false });
 
 /** The `CarouselSlides` content — React's `children`. */
@@ -23,7 +24,7 @@ const el = useTemplateRef<HTMLDivElement>('el');
 const carousel = useCarouselContext();
 
 /** The accessible label for the viewport. Default `'Carousel'`. */
-const ariaLabel = computed(() => (attrs['aria-label'] as string | undefined) ?? 'Carousel');
+const ariaLabel = computed(() => (attrs[AriaAttribute.Label] as string | undefined) ?? 'Carousel');
 
 /**
  * Runs after a consumer's own `keydown` — `rest` sits ahead of this binding in
@@ -31,7 +32,7 @@ const ariaLabel = computed(() => (attrs['aria-label'] as string | undefined) ?? 
  * same way React's explicit `onKeyDown?.(e)` call did.
  */
 function onKeydown(event: KeyboardEvent): void {
-  if (event.defaultPrevented) return;
+  if (event.defaultPrevented || event.isComposing || event.target !== event.currentTarget) return;
   if (event.key === 'ArrowLeft') {
     event.preventDefault();
     carousel.prev();
@@ -43,14 +44,14 @@ function onKeydown(event: KeyboardEvent): void {
 
 const classes = computed(() =>
   cn(
-    'relative overflow-hidden rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'relative overflow-hidden rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     attrs.class as string | undefined,
   ),
 );
 
 /** Everything but `class` and `aria-label`, both re-applied explicitly above. */
 const rest = computed(() => {
-  const { class: _class, 'aria-label': _ariaLabel, ...others } = attrs;
+  const { class: _class, [AriaAttribute.Label]: _ariaLabel, ...others } = attrs;
   return others;
 });
 

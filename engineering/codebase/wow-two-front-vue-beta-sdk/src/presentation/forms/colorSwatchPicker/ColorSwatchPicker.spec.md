@@ -1,40 +1,46 @@
 # ColorSwatchPicker
 
-## Purpose
-Grid of clickable color swatches — pick one preset color from a curated palette. Use for brand-color pickers, presets, or recently-used color rows.
+Renders an inline palette of selectable color swatches, arrow-key navigable in both axes.
 
-## Anatomy
-```
-<ColorSwatchPicker>
-  └── flex grid of <ColorSwatch onClick> with selected ring
-</ColorSwatchPicker>
-```
+Source: [ColorSwatchPicker.vue](ColorSwatchPicker.vue).
 
-## Required behaviors
-- Click a swatch → emits its color string. The selected swatch shows a ring.
-- Keyboard: arrow keys move focus across swatches (roving tabindex). Enter/Space selects.
+Public import: `import { ColorSwatchPicker } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `colors` | `string[]` | — | yes | Palette to display. |
-| `value` | `string \| null` | — | no | Controlled selection. |
-| `defaultValue` | `string \| null` | `null` | no | Uncontrolled. |
-| `onValueChange` | `(color) => void` | — | no | Selection callback. |
-| `swatchSize` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | no | Forwarded to ColorSwatch. |
-| `swatchShape` | `'square' \| 'circle'` | `'square'` | no | Forwarded. |
-| `disabled` | `boolean` | `false` | no | Block all swatches. |
+| `colors` | `ReadonlyArray<string>` | yes | — | The palette rendered as swatches. |
+| `modelValue` | `string \| null` | no | — | The selected hex, controlled. The `v-model` binding target. |
+| `defaultValue` | `string \| null` | no | — | The initial selection when uncontrolled. |
+| `swatchSize` | `ColorSwatchPreviewSize` | no | `'md'` | The size step every swatch renders at. |
+| `swatchShape` | `SwatchShape` | no | `'square'` | The outline shape every swatch renders with. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `id` | `string` | no | — | The group's id. Auto-filled from `FormControl` context when omitted. |
 
-## Composition
-Same-domain reuse of `ColorSwatch`.
+## Emits
 
-## Accessibility
-- Uses `RovingFocusGroup` from `primitives/` for arrow-key nav.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: string \| null];` | Fires when the reader picks a swatch from the palette — the `v-model` half. |
 
-## Known limitations
-- No multi-select (use a state-managed group of `ColorSwatch`es directly).
-- No "+ add new color" button (deferred — caller wires it externally).
+## Slots
 
-## Inspirations
-- React Aria `ColorSwatchPicker`.
-- Mantine `ColorPicker` swatch row.
+None declared.
+
+## Exposed handle
+
+`{ el: computed(() => root.value?.el ?? null) }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

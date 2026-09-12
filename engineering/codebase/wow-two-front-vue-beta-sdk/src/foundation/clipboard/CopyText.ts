@@ -1,15 +1,3 @@
-// The plain-text write — the one every "copy link" / "copy code" button wants, and the slice's most-used entry
-// point.
-//
-// The whole body sits inside a `try`, not only the `await`. `navigator.clipboard.writeText` can throw
-// synchronously rather than reject (a partial implementation, a polyfill, an extension patching the method), and
-// a synchronous throw would escape an `await`-only guard and reach the consumer's click handler as an unhandled
-// error — the exact failure mode the never-throws contract exists to prevent.
-//
-// A non-string `text` is answered, not coerced. The signature says `string`, so a non-string only arrives from
-// untyped JavaScript, and coercing it is a guess: `String(value)` on a `Symbol` throws, and on an object it
-// silently copies "[object Object]" to the user's clipboard — a wrong success is worse than a typed failure.
-
 import {
   reportClipboardOutcome,
   toClipboardFailure,
@@ -22,13 +10,13 @@ import { withLegacyFallback } from './LegacyCopy';
 /** Runs the Clipboard API write, mapping every outcome onto the result union. Never throws. */
 async function writeTextThroughApi(text: string): Promise<ClipboardWriteResult> {
   const writeText = clipboardMethod('writeText');
-  if (writeText === undefined) return { status: 'unsupported' };
+  if (writeText === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   try {
     await writeText(text);
-    return { status: 'copied' };
+    return { ok: true, value: undefined };
   } catch (error) {
-    return toClipboardFailure(error);
+    return { ok: false, failure: toClipboardFailure(error) };
   }
 }
 
@@ -50,7 +38,7 @@ export async function copyText(text: string, options?: ClipboardCopyOptions): Pr
   try {
     if (typeof text !== 'string') {
       return reportClipboardOutcome(
-        { status: 'failed', error: new TypeError('copyText expects a string.') } as const,
+        { ok: false, failure: { status: 'failed', error: new TypeError('copyText expects a string.') } } as const,
         options?.onError,
       );
     }
@@ -60,6 +48,6 @@ export async function copyText(text: string, options?: ClipboardCopyOptions): Pr
   } catch (error) {
     // Unreachable by design — every helper above is itself total. Kept so a future edit to one of them cannot
     // turn this entry point into a rejecting promise.
-    return reportClipboardOutcome(toClipboardFailure(error), options?.onError);
+    return reportClipboardOutcome({ ok: false, failure: toClipboardFailure(error) }, options?.onError);
   }
 }

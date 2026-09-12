@@ -3,32 +3,33 @@ import type { BadgeVariant } from '../badge/Badge.variants';
 
 export interface CountBadgeProps {
   /** The numeric count. */
-  value: number;
+  readonly value: number;
 
   /** The cap value — shows "max+" when exceeded. Default 99. */
-  max?: number;
+  readonly max?: number;
 
   /** The hide-when-zero mode — hides entirely when count is 0. Default true. */
-  canHideZero?: boolean;
+  readonly canHideZero?: boolean;
 
   /**
    * The color treatment. React spelled this `BadgeProps['variant']`; the named
    * `BadgeVariant` union it resolves to is used directly, because the SFC
    * compiler cannot follow an indexed access into an imported interface.
    */
-  variant?: BadgeVariant;
+  readonly variant?: BadgeVariant;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn, Size } from '../../../foundation/utils';
+import { cn, Size } from '../../../foundation/styles';
 import { BadgeVariant as BadgeVariantValue } from '../badge/Badge.variants';
 import Badge from '../badge/Badge.vue';
 
 /**
- * Numeric badge for notification / inbox counts. Shows "{value}" or "{max}+"
- * past the cap. Hides when `value === 0` unless `:can-hide-zero="false"`.
+ * Renders a numeric count badge showing `value` or `{max}+` past the cap, hidden at zero by default.
+ *
+ * Pass `:can-hide-zero="false"` to keep it visible at zero.
  */
 defineOptions({ name: 'CountBadge', inheritAttrs: false });
 

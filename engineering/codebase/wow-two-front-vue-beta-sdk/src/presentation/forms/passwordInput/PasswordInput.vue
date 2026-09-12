@@ -3,58 +3,53 @@ import type { InputSize, InputState } from '../InputStyles';
 
 export interface PasswordInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
   /** The visibility-toggle button's presence. Default true. */
-  hasToggle?: boolean;
-
-  /** The value, controlled — React's spelling, which wins when both are set. */
-  value?: string | number;
+  readonly hasToggle?: boolean;
 
   /** The value, controlled. The `v-model` binding target. */
-  modelValue?: string | number;
+  readonly modelValue?: string | number;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: string | number;
+  readonly defaultValue?: string | number;
 
-  /** The autofill hint. React defaulted this to `current-password`; so does the port. */
-  autocomplete?: string;
+  /** The autofill hint. Defaults to `current-password`. */
+  readonly autocomplete?: string;
 
-  /** React's spelling of {@link PasswordInputProps.autocomplete}; the DOM spelling wins. */
-  autoComplete?: string;
+  /** camelCase alias of {@link PasswordInputProps.autocomplete}; the DOM spelling wins. */
+  readonly autoComplete?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 
-  /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
-  readOnly?: boolean;
+  /** The read-only state. Falls back to the form control's `isReadOnly`. */
+  readonly readOnly?: boolean;
 
-  /** The DOM spelling of {@link PasswordInputProps.readOnly}, which wins when both are set. */
-  readonly?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly readonly?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Eye, EyeOff } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
-import { useControlled } from '../../../foundation/hooks';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 
-/**
- * Password input with optional visibility toggle. Toggle is a raw `<button>`
- * to keep the strict atom rule.
- */
+/** Renders a password field with an optional eye button that reveals the typed characters. */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'PasswordInput', inheritAttrs: false });
@@ -72,10 +67,8 @@ const props = withDefaults(defineProps<PasswordInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader edits the password — the `v-model` half. */
   'update:modelValue': [value: string];
-  /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
-  'value-change': [value: string];
 }>();
 
 const attrs = useAttrs();
@@ -84,17 +77,17 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<string | number>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', String(next));
-    emit('value-change', String(next));
   },
 });
 
 const currentValue = controlled.value;
 
 function onInput(event: Event): void {
+  if ((event as InputEvent).isComposing) return;
   controlled.setValue((event.target as HTMLInputElement).value);
 }
 
@@ -117,9 +110,9 @@ const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isRea
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'value']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const wrapperClass = computed(() => cn('relative', attrs.class as ClassValue));
@@ -136,7 +129,11 @@ const inputClass = computed(() =>
 
 const input = useTemplateRef<HTMLInputElement>('input');
 
-/** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+/** The rendered `<input>`. */
+useNativeFormReset(input, controlled.reset, () => {
+  if (input.value) input.value.value = String(currentValue.value ?? '');
+});
+
 defineExpose({ el: input });
 </script>
 
@@ -157,6 +154,7 @@ defineExpose({ el: input });
       :class="inputClass"
       v-bind="passthroughAttrs"
       @input="onInput"
+      @compositionend="onInput"
     />
     <button
       v-if="hasToggle"

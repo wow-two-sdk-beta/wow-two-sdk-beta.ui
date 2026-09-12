@@ -1,21 +1,21 @@
 <script lang="ts">
-import type { RadioProps } from '../radio';
+import type { RadioInputProps } from '../radioInput';
 
-export interface RadioFieldProps extends RadioProps {
+export interface RadioFieldProps extends RadioInputProps {
   /** The right-side label. Fill the `label` slot instead for richer content. */
-  label?: string | number;
+  readonly label?: string | number;
 
   /** The smaller helper / description below. Fill the `description` slot for richer content. */
-  description?: string | number;
+  readonly description?: string | number;
 
   /**
    * The wrap-element class (the `<label>`).
    *
-   * React put `className` on the inner `Radio` and `wrapperClassName` on the `<label>`;
+   * React put `className` on the inner `RadioInput` and `wrapperClassName` on the `<label>`;
    * that split is preserved, so Vue's `class` fallthrough attr reaches the RADIO, not the
    * root. Style the wrapper through this prop.
    */
-  wrapperClassName?: string;
+  readonly wrapperClassName?: string;
 
   /**
    * The key this item contributes to a surrounding `RadioGroup`'s selection.
@@ -23,27 +23,30 @@ export interface RadioFieldProps extends RadioProps {
    * React read it off the cloned child (`ChildLike.value`); here the group provides a
    * context and this prop is what the item registers under. Ignored outside a group.
    */
-  value?: string;
+  readonly value?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useId } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useId } from '../../../foundation/identifiers';
 import { FormControlProvider, useFormControl } from '../../../foundation/primitives';
 import { useRadioGroup } from '../radioGroup/RadioGroupContext';
-import Radio from '../radio/Radio.vue';
+import RadioInput from '../radioInput/RadioInput.vue';
 
-/**
- * Radio + right-side label + optional description, wrapped in a `<label>`.
- */
-/* `inheritAttrs: false` so `class` reaches the inner Radio (React's `className`) rather
+/** Renders a radio, its right-side label and an optional description in one clickable `<label>`. */
+/* `inheritAttrs: false` so `class` reaches the inner RadioInput (React's `className`) rather
    than landing on the `<label>`. */
 defineOptions({ name: 'RadioField', inheritAttrs: false });
 
-const props = defineProps<RadioFieldProps>();
+const props = withDefaults(defineProps<RadioFieldProps>(), {
+  modelValue: undefined,
+  defaultValue: undefined,
+  disabled: undefined,
+  required: undefined,
+});
 
 defineSlots<{
   label?(): unknown;
@@ -74,13 +77,13 @@ function onGroupChange(): void {
 const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
 
 /* No `defineEmits`: the consumer's `v-model` listeners must stay in `useAttrs()` to reach
-   the inner `Radio` — see the CheckboxField note. */
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+   the inner `RadioInput` — see the CheckboxField note. */
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
-/** This component's own props must not reach the inner `Radio`. */
+/** This component's own props must not reach the inner `RadioInput`. */
 const radioProps = computed(() => {
   const {
     label: _label,
@@ -108,17 +111,17 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
          one so siblings never adopt the surrounding Field's id or `describedBy`, while the
          group's disabled/invalid flags still cascade. -->
     <FormControlProvider v-if="isInGroup" :is-disabled="groupDisabled" :is-invalid="groupInvalid">
-      <Radio
+      <RadioInput
         ref="inner"
         v-bind="{ ...radioProps, ...passthroughAttrs }"
         :id="inputId"
         :name="groupName"
-        :checked="groupChecked"
+        :model-value="groupChecked"
         :class="radioClass"
         @change="onGroupChange"
       />
     </FormControlProvider>
-    <Radio v-else ref="inner" v-bind="{ ...radioProps, ...passthroughAttrs }" :id="inputId" :class="radioClass" />
+    <RadioInput v-else ref="inner" v-bind="{ ...radioProps, ...passthroughAttrs }" :id="inputId" :class="radioClass" />
     <span class="flex flex-col gap-0.5 text-sm">
       <span class="font-medium text-foreground">
         <slot name="label">{{ label }}</slot>

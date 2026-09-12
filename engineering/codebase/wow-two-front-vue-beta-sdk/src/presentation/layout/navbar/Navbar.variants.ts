@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, type VariantProps } from '../../../foundation/styles';
 
 /** Defines the band-height of a `Navbar`. */
 export const NavbarHeight = {

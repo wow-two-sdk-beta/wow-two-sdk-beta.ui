@@ -1,45 +1,43 @@
 # LoadingOverlay
 
-## Purpose
-Blocks interaction with a region (or the whole viewport) while a long-running task is in flight. Scrim + centered spinner + optional label.
+Renders a scrim and centered spinner that block interaction with a region during a long task.
 
-## Anatomy
-```
-<LoadingOverlay isOpen>
-  ├── Backdrop (scrim, optional blur)
-  └── center
-      ├── Spinner
-      └── label (optional)
-</LoadingOverlay>
-```
+Source: [LoadingOverlay.vue](LoadingOverlay.vue).
 
-## Required behaviors
-- When `isOpen`, scrim covers parent (or viewport).
-- Pointer events captured by the scrim — underlying UI is non-interactive.
-- Polite live region announces label changes.
+Public import: `import { LoadingOverlay } from '@wow-two-beta/ui-vue/presentation/feedback';`.
 
-## Visual states
-`closed` (returns null) · `open` · `open + blur` · `inline` (positioned within parent, not viewport)
+## Contract
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `isOpen` | `boolean` | `true` | Controls mount. |
-| `label` | `ReactNode` | `'Loading…'` | Visible + announced. |
-| `isInline` | `boolean` | `false` | Position inside parent (parent must be `position: relative`) instead of fixed-viewport. |
-| `hasBlur` | `boolean` | `false` | Scrim blurs background. |
-| `spinnerSize` | `Spinner['size']` | `'lg'` | |
-| `spinnerTone` | `Spinner['tone']` | `'brand'` | |
 
-## Composition model
-Single component. Cross-domain composes `overlays/Backdrop` for the scrim. Spinner is same-domain.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `isOpen` | `boolean` | no | `true` | The mount state. Default `true`. |
+| `label` | `string` | no | `'Loading…'` | The caption under the spinner. Default `"Loading…"`. Rich content → the `label` slot. |
+| `isInline` | `boolean` | no | `false` | The inline-positioning toggle — the scrim sits absolutely inside the parent (must be `position: relative`). |
+| `hasBlur` | `boolean` | no | `false` | The backdrop-blur toggle. |
+| `spinnerSize` | `Size` | no | `SizeToken.Lg` | The spinner diameter step. Default `lg`. |
+| `spinnerTone` | `SpinnerTone` | no | `SpinnerToneToken.Brand` | The spinner color tone. Default `brand`. |
 
-## Accessibility
-- Wrapper has `role="status"` (polite live region) so screen readers announce the busy state without an `aria-busy` suppression.
-- Label is visible AND part of the status region (so it gets read).
+## Emits
 
-## Dependencies
-Foundation: `utils`. Same domain: `feedback/Spinner`. Cross-domain: `overlays/Backdrop`.
+None declared.
 
-## Inspirations
-Mantine `LoadingOverlay`, MUI `Backdrop` + `CircularProgress`. Ours: minimal — just scrim + centered spinner + label.
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default?(): unknown;` | See the declared signature. |
+| `label` | `label?(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FeedbackExamples.ts](../../../../apps/playground/src/gallery/fixtures/FeedbackExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

@@ -1,48 +1,46 @@
 # HoverCard
 
-## Purpose
-Hover- and focus-triggered floating panel — richer than `Tooltip`, less interruptive than `Popover`. Use for inline previews (user mentions, link previews, data hovers).
+Renders only its slot, owning the open state and hover timing of the HoverCard tree below it.
 
-## Anatomy
-```
-<HoverCard>
-  ├── <HoverCard.Trigger asChild?>
-  └── <HoverCard.Content>
-        └── <HoverCard.Arrow />     (optional)
-        children
-      </HoverCard.Content>
-</HoverCard>
-```
+Source: [HoverCard.vue](HoverCard.vue).
 
-## Required behaviors
-- Pointer enter/focus on trigger opens after `openDelay`. Pointer leave / blur closes after `closeDelay`.
-- Pointer over the content keeps it open (the close timer cancels when entering content).
-- Does NOT trap focus (would interrupt page flow).
-- ARIA: trigger is unchanged; content has no special role (it's a presentation surface, not a dialog).
+Public import: `import { HoverCard } from '@wow-two-beta/ui-vue/presentation/overlays';`.
 
-## Visual states
-`open` (animated in) · `closed`
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Unmount disposes the subscriptions, listeners or timers registered by this implementation.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `open`, `defaultOpen`, `onOpenChange` | — | — | no | Standard. |
-| `openDelay` | `number` (ms) | `700` | no | Standard hover-card delay. |
-| `closeDelay` | `number` (ms) | `300` | no | Lets users move pointer to content. |
-| `placement` | Floating UI placement | `'bottom'` | no | Position. |
-| `offset` | `number` | `8` | no | Distance from trigger. |
+| `open` | `boolean` | no | `undefined` | The open state, controlled. The `v-model:open` binding target. |
+| `defaultOpen` | `boolean` | no | `false` | The initial open state when uncontrolled. Default `false`. |
+| `openDelay` | `number` | no | `700` | The hover dwell before opening, in ms. Default 700. |
+| `closeDelay` | `number` | no | `300` | The grace period before closing, in ms. Default 300. |
+| `placement` | `Placement` | no | `'bottom'` | The Floating UI placement. Default `bottom`. |
+| `offset` | `number` | no | `8` | The distance between anchor and card in px. Default 8. |
 
-## Composition
-Compound. Content is portaled and anchored. Same-domain reuse with `Popover.Arrow` style is not used (we re-derive the arrow inline) since cross-component imports inside the same domain would still work but we keep the panel visual separate to evolve independently.
+## Emits
 
-## Accessibility
-- Hover-only behavior is enhanced by focus support — tab onto the trigger to open.
-- Touch devices: tap trigger to open (handled via focus event on tap).
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:open` | `'update:open': [open: boolean];` | Fires when the card opens or closes — the `v-model:open` half. |
 
-## Known limitations
-- No focus trap — intentional. If you need trapped focus, use `Popover` instead.
-- Single child trigger — array/string children render as-is without HoverCard.
+## Slots
 
-## Inspirations
-- Radix `HoverCard`.
-- shadcn/ui `HoverCard`.
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [OverlaysExamples.ts](../../../../apps/playground/src/gallery/fixtures/OverlaysExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

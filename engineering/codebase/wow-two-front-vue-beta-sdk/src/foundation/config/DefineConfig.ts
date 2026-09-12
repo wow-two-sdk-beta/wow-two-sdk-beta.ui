@@ -20,7 +20,7 @@ export type InferConfig<S extends ConfigSchema> = { readonly [K in keyof S]: Inf
 /** Tunes where `defineConfig` reads from and how keys are namespaced. */
 export interface DefineConfigOptions {
   /** The ordered source list; earlier wins. Defaults to `[window.__APP_CONFIG__, import.meta.env]`. */
-  readonly sources?: readonly ConfigSource[];
+  readonly sources?: ReadonlyArray<ConfigSource>;
 
   /** A prefix prepended to every schema key on lookup (e.g. `'VITE_'` → key `API_URL` reads `VITE_API_URL`). */
   readonly prefix?: string;
@@ -44,9 +44,9 @@ export interface ConfigIssue {
 /** Thrown by `defineConfig` when one or more keys are missing or invalid — aggregates every issue found. */
 export class ConfigError extends Error {
   /** Every resolution failure across the schema. */
-  readonly issues: readonly ConfigIssue[];
+  readonly issues: ReadonlyArray<ConfigIssue>;
 
-  constructor(issues: readonly ConfigIssue[]) {
+  constructor(issues: ReadonlyArray<ConfigIssue>) {
     const lines = issues.map((issue) => `  - ${issue.lookupKey}: ${issue.message}`).join('\n');
     super(`Invalid configuration (${issues.length} ${issues.length === 1 ? 'issue' : 'issues'}):\n${lines}`);
     this.name = 'ConfigError';

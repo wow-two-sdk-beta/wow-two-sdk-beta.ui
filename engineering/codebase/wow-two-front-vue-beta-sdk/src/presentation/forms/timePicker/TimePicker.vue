@@ -1,64 +1,63 @@
 <script lang="ts">
 import type { Temporal } from 'temporal-polyfill';
-import type { SelectSize } from '../select';
+import type { SelectPickerSize } from '../selectPicker';
 import type { InputState } from '../InputStyles';
 
 export interface TimePickerProps {
-  /** The selected time, controlled — React's spelling, which wins when both are set. */
-  value?: Temporal.PlainTime | null;
-
   /** The selected time, controlled. The `v-model` binding target. */
-  modelValue?: Temporal.PlainTime | null;
+  readonly modelValue?: Temporal.PlainTime | null;
 
   /** The uncontrolled initial selection. */
-  defaultValue?: Temporal.PlainTime | null;
+  readonly defaultValue?: Temporal.PlainTime | null;
 
   /** The minute interval. Default 5. */
-  minuteStep?: number;
+  readonly minuteStep?: number;
 
   /** The empty-state text on the trigger. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /**
    * The trigger's time formatter.
    *
    * Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do.
    */
-  format?: (time: Temporal.PlainTime) => string;
+  readonly format?: (time: Temporal.PlainTime) => string;
 
   /** The invalid surface override. Falls back to the surrounding form control's `isInvalid`. */
-  isInvalid?: boolean;
+  readonly isInvalid?: boolean;
 
   /** The hidden input name; when set, a hidden input ships the value with form submission. */
-  name?: string;
+  readonly name?: string;
 
   /** The trigger size. */
-  size?: SelectSize;
+  readonly size?: SelectPickerSize;
 
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
 
   /** The trigger's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Clock } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
-import { selectTriggerVariants } from '../select/Select.variants';
+import { selectTriggerVariants } from '../selectPicker/SelectPicker.variants';
 import { InputState as InputStateValue } from '../InputStyles';
 import TimeColumns from '../TimeColumns.vue';
 
-/** Trigger button + popover hour/minute columns. */
+/** Renders a trigger button that opens popover hour and minute columns and shows the picked time. */
 /* `inheritAttrs: false` so `class` folds into the trigger's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'TimePicker', inheritAttrs: false });
@@ -74,16 +73,14 @@ const props = withDefaults(defineProps<TimePickerProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader picks an hour or a minute in the popover. The `v-model` half. */
   'update:modelValue': [time: Temporal.PlainTime | null];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [time: Temporal.PlainTime | null];
 }>();
 
 const attrs = useAttrs();
 
 /* Inherits id/disabled/invalid/labelledby/describedby from a surrounding <Field>;
-   standalone props win when provided, context fills the gaps (Select parity). */
+   standalone props win when provided, context fills the gaps (SelectPicker parity). */
 const field = useFormControl();
 
 const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
@@ -92,11 +89,10 @@ const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid);
 const controlled = useControlled<Temporal.PlainTime | null>({
   /* `??` is wrong here — `null` is a MEANINGFUL selection, and `??` would fall through it
      to `modelValue`. Only `undefined` means "not controlled". */
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -117,7 +113,7 @@ function onColumnsChange(next: Temporal.PlainTime): void {
 const displayText = computed(() => (time.value ? props.format(time.value) : props.placeholder));
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel`. */
-const ariaLabel = computed(() => attrs['aria-label'] as string | undefined);
+const ariaLabel = computed(() => attrs[AriaAttribute.Label] as string | undefined);
 
 const triggerId = computed(() => props.id ?? field?.id);
 /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
@@ -127,9 +123,9 @@ const ariaInvalid = computed(() => triggerState.value === InputStateValue.Invali
 
 const hiddenValue = computed(() => time.value?.toString({ smallestUnit: 'minute' }) ?? '');
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-label']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.Label]);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const triggerClass = computed(() =>
@@ -142,10 +138,15 @@ const trigger = useTemplateRef<{ el: HTMLElement | null }>('trigger');
 
 /** The rendered trigger — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: computed(() => trigger.value?.el ?? null) });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
-  <Popover v-model:open="open" placement="bottom-start" :offset="6">
+  <Popover :key="formResetRevision" v-model:open="open" placement="bottom-start" :offset="6">
     <PopoverTrigger
       ref="trigger"
       :id="triggerId"
@@ -163,8 +164,14 @@ defineExpose({ el: computed(() => trigger.value?.el ?? null) });
       <Clock class="h-4 w-4 shrink-0 text-muted-foreground" />
     </PopoverTrigger>
     <PopoverContent is-bare>
-      <TimeColumns :value="time" :minute-step="minuteStep" :on-time-change="onColumnsChange" />
+      <TimeColumns :model-value="time" :minute-step="minuteStep" @update:modelValue="onColumnsChange" />
     </PopoverContent>
     <input v-if="name && time" type="hidden" :name="name" :value="hiddenValue" />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </Popover>
 </template>

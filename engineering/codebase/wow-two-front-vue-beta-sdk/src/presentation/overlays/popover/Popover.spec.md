@@ -1,48 +1,49 @@
 # Popover
 
-## Purpose
-Click-triggered floating panel anchored to a trigger element. Use for rich content overlays that aren't full-screen modals — color pickers, share menus, settings panels, mini forms.
+Renders only its slot, owning the open state and placement of the Popover tree below it.
 
-## Anatomy
-```
-<Popover>
-  ├── <Popover.Trigger asChild?>
-  └── <Popover.Content>
-        └── <Popover.Arrow />     (optional)
-        children
-      </Popover.Content>
-</Popover>
-```
+Source: [Popover.vue](Popover.vue).
 
-## Required behaviors
-- Trigger click toggles open. Escape closes. Outside click closes.
-- Focus moves into popover on open; returns to trigger on close.
-- ARIA: trigger gets `aria-haspopup="dialog"`, `aria-expanded`, `aria-controls`. Content has `role="dialog"`.
-- Optional arrow follows the trigger via Floating UI's `arrow` middleware.
+Public import: `import { Popover } from '@wow-two-beta/ui-vue/presentation/overlays';`.
 
-## Visual states
-`open` (animated in) · `closed`
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- isModal defaults to false. A nonmodal panel allows Tab to leave.
+- Modal mode opts into focus trapping, looping and modal background behavior; anchoring does not imply modality.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `open`, `defaultOpen`, `onOpenChange` | — | — | no | Standard open-state shape. |
-| `placement` | Floating UI placement | `'bottom'` | no | Position relative to trigger. |
-| `offset` | `number` | `8` | no | Distance from trigger. |
-| `dismissOnOutsideClick` | `boolean` | `true` | no | Click-outside closes. |
-| `dismissOnEscape` | `boolean` | `true` | no | Escape closes. |
+| `open` | `boolean` | no | `undefined` | The open state, controlled. The `v-model:open` binding target. |
+| `defaultOpen` | `boolean` | no | `false` | The initial open state when uncontrolled. Default `false`. |
+| `placement` | `Placement` | no | `'bottom'` | The Floating UI placement. Default `bottom`. |
+| `offset` | `number` | no | `8` | The distance between anchor and panel in px. Default 8. |
+| `isModal` | `boolean` | no | `false` | Whether the panel is modal and traps focus. Default false. |
+| `dismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
+| `dismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
 
-## Composition
-Compound. Internal open state. Same-domain reuse with `Backdrop` is not needed — Popover doesn't dim the page.
+## Emits
 
-## Accessibility
-- WAI-ARIA Dialog (modal=false) pattern.
-- Focus trap inside the popover while open.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:open` | `'update:open': [open: boolean];` | Fires when the popover opens or closes — the `v-model:open` half. |
 
-## Known limitations
-- No animation customization (uses `animate-in fade-in-0 zoom-in-95`).
-- Arrow positioning hooks into Floating UI middleware; arrow color must match popover background.
+## Slots
 
-## Inspirations
-- Radix `Popover`.
-- shadcn/ui `Popover`.
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [OverlaysExamples.ts](../../../../apps/playground/src/gallery/fixtures/OverlaysExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [DisplayRequiredProps.dom.test.ts](../../../../tests/unit/presentation/display/DisplayRequiredProps.dom.test.ts), [Feedback.contract.dom.test.ts](../../../../tests/unit/presentation/feedback/Feedback.contract.dom.test.ts), [KeyboardExit.browser.test.ts](../../../../tests/unit/presentation/forms/KeyboardExit.browser.test.ts), [Overlays.contract.dom.test.ts](../../../../tests/unit/presentation/overlays/Overlays.contract.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

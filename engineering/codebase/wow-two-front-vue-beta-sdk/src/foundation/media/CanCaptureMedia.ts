@@ -1,19 +1,3 @@
-// Feature detection for the media-capture vector, and the one distinction that earns this module its own file:
-// `getUserMedia` is gated on a SECURE CONTEXT, and browsers enforce that by hiding `navigator.mediaDevices`
-// ENTIRELY rather than by rejecting the call. On a plain-HTTP page the API therefore looks *unimplemented* — the
-// developer reads "this browser has no camera support" off a browser that supports it perfectly, and goes hunting
-// for a polyfill instead of an `https://`. (`localhost` counts as secure, so it works in dev and breaks on the
-// first LAN-IP test.) That misreading costs real debugging time, so the insecure case gets its own reason
-// instead of collapsing into `unsupported`.
-//
-// Order of evidence: a present `getUserMedia` outranks the `isSecureContext` flag. Where the API is there, the
-// call itself answers accurately, and pre-emptively reporting `insecure-context` would block a working path.
-// `isSecureContext` is consulted only to *explain* an absent API.
-//
-// Every read is guarded. `navigator` is absent under SSR, `mediaDevices` is absent on insecure pages and older
-// browsers, and `isSecureContext` is absent outside a browser — Node reports `undefined`, which must NOT read as
-// insecure: "unknown" is not "no". A detector that throws defeats its own purpose, so the answer is total.
-
 /**
  * Why media capture is (un)available here.
  *
@@ -22,7 +6,19 @@
  *   serve over HTTPS (or `localhost`). Distinguished from `unsupported` because the fix is completely different.
  * - `unsupported` — no API and no evidence the context is the reason: SSR, a worker, an older browser.
  */
-export type MediaSupport = 'supported' | 'insecure-context' | 'unsupported';
+export const MediaSupport = {
+  /** `navigator.mediaDevices.getUserMedia` is present and callable. */
+  Supported: 'supported',
+
+  /** The API is absent and the page is a known non-secure context — serve over HTTPS or `localhost`. */
+  InsecureContext: 'insecure-context',
+
+  /** No API and no evidence the context is the reason: SSR, a worker, an older browser. */
+  Unsupported: 'unsupported',
+} as const;
+
+/** Why media capture is (un)available here. */
+export type MediaSupport = (typeof MediaSupport)[keyof typeof MediaSupport];
 
 /**
  * Reads `navigator.mediaDevices` when it exists and carries `member` as a callable.
@@ -78,8 +74,8 @@ function isKnownInsecureContext(): boolean {
  * Never throws. Returns `unsupported` under SSR.
  */
 export function getMediaSupport(): MediaSupport {
-  if (mediaDevicesWith('getUserMedia') !== undefined) return 'supported';
-  return isKnownInsecureContext() ? 'insecure-context' : 'unsupported';
+  if (mediaDevicesWith('getUserMedia') !== undefined) return MediaSupport.Supported;
+  return isKnownInsecureContext() ? MediaSupport.InsecureContext : MediaSupport.Unsupported;
 }
 
 /**
@@ -89,5 +85,5 @@ export function getMediaSupport(): MediaSupport {
  * *why*. Never throws. Returns `false` under SSR.
  */
 export function canCaptureMedia(): boolean {
-  return getMediaSupport() === 'supported';
+  return getMediaSupport() === MediaSupport.Supported;
 }

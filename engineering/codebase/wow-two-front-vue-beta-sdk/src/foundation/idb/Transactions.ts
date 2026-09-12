@@ -70,7 +70,7 @@ export interface IterateOptions {
  */
 export async function withTransaction<TResult>(
   database: IDBDatabase,
-  storeNames: string | readonly string[],
+  storeNames: string | ReadonlyArray<string>,
   mode: IDBTransactionMode,
   fn: (transaction: IDBTransaction) => TResult | Promise<TResult>,
 ): Promise<TResult> {

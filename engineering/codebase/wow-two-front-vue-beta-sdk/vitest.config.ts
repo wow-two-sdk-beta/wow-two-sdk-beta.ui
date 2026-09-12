@@ -13,22 +13,22 @@ const srcAlias = { '@src': fileURLToPath(new URL('./src', import.meta.url)) };
 const smokeSuffixes = ['**/*.ssr.test.ts', '**/*.dom.test.ts'];
 
 /*
- * Four projects (the React package's `storybook` third has no Vue counterpart yet):
+ * Four projects:
  *  - unit    — node, pure logic: the framework-agnostic engines under the components
  *              (`foundation/*`, `domain/*`, `feedback` / `analytics` / `flags` / `auth`,
- *              `forms-engine`). Node is load-bearing here too, not just in `ssr`: with no
+ *              `formsEngine`). Node is load-bearing here too, not just in `ssr`: with no
  *              `localStorage` and no `indexedDB`, a slice that forgot its capability guard
  *              throws on the first read rather than degrading.
  *  - ssr     — node, `renderToString` only. NO DOM globals, deliberately: the whole point of
  *              the tier is that a component touching `window`/`document` at setup or from an
  *              `immediate: true` watcher throws here. Giving this project a DOM environment
  *              would silently retire the tier.
- *  - dom     — happy-dom, mounts SFCs via @vue/test-utils. Smoke depth only.
+ *  - dom     — happy-dom, mounts SFCs via @vue/test-utils. Interaction tests.
  *  - browser — real chromium, for anything needing layout, real focus, or true event timing.
  *
- * Suffix convention, carried over from the React package:
+ * Test routing:
  *   `*.browser.test.ts` = needs a real DOM → browser project
- *   `*.dom.test.ts`     = mounts an SFC, smoke depth → dom project
+ *   `*.dom.test.ts`     = mounts an SFC → dom project
  *   `*.ssr.test.ts`     = server-render only, must run WITHOUT a DOM → ssr project
  *   plain `*.test.ts` in the logic layers = pure logic → unit project
  */
@@ -43,9 +43,9 @@ export default defineConfig({
           name: 'unit',
           environment: 'node',
           include: [
-            'tests/unit/foundation/{utils,themes,http,storage,resilience,identifiers,i18n,config,shortcuts,format,files,commands,errors,share,logger,device,notifications,uploads,gestures,selection,media,animation,virtualization,observers,crypto,sync,idb,workers,screen,geolocation,async,undo,clipboard,speech,collections,datetime,validation,net}/**/*.test.ts',
+            'tests/unit/foundation/**/*.test.ts',
             'tests/unit/domain/**/*.test.ts',
-            'tests/unit/{router,query,auth,feedback,forms-engine,analytics,flags}/**/*.test.ts',
+            'tests/unit/{router,query,auth,feedback,formsEngine,analytics,flags}/**/*.test.ts',
           ],
           exclude: ['**/*.browser.test.ts', '**/*.component.test.ts', ...smokeSuffixes],
         },
@@ -73,20 +73,20 @@ export default defineConfig({
         resolve: { alias: srcAlias },
         test: {
           name: 'browser',
-          include: [
-            'tests/unit/**/*.component.test.ts',
-            'tests/unit/foundation/hooks/**/*.test.ts',
-            'tests/unit/**/*.browser.test.ts',
-          ],
+          include: ['tests/unit/**/*.component.test.ts', 'tests/unit/**/*.browser.test.ts'],
           browser: {
             enabled: true,
             headless: true,
             provider: playwright(),
-            instances: [{ browser: 'chromium' }],
+            instances: [
+              { browser: 'chromium', name: 'chromium' },
+              {
+                browser: 'chromium',
+                name: 'chromium-forced-colors',
+                provider: playwright({ contextOptions: { forcedColors: 'active' } }),
+              },
+            ],
           },
-          // Scaffold-only: the smoke layer runs on happy-dom (`dom`), so nothing has claimed
-          // the real-chromium tier yet. Drop when the first `*.browser.test.ts` lands.
-          passWithNoTests: true,
         },
       },
     ],

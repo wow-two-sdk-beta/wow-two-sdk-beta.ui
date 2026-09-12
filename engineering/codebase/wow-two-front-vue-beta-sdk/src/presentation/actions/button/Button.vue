@@ -8,7 +8,7 @@ import type {
   SizePreset,
   SizeUnion,
   SizeValue,
-} from '../../../foundation/utils';
+} from '../../../foundation/styles';
 import type { ButtonVariant, ButtonShape, ButtonVariants } from './Button.variants';
 
 /* Named size presets for variant lookup. Any other string / number / object flows to box-overrides. */
@@ -25,84 +25,84 @@ type ButtonAttributes = Omit<ButtonHTMLAttributes, 'type' | 'disabled' | 'color'
 /** Defines props for the button. */
 export interface ButtonProps extends /* @vue-ignore */ ButtonAttributes {
   /** The visual surface style. */
-  variant?: ButtonVariant;
+  readonly variant?: ButtonVariant;
 
   /** The semantic tone palette. */
-  tone?: ColorTone;
+  readonly tone?: ColorTone;
 
   /** The button silhouette (default · square · circle). */
-  shape?: ButtonShape;
+  readonly shape?: ButtonShape;
 
   /** The size — preset name OR raw value OR explicit dim object; see `ButtonSize` for details. */
-  size?: ButtonSize;
+  readonly size?: ButtonSize;
 
   /** The per-instance color override for `tone` — a string derives all slots, an object sets each. */
-  color?: ColorProp;
+  readonly color?: ColorProp;
 
   /** The slot before children. Prefer the `leading` named slot. */
-  leadingSlot?: VNodeChild;
+  readonly leadingSlot?: VNodeChild;
 
   /** The slot after children. Prefer the `trailing` named slot. */
-  trailingSlot?: VNodeChild;
+  readonly trailingSlot?: VNodeChild;
 
   /** The content shown in place of children on hover / focus-visible (CSS-only swap — no JS hover state).
      Idle → children visible; hover/focus-visible → `hoverSlot` visible. Pairs with `variant="reveal"`
      for a reveal-on-hover icon swap. When undefined (and no `hover` slot), children render normally. */
-  hoverSlot?: VNodeChild;
+  readonly hoverSlot?: VNodeChild;
 
   /** The indicator replacing the built-in `<Spinner/>` while loading. Prefer the `loading` slot. */
-  loadingSlot?: VNodeChild;
+  readonly loadingSlot?: VNodeChild;
 
   /** The action-loading state — replaces leading w/ spinner, sets aria-busy, blocks clicks. */
-  isLoading?: boolean;
+  readonly isLoading?: boolean;
 
   /** The text that replaces children when loading. No default — consumer supplies (i18n). */
-  loadingText?: string;
+  readonly loadingText?: string;
 
   /** The content-loading state — hides content, keeps dimensions, shimmers. Excludes `isLoading`. */
-  isSkeleton?: boolean;
+  readonly isSkeleton?: boolean;
 
   /** The disabled state — drops focus order and clicks. Inherited from an enclosing `Field`. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The full-width state — stretches to fill container width. */
-  isFullWidth?: boolean;
+  readonly isFullWidth?: boolean;
 
   /** The multi-line state — allows label wrap; default truncates to single line. */
-  isMultiline?: boolean;
+  readonly isMultiline?: boolean;
 
   /** The as-child flag — renders as the single child element via `Primitive`'s `asChild` merge. */
-  asChild?: boolean;
+  readonly asChild?: boolean;
 
   /** The independent padding override (preset token or `{x, y}` object). */
-  padding?: PaddingProp;
+  readonly padding?: PaddingProp;
 
   /** The independent radius override (preset token or raw value). */
-  radius?: RadiusProp;
+  readonly radius?: RadiusProp;
 
   /** The explicit width override. Number = px; string = any CSS unit. */
-  width?: SizeValue;
+  readonly width?: SizeValue;
 
   /** The explicit height override. Number = px; string = any CSS unit. */
-  height?: SizeValue;
+  readonly height?: SizeValue;
 
   /** The min width reserved so the button doesn't reflow when its label morphs. */
-  minWidth?: SizeValue;
+  readonly minWidth?: SizeValue;
 
   /** The min height reserved — symmetric with `minWidth`. */
-  minHeight?: SizeValue;
+  readonly minHeight?: SizeValue;
 
   /** The square-size shorthand — fallback for `width` and `height`, which win when both are set. */
-  boxSize?: SizeValue;
+  readonly boxSize?: SizeValue;
 
   /** The button type. Default `ButtonType.Button` — NOT browser-default `'submit'`. */
-  type?: ButtonType;
+  readonly type?: ButtonType;
 
   /** The long-press duration (ms). Default 500. Out-of-range values trigger a dev warning. */
-  longPressDelay?: number;
+  readonly longPressDelay?: number;
 
   /** The click-throttle window (ms) — first wins; subsequent swallowed via `preventDefault()`. */
-  debounceMs?: number;
+  readonly debounceMs?: number;
 }
 </script>
 
@@ -114,7 +114,6 @@ import {
   normalizeStyle,
   onBeforeUnmount,
   useAttrs,
-  useSlots,
   useTemplateRef,
   watchEffect,
   type ComponentPublicInstance,
@@ -122,28 +121,26 @@ import {
 } from 'vue';
 import type { ClassValue } from 'clsx';
 import {
-  cn,
-  ColorExtensions,
+  AriaAttribute,
   composeEventHandlers,
   ButtonType,
-  CssExtensions,
   HtmlElement,
-  IS_DEV,
   Key,
-  OptionalExtensions,
   PressExtensions,
-  type BoxSizeOverrides,
   type PressEvent,
-} from '../../../foundation/utils';
+} from '../../../foundation/dom';
+import { cn, ColorExtensions, CssExtensions, type BoxSizeOverrides } from '../../../foundation/styles';
+import { IsDevelopment } from '../../../foundation/config';
+import { OptionalExtensions } from '../../../foundation/optionals';
 import { Primitive } from '../../../foundation/primitives';
 import { useFormControl } from '../../../foundation/primitives/formControlContext/FormControlContext';
 import { Spinner } from '../../../foundation/icons';
-import { useDebounceHandler } from '../../../foundation/hooks';
+import { useDebounceHandler } from '../../../foundation/async';
 import { buttonVariants } from './Button.variants';
 
-const COMPONENT_NAME = 'Button';
+const ComponentName = 'Button';
 
-const BUTTON_SIZE_PRESETS: ReadonlySet<string> = new Set<ButtonSizePreset>(['xs', 'sm', 'md', 'lg', 'xl']);
+const ButtonSizePresets: ReadonlySet<string> = new Set<ButtonSizePreset>(['xs', 'sm', 'md', 'lg', 'xl']);
 
 /* Observable state surfaced via the `data-state` DOM attribute. */
 const ButtonDataState = {
@@ -158,8 +155,9 @@ type ButtonDataState = (typeof ButtonDataState)[keyof typeof ButtonDataState];
    fallthrough would append outside `cn()`, losing tailwind-merge conflict resolution), and
    `onClick` is intercepted so loading / skeleton / long-press / the debounce window can swallow a
    click before the consumer's handler sees it. Everything else passes straight through. */
-/* The name is spelled out, not `COMPONENT_NAME`: `defineOptions()` is hoisted out of `setup()`,
+/* The name is spelled out, not `ComponentName`: `defineOptions()` is hoisted out of `setup()`,
    so it cannot reference a locally declared const. */
+/** Renders a button that runs one command, carrying tone and size variants plus loading and skeleton states. */
 defineOptions({ name: 'Button', inheritAttrs: false });
 
 const props = withDefaults(defineProps<ButtonProps>(), {
@@ -193,8 +191,24 @@ const emit = defineEmits<{
   'long-press': [event: PressEvent<HTMLButtonElement>];
 }>();
 
+const slots = defineSlots<{
+  /** The button's own label. Under `asChild`, the single element the button merges onto. */
+  default?(): unknown;
+
+  /** The indicator shown while loading. Falls back to `loadingSlot`, then to the built-in `Spinner`. */
+  loading?(): unknown;
+
+  /** Rendered before the label, for an icon. Falls back to `leadingSlot`. */
+  leading?(): unknown;
+
+  /** Rendered after the label, for an icon. Falls back to `trailingSlot`. */
+  trailing?(): unknown;
+
+  /** The content swapped in on hover / focus-visible, overlaying the label. Falls back to `hoverSlot`. */
+  hover?(): unknown;
+}>();
+
 const attrs = useAttrs();
-const slots = useSlots();
 
 /* Stable render-only wrappers for the node-valued props, so each can render as the fallback of its
    named-slot twin. Stable identity (created once) keeps them from remounting on every render. */
@@ -230,26 +244,30 @@ const safeLongPressDelay = computed(() =>
 );
 
 watchEffect(() => {
-  if (!IS_DEV) return;
+  if (!IsDevelopment) return;
   if (props.isLoading && props.isSkeleton) {
     console.warn(
-      `[${COMPONENT_NAME}] \`isLoading\` and \`isSkeleton\` are mutually exclusive — \`isSkeleton\` takes precedence.`,
+      `[${ComponentName}] \`isLoading\` and \`isSkeleton\` are mutually exclusive — \`isSkeleton\` takes precedence.`,
     );
   }
   if (safeLongPressDelay.value !== props.longPressDelay) {
     console.warn(
-      `[${COMPONENT_NAME}] longPressDelay=${props.longPressDelay}ms is outside reasonable range (${PressExtensions.longPressDelay.min}–${PressExtensions.longPressDelay.max}ms). Falling back to ${PressExtensions.longPressDelay.default}ms.`,
+      `[${ComponentName}] longPressDelay=${props.longPressDelay}ms is outside reasonable range (${PressExtensions.longPressDelay.min}–${PressExtensions.longPressDelay.max}ms). Falling back to ${PressExtensions.longPressDelay.default}ms.`,
     );
   }
-  if (slots.default === undefined && attrs['aria-label'] === undefined && attrs['aria-labelledby'] === undefined) {
+  if (
+    slots.default === undefined &&
+    attrs[AriaAttribute.Label] === undefined &&
+    attrs[AriaAttribute.LabelledBy] === undefined
+  ) {
     console.warn(
-      `[${COMPONENT_NAME}] icon-only button (no text children) is missing an accessible name — pass \`aria-label\` or \`aria-labelledby\` (Button.standard.md rule 12).`,
+      `[${ComponentName}] icon-only button (no text children) is missing an accessible name — pass \`aria-label\` or \`aria-labelledby\` (Button.standard.md rule 12).`,
     );
   }
 });
 
 /* Parse the union-typed `size` prop into preset (for variant lookup) + box overrides (for inline dims). */
-const parsedSize = computed(() => CssExtensions.parseSizeUnion<ButtonSizePreset>(props.size, BUTTON_SIZE_PRESETS));
+const parsedSize = computed(() => CssExtensions.parseSizeUnion<ButtonSizePreset>(props.size, ButtonSizePresets));
 
 const rootClass = computed(() =>
   cn(
@@ -268,7 +286,7 @@ const rootClass = computed(() =>
 const overrideStyle = computed<StyleValue | undefined>(() => {
   const padStyle = CssExtensions.resolvePadding(props.padding);
   const radStyle = CssExtensions.resolveRadius(props.radius);
-  /* Box overrides — `size` is the base; flat width / height / minWidth / minHeight / boxSize win. */
+  /* BoxLayout overrides — `size` is the base; flat width / height / minWidth / minHeight / boxSize win. */
   const composedBox: BoxSizeOverrides = {
     ...(parsedSize.value.box ?? {}),
     ...(props.width !== undefined ? { width: props.width } : {}),
@@ -414,7 +432,7 @@ function handleClick(event: MouseEvent): void {
 /* The attrs the component owns rather than forwards — see the `inheritAttrs: false` note above.
    Event names carry the single casing Vue's runtime understands (`on` + the event name with only
    its first letter capitalised); `onPointerDown` would bind a `pointer-down` listener. */
-const OWNED_ATTRS: ReadonlySet<string> = new Set([
+const OwnedAttributes: ReadonlySet<string> = new Set([
   'class',
   'style',
   'onClick',
@@ -427,7 +445,7 @@ const OWNED_ATTRS: ReadonlySet<string> = new Set([
 ]);
 
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 /** The consumer's own listener for an owned event, so it can be chained ahead of the component's. */
@@ -442,8 +460,8 @@ const rootProps = computed(() => ({
   class: rootClass.value,
   style: overrideStyle.value,
   disabled: OptionalExtensions.from(resolvedDisabled.value, true),
-  'aria-busy': OptionalExtensions.from(loadingActive.value || skeletonActive.value, true),
-  'aria-disabled': OptionalExtensions.from(loadingActive.value || skeletonActive.value, true),
+  [AriaAttribute.Busy]: OptionalExtensions.from(loadingActive.value || skeletonActive.value, true),
+  [AriaAttribute.Disabled]: OptionalExtensions.from(loadingActive.value || skeletonActive.value, true),
   tabindex: OptionalExtensions.from(skeletonActive.value, -1),
   'data-state': dataState.value,
   onClick: handleClick,

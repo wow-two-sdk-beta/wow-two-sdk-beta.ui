@@ -1,1 +1,1 @@
-export { default as ColorArea, type ColorAreaProps, type ColorAreaChange } from './ColorArea.vue';
+export { default as ColorArea, type ColorAreaProps } from './ColorArea.vue';

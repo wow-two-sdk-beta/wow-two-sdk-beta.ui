@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, type VariantProps } from '../../../foundation/styles';
 
 /** Defines the vertical-padding scale of the `Section` band. */
 export const SectionPaddingY = {

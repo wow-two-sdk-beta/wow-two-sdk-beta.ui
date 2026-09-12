@@ -8,10 +8,14 @@ import ToolbarSeparator from './ToolbarSeparator.vue';
  * `<Toolbar.Separator>` resolve in a template — the counterpart of the React
  * original's `Object.assign`. Each part is also exported on its own name.
  */
-const Toolbar = Object.assign(ToolbarRoot, {
+const Toolbar: typeof ToolbarRoot & {
+  Button: typeof ToolbarButton;
+  LinkItem: typeof ToolbarLink;
+  SeparatorLayout: typeof ToolbarSeparator;
+} = Object.assign(ToolbarRoot, {
   Button: ToolbarButton,
-  Link: ToolbarLink,
-  Separator: ToolbarSeparator,
+  LinkItem: ToolbarLink,
+  SeparatorLayout: ToolbarSeparator,
 });
 
 export { Toolbar, ToolbarButton, ToolbarLink, ToolbarSeparator };

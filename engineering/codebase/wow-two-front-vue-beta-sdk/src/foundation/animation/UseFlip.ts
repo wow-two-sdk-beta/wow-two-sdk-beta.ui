@@ -22,7 +22,7 @@
 
 import { onMounted, onScopeDispose, toValue, watch, type MaybeRefOrGetter, type WatchSource } from 'vue';
 
-import { useReducedMotion } from '../hooks';
+import { useReducedMotion } from '../device';
 
 import type { AnimationHandle } from './Animate';
 import { measureRect, playFlip, type FlipOptions, type RectLike } from './Flip';
@@ -49,7 +49,7 @@ export interface UseFlipOptions extends FlipOptions {
  */
 export function useFlip<T extends Element = HTMLElement>(
   target: MaybeRefOrGetter<T | null | undefined>,
-  deps: WatchSource | readonly WatchSource[],
+  deps: WatchSource | ReadonlyArray<WatchSource>,
   options: MaybeRefOrGetter<UseFlipOptions> = {},
 ): void {
   const prefersReducedMotion = useReducedMotion();

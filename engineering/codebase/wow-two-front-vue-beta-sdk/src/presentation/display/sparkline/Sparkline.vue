@@ -33,31 +33,31 @@ export type SparklineTone = (typeof SparklineTone)[keyof typeof SparklineTone];
 
 export interface SparklineProps {
   /** The series to plot, in order. */
-  data: ReadonlyArray<number>;
+  readonly data: ReadonlyArray<number>;
 
   /** The render style. Default `line`. */
-  variant?: SparklineVariant;
+  readonly variant?: SparklineVariant;
 
   /** The px width of the viewBox. Default `120`. */
-  width?: number;
+  readonly width?: number;
 
   /** The px height of the viewBox. Default `32`. */
-  height?: number;
+  readonly height?: number;
 
   /** The color tone. Default `brand`. */
-  tone?: SparklineTone;
+  readonly tone?: SparklineTone;
 
   /** The lower bound of the value scale. Defaults to the series minimum. */
-  min?: number;
+  readonly min?: number;
 
   /** The upper bound of the value scale. Defaults to the series maximum. */
-  max?: number;
+  readonly max?: number;
 
   /** The emphasized dot on the final point. */
-  hasLast?: boolean;
+  readonly hasLast?: boolean;
 
   /** The accessible label summarizing the trend. */
-  ariaLabel?: string;
+  readonly ariaLabel?: string;
 }
 
 /** The derived plot geometry — React's `useMemo` payload. */
@@ -71,7 +71,7 @@ interface SparklineGeometry {
   linePath: string;
 }
 
-const EMPTY_GEOMETRY: SparklineGeometry = {
+const EmptyGeometry: SparklineGeometry = {
   points: [],
   barWidth: 0,
   barRenderWidth: 0,
@@ -81,7 +81,7 @@ const EMPTY_GEOMETRY: SparklineGeometry = {
   linePath: '',
 };
 
-const TONE_CLASS: Record<SparklineTone, string> = {
+const ToneClass: Record<SparklineTone, string> = {
   brand: 'text-primary',
   success: 'text-success',
   warning: 'text-warning',
@@ -93,13 +93,13 @@ const TONE_CLASS: Record<SparklineTone, string> = {
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { useId } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useId } from '../../../foundation/identifiers';
 
 /**
- * Inline trend chart — line / area / bar / dot. SVG, no scales/axes/legend.
- * Color via Tailwind tokens (`text-*`); pair with `currentColor` for parent
- * inheritance.
+ * Renders an inline trend chart — line, area, bar, or dot — as bare SVG with no scales or axes.
+ *
+ * Colour comes from Tailwind `text-*` tokens; pair with `currentColor` for parent inheritance.
  */
 defineOptions({ name: 'Sparkline', inheritAttrs: false });
 
@@ -120,7 +120,7 @@ const titleId = useId();
 
 const geometry = computed<SparklineGeometry>(() => {
   const { data, width, height } = props;
-  if (data.length === 0) return EMPTY_GEOMETRY;
+  if (data.length === 0) return EmptyGeometry;
 
   const min = props.min ?? Math.min(...data);
   const max = props.max ?? Math.max(...data);
@@ -136,7 +136,7 @@ const geometry = computed<SparklineGeometry>(() => {
 
   const first = points[0];
   const last = points[points.length - 1];
-  if (!first || !last) return EMPTY_GEOMETRY;
+  if (!first || !last) return EmptyGeometry;
 
   const linePath = points.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`)).join(' ');
   const areaPath = `${linePath} L${last[0]},${height} L${first[0]},${height} Z`;
@@ -156,7 +156,7 @@ const geometry = computed<SparklineGeometry>(() => {
 const showLast = computed(() => Boolean(props.hasLast) && props.data.length > 0 && props.variant !== 'dot');
 
 const classes = computed(() =>
-  cn('inline-block overflow-visible', TONE_CLASS[props.tone], attrs.class as string | undefined),
+  cn('inline-block overflow-visible', ToneClass[props.tone], attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

@@ -3,66 +3,63 @@ import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyl
 
 export interface NumberInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
   /** The border weight. */
-  border?: InputBorder;
+  readonly border?: InputBorder;
   /** The focus-ring weight. */
-  ring?: InputRing;
+  readonly ring?: InputRing;
 
   /** The increment granularity of the stepper buttons and arrow keys. Default 1. */
-  step?: number;
+  readonly step?: number;
+  /** Accessible text for the increment action. */
+  readonly incrementLabel?: string;
+  /** Accessible text for the decrement action. */
+  readonly decrementLabel?: string;
 
   /**
    * The value, controlled. The `v-model` binding target.
    *
-   * Emitted back as the input's raw string, matching Vue's own `v-model` on a
-   * native `<input type="number">`; add `.number` at the call site for a number.
+   * Emits a finite number, or null when cleared. Invalid drafts do not commit.
    */
-  modelValue?: string | number;
-
-  /** The value, controlled — React's spelling of `modelValue`, which wins when both are set. */
-  value?: string | number;
+  readonly modelValue?: number | null;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: string | number;
+  readonly defaultValue?: number | null;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 
   /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
-  readOnly?: boolean;
+  readonly readOnly?: boolean;
 
-  /** The DOM spelling of {@link NumberInputProps.readOnly}, which wins when both are set. */
-  readonly?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly readonly?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Minus, Plus } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
-import { useControlled } from '../../../foundation/hooks';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 
 const MinusIcon = Minus;
 const PlusIcon = Plus;
 
-/**
- * Numeric input with stepper buttons. Steppers are raw `<button>` elements
- * to keep the strict atom rule (NumberInput is L3; importing Button would
- * make this an atom-on-atom composition).
- */
+/** Renders a numeric input flanked by minus and plus buttons that step the value by `step`. */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. Everything else is forwarded
    onto the inner `<input>` by hand, matching React's `{...props}` placement. */
@@ -70,6 +67,8 @@ defineOptions({ name: 'NumberInput', inheritAttrs: false });
 
 const props = withDefaults(defineProps<NumberInputProps>(), {
   step: 1,
+  incrementLabel: 'Increment',
+  decrementLabel: 'Decrement',
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required / not read-only". */
@@ -80,10 +79,8 @@ const props = withDefaults(defineProps<NumberInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
-  'update:modelValue': [value: string];
-  /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
-  'value-change': [value: string];
+  /** Fires when the reader types or steps the number — the `v-model` half. */
+  'update:modelValue': [value: number | null];
 }>();
 
 const attrs = useAttrs();
@@ -91,12 +88,11 @@ const attrs = useAttrs();
 /* `ctx` is a live-getter object — read fields off it, never destructure. */
 const ctx = useFormControl();
 
-const controlled = useControlled<string | number>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
-  default: () => props.defaultValue ?? '',
+const controlled = useControlled<number | null>({
+  controlled: () => props.modelValue,
+  default: () => props.defaultValue ?? null,
   onChange: (next) => {
-    emit('update:modelValue', String(next));
-    emit('value-change', String(next));
+    emit('update:modelValue', next);
   },
 });
 
@@ -105,10 +101,16 @@ const currentValue = controlled.value;
 const root = useTemplateRef<HTMLInputElement>('root');
 
 function onInput(event: Event): void {
-  controlled.setValue((event.target as HTMLInputElement).value);
+  if ((event as InputEvent).isComposing) return;
+  const input = event.target as HTMLInputElement;
+  if (input.validity.badInput) return;
+  const value = input.value === '' ? null : input.valueAsNumber;
+  if (value !== null && !Number.isFinite(value)) return;
+  controlled.setValue(value);
 }
 
 function adjust(direction: 1 | -1): void {
+  if (isDisabled.value || isReadOnly.value) return;
   const el = root.value;
   if (!el || typeof el.stepUp !== 'function') return;
   /* No argument — stepUp(n) steps n × the `step` attribute (already set on the input), not by n. */
@@ -129,9 +131,9 @@ const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isRea
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'value']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const wrapperClass = computed(() => cn('relative', attrs.class as ClassValue));
@@ -149,6 +151,10 @@ const inputClass = computed(() =>
 );
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+useNativeFormReset(root, controlled.reset, () => {
+  if (root.value) root.value.value = String(currentValue.value ?? '');
+});
+
 defineExpose({ el: root });
 </script>
 
@@ -169,12 +175,13 @@ defineExpose({ el: root });
       :class="inputClass"
       v-bind="passthroughAttrs"
       @input="onInput"
+      @compositionend="onInput"
     />
     <div class="absolute right-1 top-1/2 flex -translate-y-1/2 items-center">
       <button
         type="button"
-        :disabled="isDisabled"
-        aria-label="Decrement"
+        :disabled="isDisabled || isReadOnly"
+        :aria-label="decrementLabel"
         class="grid h-7 w-6 place-items-center rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
         @click="adjust(-1)"
       >
@@ -182,8 +189,8 @@ defineExpose({ el: root });
       </button>
       <button
         type="button"
-        :disabled="isDisabled"
-        aria-label="Increment"
+        :disabled="isDisabled || isReadOnly"
+        :aria-label="incrementLabel"
         class="grid h-7 w-6 place-items-center rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
         @click="adjust(1)"
       >

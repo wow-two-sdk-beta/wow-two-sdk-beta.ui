@@ -9,22 +9,22 @@ export const TableHeadVariant = {
 
 export type TableHeadVariant = (typeof TableHeadVariant)[keyof typeof TableHeadVariant];
 
-const HEAD_VARIANT: Record<TableHeadVariant, string> = {
+const HeadVariant: Record<TableHeadVariant, string> = {
   uppercase: 'text-xs font-semibold uppercase tracking-wide text-muted-foreground',
   plain: 'text-sm font-semibold text-foreground',
 };
 
 export interface TableHeadProps {
   /** The typography treatment for the header row. Defaults to `uppercase` (current look). */
-  headVariant?: TableHeadVariant;
+  readonly headVariant?: TableHeadVariant;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The `thead` section of a `Table`. */
+/** Renders the `thead` section of a `Table`, holding its header row. */
 defineOptions({ name: 'TableHead', inheritAttrs: false });
 
 /** The header rows — React's `children`. */
@@ -38,7 +38,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLTableSectionElement>('el');
 
 const classes = computed(() =>
-  cn('border-b border-border bg-muted/50', HEAD_VARIANT[props.headVariant], attrs.class as string | undefined),
+  cn('border-b border-border bg-muted/50', HeadVariant[props.headVariant], attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

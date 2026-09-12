@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The stacked header region of a `Card` — title + description. */
+/** Renders the stacked header region of a `Card` — title above description. */
 defineOptions({ name: 'CardHeader', inheritAttrs: false });
 
 /** The header content — React's `children`. */

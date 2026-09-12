@@ -6,7 +6,7 @@ import type {
   SurfaceRadius,
   SurfaceTone,
   SurfaceVariant,
-} from '../../../foundation/utils';
+} from '../../../foundation/styles';
 
 /** Defines the max-size token for a `DrawerContent` panel. */
 export const DrawerSize = {
@@ -27,7 +27,7 @@ export type DrawerSize = (typeof DrawerSize)[keyof typeof DrawerSize];
 // Full-edge slide: the panel rests at translate-0 when open and is pushed
 // fully off its own edge when closed. `transition-transform` (gated on
 // `motion-safe:`) animates both enter and exit via Presence's data-state flip.
-const SIDE_BASE: Record<Side, string> = {
+const SideBase: Record<Side, string> = {
   right:
     'inset-y-0 right-0 h-full w-full border-l ' +
     'motion-safe:transition-transform motion-safe:duration-(--duration-base) motion-safe:ease-(--ease-out) ' +
@@ -46,7 +46,7 @@ const SIDE_BASE: Record<Side, string> = {
     'data-[state=closed]:translate-y-full',
 };
 
-const HORIZONTAL_SIZE: Record<DrawerSize, string> = {
+const HorizontalSize: Record<DrawerSize, string> = {
   sm: 'sm:max-w-sm',
   md: 'sm:max-w-md',
   lg: 'sm:max-w-lg',
@@ -54,7 +54,7 @@ const HORIZONTAL_SIZE: Record<DrawerSize, string> = {
   full: '',
 };
 
-const VERTICAL_SIZE: Record<DrawerSize, string> = {
+const VerticalSize: Record<DrawerSize, string> = {
   sm: 'max-h-[40vh]',
   md: 'max-h-[60vh]',
   lg: 'max-h-[75vh]',
@@ -65,48 +65,48 @@ const VERTICAL_SIZE: Record<DrawerSize, string> = {
 /**
  * Represents the prop surface of `DrawerContent`.
  *
- * React declared the surface axes by `extends SurfaceVariants`; they are
+ * React declared the surface axes by `extends SurfaceLayoutVariants`; they are
  * spelled out here because the SFC compiler's type resolver cannot follow a
  * `VariantProps<typeof …>` base and fails the build on it. The aliases below
- * are the canonical ones from `foundation/utils`, already locked against the
+ * are the canonical ones from `foundation/styles`, already locked against the
  * `surfaceVariants` config there, so the two cannot drift.
  */
 export interface DrawerContentProps {
   /** The backdrop-hide toggle — disables the default backdrop when true. */
-  hideBackdrop?: boolean;
+  readonly hideBackdrop?: boolean;
 
   /** The backdrop-blur toggle. */
-  isBlurred?: boolean;
+  readonly isBlurred?: boolean;
 
   /** The per-side max-size token. Default `md`. */
-  size?: DrawerSize;
+  readonly size?: DrawerSize;
 
   /** The visual recipe. Default `elevated`. */
-  variant?: SurfaceVariant;
+  readonly variant?: SurfaceVariant;
 
   /** The color tone the recipe is tinted with. */
-  tone?: SurfaceTone;
+  readonly tone?: SurfaceTone;
 
   /** The corner rounding. Default `none`. */
-  radius?: SurfaceRadius;
+  readonly radius?: SurfaceRadius;
 
   /** The inner spacing step. Default `xl`. */
-  padding?: SurfacePadding;
+  readonly padding?: SurfacePadding;
 
   /** The shadow depth. Default `3`. */
-  elevation?: SurfaceElevation;
+  readonly elevation?: SurfaceElevation;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, provide, useAttrs } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
+import { cn, surfaceVariants } from '../../../foundation/styles';
 import { DismissableLayer, FocusScope, Portal, Presence, ScrollLockProvider } from '../../../foundation/primitives';
-import Backdrop from '../backdrop/Backdrop.vue';
+import BackdropOverlay from '../backdropOverlay/BackdropOverlay.vue';
 import { overlayChromeContextKey } from '../OverlayChrome';
 import { useDrawerContext } from './Drawer.vue';
 
-/* The portalled edge panel — scrim, focus trap, scroll lock, and the sliding surface that carries the a11y contract. */
+/** Renders the portalled edge panel — scrim, focus trap, scroll lock, and the sliding a11y surface. */
 defineOptions({ name: 'DrawerContent', inheritAttrs: false });
 
 /** The panel content — chrome subcomponents and the drawer body. React's `children`. */
@@ -134,11 +134,11 @@ provide(overlayChromeContextKey, {
 });
 
 const isHorizontal = computed(() => side.value === 'right' || side.value === 'left');
-const sizeClass = computed(() => (isHorizontal.value ? HORIZONTAL_SIZE[props.size] : VERTICAL_SIZE[props.size]));
+const sizeClass = computed(() => (isHorizontal.value ? HorizontalSize[props.size] : VerticalSize[props.size]));
 
 const classes = computed(() =>
   cn(
-    'fixed z-modal flex flex-col gap-4 outline-none',
+    'fixed z-modal flex flex-col gap-4 outline-hidden',
     surfaceVariants({
       variant: props.variant ?? 'elevated',
       tone: props.tone,
@@ -146,7 +146,7 @@ const classes = computed(() =>
       padding: props.padding ?? 'xl',
       elevation: props.elevation ?? 3,
     }),
-    SIDE_BASE[side.value],
+    SideBase[side.value],
     sizeClass.value,
     attrs.class as string | undefined,
   ),
@@ -183,9 +183,9 @@ function handleEscape(): void {
   -->
   <Portal>
     <ScrollLockProvider :is-enabled="isOpen">
-      <!-- The scrim runs on `Backdrop`'s own `Presence` (its `isOpen` prop); React
+      <!-- The scrim runs on `BackdropOverlay`'s own `Presence` (its `isOpen` prop); React
            mirrored the panel's `data-state` onto it by hand for the same effect. -->
-      <Backdrop
+      <BackdropOverlay
         v-if="!props.hideBackdrop"
         is-inline
         :is-open="isOpen"
@@ -203,7 +203,7 @@ function handleEscape(): void {
           surface classes) on one node, which is also the node `Presence` clones
           and whose `transition-transform` end defers the unmount.
         -->
-        <FocusScope as-child trapped loop>
+        <FocusScope as-child trapped loop modal>
           <DismissableLayer
             :is-escape-disabled="!dismissOnEscape"
             is-outside-click-disabled

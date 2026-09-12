@@ -1,3 +1,4 @@
+import { ResultExtensions } from '@src/foundation/results';
 import { AuthProvider } from '@src/auth';
 import { FlagsProvider } from '@src/flags';
 import { ProgressProvider } from '@src/router';
@@ -6,7 +7,7 @@ import { smokeCase, type SmokeCase } from '../../support/Smoke';
 /* The narrowest strategy that satisfies the contract: one required delegate, resolving signed
    out. `resolveOnMount: false` keeps the smoke case from depending on a promise settling. */
 const signedOutStrategy = {
-  resolveUser: () => Promise.resolve(null),
+  resolveUser: () => Promise.resolve(ResultExtensions.ok(null)),
 };
 
 /**

@@ -1,20 +1,20 @@
 <script lang="ts">
-import type { Severity } from '../../../foundation/utils';
+import type { Severity } from '../../../foundation/styles';
 
 export interface BannerSimpleProps {
   /** The semantic severity palette. */
-  severity?: Severity;
+  readonly severity?: Severity;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { bannerSimpleVariants } from './BannerSimple.variants';
 
 /**
- * Full-width banner — typically pinned to the top of the app to broadcast
- * status. Atom; for structured slotted layout use `Banner` (L4).
+ * Renders a full-width, severity-tinted banner that broadcasts app-level status.
+ * Typically pinned to the top of the app. Atom; for structured slotted layout use `Banner` (L4).
  *
  * `role="status"` is the live-region contract; bound before `v-bind="rest"`
  * so a caller-supplied `role` still wins.
@@ -22,6 +22,11 @@ import { bannerSimpleVariants } from './BannerSimple.variants';
 defineOptions({ name: 'BannerSimple', inheritAttrs: false });
 
 const props = defineProps<BannerSimpleProps>();
+
+defineSlots<{
+  /** The banner content. */
+  default?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');

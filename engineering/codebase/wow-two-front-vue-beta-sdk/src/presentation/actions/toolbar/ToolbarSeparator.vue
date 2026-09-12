@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn, Orientation } from '../../../foundation/utils';
+import { cn, Orientation } from '../../../foundation/styles';
 import { useToolbarContext } from './ToolbarContext';
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
+/** Renders a hairline rule between two toolbar groups, turned across the toolbar's own axis. */
 defineOptions({ name: 'ToolbarSeparator', inheritAttrs: false });
 
 const attrs = useAttrs();
@@ -13,9 +14,9 @@ const context = useToolbarContext();
 
 const isVertical = computed(() => context.orientation === Orientation.Vertical);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>

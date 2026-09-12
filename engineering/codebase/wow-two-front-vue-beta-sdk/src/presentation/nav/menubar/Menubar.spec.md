@@ -1,50 +1,42 @@
 # Menubar
 
-## Purpose
-Horizontal menu strip — File · Edit · View pattern from desktop apps. Only one submenu open at a time; hovering a sibling trigger while another is open switches focus + open state.
+Renders the application menu bar — one composite tab stop holding a single menu open at a time.
 
-## Anatomy
-```
-<Menubar>
-  ├── <Menubar.Menu>
-  │     ├── <Menubar.Trigger>
-  │     └── <Menubar.Content>
-  │           ├── <Menubar.Item onSelect>
-  │           ├── <Menubar.Group label?>
-  │           ├── <Menubar.Label>
-  │           └── <Menubar.Separator />
-  │         </Menubar.Content>
-  │   </Menubar.Menu>
-  └── ...more <Menubar.Menu>
-</Menubar>
-```
+Source: [Menubar.vue](Menubar.vue).
 
-## Required behaviors
-- Click trigger toggles its menu; opens close all siblings.
-- Hovering a sibling trigger while another menu is open switches active menu (mouse follow).
-- ←/→ on focused trigger moves focus across triggers (roving).
-- ↓/Enter/Space opens the trigger's menu and focuses first item.
-- Inside an open menu: same shortcuts as `Menu`. Escape closes and returns focus to its trigger.
-- ARIA: container `role="menubar"`, triggers `role="menuitem"` with `aria-haspopup="menu"` + `aria-expanded`.
+Public import: `import { Menubar } from '@wow-two-beta/ui-vue/presentation/nav';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-- `Menubar`: `defaultValue?` / `value?` / `onValueChange?` — controlled active-menu id.
-- `Menubar.Menu`: `value` (req — the id of this menu).
-- `Menubar.Trigger`, `Menubar.Content`: same shape as `DropdownMenu` siblings.
-- Items / Groups / Separators: same as `Menu`.
 
-## Composition
-Compound. Tracks active menu id at root level; each `Menubar.Menu` participates via context.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `modelValue` | `string \| null` | no | `undefined` | The id of the currently-open menu, or `null` if none. Controlled. |
+| `defaultValue` | `string \| null` | no | `null` | The initially-open menu id when uncontrolled. Default `null`. |
 
-## Accessibility
-- WAI-ARIA Menubar pattern.
-- Focus return on close.
+## Emits
 
-## Known limitations
-- No ←/→ traversal *from inside* an open menu (deferred to P6 with submenu work).
-- No type-to-search.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: string \| null];` | Fires when the reader opens a different menu — carries its id, or `null` once all close. |
 
-## Inspirations
-- Radix `Menubar`.
-- shadcn/ui `Menubar`.
-- Native macOS / Windows menubars.
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+`{ el: HTMLElement | null }` targets the inner Card or RovingFocusGroup DOM root, not its component instance. Read after mount; the handle is null before mount and after the child unmounts. It is suitable for native focus, measurement and scrolling; it does not expose child implementation methods.
+
+## Verification
+
+- Public render fixture: [NavExamples.ts](../../../../apps/playground/src/gallery/fixtures/NavExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [LiveValues.dom.test.ts](../../../../tests/unit/presentation/nav/LiveValues.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

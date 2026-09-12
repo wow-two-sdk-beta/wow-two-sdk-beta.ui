@@ -1,47 +1,49 @@
 # ColorArea
 
-## Purpose
-2D saturation/value picker — the square gradient at the heart of every color picker. X axis is saturation (0 → 1), Y axis is value (1 → 0, top to bottom). Hue is fixed by the parent.
+Renders a two-axis saturation/value square, pointer-draggable and keyboard-operable as an ARIA slider.
 
-## Anatomy
-```
-<ColorArea>
-  └── square track (layered gradients) + draggable thumb
-</ColorArea>
-```
+Source: [ColorArea.vue](ColorArea.vue).
 
-## Required behaviors
-- Pointer down on track → set saturation+value to the point's coords; capture pointer.
-- Pointer move while down → update saturation+value live.
-- Keyboard: arrows adjust by `step`; PgUp/PgDn jump faster; Home/End jump to corners.
-- ARIA: `role="slider"` (composite — represents the s+v plane), with explicit value text via `aria-valuetext`.
+Public import: `import { ColorArea } from '@wow-two-beta/ui-vue/presentation/forms';`.
 
-## Visual states
-`default` · `hover` · `focus-visible` · `disabled`
+## Contract
+
+- Saturation and HSV brightness/value remain distinct named numeric models. The component emits only changed axes; native reset requests each original seed through the same events.
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `hue` | `number` (0–360) | `0` | no | Sets the area's base color. |
-| `saturation` | `number` (0–1) | — | no | Controlled. |
-| `value` | `number` (0–1) | — | no | Controlled. |
-| `defaultSaturation` | `number` | `1` | no | Uncontrolled. |
-| `defaultValue` | `number` | `1` | no | Uncontrolled. |
-| `onValueChange` | `({ saturation, value }) => void` | — | no | Drag/key callback. |
-| `step` | `number` | `0.01` | no | Keyboard step. |
-| `disabled` | `boolean` | `false` | no | Block interaction. |
+| `hue` | `number` | no | `0` | The hue the square is tinted with (0–360). |
+| `saturation` | `number` | no | — | The saturation, controlled (0–1). The `v-model:saturation` binding target. |
+| `defaultSaturation` | `number` | no | — | The initial saturation when uncontrolled. |
+| `value` | `number` | no | — | The brightness/value, controlled (0–1). The `v-model:value` binding target. |
+| `defaultValue` | `number` | no | — | The initial value when uncontrolled. |
+| `step` | `number` | no | `0.01` | The arrow-key increment. `PageUp`/`PageDown` move ten steps. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
 
-## Composition
-Self-contained. Used by `ColorPicker`.
+## Emits
 
-## Accessibility
-- Single composite slider (the WAI-ARIA pattern for 2D pickers).
-- Keyboard: ←/→ adjust saturation, ↑/↓ adjust value.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:saturation` | `'update:saturation': [value: number];` | Fires when a drag or arrow key lands the thumb on a new saturation — the `v-model:saturation` half. |
+| `update:value` | `'update:value': [value: number];` | Fires when a drag or arrow key lands the thumb on a new brightness — the `v-model:value` half. |
 
-## Known limitations
-- No alpha (use a separate `ColorSlider channel="alpha"` for that).
-- Square only (rectangular variant deferred).
+## Slots
 
-## Inspirations
-- React Aria `ColorArea`.
-- Mantine `ColorPicker` saturation rectangle.
+None declared.
+
+## Exposed handle
+
+`{ el: track }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

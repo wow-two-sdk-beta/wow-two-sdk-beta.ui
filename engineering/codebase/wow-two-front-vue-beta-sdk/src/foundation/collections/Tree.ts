@@ -58,7 +58,7 @@ export interface BuildTreeOptions<T, TId> {
  * @param options The `id` / `parentId` accessors.
  * @returns A new array of root nodes.
  */
-export function buildTree<T, TId>(items: readonly T[], options: BuildTreeOptions<T, TId>): TreeNode<T>[] {
+export function buildTree<T, TId>(items: ReadonlyArray<T>, options: BuildTreeOptions<T, TId>): TreeNode<T>[] {
   const { id, parentId } = options;
 
   const byId = new Map<TId, T>();
@@ -103,7 +103,7 @@ export function buildTree<T, TId>(items: readonly T[], options: BuildTreeOptions
  * walk is bounded by the chain length and a loop is caught the moment it revisits an id.
  */
 function detectCyclicIds<T, TId>(
-  items: readonly T[],
+  items: ReadonlyArray<T>,
   byId: ReadonlyMap<TId, T>,
   id: (item: T) => TId,
   parentId: (item: T) => TId | null | undefined,
@@ -136,7 +136,7 @@ function detectCyclicIds<T, TId>(
 }
 
 /** Reads a node's children under the configured key, treating anything non-array as "no children". */
-function readChildren<TNode extends object>(node: TNode, childrenKey: PropertyKey): readonly TNode[] {
+function readChildren<TNode extends object>(node: TNode, childrenKey: PropertyKey): ReadonlyArray<TNode> {
   const children = (node as Record<PropertyKey, unknown>)[childrenKey];
   return Array.isArray(children) ? (children as TNode[]) : [];
 }
@@ -152,12 +152,12 @@ function readChildren<TNode extends object>(node: TNode, childrenKey: PropertyKe
  * @returns A new flat array of the same node objects.
  */
 export function flattenTree<TNode extends object>(
-  nodes: readonly TNode[],
+  nodes: ReadonlyArray<TNode>,
   childrenKey: PropertyKey = 'children',
 ): TNode[] {
   const result: TNode[] = [];
   const visited = new Set<TNode>();
-  const walk = (level: readonly TNode[]): void => {
+  const walk = (level: ReadonlyArray<TNode>): void => {
     for (const node of level) {
       if (visited.has(node)) continue;
       visited.add(node);
@@ -179,12 +179,12 @@ export function flattenTree<TNode extends object>(
  * @returns The matching node, or `undefined` when nothing matches.
  */
 export function findInTree<TNode extends object>(
-  nodes: readonly TNode[],
+  nodes: ReadonlyArray<TNode>,
   predicate: (node: TNode, depth: number) => boolean,
   childrenKey: PropertyKey = 'children',
 ): TNode | undefined {
   const visited = new Set<TNode>();
-  const walk = (level: readonly TNode[], depth: number): TNode | undefined => {
+  const walk = (level: ReadonlyArray<TNode>, depth: number): TNode | undefined => {
     for (const node of level) {
       if (visited.has(node)) continue;
       visited.add(node);
@@ -208,10 +208,10 @@ export function findInTree<TNode extends object>(
  * @returns A new tree of new nodes.
  */
 export function mapTree<T, TResult>(
-  nodes: readonly TreeNode<T>[],
+  nodes: ReadonlyArray<TreeNode<T>>,
   mapFn: (item: T, depth: number) => TResult,
 ): TreeNode<TResult>[] {
-  const walk = (level: readonly TreeNode<T>[], depth: number): TreeNode<TResult>[] =>
+  const walk = (level: ReadonlyArray<TreeNode<T>>, depth: number): TreeNode<TResult>[] =>
     level.map((node) => ({
       item: mapFn(node.item, depth),
       children: walk(node.children, depth + 1),

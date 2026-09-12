@@ -7,14 +7,14 @@
  */
 export interface ContextMenuTriggerProps {
   /** The as-child toggle — renders the trigger as its single slot child. */
-  asChild?: boolean;
+  readonly asChild?: boolean;
 
   /** The disabled state — blocks both the right-click and the long-press open. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 }
 
 /** The long-press duration, in ms, that opens the menu on touch. */
-const LONG_PRESS_MS = 600;
+const LongPressMs = 600;
 
 /** Build a zero-size virtual element at coordinates to anchor Floating UI. */
 function makeVirtualAnchor(x: number, y: number): HTMLElement {
@@ -33,10 +33,10 @@ function makeVirtualAnchor(x: number, y: number): HTMLElement {
 <script setup lang="ts">
 import { computed, onScopeDispose, useAttrs, useTemplateRef, watch, type ComponentPublicInstance } from 'vue';
 import { Primitive } from '../../../foundation/primitives';
-import { toHtmlElement } from '../NavHelpers';
+import { NavExtensions } from '../NavExtensions';
 import { useContextMenuContext } from './ContextMenuContext';
 
-/** The region a right-click (or a touch long-press) opens the menu over. */
+/** Renders the region a right-click, or a touch long-press, opens the menu over. */
 defineOptions({ name: 'ContextMenuTrigger', inheritAttrs: false });
 
 /** The region's content — React's `children`. */
@@ -57,7 +57,7 @@ let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 watch(
   inner,
   (instance) => {
-    context.triggerEl.value = toHtmlElement(instance?.$el);
+    context.triggerEl.value = NavExtensions.toHtmlElement(instance?.$el);
   },
   { immediate: true, flush: 'post' },
 );
@@ -94,7 +94,7 @@ function handlePointerDown(event: PointerEvent): void {
   longPressTimer = setTimeout(() => {
     context.setAnchor(makeVirtualAnchor(x, y));
     context.setOpen(true);
-  }, LONG_PRESS_MS);
+  }, LongPressMs);
 }
 
 /** `Primitive` renders the real element, so its `$el` is this component's root. */

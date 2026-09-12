@@ -1,41 +1,38 @@
 <script lang="ts">
-import type { Side } from '../../../foundation/utils';
-import type { SwitchProps } from '../switch';
+import type { Side } from '../../../foundation/styles';
+import type { SwitchInputProps } from '../switchInput';
 
-export interface SwitchFieldProps extends SwitchProps {
+export interface SwitchFieldProps extends SwitchInputProps {
   /** The label. Fill the `label` slot instead for richer content. */
-  label?: string | number;
+  readonly label?: string | number;
 
   /** The smaller helper / description below. Fill the `description` slot for richer content. */
-  description?: string | number;
+  readonly description?: string | number;
 
   /** The switch placement — on the left (default) or right of the label. */
-  side?: Side;
+  readonly side?: Side;
 
   /**
    * The wrap-element class (the `<label>`).
    *
-   * React put `className` on the inner `Switch` and `wrapperClassName` on the `<label>`;
+   * React put `className` on the inner `SwitchInput` and `wrapperClassName` on the `<label>`;
    * that split is preserved, so Vue's `class` fallthrough attr reaches the SWITCH, not the
    * root. Style the wrapper through this prop.
    */
-  wrapperClassName?: string;
+  readonly wrapperClassName?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn, Side as SideValue } from '../../../foundation/utils';
-import { useId } from '../../../foundation/hooks';
+import { cn, Side as SideValue } from '../../../foundation/styles';
+import { useId } from '../../../foundation/identifiers';
 import { useFormControl } from '../../../foundation/primitives';
-import Switch from '../switch/Switch.vue';
+import SwitchInput from '../switchInput/SwitchInput.vue';
 
-/**
- * Switch + label + optional description in a single clickable `<label>`.
- * `side="right"` is the common settings-row pattern (label left, switch right).
- */
-/* `inheritAttrs: false` so `class` reaches the inner Switch (React's `className`) rather
+/** Renders a switch, its label and an optional description in one clickable `<label>`; `side` picks the order. */
+/* `inheritAttrs: false` so `class` reaches the inner SwitchInput (React's `className`) rather
    than landing on the `<label>`. */
 defineOptions({ name: 'SwitchField', inheritAttrs: false });
 
@@ -57,13 +54,13 @@ const inputId = computed(() => props.id ?? ctx?.id ?? generated);
 const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
 
 /* No `defineEmits`: the consumer's `v-model` listeners must stay in `useAttrs()` to reach
-   the inner `Switch` — see the CheckboxField note. */
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+   the inner `SwitchInput` — see the CheckboxField note. */
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
-/** This component's own props must not reach the inner `Switch`. */
+/** This component's own props must not reach the inner `SwitchInput`. */
 const switchProps = computed(() => {
   const { label: _label, description: _description, side: _side, wrapperClassName: _wrapperClassName, ...rest } = props;
   return rest;
@@ -87,7 +84,7 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
 
 <template>
   <label :for="inputId" :class="wrapperClass">
-    <Switch ref="inner" v-bind="{ ...switchProps, ...passthroughAttrs }" :id="inputId" :class="switchClass" />
+    <SwitchInput ref="inner" v-bind="{ ...switchProps, ...passthroughAttrs }" :id="inputId" :class="switchClass" />
     <span class="flex flex-col gap-0.5 text-sm">
       <span class="font-medium text-foreground">
         <slot name="label">{{ label }}</slot>

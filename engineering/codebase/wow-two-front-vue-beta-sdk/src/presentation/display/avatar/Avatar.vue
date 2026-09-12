@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { CSSProperties } from 'vue';
-import type { SizePreset, SizeUnion } from '../../../foundation/utils';
+import type { SizePreset, SizeUnion } from '../../../foundation/styles';
 /* The four value-sets are imported as values (not `import type`) so the one binding serves
    as both the prop type below and the runtime enum used in the auto-color guard. */
 import { AvatarBackground, AvatarRing, AvatarShape, AvatarTone, type AvatarVariants } from './Avatar.variants';
@@ -14,10 +14,10 @@ type AvatarSizePreset = SizePreset;
  */
 export type AvatarSize = SizeUnion<AvatarSizePreset>;
 
-const AVATAR_SIZE_PRESETS: ReadonlySet<string> = new Set<AvatarSizePreset>(['xs', 'sm', 'md', 'lg', 'xl', '2xl']);
+const AvatarSizePresets: ReadonlySet<string> = new Set<AvatarSizePreset>(['xs', 'sm', 'md', 'lg', 'xl', '2xl']);
 
-/* Solid palette for autoColor — 17 distinct hues, dark-mode aware. Light: bg-100/text-800. Dark: bg-900/text-100. No opacity — keeps contrast deterministic across themes. */
-const AUTO_COLOR_PALETTE = [
+/* autoColor palette — 17 hues, dark-mode aware. No opacity keeps contrast deterministic. */
+const AutoColorPalette = [
   'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100',
   'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100',
   'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100',
@@ -46,7 +46,7 @@ function hashName(name: string): number {
 }
 
 function pickAutoColor(name: string): string {
-  return AUTO_COLOR_PALETTE[hashName(name) % AUTO_COLOR_PALETTE.length]!;
+  return AutoColorPalette[hashName(name) % AutoColorPalette.length]!;
 }
 
 function getInitials(name: string): string {
@@ -59,37 +59,40 @@ function getInitials(name: string): string {
 
 export interface AvatarProps {
   /** The silhouette. */
-  shape?: AvatarShape;
+  readonly shape?: AvatarShape;
 
   /** The tone palette (`none` cedes color to autoColor). */
-  tone?: AvatarTone;
+  readonly tone?: AvatarTone;
 
   /** The background fill style. */
-  bgStyle?: AvatarBackground;
+  readonly bgStyle?: AvatarBackground;
 
   /** The focus/emphasis ring tone. */
-  ring?: AvatarRing;
+  readonly ring?: AvatarRing;
 
   /** The skeleton state — pulses the tile and hides its content. */
-  isLoading?: boolean;
+  readonly isLoading?: boolean;
 
   /** The image source; falls back to `name` initials or `fallback` on error. */
-  src?: string;
+  readonly src?: string;
 
   /** The person/entity name — used to derive initials when no image. */
-  name?: string;
+  readonly name?: string;
 
   /** The custom fallback (overrides initials). Rich content goes through the `fallback` slot. */
-  fallback?: string | number;
+  readonly fallback?: string | number;
 
   /** The alt text for the underlying `<img>` (defaults to `name`). */
-  alt?: string;
+  readonly alt?: string;
 
-  /** The auto-color flag — when true (and no explicit non-neutral `tone` / non-solid `bgStyle`), derives a deterministic soft-color tint from `name` hash → 17-color palette. */
-  canAutoColor?: boolean;
+  /**
+   * The auto-color flag — derives a deterministic tint from the `name` hash.
+   * A non-neutral `tone` or a non-solid `bgStyle` overrides it.
+   */
+  readonly canAutoColor?: boolean;
 
-  /** The size — preset (`xs|sm|md|lg|xl|2xl`) → variant class · raw number/string → square inline · object → explicit dims. See `AvatarSize`. */
-  size?: AvatarSize;
+  /** The size — preset → variant class · number/string → square inline · object → explicit dims. */
+  readonly size?: AvatarSize;
 }
 
 /* Compile-time lock: the hand-written `isLoading` prop ≡ the tv variant key (drift = type error).
@@ -104,14 +107,15 @@ void _assertAvatarLoading;
 </script>
 
 <script setup lang="ts">
+import { UrlExtensions } from '../../../foundation/dom';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
-import { cn, CssExtensions } from '../../../foundation/utils';
+import { cn, CssExtensions } from '../../../foundation/styles';
 import { avatarVariants } from './Avatar.variants';
 
 /**
- * Image avatar with initials fallback. Supports semantic tones, deterministic
- * auto-color from name hash, gradient bg, ring, and loading skeleton.
- * Composable with `<BadgeOverlay>` for status dots / counts / icons.
+ * Renders a user image avatar that falls back to initials, with tone, ring, and loading skeleton.
+ *
+ * Auto-color is a deterministic hash of the name. Compose with `BadgeOverlay` for status dots / counts / icons.
  */
 defineOptions({ name: 'Avatar', inheritAttrs: false });
 
@@ -146,7 +150,7 @@ watch(
 const showImage = computed(() => !!props.src && !errored.value && !props.isLoading);
 
 /* Parse union-typed `size` — preset routes to variant class, raw/object routes to inline dims. */
-const parsedSize = computed(() => CssExtensions.parseSizeUnion<AvatarSizePreset>(props.size, AVATAR_SIZE_PRESETS));
+const parsedSize = computed(() => CssExtensions.parseSizeUnion<AvatarSizePreset>(props.size, AvatarSizePresets));
 
 const boxStyle = computed<CSSProperties | undefined>(() =>
   parsedSize.value.box ? CssExtensions.resolveBoxSize(parsedSize.value.box) : undefined,
@@ -207,7 +211,7 @@ defineExpose({ el });
   >
     <img
       v-if="showImage"
-      :src="props.src"
+      :src="UrlExtensions.safeResource(props.src)"
       :alt="props.alt ?? props.name"
       class="h-full w-full object-cover"
       @error="errored = true"

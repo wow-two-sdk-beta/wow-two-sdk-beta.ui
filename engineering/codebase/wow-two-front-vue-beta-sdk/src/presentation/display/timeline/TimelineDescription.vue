@@ -9,9 +9,9 @@ export interface TimelineDescriptionProps {}
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The supporting copy under a `TimelineTitle`. */
+/** Renders the supporting copy under a `TimelineTitle`, at muted body scale. */
 defineOptions({ name: 'TimelineDescription', inheritAttrs: false });
 
 /** The description copy — React's required `children`. */

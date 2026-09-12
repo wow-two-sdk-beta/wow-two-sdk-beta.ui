@@ -1,6 +1,6 @@
 import { Bike, Car, Clock, Flag, Hash, Lightbulb, PawPrint, Smile, Utensils } from 'lucide-vue-next';
 
-import { SizePreset } from '../../../foundation/utils';
+import { SizePreset } from '../../../foundation/styles';
 import { type IconAdapter } from '../../../foundation/icons';
 import { EmojiCategory } from '../../../domain/emoji';
 
@@ -22,11 +22,17 @@ export const PickerElement = {
 
 export type PickerElement = (typeof PickerElement)[keyof typeof PickerElement];
 
-/** A single scale for the whole picker, or a per-element override map — `search`/`nav`/`tile` as t-shirt scales plus `icon` as the strip icon size in px (a single dimension, so px rather than a scale). */
+/**
+ * A single scale for the whole picker, or a per-element override map — `search`/`nav`/`tile` as
+ * t-shirt scales plus `icon` as the strip icon size in px (one dimension, so px not a scale).
+ */
 export type EmojiPickerSizeInput =
   EmojiPickerSize | (Partial<Record<PickerElement, EmojiPickerSize>> & { icon?: number });
 
-/** Resolves the scale for one picker element — a uniform size applies to every element; a map falls back to `fallback` per element. Expandable to any element in `PickerElement`. */
+/**
+ * Resolves the scale for one picker element — a uniform size applies to every element, a map
+ * falls back to `fallback` per element.
+ */
 export function resolveElementSize(
   size: EmojiPickerSizeInput | undefined,
   element: PickerElement,
@@ -93,7 +99,7 @@ interface CategoryDisplay {
 }
 
 /** The nav categories in display order — recents first, then the catalog's Telegram-order groups. */
-export const CategoryOrder: readonly CategoryKey[] = [
+export const CategoryOrder: ReadonlyArray<CategoryKey> = [
   RecentCategory,
   EmojiCategory.SmileysPeople,
   EmojiCategory.AnimalsNature,

@@ -1,10 +1,11 @@
 import { Fragment, cloneVNode, defineComponent, h } from 'vue';
+import { AriaAttribute } from '../../dom/enums/AriaAttribute';
 import { renderableChildren } from '../slot/Slot';
 import VisuallyHidden from '../visuallyHidden/VisuallyHidden.vue';
 
 export interface AccessibleIconProps {
   /** The accessible label for the icon. */
-  label: string;
+  readonly label: string;
 }
 
 /**
@@ -25,7 +26,7 @@ export const AccessibleIcon = defineComponent({
     return () => {
       const children = renderableChildren(slots.default?.());
       const target = children[0];
-      const icon = target ? cloneVNode(target, { 'aria-hidden': 'true', focusable: 'false' }) : children;
+      const icon = target ? cloneVNode(target, { [AriaAttribute.Hidden]: 'true', focusable: 'false' }) : children;
       return h(Fragment, [icon, h(VisuallyHidden, null, { default: () => props.label })]);
     };
   },

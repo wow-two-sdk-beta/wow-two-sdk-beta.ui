@@ -6,7 +6,7 @@
 //   value per call, so either as the snapshot would look changed on every read. The monotonic counter is
 //   identity-stable between mutations; the arrays and the aggregate derive from it through a `computed`.
 // - The subscription is attached in `onMounted` and dropped in `onScopeDispose`, the same shape
-//   `foundation/hooks`' `useMediaQuery` uses. The queue is plain in-memory state with no client-only source, so
+//   `foundation/device`' `useMediaQuery` uses. The queue is plain in-memory state with no client-only source, so
 //   the SSR pass reads a correct version rather than a placeholder — the mount hook exists for the listener, not
 //   for a platform global.
 // - `useUploadQueueSnapshot(queue)` takes the queue EXPLICITLY, so an app that owns a module-scope queue (uploads
@@ -64,7 +64,7 @@ export function useUploadQueueVersion<TResult = unknown>(queue: UploadQueue<TRes
 export function useUploadQueueSnapshot<TResult = unknown>(
   queue: UploadQueue<TResult>,
 ): {
-  readonly items: ComputedRef<readonly UploadItem<TResult>[]>;
+  readonly items: ComputedRef<ReadonlyArray<UploadItem<TResult>>>;
   readonly state: ComputedRef<UploadQueueState>;
 } {
   const version = useUploadQueueVersion(queue);
@@ -82,12 +82,12 @@ export function useUploadQueueSnapshot<TResult = unknown>(
 }
 
 /** What {@link useUploadQueue} hands a component — live state plus every queue action. */
-export interface UseUploadQueueResult<TResult = unknown> {
+export interface UseUploadQueueControls<TResult = unknown> {
   /** The underlying queue, for anything the flattened actions don't cover (`get`, `subscribe`, passing it down). */
   readonly queue: UploadQueue<TResult>;
 
   /** Every item in admission order, refreshed on each change. */
-  readonly items: ComputedRef<readonly UploadItem<TResult>[]>;
+  readonly items: ComputedRef<ReadonlyArray<UploadItem<TResult>>>;
 
   /** The aggregate snapshot — counts, byte totals, overall progress. */
   readonly state: ComputedRef<UploadQueueState>;
@@ -124,7 +124,7 @@ export interface UseUploadQueueResult<TResult = unknown> {
  */
 export function useUploadQueue<TResult = unknown>(
   options: MaybeRefOrGetter<UploadQueueOptions<TResult>>,
-): UseUploadQueueResult<TResult> {
+): UseUploadQueueControls<TResult> {
   const queue = createUploadQueue<TResult>({
     ...toValue(options),
     // Delegated, not captured: the current transport handles every attempt.

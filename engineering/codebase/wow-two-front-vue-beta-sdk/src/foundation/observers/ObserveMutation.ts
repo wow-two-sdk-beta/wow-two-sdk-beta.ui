@@ -34,7 +34,7 @@ export interface MutationOptions {
    * Restrict attribute watching to these names, e.g. `['data-state', 'aria-expanded']`. Narrowing this is the
    * cheapest win available: an unfiltered `attributes: true` on a busy node reports every class toggle.
    */
-  readonly attributeFilter?: readonly string[];
+  readonly attributeFilter?: ReadonlyArray<string>;
 
   /** Include the previous value on each attribute record. */
   readonly attributeOldValue?: boolean;
@@ -47,7 +47,7 @@ export interface MutationOptions {
 export type Disposer = () => void;
 
 /** Shared no-op for the unsupported path, so the caller's cleanup is unconditional. */
-const NOOP: Disposer = () => {};
+const NoopDisposer: Disposer = () => {};
 
 /** Whether a usable `MutationObserver` exists — false on the server. */
 export function supportsMutationObserver(): boolean {
@@ -119,10 +119,10 @@ export function mutationSignature(options?: MutationOptions): string {
  */
 export function observeMutation(
   node: Node,
-  callback: (records: readonly MutationRecord[], observer: MutationObserver) => void,
+  callback: (records: ReadonlyArray<MutationRecord>, observer: MutationObserver) => void,
   options?: MutationOptions,
 ): Disposer {
-  if (!supportsMutationObserver()) return NOOP;
+  if (!supportsMutationObserver()) return NoopDisposer;
 
   const observer = new MutationObserver((records, self) => {
     callback(records, self);

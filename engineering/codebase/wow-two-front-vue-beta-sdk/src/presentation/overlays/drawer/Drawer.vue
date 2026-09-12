@@ -1,6 +1,6 @@
 <script lang="ts">
 import { inject, type ComputedRef, type InjectionKey, type Ref, type ShallowRef } from 'vue';
-import type { Side } from '../../../foundation/utils';
+import type { Side } from '../../../foundation/styles';
 
 /**
  * The value shared with `DrawerTrigger` / `DrawerContent`.
@@ -30,43 +30,33 @@ export function useDrawerContext(): DrawerContextValue {
   return context;
 }
 
-/**
- * The prop surface of `Drawer`.
- *
- * `open` and `isOpen` are the same controlled state under two names: `open` is
- * the `v-model:open` binding target, `isOpen` the house boolean spelling that
- * mirrors the rest of the port. `open` wins when both are set. React's
- * `onOpenChange` is the `open-change` emit; `update:open` fires alongside it so
- * `v-model:open` works.
- */
+/** Controlled axes use their canonical Vue model names; each update event requests caller state. */
 export interface DrawerProps {
   /** The open state, controlled. The `v-model:open` binding target. */
-  open?: boolean;
-
-  /** The open state, controlled — the house spelling of `open`; `open` wins when both are set. */
-  isOpen?: boolean;
+  readonly open?: boolean;
 
   /** The initial open state when uncontrolled. Default `false`. */
-  defaultOpen?: boolean;
+  readonly defaultOpen?: boolean;
 
   /** The edge the panel slides in from. Default `right`. */
-  side?: Side;
+  readonly side?: Side;
 
   /** The outside-click dismissal toggle. Default `true`. */
-  dismissOnOutsideClick?: boolean;
+  readonly dismissOnOutsideClick?: boolean;
 
   /** The Escape dismissal toggle. Default `true`. */
-  dismissOnEscape?: boolean;
+  readonly dismissOnEscape?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, provide, shallowRef } from 'vue';
-import { useControlled, useId } from '../../../foundation/hooks';
+import { useControlled } from '../../../foundation/state';
+import { useId } from '../../../foundation/identifiers';
 
 /**
- * State + a11y-id owner for a Drawer tree. Renders only its slot — React
- * returned a bare context Provider, which has no element of its own.
+ * Renders only its slot, owning the open state and a11y ids of the Drawer tree below it.
+ * React returned a bare context Provider, which has no element of its own.
  */
 defineOptions({ name: 'Drawer', inheritAttrs: false });
 
@@ -74,14 +64,13 @@ defineOptions({ name: 'Drawer', inheritAttrs: false });
 defineSlots<{ default(): unknown }>();
 
 /**
- * `open: undefined` / `isOpen: undefined` are load-bearing: Vue coerces an
+ * `open: undefined` / `open: undefined` are load-bearing: Vue coerces an
  * absent `Boolean` prop to `false` unless the declaration *owns* a `default`
  * key, which would strand the uncontrolled path behind a permanently-closed
  * controlled one.
  */
 const props = withDefaults(defineProps<DrawerProps>(), {
   open: undefined,
-  isOpen: undefined,
   defaultOpen: false,
   side: 'right',
   dismissOnOutsideClick: true,
@@ -89,18 +78,15 @@ const props = withDefaults(defineProps<DrawerProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model:open` half. */
+  /** Fires when the drawer opens or closes — the `v-model:open` half. */
   'update:open': [open: boolean];
-  /** Replaces React's `onOpenChange`. */
-  'open-change': [open: boolean];
 }>();
 
 const controlled = useControlled<boolean>({
-  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
+  controlled: () => props.open,
   default: () => props.defaultOpen,
   onChange: (value) => {
     emit('update:open', value);
-    emit('open-change', value);
   },
 });
 

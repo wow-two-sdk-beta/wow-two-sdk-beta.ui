@@ -1880,4 +1880,4 @@ const rows = [
 ];
 
 /** Maps every catalog emoji to its char, label, search tags, and display category, in display order. */
-export const emojiCatalogData = rows as readonly EmojiCatalogEntry[];
+export const emojiCatalogData = rows as ReadonlyArray<EmojiCatalogEntry>;

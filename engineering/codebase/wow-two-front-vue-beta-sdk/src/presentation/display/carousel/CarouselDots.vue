@@ -7,11 +7,11 @@ export interface CarouselDotsProps {}
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useCarouselContext } from './CarouselContext';
 import CarouselDot from './CarouselDot.vue';
 
-/** The pagination dot row, one per slide. React shipped it as `Carousel.Dots`. */
+/** Renders the pagination dot row, one dot per slide; React shipped it as `Carousel.Dots`. */
 defineOptions({ name: 'CarouselDots', inheritAttrs: false });
 
 const attrs = useAttrs();

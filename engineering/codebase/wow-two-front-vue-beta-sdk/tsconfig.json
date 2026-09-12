@@ -6,8 +6,7 @@
     "moduleResolution": "Bundler",
     // No `jsx` — components are `<script setup>` SFCs, compiled by @vitejs/plugin-vue
     // and typechecked by `vue-tsc` (which understands `.vue` natively, so no shim file).
-    // `node` is here only for the `process.env.NODE_ENV` dev-gate in foundation/utils —
-    // the React package gets it implicitly (no `types` field → every @types/* is included).
+    // Node types support the environment dev gate in foundation/config/environment.
     "types": ["vite/client", "node"],
     "strict": true,
     "noUncheckedIndexedAccess": true,

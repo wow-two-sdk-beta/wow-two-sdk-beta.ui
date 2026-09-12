@@ -1,42 +1,51 @@
 # TimeInput
 
-## Purpose
-Atomic time input — a typed `HH:MM` field with a design-system popover on its trailing clock button. Accepts and emits `Temporal.PlainTime`. `TimePicker` is the trigger-shaped peer; this one keeps the text field.
+Renders a typed `HH:MM` field with a design-system popover on the trailing clock button.
 
-## Anatomy
-Styled text `<input>` + trailing `PopoverTrigger` → `Popover` holding the shared hour/minute columns (`forms/TimeColumns`). Under `native`, a single styled `<input type="time">` and no popover.
+Source: [TimeInput.vue](TimeInput.vue).
 
-## Required behaviors
-- The popover is OURS, not the browser's. `<input type="time">` opens an OS panel that cannot be themed; that path is the `native` opt-in only.
-- Typed draft commits on blur / Enter; an unparseable draft reverts, an emptied one clears to `null`.
-- 24-hour `HH:MM` on the wire; the component does the `Temporal.PlainTime` conversion.
+Public import: `import { TimeInput } from '@wow-two-beta/ui-vue/presentation/forms';`.
 
-## Visual states
-Same as `forms/InputStyles` `inputBaseVariants`.
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the state owner and restores the resulting DOM representation; a cancelled reset changes nothing.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `{ hours, minutes } \| null` | — | no | Controlled. |
-| `defaultValue` | same | `null` | no | Uncontrolled. |
-| `onValueChange` | `(t) => void` | — | no | Selection callback. |
-| `native` | `boolean` | `false` | no | Hands the panel back to the browser. Opt-in — the OS popup cannot be themed. |
-| `minuteStep` | `number` | `5` | no | Minute interval in the popover column. |
-| `placeholder` | `string` | `'--:--'` | no | Empty-state text. Ignored under `native`. |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | no | From `inputBaseVariants`. |
-| `state` | `'default' \| 'invalid'` | `'default'` | no | From `inputBaseVariants`. |
+| `size` | `InputSize` | no | — | The control size. |
+| `state` | `InputState` | no | — | The validity surface. |
+| `border` | `InputBorder` | no | — | The border weight. |
+| `ring` | `InputRing` | no | — | The focus-ring weight. |
+| `modelValue` | `Temporal.PlainTime \| null` | no | — | The value, controlled. The `v-model` binding target. `null` is the cleared state. |
+| `defaultValue` | `Temporal.PlainTime \| null` | no | — | The initial value when uncontrolled. |
+| `native` | `boolean` | no | `false` | Renders a bare `<input type="time">` and drops the popover. Opt-in only. The browser owns that control's picker panel — it cannot be themed, so it lands a system-chrome popup in the middle of a design-system form. Reach for it when the platform picker is the point (a mobile-first form wanting the OS wheel, for instance). |
+| `minuteStep` | `number` | no | `5` | The minute interval offered in the popover. Default 5. Ignored when `native`. |
+| `placeholder` | `string` | no | `'--:--'` | The empty-state text. Ignored when `native` — that control renders its own mask. |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
 
-## Composition
-Single element. Works inside `FormField`.
+## Emits
 
-## Dependencies
-Foundation: `utils/cn`, `hooks/useControlled`, `primitives/useFormControl`. Same-domain: `InputStyles`, `DateExtensions`, `TimeColumns`. Sibling group: `overlays/popover`.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: Temporal.PlainTime \| null];` | Fires when the reader types a time or picks one in the popover — the `v-model` half. |
 
-## Known limitations
-- Typed entry is 24-hour only — no locale-aware 12h parsing yet.
-- Under `native`, picker UI varies across browsers and 12h/24h display is the browser's call.
-- For a trigger-shaped control with no text field, use `TimePicker` (L5).
+## Slots
 
-## Inspirations
-- React Aria `TimeField`.
-- shadcn/ui `Input type="time"`.
+None declared.
+
+## Exposed handle
+
+`{ el: root }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [DateTimeControls.dom.test.ts](../../../../tests/unit/presentation/forms/DateTimeControls.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

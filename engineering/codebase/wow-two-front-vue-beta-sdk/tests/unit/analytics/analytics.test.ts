@@ -108,3 +108,31 @@ describe('buffering', () => {
     expect(sink.events.map((event) => event.name)).toContain('early');
   });
 });
+
+it('flush waits for already dispatched async delivery before flushing the vendor', async () => {
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const order: string[] = [];
+  const client = createAnalytics({
+    providers: [
+      {
+        track: () =>
+          pending.then(() => {
+            order.push('delivered');
+          }),
+        flush: () => {
+          order.push('flushed');
+        },
+      },
+    ],
+  });
+  client.track('event');
+  const flushed = client.flush();
+  await Promise.resolve();
+  expect(order).toEqual([]);
+  release();
+  await flushed;
+  expect(order).toEqual(['delivered', 'flushed']);
+});

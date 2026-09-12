@@ -11,7 +11,7 @@ import type { Breakpoint } from './AppShell.vue';
 export type AppShellSidebarProps = Record<string, never>;
 
 // Complete class strings per breakpoint — Tailwind can't see interpolated names.
-const SIDEBAR_STATIC_CLASSES: Record<Breakpoint, string> = {
+const SidebarStaticClasses: Record<Breakpoint, string> = {
   sm: 'hidden sm:flex',
   md: 'hidden md:flex',
   lg: 'hidden lg:flex',
@@ -22,16 +22,16 @@ const SIDEBAR_STATIC_CLASSES: Record<Breakpoint, string> = {
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import Drawer from '../../overlays/drawer/Drawer.vue';
 import DrawerContent from '../../overlays/drawer/DrawerContent.vue';
 import { useAppShellContext } from './AppShell.vue';
 
 /**
- * Side navigation rail — the `sidebar` grid area above `sidebarBreakpoint`, a
- * left-edge `Drawer` below it. The collapsed branch takes only `class` (onto
- * the `nav`), exactly as React's did; the rest of the attrs belong to the
- * `aside` that branch does not render.
+ * Renders the side navigation rail — the `sidebar` grid area above
+ * `sidebarBreakpoint`, a left-edge `Drawer` below it. The collapsed branch takes
+ * only `class` (onto the `nav`), exactly as React's did; the rest of the attrs
+ * belong to the `aside` that branch does not render.
  */
 defineOptions({ name: 'AppShellSidebar', inheritAttrs: false });
 
@@ -49,7 +49,7 @@ const isSidebarOpen = context.isSidebarOpen;
 const asideClasses = computed(() =>
   cn(
     'sticky top-14 h-[calc(100svh-3.5rem)] overflow-y-auto border-r border-border bg-card [grid-area:sidebar]',
-    SIDEBAR_STATIC_CLASSES[context.sidebarBreakpoint.value],
+    SidebarStaticClasses[context.sidebarBreakpoint.value],
     attrs.class as string | undefined,
   ),
 );
@@ -67,7 +67,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <Drawer v-if="isCollapsed" :open="isSidebarOpen" side="left" @open-change="context.setSidebarOpen">
+  <Drawer v-if="isCollapsed" :open="isSidebarOpen" side="left" @update:open="context.setSidebarOpen">
     <DrawerContent class="w-72 max-w-[80%]">
       <nav :class="navClasses"><slot /></nav>
     </DrawerContent>

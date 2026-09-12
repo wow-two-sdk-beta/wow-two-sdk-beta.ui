@@ -1,16 +1,16 @@
 <script lang="ts">
 export interface MenuGroupProps {
   /** The group heading. React typed this `ReactNode`; the scalar form is the prop and `#label` is the rich override. */
-  label?: string | number;
+  readonly label?: string | number;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
-import { useId } from '../../../foundation/hooks';
+import { useId } from '../../../foundation/identifiers';
 import { menuLabelVariants } from './Menu.variants';
 
-/** A labelled `role="group"` of menu items. */
+/** Renders a labelled `role="group"` band of menu items. */
 defineOptions({ name: 'MenuGroup', inheritAttrs: false });
 
 defineSlots<{

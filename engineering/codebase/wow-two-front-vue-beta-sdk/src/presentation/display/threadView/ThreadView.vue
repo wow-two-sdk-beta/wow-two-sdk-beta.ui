@@ -1,37 +1,36 @@
 <script lang="ts">
 export interface ThreadViewProps {
   /** The title for the thread panel header. Default `"Thread"`. Rich content → the `title` slot. */
-  title?: string | number;
+  readonly title?: string | number;
 
   /** The subtitle shown under the title (e.g. "in #engineering"). Rich content → the `subtitle` slot. */
-  subtitle?: string | number;
+  readonly subtitle?: string | number;
 
   /**
    * The reply count label. Left unset it falls back to a count derived from the
    * reply slot; pass `null` to hide the separator row entirely. Rich content →
    * the `replyCount` slot.
    */
-  replyCount?: string | number | null;
+  readonly replyCount?: string | number | null;
 
   /** The close button's visibility. Default true. */
-  hasCloseButton?: boolean;
+  readonly hasCloseButton?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { X as CloseIcon } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { renderableChildren } from '../../../foundation/primitives';
 
 /**
- * Side-panel layout for a single thread: parent message + reply count
- * separator + reply list + composer. The actual messages stay in the slots —
- * `ThreadView` only owns the chrome.
+ * Renders the chrome of a thread panel: header, parent message, reply-count separator, composer.
  *
- * React's `parent` / `composer` were structural `ReactNode` props with no string
- * form worth keeping; they are slots only. `title` / `subtitle` / `replyCount`
- * keep their prop form and gain same-named slots.
+ * The messages themselves stay in the slots — `ThreadView` only owns the chrome.
+ *
+ * `parent` / `composer` are structural, so they are slots only. `title` / `subtitle` / `replyCount` take either a
+ * prop or a same-named slot.
  */
 defineOptions({ name: 'ThreadView', inheritAttrs: false });
 
@@ -42,13 +41,13 @@ defineSlots<{
   /** The subtitle override, when a plain string is not enough. */
   subtitle(): unknown;
 
-  /** The parent message — typically a `ChatBubble`. Required in React, required here. */
+  /** The parent message — typically a `ChatBubbleCard`. Required. */
   parent(): unknown;
 
   /** The reply-count label override, when a plain string is not enough. */
   replyCount(): unknown;
 
-  /** The reply nodes (typically `ChatBubble` items) — React's `children`. */
+  /** The reply nodes — typically `ChatBubbleCard` items. */
   default(): unknown;
 
   /** The composer rendered at the bottom of the panel. */
@@ -62,7 +61,7 @@ const props = withDefaults(defineProps<ThreadViewProps>(), {
   hasCloseButton: true,
 });
 
-/** Replaces React's `onClose`; omitting `@close` omits the close button. */
+/** Omitting `@close` omits the close button. */
 const emit = defineEmits<{
   /** Fires when the close button is activated. */
   close: [];
@@ -74,17 +73,16 @@ const instance = getCurrentInstance();
 const el = useTemplateRef<HTMLDivElement>('el');
 
 /**
- * Mirrors React's `hasCloseButton && onClose && <button/>` guard — the button
- * renders only when the consumer bound `@close`. Read through a call, not a
- * cached computed: `instance.vnode` is replaced on every re-render.
+ * The button renders only when `hasCloseButton` holds and the consumer bound
+ * `@close`. Read through a call, not a cached computed: `instance.vnode` is
+ * replaced on every re-render.
  */
 const hasClose = () => props.hasCloseButton && Boolean(instance?.vnode.props?.onClose);
 
 /**
- * Replaces React's `Array.isArray(children) ? children : [children]` count.
- * Called per render rather than cached — a slot's content is only knowable at
- * render time, and `renderableChildren` drops the comment/whitespace vnodes
- * that would otherwise read as replies.
+ * Counts the reply vnodes. Called per render rather than cached — a slot's
+ * content is only knowable at render time, and `renderableChildren` drops the
+ * comment/whitespace vnodes that would otherwise read as replies.
  */
 const defaultReplyCount = (): string => {
   const count = renderableChildren(slots.default?.()).length;
@@ -122,7 +120,7 @@ defineExpose({ el });
         v-if="hasClose()"
         type="button"
         aria-label="Close thread"
-        class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         @click="emit('close')"
       >
         <CloseIcon class="h-4 w-4" />

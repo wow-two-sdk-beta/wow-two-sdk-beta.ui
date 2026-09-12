@@ -8,8 +8,8 @@ import {
   object,
   string,
   ValidationError,
-  VALIDATION_CODES,
-} from '@src/foundation/validation';
+  ValidationCodes,
+} from '@src/foundation/validators';
 
 /*
  * Smoke depth, `unit` project (node). Two contracts carry this slice, and both are asserted
@@ -24,34 +24,34 @@ import {
 describe('rule codes', () => {
   it('reports the documented code for a failed refinement', () => {
     const result = string().min(2).validate('a');
-    expect(result.valid).toBe(false);
-    if (result.valid) return;
-    expect(result.issues[0]?.code).toBe('min');
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.failure.issues[0]?.code).toBe('min');
   });
 
   it('reports `type` when the value is the wrong kind entirely', () => {
     const result = string().validate(42);
-    expect(result.valid).toBe(false);
-    if (result.valid) return;
-    expect(result.issues[0]?.code).toBe('type');
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.failure.issues[0]?.code).toBe('type');
   });
 
   it('reports `email` for the format rule', () => {
     const result = email().validate('not-an-email');
-    expect(result.valid).toBe(false);
-    if (result.valid) return;
-    expect(result.issues[0]?.code).toBe('email');
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.failure.issues[0]?.code).toBe('email');
   });
 
   it('every emitted code belongs to the shared vocabulary', () => {
     const result = object({ name: string().min(2), age: number() }).validate({ name: 'a', age: 'x' });
-    expect(result.valid).toBe(false);
-    if (result.valid) return;
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
 
-    const codes = result.issues.map((issue) => issue.code);
+    const codes = result.failure.issues.map((issue) => issue.code);
     expect(codes.length).toBeGreaterThan(0);
     for (const code of codes) {
-      expect(VALIDATION_CODES).toContain(code);
+      expect(ValidationCodes).toContain(code);
     }
   });
 });
@@ -59,11 +59,11 @@ describe('rule codes', () => {
 describe('issue paths', () => {
   it('addresses a nested failure at the exact spot it failed', () => {
     const result = object({ tags: array(string()) }).validate({ tags: ['ok', 7] });
-    expect(result.valid).toBe(false);
-    if (result.valid) return;
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
 
-    expect(result.issues[0]?.path).toEqual(['tags', 1]);
-    expect(formatIssuePath(result.issues[0]?.path ?? [])).toContain('tags');
+    expect(result.failure.issues[0]?.path).toEqual(['tags', 1]);
+    expect(formatIssuePath(result.failure.issues[0]?.path ?? [])).toContain('tags');
   });
 });
 
@@ -78,4 +78,27 @@ describe('the no-throw contract', () => {
     expect(() => assertValid(string(), 'fine')).not.toThrow();
     expect(() => assertValid(string(), 42)).toThrow(ValidationError);
   });
+});
+
+it('preserves programmer exceptions in custom checks and transforms', () => {
+  expect(() =>
+    string()
+      .refine(() => {
+        throw new Error('check bug');
+      }, 'bad')
+      .validate('a'),
+  ).toThrow('check bug');
+  expect(() =>
+    string()
+      .transform(() => {
+        throw new Error('mapper bug');
+      })
+      .validate('a'),
+  ).toThrow('mapper bug');
+});
+it('keeps the Standard Schema adapter protocol while house validation uses Result', () => {
+  const schema = string().transform((value) => value.length);
+  expect(schema.validate('abc')).toEqual({ ok: true, value: 3 });
+  expect(schema['~standard'].validate('abc')).toEqual({ value: 3 });
+  expect(schema['~standard'].validate(3)).toHaveProperty('issues');
 });

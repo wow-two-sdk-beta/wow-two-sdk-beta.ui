@@ -1,21 +1,3 @@
-// Feature detection for BOTH halves of the speech vector, kept in one file because the two answers are
-// independent and a consumer that assumes otherwise ships a broken button. Firefox synthesizes speech perfectly
-// and recognizes none; a page in a sandboxed iframe can have neither. `getSpeechSupport()` therefore reports two
-// booleans, never one.
-//
-// Every read goes through an `unknown` cast rather than the DOM lib's `declare var speechSynthesis: SpeechSynthesis`
-// — outside a browser that global is genuinely missing, so the typed view is a lie this module must not act on.
-// The same posture as `foundation/media`'s `isKnownInsecureContext`.
-//
-// SYNTHESIS NEEDS TWO GLOBALS, not one. `speechSynthesis` is the controller and `SpeechSynthesisUtterance` is the
-// value it speaks; a page with the first and not the second (a partial polyfill, a stripped webview) would pass a
-// naive `'speechSynthesis' in window` check and then throw on `new SpeechSynthesisUtterance(...)` inside a click
-// handler. `canSpeak()` requires both.
-//
-// RECOGNITION IS PREFIXED. Chrome and Safari expose `webkitSpeechRecognition`; the unprefixed name exists in
-// newer Chrome. Both are checked, unprefixed first. Firefox exposes neither and is not a bug to work around —
-// there is no polyfill short of shipping audio to a server yourself.
-
 import type { SpeechRecognitionConstructor } from './SpeechRecognitionTypes';
 
 /** What this environment can do. Two independent answers — no browser guarantees both, and Firefox gives one. */

@@ -8,12 +8,18 @@ export type ToolbarLinkProps = /* @vue-ignore */ Omit<AnchorHTMLAttributes, 'chi
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useRovingFocusItem } from '../../../foundation/primitives';
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
+/** Renders one anchor inside a toolbar, taking its turn in the group's roving tab stop. */
 defineOptions({ name: 'ToolbarLink', inheritAttrs: false });
+
+defineSlots<{
+  /** The anchor's own label. */
+  default(): unknown;
+}>();
 
 const attrs = useAttrs();
 
@@ -21,14 +27,14 @@ const attrs = useAttrs();
    destructuring. The function `ref` registers this item's node with the group. */
 const roving = useRovingFocusItem();
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
   cn(
-    'inline-flex h-8 items-center justify-center rounded-sm px-2 text-sm text-foreground underline-offset-2 transition-colors hover:bg-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'inline-flex h-8 items-center justify-center rounded-sm px-2 text-sm text-foreground underline-offset-2 transition-colors hover:bg-muted hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     attrs.class as ClassValue,
   ),
 );

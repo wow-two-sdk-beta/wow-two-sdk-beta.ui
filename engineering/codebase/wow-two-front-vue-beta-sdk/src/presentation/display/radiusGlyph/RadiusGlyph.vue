@@ -21,7 +21,7 @@ export interface RadiusGlyphProps {
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue';
 
-/** Renders a concentric-circle glyph whose filled inner disc scales with `extent` (`0..1`) — a compact radial-extent indicator. */
+/** Renders a concentric-circle glyph whose filled inner disc scales with `extent` (`0..1`). */
 defineOptions({ name: 'RadiusGlyph' });
 
 const props = withDefaults(defineProps<RadiusGlyphProps>(), {

@@ -2,19 +2,18 @@
 import type { SpinnerProps } from '../spinner/Spinner.vue';
 
 export interface InlineSpinnerProps {
-  size?: SpinnerProps['size'];
-  tone?: SpinnerProps['tone'];
+  readonly size?: SpinnerProps['size'];
+  readonly tone?: SpinnerProps['tone'];
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import Spinner from '../spinner/Spinner.vue';
 
 /**
- * Spinner + label inline. Drops cleanly into buttons, list rows, anywhere
- * a "loading…" affordance is needed mid-flow.
+ * Renders a spinner beside a label on one line, for buttons, list rows, and mid-flow waits.
  *
  * React's `children` (default `"Loading…"`) becomes the default slot with the
  * same fallback content.
@@ -22,6 +21,11 @@ import Spinner from '../spinner/Spinner.vue';
 defineOptions({ name: 'InlineSpinner', inheritAttrs: false });
 
 const props = withDefaults(defineProps<InlineSpinnerProps>(), { size: 'sm', tone: 'default' });
+
+defineSlots<{
+  /** The label beside the spinner. Falls back to `Loading…`. */
+  default?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLSpanElement>('el');

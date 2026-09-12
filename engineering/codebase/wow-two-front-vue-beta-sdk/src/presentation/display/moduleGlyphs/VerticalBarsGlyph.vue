@@ -6,7 +6,7 @@ export type { GlyphProps };
 
 <script setup lang="ts">
 import { useTemplateRef } from 'vue';
-import { BAR_CORNER_RX, CELL_POSITIONS, CELL_SIZE } from './ModuleGlyphs';
+import { BarCornerRx, CellPositions, CellSize } from './ModuleGlyphs';
 
 /** Renders a three-vertical-bar glyph. */
 defineOptions({ name: 'VerticalBarsGlyph' });
@@ -21,13 +21,13 @@ defineExpose({ el });
 <template>
   <svg ref="el" viewBox="0 0 24 24" :width="props.size" :height="props.size" aria-hidden="true">
     <rect
-      v-for="x in CELL_POSITIONS"
+      v-for="x in CellPositions"
       :key="x"
       :x="x"
       :y="4"
-      :width="CELL_SIZE"
+      :width="CellSize"
       :height="16"
-      :rx="BAR_CORNER_RX"
+      :rx="BarCornerRx"
       fill="currentColor"
     />
   </svg>

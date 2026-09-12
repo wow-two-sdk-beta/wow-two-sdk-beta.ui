@@ -1,43 +1,40 @@
 <script lang="ts">
-import type { Orientation } from '../../../foundation/utils';
+import type { Orientation } from '../../../foundation/styles';
 
 export interface CheckboxGroupProps {
   /** The group legend (label-equivalent for fieldset). Fill the `legend` slot for richer content. */
-  legend?: string | number;
-
-  /** The selected values, controlled — React's spelling, which wins when both are set. */
-  value?: ReadonlyArray<string>;
+  readonly legend?: string | number;
 
   /** The selected values, controlled. The `v-model` binding target. */
-  modelValue?: ReadonlyArray<string>;
+  readonly modelValue?: ReadonlyArray<string>;
 
   /** The initial values (uncontrolled). */
-  defaultValue?: ReadonlyArray<string>;
+  readonly defaultValue?: ReadonlyArray<string>;
 
   /** The disabled state for the whole group. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The layout direction. Default `vertical`. */
-  orientation?: Orientation;
+  readonly orientation?: Orientation;
 
   /** The group's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, provide, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn, Orientation as OrientationValue } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn, Orientation as OrientationValue } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
-import Fieldset from '../fieldset/Fieldset.vue';
-import Legend from '../legend/Legend.vue';
+import FieldsetLayout from '../../layout/fieldsetLayout/FieldsetLayout.vue';
+import LegendText from '../../display/legendText/LegendText.vue';
 import { CheckboxGroupKey, type CheckboxGroupContextValue } from './CheckboxGroupContext';
 
 /**
- * Multi-select group of `CheckboxField` children. Each child must declare a
- * `value` prop the group uses to track selection.
+ * Renders a fieldset of `CheckboxField` children as one multi-select group, keyed by each child's `modelValue`.
  *
  * Form-aware at GROUP level: inside a `Field`/`form.Field` the fieldset takes the
  * context id (so the `Field` label's `htmlFor` resolves) plus `aria-labelledby`/
@@ -56,10 +53,8 @@ const props = withDefaults(defineProps<CheckboxGroupProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader ticks or unticks an item — the `v-model` half. */
   'update:modelValue': [value: ReadonlyArray<string>];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [value: ReadonlyArray<string>];
 }>();
 
 /** The `<CheckboxField>` children with `value="…"` attached — React's `children`. */
@@ -78,11 +73,10 @@ const isGroupDisabled = computed(() => props.isDisabled ?? ctx?.isDisabled);
 const isGroupInvalid = computed(() => ctx?.isInvalid ?? false);
 
 const controlled = useControlled<ReadonlyArray<string>>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? [],
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -109,9 +103,9 @@ const labelledBy = computed(() => ctx?.labelledBy);
 const describedBy = computed(() => ctx?.describedBy);
 const ariaInvalid = computed(() => isGroupInvalid.value || undefined);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() => cn(attrs.class as ClassValue));
@@ -124,10 +118,16 @@ const root = useTemplateRef<{ el: HTMLFieldSetElement | null }>('root');
 
 /** The rendered `<fieldset>` — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: computed(() => root.value?.el ?? null) });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
-  <Fieldset
+  <FieldsetLayout
+    :key="formResetRevision"
     ref="root"
     :id="groupId"
     :disabled="isGroupDisabled"
@@ -137,11 +137,17 @@ defineExpose({ el: computed(() => root.value?.el ?? null) });
     :class="rootClass"
     v-bind="passthroughAttrs"
   >
-    <Legend v-if="hasLegend">
+    <LegendText v-if="hasLegend">
       <slot name="legend">{{ legend }}</slot>
-    </Legend>
+    </LegendText>
     <div :class="listClass">
       <slot />
     </div>
-  </Fieldset>
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
+  </FieldsetLayout>
 </template>

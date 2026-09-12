@@ -1,7 +1,7 @@
 <script lang="ts">
 /* `StatusTone` is imported here (not in `<script setup>`) so the one binding serves as both
    the prop type below and the runtime value used in `withDefaults`. */
-import { StatusTone } from '../../../foundation/utils';
+import { StatusTone } from '../../../foundation/styles';
 
 /** Defines the Status visual size. */
 export const StatusSize = {
@@ -17,16 +17,16 @@ export type StatusSize = (typeof StatusSize)[keyof typeof StatusSize];
 
 export interface StatusProps {
   /** The semantic tone of the dot. Default `success`. */
-  tone?: StatusTone;
+  readonly tone?: StatusTone;
 
   /** The optional pulsing ring around the dot. */
-  hasPulse?: boolean;
+  readonly hasPulse?: boolean;
 
   /** The visual size — drives dot dimensions, text size, and gap. Default `md`. */
-  size?: StatusSize;
+  readonly size?: StatusSize;
 }
 
-const TONE: Record<StatusTone, string> = {
+const ToneClass: Record<StatusTone, string> = {
   success: 'bg-success',
   warning: 'bg-warning',
   destructive: 'bg-destructive',
@@ -34,7 +34,7 @@ const TONE: Record<StatusTone, string> = {
   neutral: 'bg-muted-foreground',
 };
 
-const SIZE: Record<StatusSize, { wrapper: string; dot: string }> = {
+const SizeClasses: Record<StatusSize, { wrapper: string; dot: string }> = {
   xs: { wrapper: 'gap-1.5 text-xs', dot: 'h-1.5 w-1.5' },
   sm: { wrapper: 'gap-1.5 text-sm', dot: 'h-2 w-2' },
   md: { wrapper: 'gap-2 text-sm', dot: 'h-2 w-2' },
@@ -43,12 +43,12 @@ const SIZE: Record<StatusSize, { wrapper: string; dot: string }> = {
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
 /**
- * Colored dot + text label — server status, online presence, build state.
- * Use `Status` (with text) for labelled indicators; `NotificationDot` for
- * the bare positioned dot.
+ * Renders a coloured dot beside a text label — server status, online presence, build state.
+ *
+ * Use `Status` for labelled indicators; `NotificationIndicator` for the bare positioned dot.
  */
 defineOptions({ name: 'Status', inheritAttrs: false });
 
@@ -64,16 +64,16 @@ const props = withDefaults(defineProps<StatusProps>(), {
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLSpanElement>('el');
 
-const size = computed(() => SIZE[props.size]);
+const size = computed(() => SizeClasses[props.size]);
 
 const classes = computed(() =>
   cn('inline-flex items-center text-foreground', size.value.wrapper, attrs.class as string | undefined),
 );
 
-const dotClasses = computed(() => cn('inline-block rounded-full', size.value.dot, TONE[props.tone]));
+const dotClasses = computed(() => cn('inline-block rounded-full', size.value.dot, ToneClass[props.tone]));
 
 const pulseClasses = computed(() =>
-  cn('absolute inset-0 inline-block rounded-full opacity-75 animate-ping', TONE[props.tone]),
+  cn('absolute inset-0 inline-block rounded-full opacity-75 animate-ping', ToneClass[props.tone]),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

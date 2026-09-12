@@ -4,8 +4,8 @@ import type { HTMLAttributes } from 'vue';
 // `Orientation` is imported as a value by `<script setup>` below; both blocks
 // share one module scope, so re-importing the type here would duplicate it.
 export interface RovingFocusGroupProps extends /* @vue-ignore */ HTMLAttributes {
-  orientation?: Orientation;
-  canLoop?: boolean;
+  readonly orientation?: Orientation;
+  readonly canLoop?: boolean;
 }
 </script>
 
@@ -24,13 +24,13 @@ import {
 } from './RovingFocusContext';
 
 /**
- * Provide arrow-key navigation for a group of focusable children. Children
- * call `useRovingFocusItem()` to register and receive `tabindex` / event
- * handlers. Disabled items (native `disabled`, `aria-disabled="true"`, or
- * `data-disabled`) are never valid stops: arrow / Home / End navigation
- * skips them (wrap-around keeps skipping past disabled edges) and the tab
- * stop is always kept on an enabled item. Used by Tabs, Toolbar, Tree,
- * Accordion, Stepper, NavigationMenu, Menubar.
+ * Renders a `role="group"` wrapper that gives its focusable children arrow-key
+ * navigation. Children call `useRovingFocusItem()` to register and receive
+ * `tabindex` / event handlers. Disabled items (native `disabled`,
+ * `aria-disabled="true"`, or `data-disabled`) are never valid stops: arrow /
+ * Home / End navigation skips them (wrap-around keeps skipping past disabled
+ * edges) and the tab stop is always kept on an enabled item. Used by Tabs,
+ * Toolbar, Tree, Accordion, Stepper, NavigationMenu, Menubar.
  */
 defineOptions({ name: 'RovingFocusGroup' });
 
@@ -38,6 +38,11 @@ const props = withDefaults(defineProps<RovingFocusGroupProps>(), {
   orientation: Orientation.Horizontal,
   canLoop: true,
 });
+
+defineSlots<{
+  /** The focusable children that register as arrow-key stops. */
+  default(): unknown;
+}>();
 
 // Typed as `HTMLElement`, not `HTMLDivElement` — `ShallowRef` is invariant, so
 // the narrower element type would not satisfy the context's `groupEl`.

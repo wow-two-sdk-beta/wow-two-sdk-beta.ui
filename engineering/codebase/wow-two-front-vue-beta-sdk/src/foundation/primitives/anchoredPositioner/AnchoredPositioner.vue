@@ -4,16 +4,16 @@ import type { HTMLAttributes } from 'vue';
 
 export interface AnchoredPositionerProps extends /* @vue-ignore */ HTMLAttributes {
   /** The element the floating layer should be anchored to. */
-  anchor: HTMLElement | null;
+  readonly anchor: HTMLElement | null;
 
   /** The Floating UI placement. Default `bottom`. */
-  placement?: Placement;
+  readonly placement?: Placement;
 
   /** The distance between anchor and floating element in px. Default 8. */
-  offset?: number;
+  readonly offset?: number;
 
   /** The open flag — renders the floating element only when open. */
-  isOpen?: boolean;
+  readonly isOpen?: boolean;
 }
 </script>
 
@@ -29,9 +29,9 @@ import {
 import { computed, useAttrs, useTemplateRef, type CSSProperties } from 'vue';
 
 /**
- * Position slot content relative to an anchor element using Floating UI.
- * Auto-flips and shifts to stay in viewport. Use as the positioning surface
- * for Tooltip, Popover, Menu, HoverCard.
+ * Renders the slot inside a floating element positioned against an anchor via
+ * Floating UI. Auto-flips and shifts to stay in viewport. Use as the positioning
+ * surface for Tooltip, Popover, Menu, HoverCard.
  *
  * Exposes the anchor's measured size as CSS variables on the floating
  * element, enabling consumers to size content relative to the trigger:
@@ -56,6 +56,11 @@ const props = withDefaults(
   }>(),
   { placement: 'bottom', offset: 8, isOpen: true },
 );
+
+defineSlots<{
+  /** The floating content positioned against the anchor. */
+  default(): unknown;
+}>();
 
 const attrs = useAttrs();
 const floating = useTemplateRef<HTMLDivElement>('floating');

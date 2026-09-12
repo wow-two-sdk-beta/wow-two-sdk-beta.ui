@@ -1,51 +1,48 @@
 <script lang="ts">
-import type { ColorSwatchSize, SwatchShape } from '../colorSwatch';
+import type { ColorSwatchPreviewSize, SwatchShape } from '../../display/colorSwatchPreview';
 
 /**
  * Defines props for a `ColorSwatchPicker`.
  *
- * `swatchSize` / `swatchShape` are the NAMED axis types, not `ColorSwatchVariants['size']`
+ * `swatchSize` / `swatchShape` are the NAMED axis types, not `ColorSwatchPreviewVariants['size']`
  * as the React original spelled them — the SFC prop resolver cannot follow an indexed access
  * into an imported interface, and the build fails on it while `vue-tsc` stays green.
  */
 export interface ColorSwatchPickerProps {
   /** The palette rendered as swatches. */
-  colors: ReadonlyArray<string>;
-
-  /** The selected hex, controlled — React's spelling, which wins when both are set. */
-  value?: string | null;
+  readonly colors: ReadonlyArray<string>;
 
   /** The selected hex, controlled. The `v-model` binding target. */
-  modelValue?: string | null;
+  readonly modelValue?: string | null;
 
   /** The initial selection when uncontrolled. */
-  defaultValue?: string | null;
+  readonly defaultValue?: string | null;
 
   /** The size step every swatch renders at. */
-  swatchSize?: ColorSwatchSize;
+  readonly swatchSize?: ColorSwatchPreviewSize;
 
   /** The outline shape every swatch renders with. */
-  swatchShape?: SwatchShape;
+  readonly swatchShape?: SwatchShape;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The group's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { Orientation, RovingFocusGroup, useFormControl } from '../../../foundation/primitives';
 import ColorSwatchItem from './ColorSwatchItem.vue';
 
-/**
- * Inline palette of selectable swatches, arrow-key navigable in both axes.
- */
+/** Renders an inline palette of selectable color swatches, arrow-key navigable in both axes. */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'ColorSwatchPicker', inheritAttrs: false });
@@ -59,16 +56,14 @@ const props = withDefaults(defineProps<ColorSwatchPickerProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader picks a swatch from the palette — the `v-model` half. */
   'update:modelValue': [value: string | null];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [value: string | null];
 }>();
 
 const attrs = useAttrs();
 
 /*
- * Inline swatch group (no popover trigger) — the `role="group"` node is the control:
+ * InlineLayout swatch group (no popover trigger) — the `role="group"` node is the control:
  * it takes the context id (so a Field label's `htmlFor` resolves), is named via
  * `aria-labelledby`, and described via `aria-describedby`. `aria-invalid` is not valid
  * on `group`; invalid state surfaces through the describedby swap to the error chrome.
@@ -80,11 +75,10 @@ const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled ?? fa
 const controlled = useControlled<string | null>({
   /* `??` is wrong here — `null` is a MEANINGFUL selection ("nothing selected"), and `??`
      would fall through it to `modelValue`. Only `undefined` means "not controlled". */
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -96,16 +90,16 @@ function onSelect(color: string): void {
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel` and
    stop reaching the DOM. It is read off the attrs so `aria-labelledby` can defer to it. */
-const ariaLabel = computed(() => attrs['aria-label'] as string | undefined);
+const ariaLabel = computed(() => attrs[AriaAttribute.Label] as string | undefined);
 
 const groupId = computed(() => props.id ?? field?.id);
 /* Names the group from the Field label when present; an explicit aria-label always wins. */
 const labelledBy = computed(() => (ariaLabel.value ? undefined : field?.labelledBy));
 const describedBy = computed(() => field?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() => cn('flex flex-wrap gap-1.5', attrs.class as ClassValue));
@@ -114,10 +108,16 @@ const root = useTemplateRef<InstanceType<typeof RovingFocusGroup>>('root');
 
 /** The rendered group element. */
 defineExpose({ el: computed(() => root.value?.el ?? null) });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
   <RovingFocusGroup
+    :key="formResetRevision"
     ref="root"
     :orientation="Orientation.Both"
     can-loop
@@ -136,6 +136,12 @@ defineExpose({ el: computed(() => root.value?.el ?? null) });
       :size="swatchSize"
       :shape="swatchShape"
       @select="onSelect"
+    />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
     />
   </RovingFocusGroup>
 </template>

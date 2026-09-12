@@ -11,9 +11,9 @@ export type OverlayBodyProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../foundation/utils';
+import { cn } from '../../foundation/styles';
 
-/* The main content region of a Modal / Drawer panel. */
+/** Renders the main content region of a Modal / Drawer panel. */
 defineOptions({ name: 'OverlayBody', inheritAttrs: false });
 
 /** The body content — React's `children`. */

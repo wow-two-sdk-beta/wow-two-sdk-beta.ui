@@ -35,7 +35,7 @@ export {
 
 export { type BinaryInput, type DigestAlgorithm, digest, sha1, sha256, sha384, sha512, sha256Hex } from './Digest';
 
-export { URL_SAFE_ALPHABET, randomBytes, randomString } from './Random';
+export { UrlSafeAlphabet, randomBytes, randomString } from './Random';
 
 export { timingSafeEqual } from './TimingSafeEqual';
 

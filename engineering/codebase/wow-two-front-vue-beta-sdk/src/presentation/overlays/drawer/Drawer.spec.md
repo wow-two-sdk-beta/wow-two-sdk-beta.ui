@@ -1,48 +1,45 @@
 # Drawer
 
-## Purpose
-Side-anchored modal — slides in from the edge of the viewport. Use for navigation drawers, side panels, slide-over sheets, mobile bottom sheets.
+Renders only its slot, owning the open state and a11y ids of the Drawer tree below it.
 
-## Anatomy
-```
-<Drawer side?>
-  ├── <Drawer.Trigger asChild?>
-  └── <Drawer.Content>
-        ├── <Drawer.Header>
-        │     ├── <Drawer.Title>
-        │     └── <Drawer.Description>
-        ├── <Drawer.Body>
-        ├── <Drawer.Footer>
-        └── <Drawer.Close asChild?>
-      </Drawer.Content>
-</Drawer>
-```
+Source: [Drawer.vue](Drawer.vue).
 
-## Required behaviors
-- Same modal mechanics as `Dialog` (focus trap, scroll lock, backdrop, dismissal).
-- `side` prop chooses anchor edge: `'right'` (default), `'left'`, `'top'`, `'bottom'`.
-- Animations: slide-in from the chosen edge.
+Public import: `import { Drawer } from '@wow-two-beta/ui-vue/presentation/overlays';`.
 
-## Visual states
-`open` (animated in) · `closed`
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-Same as `Dialog` plus:
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `side` | `'top' \| 'right' \| 'bottom' \| 'left'` | `'right'` | no | Edge to anchor against. |
+| `open` | `boolean` | no | `undefined` | The open state, controlled. The `v-model:open` binding target. |
+| `defaultOpen` | `boolean` | no | `false` | The initial open state when uncontrolled. Default `false`. |
+| `side` | `Side` | no | `'right'` | The edge the panel slides in from. Default `right`. |
+| `dismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
+| `dismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
 
-## Composition
-Same-domain reuse of `Backdrop` and `Dialog`-shaped header/body/footer/close. State machinery is local (own context) since the wrapper layout differs from `Dialog`.
+## Emits
 
-## Accessibility
-- WAI-ARIA Dialog (Modal) pattern — same as `Dialog` (`role="dialog"`, `aria-modal="true"`).
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:open` | `'update:open': [open: boolean];` | Fires when the drawer opens or closes — the `v-model:open` half. |
 
-## Known limitations
-- No drag-to-dismiss gesture (deferred to P6).
-- Width / height fixed per side via Tailwind defaults — caller can override via class on `Drawer.Content`.
+## Slots
 
-## Inspirations
-- shadcn/ui `Sheet`.
-- Radix `Dialog` with positioning override.
-- Mantine `Drawer`.
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [OverlaysExamples.ts](../../../../apps/playground/src/gallery/fixtures/OverlaysExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [Overlays.contract.dom.test.ts](../../../../tests/unit/presentation/overlays/Overlays.contract.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

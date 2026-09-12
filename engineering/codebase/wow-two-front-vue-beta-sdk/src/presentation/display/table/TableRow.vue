@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** A `tr` in a `Table`. Set `data-selected` to tint it with the selection fill. */
+/** Renders a `tr` in a `Table`; `data-selected` tints it with the selection fill. */
 defineOptions({ name: 'TableRow', inheritAttrs: false });
 
 /** The row cells — React's `children`. */

@@ -53,7 +53,7 @@ export function isSubtleAvailable(): boolean {
   return typeof resolveSubtle()?.digest === 'function';
 }
 
-/** Returns the ambient `Crypto`, throwing a diagnostic `Error` when unavailable. Internal — not exported from the barrel. */
+/** Returns the ambient `Crypto`, throwing a diagnostic `Error` when unavailable. Internal — not barrelled. */
 export function requireCrypto(): Crypto {
   const source = resolveCrypto();
   if (source === undefined || typeof source.getRandomValues !== 'function') {
@@ -66,7 +66,7 @@ export function requireCrypto(): Crypto {
   return source;
 }
 
-/** Returns the ambient `SubtleCrypto`, throwing a diagnostic `Error` when unavailable. Internal — not exported from the barrel. */
+/** Returns the ambient `SubtleCrypto`, throwing a diagnostic `Error` when unavailable. Internal — not barrelled. */
 export function requireSubtle(): SubtleCrypto {
   const subtle = resolveSubtle();
   if (subtle === undefined || typeof subtle.digest !== 'function') {

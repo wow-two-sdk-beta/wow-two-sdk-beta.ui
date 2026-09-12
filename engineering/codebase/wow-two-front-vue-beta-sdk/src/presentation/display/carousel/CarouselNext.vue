@@ -9,11 +9,11 @@
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { ChevronRight } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import { useCarouselContext } from './CarouselContext';
 
-/** The step-forward nav button. React shipped it as `Carousel.Next`. */
+/** Renders the step-forward nav button; React shipped it as `Carousel.Next`. */
 defineOptions({ name: 'CarouselNext', inheritAttrs: false });
 
 /** Overrides the chevron — React's `children ?? <Icon …>`. */
@@ -37,7 +37,7 @@ function onClick(event: MouseEvent): void {
 
 const classes = computed(() =>
   cn(
-    'absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground shadow ring-1 ring-border transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40',
+    'absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground shadow ring-1 ring-border transition-colors hover:bg-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40',
     attrs.class as string | undefined,
   ),
 );

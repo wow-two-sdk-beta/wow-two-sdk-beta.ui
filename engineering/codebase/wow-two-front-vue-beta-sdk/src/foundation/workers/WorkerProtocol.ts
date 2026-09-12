@@ -47,7 +47,7 @@ export interface WorkerRequestMessage {
   readonly method: string;
 
   /** The positional arguments, structured-cloned (or transferred) to the worker. */
-  readonly args: readonly unknown[];
+  readonly args: ReadonlyArray<unknown>;
 }
 
 /** Describes a reply carrying a handler's resolved value. */
@@ -128,7 +128,7 @@ export function isWorkerResponseMessage(value: unknown): value is WorkerResponse
 }
 
 /** Builds a request envelope. */
-export function createRequestMessage(id: number, method: string, args: readonly unknown[]): WorkerRequestMessage {
+export function createRequestMessage(id: number, method: string, args: ReadonlyArray<unknown>): WorkerRequestMessage {
   return { channel: WorkerMessageChannel, kind: 'request', id, method, args };
 }
 

@@ -1,42 +1,39 @@
 # Toolbar
 
-## Purpose
-Container for grouped action controls — buttons, separators, links — sharing a single tab stop with arrow-key navigation between items. Use for editor toolbars, action bars, formatting controls.
+Renders a bordered strip of actions that arrow keys walk through as a single tab stop.
 
-## Anatomy
-```
-<Toolbar>
-  ├── <Toolbar.Button> (or <Toolbar.Link>)
-  ├── <Toolbar.Separator />
-  └── ...more items
-</Toolbar>
-```
+Source: [Toolbar.vue](Toolbar.vue).
 
-## Required behaviors
-- Single tab stop. Arrow keys (←/→ horizontal, ↑/↓ vertical) move focus across items (roving).
-- Home/End jump to first/last item.
-- ARIA: container = `role="toolbar"`.
+Internal implementation: compose through the family’s public exports in [index.ts](index.ts).
 
-## Visual states (per item)
-Same as `actions/button`'s focus/hover/disabled states.
+## Contract
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+Inherited contracts: `extends /* @vue-ignore */ HTMLAttributes`. These members remain part of the component surface.
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | no | Layout + arrow-key axis. |
-| `aria-label` | `string` | — | recommended | A11y label for the toolbar. |
+| `orientation` | `Orientation` | no | `OrientationValue.Horizontal` | The layout axis — drives both the arrow-key navigation and the flex direction. Default `horizontal`. |
 
-`Toolbar.Button` / `Toolbar.Link`: standard button/anchor props plus auto-roving-focus participation.
+## Emits
 
-## Composition
-Compound. Same-domain reuse: caller can compose existing `actions/Button` (text, `shape="square"`, or `shape="circle"`) and `ToggleButton` inside `Toolbar.Button asChild`.
+None declared.
 
-## Accessibility
-- WAI-ARIA Toolbar pattern.
+## Slots
 
-## Known limitations
-- No nested groups (e.g., toggle-group within toolbar) with shared roving — item types are flat. Defer to P6 if a real consumer needs it.
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown;` | The toolbar items — buttons, links, and separators sharing one roving tab stop. |
 
-## Inspirations
-- Radix `Toolbar`.
-- React Aria `Toolbar`.
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [ActionsExamples.ts](../../../../apps/playground/src/gallery/fixtures/ActionsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

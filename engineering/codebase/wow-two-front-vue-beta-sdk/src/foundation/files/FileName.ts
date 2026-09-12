@@ -33,10 +33,10 @@ export interface SafeFileNameOptions {
  * control byte ever appears in this source file.
  */
 // eslint-disable-next-line no-control-regex -- stripping control chars is the point of this pattern
-const CONTROL_CHARS = new RegExp('[\\u0000-\\u001f\\u007f]', 'g');
+const ControlCharacters = new RegExp('[\\u0000-\\u001f\\u007f]', 'g');
 
 /** Path separators + the characters Windows reserves in a file name. */
-const RESERVED_CHARS = /[/\\<>:"|?*]+/g;
+const ReservedCharacters = /[/\\<>:"|?*]+/g;
 
 /**
  * Sanitizes a string into a file name safe across Windows / macOS / Linux: strips path separators, the reserved
@@ -48,8 +48,8 @@ export function safeFileName(name: string, options?: SafeFileNameOptions): strin
   const maxLength = Math.max(1, options?.maxLength ?? 255);
 
   const cleaned = name
-    .replace(CONTROL_CHARS, '')
-    .replace(RESERVED_CHARS, replacement)
+    .replace(ControlCharacters, '')
+    .replace(ReservedCharacters, replacement)
     .replace(/\s+/g, ' ')
     .replace(/^[.\s]+|[.\s]+$/g, '')
     .trim();

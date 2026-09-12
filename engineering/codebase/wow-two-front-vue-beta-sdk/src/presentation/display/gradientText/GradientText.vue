@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { ElementTag } from '../../../foundation/utils';
+import type { ElementTag } from '../../../foundation/dom';
 
 /** Defines the gradient sweep direction (compass shorthand). */
 export const GradientTextDirection = {
@@ -25,25 +25,29 @@ export type GradientTextDirection = (typeof GradientTextDirection)[keyof typeof 
 
 export interface GradientTextProps {
   /** The first color stop. Default `var(--color-primary)`. */
-  from?: string;
+  readonly from?: string;
 
   /** The optional middle color stop. */
-  via?: string;
+  readonly via?: string;
 
   /** The last color stop. Default `var(--color-accent, var(--color-primary))`. */
-  to?: string;
+  readonly to?: string;
 
   /** The sweep direction. Default `r`. */
-  direction?: GradientTextDirection;
+  readonly direction?: GradientTextDirection;
 
   /** The gradient-pan animation, skipped under `prefers-reduced-motion`. */
-  isAnimated?: boolean;
+  readonly isAnimated?: boolean;
+  /** The localized pause action label. */
+  readonly pauseLabel?: string;
+  /** The localized resume action label. */
+  readonly resumeLabel?: string;
 
   /** The rendered tag. Default `span`. */
-  as?: ElementTag;
+  readonly as?: ElementTag;
 }
 
-const DIR_TO_DEG: Record<GradientTextDirection, number> = {
+const DirToDeg: Record<GradientTextDirection, number> = {
   r: 90,
   l: 270,
   t: 0,
@@ -56,13 +60,14 @@ const DIR_TO_DEG: Record<GradientTextDirection, number> = {
 </script>
 
 <script setup lang="ts">
-import { computed, normalizeStyle, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { computed, ref, normalizeStyle, useAttrs, useTemplateRef } from 'vue';
+import { cn } from '../../../foundation/styles';
 
 /**
- * Decorative gradient-filled text via `background-clip: text`. Optional
- * `isAnimated` pans the gradient on a 4s loop (skipped under
- * `prefers-reduced-motion` via the global `motion-reduce:` CSS guard).
+ * Renders text filled with a gradient through `background-clip: text`.
+ *
+ * Optional `isAnimated` pans the gradient on a 4s loop, skipped under `prefers-reduced-motion` via the global
+ * `motion-reduce:` CSS guard.
  */
 defineOptions({ name: 'GradientText', inheritAttrs: false });
 
@@ -70,6 +75,8 @@ defineOptions({ name: 'GradientText', inheritAttrs: false });
 defineSlots<{ default(): unknown }>();
 
 const props = withDefaults(defineProps<GradientTextProps>(), {
+  pauseLabel: 'Pause animation',
+  resumeLabel: 'Resume animation',
   from: 'var(--color-primary)',
   via: undefined,
   to: 'var(--color-accent, var(--color-primary))',
@@ -78,6 +85,7 @@ const props = withDefaults(defineProps<GradientTextProps>(), {
   as: 'span',
 });
 
+const paused = ref(false);
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
 
@@ -91,14 +99,15 @@ const classes = computed(() =>
   ),
 );
 
-/** `normalizeStyle` merges left → right, so a caller's `style` lands last and wins — as React's `{ …, ...style }` did. */
+/** `normalizeStyle` merges left → right, so a caller's `style` lands last and wins. */
 const styles = computed(() =>
   normalizeStyle([
     {
-      backgroundImage: `linear-gradient(${DIR_TO_DEG[props.direction]}deg, ${stops.value})`,
+      backgroundImage: `linear-gradient(${DirToDeg[props.direction]}deg, ${stops.value})`,
       backgroundSize: props.isAnimated ? '200% 100%' : undefined,
     },
     attrs.style,
+    { animationPlayState: paused.value ? 'paused' : undefined },
   ]),
 );
 
@@ -115,4 +124,13 @@ defineExpose({ el });
   <component :is="props.as" ref="el" v-bind="rest" :class="classes" :style="styles">
     <slot />
   </component>
+  <button
+    v-if="isAnimated"
+    type="button"
+    :aria-pressed="paused"
+    class="ml-2 rounded border px-2 py-1 text-sm motion-reduce:hidden"
+    @click="paused = !paused"
+  >
+    {{ paused ? resumeLabel : pauseLabel }}
+  </button>
 </template>

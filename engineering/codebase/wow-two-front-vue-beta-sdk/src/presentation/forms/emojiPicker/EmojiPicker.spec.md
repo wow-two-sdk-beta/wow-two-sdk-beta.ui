@@ -1,51 +1,48 @@
 # EmojiPicker
 
-## Purpose
-Emoji picker over the full bundled emoji catalog (`domain/emoji`, ~1870 base emoji): search + a "recently used" bucket + a swappable category nav. Fully controlled — emits the picked `EmojiCatalogEntry` (the full `{ glyph, label, tags, category }` record) or `null` for none. Size is a separate concern (`EmojiSizeControl`), and a popover-hosted variant lives in `EmojiPickerPopover`. Storage-agnostic: recents persist through an injected `StorageBroker`, so the component itself touches no `localStorage`.
+Renders a searchable emoji catalog with a recents bucket and a swappable category nav over the bundled set.
 
-## Anatomy
-```
-<EmojiPicker>
-  ├── header: "Emoji" + None button (clears to null)
-  ├── <SearchInput>                      (forms/searchInput)
-  ├── <CategoryNav>                      (strip | pills — hidden while searching)
-  │     └── <ToggleButtonGroup>          (actions/toggleButtonGroup)
-  └── <EmojiGrid>                        (roving listbox of <EmojiTile>)
-</EmojiPicker>
-```
+Source: [EmojiPicker.vue](EmojiPicker.vue).
 
-## Required behaviors
-- Search filters the whole catalog by label + tags (label matches rank above tag-only); a blank keyword returns to category browsing.
-- The category nav jumps between the synthetic **Recent** bucket and the eight catalog categories; it is hidden while a search is active.
-- Recents are a most-recently-used list (deduped by glyph, capped at 24) persisted through the injected `storage` broker.
-- Clicking an emoji emits its `EmojiCatalogEntry` and records it as recent.
-- **None** clears the selection to `null`.
+Public import: `import { EmojiPicker } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests null (clear) through the caller-owned value; a controlled value remains rendered until the caller accepts. Nested picker reset is handled once by its outer owner.
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Undeclared attributes follow Vue fallthrough to the rendered root when the component has a single element root.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `EmojiCatalogEntry \| null` | — | yes | Controlled selection; `null` = none. |
-| `onChange` | `(entry: EmojiCatalogEntry \| null) => void` | — | yes | Fires on pick and clear. |
-| `storage` | `StorageBroker` | — | yes | Persistence seam for recents. Plug `localStorageStorageBroker`, `memoryStorageBroker()`, or a custom broker. |
-| `categoryNavVariant` | `CategoryNavVariant` | `strip` | no | Segmented icon strip vs labelled pills. |
-| `size` | `EmojiPickerSizeInput` | `md` | no | One scale for all elements, or a per-element `{ search, nav, tile }` map. |
-| `tileShape` | `EmojiTileShape` | `rounded` | no | Rounded chip vs circle tiles. |
-| `rowsCount` | `number` | `6` | no | Scrollable tile-viewport height, in tile rows. |
+| `modelValue` | `EmojiCatalogEntry \| null` | no | — | The current emoji catalog entry, or `null` for none. The `v-model` binding target. |
+| `storage` | `StorageBroker` | yes | — | The persistence contract backing the "recently used" list — required, so the picker stays pure and storage-agnostic. Plug `localStorageStorageBroker` for browser persistence, `memoryStorageBroker()` for a throwaway in-memory store, or a custom `StorageBroker` (Redux, IndexedDB, …). |
+| `categoryNavVariant` | `CategoryNavVariant` | no | `CategoryNavVariantValue.Strip` | The category-navigation affordance. Default `strip`. |
+| `size` | `EmojiPickerSizeInput` | no | — | The element scale — one value for every element, or a per-element `{ search, nav, tile }`. Default `md`. |
+| `tileShape` | `EmojiTileShape` | no | `EmojiTileShapeValue.Rounded` | The emoji-tile frame — rounded chip or circle. Default `rounded`. |
+| `rowsCount` | `number` | no | `6` | The scrollable tile viewport's height, in tile rows. Default `6`. |
+| `label` | `string` | no | `'Emoji'` | The heading rendered above the picker. Default `Emoji`. |
+| `showFirstCategoryWhenRecentsEmpty` | `boolean` | no | `false` | With recents still empty, opens on the first real category instead of the recents bucket. Default `false`. |
+| `scrollThumbColor` | `string` | no | — | The scrollbar thumb color for the tile viewport — any CSS color. Default `var(--color-border-strong)`. |
 
-## Value
-An `EmojiCatalogEntry` (`{ glyph, label, tags, category }` from `domain/emoji`), or `null` for none. Consumers read whatever field they need — chat reads `entry.glyph`; a QR host reads `entry.glyph` and drives size separately through `EmojiSizeControl`.
+## Emits
 
-## Composition
-- Cross-domain: consumes `domain/emoji` (catalog), `foundation/storage` (`StorageBroker`), `foundation/hooks` (`useRecentItems` via `useEmojiPicker`).
-- Cross-group: `presentation/actions` (`Button`, `ToggleButton*`), `presentation/layout` (`Stack`), `presentation/forms` (`SearchInput`).
-- Headless core: `useEmojiPicker({ value, onChange, storage })` owns the keyword / active category / visible list / recents — reusable behind a custom layout.
-- Siblings: `EmojiSizeControl` (standalone size presets) · `EmojiPickerPopover` (popover-hosted trigger + picker).
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [entry: EmojiCatalogEntry \| null];` | Fires when the reader picks an emoji or clears the selection — the `v-model` half. |
 
-## Accessibility
-- Grid is a single-tab-stop `role="listbox"`; each tile is a `role="option"` `<button>` with `aria-label` (emoji name) + `aria-selected`. Arrow keys + Home/End rove focus.
-- Category nav is a single-select `ToggleButtonGroup` labelled "Emoji categories".
-- Search is a native `type="search"` input.
+## Slots
 
-## Known limitations
-- Base emoji only — no skin-tone variants.
-- No custom / uploaded emoji; the catalog is bundled and fixed (regenerated from `@emoji-mart/data`).
+None declared.
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

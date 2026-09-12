@@ -4,84 +4,80 @@ import type { InputSize, InputState } from '../InputStyles';
 
 export interface TagsInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
 
   /** The validity surface. */
-  state?: InputState;
-
-  /** The committed tags, controlled — React's spelling, which wins when both are set. */
-  value?: ReadonlyArray<string>;
+  readonly state?: InputState;
 
   /** The committed tags, controlled. The `v-model` binding target. */
-  modelValue?: ReadonlyArray<string>;
+  readonly modelValue?: ReadonlyArray<string>;
 
   /** The initial tags when uncontrolled. */
-  defaultValue?: ReadonlyArray<string>;
+  readonly defaultValue?: ReadonlyArray<string>;
 
   /** The in-flight text, controlled. The `v-model:input-value` binding target. */
-  inputValue?: string;
+  readonly inputValue?: string;
 
   /** The empty-state placeholder. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /** The characters that commit the current input. Enter and Tab always do. */
-  delimiters?: ReadonlyArray<string>;
+  readonly delimiters?: ReadonlyArray<string>;
 
   /**
    * The predicate gating committed tags. Default: non-empty after trim.
    *
    * Kept a PROP, not an emit: it RETURNS a verdict, which an emit cannot do.
    */
-  validate?: (tag: string) => boolean;
+  readonly validate?: (tag: string) => boolean;
 
   /** Whether the same tag may be committed twice. */
-  allowsDuplicates?: boolean;
+  readonly allowsDuplicates?: boolean;
 
   /** The cap on committed tags. */
-  max?: number;
+  readonly max?: number;
 
   /** The invalid surface override. Falls back to the surrounding form control's `isInvalid`. */
-  isInvalid?: boolean;
+  readonly isInvalid?: boolean;
 
   /** The hidden input name; the hidden input emits the comma-joined value. */
-  name?: string;
+  readonly name?: string;
 
   /**
    * The chip variant.
    *
-   * The NAMED type, not `TagVariants['variant']` as React spelled it — the SFC prop
-   * resolver cannot follow an indexed access into an imported interface, and the build
-   * fails on it while `vue-tsc` stays green.
+   * The NAMED type, not `TagVariants['variant']` — the SFC prop resolver cannot follow
+   * an indexed access into an imported interface, and the build fails on it while
+   * `vue-tsc` stays green.
    */
-  tagVariant?: TagVariant;
+  readonly tagVariant?: TagVariant;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
-  /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
-  readOnly?: boolean;
+  /** The read-only state. Falls back to the form control's `isReadOnly`. */
+  readonly readOnly?: boolean;
 
-  /** The DOM spelling of {@link TagsInputProps.readOnly}, which wins when both are set. */
-  readonly?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly readonly?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import Tag from '../../display/tag/Tag.vue';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 
-/**
- * Free-form tag entry. Type → Enter/comma/Tab commits. Backspace at empty
- * input removes the last tag. Renders chips via `display/Tag`.
- */
+/** Renders committed tags as chips beside a free-form input — Enter, comma or Tab commits the next one. */
 /* `inheritAttrs: false` so `class` folds into the container's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'TagsInput', inheritAttrs: false });
@@ -101,24 +97,19 @@ const props = withDefaults(defineProps<TagsInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader commits or removes a tag — the `v-model` half. */
   'update:modelValue': [tags: ReadonlyArray<string>];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [tags: ReadonlyArray<string>];
-  /** The `v-model:input-value` half. */
+  /** Fires when the reader edits the uncommitted draft text — the `v-model:input-value` half. */
   'update:inputValue': [input: string];
-  /** Replaces React's `onInputChange`. */
-  'input-change': [input: string];
 }>();
 
 const attrs = useAttrs();
 
 const tagsControlled = useControlled<ReadonlyArray<string>>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? [],
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -127,7 +118,6 @@ const textControlled = useControlled<string>({
   default: () => '',
   onChange: (next) => {
     emit('update:inputValue', next);
-    emit('input-change', next);
   },
 });
 
@@ -158,16 +148,17 @@ function removeAt(index: number): void {
 }
 
 function onInput(event: Event): void {
+  if ((event as InputEvent).isComposing) return;
   textControlled.setValue((event.target as HTMLInputElement).value);
 }
 
-/* Runs after any caller-supplied `@keydown` (declared after `v-bind`), exactly as React's
-   `onKeyDown?.(e)` ran before this body. */
+/* Runs after any caller-supplied `@keydown` — declared after `v-bind`. */
 function onKeydown(event: KeyboardEvent): void {
+  if (event.isComposing) return;
   if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
   if (event.key === 'Enter' || (event.key === 'Tab' && text.value)) {
     if (text.value) {
-      event.preventDefault();
+      if (event.key === 'Enter') event.preventDefault();
       commit(text.value);
       pendingDelete.value = false;
     }
@@ -192,7 +183,7 @@ function onKeydown(event: KeyboardEvent): void {
   pendingDelete.value = false;
 }
 
-/* React did not gate blur on `defaultPrevented`; neither does this. */
+/* Blur is not gated on `defaultPrevented`. */
 function onBlur(): void {
   if (text.value) commit(text.value);
   pendingDelete.value = false;
@@ -207,9 +198,9 @@ function isPendingDelete(index: number): boolean {
 }
 
 /**
- * The Vue `Tag` renders its close button only when the consumer bound `@close` — the same
- * `onClose && <button/>` guard React had. A listener cannot be conditionally omitted with
- * `@close`, so it is bound through `v-on` with an object that is empty when closing is off.
+ * `Tag` renders its close button only when the consumer bound `@close`. A listener cannot be
+ * conditionally omitted with `@close`, so it is bound through `v-on` with an object that is
+ * empty when closing is off.
  */
 function tagListeners(index: number): Record<string, () => void> {
   if (isDisabled.value || isReadOnly.value) return {};
@@ -223,8 +214,8 @@ function tagClass(index: number): string {
 /* Never declared props — a declared `'aria-describedby'` would arrive as
    `props.ariaDescribedby` and stop reaching the DOM. Both are read off the attrs so the
    consumer's value can override the context's. */
-const ariaDescribedBy = computed(() => attrs['aria-describedby'] as string | undefined);
-const ariaRequired = computed(() => attrs['aria-required'] as 'true' | 'false' | boolean | undefined);
+const ariaDescribedBy = computed(() => attrs[AriaAttribute.DescribedBy] as string | undefined);
+const ariaRequired = computed(() => attrs[AriaAttribute.Required] as 'true' | 'false' | boolean | undefined);
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const describedBy = computed(() => ariaDescribedBy.value ?? ctx?.describedBy);
@@ -234,9 +225,9 @@ const requiredAttr = computed(() => ariaRequired.value ?? (ctx?.isRequired || un
 const inputPlaceholder = computed(() => (tags.value.length === 0 ? props.placeholder : undefined));
 const hiddenValue = computed(() => tags.value.join(','));
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-describedby', 'aria-required']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.DescribedBy, AriaAttribute.Required]);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
@@ -248,12 +239,19 @@ const rootClass = computed(() =>
   ),
 );
 
-/** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+/** The rendered `<input>`. */
 defineExpose({ el: input });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  tagsControlled.reset();
+  textControlled.reset();
+});
 </script>
 
 <template>
   <div
+    :key="formResetRevision"
     role="group"
     :data-disabled="isDisabled || undefined"
     :data-readonly="isReadOnly || undefined"
@@ -282,12 +280,19 @@ defineExpose({ el: input });
       :aria-invalid="invalid || undefined"
       :aria-describedby="describedBy"
       :aria-required="requiredAttr"
-      class="min-w-[6rem] flex-1 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-subtle-foreground disabled:cursor-not-allowed"
+      class="min-w-[6rem] flex-1 border-0 bg-transparent p-0 text-sm outline-hidden placeholder:text-subtle-foreground disabled:cursor-not-allowed"
       v-bind="passthroughAttrs"
       @input="onInput"
+      @compositionend="onInput"
       @keydown="onKeydown"
       @blur="onBlur"
     />
     <input v-if="name" type="hidden" :name="name" :value="hiddenValue" />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </div>
 </template>

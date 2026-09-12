@@ -3,49 +3,47 @@ import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyl
 
 export interface EmailInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
   /** The border weight. */
-  border?: InputBorder;
+  readonly border?: InputBorder;
   /** The focus-ring weight. */
-  ring?: InputRing;
+  readonly ring?: InputRing;
 
   /** The value, controlled. The `v-model` binding target. */
-  modelValue?: string | number;
-
-  /** The value, controlled — React's spelling of `modelValue`, which wins when both are set. */
-  value?: string | number;
+  readonly modelValue?: string | number;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: string | number;
+  readonly defaultValue?: string | number;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 
   /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
-  readOnly?: boolean;
+  readonly readOnly?: boolean;
 
-  /** The DOM spelling of {@link EmailInputProps.readOnly}, which wins when both are set. */
-  readonly?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly readonly?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 
-/** `<input type="email">` with sensible defaults (autocomplete, inputmode). */
+/** Renders an `<input type="email">` carrying the email `autocomplete` and `inputmode` defaults. */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'EmailInput', inheritAttrs: false });
@@ -61,10 +59,8 @@ const props = withDefaults(defineProps<EmailInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader edits the address — the `v-model` half. */
   'update:modelValue': [value: string];
-  /** Replaces React's `onValueChange`. Native `input` / `change` stay fallthrough listeners. */
-  'value-change': [value: string];
 }>();
 
 const attrs = useAttrs();
@@ -73,17 +69,17 @@ const attrs = useAttrs();
 const ctx = useFormControl();
 
 const controlled = useControlled<string | number>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? '',
   onChange: (next) => {
     emit('update:modelValue', String(next));
-    emit('value-change', String(next));
   },
 });
 
 const currentValue = controlled.value;
 
 function onInput(event: Event): void {
+  if ((event as InputEvent).isComposing) return;
   controlled.setValue((event.target as HTMLInputElement).value);
 }
 
@@ -96,9 +92,9 @@ const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isRea
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'value']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
@@ -116,6 +112,10 @@ const rootClass = computed(() =>
 const root = useTemplateRef<HTMLInputElement>('root');
 
 /** The rendered element — the Vue stand-in for the React original's forwarded ref. */
+useNativeFormReset(root, controlled.reset, () => {
+  if (root.value) root.value.value = String(currentValue.value ?? '');
+});
+
 defineExpose({ el: root });
 </script>
 
@@ -136,5 +136,6 @@ defineExpose({ el: root });
     :class="rootClass"
     v-bind="passthroughAttrs"
     @input="onInput"
+    @compositionend="onInput"
   />
 </template>

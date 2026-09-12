@@ -11,12 +11,12 @@
  * ------------------------------------------------------------------------- */
 
 /** The six tone families that each carry base / -foreground / -soft / -soft-foreground. */
-export const TONE_FAMILIES = ['primary', 'accent', 'destructive', 'info', 'success', 'warning'] as const;
+export const ToneFamilies = ['primary', 'accent', 'destructive', 'info', 'success', 'warning'] as const;
 
-export type ToneFamilyName = (typeof TONE_FAMILIES)[number];
+export type ToneFamilyName = (typeof ToneFamilies)[number];
 
 /** Surface + chrome tokens (everything that isn't one of the tone families). */
-export const SURFACE_TOKENS = [
+export const SurfaceTokens = [
   'background',
   'foreground',
   'card',
@@ -46,7 +46,7 @@ type ToneFamilyTokens<F extends string> = F extends string ? `${F}${ToneSlotSuff
  * = surface/chrome tokens ∪ (each tone family × {base,-foreground,-soft,-soft-foreground}).
  * 15 surface + 6×4 tone = 39 keys total.
  */
-export type SemanticToken = (typeof SURFACE_TOKENS)[number] | ToneFamilyTokens<ToneFamilyName>;
+export type SemanticToken = (typeof SurfaceTokens)[number] | ToneFamilyTokens<ToneFamilyName>;
 
 /** A complete set of color values — one CSS color string per semantic token. */
 export type TokenSet = Record<SemanticToken, string>;
@@ -71,9 +71,9 @@ export interface ToneSlots {
  * constants the type is built from, so it can never drift from `SemanticToken`.
  * Used by the validator/emitter to iterate exhaustively.
  */
-export const SEMANTIC_TOKENS: ReadonlyArray<SemanticToken> = [
-  ...SURFACE_TOKENS,
-  ...TONE_FAMILIES.flatMap((f) => [f, `${f}-foreground`, `${f}-soft`, `${f}-soft-foreground`] as SemanticToken[]),
+export const SemanticTokens: ReadonlyArray<SemanticToken> = [
+  ...SurfaceTokens,
+  ...ToneFamilies.flatMap((f) => [f, `${f}-foreground`, `${f}-soft`, `${f}-soft-foreground`] as SemanticToken[]),
 ];
 
 /** Write a tone family's four slots into a partial token set under the family's keys. */

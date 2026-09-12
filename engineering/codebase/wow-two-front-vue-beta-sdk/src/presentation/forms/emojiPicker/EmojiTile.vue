@@ -31,13 +31,13 @@ export interface EmojiTileProps {
 import { computed, type CSSProperties } from 'vue';
 import { EmojiPickerSizes, EmojiTileShape as EmojiTileShapeValue } from './EmojiPicker.variants';
 
-/** Renders one selectable emoji tile as a listbox option — its glyph sized by the picker scale, framed by the tile shape. */
+/** Renders one emoji tile as a listbox option — glyph sized by the picker scale, framed by the tile shape. */
 defineOptions({ name: 'EmojiTile' });
 
 const props = defineProps<EmojiTileProps>();
 
 const emit = defineEmits<{
-  /** Replaces React's `onSelect`. Carries this tile's catalog entry. */
+  /** Fires when the reader clicks or keys this tile, carrying its catalog entry. Replaces React's `onSelect`. */
   select: [entry: EmojiCatalogEntry];
 }>();
 

@@ -3,26 +3,23 @@ import type { AvatarSize } from '../avatar/Avatar.vue';
 
 export interface AvatarGroupProps {
   /** The maximum avatars to render. Excess is shown as a "+N" tile. */
-  max?: number;
+  readonly max?: number;
 
   /** The avatar size applied to all children. Default `md`. */
-  size?: AvatarSize;
+  readonly size?: AvatarSize;
 
   /** The negative-margin overlap class applied between avatars. Default `-ml-2`. */
-  overlap?: string;
+  readonly overlap?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { cloneVNode, computed, useAttrs, useSlots, useTemplateRef, type VNode } from 'vue';
-import { cn, SizePreset } from '../../../foundation/utils';
+import { cn, SizePreset } from '../../../foundation/styles';
 import { renderableChildren } from '../../../foundation/primitives';
 import Avatar from '../avatar/Avatar.vue';
 
-/**
- * Stacked group of `Avatar` children with overlap and an optional "+N more"
- * indicator when children exceed `max`.
- */
+/** Renders a stack of overlapping `Avatar` children, with a "+N more" chip once they exceed `max`. */
 defineOptions({ name: 'AvatarGroup', inheritAttrs: false });
 
 /** The `Avatar` children — React's `children`. */
@@ -75,7 +72,7 @@ defineExpose({ el });
 
 <template>
   <div ref="el" v-bind="rest" :class="classes">
-    <div v-for="(child, index) in sizedChildren()" :key="index" :class="itemClasses(index)">
+    <div v-for="(child, index) in sizedChildren()" :key="child.key ?? index" :class="itemClasses(index)">
       <!-- Force consistent size -->
       <component :is="child" />
     </div>

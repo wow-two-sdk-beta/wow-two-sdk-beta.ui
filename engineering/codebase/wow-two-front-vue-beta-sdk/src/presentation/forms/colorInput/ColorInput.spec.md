@@ -1,44 +1,49 @@
 # ColorInput
 
-## Purpose
-Text input for hex colors with a leading swatch preview. Validates on blur — accepts `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`. Use as a standalone input or as part of `ColorPicker`.
+Renders a hex text field with a live swatch, committing on blur or Enter and reverting an unparseable draft.
 
-## Anatomy
-```
-<ColorInput>
-  ├── leading <ColorSwatch> (preview of current value)
-  └── <input type="text"> (hex string)
-</ColorInput>
-```
+Source: [ColorInput.vue](ColorInput.vue).
 
-## Required behaviors
-- Accepts hex with or without leading `#`. Auto-prepends `#` on blur if missing.
-- Invalid hex on blur: revert to last valid value, set `state="invalid"` briefly (caller can wire validation).
-- Emits `onValueChange(hexString)` only on valid hex (after blur or Enter).
-- Pairs with `FormControl` (id, disabled, required, invalid, describedBy).
+Public import: `import { ColorInput } from '@wow-two-beta/ui-vue/presentation/forms';`.
 
-## Visual states
-Same as `forms/InputStyles` `inputBaseVariants`.
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the state owner and restores the resulting DOM representation; a cancelled reset changes nothing.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `string \| null` | — | no | Controlled hex (`#RRGGBB` or `#RRGGBBAA`). |
-| `defaultValue` | `string \| null` | `null` | no | Uncontrolled. |
-| `onValueChange` | `(hex \| null) => void` | — | no | Fires on commit (blur / Enter). |
-| `size`, `state` | — | — | no | From `inputBaseVariants`. |
-| `swatchShape` | `'square' \| 'circle'` | `'square'` | no | Swatch shape. |
-| `withAlpha` | `boolean` | `false` | no | Allow / require 8-digit hex. |
+| `size` | `InputSize` | no | — | The control size. |
+| `state` | `InputState` | no | — | The validity surface. |
+| `border` | `InputBorder` | no | — | The border weight. |
+| `ring` | `InputRing` | no | — | The focus-ring weight. |
+| `modelValue` | `string \| null` | no | — | The committed hex, controlled. The `v-model` binding target. |
+| `defaultValue` | `string \| null` | no | — | The initial hex when uncontrolled. |
+| `swatchShape` | `SwatchShape` | no | `SwatchShapeValue.Square` | The swatch outline shape shown inside the field. |
+| `hasAlpha` | `boolean` | no | `false` | Whether a committed hex keeps its alpha channel (`#RRGGBBAA`). |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
 
-## Composition
-Self-contained. Same-domain reuse: `ColorSwatch`, `InputStyles`, `ColorExtensions`.
+## Emits
 
-## Dependencies
-Foundation: `utils/cn`, `hooks/useControlled`. Same-domain: `colorSwatch`, `InputStyles`, `ColorExtensions`.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: string \| null];` | Fires when the reader commits a new hex on blur or Enter — the `v-model` half. |
 
-## Known limitations
-- Hex only (P6: support RGB/HSL syntax).
+## Slots
 
-## Inspirations
-- Mantine `ColorInput`.
-- React Aria `ColorField`.
+None declared.
+
+## Exposed handle
+
+`{ el: root }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

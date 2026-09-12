@@ -1,26 +1,3 @@
-// The streaming read: a continuous subscription to the device's position, handed back as a disposer.
-//
-// A FORGOTTEN WATCH IS A BATTERY BUG, and the worst kind — invisible in every metric a web app has. `watchId`
-// registrations are owned by the browser, not by the page's component tree: they outlive the component that
-// started them, they are not garbage-collected when the last reference to the handler is dropped, and a
-// high-accuracy watch holds the GPS radio ACTIVE for as long as it lives. A single watch started in an effect
-// with no cleanup keeps draining after the user has navigated away from the screen that wanted it, and a
-// remount starts a second one on top. Hence the shape: this returns a disposer, not an id — there is no way to
-// call it and be handed something you can forget to clean up without noticing you were handed it.
-//
-// The disposer is IDEMPOTENT. Browsers recycle watch ids, so a second `clearWatch(id)` after the id has been
-// reissued would cancel an unrelated watch belonging to some other part of the app. The `disposed` flag makes
-// double-dispose (a watcher re-run that cleans up twice, a defensive `finally`) a no-op instead of sabotage.
-//
-// EMISSIONS AFTER DISPOSE ARE DROPPED. `clearWatch` stops future acquisitions but does not un-queue a callback
-// the platform has already scheduled, so a late fix can arrive after the consumer has torn down. The same flag
-// gates the handler.
-//
-// Every emission is the same `PositionResult` union `getCurrentPosition` resolves to — including `unsupported`,
-// emitted once and synchronously where there is no API, so a subscriber always hears exactly one answer rather
-// than waiting forever for a fix that cannot come. A throwing handler is swallowed: a consumer's broken render
-// must not kill the subscription or throw inside a platform callback.
-
 import { toError } from '../errors';
 
 import { geolocationApi } from './CanLocate';
@@ -28,11 +5,11 @@ import {
   toPositionResult,
   toPositionSuccess,
   type PositionRequestOptions,
-  type PositionResult,
-} from './PositionResult';
+  type PositionReadResult,
+} from './PositionMapping';
 
 /** Receives every emission of a watch — a new fix, or a failure. Called with the same union as a one-shot read. */
-export type PositionHandler = (result: PositionResult) => void;
+export type PositionHandler = (result: PositionReadResult) => void;
 
 /**
  * Subscribes to the device's position and calls `handler` on every fix and every failure.
@@ -45,7 +22,7 @@ export type PositionHandler = (result: PositionResult) => void;
  *
  * Never throws — neither this call nor any emission.
  *
- * @param handler Called with each {@link PositionResult}. A throw from it is swallowed.
+ * @param handler Called with each {@link PositionReadResult}. A throw from it is swallowed.
  * @param options Accuracy / timeout / cache-age tuning. See {@link PositionRequestOptions}.
  * @returns The disposer. Idempotent; safe to call more than once and after emissions have stopped.
  */
@@ -54,7 +31,7 @@ export function watchPosition(handler: PositionHandler, options?: PositionReques
   let watchId: number | undefined;
 
   /** Hands the subscriber a result, absorbing a throw from their own handler and ignoring post-dispose noise. */
-  const emit = (result: PositionResult): void => {
+  const emit = (result: PositionReadResult): void => {
     if (disposed) return;
     try {
       handler(result);
@@ -66,7 +43,7 @@ export function watchPosition(handler: PositionHandler, options?: PositionReques
 
   const api = geolocationApi();
   if (api === undefined || typeof api.watchPosition !== 'function') {
-    emit({ status: 'unsupported' });
+    emit({ ok: false, failure: { status: 'unsupported' } });
     return () => {
       disposed = true;
     };
@@ -82,7 +59,7 @@ export function watchPosition(handler: PositionHandler, options?: PositionReques
     // never hands `clearWatch` a value it cannot act on.
     if (typeof id === 'number') watchId = id;
   } catch (error) {
-    emit({ status: 'failed', error: toError(error) });
+    emit({ ok: false, failure: { status: 'failed', error: toError(error) } });
   }
 
   return () => {

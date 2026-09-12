@@ -1,55 +1,62 @@
 # TagsInput
 
-## Purpose
-Free-form tag entry. User types text → Enter / comma / Tab commits a tag; Backspace at empty input deletes the last tag.
+Renders committed tags as chips beside a free-form input — Enter, comma or Tab commits the next one.
 
-## Anatomy
-```
-<TagsInput>          ← outer container styled like an input
-  <Tag/>             ← rendered per value entry (Tag from display/)
-  <Tag/>
-  <input/>           ← inline text input
-</TagsInput>
-```
+Source: [TagsInput.vue](TagsInput.vue).
 
-## Required behaviors
-- Enter / `,` / Tab → commit current text as new tag (if non-empty + not duplicate).
-- Backspace on empty input → focus last tag → second Backspace removes it.
-- Click anywhere on container → focuses inner input.
-- Disabled / read-only propagate to chips (close buttons hidden).
+Public import: `import { TagsInput } from '@wow-two-beta/ui-vue/presentation/forms';`.
 
-## Visual states
-`default` · `focus-within` · `invalid` · `disabled` · `read-only` · `empty (placeholder visible)`
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- Composing Enter/Tab and delimiters do not commit a tag.
+- Tab may commit a nonempty draft while keeping native keyboard navigation.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `value` | `string[]` | — | Controlled tags. |
-| `defaultValue` | `string[]` | `[]` | Uncontrolled initial. |
-| `onValueChange` | `(tags: string[]) => void` | — | Fires on add/remove. |
-| `inputValue` | `string` | — | Controlled text in the input. |
-| `onInputChange` | `(input: string) => void` | — | |
-| `placeholder` | `string` | `'Add tag…'` | |
-| `delimiters` | `string[]` | `[',']` | Extra characters that commit a tag (Enter always works). |
-| `validate` | `(tag: string) => boolean` | `(t) => t.trim().length > 0` | Reject duplicates / empties / format. |
-| `allowDuplicates` | `boolean` | `false` | |
-| `max` | `number` | — | Cap on number of tags. |
-| `disabled` / `invalid` / `readOnly` | `boolean` | `false` | |
-| `name` | `string` | — | Hidden input emits comma-joined value. |
-| `tagVariant` | `TagVariants['variant']` | `'neutral'` | |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Mirrors `inputBaseVariants`. |
 
-## Composition model
-Single `<TagsInput>` component. No compound surface — tag rendering is internal. Cross-domain import: `display/Tag` for the chips.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `size` | `InputSize` | no | — | The control size. |
+| `state` | `InputState` | no | — | The validity surface. |
+| `modelValue` | `ReadonlyArray<string>` | no | — | The committed tags, controlled. The `v-model` binding target. |
+| `defaultValue` | `ReadonlyArray<string>` | no | — | The initial tags when uncontrolled. |
+| `inputValue` | `string` | no | — | The in-flight text, controlled. The `v-model:input-value` binding target. |
+| `placeholder` | `string` | no | `'Add tag…'` | The empty-state placeholder. |
+| `delimiters` | `ReadonlyArray<string>` | no | `() => [',']` | The characters that commit the current input. Enter and Tab always do. |
+| `validate` | `(tag: string) => boolean` | no | `(t: string) => t.trim().length > 0` | The predicate gating committed tags. Default: non-empty after trim. Kept a PROP, not an emit: it RETURNS a verdict, which an emit cannot do. |
+| `allowsDuplicates` | `boolean` | no | `false` | Whether the same tag may be committed twice. |
+| `max` | `number` | no | — | The cap on committed tags. |
+| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
+| `name` | `string` | no | — | The hidden input name; the hidden input emits the comma-joined value. |
+| `tagVariant` | `TagVariant` | no | `'neutral'` | The chip variant. The NAMED type, not `TagVariants['variant']` — the SFC prop resolver cannot follow an indexed access into an imported interface, and the build fails on it while `vue-tsc` stays green. |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `readOnly` | `boolean` | no | `undefined` | The read-only state. Falls back to the form control's `isReadOnly`. |
+| `readonly` | `boolean` | no | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
 
-## Accessibility
-- `role="group"`, `aria-label` recommended.
-- Inner input gets all standard form attrs (id, disabled, readOnly, aria-invalid).
-- Each chip's close button has `aria-label`.
-- Backspace-back-to-tag transition uses `tabindex` so keyboard users can navigate to a chip.
+## Emits
 
-## Dependencies
-Foundation: `utils`, `forms/InputStyles`. Cross-domain: `display/Tag`.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [tags: ReadonlyArray<string>];` | Fires when the reader commits or removes a tag — the `v-model` half. |
+| `update:inputValue` | `'update:inputValue': [input: string];` | Fires when the reader edits the uncommitted draft text — the `v-model:input-value` half. |
 
-## Inspirations
-Mantine `TagsInput`, Ark `TagsInput`, react-tag-input.
+## Slots
+
+None declared.
+
+## Exposed handle
+
+`{ el: input }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Reset regressions: [CompositeReset.dom.test.ts](../../../../tests/unit/presentation/forms/CompositeReset.dom.test.ts).
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [InputInteraction.dom.test.ts](../../../../tests/unit/presentation/forms/InputInteraction.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

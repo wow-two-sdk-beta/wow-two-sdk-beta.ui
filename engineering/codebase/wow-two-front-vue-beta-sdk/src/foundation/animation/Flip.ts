@@ -58,7 +58,7 @@ export interface FlipTransform {
 export type FlipOptions = Pick<AnimateOptions, 'duration' | 'easing' | 'reducedMotion'>;
 
 /** The transform of an element that did not move or resize — the no-op FLIP. */
-export const IDENTITY_FLIP_TRANSFORM: FlipTransform = {
+export const IdentityFlipTransform: FlipTransform = {
   translateX: 0,
   translateY: 0,
   scaleX: 1,
@@ -66,7 +66,7 @@ export const IDENTITY_FLIP_TRANSFORM: FlipTransform = {
 };
 
 /** Below this, a translate (px) or a scale delta is invisible and not worth an animation. */
-const FLIP_EPSILON = 0.01;
+const FlipEpsilon = 0.01;
 
 /** Returns `value` when it is a usable number, else `fallback` — the guard every rect field passes through. */
 function finiteOr(value: number, fallback: number): number {
@@ -124,7 +124,7 @@ export function computeFlipTransform(first: RectLike, last: RectLike): FlipTrans
  * @param epsilon Tolerance for sub-pixel layout noise. Defaults to `0.01`.
  * @returns `true` when the element effectively did not move or resize.
  */
-export function isIdentityFlip(transform: FlipTransform, epsilon: number = FLIP_EPSILON): boolean {
+export function isIdentityFlip(transform: FlipTransform, epsilon: number = FlipEpsilon): boolean {
   return (
     Math.abs(transform.translateX) < epsilon &&
     Math.abs(transform.translateY) < epsilon &&

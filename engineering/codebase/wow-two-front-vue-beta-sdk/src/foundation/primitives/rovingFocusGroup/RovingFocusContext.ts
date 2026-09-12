@@ -12,6 +12,7 @@ import {
   type MaybeRefOrGetter,
   type ShallowRef,
 } from 'vue';
+import { AriaAttribute } from '../../dom/enums/AriaAttribute';
 
 /**
  * Defines the arrow-key navigation axis of a roving-focus group.
@@ -45,7 +46,9 @@ export interface ItemEntry {
 export function isNodeDisabled(node: HTMLElement | null): boolean {
   if (!node) return false;
   return (
-    node.matches(':disabled') || node.getAttribute('aria-disabled') === 'true' || node.hasAttribute('data-disabled')
+    node.matches(':disabled') ||
+    node.getAttribute(AriaAttribute.Disabled) === 'true' ||
+    node.hasAttribute('data-disabled')
   );
 }
 
@@ -102,7 +105,7 @@ export interface RovingFocusContextValue {
 export const RovingFocusKey: InjectionKey<RovingFocusContextValue> = Symbol('wow-two.rovingFocus');
 
 export interface UseRovingFocusItemOptions {
-  /** Preferred tab stop while focus is outside the group (e.g. the selected tab) — APG composite-widget pattern. Accepts a ref or getter. */
+  /** Preferred tab stop while focus is outside the group (e.g. the selected tab) — APG composite-widget pattern. */
   isActive?: MaybeRefOrGetter<boolean>;
 }
 
@@ -153,7 +156,7 @@ export function useRovingFocusItem(options: UseRovingFocusItemOptions = {}): Use
     observer = new MutationObserver(() => context.ensureEnabledStop(id));
     observer.observe(el, {
       attributes: true,
-      attributeFilter: ['disabled', 'aria-disabled', 'data-disabled'],
+      attributeFilter: ['disabled', AriaAttribute.Disabled, 'data-disabled'],
     });
   });
 

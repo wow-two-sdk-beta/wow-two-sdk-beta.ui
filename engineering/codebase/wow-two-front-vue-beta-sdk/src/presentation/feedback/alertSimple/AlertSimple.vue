@@ -1,19 +1,19 @@
 <script lang="ts">
-import type { Severity } from '../../../foundation/utils';
+import type { Severity } from '../../../foundation/styles';
 
 export interface AlertSimpleProps {
   /** The semantic severity palette. */
-  severity?: Severity;
+  readonly severity?: Severity;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { alertSimpleVariants } from './AlertSimple.variants';
 
 /**
- * Atomic alert — a styled colored container that takes free-form children.
+ * Renders a severity-tinted alert container around free-form children.
  * No internal slots; consumer composes title/description/actions inline.
  *
  * For the structured Icon + Title + Description + Actions composition use
@@ -25,6 +25,11 @@ import { alertSimpleVariants } from './AlertSimple.variants';
 defineOptions({ name: 'AlertSimple', inheritAttrs: false });
 
 const props = defineProps<AlertSimpleProps>();
+
+defineSlots<{
+  /** The alert content. */
+  default?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');

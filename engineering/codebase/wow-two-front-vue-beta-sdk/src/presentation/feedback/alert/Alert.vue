@@ -1,33 +1,33 @@
 <script lang="ts">
-import type { Severity } from '../../../foundation/utils';
+import type { Severity } from '../../../foundation/styles';
 
 export interface AlertProps {
   /** The semantic severity palette. */
-  severity?: Severity;
+  readonly severity?: Severity;
   /** The optional leading icon. Rich content → the `icon` slot. */
-  icon?: string;
+  readonly icon?: string;
   /** The bold heading line. Rich content → the `title` slot. */
-  title?: string;
+  readonly title?: string;
   /** The body text below the title. Rich content → the `description` slot. */
-  description?: string;
+  readonly description?: string;
   /** The right-side action slot (typically Button(s)). Rich content → the `actions` slot. */
-  actions?: string;
+  readonly actions?: string;
   /** The accessible label for the close button. Default `"Dismiss"`. */
-  closeLabel?: string;
+  readonly closeLabel?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { X } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import AlertSimple from '../alertSimple/AlertSimple.vue';
 
 const CloseIcon = X;
 
 /**
- * Slotted Alert — Icon + Title + Description + Actions on top of `AlertSimple`.
+ * Renders an icon, title, description, and actions laid over the `AlertSimple` atom.
  * Pair: `AlertSimple` (atom, free-form children) + `Alert` (this molecule).
  *
  * Each of React's four `ReactNode` props keeps its string form and gains a
@@ -41,6 +41,19 @@ const props = withDefaults(defineProps<AlertProps>(), { closeLabel: 'Dismiss' })
 const emit = defineEmits<{
   /** Fires when the close button is activated. */
   close: [];
+}>();
+
+defineSlots<{
+  /** The extra content below the description. */
+  default?(): unknown;
+  /** The leading icon. Falls back to the `icon` prop. */
+  icon?(): unknown;
+  /** The heading line. Falls back to the `title` prop. */
+  title?(): unknown;
+  /** The body text below the title. Falls back to the `description` prop. */
+  description?(): unknown;
+  /** The action row. Falls back to the `actions` prop. */
+  actions?(): unknown;
 }>();
 
 const attrs = useAttrs();
@@ -97,7 +110,7 @@ defineExpose({ el });
       v-if="hasClose()"
       type="button"
       :aria-label="props.closeLabel"
-      class="-mr-1 grid h-6 w-6 shrink-0 place-items-center rounded text-current opacity-60 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-current"
+      class="-mr-1 grid h-6 w-6 shrink-0 place-items-center rounded text-current opacity-60 transition-opacity hover:opacity-100 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-current"
       @click="emit('close')"
     >
       <Icon :icon="CloseIcon" :size="14" />

@@ -1,5 +1,5 @@
 export { default as Menu, type MenuProps } from './Menu.vue';
-/* React attached these as `Menu.Item` / `.Group` / `.Label` / `.Separator` via
+/* React attached these as `Menu.Item` / `.Group` / `.LabelText` / `.SeparatorLayout` via
    `Object.assign`. An SFC's generated default export cannot carry statics
    cleanly, so they ship as siblings. */
 export { default as MenuItem, type MenuItemProps } from './MenuItem.vue';

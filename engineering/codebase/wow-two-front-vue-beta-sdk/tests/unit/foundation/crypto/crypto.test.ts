@@ -15,7 +15,7 @@ import {
   stableStringify,
   timingSafeEqual,
   utf8ToBytes,
-  URL_SAFE_ALPHABET,
+  UrlSafeAlphabet,
 } from '@src/foundation/crypto';
 
 /*
@@ -67,7 +67,7 @@ describe('randomness', () => {
     const value = randomString(32);
     expect(value).toHaveLength(32);
     for (const character of value) {
-      expect(URL_SAFE_ALPHABET).toContain(character);
+      expect(UrlSafeAlphabet).toContain(character);
     }
   });
 });

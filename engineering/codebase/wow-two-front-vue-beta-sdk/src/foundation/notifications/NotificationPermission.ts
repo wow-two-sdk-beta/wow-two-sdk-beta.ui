@@ -1,17 +1,3 @@
-// The permission half of the web-notification vector: read the current grant, ask for one. Two entry points,
-// one four-member union, no throw.
-//
-// `Notification.permission` is a synchronous static read, so the getter needs no promise. What it does need is a
-// fourth state the platform itself does not have: `unsupported`. Under SSR, and on a browser without the API,
-// there is nothing to grant — and a consumer must render that differently from `denied` ("the user said no",
-// which is recoverable only through browser settings) and from `default` ("not asked yet", the one state where
-// an enable button makes sense).
-//
-// `requestPermission` ships in two incompatible shapes. The modern one returns a promise; Safari before 16
-// returns `undefined` and invokes a callback instead. Passing the callback AND adopting a returned promise
-// covers both at once — modern engines still honour the deprecated callback, so both may fire, and a
-// settle-once latch keeps the second from mattering.
-
 /**
  * The state of this origin's notification grant.
  *
@@ -20,7 +6,23 @@
  * - `default` — not decided yet. The only state where {@link requestNotificationPermission} shows a prompt.
  * - `unsupported` — no Notification API here: SSR, a non-supporting browser, or an unreadable implementation.
  */
-export type NotificationPermissionState = 'granted' | 'denied' | 'default' | 'unsupported';
+export const NotificationPermissionState = {
+  /** Notifications will be shown. */
+  Granted: 'granted',
+
+  /** The user refused. The prompt will not reappear; only browser settings can undo it. */
+  Denied: 'denied',
+
+  /** Not decided yet — the only state where {@link requestNotificationPermission} shows a prompt. */
+  Default: 'default',
+
+  /** No Notification API here: SSR, a non-supporting browser, or an unreadable implementation. */
+  Unsupported: 'unsupported',
+} as const;
+
+/** The state of this origin's notification grant. */
+export type NotificationPermissionState =
+  (typeof NotificationPermissionState)[keyof typeof NotificationPermissionState];
 
 /**
  * Whether the environment exposes a constructible `Notification`. False under SSR and on non-supporting
@@ -48,10 +50,16 @@ function hasRequestPermission(): boolean {
 
 /** Maps whatever the platform answered onto the union, tolerating an off-spec implementation. */
 function normalizePermission(value: unknown): NotificationPermissionState {
-  if (value === 'granted' || value === 'denied' || value === 'default') return value;
+  if (
+    value === NotificationPermissionState.Granted ||
+    value === NotificationPermissionState.Denied ||
+    value === NotificationPermissionState.Default
+  ) {
+    return value;
+  }
   // An answer we don't recognize tells us nothing about the grant. `default` is the one state where asking
   // again is both harmless and useful, so an unreadable answer degrades to "not decided yet".
-  return 'default';
+  return NotificationPermissionState.Default;
 }
 
 /** Narrows a value to something awaitable — the modern `requestPermission` return, or any thenable polyfill. */
@@ -100,14 +108,14 @@ function requestRawPermission(): Promise<unknown> {
  * an external change, use `useNotificationPermission`, which pairs this read with a Permissions API signal.
  */
 export function getNotificationPermission(): NotificationPermissionState {
-  if (!isNotificationSupported()) return 'unsupported';
+  if (!isNotificationSupported()) return NotificationPermissionState.Unsupported;
 
   try {
     return normalizePermission(Notification.permission);
   } catch {
     // A throwing `permission` getter means the API is nominally present but unusable. Reported as `unsupported`
     // so a consumer hides the enable affordance rather than offering one that cannot work.
-    return 'unsupported';
+    return NotificationPermissionState.Unsupported;
   }
 }
 
@@ -120,7 +128,7 @@ export function getNotificationPermission(): NotificationPermissionState {
  * since that remains the truth of the matter.
  */
 export async function requestNotificationPermission(): Promise<NotificationPermissionState> {
-  if (!hasRequestPermission()) return 'unsupported';
+  if (!hasRequestPermission()) return NotificationPermissionState.Unsupported;
 
   try {
     return normalizePermission(await requestRawPermission());

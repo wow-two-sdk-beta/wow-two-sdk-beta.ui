@@ -1,50 +1,53 @@
 # DatePicker
 
-## Purpose
-Date input with a calendar popover — click the trigger to open a `Calendar` for selection. Use when a unified custom UI matters (cross-browser consistency over native `DateInput`'s browser-specific picker).
+Renders a trigger button that opens a popover `CalendarPicker` and shows the picked date.
 
-## Anatomy
-```
-<DatePicker>
-  ├── trigger button (shows formatted date or placeholder)
-  └── popover
-        └── <Calendar>          (embedded)
-</DatePicker>
-```
+Source: [DatePicker.vue](DatePicker.vue).
 
-## Required behaviors
-- Click trigger toggles popover. Outside click / Escape closes.
-- Selecting a day in the calendar fills the value + closes the popover.
-- Focus returns to trigger on close.
-- ARIA: trigger has `aria-haspopup="dialog"`, `aria-expanded`. Popover wraps `Calendar`.
+Public import: `import { DatePicker } from '@wow-two-beta/ui-vue/presentation/forms';`.
 
-## Visual states
-Trigger: same as `forms/InputStyles` `inputBaseVariants` plus `data-state="open"`.
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `Date \| null` | — | no | Controlled. |
-| `defaultValue` | `Date \| null` | `null` | no | Uncontrolled. |
-| `onValueChange` | `(d) => void` | — | no | Selection callback. |
-| `placeholder` | `string` | `'Pick a date'` | no | Trigger text when no value. |
-| `format` | `(d) => string` | `Date.toLocaleDateString()` | no | Custom display formatter. |
-| `min` / `max` | `Date \| null` | — | no | Forwarded to Calendar. |
-| `isDisabled` | `(d) => boolean` | — | no | Forwarded to Calendar. |
-| `disabled`, `name`, `invalid` | — | — | no | Standard input shape. |
+| `modelValue` | `Temporal.PlainDate \| null` | no | — | The selected date, controlled. The `v-model` binding target. |
+| `defaultValue` | `Temporal.PlainDate \| null` | no | — | The uncontrolled initial selection. |
+| `placeholder` | `string` | no | `'Pick a date'` | The empty-state text on the trigger. |
+| `format` | `(date: Temporal.PlainDate) => string` | no | `(d: Temporal.PlainDate) => d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })` | The trigger's date formatter. Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do. |
+| `min` | `Temporal.PlainDate \| null` | no | — | The minimum selectable date. |
+| `max` | `Temporal.PlainDate \| null` | no | — | The maximum selectable date. |
+| `isDisabled` | `(date: Temporal.PlainDate) => boolean` | no | — | The custom per-day disable predicate. Also a returning prop. |
+| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
+| `name` | `string` | no | — | The hidden input name; when set, a hidden input ships the ISO value with form submission. |
+| `size` | `SelectPickerSize` | no | — | The trigger size. |
+| `state` | `InputState` | no | — | The validity surface. |
+| `id` | `string` | no | — | The trigger's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
 
-## Composition
-Wraps `Calendar` (same domain). Floating panel built inline via primitives (no cross-domain `Popover` import).
+## Emits
 
-## Accessibility
-- WAI-ARIA Date Picker pattern.
-- Title-less popover: trigger's accessible name labels the dialog.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [date: Temporal.PlainDate \| null];` | Fires when the reader picks a day in the popover. The `v-model` half. |
 
-## Known limitations
-- No keyboard typing into the trigger (use `DateInput` if typing matters more than the calendar UI).
-- Single-month calendar.
+## Slots
 
-## Inspirations
-- shadcn/ui `Popover + Calendar` recipe.
-- Mantine `DateInput`.
-- React Aria `DatePicker`.
+None declared.
+
+## Exposed handle
+
+`{ el: computed(() => trigger.value?.el ?? null) }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [DateTimeControls.dom.test.ts](../../../../tests/unit/presentation/forms/DateTimeControls.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

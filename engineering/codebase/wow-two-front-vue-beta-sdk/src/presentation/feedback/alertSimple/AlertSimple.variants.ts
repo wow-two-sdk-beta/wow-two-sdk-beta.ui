@@ -1,4 +1,4 @@
-import { Severity, tv, type VariantProps } from '../../../foundation/utils';
+import { Severity, tv, type VariantProps } from '../../../foundation/styles';
 
 export const alertSimpleVariants = tv({
   base: 'rounded-md border px-4 py-3 text-sm',

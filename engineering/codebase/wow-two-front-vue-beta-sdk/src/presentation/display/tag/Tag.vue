@@ -3,26 +3,27 @@ import type { TagVariant } from './Tag.variants';
 
 export interface TagProps {
   /** The color treatment. */
-  variant?: TagVariant;
+  readonly variant?: TagVariant;
 
   /** The accessible label for the close button. Default `"Remove"`. */
-  closeLabel?: string;
+  readonly closeLabel?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, useAttrs, useTemplateRef } from 'vue';
 import { X } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import { tagVariants } from './Tag.variants';
 
 const CloseIcon = X;
 
 /**
- * Pill with an optional close button. The close button is a raw `<button>`
- * to keep the strict atom rule (Tag is L3, so importing Button would make
- * this an atom-on-atom composition).
+ * Renders a pill with an optional close button, shown only when the consumer binds `@close`.
+ *
+ * The close button is a raw `<button>` to keep the strict atom rule — `Tag` is L3, so importing `Button` would make
+ * this an atom-on-atom composition.
  */
 defineOptions({ name: 'Tag', inheritAttrs: false });
 
@@ -66,7 +67,7 @@ defineExpose({ el });
       v-if="hasClose()"
       type="button"
       :aria-label="props.closeLabel"
-      class="-mr-1 inline-flex h-4 w-4 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      class="-mr-1 inline-flex h-4 w-4 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
       @click="emit('close')"
     >
       <Icon :icon="CloseIcon" :size="12" />

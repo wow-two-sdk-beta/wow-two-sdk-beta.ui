@@ -33,5 +33,6 @@ writeFileSync(jsonPath, JSON.stringify(emitThemesManifest(THEMES), null, 2) + '\
 
 const proven = THEMES.filter((t) => t.meta.contrastAA).length;
 console.log(
-  `themes: emitted ${THEMES.length} themes → dist/themes.css + dist/themes.json (${proven}/${THEMES.length} proven AA)`,
+  `themes: emitted ${THEMES.length} themes → dist/themes.css + dist/themes.json ` +
+    `(${proven}/${THEMES.length} pass declared contrast pairs)`,
 );

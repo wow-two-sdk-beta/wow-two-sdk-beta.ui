@@ -11,7 +11,8 @@
 //   | Backing store | `localStorage` | IndexedDB |
 //   | Timing | **synchronous** — readable during render | **asynchronous** — always awaited |
 //   | Wire format | JSON | **structured clone** |
-//   | Holds | strings, numbers, plain objects | + `Blob` · `File` · `ArrayBuffer` · typed arrays · `Map` · `Set` · `Date` · `RegExp` · cyclic graphs |
+//   | Holds | strings, numbers, plain objects | + `Blob` · `File` · `ArrayBuffer` · typed arrays |
+//   |  |  | + `Map` · `Set` · `Date` · `RegExp` · cyclic graphs |
 //   | Capacity | ~5MB per origin, hard wall | the origin's storage quota (typically GBs) |
 //   | On failure | swallows — a bad read degrades to a miss | **rejects** with a normalized `Error` |
 //

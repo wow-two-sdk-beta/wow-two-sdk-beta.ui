@@ -10,17 +10,17 @@ import FeedbackGroup from './groups/FeedbackGroup.vue';
 import NavGroup from './groups/NavGroup.vue';
 import OverlaysGroup from './groups/OverlaysGroup.vue';
 
-/* One group at a time. A single page holding all 232 components is slow to
+/* One group at a time. A single page holding every component is slow to
    scroll, slow to re-render on a theme switch, and impossible to screenshot
    usefully — the whole point of the gallery is looking at it. */
 const GROUPS = [
-  { key: 'layout', label: 'layout', count: 24, view: LayoutGroup },
-  { key: 'actions', label: 'actions', count: 14, view: ActionsGroup },
-  { key: 'forms', label: 'forms', count: 74, view: FormsGroup },
-  { key: 'display', label: 'display', count: 73, view: DisplayGroup },
-  { key: 'feedback', label: 'feedback', count: 27, view: FeedbackGroup },
-  { key: 'nav', label: 'nav', count: 11, view: NavGroup },
-  { key: 'overlays', label: 'overlays', count: 9, view: OverlaysGroup },
+  { key: 'layout', label: 'layout', view: LayoutGroup },
+  { key: 'actions', label: 'actions', view: ActionsGroup },
+  { key: 'forms', label: 'forms', view: FormsGroup },
+  { key: 'display', label: 'display', view: DisplayGroup },
+  { key: 'feedback', label: 'feedback', view: FeedbackGroup },
+  { key: 'nav', label: 'nav', view: NavGroup },
+  { key: 'overlays', label: 'overlays', view: OverlaysGroup },
 ] as const;
 
 const active = ref<string>(new URLSearchParams(location.search).get('g') ?? 'layout');
@@ -30,14 +30,6 @@ const activeView = computed(() => GROUPS.find((g) => g.key === active.value)?.vi
 
 const errorCount = computed(() => diagnostics.filter((d) => d.kind === 'error').length);
 const warnCount = computed(() => diagnostics.filter((d) => d.kind === 'warn').length);
-
-function select(key: string) {
-  active.value = key;
-  const url = new URL(location.href);
-  url.searchParams.set('g', key);
-  history.replaceState(null, '', url);
-  window.scrollTo(0, 0);
-}
 </script>
 
 <template>
@@ -48,22 +40,17 @@ function select(key: string) {
       <span class="font-mono text-sm font-semibold">@wow-two-beta/ui-vue</span>
 
       <nav class="flex flex-wrap gap-1">
-        <button
+        <a
           v-for="g in GROUPS"
           :key="g.key"
-          type="button"
+          :href="`?g=${g.key}`"
+          :aria-current="active === g.key ? 'page' : undefined"
           class="rounded-md px-2 py-1 font-mono text-xs transition-colors"
-          :class="
-            active === g.key
-              ? 'bg-primary text-primary-foreground'
-              : 'text-subtle-foreground hover:bg-muted'
-          "
+          :class="active === g.key ? 'bg-primary text-primary-foreground' : 'text-subtle-foreground hover:bg-muted'"
           :data-group="g.key"
-          @click="select(g.key)"
         >
           {{ g.label }}
-          <span class="opacity-60">{{ g.count }}</span>
-        </button>
+        </a>
       </nav>
 
       <div class="ml-auto flex items-center gap-2">
@@ -82,9 +69,7 @@ function select(key: string) {
           class="rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground"
           data-testid="theme-select"
         >
-          <option v-for="t in themes" :key="t.id" :value="t.id">
-            {{ t.name }} — {{ t.id }} ({{ t.status }})
-          </option>
+          <option v-for="t in themes" :key="t.id" :value="t.id">{{ t.name }} — {{ t.id }} ({{ t.status }})</option>
         </select>
 
         <button
@@ -98,13 +83,8 @@ function select(key: string) {
       </div>
     </header>
 
-    <div
-      v-if="showDiagnostics"
-      class="max-h-[50svh] overflow-auto border-b border-border bg-card px-4 py-3"
-    >
-      <p v-if="!diagnostics.length" class="text-xs text-subtle-foreground">
-        No Vue warnings or errors captured.
-      </p>
+    <div v-if="showDiagnostics" class="max-h-[50svh] overflow-auto border-b border-border bg-card px-4 py-3">
+      <p v-if="!diagnostics.length" class="text-xs text-subtle-foreground">No Vue warnings or errors captured.</p>
       <ul v-else class="space-y-1">
         <li
           v-for="(d, i) in diagnostics"

@@ -1,101 +1,93 @@
 <script lang="ts">
-import type { HTMLAttributes } from 'vue';
+import type { HTMLAttributes, InjectionKey } from 'vue';
 
 export interface DismissableLayerProps extends /* @vue-ignore */ HTMLAttributes {
   /** Fires when Escape is pressed and this is the topmost layer. */
-  onEscape?: (event: KeyboardEvent) => void;
-
-  /** Fires when a pointerdown lands outside this layer's DOM and this is topmost. */
-  onOutsidePointerDown?: (event: PointerEvent) => void;
-
-  /** The Escape-listener disable flag for this layer. */
-  isEscapeDisabled?: boolean;
-
-  /** The outside-pointer-down-listener disable flag for this layer. */
-  isOutsideClickDisabled?: boolean;
+  readonly onEscape?: (event: KeyboardEvent) => void;
+  /** Fires when a pointerdown lands outside the topmost layer. */
+  readonly onOutsidePointerDown?: (event: PointerEvent) => void;
+  /** Suppress Escape for this layer without activating an underlying layer. */
+  readonly isEscapeDisabled?: boolean;
+  /** Suppress outside dismissal without activating an underlying layer. */
+  readonly isOutsideClickDisabled?: boolean;
 }
 
 interface LayerEntry {
-  node: HTMLElement;
-  onEscape?: (event: KeyboardEvent) => void;
-  onOutsidePointerDown?: (event: PointerEvent) => void;
+  readonly parent: LayerEntry | null;
+  readonly node: () => HTMLElement | null;
+  readonly onEscape: (event: KeyboardEvent) => void;
+  readonly onOutsidePointerDown: (event: PointerEvent) => void;
 }
 
-const layerStack: Array<LayerEntry> = [];
+const LayerKey: InjectionKey<LayerEntry> = Symbol('DismissableLayer');
+const LayerStacks = new WeakMap<Document, LayerEntry[]>();
+const HandledEvents = new WeakSet<Event>();
+
+function isDescendant(entry: LayerEntry, ancestor: LayerEntry): boolean {
+  for (let current: LayerEntry | null = entry; current; current = current.parent) {
+    if (current === ancestor) return true;
+  }
+  return false;
+}
 </script>
 
 <script setup lang="ts">
-import { onMounted, onScopeDispose, useTemplateRef, watch } from 'vue';
+import { inject, onMounted, onScopeDispose, provide, useTemplateRef } from 'vue';
 
-/**
- * Stack-aware dismissal layer. Multiple layers may stack (modal > popover);
- * only the topmost reacts to Escape / outside click. Used as the base of
- * Modal, Drawer, Popover, Menu, HoverCard, ContextMenu.
- */
+/** Renders the topmost Escape/outside-dismiss layer, preserving logical nesting across Teleport. */
 defineOptions({ name: 'DismissableLayer' });
-
 const props = defineProps<DismissableLayerProps>();
-
+defineSlots<{ default(): unknown }>();
 const el = useTemplateRef<HTMLDivElement>('el');
-
-// The stack entry reads the handlers off `props` at call time rather than
-// capturing them. React needed refs here so registration could run once —
-// re-registering on callback identity change would reorder the stack and
-// corrupt dismissal ordering. Vue props are live, so the indirection is free.
-let entry: LayerEntry | null = null;
+const parent = inject(LayerKey, null);
+const entry: LayerEntry = {
+  parent,
+  node: () => el.value,
+  onEscape: (event) => {
+    if (!props.isEscapeDisabled) props.onEscape?.(event);
+  },
+  onOutsidePointerDown: (event) => {
+    if (!props.isOutsideClickDisabled) props.onOutsidePointerDown?.(event);
+  },
+};
+provide(LayerKey, entry);
+let cleanup: (() => void) | null = null;
 
 onMounted(() => {
-  const node = el.value;
-  if (!node) return;
-  entry = {
-    node,
-    onEscape: (event) => props.onEscape?.(event),
-    onOutsidePointerDown: (event) => props.onOutsidePointerDown?.(event),
+  const document = el.value?.ownerDocument;
+  if (!document) return;
+  const stack = LayerStacks.get(document) ?? [];
+  LayerStacks.set(document, stack);
+  const descendant = stack.findIndex((candidate) => isDescendant(candidate, entry));
+  if (descendant < 0) stack.push(entry);
+  else stack.splice(descendant, 0, entry);
+  const onKeyDown = (event: KeyboardEvent): void => {
+    if (stack.at(-1) !== entry || event.key !== 'Escape' || event.defaultPrevented || HandledEvents.has(event)) return;
+    HandledEvents.add(event);
+    entry.onEscape(event);
   };
-  layerStack.push(entry);
+  const onPointer = (event: PointerEvent): void => {
+    const node = el.value;
+    if (stack.at(-1) !== entry || !node || HandledEvents.has(event)) return;
+    HandledEvents.add(event);
+    const target = event.target as Node | null;
+    if (event.composedPath().includes(node) || (target && node.contains(target))) return;
+    entry.onOutsidePointerDown(event);
+  };
+  document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('pointerdown', onPointer, true);
+  cleanup = () => {
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('pointerdown', onPointer, true);
+    const index = stack.indexOf(entry);
+    if (index >= 0) stack.splice(index, 1);
+    if (stack.length === 0) LayerStacks.delete(document);
+  };
 });
-
-// Registered at setup level — `onScopeDispose` only binds to the component's
-// effect scope while that scope is current, which it is not inside `onMounted`.
 onScopeDispose(() => {
-  if (!entry) return;
-  const index = layerStack.indexOf(entry);
-  if (index >= 0) layerStack.splice(index, 1);
-  entry = null;
+  cleanup?.();
+  cleanup = null;
 });
-
-watch(
-  () => props.isEscapeDisabled,
-  (isDisabled, _previous, onCleanup) => {
-    if (isDisabled || typeof document === 'undefined') return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      const top = layerStack[layerStack.length - 1];
-      if (top && top.node === el.value) top.onEscape?.(event);
-    };
-    document.addEventListener('keydown', onKeyDown);
-    onCleanup(() => document.removeEventListener('keydown', onKeyDown));
-  },
-  { immediate: true },
-);
-
-watch(
-  () => props.isOutsideClickDisabled,
-  (isDisabled, _previous, onCleanup) => {
-    if (isDisabled || typeof document === 'undefined') return;
-    const onPointer = (event: PointerEvent) => {
-      const top = layerStack[layerStack.length - 1];
-      if (!top || top.node !== el.value) return;
-      const target = event.target as Node | null;
-      if (!target || el.value?.contains(target)) return;
-      top.onOutsidePointerDown?.(event);
-    };
-    document.addEventListener('pointerdown', onPointer, true);
-    onCleanup(() => document.removeEventListener('pointerdown', onPointer, true));
-  },
-  { immediate: true },
-);
-
 defineExpose({ el });
 </script>
 

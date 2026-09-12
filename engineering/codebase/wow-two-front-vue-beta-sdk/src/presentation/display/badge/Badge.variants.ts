@@ -1,4 +1,4 @@
-import { tv, Size, type VariantProps } from '../../../foundation/utils';
+import { tv, Size, type VariantProps } from '../../../foundation/styles';
 
 /** Defines the Badge color treatment. */
 export const BadgeVariant = {

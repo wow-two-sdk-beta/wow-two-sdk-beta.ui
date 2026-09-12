@@ -1,21 +1,21 @@
 <script lang="ts">
-import type { Severity } from '../../../foundation/utils';
+import type { Severity } from '../../../foundation/styles';
 
 export interface CalloutProps {
   /** The semantic severity palette. */
-  severity?: Severity;
+  readonly severity?: Severity;
   /** The optional leading icon. Rich content → the `icon` slot. */
-  icon?: string;
+  readonly icon?: string;
   /** The bold heading line. Rich content → the `title` slot. */
-  title?: string;
+  readonly title?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
-import { cn, Severity as SeverityToken } from '../../../foundation/utils';
+import { cn, Severity as SeverityToken } from '../../../foundation/styles';
 
-const SEVERITY: Record<Severity, string> = {
+const SeverityClass: Record<Severity, string> = {
   info: 'border-l-info text-foreground',
   success: 'border-l-success text-foreground',
   warning: 'border-l-warning text-foreground',
@@ -24,8 +24,8 @@ const SEVERITY: Record<Severity, string> = {
 };
 
 /**
- * Quieter cousin of `Alert` — colored left rule, no fill. Use for inline
- * doc-style notes, supplementary content (think MDX callouts).
+ * Renders an inline doc-style note — colored left rule, no fill, quieter than `Alert`.
+ * Use for supplementary content (think MDX callouts).
  *
  * React's `children` becomes the default slot; `icon` / `title` keep their
  * string form and gain same-named slots for rich content.
@@ -33,6 +33,15 @@ const SEVERITY: Record<Severity, string> = {
 defineOptions({ name: 'Callout', inheritAttrs: false });
 
 const props = withDefaults(defineProps<CalloutProps>(), { severity: SeverityToken.Info });
+
+defineSlots<{
+  /** The note body. */
+  default?(): unknown;
+  /** The leading icon. Falls back to the `icon` prop. */
+  icon?(): unknown;
+  /** The heading line. Falls back to the `title` prop. */
+  title?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const slots = useSlots();
@@ -44,7 +53,7 @@ const hasTitle = computed(() => Boolean(props.title) || Boolean(slots.title));
 const classes = computed(() =>
   cn(
     'flex items-start gap-3 rounded-md border-l-4 bg-card px-4 py-3 text-sm',
-    SEVERITY[props.severity],
+    SeverityClass[props.severity],
     attrs.class as string | undefined,
   ),
 );

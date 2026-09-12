@@ -1,22 +1,22 @@
 <script lang="ts">
 export interface AudioPlayerProps {
   /** The audio source URL. */
-  src: string;
-  /** The pre-computed per-bin amplitudes — swaps the range scrubber for an `AudioWaveform`. */
-  peaks?: ReadonlyArray<number>;
+  readonly src: string;
+  /** The pre-computed per-bin amplitudes — swaps the range scrubber for an `AudioWaveformPreview`. */
+  readonly peaks?: ReadonlyArray<number>;
   /** The autoplay state, forwarded to the native `<audio>`. */
-  autoPlay?: boolean;
+  readonly autoPlay?: boolean;
   /** The loop state, forwarded to the native `<audio>`. */
-  loop?: boolean;
+  readonly loop?: boolean;
   /** The initial volume in 0..1. Default `1`. */
-  defaultVolume?: number;
+  readonly defaultVolume?: number;
   /** The initial playback rate. Default `1`. */
-  defaultPlaybackRate?: number;
+  readonly defaultPlaybackRate?: number;
   /** The dense layout. Default `false`. */
-  isCompact?: boolean;
+  readonly isCompact?: boolean;
 }
 
-const SPEEDS: ReadonlyArray<number> = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const PlaybackRates: ReadonlyArray<number> = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
@@ -30,15 +30,17 @@ function formatTime(seconds: number): string {
 </script>
 
 <script setup lang="ts">
+import { UrlExtensions } from '../../../foundation/dom';
 import { computed, onMounted, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import { Pause, Play, Volume2, VolumeX } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
-import { AudioWaveform } from '../audioWaveform';
+import { AudioWaveformPreview } from '../audioWaveformPreview';
 
 /**
- * Custom-controls audio player. Native `<audio>` underneath; play/pause,
- * scrubber (or `AudioWaveform` if `peaks` provided), volume, speed.
+ * Renders an audio player with play/pause, a scrubber, volume, and speed over a native `<audio>`.
+ *
+ * The scrubber becomes an `AudioWaveformPreview` when `peaks` are provided.
  */
 defineOptions({ name: 'AudioPlayer', inheritAttrs: false });
 
@@ -56,7 +58,7 @@ const emit = defineEmits<{
   play: [];
   /** Fires when playback pauses. */
   pause: [];
-  /** Fires on every `timeupdate` with the current time and the total duration. */
+  /** Fires when playback time advances, with the current time and the total duration. */
   'time-update': [time: number, duration: number];
   /** Fires when playback reaches the end. */
   ended: [];
@@ -176,7 +178,7 @@ const progress = computed(() => (duration.value > 0 ? currentTime.value / durati
 
 const classes = computed(() =>
   cn(
-    'flex items-center gap-3 rounded-md border border-border bg-card p-2 text-card-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'flex items-center gap-3 rounded-md border border-border bg-card p-2 text-card-foreground shadow-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     props.isCompact && 'gap-2 p-1.5',
     attrs.class as string | undefined,
   ),
@@ -191,8 +193,13 @@ const rest = computed(() => {
   return others;
 });
 
-const TIME_STYLE = { minWidth: '3.5rem' } as const;
-const DURATION_STYLE = { minWidth: '3.5rem', textAlign: 'right' } as const;
+const TimeStyle = { minWidth: '3.5rem' } as const;
+const DurationStyle = { minWidth: '3.5rem', textAlign: 'right' } as const;
+
+/** The play / pause toggle's size-independent classes — round primary surface plus the focus ring. */
+const PlayToggleClasses =
+  'inline-flex shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground ' +
+  'transition-colors hover:bg-primary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring';
 
 defineExpose({ el });
 </script>
@@ -208,7 +215,7 @@ defineExpose({ el });
   >
     <audio
       ref="el"
-      :src="src"
+      :src="UrlExtensions.safeResource(src)"
       :autoplay="autoPlay"
       :loop="loop"
       v-bind="rest"
@@ -221,21 +228,16 @@ defineExpose({ el });
     <button
       type="button"
       :aria-label="playing ? 'Pause' : 'Play'"
-      :class="
-        cn(
-          'inline-flex shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          isCompact ? 'h-7 w-7' : 'h-9 w-9',
-        )
-      "
+      :class="cn(PlayToggleClasses, isCompact ? 'h-7 w-7' : 'h-9 w-9')"
       @click="togglePlay"
     >
       <Icon :icon="playing ? Pause : Play" :size="isCompact ? 12 : 14" />
     </button>
-    <span class="shrink-0 text-xs tabular-nums text-muted-foreground" :style="TIME_STYLE">{{
+    <span class="shrink-0 text-xs tabular-nums text-muted-foreground" :style="TimeStyle">{{
       formatTime(currentTime)
     }}</span>
     <div class="flex-1">
-      <AudioWaveform
+      <AudioWaveformPreview
         v-if="peaks"
         :peaks="peaks"
         :progress="progress"
@@ -257,7 +259,7 @@ defineExpose({ el });
         @input="onRangeInput"
       />
     </div>
-    <span class="shrink-0 text-xs tabular-nums text-muted-foreground" :style="DURATION_STYLE">{{
+    <span class="shrink-0 text-xs tabular-nums text-muted-foreground" :style="DurationStyle">{{
       formatTime(duration)
     }}</span>
     <button
@@ -273,7 +275,7 @@ defineExpose({ el });
       aria-label="Playback speed"
       class="h-7 rounded-sm border border-input bg-background px-1 text-xs"
     >
-      <option v-for="rate in SPEEDS" :key="rate" :value="rate">{{ rate }}×</option>
+      <option v-for="rate in PlaybackRates" :key="rate" :value="rate">{{ rate }}×</option>
     </select>
   </div>
 </template>

@@ -5,16 +5,16 @@ import { TimelineStatus } from './TimelineContext';
 
 export interface TimelineItemProps {
   /** The semantic tone of the node marker. Default `default`. */
-  status?: TimelineStatus;
+  readonly status?: TimelineStatus;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { STATUS_BG, TimelineAlign, useTimelineContext } from './TimelineContext';
+import { cn } from '../../../foundation/styles';
+import { StatusBackground, TimelineAlign, useTimelineContext } from './TimelineContext';
 
-/** One node on the rail — marker + connector column, then the content column. */
+/** Renders one rail node — marker and connector column, then the content column. */
 defineOptions({ name: 'TimelineItem', inheritAttrs: false });
 
 defineSlots<{
@@ -38,7 +38,7 @@ const isLast = computed(() => attrs['data-last'] !== undefined);
 const classes = computed(() => cn('relative flex gap-3 pb-6 last:pb-0', attrs.class as string | undefined));
 
 const markerClasses = computed(() =>
-  cn('relative z-raised grid h-7 w-7 place-items-center rounded-full border-2', STATUS_BG[props.status]),
+  cn('relative z-raised grid h-7 w-7 place-items-center rounded-full border-2', StatusBackground[props.status]),
 );
 
 const contentClasses = computed(() =>

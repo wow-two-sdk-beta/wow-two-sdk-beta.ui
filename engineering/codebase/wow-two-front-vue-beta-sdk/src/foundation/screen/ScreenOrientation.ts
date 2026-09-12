@@ -1,35 +1,10 @@
-// The Screen Orientation API — reading which way the device is held, and asking it to stay that way.
-//
-// LOCKING ALMOST ALWAYS NEEDS FULLSCREEN. On mobile Chromium — the only place `lock()` meaningfully works — the
-// document must already be fullscreen, and a call from a normal page rejects. Desktop browsers reject it
-// outright, and Safari does not implement `lock()` at all on any platform. So the realistic sequence is
-// `enterFullscreen()` first, `lockOrientation()` second, and a consumer that skips the first step gets a
-// rejection that has nothing to do with orientation being unavailable.
-//
-// That is why `requires-fullscreen` is its own status. Reported as `failed` it reads as "orientation locking is
-// broken here" and a consumer hides the feature; reported accurately it says "you called this too early", which
-// is fixable in one line. The union is widened for this one entry point rather than for the whole slice, the
-// same way `foundation/share` widens `ShareResult` with `copied` for `shareOrCopy` alone — the extra leg exists
-// where it is real and nowhere else.
-//
-// NAMING, because this repo has two orientations: `foundation/utils`' `Orientation` is a LAYOUT axis
-// (horizontal / vertical) for components. This slice's `ScreenOrientationType` is a DEVICE orientation
-// (portrait-primary / landscape-secondary …). They are unrelated vocabularies and the `Screen` prefix keeps an
-// import from silently resolving to the wrong one.
-//
-// The read and lock vocabularies differ, which is not an accident of this file: the platform reports one of four
-// concrete orientations, but accepts eight lock targets including the relative `natural`, `portrait`, and
-// `landscape`. Modelling them as one type would let `getOrientation()` claim to return `any`.
-//
-// KNOWN GAP — the legacy `window.orientationchange` event and `window.orientation` angle are deliberately NOT
-// read. They are the only signal on iOS before 16.4, but `screen.orientation` is absent there too, so a
-// subscription would fire against a `getOrientation()` that returns `null` regardless. One mechanism, one
-// answer; the same call `foundation/device`'s `useDisplayMode` makes about `navigator.standalone`.
+import type { OrientationLockResult } from './models/OrientationLockResult';
+import type { OrientationLockFailure } from './models/OrientationLockFailure';
 
 import { toError } from '../errors';
 
 import { getScreen, isFunction, readMember } from './ScreenEnvironment';
-import type { ScreenResult } from './ScreenResult';
+import type { ScreenRequestResult } from './ScreenOutcome';
 
 /** The concrete orientations the platform reports — what `getOrientation` can return. */
 export const ScreenOrientationType = {
@@ -68,18 +43,11 @@ export const ScreenOrientationLock = {
 
 /** One of the {@link ScreenOrientationLock} values. */
 export type ScreenOrientationLock = (typeof ScreenOrientationLock)[keyof typeof ScreenOrientationLock];
-
-/**
- * A {@link ScreenResult} widened with the precondition that only orientation locking has.
- *
- * `requires-fullscreen` means the API is present and willing, but the document is not fullscreen — enter
- * fullscreen and retry. Distinct from `denied` (the platform refused outright) and from `unsupported` (this
- * device cannot lock at all, which is every desktop browser and all of Safari).
- */
-export type OrientationLockResult = ScreenResult | { readonly status: 'requires-fullscreen'; readonly error: Error };
+export type { OrientationLockFailure } from './models/OrientationLockFailure';
+export type { OrientationLockResult } from './models/OrientationLockResult';
 
 /** The `status` discriminant of an {@link OrientationLockResult}. */
-export type OrientationLockStatus = OrientationLockResult['status'];
+export type OrientationLockStatus = 'ok' | OrientationLockFailure['status'];
 
 /** `ScreenOrientation.lock`, as the platform exposes it. */
 type OrientationLockCall = (this: unknown, orientation: string) => Promise<void>;
@@ -91,7 +59,7 @@ type OrientationUnlockCall = (this: unknown) => void;
 const FullscreenRequirementPattern = /fullscreen/i;
 
 /** The reported orientations, for validating whatever the platform actually puts in `screen.orientation.type`. */
-const KnownOrientationTypes: readonly string[] = Object.values(ScreenOrientationType);
+const KnownOrientationTypes: ReadonlyArray<string> = Object.values(ScreenOrientationType);
 
 /** The `screen.orientation` object, or `undefined` where the API is absent (older iOS, SSR). */
 function getScreenOrientation(): unknown {
@@ -104,7 +72,7 @@ function isOrientationType(value: unknown): value is ScreenOrientationType {
 }
 
 /** Sorts a rejected `lock()` into the vocabulary — see this file's header on why fullscreen gets its own leg. */
-function classifyOrientationRejection(cause: unknown): Exclude<OrientationLockResult, { status: 'ok' }> {
+function classifyOrientationRejection(cause: unknown): OrientationLockFailure {
   const error = toError(cause);
 
   // Checked before the name: browsers disagree on the type here (`SecurityError`, `NotSupportedError`, a bare
@@ -173,13 +141,13 @@ export async function lockOrientation(orientation: ScreenOrientationLock): Promi
   const screenOrientation = getScreenOrientation();
 
   const lock = readMember(screenOrientation, 'lock') as OrientationLockCall | undefined;
-  if (!isFunction(lock) || lock === undefined) return { status: 'unsupported' };
+  if (!isFunction(lock) || lock === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   try {
     await lock.call(screenOrientation, orientation);
-    return { status: 'ok' };
+    return { ok: true, value: undefined };
   } catch (error) {
-    return classifyOrientationRejection(error);
+    return { ok: false, failure: classifyOrientationRejection(error) };
   }
 }
 
@@ -194,18 +162,18 @@ export async function lockOrientation(orientation: ScreenOrientationLock): Promi
  *
  * @returns `ok` when the lock was released, `unsupported` where the API is absent, `failed` on a throw.
  */
-export function unlockOrientation(): ScreenResult {
+export function unlockOrientation(): ScreenRequestResult {
   const screenOrientation = getScreenOrientation();
 
   const unlock = readMember(screenOrientation, 'unlock') as OrientationUnlockCall | undefined;
-  if (!isFunction(unlock) || unlock === undefined) return { status: 'unsupported' };
+  if (!isFunction(unlock) || unlock === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   try {
     unlock.call(screenOrientation);
-    return { status: 'ok' };
+    return { ok: true, value: undefined };
   } catch (error) {
     // `unlock()` has no fullscreen precondition, so the widened leg cannot apply here — a throw is a plain failure.
-    return { status: 'failed', error: toError(error) };
+    return { ok: false, failure: { status: 'failed', error: toError(error) } };
   }
 }
 

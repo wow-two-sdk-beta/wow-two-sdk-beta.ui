@@ -1,17 +1,17 @@
 import { defineComponent, h, type PropType } from 'vue';
-import type { ElementType } from '../../utils/polymorphic';
+import type { ElementType } from '../../dom/Polymorphic';
 import { renderSlotClone, type AnyProps } from './Slot';
 
 export interface PrimitiveProps {
   /** The element or component to render. Default `'div'`. Ignored when `asChild`. */
-  as?: ElementType;
+  readonly as?: ElementType;
 
   /**
    * The merge flag — render the single slot child instead of `as`, with this
    * component's attrs merged into it (class concatenated, handlers chained,
    * child props winning). The Vue counterpart of React's `asChild` + `Slot`.
    */
-  asChild?: boolean;
+  readonly asChild?: boolean;
 }
 
 /**

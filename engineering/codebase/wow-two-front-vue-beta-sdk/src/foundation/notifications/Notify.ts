@@ -1,45 +1,12 @@
-// The delivery half of the notification vector: one call, four outcomes, no throw.
-//
-// DEFINING CONTRACT: NOTHING HERE THROWS. This is called straight from a click handler or an effect, where a
-// throw is an unhandled error in the consumer's app — and the user, whose tab is in the background, sees
-// nothing at all. Every path resolves to a `NotifyResult` the caller switches on: a missing API, a missing
-// grant, a constructor that rejects the payload, even a hostile options getter.
-//
-// Synchronous by design, unlike `foundation/share`'s `share`: `new Notification()` is a synchronous call, and
-// returning the handle immediately is what lets a caller `close()` it, re-tag it, or keep it for later. The
-// permission prompt is the async part of this vector and lives in `NotificationPermission.ts`.
-//
-// `default` and `denied` both come back as `denied`. Not-granted is not-shown either way, and the distinction
-// that matters to a consumer — whether a prompt is still worth offering — is `getNotificationPermission`'s to
-// answer, not a delivery result's. Ask for the grant first; `notify` never prompts on its own, because a prompt
-// raised from a background timer is exactly the pattern browsers now punish.
-//
-// Auto-close is a convenience the platform lacks: `requireInteraction` aside, how long a notification lingers
-// is the OS's business, and a transient one often has to be closed by hand. The timer is cancelled the moment
-// the notification closes or is clicked, so a dismissed notification never leaves a pending `setTimeout`
-// holding its handle alive.
+import type { NotificationShowResult } from './models/NotificationShowResult';
+import type { NotificationFailure } from './models/NotificationFailure';
 
 import { toError } from '../errors';
 
 import { getNotificationPermission } from './NotificationPermission';
-
-/**
- * The outcome of a notification attempt.
- *
- * - `shown` — handed to the OS, carrying the live handle. "Handed off", not "seen": the platform reports
- *   neither whether it was rendered nor whether the user looked at it.
- * - `denied` — the API exists but this origin holds no grant (refused, or never asked).
- * - `unsupported` — no Notification API here: SSR, or a non-supporting browser.
- * - `failed` — construction threw, carrying the normalized `Error`.
- */
-export type NotifyResult =
-  | { readonly status: 'shown'; readonly notification: Notification }
-  | { readonly status: 'denied' }
-  | { readonly status: 'unsupported' }
-  | { readonly status: 'failed'; readonly error: Error };
-
-/** The `status` discriminant of a {@link NotifyResult} — for a consumer's own switch or status→copy map. */
-export type NotifyStatus = NotifyResult['status'];
+export type { NotificationFailure } from './models/NotificationFailure';
+export type { NotificationShowResult } from './models/NotificationShowResult';
+export type NotifyStatus = 'shown' | NotificationFailure['status'];
 
 /** Tunes a notification. Every member is optional; a bare `notify(title)` is valid. */
 export interface NotifyOptions {
@@ -167,7 +134,7 @@ function wireLifecycle(notification: Notification, options: NotifyOptions): void
 }
 
 /**
- * Shows an OS-level notification and returns a {@link NotifyResult}. Never throws.
+ * Shows an OS-level notification and returns a {@link NotificationShowResult}. Never throws.
  *
  * Requires a granted permission — this call never prompts. Pair it with `getNotificationPermission` /
  * `requestNotificationPermission` (or the `useNotificationPermission` hook) and treat `denied` as "ask first",
@@ -177,10 +144,10 @@ function wireLifecycle(notification: Notification, options: NotifyOptions): void
  * @param options Body, icon, tag, and the {@link NotifyOptions.autoCloseMs} / {@link NotifyOptions.onClick}
  *   conveniences this module adds on top of the platform dictionary.
  */
-export function notify(title: string, options?: NotifyOptions): NotifyResult {
+export function notify(title: string, options?: NotifyOptions): NotificationShowResult {
   const permission = getNotificationPermission();
-  if (permission === 'unsupported') return { status: 'unsupported' };
-  if (permission !== 'granted') return { status: 'denied' };
+  if (permission === 'unsupported') return { ok: false, failure: { status: 'unsupported' } };
+  if (permission !== 'granted') return { ok: false, failure: { status: 'denied' } };
 
   const settings = options ?? {};
 
@@ -190,9 +157,9 @@ export function notify(title: string, options?: NotifyOptions): NotifyResult {
   } catch (error) {
     // Construction is where the platform vetoes: a payload it rejects, a browser that only allows notifications
     // from a service worker (mobile Chrome), a document that lost its permission mid-session.
-    return { status: 'failed', error: toError(error) };
+    return { ok: false, failure: { status: 'failed', error: toError(error) } };
   }
 
   wireLifecycle(notification, settings);
-  return { status: 'shown', notification };
+  return { ok: true, value: notification };
 }

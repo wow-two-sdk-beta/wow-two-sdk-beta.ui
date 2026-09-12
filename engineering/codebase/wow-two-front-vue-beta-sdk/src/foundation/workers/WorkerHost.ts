@@ -41,7 +41,7 @@ export interface WorkerScope {
   removeEventListener(type: 'message', listener: (event: MessageEvent) => void): void;
 
   /** Posts a reply back to the main thread, optionally transferring ownership of objects reachable from it. */
-  postMessage(message: unknown, transfer?: Transferable[]): void;
+  postMessage(message: unknown, transfer?: ReadonlyArray<Transferable>): void;
 }
 
 /** Constrains a handler map: method name → implementation, sync or async. */
@@ -85,7 +85,7 @@ export interface WorkerTransfer<TValue> {
   readonly value: TValue;
 
   /** The objects whose ownership moves to the main thread. */
-  readonly transfer: readonly Transferable[];
+  readonly transfer: ReadonlyArray<Transferable>;
 }
 
 /**
@@ -111,7 +111,7 @@ export interface WorkerTransfer<TValue> {
  * The same neutering hits the CALLER when transferring into the worker via `callWith({ transfer })`: after
  * that call the caller's `ArrayBuffer` is the empty one.
  */
-export function withTransfer<TValue>(value: TValue, transfer: readonly Transferable[]): WorkerTransfer<TValue> {
+export function withTransfer<TValue>(value: TValue, transfer: ReadonlyArray<Transferable>): WorkerTransfer<TValue> {
   return { [WorkerTransferMarker]: true, value, transfer };
 }
 
@@ -166,7 +166,7 @@ export function exposeWorkerApi<THandlers extends WorkerHandlerMap>(
 
       // The handler map's `never[]` parameters make it unassignable at a call site by construction — the
       // wire is untyped, so the arguments are trusted here and checked by `TApi` on the client.
-      const invoke = handler as (...args: readonly unknown[]) => unknown;
+      const invoke = handler as (...args: ReadonlyArray<unknown>) => unknown;
       const outcome: unknown = await invoke(...request.args);
 
       const value = isWorkerTransfer(outcome) ? outcome.value : outcome;

@@ -10,10 +10,10 @@ export type MenuSeparatorProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { menuSeparatorVariants } from './Menu.variants';
 
-/** The hairline rule between menu sections. */
+/** Renders the hairline rule between menu sections. */
 defineOptions({ name: 'MenuSeparator', inheritAttrs: false });
 
 const attrs = useAttrs();

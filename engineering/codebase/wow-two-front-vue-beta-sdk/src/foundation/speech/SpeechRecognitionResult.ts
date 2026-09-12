@@ -1,28 +1,3 @@
-// The result vocabulary of the recognition half, and the error-code table that produces it. THIS TABLE IS THE
-// MODULE'S REAL VALUE: one `error` event carries at least six situations that a user resolves in six different
-// ways — a blocked microphone (browser settings), no microphone at all (plug one in), a dropped network (Chrome
-// streams audio to a Google server, so recognition dies offline while synthesis keeps working), silence (speak
-// louder), an abort the app itself asked for (say nothing), and a language the service will not transcribe (pick
-// another). A consumer that renders one "speech recognition failed" message for all six is unhelpable.
-//
-// The vocabulary deliberately REUSES `foundation/media`'s words where the situation is the same one: `denied` for
-// a refused permission, `unavailable` for a missing device, `unsupported` for a missing API, `failed` for the
-// rest. A microphone denial is a microphone denial whether it arrived through `getUserMedia` or through
-// recognition, and two spellings of it would force every consumer to write the mapping twice.
-//
-// Codes mapped away from their literal name, each for a reason:
-//  - `service-not-allowed` → `denied`. Chrome sends this when the BROWSER or OS blocks the speech service rather
-//    than the user — including on an insecure origin. Different cause, identical remedy path for the user, and
-//    splitting it would give consumers a status with no distinct copy to write.
-//  - `audio-capture` → `unavailable`. The literal meaning is "no input device was usable", which is
-//    `foundation/media`'s `unavailable`, not a failure.
-//  - `bad-grammar` → `failed`. It means the app supplied a grammar the engine rejected — a programmer error that
-//    deserves the real `Error`, and this slice does not expose grammars at all.
-//
-// `aborted` is a first-class status rather than an error for the same reason `foundation/share` keeps
-// `dismissed`: it is what the app's own `abort()` produces (an unmount, a cancel button), and reporting the app's
-// own decision back to the user as a failure raises a toast for something nobody did wrong.
-
 /**
  * Why a recognition session ended badly. Eight arms, four of them sharing `foundation/media`'s vocabulary.
  *

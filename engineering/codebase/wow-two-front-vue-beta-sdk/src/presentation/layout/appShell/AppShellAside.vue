@@ -11,10 +11,10 @@ export type AppShellAsideProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, normalizeStyle, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useAppShellContext } from './AppShell.vue';
 
-/* Right-hand rail inside `AppShellMain` — renders nothing below `asideBreakpoint`. */
+/** Renders the right-hand rail inside `AppShellMain`, and nothing at all below `asideBreakpoint`. */
 defineOptions({ name: 'AppShellAside', inheritAttrs: false });
 
 /** The rail content — React's `children`. */

@@ -137,7 +137,7 @@ export function loadGoogleIdentity(): Promise<GoogleAccountsId> {
 
 /** Defines the options {@link useGoogleIdentity} takes. */
 export interface UseGoogleIdentityOptions {
-  /** The OAuth client id. Empty / undefined keeps the status `unresolved` and loads nothing — the app stays guest-only. */
+  /** OAuth client id. Empty / undefined keeps the status `unresolved` and loads nothing — app stays guest-only. */
   readonly clientId: MaybeRefOrGetter<string | undefined>;
 
   /** Receives the ID token on a successful sign-in. */

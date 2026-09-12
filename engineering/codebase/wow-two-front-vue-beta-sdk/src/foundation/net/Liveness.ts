@@ -70,7 +70,7 @@ export function subscribeOnline(listener: (online: boolean) => void): () => void
 
 /** Configures a {@link waitForOnline} call. Every member is optional. */
 export interface WaitForOnlineOptions {
-  /** The maximum wait (ms) before giving up and resolving `false`. Omit, or pass a non-positive value, to wait indefinitely. */
+  /** Max wait (ms) before resolving `false`. Omit, or pass a non-positive value, to wait indefinitely. */
   readonly timeoutMs?: number;
 
   /** Abandons the wait early, resolving `false` — an abort is a "stop waiting" verdict here, never a rejection. */

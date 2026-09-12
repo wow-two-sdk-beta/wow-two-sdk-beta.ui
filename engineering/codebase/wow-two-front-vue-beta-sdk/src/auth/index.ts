@@ -20,8 +20,8 @@
 
 // Session model + provider
 export { AuthStatus, type AuthSession, type AuthResolveContext, type AuthStrategy } from './AuthSession';
-export { default as AuthProvider, type AuthProviderProps } from './AuthProvider.vue';
-export { useAuth, type AuthApi } from './AuthContext';
+export { default as AuthProvider, type AuthProviderProps } from './providers/AuthProvider.vue';
+export { useAuth, type AuthApi } from './providers/AuthContext';
 
 // Non-Vue seams — api-client 401s in, router-guard reads out
 export { createAuthBridge, type AuthBridge, type UnauthorizedListener, type SessionListener } from './AuthBridge';
@@ -42,7 +42,7 @@ export {
   createBearerStrategy,
   type CreateBearerStrategyOptions,
   type BearerStrategy,
-  type BearerAuthenticateResult,
+  type BearerCredentials,
 } from './BearerStrategy';
 export { createRedirectStrategy, type CreateRedirectStrategyOptions } from './RedirectStrategy';
 export { createMemoryTokenStorage, type TokenStorage } from './TokenStorage';

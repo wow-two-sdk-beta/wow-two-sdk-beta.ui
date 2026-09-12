@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, type VariantProps } from '../../../foundation/styles';
 
 /** Defines the Avatar silhouette. */
 export const AvatarShape = {
@@ -94,7 +94,7 @@ export const avatarVariants = tv({
       warning: 'ring-2 ring-offset-2 ring-warning ring-offset-background',
     },
     isLoading: {
-      true: 'animate-pulse !bg-muted text-transparent',
+      true: 'animate-pulse bg-muted! text-transparent',
       false: '',
     },
   },

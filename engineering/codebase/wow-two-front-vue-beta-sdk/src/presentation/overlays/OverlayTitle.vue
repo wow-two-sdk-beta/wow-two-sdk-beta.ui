@@ -11,10 +11,10 @@ export type OverlayTitleProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../foundation/utils';
+import { cn } from '../../foundation/styles';
 import { useOverlayChromeContext } from './OverlayChrome';
 
-/* The accessible name of the enclosing dialog — carries the `id` its `aria-labelledby` points at. */
+/** Renders the enclosing dialog's accessible name, carrying the `id` its `aria-labelledby` names. */
 defineOptions({ name: 'OverlayTitle', inheritAttrs: false });
 
 /** The title text — React's `children`. */

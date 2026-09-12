@@ -122,7 +122,7 @@ export default tseslint.config(
         // adapters); composes foundation only (FormControl provide/inject, http error
         // seams) — NEVER presentation: label/error chrome (presentation `Field`,
         // `FormErrorMessage`) composes INSIDE the slot, app- or presentation-side.
-        { type: 'forms-engine', pattern: 'src/forms-engine/**' },
+        { type: 'formsEngine', pattern: 'src/formsEngine/**' },
         // Analytics + flags = standalone top-level subpath layers, peer-free, composing foundation only.
         // Like `feedback`, they are headless buses/evaluators a presentation adapter may consume — never
         // the other way round.
@@ -154,7 +154,7 @@ export default tseslint.config(
             { from: ['query'], allow: ['foundation', 'router', 'query'] },
             { from: ['auth'], allow: ['foundation', 'auth'] },
             { from: ['feedback'], allow: ['foundation', 'feedback'] },
-            { from: ['forms-engine'], allow: ['foundation', 'forms-engine'] },
+            { from: ['formsEngine'], allow: ['foundation', 'formsEngine'] },
             { from: ['analytics'], allow: ['foundation', 'analytics'] },
             { from: ['flags'], allow: ['foundation', 'flags'] },
             { from: ['root'], allow: ['foundation', 'domain', 'presentation'] },

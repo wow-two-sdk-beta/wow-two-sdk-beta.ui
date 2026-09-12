@@ -1,29 +1,31 @@
 <script lang="ts">
 export interface StepCardProps {
   /** The step number — rendered as a large faint overlay top-right. */
-  step: number;
+  readonly step: number;
 
   /**
    * The step title. React typed this `ReactNode`; a scalar stays a prop so it
    * remains the discriminator, and the same-named slot is the rich override.
    */
-  title: string | number;
+  readonly title: string | number;
 
   /** The optional supporting copy below the title. Falls back to the default slot when omitted. */
-  description?: string | number;
+  readonly description?: string | number;
 }
 </script>
 
 <script setup lang="ts">
+import type { ComponentElement } from '../../../foundation/primitives';
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import Card from '../card/Card.vue';
 import Heading from '../heading/Heading.vue';
 import Text from '../text/Text.vue';
 
 /**
- * Numbered "how it works" step — large faint step number overlay + tinted icon
- * badge + title + description. Outlined card; content-only (no baked routing).
+ * Renders a numbered "how it works" step — faint step number, tinted icon badge, title, description.
+ *
+ * Outlined card, content-only, no baked routing.
  */
 defineOptions({ name: 'StepCard', inheritAttrs: false });
 
@@ -48,7 +50,7 @@ const props = withDefaults(defineProps<StepCardProps>(), { description: undefine
 
 const attrs = useAttrs();
 const slots = useSlots();
-const el = useTemplateRef<InstanceType<typeof Card>>('el');
+const el = useTemplateRef<ComponentElement>('el');
 
 const hasBody = computed(() => props.description !== undefined || !!slots.description || !!slots.default);
 
@@ -62,7 +64,14 @@ const rest = computed(() => {
   return others;
 });
 
-defineExpose({ el });
+/** Exposes the child's documented DOM handle, never its component instance. */
+const rootElement = computed<HTMLElement | null>(() => {
+  const node = el.value?.el;
+  const elementType = node?.ownerDocument.defaultView?.HTMLElement;
+  return elementType && node instanceof elementType ? node : null;
+});
+
+defineExpose({ el: rootElement });
 </script>
 
 <template>

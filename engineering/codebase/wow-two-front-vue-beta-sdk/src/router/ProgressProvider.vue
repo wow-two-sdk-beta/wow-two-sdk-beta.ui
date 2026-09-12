@@ -1,29 +1,22 @@
 <script lang="ts">
-import type { NavigationProgressState } from './UseNavigationProgress';
+import type { NavigationProgressState } from './hooks/UseNavigationProgress';
 
 /** Defines the props for {@link ProgressProvider}. */
 export interface ProgressProviderProps {
   /** An externally created state to provide (from `createNavigationProgress()`); a fresh one when omitted. */
-  state?: NavigationProgressState;
+  readonly state?: NavigationProgressState;
 }
 </script>
 
 <script setup lang="ts">
 // `NavigationProgressState` is already imported by the plain `<script>` block above — the two
 // blocks compile into ONE module, so importing it again here is a duplicate identifier.
-import { provideNavigationProgress } from './UseNavigationProgress';
+import { createNavigationProgress, provideNavigationProgress } from './hooks/UseNavigationProgress';
 
 /**
- * Provides the navigation-progress state to its subtree — ref-counts manual busy spans that
+ * Renders no element of its own — the slot passes straight through — while providing the
+ * navigation-progress state to that subtree, ref-counting the manual busy spans that
  * `<NavigationProgress mode="manual">` (and `QueryProgressBridge`) drive.
- *
- * ```vue
- * <ProgressProvider>
- *   <App />
- * </ProgressProvider>
- * ```
- *
- * Renders no element of its own — the slot passes straight through.
  */
 defineOptions({ name: 'ProgressProvider' });
 
@@ -34,7 +27,17 @@ defineSlots<{
 
 const props = withDefaults(defineProps<ProgressProviderProps>(), { state: undefined });
 
-provideNavigationProgress(props.state);
+const local = createNavigationProgress();
+const current = (): NavigationProgressState => props.state ?? local;
+
+provideNavigationProgress({
+  get isBusy() {
+    return current().isBusy;
+  },
+  begin: () => current().begin(),
+  end: () => current().end(),
+  track: <T,>(promise: Promise<T>): Promise<T> => current().track(promise),
+});
 </script>
 
 <template>

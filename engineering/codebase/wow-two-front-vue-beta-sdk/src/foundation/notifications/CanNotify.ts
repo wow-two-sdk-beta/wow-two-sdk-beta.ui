@@ -1,10 +1,3 @@
-// Feature detection for the notification vector. Unlike `foundation/share`'s `canShare`, availability alone is
-// not the question: an origin can have the whole API and still be unable to show anything, because the user
-// never answered the prompt or refused it. So the check is the conjunction — API present AND grant held — and
-// the two halves stay separable through `getNotificationPermission`, whose `default` vs `denied` vs
-// `unsupported` distinction is what a consumer needs to decide between an enable button, a settings hint, and
-// hiding the feature entirely.
-
 import { getNotificationPermission } from './NotificationPermission';
 
 /**

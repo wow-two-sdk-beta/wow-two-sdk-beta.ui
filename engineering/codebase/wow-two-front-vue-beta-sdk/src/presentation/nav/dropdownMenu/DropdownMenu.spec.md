@@ -1,48 +1,43 @@
 # DropdownMenu
 
-## Purpose
-Button-triggered menu — most common menu shape. Click the trigger to open; pick an item; menu closes. Same internals as `Menu`, plus owned open state and trigger.
+Renders only its slot, owning the open state and placement of the DropdownMenu tree below.
 
-## Anatomy
-```
-<DropdownMenu>
-  ├── <DropdownMenu.Trigger asChild?>
-  └── <DropdownMenu.Content>
-        ├── <DropdownMenu.Item onSelect>
-        ├── <DropdownMenu.Group label?>
-        ├── <DropdownMenu.Label>
-        └── <DropdownMenu.Separator />
-      </DropdownMenu.Content>
-</DropdownMenu>
-```
+Source: [DropdownMenu.vue](DropdownMenu.vue).
 
-## Required behaviors
-- Trigger click toggles open. Enter/Space on focused trigger opens.
-- ↓ on trigger opens + focuses first item. ↑ opens + focuses last.
-- Inside menu: arrow keys, Enter/Space, Escape, outside click — same as `Menu`.
-- Selecting an item closes the menu and returns focus to the trigger.
-- ARIA: trigger gets `aria-haspopup="menu"`, `aria-expanded`, `aria-controls`.
+Public import: `import { DropdownMenu } from '@wow-two-beta/ui-vue/presentation/nav';`.
 
-## Props (Root)
-| Name | Type | Default | Required | Why |
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
+
+## Props
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `open`, `defaultOpen`, `onOpenChange` | — | — | no | Standard open-state shape. |
-| `placement` | Floating UI placement | `'bottom-start'` | no | Pass-through to `Menu`. |
+| `open` | `boolean` | no | `undefined` | The open state, controlled. The `v-model:open` binding target. |
+| `defaultOpen` | `boolean` | no | `false` | The initial open state when uncontrolled. Default `false`. |
+| `placement` | `Placement` | no | `'bottom-start'` | The Floating UI placement. Default `bottom-start`. |
+| `offset` | `number` | no | `6` | The distance between trigger and menu in px. Default 6. |
 
-`DropdownMenu.Trigger`: `asChild` to use a custom button (e.g., `<Button>` text or `<Button shape="square">` icon-only). Default renders a plain button.
-`DropdownMenu.Item`: same shape as `Menu.Item`.
+## Emits
 
-## Composition
-Compound with internal open state. Wraps `Menu` for content rendering; same-domain reuse.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:open` | `'update:open': [open: boolean];` | Fires when the menu opens or closes — the `v-model:open` half. |
 
-## Accessibility
-- WAI-ARIA Menu Button pattern.
-- Focus return to trigger after selection / Escape.
+## Slots
 
-## Known limitations
-- No submenus (P6).
-- No checkbox/radio items (P6 — promote `Menu.CheckboxItem` then alias).
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
 
-## Inspirations
-- Radix `DropdownMenu`.
-- shadcn/ui `DropdownMenu`.
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [NavExamples.ts](../../../../apps/playground/src/gallery/fixtures/NavExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

@@ -1,7 +1,7 @@
 // Three-cell preview geometry — cells at these x-positions, each this wide, on a 24-unit canvas.
-export const CELL_POSITIONS = [3, 9.5, 16];
-export const CELL_SIZE = 5;
-export const BAR_CORNER_RX = 2.4;
+export const CellPositions = [3, 9.5, 16];
+export const CellSize = 5;
+export const BarCornerRx = 2.4;
 
 /**
  * Defines props for a fixed-geometry glyph.

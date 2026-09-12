@@ -1,4 +1,4 @@
-import { tv, Tones, ColorTone, type VariantProps } from '../../../foundation/utils';
+import { tv, Tones, ColorTone, type VariantProps } from '../../../foundation/styles';
 
 /** Defines the Button visual surface style. */
 export const ButtonVariant = {
@@ -50,12 +50,12 @@ export const buttonVariants = tv({
     'transition-colors duration-150 ease-out',
     'motion-reduce:transition-none',
     // focus
-    'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+    'outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
     // disabled (native attr handles click-blocking; pointer-events-none would
     // suppress the cursor visual, so we don't add it here)
     'disabled:opacity-50 disabled:cursor-not-allowed',
     // skeleton state — wins over everything
-    'data-[state=skeleton]:!bg-muted data-[state=skeleton]:!text-transparent data-[state=skeleton]:!border-transparent data-[state=skeleton]:!cursor-default data-[state=skeleton]:!pointer-events-none data-[state=skeleton]:animate-pulse',
+    'data-[state=skeleton]:bg-muted! data-[state=skeleton]:text-transparent! data-[state=skeleton]:border-transparent! data-[state=skeleton]:cursor-default! data-[state=skeleton]:!pointer-events-none data-[state=skeleton]:animate-pulse',
     'data-[state=skeleton]:[&>*]:!invisible',
   ],
   variants: {
@@ -69,7 +69,7 @@ export const buttonVariants = tv({
       // revealed (border + bg + foreground text). Per-tone reveal target set via
       // compoundVariants below. Pairs with `hoverSlot` for the icon-swap affordance.
       reveal: 'bg-transparent border-transparent',
-      link: 'bg-transparent !h-auto !p-0 !rounded-none underline-offset-4 hover:underline focus-visible:ring-offset-0',
+      link: 'bg-transparent h-auto! p-0! rounded-none! underline-offset-4 hover:underline focus-visible:ring-offset-0',
       // Base = neutral/default tone: dark image-overlay wash + blur. Non-neutral tones resolve
       // through the shared `Tones.glass` palette via compoundVariants below (so tone + color
       // overrides apply). `backdrop-blur-md` stays here for every tone.
@@ -95,8 +95,8 @@ export const buttonVariants = tv({
     },
     shape: {
       default: '',
-      square: 'aspect-square !px-0',
-      circle: 'aspect-square !px-0 !rounded-full',
+      square: 'aspect-square px-0!',
+      circle: 'aspect-square px-0! rounded-full!',
     },
     fullWidth: {
       true: 'w-full',
@@ -165,7 +165,7 @@ export const buttonVariants = tv({
      * `theme-smart-qr` card. `--color-{tone}-soft-foreground` is the token minted for exactly
      * this pairing, and the `soft` rows below have always used it; these rows were the ones
      * that were missed. Borders stay full-strength `{tone}` so the tone still reads.
-     * Matches `foundation/utils/Tones.ts`, which routes `soft` + `outline` the same way.
+     * Matches `foundation/styles/constants/Tones.ts`, which routes `soft` + `outline` the same way.
      */
     // === SURFACE × tone (subtle tinted bg + visible tone-colored border) ===
     {

@@ -1,27 +1,27 @@
 <script lang="ts">
-import type { ProgressTone, Size } from '../../../foundation/utils';
+import type { ProgressTone, Size } from '../../../foundation/styles';
 
 export interface ProgressBarProps {
   /** The track thickness. */
-  size?: Size;
+  readonly size?: Size;
   /** The fill tone palette. */
-  tone?: ProgressTone;
+  readonly tone?: ProgressTone;
   /** The current value 0–100. Pass `undefined` for indeterminate. */
-  value?: number;
-  max?: number;
+  readonly value?: number;
+  readonly max?: number;
   /** The accessible label for the progress. */
-  label?: string;
+  readonly label?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { progressFillVariants, progressTrackVariants, type ProgressBarVariants } from './ProgressBar.variants';
 
 /**
- * Linear progress indicator. Set `value` (0–`max`) for determinate; omit
- * for indeterminate.
+ * Renders a linear progress bar with an optional label above it.
+ * Set `value` (0–`max`) for determinate; omit for indeterminate.
  */
 defineOptions({ name: 'ProgressBar', inheritAttrs: false });
 

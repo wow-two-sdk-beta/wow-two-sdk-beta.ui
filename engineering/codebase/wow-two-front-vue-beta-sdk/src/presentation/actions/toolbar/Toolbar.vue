@@ -1,28 +1,34 @@
 <script lang="ts">
 import type { HTMLAttributes } from 'vue';
-import type { Orientation } from '../../../foundation/utils';
+import type { Orientation } from '../../../foundation/styles';
 
 /* Native div attributes stay in attribute fallthrough rather than becoming runtime props. */
 export interface ToolbarProps extends /* @vue-ignore */ HTMLAttributes {
   /** The layout axis — drives both the arrow-key navigation and the flex direction. Default `horizontal`. */
-  orientation?: Orientation;
+  readonly orientation?: Orientation;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, provide, useAttrs, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn, Orientation as OrientationValue } from '../../../foundation/utils';
+import { cn, Orientation as OrientationValue } from '../../../foundation/styles';
 import { RovingFocusGroup } from '../../../foundation/primitives';
 import { ToolbarKey } from './ToolbarContext';
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
+/** Renders a bordered strip of actions that arrow keys walk through as a single tab stop. */
 defineOptions({ name: 'Toolbar', inheritAttrs: false });
 
 const props = withDefaults(defineProps<ToolbarProps>(), {
   orientation: OrientationValue.Horizontal,
 });
+
+defineSlots<{
+  /** The toolbar items — buttons, links, and separators sharing one roving tab stop. */
+  default(): unknown;
+}>();
 
 const attrs = useAttrs();
 
@@ -33,9 +39,9 @@ provide(ToolbarKey, {
   },
 });
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>

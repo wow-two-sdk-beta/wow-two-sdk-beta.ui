@@ -3,10 +3,10 @@ import { h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { Temporal } from 'temporal-polyfill';
 import {
-  Calendar,
+  CalendarPicker,
   DateInput,
   DateTimeInput,
-  RangeCalendar,
+  RangeCalendarPicker,
   RecurrenceEditor,
   TimeInput,
   TimePicker,
@@ -71,7 +71,7 @@ describe('TimeInput — popover by default, native only on request', () => {
     ['9', 9, 0],
   ])('commits the typed draft %s on blur', async (typed, hour, minute) => {
     const seen: Array<Temporal.PlainTime | null> = [];
-    const wrapper = mount(TimeInput, { props: { onValueChange: (v: never) => seen.push(v) } });
+    const wrapper = mount(TimeInput, { props: { 'onUpdate:modelValue': (v) => seen.push(v) } });
 
     const input = wrapper.find('input');
     await input.setValue(typed);
@@ -85,7 +85,7 @@ describe('TimeInput — popover by default, native only on request', () => {
 
   it('reverts an unparseable draft to the committed value', async () => {
     const wrapper = mount(TimeInput, {
-      props: { value: Temporal.PlainTime.from('08:15') },
+      props: { modelValue: Temporal.PlainTime.from('08:15') },
     });
 
     const input = wrapper.find('input');
@@ -102,8 +102,8 @@ describe('TimeInput — popover by default, native only on request', () => {
     const seen: Array<Temporal.PlainTime | null> = [];
     const wrapper = mount(TimeInput, {
       props: {
-        value: Temporal.PlainTime.from('08:15'),
-        onValueChange: (v: never) => seen.push(v),
+        modelValue: Temporal.PlainTime.from('08:15'),
+        'onUpdate:modelValue': (v) => seen.push(v),
       },
     });
 
@@ -140,8 +140,8 @@ describe('DateInput — popover by default, native only on request', () => {
     const seen: Array<Temporal.PlainDate | null> = [];
     const wrapper = mount(DateInput, {
       props: {
-        value: Temporal.PlainDate.from('2026-03-04'),
-        onValueChange: (v: never) => seen.push(v),
+        modelValue: Temporal.PlainDate.from('2026-03-04'),
+        'onUpdate:modelValue': (v) => seen.push(v),
       },
     });
 
@@ -163,8 +163,8 @@ describe('DateInput — popover by default, native only on request', () => {
     const seen: Array<Temporal.PlainDate | null> = [];
     const wrapper = mount(DateInput, {
       props: {
-        value: Temporal.PlainDate.from('2026-03-04'),
-        onValueChange: (v: never) => seen.push(v),
+        modelValue: Temporal.PlainDate.from('2026-03-04'),
+        'onUpdate:modelValue': (v) => seen.push(v),
       },
     });
 
@@ -199,7 +199,7 @@ describe('DateTimeInput — popover by default, native only on request', () => {
 
   it('commits a typed date + time, and a bare date as midnight', async () => {
     const seen: Array<Temporal.PlainDateTime | null> = [];
-    const wrapper = mount(DateTimeInput, { props: { onValueChange: (v: never) => seen.push(v) } });
+    const wrapper = mount(DateTimeInput, { props: { 'onUpdate:modelValue': (v) => seen.push(v) } });
 
     const input = wrapper.find('input');
     await input.setValue('2026-03-04 07:45');
@@ -215,7 +215,7 @@ describe('DateTimeInput — popover by default, native only on request', () => {
 
   it('ships the ISO value in a hidden input when named', () => {
     const wrapper = mount(DateTimeInput, {
-      props: { name: 'starts', value: Temporal.PlainDateTime.from('2026-03-04T07:45') },
+      props: { name: 'starts', modelValue: Temporal.PlainDateTime.from('2026-03-04T07:45') },
     });
 
     expect(wrapper.find('input[type="hidden"]').attributes('value')).toBe('2026-03-04T07:45');
@@ -226,7 +226,7 @@ describe('DateTimeInput — popover by default, native only on request', () => {
 
 describe('day-grid hover states stay legible', () => {
   it('gives an unselected day a hover that is not the popover surface', () => {
-    const wrapper = mount(Calendar);
+    const wrapper = mount(CalendarPicker);
 
     const cell = wrapper.find('button[role="gridcell"]:not([data-selected])');
     const classes = classesOf(cell.element);
@@ -238,7 +238,7 @@ describe('day-grid hover states stay legible', () => {
   });
 
   it('keeps the selected day white-on-accent while hovered', () => {
-    const wrapper = mount(Calendar, { props: { value: Temporal.PlainDate.from('2026-03-04') } });
+    const wrapper = mount(CalendarPicker, { props: { modelValue: Temporal.PlainDate.from('2026-03-04') } });
 
     const cell = wrapper.find('button[data-selected]');
     expect(cell.exists(), 'no day rendered as selected').toBe(true);
@@ -252,9 +252,9 @@ describe('day-grid hover states stay legible', () => {
   });
 
   it('keeps a range end and the run between filled while hovered', () => {
-    const wrapper = mount(RangeCalendar, {
+    const wrapper = mount(RangeCalendarPicker, {
       props: {
-        value: {
+        modelValue: {
           start: Temporal.PlainDate.from('2026-03-04'),
           end: Temporal.PlainDate.from('2026-03-08'),
         },
@@ -288,14 +288,14 @@ describe('TimePicker — the panel is ours', () => {
 });
 
 describe('RecurrenceEditor — design-system controls only', () => {
-  it('renders the styled Radio, not bare platform radios', () => {
+  it('renders the styled RadioInput, not bare platform radios', () => {
     const wrapper = mount(RecurrenceEditor);
 
     const radios = wrapper.findAll('input[type="radio"]');
     expect(radios, 'the end-mode group lost its radios').toHaveLength(3);
 
     for (const radio of radios) {
-      expect(classesOf(radio.element), 'a bare platform radio is rendering instead of `Radio`').toContain('peer');
+      expect(classesOf(radio.element), 'a bare platform radio is rendering instead of `RadioInput`').toContain('peer');
       expect(radio.attributes('id'), 'radios share an id inside a Field').toBeTruthy();
     }
 
@@ -353,8 +353,8 @@ describe('DateTimeInput — the popover writes both halves', () => {
     const wrapper = mount({
       render: () =>
         h(DateTimeInput, {
-          value: Temporal.PlainDateTime.from('2026-03-04T07:45'),
-          onValueChange: (v: Temporal.PlainDateTime | null) => seen.push(v),
+          modelValue: Temporal.PlainDateTime.from('2026-03-04T07:45'),
+          'onUpdate:modelValue': (v: Temporal.PlainDateTime | null) => seen.push(v),
         }),
     });
 

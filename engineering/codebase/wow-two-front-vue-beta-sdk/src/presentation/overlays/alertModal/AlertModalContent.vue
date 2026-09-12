@@ -9,7 +9,7 @@ export type AlertModalContentProps = ModalContentProps;
 import { computed, useAttrs, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import ModalContent from '../modal/ModalContent.vue';
 
-/* The alert dialog's panel — `ModalContent` verbatim; the alert semantics live on the root. */
+/** Renders the alert dialog's panel — `ModalContent` verbatim; the alert semantics live on the root. */
 defineOptions({ name: 'AlertModalContent', inheritAttrs: false });
 
 /** The panel content — chrome subcomponents and the dialog body. React's `children`. */

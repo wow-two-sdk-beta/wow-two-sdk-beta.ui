@@ -33,20 +33,25 @@
     "LICENSE"
   ],
   "exports": {
+    "./foundation/numbers": {
+      "types": "./dist/foundation/numbers/index.d.ts",
+      "import": "./dist/foundation/numbers/index.js",
+      "default": "./dist/foundation/numbers/index.js"
+    },
+    "./foundation/json": {
+      "types": "./dist/foundation/json/index.d.ts",
+      "import": "./dist/foundation/json/index.js",
+      "default": "./dist/foundation/json/index.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./foundation/utils": {
-      "types": "./dist/foundation/utils/index.d.ts",
-      "import": "./dist/foundation/utils/index.js",
-      "default": "./dist/foundation/utils/index.js"
-    },
-    "./foundation/hooks": {
-      "types": "./dist/foundation/hooks/index.d.ts",
-      "import": "./dist/foundation/hooks/index.js",
-      "default": "./dist/foundation/hooks/index.js"
+    "./foundation/state": {
+      "types": "./dist/foundation/state/index.d.ts",
+      "import": "./dist/foundation/state/index.js",
+      "default": "./dist/foundation/state/index.js"
     },
     "./foundation/icons": {
       "types": "./dist/foundation/icons/index.d.ts",
@@ -68,15 +73,20 @@
       "import": "./dist/foundation/http/index.js",
       "default": "./dist/foundation/http/index.js"
     },
+    "./foundation/results": {
+      "types": "./dist/foundation/results/index.d.ts",
+      "import": "./dist/foundation/results/index.js",
+      "default": "./dist/foundation/results/index.js"
+    },
     "./foundation/storage": {
       "types": "./dist/foundation/storage/index.d.ts",
       "import": "./dist/foundation/storage/index.js",
       "default": "./dist/foundation/storage/index.js"
     },
     "./foundation/storage/zustand": {
-      "types": "./dist/foundation/storage/zustand/index.d.ts",
-      "import": "./dist/foundation/storage/zustand/index.js",
-      "default": "./dist/foundation/storage/zustand/index.js"
+      "types": "./dist/foundation/storage/adapters/zustand/index.d.ts",
+      "import": "./dist/foundation/storage/adapters/zustand/index.js",
+      "default": "./dist/foundation/storage/adapters/zustand/index.js"
     },
     "./foundation/resilience": {
       "types": "./dist/foundation/resilience/index.d.ts",
@@ -103,10 +113,10 @@
       "import": "./dist/foundation/shortcuts/index.js",
       "default": "./dist/foundation/shortcuts/index.js"
     },
-    "./foundation/format": {
-      "types": "./dist/foundation/format/index.d.ts",
-      "import": "./dist/foundation/format/index.js",
-      "default": "./dist/foundation/format/index.js"
+    "./foundation/formatters": {
+      "types": "./dist/foundation/formatters/index.d.ts",
+      "import": "./dist/foundation/formatters/index.js",
+      "default": "./dist/foundation/formatters/index.js"
     },
     "./foundation/files": {
       "types": "./dist/foundation/files/index.d.ts",
@@ -183,10 +193,10 @@
       "import": "./dist/foundation/crypto/index.js",
       "default": "./dist/foundation/crypto/index.js"
     },
-    "./foundation/sync": {
-      "types": "./dist/foundation/sync/index.d.ts",
-      "import": "./dist/foundation/sync/index.js",
-      "default": "./dist/foundation/sync/index.js"
+    "./foundation/channels": {
+      "types": "./dist/foundation/channels/index.d.ts",
+      "import": "./dist/foundation/channels/index.js",
+      "default": "./dist/foundation/channels/index.js"
     },
     "./foundation/idb": {
       "types": "./dist/foundation/idb/index.d.ts",
@@ -213,10 +223,10 @@
       "import": "./dist/foundation/async/index.js",
       "default": "./dist/foundation/async/index.js"
     },
-    "./foundation/undo": {
-      "types": "./dist/foundation/undo/index.d.ts",
-      "import": "./dist/foundation/undo/index.js",
-      "default": "./dist/foundation/undo/index.js"
+    "./foundation/history": {
+      "types": "./dist/foundation/history/index.d.ts",
+      "import": "./dist/foundation/history/index.js",
+      "default": "./dist/foundation/history/index.js"
     },
     "./foundation/clipboard": {
       "types": "./dist/foundation/clipboard/index.d.ts",
@@ -238,10 +248,10 @@
       "import": "./dist/foundation/datetime/index.js",
       "default": "./dist/foundation/datetime/index.js"
     },
-    "./foundation/validation": {
-      "types": "./dist/foundation/validation/index.d.ts",
-      "import": "./dist/foundation/validation/index.js",
-      "default": "./dist/foundation/validation/index.js"
+    "./foundation/validators": {
+      "types": "./dist/foundation/validators/index.d.ts",
+      "import": "./dist/foundation/validators/index.js",
+      "default": "./dist/foundation/validators/index.js"
     },
     "./foundation/net": {
       "types": "./dist/foundation/net/index.d.ts",
@@ -319,9 +329,9 @@
       "default": "./dist/query/index.js"
     },
     "./query/testing": {
-      "types": "./dist/query/testing.d.ts",
-      "import": "./dist/query/testing.js",
-      "default": "./dist/query/testing.js"
+      "types": "./dist/query/Testing.d.ts",
+      "import": "./dist/query/Testing.js",
+      "default": "./dist/query/Testing.js"
     },
     "./auth": {
       "types": "./dist/auth/index.d.ts",
@@ -334,29 +344,44 @@
       "default": "./dist/feedback/index.js"
     },
     "./forms-engine": {
-      "types": "./dist/forms-engine/index.d.ts",
-      "import": "./dist/forms-engine/index.js",
-      "default": "./dist/forms-engine/index.js"
+      "types": "./dist/formsEngine/index.d.ts",
+      "import": "./dist/formsEngine/index.js",
+      "default": "./dist/formsEngine/index.js"
     },
     "./forms-engine/house": {
-      "types": "./dist/forms-engine/house/index.d.ts",
-      "import": "./dist/forms-engine/house/index.js",
-      "default": "./dist/forms-engine/house/index.js"
+      "types": "./dist/formsEngine/adapters/house/index.d.ts",
+      "import": "./dist/formsEngine/adapters/house/index.js",
+      "default": "./dist/formsEngine/adapters/house/index.js"
     },
     "./forms-engine/tanstack": {
-      "types": "./dist/forms-engine/tanstack/index.d.ts",
-      "import": "./dist/forms-engine/tanstack/index.js",
-      "default": "./dist/forms-engine/tanstack/index.js"
+      "types": "./dist/formsEngine/adapters/tanstack/index.d.ts",
+      "import": "./dist/formsEngine/adapters/tanstack/index.js",
+      "default": "./dist/formsEngine/adapters/tanstack/index.js"
     },
     "./styles.css": "./dist/index.css",
     "./themes.css": "./dist/themes.css",
     "./themes.json": "./dist/themes.json",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./foundation/styles": {
+      "types": "./dist/foundation/styles/index.d.ts",
+      "import": "./dist/foundation/styles/index.js",
+      "default": "./dist/foundation/styles/index.js"
+    },
+    "./foundation/dom": {
+      "types": "./dist/foundation/dom/index.d.ts",
+      "import": "./dist/foundation/dom/index.js",
+      "default": "./dist/foundation/dom/index.js"
+    },
+    "./foundation/optionals": {
+      "types": "./dist/foundation/optionals/index.d.ts",
+      "import": "./dist/foundation/optionals/index.js",
+      "default": "./dist/foundation/optionals/index.js"
+    }
   },
   "scripts": {
     "build": "vite build && cp src/index.css dist/index.css && node scripts/build-themes-css.mjs",
     "dev": "vite build --watch",
-    "typecheck": "vue-tsc --noEmit -p tsconfig.typecheck.json && node scripts/check-sfc.mjs",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.typecheck.json && pnpm check:capabilities && node scripts/check-sfc.mjs",
     "lint": "eslint .",
     "format": "prettier --write \"{src,tests}/**/*.{ts,vue,css}\"",
     "format:check": "prettier --check \"{src,tests}/**/*.{ts,vue,css}\"",
@@ -366,17 +391,27 @@
     "test:unit": "vitest run --project unit",
     "test:browser": "vitest run --project browser",
     "coverage": "vitest run --coverage",
-    "prepublishOnly": "pnpm typecheck && pnpm build",
+    "prepublishOnly": "pnpm typecheck && pnpm build && pnpm check:package",
+    "check:package": "node scripts/check-package.mjs",
+    "check:capabilities": "node scripts/check-capabilities.mjs --all",
     "check:sfc": "node scripts/check-sfc.mjs",
     "playground": "pnpm --filter playground dev"
   },
   "peerDependencies": {
     "@tanstack/vue-form": "^1.0.0",
-    "@tanstack/vue-query": "^5.0.0",
+    "@tanstack/vue-query": "^5.102.8",
+    "@vue/test-utils": "^2.4.6",
+    "tailwindcss": "^4.1.0",
     "vue": "^3.5.0",
     "vue-router": "^4.0.0"
   },
   "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    },
+    "@vue/test-utils": {
+      "optional": true
+    },
     "vue-router": {
       "optional": true
     },
@@ -389,18 +424,20 @@
   },
   "dependencies": {
     "@floating-ui/vue": "^1.1.0",
+    "bignumber.js": "11.1.5",
     "clsx": "^2.1.1",
+    "lossless-json": "4.3.1",
     "lucide-vue-next": "^0.460.0",
     "marked": "^18.0.3",
     "tailwind-merge": "^3.0.0",
-    "tailwind-variants": "^0.3.0",
+    "tailwind-variants": "^3.3.1",
     "temporal-polyfill": "^1.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
     "@tailwindcss/vite": "^4.1.0",
     "@tanstack/vue-form": "^1.0.0",
-    "@tanstack/vue-query": "^5.0.0",
+    "@tanstack/vue-query": "^5.102.8",
     "@types/node": "^22.10.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitest/browser": "^4.1.10",

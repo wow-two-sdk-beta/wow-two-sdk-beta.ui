@@ -1,56 +1,42 @@
 # NavigationMenu
 
-## Purpose
-Top-level site/app navigation with optional rich content panels per item — the "mega menu" pattern. Use for product nav, marketing site headers, app-wide section selectors.
+Renders the top-level site navigation bar, holding one expandable panel open at a time.
 
-## Anatomy
-```
-<NavigationMenu>
-  └── <NavigationMenu.List>
-        ├── <NavigationMenu.Item>
-        │     ├── <NavigationMenu.Trigger>     (opens content panel)
-        │     └── <NavigationMenu.Content>     (rich panel below)
-        │   </NavigationMenu.Item>
-        └── <NavigationMenu.Item>
-              └── <NavigationMenu.Link href>   (no content panel)
-            </NavigationMenu.Item>
-      </NavigationMenu.List>
-</NavigationMenu>
-```
+Source: [NavigationMenu.vue](NavigationMenu.vue).
 
-## Required behaviors
-- Click trigger toggles its content panel. Hovering a sibling trigger while another panel is open switches active.
-- ←/→ on focused trigger moves focus across triggers (roving).
-- Escape closes the active panel.
-- Click outside the menu closes the active panel.
-- ARIA: container `role="navigation"`; list items have triggers with `aria-expanded` + `aria-controls`; content panel has `id` referenced by the trigger.
+Public import: `import { NavigationMenu } from '@wow-two-beta/ui-vue/presentation/nav';`.
 
-## Visual states (per item)
-`default` · `hover` · `focus-visible` · `open` (active trigger)
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `string \| null` | — | no | Controlled active item id. |
-| `defaultValue` | `string \| null` | `null` | no | Uncontrolled. |
-| `onValueChange` | `(v) => void` | — | no | Callback. |
-| `aria-label` | `string` | `'Main navigation'` | no | A11y label. |
+| `modelValue` | `string \| null` | no | `undefined` | The value of the item whose panel is open, or `null` if none. Controlled. |
+| `defaultValue` | `string \| null` | no | `null` | The initially-open item value when uncontrolled. Default `null`. |
 
-`NavigationMenu.Item`: `value` (req — used as id when wrapped with Trigger).
-`NavigationMenu.Trigger`: standard button.
-`NavigationMenu.Content`: rich panel.
-`NavigationMenu.Link`: anchor for non-popover items.
+## Emits
 
-## Composition
-Compound. State on root tracks active item. Same-domain pattern echoes `Menubar` but with content panels (not nested menus) and link-only items mixed with trigger items.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: string \| null];` | Fires when the reader opens a different item — carries its value, or `null` once all close. |
 
-## Accessibility
-- WAI-ARIA Disclosure pattern per item (the spec doesn't have a dedicated NavigationMenu role; we use `role="navigation"` on the container).
+## Slots
 
-## Known limitations
-- No hover-delay state machine (Radix has one). Click-based for batch 5; defer hover behavior to P6.
-- Content panels render below the trigger via `AnchoredPositioner`. No "viewport" pattern (Radix has a single shared content viewport that animates between item contents).
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
 
-## Inspirations
-- Radix `NavigationMenu`.
-- shadcn/ui `NavigationMenu`.
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [NavExamples.ts](../../../../apps/playground/src/gallery/fixtures/NavExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [LiveValues.dom.test.ts](../../../../tests/unit/presentation/nav/LiveValues.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

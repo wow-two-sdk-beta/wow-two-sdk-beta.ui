@@ -1,46 +1,38 @@
 # Timeline
 
-## Purpose
-Vertical activity / event feed — markers connected by a line, each with title + body content. Use for audit logs, build histories, onboarding progress, project changelogs.
+Renders a vertical rail of `TimelineItem` nodes joined by connectors, suppressed on the last.
 
-## Anatomy
-```
-<Timeline>
-  ├── <Timeline.Item icon? status?>
-  │     ├── <Timeline.Title>
-  │     ├── <Timeline.Description>
-  │     └── (any children)
-  │   </Timeline.Item>
-  └── ...more items
-</Timeline>
-```
+Source: [Timeline.vue](Timeline.vue).
 
-## Required behaviors
-- Renders an `<ol>` with each item showing a circular marker connected to the next via a vertical line.
-- The last item omits the connecting line below.
-- `status` controls marker color: `default` (muted), `primary`, `success`, `warning`, `destructive`, `info`.
-- Optional `icon` replaces the default dot inside the marker circle.
+Public import: `import { Timeline } from '@wow-two-beta/ui-vue/presentation/display';`.
 
-## Visual states (per item)
-`default` · `primary` · `success` · `warning` · `destructive` · `info`
+## Contract
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `align` | `'left' \| 'right'` | `'left'` | no | Marker side. |
+| `align` | `TimelineAlign` | no | `TimelineAlign.Left` | The side the rail sits on. Default `left`. |
 
-`Timeline.Item`: `icon?`, `status?`, `children`.
+## Emits
 
-## Composition
-Compound. Each `Timeline.Item` is a list item with positioned marker.
+None declared.
 
-## Dependencies
-Foundation: `utils/cn`. Same-domain: none.
+## Slots
 
-## Known limitations
-- No alternating left/right layout (zigzag) — use `align="left"` or `"right"` consistently.
-- No "load more" pagination.
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
 
-## Inspirations
-- Mantine `Timeline`.
-- MUI Lab `Timeline`.
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [DisplayExamples.ts](../../../../apps/playground/src/gallery/fixtures/DisplayExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [DisplayRequiredProps.dom.test.ts](../../../../tests/unit/presentation/display/DisplayRequiredProps.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

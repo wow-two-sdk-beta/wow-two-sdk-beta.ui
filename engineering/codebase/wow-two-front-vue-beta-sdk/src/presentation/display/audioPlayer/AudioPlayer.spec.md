@@ -1,41 +1,46 @@
 # AudioPlayer
 
-## Purpose
-`<audio>` element wrapped in a styled control bar — play/pause, time display, scrubber (or AudioWaveform if `peaks` provided), volume, speed, optional skip-back/forward.
+Renders an audio player with play/pause, a scrubber, volume, and speed over a native `<audio>`.
 
-## Anatomy
-```
-<AudioPlayer src peaks?>
-  ├── play/pause
-  ├── current / duration time
-  ├── scrubber (range) OR <AudioWaveform progress onSeek>
-  ├── volume
-  └── speed (0.5 / 0.75 / 1 / 1.25 / 1.5 / 2)
-</AudioPlayer>
-```
+Source: [AudioPlayer.vue](AudioPlayer.vue).
 
-## Required behaviors
-- Uses native `<audio>` underneath; `controls` attribute disabled in favor of custom UI.
-- `peaks` opt-in: when provided, scrubber is replaced by an `AudioWaveform`.
-- Keyboard: Space → play/pause; ←/→ scrub 5s; M → mute; Up/Down → volume.
-- Loading / error states surfaced via `data-state`.
+Public import: `import { AudioPlayer } from '@wow-two-beta/ui-vue/presentation/display';`.
+
+## Contract
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `src` | `string` | required | Audio URL |
-| `peaks` | `number[]` | — | Optional waveform; replaces scrubber |
-| `autoPlay` | `boolean` | `false` | |
-| `loop` | `boolean` | `false` | |
-| `defaultVolume` | `number` (0..1) | `1` | |
-| `defaultPlaybackRate` | `number` | `1` | |
-| `onPlay` / `onPause` / `onTimeUpdate` / `onEnded` | callbacks | — | Forwarded |
-| `isCompact` | `boolean` | `false` | Smaller height variant |
 
-## Accessibility
-- `<audio>` retains semantics; we add play button with `aria-label="Play"` / "Pause".
-- Scrubber: `role="slider"` with `aria-valuetext` reading current time.
-- Time displayed in `mm:ss` (or `h:mm:ss` past 1h).
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `src` | `string` | yes | — | The audio source URL. |
+| `peaks` | `ReadonlyArray<number>` | no | `undefined` | The pre-computed per-bin amplitudes — swaps the range scrubber for an `AudioWaveformPreview`. |
+| `autoPlay` | `boolean` | no | `undefined` | The autoplay state, forwarded to the native `<audio>`. |
+| `loop` | `boolean` | no | `undefined` | The loop state, forwarded to the native `<audio>`. |
+| `defaultVolume` | `number` | no | `1` | The initial volume in 0..1. Default `1`. |
+| `defaultPlaybackRate` | `number` | no | `1` | The initial playback rate. Default `1`. |
+| `isCompact` | `boolean` | no | `undefined` | The dense layout. Default `false`. |
 
-## Dependencies
-Foundation: `utils`, `icons`. Same domain: `display/AudioWaveform` (optional).
+## Emits
+
+| Event | Signature | Meaning |
+|---|---|---|
+| `play` | `play: [];` | Fires when playback starts. |
+| `pause` | `pause: [];` | Fires when playback pauses. |
+| `time-update` | `'time-update': [time: number, duration: number];` | Fires when playback time advances, with the current time and the total duration. |
+| `ended` | `ended: [];` | Fires when playback reaches the end. |
+
+## Slots
+
+None declared.
+
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [DisplayExamples.ts](../../../../apps/playground/src/gallery/fixtures/DisplayExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

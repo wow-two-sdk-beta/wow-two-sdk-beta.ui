@@ -1,34 +1,34 @@
 <script lang="ts">
-import type { SurfaceTone } from '../../../foundation/utils';
-import type { ContainerProps } from '../container';
+import type { SurfaceTone } from '../../../foundation/styles';
+import type { ContainerLayoutProps } from '../containerLayout';
 import type { NavbarHeight } from './Navbar.variants';
 
 export interface NavbarProps {
-  /** The max-width of the inner centered `Container`. Passthrough to `Container.size`. Default `lg`. */
-  containerSize?: ContainerProps['size'];
+  /** The max-width of the inner centered `ContainerLayout`. Passthrough to `ContainerLayout.size`. Default `lg`. */
+  readonly containerSize?: ContainerLayoutProps['size'];
   /** The band height. Default `md`. */
-  height?: NavbarHeight;
+  readonly height?: NavbarHeight;
   /** The sticky pinning of the bar to the top of the scroll container. Default `false` (non-sticky). */
-  sticky?: boolean;
+  readonly sticky?: boolean;
   /**
    * The tinted background tone for the band — applies the shadow-less `subtle`
    * surface treatment. Omit for a transparent bar (relies on `bordered` / page bg).
    */
-  tone?: SurfaceTone;
+  readonly tone?: SurfaceTone;
   /** The bottom border under the bar. Default `true`. */
-  bordered?: boolean;
+  readonly bordered?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
-import Container from '../container/Container.vue';
+import { cn, surfaceVariants } from '../../../foundation/styles';
+import ContainerLayout from '../containerLayout/ContainerLayout.vue';
 import { navbarVariants } from './Navbar.variants';
 
 /**
- * Lightweight header band (`<header>`) with `start` / `center` / `end` slots
- * laid out in a row inside a centered `Container`. The everyday "navbar +
+ * Renders a lightweight header band (`<header>`) with `start` / `center` / `end` slots
+ * laid out in a row inside a centered `ContainerLayout`. The everyday "navbar +
  * centered content" need that `AppShell` (a 5-slot dashboard grid w/ sidebar)
  * overshoots. Non-sticky by default; pass `sticky` to pin it.
  */
@@ -78,7 +78,7 @@ defineExpose({ el });
 
 <template>
   <header ref="el" v-bind="rest" :class="classes">
-    <Container :size="props.containerSize" class="flex h-full items-center gap-3">
+    <ContainerLayout :size="props.containerSize" class="flex h-full items-center gap-3">
       <slot v-if="$slots.default" />
       <template v-else>
         <div v-if="$slots.start" class="flex min-w-0 items-center gap-3">
@@ -91,6 +91,6 @@ defineExpose({ el });
           <slot name="end" />
         </div>
       </template>
-    </Container>
+    </ContainerLayout>
   </header>
 </template>

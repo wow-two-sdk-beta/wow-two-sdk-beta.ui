@@ -1,10 +1,10 @@
 <script lang="ts">
 export interface PortalProps {
   /** The container to render into. Default: `document.body`. */
-  container?: HTMLElement | null;
+  readonly container?: HTMLElement | null;
 
   /** The optional named layer — sets `data-portal-name` on the wrapper. */
-  name?: string;
+  readonly name?: string;
 }
 </script>
 
@@ -12,7 +12,7 @@ export interface PortalProps {
 import { computed, onMounted, shallowRef } from 'vue';
 
 /**
- * Render slot content into a different DOM node (default `document.body`).
+ * Renders the slot into a different DOM node (default `document.body`).
  * SSR-inert — renders nothing on the server, teleports in after mount on the client.
  *
  * React's `createPortal` becomes `<Teleport>`; the mount gate is kept because
@@ -22,6 +22,11 @@ import { computed, onMounted, shallowRef } from 'vue';
 defineOptions({ name: 'Portal' });
 
 const props = defineProps<PortalProps>();
+
+defineSlots<{
+  /** The content teleported into the target container. */
+  default(): unknown;
+}>();
 
 const isMounted = shallowRef(false);
 onMounted(() => {

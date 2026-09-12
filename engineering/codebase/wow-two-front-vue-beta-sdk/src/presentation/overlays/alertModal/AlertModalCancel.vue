@@ -10,10 +10,10 @@ export type AlertModalCancelProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef, type ComponentPublicInstance } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import OverlayCloseButton from '../OverlayCloseButton.vue';
 
-/* The dismissing button of an `AlertModal` — closes the dialog without firing an action. */
+/** Renders the dismissing button of an `AlertModal`; it closes the dialog without firing an action. */
 defineOptions({ name: 'AlertModalCancel', inheritAttrs: false });
 
 /** The button label — React's `children`. */
@@ -28,7 +28,7 @@ const inner = useTemplateRef<ComponentPublicInstance & { el?: unknown }>('inner'
  */
 const classes = computed(() =>
   cn(
-    'inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     attrs.class as string | undefined,
   ),
 );

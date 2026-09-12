@@ -7,18 +7,18 @@
  */
 export interface OverlayCloseButtonProps {
   /** Merge onto the single slot child instead of rendering a `<button>`. */
-  asChild?: boolean;
+  readonly asChild?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import { X } from 'lucide-vue-next';
-import { cn } from '../../foundation/utils';
+import { cn } from '../../foundation/styles';
 import { Primitive } from '../../foundation/primitives';
 import { useOverlayChromeContext } from './OverlayChrome';
 
-/* Dismiss control for a Modal / Drawer panel — closes the overlay and hands focus back to the trigger. */
+/** Renders the dismiss control of a Modal / Drawer panel; it closes the overlay and restores focus. */
 defineOptions({ name: 'OverlayCloseButton', inheritAttrs: false });
 
 /** The button content — React's `children`. Falls back to an `X` glyph. */
@@ -36,7 +36,7 @@ const classes = computed(() =>
   props.asChild
     ? (attrs.class as string | undefined)
     : cn(
-        'absolute right-4 top-4 grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'absolute right-4 top-4 grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
         attrs.class as string | undefined,
       ),
 );

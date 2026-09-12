@@ -1,49 +1,39 @@
-# AlertDialog
+# AlertModal
 
-## Purpose
-Confirm-style dialog — a `Dialog` variant that requires explicit user action to close. Used for destructive operations ("Are you sure you want to delete?") or other flows where dismissing by accident is undesirable.
+Renders a confirmation dialog — a `Modal` locked to `role="alertdialog"`, outside-click dismissal off.
 
-## Anatomy
-```
-<AlertDialog>
-  ├── <AlertDialog.Trigger asChild?>
-  └── <AlertDialog.Content>
-        ├── <AlertDialog.Header>
-        │     ├── <AlertDialog.Title>
-        │     └── <AlertDialog.Description>
-        ├── <AlertDialog.Body>
-        └── <AlertDialog.Footer>
-              ├── <AlertDialog.Cancel>
-              └── <AlertDialog.Action onAction>
-            </AlertDialog.Footer>
-      </AlertDialog.Content>
-</AlertDialog>
-```
+Source: [AlertModal.vue](AlertModal.vue).
 
-## Differences from `Dialog`
-- `role="alertdialog"` (screen readers announce it more emphatically).
-- Backdrop click does NOT dismiss (`dismissOnOutsideClick={false}`).
-- Escape still closes by default (override per-instance if needed).
-- Footer requires `Cancel` and `Action` — no X close in corner.
+Public import: `import { AlertModal } from '@wow-two-beta/ui-vue/presentation/overlays';`.
 
-## Required behaviors
-- Same as `Dialog` plus: outside click does nothing.
-- `Action` runs callback then closes.
-- `Cancel` just closes.
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-- `AlertDialog`: same as `Dialog` (with `role` locked to `alertdialog` and `dismissOnOutsideClick` locked to `false`).
-- `AlertDialog.Action`: `onAction?` callback — runs before close.
-- `AlertDialog.Cancel`: same as `Dialog.Close`.
 
-## Composition
-Wraps `Dialog`. Same-domain reuse (overlays domain).
+Props follow `AlertModalProps`; resolve the imported contract from the source imports.
 
-## Accessibility
-- WAI-ARIA AlertDialog pattern.
-- Title required and linked via `aria-labelledby`.
-- Initial focus typically lands on the safe option (Cancel) — caller can override via `autoFocus`.
+## Emits
 
-## Inspirations
-- Radix `AlertDialog`.
-- shadcn/ui `AlertDialog`.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:open` | `'update:open': [open: boolean];` | Fires when the dialog opens or closes — the `v-model:open` half. |
+
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [OverlaysExamples.ts](../../../../apps/playground/src/gallery/fixtures/OverlaysExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [Overlays.contract.dom.test.ts](../../../../tests/unit/presentation/overlays/Overlays.contract.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

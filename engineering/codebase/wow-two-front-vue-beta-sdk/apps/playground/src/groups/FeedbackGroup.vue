@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import * as sweepDisplay from '@wow-two-beta/ui-vue/presentation/display';
 import { ref } from 'vue';
 import * as feedback from '@wow-two-beta/ui-vue/presentation/feedback';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
@@ -17,10 +18,10 @@ const {
   ToastSimple,
   Spinner,
   InlineSpinner,
-  Skeleton,
+  SkeletonState,
   ProgressBar,
-  ProgressCircle,
-  ProgressSteps,
+  ProgressCircleIndicator,
+  ProgressStepsIndicator,
   MeterBar,
   StatusIndicator,
   PresenceIndicator,
@@ -28,13 +29,13 @@ const {
   TypingIndicator,
   LoadingOverlay,
   LoadingState,
-  NotificationCenter,
+  NotificationCenterGroup,
   NotificationItem,
-  OnboardingChecklist,
-  OnboardingChecklistTask,
+  OnboardingChecklistCard,
+  OnboardingChecklistCardTask,
   UndoBar,
-  LiveCursor,
-} = feedback;
+  LiveCursorIndicator,
+} = { ...feedback, ...sweepDisplay };
 
 const covered = [
   'Alert',
@@ -46,10 +47,10 @@ const covered = [
   'ToastSimple',
   'Spinner',
   'InlineSpinner',
-  'Skeleton',
+  'SkeletonState',
   'ProgressBar',
-  'ProgressCircle',
-  'ProgressSteps',
+  'ProgressCircleIndicator',
+  'ProgressStepsIndicator',
   'MeterBar',
   'StatusIndicator',
   'PresenceIndicator',
@@ -57,12 +58,12 @@ const covered = [
   'TypingIndicator',
   'LoadingOverlay',
   'LoadingState',
-  'NotificationCenter',
+  'NotificationCenterGroup',
   'NotificationItem',
-  'OnboardingChecklist',
-  'OnboardingChecklistTask',
+  'OnboardingChecklistCard',
+  'OnboardingChecklistCardTask',
   'UndoBar',
-  'LiveCursor',
+  'LiveCursorIndicator',
 ];
 
 const SEVERITIES = ['neutral', 'info', 'success', 'warning', 'danger'] as const;
@@ -139,12 +140,7 @@ const overlayOn = ref(false);
       </Demo>
 
       <Demo name="Spinner" note="size × tone">
-        <Matrix
-          row-axis="size"
-          col-axis="tone"
-          :rows="SIZES"
-          :cols="['default', 'brand', 'muted', 'current']"
-        >
+        <Matrix row-axis="size" col-axis="tone" :rows="SIZES" :cols="['default', 'brand', 'muted', 'current']">
           <template #default="{ row, col }">
             <Spinner :size="row as never" :tone="col as never" />
           </template>
@@ -155,24 +151,18 @@ const overlayOn = ref(false);
         <p class="text-sm">Saving <InlineSpinner /> please wait…</p>
       </Demo>
 
-      <Demo name="Skeleton" note="shape: rect / text / circle">
+      <Demo name="SkeletonState" note="shape: rect / text / circle">
         <div class="space-y-2">
-          <Skeleton shape="rect" class="h-8 w-full" />
-          <Skeleton shape="text" class="w-3/4" />
-          <Skeleton shape="circle" class="size-10" />
+          <SkeletonState shape="rect" class="h-8 w-full" />
+          <SkeletonState shape="text" class="w-3/4" />
+          <SkeletonState shape="circle" class="size-10" />
         </div>
       </Demo>
 
       <Demo name="ProgressBar" note="size × tone at 60%">
         <Matrix row-axis="size" col-axis="tone" :rows="['sm', 'md', 'lg']" :cols="PROGRESS_TONES">
           <template #default="{ row, col }">
-            <ProgressBar
-              :value="60"
-              :size="row as never"
-              :tone="col as never"
-              class="w-16"
-              label="60%"
-            />
+            <ProgressBar :value="60" :size="row as never" :tone="col as never" class="w-16" label="60%" />
           </template>
         </Matrix>
         <div class="mt-2 space-y-2">
@@ -182,9 +172,9 @@ const overlayOn = ref(false);
         </div>
       </Demo>
 
-      <Demo name="ProgressCircle" note="tone axis at 25 / 50 / 75%">
+      <Demo name="ProgressCircleIndicator" note="tone axis at 25 / 50 / 75%">
         <div class="flex flex-wrap items-center gap-3">
-          <ProgressCircle
+          <ProgressCircleIndicator
             v-for="(t, i) in PROGRESS_TONES"
             :key="t"
             :value="[10, 25, 50, 75, 100][i]"
@@ -193,14 +183,10 @@ const overlayOn = ref(false);
         </div>
       </Demo>
 
-      <Demo name="ProgressSteps" note="horizontal + vertical, current = 1">
+      <Demo name="ProgressStepsIndicator" note="horizontal + vertical, current = 1">
         <div class="space-y-4">
-          <ProgressSteps :steps="['Account', 'Profile', 'Billing', 'Done']" :current="1" />
-          <ProgressSteps
-            :steps="['Account', 'Profile', 'Done']"
-            :current="2"
-            orientation="vertical"
-          />
+          <ProgressStepsIndicator :steps="['Account', 'Profile', 'Billing', 'Done']" :current="1" />
+          <ProgressStepsIndicator :steps="['Account', 'Profile', 'Done']" :current="2" orientation="vertical" />
         </div>
       </Demo>
 
@@ -228,11 +214,7 @@ const overlayOn = ref(false);
 
       <Demo name="PresenceIndicator" note="status axis">
         <div class="flex flex-wrap items-center gap-3">
-          <div
-            v-for="s in ['online', 'idle', 'busy', 'offline', 'invisible']"
-            :key="s"
-            class="flex items-center gap-1"
-          >
+          <div v-for="s in ['online', 'idle', 'busy', 'offline', 'invisible']" :key="s" class="flex items-center gap-1">
             <PresenceIndicator :status="s as never" />
             <span class="text-[10px] text-subtle-foreground">{{ s }}</span>
           </div>
@@ -268,44 +250,42 @@ const overlayOn = ref(false);
         </Button>
       </Demo>
 
-      <Demo name="NotificationCenter / NotificationItem">
-        <NotificationCenter class="w-full">
+      <Demo name="NotificationCenterGroup / NotificationItem">
+        <NotificationCenterGroup class="w-full">
           <NotificationItem title="Build finished" description="2 minutes ago" @dismiss="() => {}" />
           <NotificationItem title="New comment" description="9 minutes ago" @select="() => {}" />
           <NotificationItem title="Deploy failed" description="1 hour ago" />
-        </NotificationCenter>
+        </NotificationCenterGroup>
       </Demo>
 
-      <Demo name="OnboardingChecklist">
-        <OnboardingChecklist title="Get started">
-          <OnboardingChecklistTask label="Create an account" description="Done in 30s" is-done />
-          <OnboardingChecklistTask label="Install the SDK" action="Install" />
-          <OnboardingChecklistTask label="Ship a page" />
-        </OnboardingChecklist>
+      <Demo name="OnboardingChecklistCard">
+        <OnboardingChecklistCard title="Get started">
+          <OnboardingChecklistCardTask label="Create an account" description="Done in 30s" is-done />
+          <OnboardingChecklistCardTask label="Install the SDK" action="Install" />
+          <OnboardingChecklistCardTask label="Ship a page" />
+        </OnboardingChecklistCard>
       </Demo>
 
       <Demo name="UndoBar" note="fixed-position portal — click to raise it">
         <Button variant="outline" size="sm" @click="undoOpen = true">Show undo bar</Button>
         <UndoBar
-          :is-open="undoOpen"
+          :open="undoOpen"
           message="Item deleted"
           has-countdown
           @undo="undoOpen = false"
-          @open-change="(o) => (undoOpen = o)"
+          @update:open="(o) => (undoOpen = o)"
         />
       </Demo>
 
-      <Demo name="LiveCursor" note="absolute-positioned collaborator cursor">
+      <Demo name="LiveCursorIndicator" note="absolute-positioned collaborator cursor">
         <div class="relative h-24 rounded-md bg-muted">
-          <LiveCursor :x="40" :y="30" name="Ada" />
-          <LiveCursor :x="140" :y="60" name="Grace" color="var(--color-success)" />
+          <LiveCursorIndicator :x="40" :y="30" name="Ada" />
+          <LiveCursorIndicator :x="140" :y="60" name="Grace" color="var(--color-success)" />
         </div>
       </Demo>
     </div>
 
-    <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">
-      auto-mounted tail
-    </h3>
+    <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
     <AutoGroup :namespace="feedback" :covered="covered" />
   </div>
 </template>

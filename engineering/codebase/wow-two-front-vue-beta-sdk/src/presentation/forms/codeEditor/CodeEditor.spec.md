@@ -1,49 +1,56 @@
 # CodeEditor
 
-## Purpose
-Lightweight code-input field with line numbers and Tab handling. **First-generation** — no syntax highlighting; the surface is a styled `<textarea>`. Real IDE features (highlighting, IntelliSense, multi-cursor) are deferred to a follow-up that wraps Monaco / CodeMirror inside this contract.
+Renders a source-code textarea with a synced line-number gutter and Tab/Shift-Tab indenting, unhighlighted.
 
-## Anatomy
-```
-<CodeEditor>
-  ├── line number gutter
-  └── textarea
-</CodeEditor>
-```
+Source: [CodeEditor.vue](CodeEditor.vue).
 
-## Required behaviors
-- `value` / `onValueChange` controlled or uncontrolled.
-- Tab key inserts `tabSize` spaces (or a literal `\t`); Shift+Tab outdents.
-- Line numbers regenerate from line count.
-- Vertical scroll syncs gutter ↔ textarea.
-- Monospace font, dark background tone.
+Public import: `import { CodeEditor } from '@wow-two-beta/ui-vue/presentation/forms';`.
 
-## Visual states
-`default` · `focus` · `disabled` · `read-only`
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Tab indents by default. Escape then Tab or Shift+Tab leaves the editor; canIndentOnTab=false preserves native Tab.
+- The visible keyboard instruction is included in aria-describedby alongside existing help.
+- IME composition does not trigger indentation or input conversion before compositionend.
+- Native form reset requests the original seed through the state owner and restores the resulting DOM representation; a cancelled reset changes nothing.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `value` / `defaultValue` / `onValueChange` | controlled | uncontrolled | |
-| `language` | `string` | — | Hint for future engine routing; today purely informational. |
-| `tabSize` | `number` | `2` | Number of spaces per tab |
-| `useTabs` | `boolean` | `false` | Insert literal tab char instead of spaces |
-| `disabled` / `readOnly` | `boolean` | `false` | |
-| `placeholder` | `string` | — | |
-| `minHeight` | `string` | `'12rem'` | CSS height |
-| `name` | `string` | — | Form field name |
 
-## Composition
-Single component. No compound surface.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `modelValue` | `string` | no | `undefined` | The source text, controlled. The `v-model` binding target. |
+| `defaultValue` | `string` | no | — | The initial source text when uncontrolled. |
+| `language` | `string` | no | — | The forward-compat hint; unused by this first-gen component. |
+| `tabSize` | `number` | no | `2` | The number of spaces one indent step inserts. Default `2`. |
+| `isTabIndented` | `boolean` | no | `false` | Whether indenting inserts a tab character instead of `tabSize` spaces. Default `false`. |
+| `canIndentOnTab` | `boolean` | no | `true` | Whether Tab indents. Escape then Tab leaves the editor. Default true. |
+| `keyboardExitLabel` | `string` | no | `'Press Escape, then Tab to leave the editor.'` | The localized keyboard-exit instruction shown below the editor. |
+| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
+| `minHeight` | `string` | no | `'12rem'` | The CSS minHeight on the surface (default `12rem`). |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `readOnly` | `boolean` | no | `undefined` | The read-only state — the legacy alias. Falls back to the form control's `isReadOnly`. |
+| `readonly` | `boolean` | no | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
+| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
 
-## Accessibility
-- `<textarea>` retains semantics; consumers should pair with `<Label>` / `formField`.
-- Line number gutter is `aria-hidden` decorative.
+## Emits
 
-## Dependencies
-Foundation: `utils`. Same domain: `forms/InputStyles`. No cross-domain.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: string];` | Fires when the reader types or re-indents the source — the `v-model` half. |
 
-## Known limitations
-- **No syntax highlighting** — `language` prop is forward-compat only.
-- No find/replace, multi-cursor, code folding, IntelliSense, linting, LSP.
-- For real IDE features, install `@monaco-editor/react` or `@uiw/react-codemirror` separately and wrap them in your app.
+## Slots
+
+None declared.
+
+## Exposed handle
+
+`{ el: textarea }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [InputInteraction.dom.test.ts](../../../../tests/unit/presentation/forms/InputInteraction.dom.test.ts), [KeyboardExit.browser.test.ts](../../../../tests/unit/presentation/forms/KeyboardExit.browser.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

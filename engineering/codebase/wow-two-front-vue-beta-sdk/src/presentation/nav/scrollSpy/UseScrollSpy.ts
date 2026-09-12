@@ -9,7 +9,7 @@ import { shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } fr
  */
 export interface UseScrollSpyOptions {
   rootMargin?: MaybeRefOrGetter<string | undefined>;
-  threshold?: MaybeRefOrGetter<number | number[] | undefined>;
+  threshold?: MaybeRefOrGetter<number | ReadonlyArray<number> | undefined>;
   /** Element to observe within. Defaults to viewport. */
   root?: MaybeRefOrGetter<Element | Document | null | undefined>;
 }
@@ -64,7 +64,9 @@ export function useScrollSpy(
           }
           activeId.value = bestId;
         },
-        { rootMargin, threshold, root },
+        /* `IntersectionObserverInit.threshold` is spelled `number[]`; the option keeps the readonly form for
+           callers, and the observer only reads the list. */
+        { rootMargin, threshold: threshold as number | Array<number>, root },
       );
 
       for (const el of elements) observer.observe(el);

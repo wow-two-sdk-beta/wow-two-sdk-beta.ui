@@ -1,20 +1,3 @@
-// The generic Permissions API seam — `navigator.permissions.query`, wrapped so it answers instead of throwing.
-//
-// It lives in this slice rather than a slice of its own because notifications are the one permission with two
-// APIs: `Notification.permission` is authoritative for the grant but fires no event, while this one is the only
-// thing that reports a change (a revoke from the browser's site settings, a grant given in another tab). The
-// wrapper is written generically because nothing about it is notification-specific — `geolocation`, `camera`,
-// `microphone`, `persistent-storage` all answer through the same call.
-//
-// Three ways this API fails, all of which have to become a state rather than an exception:
-//  - absent entirely (SSR, older Safari) — no `navigator`, or no `permissions` on it;
-//  - present but ignorant of the name — Safari throws a `TypeError` for a name it doesn't implement rather than
-//    resolving, which is why the `try` wraps the call and not only the `await`;
-//  - present and answering off-spec — a state string outside the documented three.
-//
-// All three collapse to `unsupported`: the question was asked and no usable answer came back. That is
-// deliberately NOT `prompt` — a consumer must not read "we couldn't tell" as "the user hasn't been asked".
-
 /**
  * The state of a queried permission.
  *
@@ -23,7 +6,22 @@
  * - `unsupported` — no Permissions API, an unknown permission name, or an unreadable answer. Not a state the
  *   platform has; the wrapper's own "no usable answer".
  */
-export type PermissionQueryState = 'granted' | 'denied' | 'prompt' | 'unsupported';
+export const PermissionQueryState = {
+  /** The user allowed the capability; using it raises no prompt. */
+  Granted: 'granted',
+
+  /** The user refused. Only browser settings can undo it — stop asking. */
+  Denied: 'denied',
+
+  /** Not decided yet; requesting the capability will show a prompt. */
+  Prompt: 'prompt',
+
+  /** No usable answer came back — no Permissions API, an unknown name, or an off-spec state. Not `prompt`. */
+  Unsupported: 'unsupported',
+} as const;
+
+/** The state of a queried permission. */
+export type PermissionQueryState = (typeof PermissionQueryState)[keyof typeof PermissionQueryState];
 
 /**
  * A permission name. The DOM's `PermissionName` union supplies autocomplete for the well-known names, and the
@@ -52,11 +50,17 @@ function permissionsApi(): Permissions | undefined {
 export function readPermissionState(status: PermissionStatus): PermissionQueryState {
   try {
     const state: unknown = status.state;
-    if (state === 'granted' || state === 'denied' || state === 'prompt') return state;
+    if (
+      state === PermissionQueryState.Granted ||
+      state === PermissionQueryState.Denied ||
+      state === PermissionQueryState.Prompt
+    ) {
+      return state;
+    }
   } catch {
     // A throwing `state` getter. Falls through to the same answer as an off-spec value.
   }
-  return 'unsupported';
+  return PermissionQueryState.Unsupported;
 }
 
 /**
@@ -93,7 +97,7 @@ export async function getPermissionStatus(name: PermissionQueryName): Promise<Pe
  */
 export async function queryPermission(name: PermissionQueryName): Promise<PermissionQueryState> {
   const status = await getPermissionStatus(name);
-  return status === null ? 'unsupported' : readPermissionState(status);
+  return status === null ? PermissionQueryState.Unsupported : readPermissionState(status);
 }
 
 /**
@@ -131,7 +135,7 @@ export function subscribeToPermissionChange(
     (status) => {
       if (cancelled) return;
       if (status === null) {
-        emit('unsupported');
+        emit(PermissionQueryState.Unsupported);
         return;
       }
 
@@ -156,7 +160,7 @@ export function subscribeToPermissionChange(
     // `getPermissionStatus` is contractually non-rejecting; the handler exists so a future edit to it cannot
     // turn this fire-and-forget `then` into an unhandled rejection.
     () => {
-      if (!cancelled) emit('unsupported');
+      if (!cancelled) emit(PermissionQueryState.Unsupported);
     },
   );
 

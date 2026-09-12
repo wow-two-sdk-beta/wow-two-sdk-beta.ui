@@ -1,4 +1,4 @@
-import { Severity, tv, type VariantProps } from '../../../foundation/utils';
+import { Severity, tv, type VariantProps } from '../../../foundation/styles';
 
 export const bannerSimpleVariants = tv({
   base: 'w-full px-6 py-3 text-sm',

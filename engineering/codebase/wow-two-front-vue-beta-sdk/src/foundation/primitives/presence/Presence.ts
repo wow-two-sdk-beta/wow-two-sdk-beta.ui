@@ -3,7 +3,7 @@ import { renderableChildren } from '../slot/Slot';
 
 export interface PresenceProps {
   /** The presence flag — toggle false to trigger exit. */
-  isPresent: boolean;
+  readonly isPresent: boolean;
 }
 
 function parseTimes(value: string): ReadonlyArray<number> {
@@ -38,10 +38,10 @@ function toElement(value: unknown): HTMLElement | null {
  * ~2 frames at 60Hz. Long enough that rAF wins whenever the document is actually being
  * painted, short enough that the enter flip is not perceptibly late when it does not.
  */
-const TWO_FRAMES_MS = 32;
+const TwoFramesMs = 32;
 
 /**
- * Runs `cb` after two animation frames, or after {@link TWO_FRAMES_MS}, whichever lands first.
+ * Runs `cb` after two animation frames, or after {@link TwoFramesMs}, whichever lands first.
  *
  * `requestAnimationFrame` does not fire at all while `document.hidden` — a background tab, a
  * prerendered page, an embedded webview. Gating on rAF alone left an overlay mounted stuck at
@@ -77,7 +77,7 @@ function afterTwoFrames(cb: () => void): () => void {
   }
   /* Declared after `clear` closes over it: both callers are async, so the binding is
      always initialised by the time either one reads it. */
-  const timer = setTimeout(run, TWO_FRAMES_MS);
+  const timer = setTimeout(run, TwoFramesMs);
 
   return (): void => {
     settled = true;

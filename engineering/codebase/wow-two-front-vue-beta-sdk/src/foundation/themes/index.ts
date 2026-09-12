@@ -29,7 +29,7 @@ export {
 
 // Token contract
 export type { SemanticToken, TokenSet, RadiusScale, ToneFamilyName, ToneSlots } from './Tokens';
-export { SEMANTIC_TOKENS, SURFACE_TOKENS, TONE_FAMILIES, applyToneSlots } from './Tokens';
+export { SemanticTokens, SurfaceTokens, ToneFamilies, applyToneSlots } from './Tokens';
 
 // Theme + seed shapes
 export type { Theme, ThemeMeta, ThemeSeed } from './Theme';
@@ -37,13 +37,13 @@ export type { Theme, ThemeMeta, ThemeSeed } from './Theme';
 export { ThemeStatus, ThemeRadius, NeutralTemp, AccentMode, SurfaceStyle } from './Theme';
 
 // Generator
-export { generateTheme } from './generate';
+export { generateTheme } from './Generate';
 
 // Validator
-export { validateTheme, contrastPairs, AA_TEXT, AA_UI } from './validate';
+export { validateTheme, contrastPairs, AaText, AaUi } from './Validate';
 
 // CSS / manifest emitters
-export { themeToCss, emitAllThemesCss, emitThemesManifest, type ThemeManifestEntry } from './css';
+export { themeToCss, emitAllThemesCss, emitThemesManifest, type ThemeManifestEntry } from './Css';
 
 // Curated registry
-export { THEMES, THEME_SEEDS, THEME_IDS, getTheme, validatedThemes, candidateThemes } from './registry';
+export { THEMES, ThemeSeeds, ThemeIds, getTheme, validatedThemes, candidateThemes } from './Registry';

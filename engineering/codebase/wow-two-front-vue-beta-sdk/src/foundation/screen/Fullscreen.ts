@@ -1,47 +1,19 @@
-// The Fullscreen API, made total. Enter / exit / toggle / read, each resolving to a `ScreenResult`.
-//
-// WEBKIT PREFIXES ARE NOT LEGACY CRUFT. Safari has never shipped the unprefixed names on all its surfaces —
-// `webkitRequestFullscreen`, `webkitFullscreenElement`, `webkitExitFullscreen`, and the `webkitfullscreenchange`
-// event are still the live path there. So every accessor tries the standard member first and falls back to the
-// prefixed one, and `onFullscreenChange` subscribes to BOTH events: a browser that fires only one is the normal
-// case, and a browser firing both merely calls an idempotent snapshot read twice.
-//
-// WHY A REJECTION IS CLASSIFIED RATHER THAN REPORTED: `requestFullscreen` rejects for two very different
-// reasons that the platform reports almost identically. The common one by far is a missing user gesture — the
-// call escaped its click handler, or an `await` landed before it and spent the transient activation. That is a
-// developer error with a mechanical fix, and it must not read the same as "this browser cannot do fullscreen".
-// The spec rejects the activation case with a `TypeError`, whereas operational failures arrive as `DOMException`s
-// with a name, so the type itself carries most of the signal; the message pattern is checked first because it is
-// the only thing that survives a browser choosing a different type.
-//
-// KNOWN AMBIGUITY, deliberately resolved toward the common case: a permissions-policy block (an iframe without
-// `allow="fullscreen"`) also rejects with a `TypeError` in Chromium, so it lands on `requires-gesture` too.
-// Distinguishing them would take reading `document.featurePolicy`, which is non-standard and absent in Safari.
-// Since both are fixed by the embedder rather than at runtime, and the gesture case is overwhelmingly more
-// frequent, the mapping favours it — and the original error rides along on the result for anyone who needs more.
-//
-// `document.fullscreenEnabled` is NOT used as the support check. It reports the permissions-policy answer, not
-// the API's presence, so a `false` there would make the whole slice claim `unsupported` in an iframe where the
-// call might still be worth attempting. Method presence is the honest question for "is this API here".
-
 import { toError } from '../errors';
 
 import { getDocument, isFunction, readMember } from './ScreenEnvironment';
-import type { ScreenFailure, ScreenResult } from './ScreenResult';
+import type { ScreenFailure, ScreenRequestResult } from './ScreenOutcome';
 
 /** Matches how browsers word an activation failure — checked before the error's type, which browsers vary on. */
 const GestureRejectionPattern = /user (?:gesture|activation)|transient activation|user-activation/i;
 
-/** A fullscreen request or exit, as the platform exposes it. Safari's prefixed form returns `undefined`, not a promise. */
+/** A fullscreen request or exit. Safari's prefixed form returns `undefined` rather than a promise. */
 type FullscreenCall = (this: unknown) => Promise<void> | void;
 
-/** Sorts a rejected fullscreen call into the slice's vocabulary — see this file's header for the reasoning. */
+/** Classifies explicit platform evidence; ambiguous TypeError failures retain their diagnostics. */
 function classifyFullscreenRejection(cause: unknown): ScreenFailure {
   const error = toError(cause);
 
   if (GestureRejectionPattern.test(error.message)) return { status: 'requires-gesture', error };
-  // The spec's activation rejection. `DOMException`s (which carry a `name`) fall through to the checks below.
-  if (error.name === 'TypeError') return { status: 'requires-gesture', error };
   if (error.name === 'NotAllowedError' || error.name === 'SecurityError') return { status: 'denied', error };
 
   return { status: 'failed', error };
@@ -105,30 +77,30 @@ export function isFullscreenSupported(): boolean {
 /**
  * Presents `element` fullscreen, defaulting to the document root.
  *
- * CALL THIS FROM A USER GESTURE. Browsers require transient activation, and a call that has lost it — because it
- * sits outside a click handler, or because an `await` preceded it — resolves to `requires-gesture`, not `failed`.
+ * Call while transient user activation remains active. Failure diagnostics distinguish an explicit
+ * activation rejection from permission refusals and ambiguous platform errors.
  *
  * Never throws, never rejects.
  *
  * @param element The element to present. Defaults to `document.documentElement`.
  * @returns `ok` once the platform accepts the request, or the classified failure.
  */
-export async function enterFullscreen(element?: Element): Promise<ScreenResult> {
+export async function enterFullscreen(element?: Element): Promise<ScreenRequestResult> {
   const doc = getDocument();
-  if (doc === undefined) return { status: 'unsupported' };
+  if (doc === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   const target = element ?? (readMember(doc, 'documentElement') as Element | null | undefined);
-  if (target === null || target === undefined) return { status: 'unsupported' };
+  if (target === null || target === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   const request = pickPrefixed(target, 'requestFullscreen', 'webkitRequestFullscreen');
-  if (request === undefined) return { status: 'unsupported' };
+  if (request === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   try {
     // `await` on Safari's `undefined` return is a no-op, which is exactly the intended "already done" semantic.
     await request.call(target);
-    return { status: 'ok' };
+    return { ok: true, value: undefined };
   } catch (error) {
-    return classifyFullscreenRejection(error);
+    return { ok: false, failure: classifyFullscreenRejection(error) };
   }
 }
 
@@ -142,20 +114,20 @@ export async function enterFullscreen(element?: Element): Promise<ScreenResult> 
  *
  * @returns `ok` once the document is out of fullscreen, or the classified failure.
  */
-export async function exitFullscreen(): Promise<ScreenResult> {
+export async function exitFullscreen(): Promise<ScreenRequestResult> {
   const doc = getDocument();
-  if (doc === undefined) return { status: 'unsupported' };
+  if (doc === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
   const exit = pickPrefixed(doc, 'exitFullscreen', 'webkitExitFullscreen');
-  if (exit === undefined) return { status: 'unsupported' };
+  if (exit === undefined) return { ok: false, failure: { status: 'unsupported' } };
 
-  if (getFullscreenElement() === null) return { status: 'ok' };
+  if (getFullscreenElement() === null) return { ok: true, value: undefined };
 
   try {
     await exit.call(doc);
-    return { status: 'ok' };
+    return { ok: true, value: undefined };
   } catch (error) {
-    return classifyFullscreenRejection(error);
+    return { ok: false, failure: classifyFullscreenRejection(error) };
   }
 }
 
@@ -167,7 +139,7 @@ export async function exitFullscreen(): Promise<ScreenResult> {
  * @param element The element to present when entering. Defaults to `document.documentElement`.
  * @returns The result of whichever leg ran.
  */
-export function toggleFullscreen(element?: Element): Promise<ScreenResult> {
+export function toggleFullscreen(element?: Element): Promise<ScreenRequestResult> {
   return isFullscreen() ? exitFullscreen() : enterFullscreen(element);
 }
 

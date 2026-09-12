@@ -11,10 +11,10 @@ export type MenuLabelProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { menuLabelVariants } from './Menu.variants';
 
-/** A standalone heading row inside a menu — no `role`, purely visual. */
+/** Renders a standalone heading row inside a menu — no `role`, purely visual. */
 defineOptions({ name: 'MenuLabel', inheritAttrs: false });
 
 /** The label content — React's `children`. */

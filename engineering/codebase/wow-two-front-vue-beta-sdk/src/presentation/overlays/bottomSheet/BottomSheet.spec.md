@@ -1,37 +1,52 @@
 # BottomSheet
 
-## Purpose
-Mobile-style bottom sheet with drag handle and snap points. Drag-to-resize between configurable heights; drag-to-dismiss past the lowest snap.
+Renders a mobile bottom sheet with a drag handle and snap points.
 
-## Anatomy
-```
-<BottomSheet open onOpenChange snapPoints={[200, 400, '90vh']} initialSnap={1}>
-  ├── drag handle
-  ├── header? (Title / Description)
-  └── body content
-</BottomSheet>
-```
+Source: [BottomSheet.vue](BottomSheet.vue).
 
-## Required behaviors
-- Snap points define the heights the sheet rests at (px or CSS unit).
-- Drag handle (visible) drags the sheet between snaps.
-- Releasing snaps to the nearest point.
-- Past the lowest snap → dismiss.
-- Backdrop scrim, click-to-dismiss, Escape-to-dismiss.
+Public import: `import { BottomSheet } from '@wow-two-beta/ui-vue/presentation/overlays';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- A modal FocusScope traps/loops focus and owns modal background isolation.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `open` / `defaultOpen` / `onOpenChange` | controlled | uncontrolled | |
-| `snapPoints` | `(number \| string)[]` | `['40vh', '90vh']` | px or CSS units |
-| `initialSnap` | `number` | `0` | Index into `snapPoints` |
-| `dismissOnOutsideClick` | `boolean` | `true` | |
-| `dismissOnEscape` | `boolean` | `true` | |
-| `dragToDismiss` | `boolean` | `true` | |
 
-## Accessibility
-- Wraps `Drawer` (`side="bottom"`) — inherits FocusScope, Backdrop, ScrollLock.
-- Drag handle is `role="separator"` with `aria-orientation="horizontal"` + arrow-key snap navigation.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `open` | `boolean` | no | `undefined` | The open state, controlled. The `v-model:open` binding target. |
+| `defaultOpen` | `boolean` | no | `false` | The initial open state when uncontrolled. Default `false`. |
+| `snapPoints` | `ReadonlyArray<SnapPoint>` | no | `() => ['40vh', '90vh']` | The heights the sheet snaps between — px numbers or CSS lengths. Default `['40vh', '90vh']`. |
+| `initialSnap` | `number` | no | `0` | The snap index the sheet opens at. Default 0. |
+| `dismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
+| `dismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
+| `dragToDismiss` | `boolean` | no | `true` | The drag-below-lowest-snap dismissal toggle. Default `true`. |
+| `variant` | `SurfaceVariant` | no | — | The visual recipe. Default `elevated`. |
+| `tone` | `SurfaceTone` | no | — | The color tone the recipe is tinted with. |
+| `radius` | `SurfaceRadius` | no | — | The corner rounding. Default `none`. |
+| `padding` | `SurfacePadding` | no | — | The inner spacing step. Default `none`. |
+| `elevation` | `SurfaceElevation` | no | — | The shadow depth. Default `5`. |
 
-## Dependencies
-Foundation: `utils`, `hooks/useControlled`. Same domain: `overlays/Drawer` (chrome wiring), `overlays/Backdrop`. Cross-domain: none.
+## Emits
+
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:open` | `'update:open': [open: boolean];` | Fires when the sheet opens or closes — the `v-model:open` half. |
+
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [OverlaysExamples.ts](../../../../apps/playground/src/gallery/fixtures/OverlaysExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

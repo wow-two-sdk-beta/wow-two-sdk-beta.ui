@@ -12,20 +12,20 @@ import type { Placement } from '@floating-ui/vue';
  */
 export interface ContextMenuContentProps {
   /** The Floating UI placement. Default `bottom-start`. */
-  placement?: Placement;
+  readonly placement?: Placement;
 
   /** The distance between the gesture point and the menu in px. Default 2. */
-  offset?: number;
+  readonly offset?: number;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import Menu from '../menu/Menu.vue';
 import { useContextMenuContext } from './ContextMenuContext';
 
-/** The menu surface, anchored to the point the gesture happened at. */
+/** Renders the menu surface, anchored to the point the gesture happened at. */
 defineOptions({ name: 'ContextMenuContent', inheritAttrs: false });
 
 /** The menu contents — React's `children`. */
@@ -65,7 +65,7 @@ const rest = computed(() => {
     :offset="offset"
     v-bind="rest"
     :class="classes"
-    @close="context.setOpen(false)"
+    @update:open="context.setOpen(false)"
   >
     <slot />
   </Menu>

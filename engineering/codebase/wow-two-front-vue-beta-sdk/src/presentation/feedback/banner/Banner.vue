@@ -1,34 +1,34 @@
 <script lang="ts">
-import type { Severity } from '../../../foundation/utils';
+import type { Severity } from '../../../foundation/styles';
 
 export interface BannerProps {
   /** The semantic severity palette. */
-  severity?: Severity;
+  readonly severity?: Severity;
   /** The optional leading icon. Rich content → the `icon` slot. */
-  icon?: string;
+  readonly icon?: string;
   /** The bold heading line. Rich content → the `title` slot. */
-  title?: string;
+  readonly title?: string;
   /** The body text beside the title. Rich content → the `description` slot. */
-  description?: string;
+  readonly description?: string;
   /** The right-side action area (typically Button(s)). Rich content → the `actions` slot. */
-  actions?: string;
+  readonly actions?: string;
   /** The accessible label for the close button. Default `"Dismiss"`. */
-  closeLabel?: string;
+  readonly closeLabel?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { X } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import BannerSimple from '../bannerSimple/BannerSimple.vue';
 
 const CloseIcon = X;
 
 /**
- * Slotted full-width banner. Pair with `BannerSimple` (atomic, free-form
- * children) when you don't need the structured slots.
+ * Renders a full-width banner with icon, title, description, and action slots.
+ * Pair with `BannerSimple` (atomic, free-form children) when the structured slots are unneeded.
  *
  * Each of React's four `ReactNode` props keeps its string form and gains a
  * same-named slot for rich content; the slot wins when both are supplied.
@@ -41,6 +41,19 @@ const props = withDefaults(defineProps<BannerProps>(), { closeLabel: 'Dismiss' }
 const emit = defineEmits<{
   /** Fires when the close button is activated. */
   close: [];
+}>();
+
+defineSlots<{
+  /** The extra content beside the description. */
+  default?(): unknown;
+  /** The leading icon. Falls back to the `icon` prop. */
+  icon?(): unknown;
+  /** The heading line. Falls back to the `title` prop. */
+  title?(): unknown;
+  /** The body text beside the title. Falls back to the `description` prop. */
+  description?(): unknown;
+  /** The trailing action row. Falls back to the `actions` prop. */
+  actions?(): unknown;
 }>();
 
 const attrs = useAttrs();
@@ -95,7 +108,7 @@ defineExpose({ el });
       v-if="hasClose()"
       type="button"
       :aria-label="props.closeLabel"
-      class="-mr-2 grid h-7 w-7 shrink-0 place-items-center rounded text-current opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-current"
+      class="-mr-2 grid h-7 w-7 shrink-0 place-items-center rounded text-current opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-current"
       @click="emit('close')"
     >
       <Icon :icon="CloseIcon" :size="16" />

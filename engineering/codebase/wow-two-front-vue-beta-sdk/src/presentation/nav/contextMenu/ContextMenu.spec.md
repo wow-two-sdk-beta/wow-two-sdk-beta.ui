@@ -1,42 +1,35 @@
 # ContextMenu
 
-## Purpose
-Right-click menu — wraps a target area; opens at the pointer position. Same item shape as `Menu` / `DropdownMenu`.
+Renders only its slot, owning the open state and anchor point of the ContextMenu tree below.
 
-## Anatomy
-```
-<ContextMenu>
-  ├── <ContextMenu.Trigger asChild?>
-  └── <ContextMenu.Content>
-        ├── <ContextMenu.Item onSelect>
-        ├── <ContextMenu.Group label?>
-        ├── <ContextMenu.Label>
-        └── <ContextMenu.Separator />
-      </ContextMenu.Content>
-</ContextMenu>
-```
+Source: [ContextMenu.vue](ContextMenu.vue).
 
-## Required behaviors
-- `contextmenu` event on the trigger area opens the menu at pointer position (suppresses native menu).
-- Long-press on touch devices opens the menu.
-- Inside menu: same shortcuts as `Menu`. Outside click / Escape closes.
-- ARIA: container `role="menu"`, items `role="menuitem"`.
+Public import: `import { ContextMenu } from '@wow-two-beta/ui-vue/presentation/nav';`.
+
+## Contract
+
+- Unmount disposes the subscriptions, listeners or timers registered by this implementation.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-- `ContextMenu.Trigger`: `asChild` allowed; default renders a `<div>` wrapper.
-- Items / Groups / Separators: same shape as `Menu`.
 
-## Composition
-Wraps `Menu`. Anchor is a virtual element at the pointer coordinates.
+No declared props.
 
-## Accessibility
-- Activatable via Shift+F10 / context-menu key while focused on trigger.
-- Focus returns to whatever was focused before opening.
+## Emits
 
-## Known limitations
-- No submenus (P6).
-- Touch long-press uses a 600ms timer — not configurable yet.
+None declared.
 
-## Inspirations
-- Radix `ContextMenu`.
-- shadcn/ui `ContextMenu`.
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+No explicit exposed handle.
+
+## Verification
+
+- Public render fixture: [NavExamples.ts](../../../../apps/playground/src/gallery/fixtures/NavExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

@@ -1,18 +1,3 @@
-// Capability detection — the four questions a UI asks BEFORE it renders a clipboard affordance, plus the two
-// guarded global reads every other module in the slice goes through.
-//
-// Per-method, not per-API. `navigator.clipboard` existing tells you almost nothing: Firefox exposes the object
-// and `writeText` on it while withholding `readText` from page script entirely, and every engine shipped
-// `writeText` years before `write`. So each predicate probes the exact method its operation calls, and the
-// modules never touch `navigator.clipboard` directly.
-//
-// Every read is wrapped: `navigator` can be absent (SSR), a getter can throw (a hardened page, an over-eager
-// polyfill), and a partial implementation can leave a property that is not a function. All of those have to
-// become `false`, never an exception — a feature check that throws is worse than no feature check.
-//
-// `ClipboardItem` is read off `globalThis` rather than referenced as a bare global for the same reason: it is
-// undefined in Node and in older Safari, and a bare reference would be a `ReferenceError` instead of a `false`.
-
 /** The `ClipboardItem` constructor, narrowed to the one overload this slice calls. */
 export type ClipboardItemConstructor = new (items: Record<string, Blob>) => ClipboardItem;
 
@@ -41,7 +26,22 @@ export function clipboardApi(): Clipboard | undefined {
 }
 
 /** The Clipboard API methods this slice calls. */
-export type ClipboardMethodName = 'writeText' | 'write' | 'readText' | 'read';
+export const ClipboardMethodName = {
+  /** Names `clipboard.writeText` — the plain-text write, implemented in every engine with a clipboard. */
+  WriteText: 'writeText',
+
+  /** Names `clipboard.write` — the `ClipboardItem` write, for images and multi-flavour payloads. */
+  Write: 'write',
+
+  /** Names `clipboard.readText` — the plain-text read. */
+  ReadText: 'readText',
+
+  /** Names `clipboard.read` — the `ClipboardItem` read. */
+  Read: 'read',
+} as const;
+
+/** The Clipboard API methods this slice calls. */
+export type ClipboardMethodName = (typeof ClipboardMethodName)[keyof typeof ClipboardMethodName];
 
 /**
  * Resolves one of the Clipboard API's methods, bound to the clipboard object, or `undefined` when this engine
@@ -89,7 +89,7 @@ export function clipboardItemConstructor(): ClipboardItemConstructor | undefined
  * "is the road there", not "will the trip succeed".
  */
 export function canCopy(): boolean {
-  return clipboardMethod('writeText') !== undefined;
+  return clipboardMethod(ClipboardMethodName.WriteText) !== undefined;
 }
 
 /**
@@ -97,19 +97,19 @@ export function canCopy(): boolean {
  * Strictly narrower than {@link canCopy}: every engine shipped `writeText` first.
  */
 export function canCopyItems(): boolean {
-  return clipboardMethod('write') !== undefined && clipboardItemConstructor() !== undefined;
+  return clipboardMethod(ClipboardMethodName.Write) !== undefined && clipboardItemConstructor() !== undefined;
 }
 
 /**
  * Whether reading from the clipboard is available — `navigator.clipboard.readText`.
  *
- * `false` in Firefox, which does not expose reading to page script at all, and under SSR. Even where it is
- * `true`, the read needs a user gesture and shows an explicit paste prompt. If all you need is the payload the
+ * Returns `false` when the method is absent, including under SSR. Even where present,
+ * reading remains subject to browser permission and user-activation requirements. If all you need is the payload the
  * user just pasted, do not read at all — handle the `paste` event with `getPasteItems`, which needs no
  * permission and no prompt.
  */
 export function canReadClipboard(): boolean {
-  return clipboardMethod('readText') !== undefined;
+  return clipboardMethod(ClipboardMethodName.ReadText) !== undefined;
 }
 
 /**

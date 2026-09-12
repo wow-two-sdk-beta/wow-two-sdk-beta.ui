@@ -10,13 +10,13 @@ export type MenubarTriggerProps = Record<string, never>;
 </script>
 
 <script setup lang="ts">
-import { computed, onScopeDispose, shallowRef, useAttrs, watch } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { computed, shallowRef, useAttrs, watch } from 'vue';
+import { cn } from '../../../foundation/styles';
 import { useRovingFocusItem } from '../../../foundation/primitives';
 import { useMenubarContext, useMenubarMenuContext } from './MenubarContext';
 import { menubarTriggerVariants } from './Menubar.variants';
 
-/** One `role="menuitem"` button in the bar, and the anchor of its menu. */
+/** Renders one `role="menuitem"` button in the bar, and anchors its menu. */
 defineOptions({ name: 'MenubarTrigger', inheritAttrs: false });
 
 /** The trigger label — React's `children`. */
@@ -42,8 +42,14 @@ function setRef(node: unknown): void {
   item.ref(node);
 }
 
-watch(el, (node) => bar.registerTrigger(menu.id, node), { immediate: true, flush: 'post' });
-onScopeDispose(() => bar.unregisterTrigger(menu.id));
+watch(
+  [() => menu.id, el],
+  ([id, node], _, onCleanup) => {
+    bar.registerTrigger(id, node);
+    onCleanup(() => bar.unregisterTrigger(id));
+  },
+  { immediate: true, flush: 'post' },
+);
 
 /* Lifted to a setup const so the template auto-unwraps it (a plain injected object does not). */
 const isOpen = menu.open;

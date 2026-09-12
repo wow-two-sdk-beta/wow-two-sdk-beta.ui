@@ -1,14 +1,3 @@
-// The payload half of the share vector — what a caller hands in, the shape the native API actually accepts, and
-// the text a share degrades to once it becomes a clipboard copy.
-//
-// Why a hand-rolled `ShareData` rather than the DOM lib's: ours is `readonly` end-to-end (a payload is a value,
-// not a buffer the platform may edit) and carries `readonly File[]`. Neither is assignable to the DOM dictionary,
-// so every native call goes through `toNativeSharePayload` to copy into the mutable shape the API demands.
-//
-// That copy is built key-by-key rather than spread, so the payload carries only members the caller actually set.
-// `canShare` and `share` then judge the exact same object, and a member the caller left off never reaches the
-// platform as a present-but-`undefined` key.
-
 /**
  * A Web Share payload — a structural mirror of the browser's `ShareData` dictionary. Every member is optional,
  * but the platform rejects a payload with none of them set.
@@ -24,7 +13,7 @@ export interface ShareData {
   readonly url?: string;
 
   /** Files to share. Support is far narrower than the rest of the payload — always gate on `canShare`. */
-  readonly files?: readonly File[];
+  readonly files?: ReadonlyArray<File>;
 }
 
 /**

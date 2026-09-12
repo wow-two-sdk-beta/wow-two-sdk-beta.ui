@@ -52,11 +52,11 @@ import {
   type ShallowRef,
 } from 'vue';
 
-import { useResizeObserver } from '../hooks';
+import { useResizeObserver } from '../observers';
 
 import { buildMeasurements, itemOffset, itemSize, measurementsTotalSize, type Measurements } from './Measurements';
 import {
-  DEFAULT_OVERSCAN,
+  DefaultOverscan,
   computeRange,
   computeScrollOffset,
   type ScrollAlignment,
@@ -95,13 +95,16 @@ export interface UseVirtualListOptions {
   /** Callback form of the same thing, for containers not held in a ref. Takes precedence over `target`. */
   readonly getScrollElement?: () => HTMLElement | null;
 
-  /** Extra items rendered beyond each edge of the viewport. Defaults to {@link DEFAULT_OVERSCAN}. */
+  /** Extra items rendered beyond each edge of the viewport. Defaults to {@link DefaultOverscan}. */
   readonly overscan?: MaybeRefOrGetter<number | undefined>;
 
   /** Whether the list scrolls horizontally (`scrollLeft`/`clientWidth`) instead of vertically. Defaults to `false`. */
   readonly horizontal?: MaybeRefOrGetter<boolean | undefined>;
 
-  /** Viewport size assumed before the container is measured — set it to render a sensible first frame under SSR. Defaults to `0`. */
+  /**
+   * Viewport size assumed before the container is measured — set it to render a sensible first frame under SSR.
+   * Defaults to `0`.
+   */
   readonly initialViewportSize?: number;
 
   /** Stable key for an item, for reordering data. Defaults to the index. */
@@ -111,7 +114,7 @@ export interface UseVirtualListOptions {
 /** What a virtualized list hands back to its consumer. */
 export interface VirtualList {
   /** The items to render right now, in index order, overscan included. Empty when the list is empty. */
-  readonly virtualItems: ComputedRef<readonly VirtualItem[]>;
+  readonly virtualItems: ComputedRef<ReadonlyArray<VirtualItem>>;
 
   /** Combined size of every item — the size the scrollable spacer must have for the scrollbar to be honest. */
   readonly totalSize: ComputedRef<number>;
@@ -163,7 +166,7 @@ export interface VirtualList {
 export function useVirtualList(options: UseVirtualListOptions): VirtualList {
   const horizontal = computed(() => toValue(options.horizontal) ?? false);
   const count = computed(() => toValue(options.count));
-  const overscan = computed(() => toValue(options.overscan) ?? DEFAULT_OVERSCAN);
+  const overscan = computed(() => toValue(options.overscan) ?? DefaultOverscan);
 
   const scrollOffset = shallowRef(0);
   const viewportSize = shallowRef(Math.max(0, options.initialViewportSize ?? 0));

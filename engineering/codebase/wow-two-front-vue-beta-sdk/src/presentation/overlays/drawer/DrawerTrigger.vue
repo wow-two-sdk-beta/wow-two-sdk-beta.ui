@@ -7,17 +7,17 @@
  */
 export interface DrawerTriggerProps {
   /** Merge onto the single slot child instead of rendering a `<button>`. */
-  asChild?: boolean;
+  readonly asChild?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef, watch, type ComponentPublicInstance } from 'vue';
-import { toHtmlElement } from '../OverlayHelpers';
+import { OverlayExtensions } from '../OverlayExtensions';
 import { Primitive } from '../../../foundation/primitives';
 import { useDrawerContext } from './Drawer.vue';
 
-/* Opens the enclosing `Drawer` and registers itself as the focus-return target. */
+/** Renders the control that opens the enclosing `Drawer` and takes focus back on close. */
 defineOptions({ name: 'DrawerTrigger', inheritAttrs: false });
 
 /** The trigger content — React's `children`. */
@@ -36,7 +36,7 @@ const isOpen = context.open;
 watch(
   inner,
   (instance) => {
-    context.triggerEl.value = toHtmlElement(instance?.$el);
+    context.triggerEl.value = OverlayExtensions.toHtmlElement(instance?.$el);
   },
   { immediate: true, flush: 'post' },
 );

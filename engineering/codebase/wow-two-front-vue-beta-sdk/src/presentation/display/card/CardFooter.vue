@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The bordered action row at the bottom of a `Card`. */
+/** Renders the bordered action row pinned to the bottom of a `Card`. */
 defineOptions({ name: 'CardFooter', inheritAttrs: false });
 
 /** The footer content — React's `children`. */

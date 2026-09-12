@@ -9,9 +9,9 @@ export interface TimelineTitleProps {}
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** The headline of a `TimelineItem`. */
+/** Renders the headline of a `TimelineItem`, at the rail title weight. */
 defineOptions({ name: 'TimelineTitle', inheritAttrs: false });
 
 /** The title copy — React's required `children`. */

@@ -13,14 +13,14 @@ export type DropdownMenuContentProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, shallowRef, useAttrs, watch } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { useReducedMotion } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useReducedMotion } from '../../../foundation/device';
 import { Presence } from '../../../foundation/primitives';
 import Menu from '../menu/Menu.vue';
 import { useDropdownMenuContext } from './DropdownMenuContext';
 
 /**
- * Animated panel handed to `Menu` as its child. `Presence` clones `data-state`
+ * Renders the animated panel handed to `Menu` as its child. `Presence` clones `data-state`
  * ("open" | "closed") onto the panel div, so the pop tokens below run gated on
  * that state.
  */
@@ -130,7 +130,7 @@ const rest = computed(() => {
     :placement="placement"
     :offset="offset"
     v-bind="rest"
-    @close="handleClose"
+    @update:open="handleClose"
   >
     <Presence :is-present="isOpen">
       <div :ref="setPanel" :class="panelClasses" @animationend="handleAnimationEnd">

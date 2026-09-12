@@ -28,7 +28,7 @@ const {
   ActionSheetAction,
   ActionSheetCancel,
   BottomSheet,
-  Backdrop,
+  BackdropOverlay,
   ModalHeader,
   ModalTitle,
   ModalDescription,
@@ -63,7 +63,7 @@ const covered = [
   'ActionSheetAction',
   'ActionSheetCancel',
   'BottomSheet',
-  'Backdrop',
+  'BackdropOverlay',
   'ModalHeader',
   'ModalTitle',
   'ModalDescription',
@@ -118,9 +118,7 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
               <ModalDescription>This cannot be undone.</ModalDescription>
             </ModalHeader>
             <ModalBody>
-              <p class="text-sm">
-                Every file, deployment and secret attached to the project is removed.
-              </p>
+              <p class="text-sm">Every file, deployment and secret attached to the project is removed.</p>
             </ModalBody>
             <ModalFooter>
               <ModalClose>
@@ -133,9 +131,7 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
       </Demo>
 
       <Demo name="AlertModal" note="role=alertdialog — Escape should NOT dismiss by default">
-        <Button variant="outline" tone="danger" size="sm" @click="alertOpen = true">
-          Open alert modal
-        </Button>
+        <Button variant="outline" tone="danger" size="sm" @click="alertOpen = true"> Open alert modal </Button>
         <AlertModal v-model:open="alertOpen">
           <AlertModalContent>
             <ModalHeader>
@@ -157,7 +153,7 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
       <Demo name="Drawer" note="side axis: left / right / top / bottom">
         <div class="flex flex-wrap gap-2">
           <Button
-            v-for="s in (['left', 'right', 'top', 'bottom'] as const)"
+            v-for="s in ['left', 'right', 'top', 'bottom'] as const"
             :key="s"
             variant="outline"
             size="sm"
@@ -178,11 +174,7 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
 
       <Demo name="Popover" note="placement + arrow — click the trigger">
         <div class="flex flex-wrap gap-2">
-          <Popover
-            v-for="p in (['top', 'right', 'bottom', 'left'] as const)"
-            :key="p"
-            :placement="p"
-          >
+          <Popover v-for="p in ['top', 'right', 'bottom', 'left'] as const" :key="p" :placement="p">
             <PopoverTrigger>
               <Button variant="soft" size="sm">{{ p }}</Button>
             </PopoverTrigger>
@@ -224,10 +216,10 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
         </BottomSheet>
       </Demo>
 
-      <Demo name="Backdrop" note="inline — blurred variant over the box">
+      <Demo name="BackdropOverlay" note="inline — blurred variant over the box">
         <div class="relative h-24 overflow-hidden rounded-md bg-muted">
           <div class="p-2 text-xs">content behind the backdrop</div>
-          <Backdrop :is-open="backdropOn" is-blurred is-inline />
+          <BackdropOverlay :is-open="backdropOn" is-blurred is-inline />
         </div>
         <Button variant="ghost" size="sm" class="mt-2" @click="backdropOn = !backdropOn">
           toggle backdrop ({{ backdropOn }})
@@ -243,12 +235,15 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
         <table class="w-full text-left text-[11px]">
           <thead>
             <tr class="text-subtle-foreground">
-              <th class="py-1">shared SFC</th><th>Modal</th><th>Dialog</th><th>Drawer</th>
+              <th class="py-1">shared SFC</th>
+              <th>Modal</th>
+              <th>Dialog</th>
+              <th>Drawer</th>
             </tr>
           </thead>
           <tbody class="font-mono">
             <tr v-for="p in ['Header', 'Title', 'Description', 'Body', 'Footer']" :key="p">
-              <td class="py-0.5">Overlay{{ p }}</td>
+              <td class="py-0.5">AnchorLayout{{ p }}</td>
               <td>Modal{{ p }}</td>
               <td>Dialog{{ p }}</td>
               <td>Drawer{{ p }}</td>
@@ -264,9 +259,7 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
       </Demo>
     </div>
 
-    <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">
-      auto-mounted tail
-    </h3>
+    <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
     <AutoGroup :namespace="overlays" :covered="covered" />
   </div>
 </template>

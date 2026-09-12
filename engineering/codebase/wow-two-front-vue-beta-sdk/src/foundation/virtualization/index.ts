@@ -51,7 +51,7 @@
 // Consumers preferring spacer divs over absolute positioning can render `paddingStart` / `paddingEnd` instead.
 //
 // NOT HERE, on purpose:
-//  - `useResizeObserver` — it lives in `foundation/hooks` and is not re-exported; one export site per composable.
+//  - `useResizeObserver` — it lives in `foundation/observers` and is not re-exported; one export site per composable.
 //  - The scroll container itself — that is `foundation/primitives`' `ScrollViewport` (see above).
 //  - Grid/2D windowing, sticky headers, and infinite-scroll paging — this is the primitive they would build on.
 
@@ -63,15 +63,15 @@ export {
   itemSize,
   measurementsTotalSize,
   withMeasuredSize,
-  EMPTY_MEASUREMENTS,
+  EmptyMeasurements,
   type Measurements,
 } from './Measurements';
 
 export {
   computeRange,
   computeScrollOffset,
-  DEFAULT_OVERSCAN,
-  EMPTY_RANGE,
+  DefaultOverscan,
+  EmptyRange,
   type ComputeRangeOptions,
   type ComputeScrollOffsetOptions,
   type ScrollAlignment,

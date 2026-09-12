@@ -5,7 +5,7 @@ import type { EmojiPickerSize, EmojiTileShape } from './EmojiPicker.variants';
 /** Defines props for the emoji tile grid. */
 export interface EmojiGridProps {
   /** The emoji to lay out, in order. */
-  readonly emojis: readonly EmojiCatalogEntry[];
+  readonly emojis: ReadonlyArray<EmojiCatalogEntry>;
 
   /** The selected emoji's glyph, or `null`. */
   readonly selectedGlyph: string | null;
@@ -26,7 +26,7 @@ export interface EmojiGridProps {
   readonly scrollThumbColor?: string;
 }
 
-/** Reads the grid's live column count from its resolved `grid-template-columns` — the step size for a vertical arrow move. */
+/** Reads the grid's column count from the resolved `grid-template-columns` — the step for a vertical arrow move. */
 function columnCount(grid: HTMLElement): number {
   const template = getComputedStyle(grid).gridTemplateColumns;
   return template ? template.split(' ').length : 1;
@@ -35,27 +35,26 @@ function columnCount(grid: HTMLElement): number {
 /* WebKit/Blink: slim scrollbar via the shadow-DOM pseudo-elements (not inline-styleable),
    expressed as Tailwind arbitrary variants — ~8px, transparent track, rounded thumb on the
    resolved color. */
-const SCROLLBAR_CLASS =
+const ScrollbarClass =
   '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent ' +
   '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--emoji-scroll-thumb)]';
 </script>
 
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, watch, type CSSProperties } from 'vue';
-import { Key } from '../../../foundation/utils';
+import { Key } from '../../../foundation/dom';
 import { EmojiEmptyLabels, EmojiPickerSizes } from './EmojiPicker.variants';
 import EmojiTile from './EmojiTile.vue';
 
-/**
- * Renders emoji as an auto-filling `listbox`, or a muted hint when the set is empty. A single roving `tabindex`
- * keeps the ~1870-tile grid to one tab stop; arrow keys (plus Home / End) move focus between options.
- */
+/** Renders emoji as an auto-filling `listbox`, or a muted hint when the visible set is empty. */
+/* A single roving `tabindex` keeps the ~1870-tile grid to one tab stop; arrow keys (plus Home / End) move
+   focus between options. */
 defineOptions({ name: 'EmojiGrid' });
 
 const props = defineProps<EmojiGridProps>();
 
 const emit = defineEmits<{
-  /** Replaces React's `onSelect`. Carries the picked catalog entry. */
+  /** Fires when the reader activates a tile in the grid, carrying its entry. Replaces React's `onSelect`. */
   select: [entry: EmojiCatalogEntry];
 }>();
 
@@ -146,9 +145,9 @@ const viewportStyle = computed<CSSProperties>(() => ({
   <!--
     Two branches rather than one always-present wrapper: React returned the bare grid when
     `viewportRows` is undefined, and an unconditional extra block would become a stray flex
-    item in the picker's `Stack`.
+    item in the picker's `StackLayout`.
   -->
-  <div v-else-if="viewportRows !== undefined" :class="SCROLLBAR_CLASS" :style="viewportStyle">
+  <div v-else-if="viewportRows !== undefined" :class="ScrollbarClass" :style="viewportStyle">
     <div ref="grid" role="listbox" aria-label="Emoji" :style="gridStyle" @keydown="moveFocus">
       <EmojiTile
         v-for="(entry, index) in emojis"

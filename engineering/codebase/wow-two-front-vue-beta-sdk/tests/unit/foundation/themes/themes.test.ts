@@ -6,7 +6,7 @@ import {
   Oklch,
   oklchToHex,
   parseColor,
-  SEMANTIC_TOKENS,
+  SemanticTokens,
   THEMES,
   ThemeStatus,
   validateTheme,
@@ -24,7 +24,7 @@ describe('generateTheme', () => {
   const theme = generateTheme({ id: 'smoke-seed', name: 'Smoke Seed', primaryHue: 265 });
 
   it('emits every semantic token in both modes', () => {
-    for (const token of SEMANTIC_TOKENS) {
+    for (const token of SemanticTokens) {
       expect(theme.light[token], `light is missing \`${token}\``).toBeDefined();
       expect(theme.dark[token], `dark is missing \`${token}\``).toBeDefined();
     }

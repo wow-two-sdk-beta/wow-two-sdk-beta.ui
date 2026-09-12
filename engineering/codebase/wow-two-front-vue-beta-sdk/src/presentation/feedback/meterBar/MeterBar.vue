@@ -1,36 +1,36 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 
 export interface MeterBarProps {
   /** The current value 0–`max`. */
-  value: number;
-  max?: number;
+  readonly value: number;
+  readonly max?: number;
   /** The threshold values that change the fill tone. Pass `[good, warn]` —
    *  `value <= good` → success, `<= warn` → warning, otherwise destructive.
    *  Defaults: `[max * 0.7, max * 0.9]`. */
-  thresholds?: [number, number];
+  readonly thresholds?: [number, number];
 
   /** The bar thickness. */
-  size?: Size;
-  label?: string;
+  readonly size?: Size;
+  readonly label?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn, Size as SizeToken } from '../../../foundation/utils';
+import { cn, Size as SizeToken } from '../../../foundation/styles';
 
 /* Only the sm/md/lg steps carry a thickness; other `Size` members fall through
    to the `md` default at the lookup below. */
-const SIZE: Partial<Record<Size, string>> = {
+const TrackHeight: Partial<Record<Size, string>> = {
   sm: 'h-1',
   md: 'h-2',
   lg: 'h-3',
 };
 
 /**
- * Like `ProgressBar` but the fill color reflects threshold zones — green /
- * amber / red. Use for usage gauges, capacity, score meters.
+ * Renders a horizontal gauge whose fill color crosses threshold zones — green / amber / red.
+ * Use for usage gauges, capacity, and score meters; `ProgressBar` covers plain progress.
  */
 defineOptions({ name: 'MeterBar', inheritAttrs: false });
 
@@ -47,7 +47,11 @@ const tone = computed(() => {
 const pct = computed(() => Math.min(100, Math.max(0, (props.value / props.max) * 100)));
 
 const classes = computed(() =>
-  cn('w-full overflow-hidden rounded-full bg-muted', SIZE[props.size] ?? SIZE.md, attrs.class as string | undefined),
+  cn(
+    'w-full overflow-hidden rounded-full bg-muted',
+    TrackHeight[props.size] ?? TrackHeight.md,
+    attrs.class as string | undefined,
+  ),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

@@ -2,23 +2,22 @@
 /**
  * The prop surface of `HoverCardContent`.
  *
- * React declared `extends HTMLAttributes<HTMLDivElement>` plus `children`;
- * attributes reach the root through `useAttrs` here and `children` is the
- * default slot, which leaves no declared prop.
+ * Attributes reach the root through `useAttrs` and the content is the default
+ * slot, which leaves no declared prop.
  */
 export type HoverCardContentProps = Record<string, never>;
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { AnchoredPositioner, Portal, Presence } from '../../../foundation/primitives';
 import { useHoverCardContext } from './HoverCard.vue';
 
-/* The anchored hover card panel — stays open while the pointer is over it. */
+/** Renders the anchored hover-card panel, which stays open while the pointer is over it. */
 defineOptions({ name: 'HoverCardContent', inheritAttrs: false });
 
-/** The card content — React's `children`. */
+/** The card content. */
 defineSlots<{ default(): unknown }>();
 
 const attrs = useAttrs();
@@ -34,7 +33,7 @@ const anchor = computed(() => context.triggerEl.value);
 
 const classes = computed(() =>
   cn(
-    'w-64 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-none',
+    'w-64 rounded-md border border-border bg-popover p-4 text-popover-foreground shadow-md outline-hidden',
     'motion-safe:data-[state=open]:animate-(--animate-pop-in) motion-safe:data-[state=closed]:animate-(--animate-pop-out) motion-reduce:animate-none',
     attrs.class as string | undefined,
   ),
@@ -51,12 +50,10 @@ defineExpose({ el });
 
 <template>
   <!--
-    React nested `Portal` + `AnchoredPositioner` inside the Presence-cloned panel
-    and bridged the injected `ref` / `data-state` past them with `forwardRef`. Vue
-    resolves a cloned `ref` through `$el` and a Teleport has no element, so both
-    are hoisted above `Presence` and the panel stays Presence's direct child —
-    keeping `data-state` and the pop animation on the same node React had them on.
-    The trade: the positioner stays mounted (empty) while the card is closed.
+    Vue resolves a cloned `ref` through `$el` and a Teleport has no element, so
+    `Portal` and `AnchoredPositioner` are hoisted above `Presence` and the panel
+    stays Presence's direct child — keeping `data-state` and the pop animation on
+    the same node. The trade: the positioner stays mounted (empty) while closed.
   -->
   <Portal>
     <AnchoredPositioner :anchor="anchor" :placement="placement" :offset="offset" class="z-dropdown">

@@ -18,7 +18,11 @@ export interface FrameGlyphProps {
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue';
 
-/** Renders a nested-frame glyph — an outer frame + inner pupil, or (with `isDot`) just the enlarged pupil; a scanner / viewfinder / QR-eye indicator. */
+/**
+ * Renders a nested-frame glyph — an outer frame plus inner pupil, or the enlarged pupil alone.
+ *
+ * `isDot` picks the pupil-only form. Reads as a scanner / viewfinder / QR-eye indicator.
+ */
 defineOptions({ name: 'FrameGlyph' });
 
 /* `isDot` defaults to `undefined`, not `false`: Vue casts an absent `Boolean`

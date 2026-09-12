@@ -1,29 +1,34 @@
 <script lang="ts">
 export interface CarouselProps {
   /** The controlled active slide index. */
-  index?: number;
+  readonly index?: number;
   /** The uncontrolled initial slide index. Default `0`. */
-  defaultIndex?: number;
+  readonly defaultIndex?: number;
   /** The wrap-around state. Default `false`. */
-  canLoop?: boolean;
+  readonly canLoop?: boolean;
   /** The auto-advance interval in ms. Omit to disable. */
-  autoPlay?: number;
+  readonly autoPlay?: number;
+  /** The localized pause action label. */
+  readonly pauseLabel?: string;
+  /** The localized resume action label. */
+  readonly resumeLabel?: string;
   /** The explicit slide count — overrides the automatic count (use for virtualised slides). */
-  slidesCount?: number;
+  readonly slidesCount?: number;
 }
 </script>
 
 <script setup lang="ts">
-import { computed, provide, ref, useAttrs, useTemplateRef, watch, watchEffect } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { computed, onMounted, provide, ref, useAttrs, useTemplateRef, watch, watchEffect } from 'vue';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
+import { useReducedMotion } from '../../../foundation/device';
 import { CarouselKey, type CarouselContextValue } from './CarouselContext';
 
 /**
- * Carousel root. Owns the index, the slide count and the auto-play pause flag,
- * and publishes them to `CarouselViewport` / `CarouselSlides` / `CarouselPrev` /
- * `CarouselNext` / `CarouselDots` / `CarouselDot` through injection — React
- * attached those as statics, which an SFC's default export cannot carry.
+ * Renders the carousel root that owns the index, the slide count, and the auto-play pause flag.
+ *
+ * The parts read them through injection — `CarouselViewport` / `CarouselSlides` / `CarouselPrev` / `CarouselNext` /
+ * `CarouselDots` / `CarouselDot` — because an SFC's default export cannot carry React's statics.
  */
 defineOptions({ name: 'Carousel', inheritAttrs: false });
 
@@ -35,12 +40,14 @@ const props = withDefaults(defineProps<CarouselProps>(), {
   defaultIndex: 0,
   canLoop: false,
   autoPlay: undefined,
+  pauseLabel: 'Pause slides',
+  resumeLabel: 'Resume slides',
   slidesCount: undefined,
 });
 
 const emit = defineEmits<{
-  /** Fires with the newly active slide index. */
-  'index-change': [index: number];
+  /** Fires when the reader moves to a different slide, with the new index. */
+  'update:index': [index: number];
 }>();
 
 const attrs = useAttrs();
@@ -49,11 +56,18 @@ const el = useTemplateRef<HTMLDivElement>('el');
 const { value: index, setValue: setIndexState } = useControlled<number>({
   controlled: () => props.index,
   default: props.defaultIndex,
-  onChange: (next) => emit('index-change', next),
+  onChange: (next) => emit('update:index', next),
 });
 
 const count = ref(props.slidesCount ?? 0);
 const paused = ref(false);
+const pointerPaused = ref(false);
+const focusPaused = ref(false);
+const mounted = ref(false);
+const reducedMotion = useReducedMotion();
+onMounted(() => {
+  mounted.value = true;
+});
 
 // External override.
 watch(
@@ -98,7 +112,17 @@ watchEffect((onCleanup) => {
   const loop = props.canLoop;
   const total = count.value;
   const current = index.value;
-  if (!interval || paused.value || total === 0) return;
+  if (
+    !mounted.value ||
+    !interval ||
+    interval <= 0 ||
+    paused.value ||
+    pointerPaused.value ||
+    focusPaused.value ||
+    reducedMotion.value ||
+    total === 0
+  )
+    return;
   const handle = window.setInterval(() => {
     setIndex(loop ? current + 1 : Math.min(total - 1, current + 1));
   }, interval);
@@ -122,7 +146,7 @@ provide<CarouselContextValue>(CarouselKey, {
   prev,
   next,
   get paused() {
-    return paused.value;
+    return paused.value || pointerPaused.value || focusPaused.value;
   },
   setPaused,
   get autoPlay() {
@@ -148,11 +172,20 @@ defineExpose({ el });
     ref="el"
     v-bind="rest"
     :class="classes"
-    @mouseenter="setPaused(true)"
-    @mouseleave="setPaused(false)"
-    @focusin="setPaused(true)"
-    @focusout="setPaused(false)"
+    @mouseenter="pointerPaused = true"
+    @mouseleave="pointerPaused = false"
+    @focusin="focusPaused = true"
+    @focusout="focusPaused = el?.contains($event.relatedTarget as Node) ?? false"
   >
+    <button
+      v-if="props.autoPlay && !reducedMotion"
+      type="button"
+      :aria-pressed="paused"
+      class="mb-2 rounded border px-2 py-1 text-sm"
+      @click="setPaused(!paused)"
+    >
+      {{ paused ? props.resumeLabel : props.pauseLabel }}
+    </button>
     <slot />
   </div>
 </template>

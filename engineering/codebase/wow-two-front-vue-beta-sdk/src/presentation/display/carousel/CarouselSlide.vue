@@ -7,9 +7,9 @@ export interface CarouselSlideProps {}
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/** One slide's content box. React shipped it as `Carousel.Slide`. */
+/** Renders one slide's content box; React shipped it as `Carousel.Slide`. */
 defineOptions({ name: 'CarouselSlide', inheritAttrs: false });
 
 /** The slide content — React's `children`. */

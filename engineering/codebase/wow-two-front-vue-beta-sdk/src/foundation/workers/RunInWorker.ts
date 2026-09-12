@@ -1,3 +1,5 @@
+import type { WorkerRunResult } from './models/WorkerRunResult';
+
 // One-shot offloading: run a self-contained function on another thread without authoring a worker file,
 // wiring it into the bundler, or keeping a thread alive afterwards. For the one expensive pure computation
 // that would otherwise block a frame — a hash over a large buffer, a sort of a hundred thousand rows,
@@ -32,36 +34,19 @@
 import { toError } from '../errors';
 
 import { isBlobWorkerSupported } from './WorkerSupport';
-
-/** The outcome of a {@link runInWorker} attempt. */
-export type RunInWorkerResult<TValue> =
-  | {
-      /** The function ran on the worker thread and returned. */
-      readonly status: 'ok';
-      /** The value it returned, structured-cloned back. */
-      readonly value: TValue;
-    }
-  | {
-      /** No `Worker`, `Blob`, or `URL.createObjectURL` here — SSR, or a CSP blocking `blob:` workers. Nothing ran. */
-      readonly status: 'unsupported';
-    }
-  | {
-      /** The function threw, the worker failed to start, or the deadline elapsed. */
-      readonly status: 'failed';
-      /** The normalized failure — the worker's own error where one crossed the boundary. */
-      readonly error: Error;
-    };
+export type { WorkerRunFailure } from './models/WorkerRunFailure';
+export type { WorkerRunResult } from './models/WorkerRunResult';
 
 /** Tunes a {@link runInWorker} call. */
 export interface RunInWorkerOptions {
-  /** The deadline in milliseconds. On lapse the worker is terminated and the result is `failed` with a `TimeoutError`. Omit for none. */
+  /** Deadline (ms), omit for none. On lapse the worker is terminated and the result is `failed` (`TimeoutError`). */
   readonly timeoutMs?: number;
 
   /**
    * The objects to transfer into the worker instead of cloning. Each is NEUTERED in the caller: an
    * `ArrayBuffer` passed here has `byteLength === 0` once the call returns.
    */
-  readonly transfer?: readonly Transferable[];
+  readonly transfer?: ReadonlyArray<Transferable>;
 }
 
 /**
@@ -106,7 +91,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  *
  * ```ts
  * const result = await runInWorker((rows: number[]) => rows.reduce((a, b) => a + b, 0), [bigArray]);
- * if (result.status === 'ok') console.log(result.value);
+ * if (result.ok) console.log(result.value);
  * ```
  *
  * `fn` MUST be self-contained — it is stringified, so it captures nothing from the scope it was written
@@ -114,17 +99,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * return value must survive structured clone. See the module header for the full rationale.
  *
  * Never throws: an unsupported runtime, a failed start, a thrown function, and a lapsed deadline all
- * resolve to a {@link RunInWorkerResult}. The worker is terminated and the blob URL revoked on every path.
+ * resolve to a {@link WorkerRunResult}. The worker is terminated and the blob URL revoked on every path.
  */
 export async function runInWorker<TArgs extends readonly unknown[], TValue>(
   fn: (...args: TArgs) => TValue | Promise<TValue>,
   args: TArgs,
   options?: RunInWorkerOptions,
-): Promise<RunInWorkerResult<TValue>> {
-  if (!isBlobWorkerSupported()) return { status: 'unsupported' };
+): Promise<WorkerRunResult<TValue>> {
+  if (!isBlobWorkerSupported()) return { ok: false, failure: { status: 'unsupported' } };
 
   let url: string | undefined;
   let worker: Worker | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
 
   try {
     url = URL.createObjectURL(new Blob([buildWorkerSource(fn.toString())], { type: 'text/javascript' }));
@@ -132,8 +118,6 @@ export async function runInWorker<TArgs extends readonly unknown[], TValue>(
     worker = instance;
 
     const value = await new Promise<TValue>((resolve, reject) => {
-      let timer: ReturnType<typeof setTimeout> | undefined;
-
       /** Cancels the deadline so a settled run cannot be failed by its own timer afterwards. */
       const done = (): void => {
         if (timer !== undefined) clearTimeout(timer);
@@ -175,10 +159,11 @@ export async function runInWorker<TArgs extends readonly unknown[], TValue>(
       else instance.postMessage(args);
     });
 
-    return { status: 'ok', value };
+    return { ok: true, value };
   } catch (error) {
-    return { status: 'failed', error: toError(error) };
+    return { ok: false, failure: { status: 'failed', error: toError(error) } };
   } finally {
+    if (timer !== undefined) clearTimeout(timer);
     worker?.terminate();
     // Revoked on every path, including the ones that already failed — an un-revoked URL pins its blob for
     // the life of the document.

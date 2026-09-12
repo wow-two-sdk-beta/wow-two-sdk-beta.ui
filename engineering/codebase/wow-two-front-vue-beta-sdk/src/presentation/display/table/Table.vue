@@ -5,31 +5,30 @@
 import { TableDensity, TableRadius } from './TableContext';
 
 export interface TableProps {
-  isStriped?: boolean;
-  isHoverable?: boolean;
-  density?: TableDensity;
-  isBare?: boolean;
+  readonly isStriped?: boolean;
+  readonly isHoverable?: boolean;
+  readonly density?: TableDensity;
+  readonly isBare?: boolean;
   /** The corner radius of the scroll wrapper (ignored when `isBare`). */
-  radius?: TableRadius;
+  readonly radius?: TableRadius;
 
-  /** The classes applied to the scroll wrapper (ignored when `isBare`). A fallthrough `class` still lands on the inner `<table>`. */
-  containerClassName?: string;
+  /** Classes for the scroll wrapper (ignored when `isBare`). A fallthrough `class` lands on the inner `<table>`. */
+  readonly containerClassName?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, provide, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { TableKey, WRAPPER_RADIUS, type TableContextValue } from './TableContext';
+import { cn } from '../../../foundation/styles';
+import { TableKey, WrapperRadius, type TableContextValue } from './TableContext';
 
 /**
- * Data table root. Owns the scroll wrapper (unless `isBare`) and shares density
- * / striping with its sections through injection, so `TableBody`, `TableCell`
- * and `TableHeaderCell` need no props of their own.
+ * Renders the table root and its scroll wrapper, sharing density and striping with its sections.
  *
- * React attached the sections as `Table.Body` / `.Row` / … via `Object.assign`.
- * An SFC's generated default export cannot carry statics cleanly, so they ship
- * as siblings: `TableHead`, `TableBody`, `TableFooter`, `TableRow`,
+ * `TableBody`, `TableCell` and `TableHeaderCell` therefore need no props of their own; `isBare` drops the wrapper.
+ *
+ * React attached the sections as `Table.Body` / `.Row` / … via `Object.assign`. An SFC's generated default export
+ * cannot carry statics cleanly, so they ship as siblings: `TableHead`, `TableBody`, `TableFooter`, `TableRow`,
  * `TableHeaderCell`, `TableCell`, `TableCaption`.
  */
 defineOptions({ name: 'Table', inheritAttrs: false });
@@ -68,7 +67,7 @@ const classes = computed(() =>
 );
 
 const containerClasses = computed(() =>
-  cn('relative w-full overflow-x-auto border border-border', WRAPPER_RADIUS[props.radius], props.containerClassName),
+  cn('relative w-full overflow-x-auto border border-border', WrapperRadius[props.radius], props.containerClassName),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

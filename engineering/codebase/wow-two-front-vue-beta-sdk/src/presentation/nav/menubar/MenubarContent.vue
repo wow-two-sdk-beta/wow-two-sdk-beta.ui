@@ -13,10 +13,10 @@ import type { Placement } from '@floating-ui/vue';
  */
 export interface MenubarContentProps {
   /** The Floating UI placement. Default `bottom-start`. */
-  placement?: Placement;
+  readonly placement?: Placement;
 
   /** The distance between trigger and menu in px. Default 4. */
-  offset?: number;
+  readonly offset?: number;
 }
 </script>
 
@@ -25,7 +25,7 @@ import { computed, useAttrs } from 'vue';
 import Menu from '../menu/Menu.vue';
 import { useMenubarContext, useMenubarMenuContext } from './MenubarContext';
 
-/** The menu surface for one bar entry. */
+/** Renders the menu surface for one bar entry. */
 defineOptions({ name: 'MenubarContent', inheritAttrs: false });
 
 /** The menu contents — React's `children`. */
@@ -75,7 +75,7 @@ function handleKeydown(event: KeyboardEvent): void {
     :placement="placement"
     :offset="offset"
     v-bind="attrs"
-    @close="handleClose"
+    @update:open="handleClose"
     @keydown="handleKeydown"
   >
     <slot />

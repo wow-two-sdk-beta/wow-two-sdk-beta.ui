@@ -29,3 +29,5 @@ export { pLimit, mapLimit, type Limiter } from './Limit';
 export { retryAsync, type RetryAsyncOptions } from './Retry';
 export { debounceAsync, throttleAsync, type DebouncedAsync, type ThrottledAsync } from './Rate';
 export { sequential, allSettledValues } from './Combinators';
+
+export * from './UseDebounceHandler';

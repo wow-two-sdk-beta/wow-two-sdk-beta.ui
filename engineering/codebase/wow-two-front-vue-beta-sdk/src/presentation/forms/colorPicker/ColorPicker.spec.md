@@ -1,52 +1,50 @@
 # ColorPicker
 
-## Purpose
-Full color picker — a trigger swatch that opens a popover containing a saturation/value area, a hue slider, an optional alpha slider, a hex input, and an optional preset palette. The first L5 organism to deliberately cross domains: it imports `Popover` from `overlays/`.
+Renders a trigger opening a panel with a saturation/value area, hue and alpha sliders, a hex field and presets.
 
-## Anatomy
-```
-<ColorPicker>
-  ├── trigger: <ColorSwatch> + caption (formatted hex)
-  └── <Popover.Content>
-        ├── <ColorArea>
-        ├── <ColorSlider channel="hue">
-        ├── <ColorSlider channel="alpha"> (optional)
-        ├── <ColorInput>
-        └── <ColorSwatchPicker> (optional, when `presets` provided)
-</ColorPicker>
-```
+Source: [ColorPicker.vue](ColorPicker.vue).
 
-## Required behaviors
-- Trigger click toggles popover. Outside click / Escape closes (handled by `Popover`).
-- All sub-controls update the same internal HSV(+A) state. The bound `value` is a hex string (`#RRGGBB` or `#RRGGBBAA` if `withAlpha`).
-- Stays open during fine adjustment (typical color-picker behavior).
+Public import: `import { ColorPicker } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Required | Why |
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `value` | `string \| null` | — | no | Controlled hex. |
-| `defaultValue` | `string \| null` | `'#3b82f6'` | no | Uncontrolled. |
-| `onValueChange` | `(hex) => void` | — | no | Fires on every adjustment. |
-| `withAlpha` | `boolean` | `false` | no | Show alpha slider; emits 8-digit hex. |
-| `presets` | `string[]` | — | no | If provided, renders a `ColorSwatchPicker` row. |
-| `triggerSize` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | no | Trigger swatch size. |
-| `disabled` | `boolean` | `false` | no | Block interaction. |
-| `name` | `string` | — | no | Hidden input ships hex with form submission. |
+| `modelValue` | `string \| null` | no | — | The selected hex, controlled. The `v-model` binding target. |
+| `defaultValue` | `string \| null` | no | `'#3b82f6'` | The initial hex when uncontrolled. Default `#3b82f6`. |
+| `hasAlpha` | `boolean` | no | `false` | Whether the committed hex keeps its alpha channel, and the alpha slider renders. |
+| `presets` | `ReadonlyArray<string>` | no | — | The preset palette rendered under the panel; omitted or empty hides the row. |
+| `triggerSize` | `ColorSwatchPreviewSize` | no | `ColorSwatchSizeValue.Md` | The size step the built-in trigger's swatch renders at. |
+| `triggerVariant` | `ColorPickerTriggerVariant` | no | `ColorPickerTriggerVariant.Full` | The built-in trigger to render (ignored when the `trigger` slot is filled): - `full` *(default)* — swatch + hex-value text, framed button. - `swatch` — a bare interactive swatch, no text (compact toolbars, tiles). - `modelValue` — hex-value text only, no swatch (dense / code contexts). |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `name` | `string` | no | — | The hidden input's name — renders a form-submittable mirror of the hex. |
+| `id` | `string` | no | — | The trigger id; falls back to a surrounding `<Field>`'s control id. |
 
-## Composition
-- Cross-domain: imports `Popover` from `overlays/` (allowed under the revised cross-domain rule).
-- Same-domain: uses `ColorSwatch`, `ColorArea`, `ColorSlider`, `ColorInput`, `ColorSwatchPicker`, `ColorExtensions`.
+## Emits
 
-## Accessibility
-- Each sub-control carries its own slider semantics.
-- Trigger is a `<button>` with `aria-haspopup="dialog"` (via `Popover`).
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: string \| null];` | Fires when the reader commits a color from the panel or the preset row — the `v-model` half. |
 
-## Known limitations
-- No "eyedropper" support (browser API only in some browsers — deferred).
-- No "format toggle" (hex / rgb / hsl) — hex only for now.
-- No history / "recent colors".
+## Slots
 
-## Inspirations
-- React Aria `ColorPicker`.
-- Mantine `ColorPicker`.
-- shadcn doesn't ship one — built from scratch here.
+| Slot | Signature | Meaning |
+|---|---|---|
+| `trigger` | `trigger?(): unknown` | See the declared signature. |
+
+## Exposed handle
+
+`{ el: computed(() => trigger.value?.el ?? null) }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

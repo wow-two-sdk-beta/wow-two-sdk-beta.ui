@@ -6,7 +6,7 @@ import type {
   SurfaceRadius,
   SurfaceTone,
   SurfaceVariant,
-} from '../../../foundation/utils';
+} from '../../../foundation/styles';
 
 export type SnapPoint = number | string;
 
@@ -43,51 +43,48 @@ export function resolveSnapPx(point: SnapPoint, viewport: number): number {
 /**
  * Represents the prop surface of `BottomSheet`.
  *
- * React declared the surface axes by `extends SurfaceVariants`; they are
+ * React declared the surface axes by `extends SurfaceLayoutVariants`; they are
  * spelled out here because the SFC compiler's type resolver cannot follow a
  * `VariantProps<typeof …>` base and fails the build on it. The aliases below
- * are the canonical ones from `foundation/utils`, already locked against the
+ * are the canonical ones from `foundation/styles`, already locked against the
  * `surfaceVariants` config there, so the two cannot drift.
  */
 export interface BottomSheetProps {
   /** The open state, controlled. The `v-model:open` binding target. */
-  open?: boolean;
-
-  /** The open state, controlled — the house spelling of `open`; `open` wins when both are set. */
-  isOpen?: boolean;
+  readonly open?: boolean;
 
   /** The initial open state when uncontrolled. Default `false`. */
-  defaultOpen?: boolean;
+  readonly defaultOpen?: boolean;
 
   /** The heights the sheet snaps between — px numbers or CSS lengths. Default `['40vh', '90vh']`. */
-  snapPoints?: ReadonlyArray<SnapPoint>;
+  readonly snapPoints?: ReadonlyArray<SnapPoint>;
 
   /** The snap index the sheet opens at. Default 0. */
-  initialSnap?: number;
+  readonly initialSnap?: number;
 
   /** The outside-click dismissal toggle. Default `true`. */
-  dismissOnOutsideClick?: boolean;
+  readonly dismissOnOutsideClick?: boolean;
 
   /** The Escape dismissal toggle. Default `true`. */
-  dismissOnEscape?: boolean;
+  readonly dismissOnEscape?: boolean;
 
   /** The drag-below-lowest-snap dismissal toggle. Default `true`. */
-  dragToDismiss?: boolean;
+  readonly dragToDismiss?: boolean;
 
   /** The visual recipe. Default `elevated`. */
-  variant?: SurfaceVariant;
+  readonly variant?: SurfaceVariant;
 
   /** The color tone the recipe is tinted with. */
-  tone?: SurfaceTone;
+  readonly tone?: SurfaceTone;
 
   /** The corner rounding. Default `none`. */
-  radius?: SurfaceRadius;
+  readonly radius?: SurfaceRadius;
 
   /** The inner spacing step. Default `none`. */
-  padding?: SurfacePadding;
+  readonly padding?: SurfacePadding;
 
   /** The shadow depth. Default `5`. */
-  elevation?: SurfaceElevation;
+  readonly elevation?: SurfaceElevation;
 }
 </script>
 
@@ -103,16 +100,17 @@ import {
   watch,
   type ComponentPublicInstance,
 } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
-import { useControlled, useId } from '../../../foundation/hooks';
+import { cn, surfaceVariants } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
+import { useId } from '../../../foundation/identifiers';
 import { DismissableLayer, FocusScope, Portal, Presence, ScrollLockProvider } from '../../../foundation/primitives';
-import Backdrop from '../backdrop/Backdrop.vue';
+import BackdropOverlay from '../backdropOverlay/BackdropOverlay.vue';
 import { overlayChromeContextKey } from '../OverlayChrome';
-import { toHtmlElement } from '../OverlayHelpers';
+import { OverlayExtensions } from '../OverlayExtensions';
 
 /**
- * Mobile bottom sheet with drag handle + snap points. Pointer-event drag
- * between heights; releasing snaps to the nearest point. Past the lowest
+ * Renders a mobile bottom sheet with a drag handle and snap points.
+ * Pointer-event drag moves between heights; releasing snaps to the nearest point. Past the lowest
  * snap with `dragToDismiss`, the sheet closes.
  */
 defineOptions({ name: 'BottomSheet', inheritAttrs: false });
@@ -120,10 +118,9 @@ defineOptions({ name: 'BottomSheet', inheritAttrs: false });
 /** The sheet content — `BottomSheetTitle` / `BottomSheetDescription` and the body. React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-/** `open` / `isOpen` default to `undefined` so an absent prop cannot read as an explicit `false`. */
+/** `open` default to `undefined` so an absent prop cannot read as an explicit `false`. */
 const props = withDefaults(defineProps<BottomSheetProps>(), {
   open: undefined,
-  isOpen: undefined,
   defaultOpen: false,
   snapPoints: () => ['40vh', '90vh'],
   initialSnap: 0,
@@ -133,20 +130,17 @@ const props = withDefaults(defineProps<BottomSheetProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model:open` half. */
+  /** Fires when the sheet opens or closes — the `v-model:open` half. */
   'update:open': [open: boolean];
-  /** Replaces React's `onOpenChange`. */
-  'open-change': [open: boolean];
 }>();
 
 const attrs = useAttrs();
 
 const controlled = useControlled<boolean>({
-  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
+  controlled: () => props.open,
   default: () => props.defaultOpen,
   onChange: (value) => {
     emit('update:open', value);
-    emit('open-change', value);
   },
 });
 
@@ -162,7 +156,7 @@ const handle = useTemplateRef<HTMLDivElement>('handle');
 let startY: number | null = null;
 let startHeight = 0;
 
-/* Reset to `initialSnap` each time the sheet re-opens — React's `useEffect` on `[open, initialSnap, snapPoints.length]`. */
+/* Reset to `initialSnap` each time the sheet re-opens. */
 watch(
   () => [resolvedOpen.value, props.initialSnap, props.snapPoints.length] as const,
   () => {
@@ -190,7 +184,7 @@ provide(overlayChromeContextKey, {
 
 /** `DismissableLayer` renders the panel div and exposes it, so `$el` is the sheet element. */
 function panelEl(): HTMLElement | null {
-  return toHtmlElement(panel.value?.$el);
+  return OverlayExtensions.toHtmlElement(panel.value?.$el);
 }
 
 function handlePointerDown(event: PointerEvent): void {
@@ -284,7 +278,7 @@ const panelStyle = computed(() =>
 
 const classes = computed(() =>
   cn(
-    'fixed inset-x-0 bottom-0 z-modal flex flex-col rounded-t-xl border-t outline-none',
+    'fixed inset-x-0 bottom-0 z-modal flex flex-col rounded-t-xl border-t outline-hidden',
     'will-change-transform',
     'motion-safe:data-[state=closed]:translate-y-full',
     'motion-reduce:translate-y-0',
@@ -322,9 +316,9 @@ defineExpose({ el });
   -->
   <Portal>
     <ScrollLockProvider :is-enabled="resolvedOpen">
-      <!-- The scrim runs on `Backdrop`'s own `Presence` (its `isOpen` prop) so the
+      <!-- The scrim runs on `BackdropOverlay`'s own `Presence` (its `open` prop) so the
            fade-out plays before it unmounts. -->
-      <Backdrop is-inline :is-open="resolvedOpen" @click="handleBackdropClick" />
+      <BackdropOverlay is-inline :is-open="resolvedOpen" @click="handleBackdropClick" />
       <Presence :is-present="resolvedOpen">
         <!--
           `FocusScope as-child` merges into `DismissableLayer`, whose own root div
@@ -332,7 +326,7 @@ defineExpose({ el });
           and forwarded `data-state` down to the inner one. Collapsing them keeps
           every attribute of React's panel on the node `Presence` clones.
         -->
-        <FocusScope as-child trapped loop :on-mount-auto-focus="handleMountAutoFocus">
+        <FocusScope as-child trapped loop modal :on-mount-auto-focus="handleMountAutoFocus">
           <DismissableLayer
             ref="panel"
             :is-escape-disabled="!props.dismissOnEscape"
@@ -354,7 +348,7 @@ defineExpose({ el });
               :aria-valuemin="0"
               :aria-valuemax="props.snapPoints.length - 1"
               tabindex="0"
-              class="flex h-7 cursor-ns-resize items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+              class="flex h-7 cursor-ns-resize items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
               @pointerdown="handlePointerDown"
               @pointermove="handlePointerMove"
               @pointerup="handlePointerUp"

@@ -1,6 +1,6 @@
 import { computed, type ComputedRef } from 'vue';
 
-import { useLocale } from './LocaleContext';
+import { useLocale } from './providers/LocaleContext';
 
 // `Intl` instances are cached across components by locale + options — constructing them is the expensive part,
 // so a shared module cache keeps `useLocaleFormatters` allocation-free after warm-up.

@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, type VariantProps } from '../../../foundation/styles';
 
 /** Defines the Heading visual size step (independent of semantic level). */
 export const HeadingSize = {

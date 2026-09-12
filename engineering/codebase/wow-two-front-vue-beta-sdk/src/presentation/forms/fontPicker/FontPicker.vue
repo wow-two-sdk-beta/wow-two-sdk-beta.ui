@@ -1,12 +1,12 @@
 <script lang="ts">
 /** Represents a single selectable font face. */
 export interface FontOption {
-  name: string;
-  family: string;
-  sample?: string;
+  readonly name: string;
+  readonly family: string;
+  readonly sample?: string;
 }
 
-export const BUILT_IN_FONTS: ReadonlyArray<FontOption> = [
+export const BuiltInFonts: ReadonlyArray<FontOption> = [
   { name: 'System Sans', family: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' },
   { name: 'System Serif', family: 'ui-serif, Cambria, Georgia, "Times New Roman", serif' },
   { name: 'System Mono', family: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace' },
@@ -23,85 +23,77 @@ export const BUILT_IN_FONTS: ReadonlyArray<FontOption> = [
 ];
 
 export interface FontPickerProps {
-  /** The selected font family, controlled — React's spelling, which wins when both are set. */
-  value?: string;
-
   /** The selected font family, controlled. The `v-model` binding target. */
-  modelValue?: string;
+  readonly modelValue?: string;
 
   /** The initial font family when uncontrolled. Defaults to the first entry in `fonts`. */
-  defaultValue?: string;
+  readonly defaultValue?: string;
 
-  /** The selectable font set. Defaults to {@link BUILT_IN_FONTS}. */
-  fonts?: ReadonlyArray<FontOption>;
+  /** The selectable font set. Defaults to {@link BuiltInFonts}. */
+  readonly fonts?: ReadonlyArray<FontOption>;
 
   /** The trigger text shown when the value matches no known font. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /** The sample string rendered in each row's own face, unless the option carries its own `sample`. */
-  previewText?: string;
+  readonly previewText?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The hidden form input name; the hidden input emits the selected family. */
-  name?: string;
+  readonly name?: string;
 
   /** The control's id — it lands on the trigger button. Auto-filled from `FormControl` context. */
-  id?: string;
+  readonly id?: string;
 }
 </script>
 
 <script setup lang="ts">
+import { useTemplateRef } from 'vue';
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs } from 'vue';
 import type { ClassValue } from 'clsx';
 import { ChevronDown } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { Icon } from '../../../foundation/icons';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 
-/**
- * Font-family picker with live preview. Each option row renders in its own
- * font face. Wraps `overlays/Popover` for the dropdown.
- */
+/** Renders a font-family picker whose every option row previews itself in its own face. */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'FontPicker', inheritAttrs: false });
 
 const props = withDefaults(defineProps<FontPickerProps>(), {
-  fonts: () => BUILT_IN_FONTS,
-  placeholder: 'Select font…',
+  fonts: () => BuiltInFonts,
+  placeholder: 'SelectPicker font…',
   previewText: 'The quick brown fox',
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
-  value: undefined,
   modelValue: undefined,
   isDisabled: undefined,
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader picks a different font — the `v-model` half. */
   'update:modelValue': [family: string];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [family: string];
 }>();
 
 const attrs = useAttrs();
 
 /* Inherits id/disabled/invalid/labelledby/describedby from a surrounding <Field>;
-   standalone props win when provided, context fills the gaps (Select parity).
+   standalone props win when provided, context fills the gaps (SelectPicker parity).
    The `id` lands on the trigger button (the control), not the wrapper div. */
 const field = useFormControl();
 const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled);
 
 const controlled = useControlled<string>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? props.fonts[0]?.family ?? '',
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -141,19 +133,24 @@ function optionClass(option: FontOption): string {
 
 const triggerId = computed(() => props.id ?? field?.id);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const wrapperClass = computed(() => cn('inline-block', attrs.class as ClassValue));
 
 const ChevronDownIcon = ChevronDown;
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
-  <div :class="wrapperClass" v-bind="passthroughAttrs">
-    <Popover :open="open" @open-change="onOpenChange">
+  <div :key="formResetRevision" :class="wrapperClass" v-bind="passthroughAttrs">
+    <Popover :open="open" @update:open="onOpenChange">
       <PopoverTrigger as-child>
         <button
           type="button"
@@ -164,7 +161,7 @@ const ChevronDownIcon = ChevronDown;
           :aria-describedby="field?.describedBy"
           aria-haspopup="listbox"
           :aria-expanded="open"
-          class="inline-flex h-10 min-w-[14rem] items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+          class="inline-flex h-10 min-w-[14rem] items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-sm transition-colors hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span :style="{ fontFamily: family }" class="truncate text-foreground">
             {{ current?.name ?? placeholder }}
@@ -183,7 +180,7 @@ const ChevronDownIcon = ChevronDown;
           autofocus
           :value="query"
           placeholder="Search fonts…"
-          class="mb-2 h-8 w-full rounded-md border border-input bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          class="mb-2 h-8 w-full rounded-md border border-input bg-background px-2 text-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           @input="onQueryInput"
         />
         <div role="listbox" aria-label="Fonts" class="max-h-72 overflow-y-auto">
@@ -208,5 +205,11 @@ const ChevronDownIcon = ChevronDown;
       </PopoverContent>
     </Popover>
     <input v-if="name" type="hidden" :name="name" :value="family" />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </div>
 </template>

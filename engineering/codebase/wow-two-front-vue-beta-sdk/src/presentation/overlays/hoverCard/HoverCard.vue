@@ -27,45 +27,35 @@ export function useHoverCardContext(): HoverCardContextValue {
   return context;
 }
 
-/**
- * The prop surface of `HoverCard`.
- *
- * `open` and `isOpen` are the same controlled state under two names: `open` is
- * the `v-model:open` binding target, `isOpen` the house boolean spelling that
- * mirrors the rest of the port. `open` wins when both are set. React's
- * `onOpenChange` is the `open-change` emit; `update:open` fires alongside it so
- * `v-model:open` works.
- */
+/** Controlled axes use their canonical Vue model names; each update event requests caller state. */
 export interface HoverCardProps {
   /** The open state, controlled. The `v-model:open` binding target. */
-  open?: boolean;
-
-  /** The open state, controlled — the house spelling of `open`; `open` wins when both are set. */
-  isOpen?: boolean;
+  readonly open?: boolean;
 
   /** The initial open state when uncontrolled. Default `false`. */
-  defaultOpen?: boolean;
+  readonly defaultOpen?: boolean;
 
   /** The hover dwell before opening, in ms. Default 700. */
-  openDelay?: number;
+  readonly openDelay?: number;
 
   /** The grace period before closing, in ms. Default 300. */
-  closeDelay?: number;
+  readonly closeDelay?: number;
 
   /** The Floating UI placement. Default `bottom`. */
-  placement?: Placement;
+  readonly placement?: Placement;
 
   /** The distance between anchor and card in px. Default 8. */
-  offset?: number;
+  readonly offset?: number;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, onScopeDispose, provide, shallowRef } from 'vue';
-import { useControlled, useEscape } from '../../../foundation/hooks';
+import { useControlled } from '../../../foundation/state';
+import { useEscape } from '../../../foundation/shortcuts';
 
 /**
- * State + hover-timing owner for a HoverCard tree. Renders only its slot —
+ * Renders only its slot, owning the open state and hover timing of the HoverCard tree below it.
  * React returned a bare context Provider, which has no element of its own.
  */
 defineOptions({ name: 'HoverCard', inheritAttrs: false });
@@ -73,10 +63,9 @@ defineOptions({ name: 'HoverCard', inheritAttrs: false });
 /** The HoverCard tree — `HoverCardTrigger` and `HoverCardContent`. React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-/** `open` / `isOpen` default to `undefined` so an absent prop cannot read as an explicit `false`. */
+/** `open` default to `undefined` so an absent prop cannot read as an explicit `false`. */
 const props = withDefaults(defineProps<HoverCardProps>(), {
   open: undefined,
-  isOpen: undefined,
   defaultOpen: false,
   openDelay: 700,
   closeDelay: 300,
@@ -85,18 +74,15 @@ const props = withDefaults(defineProps<HoverCardProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model:open` half. */
+  /** Fires when the card opens or closes — the `v-model:open` half. */
   'update:open': [open: boolean];
-  /** Replaces React's `onOpenChange`. */
-  'open-change': [open: boolean];
 }>();
 
 const controlled = useControlled<boolean>({
-  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
+  controlled: () => props.open,
   default: () => props.defaultOpen,
   onChange: (value) => {
     emit('update:open', value);
-    emit('open-change', value);
   },
 });
 

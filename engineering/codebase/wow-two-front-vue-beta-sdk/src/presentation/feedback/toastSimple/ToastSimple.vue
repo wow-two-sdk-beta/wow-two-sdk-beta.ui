@@ -1,21 +1,21 @@
 <script lang="ts">
-import type { Severity } from '../../../foundation/utils';
+import type { Severity } from '../../../foundation/styles';
 
 /** Represents the prop surface of `ToastSimple`. */
 export interface ToastSimpleProps {
   /** The semantic severity palette. */
-  severity?: Severity;
+  readonly severity?: Severity;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
-import type { Tone } from '../../../foundation/utils';
+import { cn, surfaceVariants } from '../../../foundation/styles';
+import type { Tone } from '../../../foundation/styles';
 import type { ToastSimpleVariants } from './ToastSimple.variants';
 
 /** Maps the toast `severity` keyword to a SurfaceStyles `tone`. */
-const SEVERITY_TO_TONE: Record<NonNullable<ToastSimpleVariants['severity']>, Tone> = {
+const SeverityToTone: Record<NonNullable<ToastSimpleVariants['severity']>, Tone> = {
   info: 'info',
   success: 'success',
   warning: 'warning',
@@ -24,7 +24,7 @@ const SEVERITY_TO_TONE: Record<NonNullable<ToastSimpleVariants['severity']>, Ton
 };
 
 /**
- * Provides the atomic toast card — single tone-driven notification with free-form children.
+ * Renders the atomic toast card — a single tone-driven notification around free-form children.
  *
  * `role="status"` + `aria-live="polite"` are the live-region contract; `role` is
  * bound before `v-bind="rest"` so a caller-supplied `role` still wins.
@@ -32,6 +32,11 @@ const SEVERITY_TO_TONE: Record<NonNullable<ToastSimpleVariants['severity']>, Ton
 defineOptions({ name: 'ToastSimple', inheritAttrs: false });
 
 const props = withDefaults(defineProps<ToastSimpleProps>(), { severity: 'neutral' });
+
+defineSlots<{
+  /** The toast content. */
+  default?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
@@ -41,7 +46,7 @@ const classes = computed(() =>
     'pointer-events-auto text-sm',
     surfaceVariants({
       variant: 'surface',
-      tone: SEVERITY_TO_TONE[props.severity],
+      tone: SeverityToTone[props.severity],
       radius: 'md',
       padding: 'md',
       elevation: 3,

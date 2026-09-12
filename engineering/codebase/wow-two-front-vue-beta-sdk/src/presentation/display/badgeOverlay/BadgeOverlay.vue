@@ -1,17 +1,17 @@
 <script lang="ts">
 /* `CornerPosition` is imported here (not in `<script setup>`) so the one binding serves
    as both the type below and the runtime value used in `withDefaults`. */
-import { CornerPosition } from '../../../foundation/utils';
+import { CornerPosition } from '../../../foundation/styles';
 
 export interface BadgeOverlayProps {
   /** The position of the badge relative to the wrapper. Default `top-right`. */
-  position?: CornerPosition;
+  readonly position?: CornerPosition;
 
   /** The hidden state — hides the badge when truthy (e.g. when count is 0). */
-  isHidden?: boolean;
+  readonly isHidden?: boolean;
 }
 
-const POS: Record<NonNullable<BadgeOverlayProps['position']>, string> = {
+const PositionClass: Record<NonNullable<BadgeOverlayProps['position']>, string> = {
   'top-right': 'top-0 right-0 -translate-y-1/2 translate-x-1/2',
   'top-left': 'top-0 left-0 -translate-y-1/2 -translate-x-1/2',
   'bottom-right': 'bottom-0 right-0 translate-y-1/2 translate-x-1/2',
@@ -21,12 +21,12 @@ const POS: Record<NonNullable<BadgeOverlayProps['position']>, string> = {
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
 /**
- * Decorator that overlays a badge / dot on top of any child. Use to
- * attach `CountBadge`, `NotificationDot`, or arbitrary `Badge` to an
- * `Avatar`, icon, or `<Button shape="square"/circle">`.
+ * Renders a badge, dot, or icon pinned to a corner of whatever child it wraps.
+ *
+ * Attaches `CountBadge`, `NotificationIndicator`, or a `Badge` to an `Avatar`, an icon, or a square / circle `Button`.
  */
 defineOptions({ name: 'BadgeOverlay', inheritAttrs: false });
 
@@ -48,7 +48,7 @@ const el = useTemplateRef<HTMLDivElement>('el');
 
 const classes = computed(() => cn('relative inline-flex', attrs.class as string | undefined));
 
-const badgeClasses = computed(() => cn('absolute z-raised', POS[props.position]));
+const badgeClasses = computed(() => cn('absolute z-raised', PositionClass[props.position]));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

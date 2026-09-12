@@ -1,60 +1,42 @@
 # Table
 
-## Purpose
-Styled wrapper around the native HTML table elements. Use when you control the row markup directly. For data-bound tables with sorting/pagination, use `DataTable`.
+Renders the table root and its scroll wrapper, sharing density and striping with its sections.
 
-## Anatomy
-```
-<Table>
-  ├── <Table.Caption>
-  ├── <Table.Head>
-  │     └── <Table.Row>
-  │           └── <Table.HeaderCell>
-  ├── <Table.Body>
-  │     └── <Table.Row>
-  │           └── <Table.Cell>
-  └── <Table.Footer>
-        └── <Table.Row>
-              └── <Table.Cell>
-</Table>
-```
+Source: [Table.vue](Table.vue).
 
-## Required behaviors
-- Wraps in a horizontally-scrollable container by default (use `isBare` to skip).
-- Scroll-wrapper corner radius via `radius`; extra wrapper classes via `containerClassName`. `className` still targets the inner `<table>`.
-- Optional zebra striping on body rows via `isStriped`.
-- Optional hover-row highlight via `isHoverable`.
-- Compact / cozy / comfortable / roomy density via `density`.
-- Header typography treatment via `Table.Head` `headVariant` (`uppercase` default, `plain` for normal-case `text-sm`).
+Public import: `import { Table } from '@wow-two-beta/ui-vue/presentation/display';`.
 
-## Visual states
-Per row: `default` · `hover` · `selected` (manual via class)
+## Contract
 
-## Props (Root)
-| Name | Type | Default | Required | Why |
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
+
+## Props
+
+| Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `isStriped` | `boolean` | `false` | no | Zebra body rows. |
-| `isHoverable` | `boolean` | `false` | no | Highlight body rows on hover. |
-| `density` | `'compact' \| 'cozy' \| 'comfortable' \| 'roomy'` | `'cozy'` | no | Cell padding scale. `roomy` = `px-5 py-4`. |
-| `isBare` | `boolean` | `false` | no | Skip scroll container + outer border. |
-| `radius` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'` | no | Scroll-wrapper corner radius (ignored when `isBare`). |
-| `containerClassName` | `string` | — | no | Classes on the scroll wrapper (ignored when `isBare`). `className` lands on the inner `<table>`. |
+| `isStriped` | `boolean` | no | `false` | Declared by the source contract. |
+| `isHoverable` | `boolean` | no | `false` | Declared by the source contract. |
+| `density` | `TableDensity` | no | `TableDensity.Cozy` | Declared by the source contract. |
+| `isBare` | `boolean` | no | `false` | Declared by the source contract. |
+| `radius` | `TableRadius` | no | `TableRadius.Md` | The corner radius of the scroll wrapper (ignored when `isBare`). |
+| `containerClassName` | `string` | no | `undefined` | Classes for the scroll wrapper (ignored when `isBare`). A fallthrough `class` lands on the inner `<table>`. |
 
-## Props (`Table.Head`)
-| Name | Type | Default | Required | Why |
-|---|---|---|---|---|
-| `headVariant` | `'uppercase' \| 'plain'` | `'uppercase'` | no | `uppercase` = `text-xs` uppercase tracking-wide (current look); `plain` = normal-case `text-sm`. |
+## Emits
 
-## Composition
-Compound. Subcomponents are thin wrappers around `<thead>` / `<tbody>` / `<tfoot>` / `<tr>` / `<th>` / `<td>`.
+None declared.
 
-## Dependencies
-Foundation: `utils/cn`. Same-domain: none.
+## Slots
 
-## Known limitations
-- No row-level selection helpers — caller adds checkboxes if needed.
-- No virtualization.
+| Slot | Signature | Meaning |
+|---|---|---|
+| `default` | `default(): unknown` | See the declared signature. |
 
-## Inspirations
-- shadcn/ui `Table`.
-- Mantine `Table`.
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [DisplayExamples.ts](../../../../apps/playground/src/gallery/fixtures/DisplayExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

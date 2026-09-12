@@ -11,13 +11,13 @@ export type NavigationMenuContentProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, shallowRef, useAttrs, watch } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
-import { useReducedMotion } from '../../../foundation/hooks';
+import { cn, surfaceVariants } from '../../../foundation/styles';
+import { useReducedMotion } from '../../../foundation/device';
 import { AnchoredPositioner, DismissableLayer, Portal, Presence } from '../../../foundation/primitives';
 import { useNavigationMenuContext, useNavigationMenuItemContext } from './NavigationMenuContext';
 
 /**
- * The anchored panel for one item. `Presence` clones `data-state`
+ * Renders the anchored panel for one item. `Presence` clones `data-state`
  * ("open" | "closed") onto the panel div, so the pop tokens below run gated on
  * that state.
  */
@@ -86,7 +86,7 @@ const classes = computed(() =>
   cn(
     /* pop (fade + slight scale) gated on data-state; motion-safe so
        reduced-motion users get no movement. */
-    'min-w-[12rem] outline-none',
+    'min-w-[12rem] outline-hidden',
     'motion-safe:data-[state=open]:animate-(--animate-pop-in)',
     'motion-safe:data-[state=closed]:animate-(--animate-pop-out)',
     'motion-reduce:animate-none',

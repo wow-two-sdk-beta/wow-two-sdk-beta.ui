@@ -44,7 +44,7 @@ export interface ConfigField<T, Optional extends boolean = false> {
   parse(raw: string): T;
 }
 
-/** Computes a field's phantom optionality from its options literal — optional iff no `default` and `required: false`. */
+/** Computes a field's phantom optionality from its options — optional iff no `default` and `required: false`. */
 type Optionality<O> = O extends { default: unknown } ? false : O extends { required: false } ? true : false;
 
 /** The upper bound for a field of unknown scalar type — every concrete `ConfigField<T, …>` is assignable to it. */
@@ -91,8 +91,8 @@ export function num<const O extends ConfigFieldOptions<number> = ConfigFieldOpti
 }
 
 /** The raw spellings each boolean side accepts, case-insensitively. */
-const TRUE_TOKENS = new Set(['true', '1', 'yes', 'on']);
-const FALSE_TOKENS = new Set(['false', '0', 'no', 'off']);
+const TrueTokens = new Set(['true', '1', 'yes', 'on']);
+const FalseTokens = new Set(['false', '0', 'no', 'off']);
 
 /** A boolean field — accepts `true/1/yes/on` and `false/0/no/off` (case-insensitive); rejects anything else. */
 export function bool<const O extends ConfigFieldOptions<boolean> = ConfigFieldOptions<boolean>>(
@@ -102,8 +102,8 @@ export function bool<const O extends ConfigFieldOptions<boolean> = ConfigFieldOp
     'boolean',
     (raw) => {
       const token = raw.trim().toLowerCase();
-      if (TRUE_TOKENS.has(token)) return true;
-      if (FALSE_TOKENS.has(token)) return false;
+      if (TrueTokens.has(token)) return true;
+      if (FalseTokens.has(token)) return false;
       throw `expected a boolean (true/false/1/0/yes/no/on/off), got "${raw}"`;
     },
     options,
@@ -185,7 +185,7 @@ export interface ListFieldOptions extends ConfigFieldOptions<readonly string[]> 
 /** A string-list field — splits on `separator` (default `,`), trims each item, and drops empty items. */
 export function list<const O extends ListFieldOptions = ListFieldOptions>(
   options?: O,
-): ConfigField<readonly string[], Optionality<O>> {
+): ConfigField<ReadonlyArray<string>, Optionality<O>> {
   const separator = options?.separator ?? ',';
   return createField<readonly string[]>(
     'list',

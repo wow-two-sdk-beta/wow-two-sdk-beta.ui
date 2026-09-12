@@ -5,20 +5,17 @@ import type { NumberInputProps } from '../numberInput';
    whole `NumberInput` surface carries over unchanged. */
 export interface CurrencyInputProps extends NumberInputProps {
   /** The currency symbol or 3-letter code displayed as a prefix. Default `"$"`. */
-  symbol?: string;
+  readonly symbol?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import NumberInput from '../numberInput/NumberInput.vue';
 
-/**
- * `NumberInput` with a leading currency symbol. Symbol shown as a non-input
- * decoration (input value is the bare number).
- */
+/** Renders a `NumberInput` behind a leading currency symbol; the typed value stays the bare number. */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'CurrencyInput', inheritAttrs: false });
@@ -28,13 +25,13 @@ const props = withDefaults(defineProps<CurrencyInputProps>(), { symbol: '$' });
 const attrs = useAttrs();
 
 /*
- * No `defineEmits` on purpose: `update:modelValue` / `value-change` are NOT re-declared, so a
+ * No `defineEmits` on purpose: `update:modelValue` are NOT re-declared, so a
  * consumer's listeners stay in `useAttrs()` and reach `NumberInput` through the passthrough
  * below — declaring them here would strip the listeners and silently break `v-model`.
  */
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 /** `symbol` is this component's own — it must not reach the inner `NumberInput`. */

@@ -1,4 +1,4 @@
-import { tv, type VariantProps } from '../../../foundation/utils';
+import { tv, type VariantProps } from '../../../foundation/styles';
 
 export const gridVariants = tv({
   base: 'grid',
@@ -64,7 +64,7 @@ export type GridResponsive<T extends string> = Partial<Record<GridBreakpoint, T>
 
 /* Tailwind can't see interpolated class names, so every responsive permutation
    is spelled out as a complete literal here (base + sm/md/lg/xl prefixes). */
-const COLUMN_CLASSES: Record<GridBreakpoint, Record<GridColumns, string>> = {
+const ColumnClasses: Record<GridBreakpoint, Record<GridColumns, string>> = {
   base: {
     '1': 'grid-cols-1',
     '2': 'grid-cols-2',
@@ -117,7 +117,7 @@ const COLUMN_CLASSES: Record<GridBreakpoint, Record<GridColumns, string>> = {
   },
 };
 
-const GAP_CLASSES: Record<GridBreakpoint, Record<GridGap, string>> = {
+const GapClasses: Record<GridBreakpoint, Record<GridGap, string>> = {
   base: {
     '0': 'gap-0',
     '1': 'gap-1',
@@ -180,15 +180,15 @@ const GAP_CLASSES: Record<GridBreakpoint, Record<GridGap, string>> = {
   },
 };
 
-const BREAKPOINT_ORDER: ReadonlyArray<GridBreakpoint> = ['base', 'sm', 'md', 'lg', 'xl'];
+const BreakpointOrder: ReadonlyArray<GridBreakpoint> = ['base', 'sm', 'md', 'lg', 'xl'];
 
 /** Resolves a scalar-or-responsive `columns` value to its complete Tailwind class string. */
 export function resolveGridColumns(value: GridColumns | GridResponsive<GridColumns> | undefined): string | undefined {
   if (value === undefined) return undefined;
-  if (typeof value === 'string') return COLUMN_CLASSES.base[value];
-  return BREAKPOINT_ORDER.map((bp) => {
+  if (typeof value === 'string') return ColumnClasses.base[value];
+  return BreakpointOrder.map((bp) => {
     const v = value[bp];
-    return v === undefined ? undefined : COLUMN_CLASSES[bp][v];
+    return v === undefined ? undefined : ColumnClasses[bp][v];
   })
     .filter((c): c is string => Boolean(c))
     .join(' ');
@@ -197,10 +197,10 @@ export function resolveGridColumns(value: GridColumns | GridResponsive<GridColum
 /** Resolves a scalar-or-responsive `gap` value to its complete Tailwind class string. */
 export function resolveGridGap(value: GridGap | GridResponsive<GridGap> | undefined): string | undefined {
   if (value === undefined) return undefined;
-  if (typeof value === 'string') return GAP_CLASSES.base[value];
-  return BREAKPOINT_ORDER.map((bp) => {
+  if (typeof value === 'string') return GapClasses.base[value];
+  return BreakpointOrder.map((bp) => {
     const v = value[bp];
-    return v === undefined ? undefined : GAP_CLASSES[bp][v];
+    return v === undefined ? undefined : GapClasses[bp][v];
   })
     .filter((c): c is string => Boolean(c))
     .join(' ');

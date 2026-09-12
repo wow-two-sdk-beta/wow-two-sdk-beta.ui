@@ -1,1 +1,0 @@
-export { default as Kbd, type KbdProps } from './Kbd.vue';

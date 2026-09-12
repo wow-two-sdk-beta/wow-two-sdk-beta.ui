@@ -17,9 +17,6 @@ export interface EmojiPickerPopoverProps {
   /** The current emoji catalog entry, or `null` for none. The `v-model` binding target. */
   readonly modelValue?: EmojiCatalogEntry | null;
 
-  /** The current emoji catalog entry — React's spelling of `modelValue`, which wins when both are set. */
-  readonly value?: EmojiCatalogEntry | null;
-
   /** The persistence contract backing the "recently used" list. */
   readonly storage: StorageBroker;
 
@@ -50,32 +47,28 @@ export interface EmojiPickerPopoverProps {
   /** The open state, controlled. The `v-model:open` binding target. */
   readonly open?: boolean;
 
-  /** The open state, controlled — the house boolean spelling of `open`; `open` wins when both are set. */
-  readonly isOpen?: boolean;
-
   /** The initial open state when uncontrolled. Default `false`. */
   readonly defaultOpen?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useTemplateRef } from 'vue';
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed } from 'vue';
-import { ColorTone, SizePreset } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { ColorTone, SizePreset } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { FormControlProvider, useFormControl } from '../../../foundation/primitives';
 import { Button, ButtonShape, ButtonVariant } from '../../actions';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import EmojiPicker from './EmojiPicker.vue';
 
-/**
- * Popover-hosted `EmojiPicker` — a chat/toolbar-friendly variant. A trigger opens a `Popover` holding the
- * full `EmojiPicker`; picking an entry emits it via `@value-change` / `v-model` (consumers read
- * `entry.glyph`) and closes the popover. Size is out of scope here — compose `EmojiSizeControl`
- * separately when a host needs a per-emoji scale.
- */
+/** Renders a trigger opening a popover that holds the full `EmojiPicker` — the chat/toolbar-friendly variant. */
+/* Picking an entry emits it via `@update:modelValue` / `v-model` (consumers read `entry.glyph`) and closes the
+   popover. Size is out of scope here — compose `EmojiSizePicker` separately for a per-emoji scale. */
 defineOptions({ name: 'EmojiPickerPopover' });
 
-/** React's `trigger` / `children` props are one `trigger` slot — a custom trigger replacing the default emoji-icon `Button`. */
+/** A custom trigger replacing the default emoji-icon `Button`. */
 defineSlots<{ trigger?(): unknown }>();
 
 const props = withDefaults(defineProps<EmojiPickerPopoverProps>(), {
@@ -84,31 +77,25 @@ const props = withDefaults(defineProps<EmojiPickerPopoverProps>(), {
   /* `useControlled` keys on `=== undefined`, and Vue casts an absent `boolean` prop to `false`:
      without these the popover would read as "controlled, and closed" and never open. */
   open: undefined,
-  isOpen: undefined,
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader picks an emoji in the panel — the `v-model` half. */
   'update:modelValue': [entry: EmojiCatalogEntry | null];
-  /** Replaces React's `onChange`. Carries the picked entry, or `null` on clear. */
-  'value-change': [entry: EmojiCatalogEntry | null];
-  /** The `v-model:open` half. */
+  /** Fires when the popover opens or closes — the `v-model:open` half. */
   'update:open': [open: boolean];
-  /** Replaces React's `onOpenChange`. */
-  'open-change': [open: boolean];
 }>();
 
 const openCtl = useControlled<boolean>({
-  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
+  controlled: () => props.open,
   default: () => props.defaultOpen,
   onChange: (next) => {
     emit('update:open', next);
-    emit('open-change', next);
   },
 });
 
 const isOpenNow = computed(() => openCtl.value.value);
-const currentValue = computed(() => (props.value !== undefined ? props.value : (props.modelValue ?? null)));
+const currentValue = computed(() => props.modelValue ?? null);
 
 /* Inherits id/invalid/labelledby/describedby from a surrounding <Field> for the DEFAULT trigger
    (`Button` already inherits `isDisabled` from the context itself). A custom trigger slot owns
@@ -125,13 +112,18 @@ const triggerGlyph = computed(() => currentValue.value?.glyph ?? '🙂');
 
 function onPick(entry: EmojiCatalogEntry | null): void {
   emit('update:modelValue', entry);
-  emit('value-change', entry);
   if (entry !== null) openCtl.setValue(false);
 }
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  openCtl.reset();
+  if (currentValue.value !== null) onPick(null);
+});
 </script>
 
 <template>
-  <Popover :open="isOpenNow" :placement="placement" @open-change="openCtl.setValue($event)">
+  <Popover :key="formResetRevision" :open="isOpenNow" :placement="placement" @update:open="openCtl.setValue($event)">
     <PopoverTrigger as-child>
       <slot name="trigger">
         <Button
@@ -166,9 +158,15 @@ function onPick(entry: EmojiCatalogEntry | null): void {
           :label="label"
           :show-first-category-when-recents-empty="showFirstCategoryWhenRecentsEmpty"
           :scroll-thumb-color="scrollThumbColor"
-          @value-change="onPick"
+          @update:modelValue="onPick"
         />
       </FormControlProvider>
     </PopoverContent>
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </Popover>
 </template>

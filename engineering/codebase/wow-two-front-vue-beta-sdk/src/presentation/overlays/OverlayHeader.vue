@@ -11,9 +11,9 @@ export type OverlayHeaderProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../foundation/utils';
+import { cn } from '../../foundation/styles';
 
-/* Stacked title + description region at the top of a Modal / Drawer panel. */
+/** Renders the stacked title and description region at the top of a Modal / Drawer panel. */
 defineOptions({ name: 'OverlayHeader', inheritAttrs: false });
 
 /** The header content — React's `children`. */

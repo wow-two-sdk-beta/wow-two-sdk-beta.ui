@@ -1,7 +1,7 @@
 <script lang="ts">
 export interface MenubarMenuProps {
   /** The stable id for this menu — used for active-menu tracking. */
-  value: string;
+  readonly value: string;
 }
 </script>
 
@@ -10,8 +10,8 @@ import { computed, provide, shallowRef } from 'vue';
 import { menubarMenuContextKey, useMenubarContext } from './MenubarContext';
 
 /**
- * One menu of the bar — pairs a `MenubarTrigger` with its `MenubarContent`.
- * Renders only its slot; React returned a bare context Provider.
+ * Renders only its slot, pairing one `MenubarTrigger` with its `MenubarContent`.
+ * React returned a bare context Provider, which has no element of its own.
  */
 defineOptions({ name: 'MenubarMenu', inheritAttrs: false });
 
@@ -23,7 +23,9 @@ const props = defineProps<MenubarMenuProps>();
 const bar = useMenubarContext();
 
 provide(menubarMenuContextKey, {
-  id: props.value,
+  get id() {
+    return props.value;
+  },
   open: computed(() => bar.activeId.value === props.value),
   setOpen: (next: boolean) => bar.setActiveId(next ? props.value : null),
   triggerEl: shallowRef<HTMLButtonElement | null>(null),

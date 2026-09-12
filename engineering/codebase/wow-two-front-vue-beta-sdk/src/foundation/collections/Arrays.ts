@@ -16,7 +16,7 @@
 // cosmetic bug into a blank screen. `chunk` and `range` are the exceptions and DO throw, because a zero or
 // negative step is a programmer error with no sane fallback — and would loop forever.
 
-import { Equality, type EqualityComparer } from '../utils/Equality';
+import { Equality, type EqualityComparer } from './Equality';
 
 /**
  * Removes duplicates, keeping the FIRST occurrence of each key and the input's order.
@@ -29,7 +29,7 @@ import { Equality, type EqualityComparer } from '../utils/Equality';
  * @param keyFn Optional key extractor receiving the item and its index.
  * @returns A new array holding the first item per distinct key.
  */
-export function unique<T, TKey = T>(items: readonly T[], keyFn?: (item: T, index: number) => TKey): T[] {
+export function unique<T, TKey = T>(items: ReadonlyArray<T>, keyFn?: (item: T, index: number) => TKey): T[] {
   const seen = new Set<TKey | T>();
   const result: T[] = [];
   items.forEach((item, index) => {
@@ -52,7 +52,7 @@ export function unique<T, TKey = T>(items: readonly T[], keyFn?: (item: T, index
  * @param keyFn Extracts the group key from an item and its index.
  * @returns A new `Map` of key to a new array of that key's items, both in first-seen order.
  */
-export function groupBy<T, TKey>(items: readonly T[], keyFn: (item: T, index: number) => TKey): Map<TKey, T[]> {
+export function groupBy<T, TKey>(items: ReadonlyArray<T>, keyFn: (item: T, index: number) => TKey): Map<TKey, T[]> {
   const groups = new Map<TKey, T[]>();
   items.forEach((item, index) => {
     const key = keyFn(item, index);
@@ -70,7 +70,7 @@ export function groupBy<T, TKey>(items: readonly T[], keyFn: (item: T, index: nu
  * @param predicate Decides whether an item belongs to the first half.
  * @returns A `[matched, rest]` tuple of two new arrays.
  */
-export function partition<T>(items: readonly T[], predicate: (item: T, index: number) => boolean): [T[], T[]] {
+export function partition<T>(items: ReadonlyArray<T>, predicate: (item: T, index: number) => boolean): [T[], T[]] {
   const matched: T[] = [];
   const rest: T[] = [];
   items.forEach((item, index) => {
@@ -89,7 +89,7 @@ export function partition<T>(items: readonly T[], predicate: (item: T, index: nu
  * @throws {RangeError} When `size` is not a positive integer — a zero or negative size has no meaningful
  * result and would loop forever.
  */
-export function chunk<T>(items: readonly T[], size: number): T[][] {
+export function chunk<T>(items: ReadonlyArray<T>, size: number): T[][] {
   if (!Number.isInteger(size) || size < 1) {
     throw new RangeError(`chunk: size must be a positive integer, received ${String(size)}`);
   }
@@ -114,7 +114,7 @@ export function chunk<T>(items: readonly T[], size: number): T[][] {
  * @param to The index it should occupy afterwards.
  * @returns A new array with the item relocated; a new copy when `from` and `to` resolve to the same slot.
  */
-export function move<T>(items: readonly T[], from: number, to: number): T[] {
+export function move<T>(items: ReadonlyArray<T>, from: number, to: number): T[] {
   const result = [...items];
   if (result.length === 0) return result;
   const lastIndex = result.length - 1;
@@ -135,7 +135,7 @@ export function move<T>(items: readonly T[], from: number, to: number): T[] {
  * @param value The value to insert.
  * @returns A new array one longer than the input.
  */
-export function insertAt<T>(items: readonly T[], index: number, value: T): T[] {
+export function insertAt<T>(items: ReadonlyArray<T>, index: number, value: T): T[] {
   const result = [...items];
   const at = Math.min(Math.max(Math.trunc(index), 0), result.length);
   result.splice(at, 0, value);
@@ -149,7 +149,7 @@ export function insertAt<T>(items: readonly T[], index: number, value: T): T[] {
  * @param index The index to drop.
  * @returns A new array, one shorter when the index was in range.
  */
-export function removeAt<T>(items: readonly T[], index: number): T[] {
+export function removeAt<T>(items: ReadonlyArray<T>, index: number): T[] {
   const result = [...items];
   const at = Math.trunc(index);
   if (at < 0 || at >= result.length) return result;
@@ -166,7 +166,7 @@ export function removeAt<T>(items: readonly T[], index: number): T[] {
  * @param value The replacement value.
  * @returns A new array of the same length as the input.
  */
-export function replaceAt<T>(items: readonly T[], index: number, value: T): T[] {
+export function replaceAt<T>(items: ReadonlyArray<T>, index: number, value: T): T[] {
   const result = [...items];
   const at = Math.trunc(index);
   if (at < 0 || at >= result.length) return result;
@@ -177,7 +177,7 @@ export function replaceAt<T>(items: readonly T[], index: number, value: T): T[] 
 /**
  * Adds an item when absent, removes it when present — the checkbox/chip/multi-select primitive.
  *
- * Equality defaults to `foundation/utils`' `Equality.strictEquals` (`Object.is`), which is reference
+ * Equality defaults to `foundation/collections`' `Equality.strictEquals` (`Object.is`), which is reference
  * equality for objects; pass `Equality.byKey((row) => row.id)` (or any comparer) when the toggled value is
  * a fresh object each render. EVERY match is removed, so a list that already held duplicates toggles all of
  * them off at once. An added item is appended at the end.
@@ -188,7 +188,7 @@ export function replaceAt<T>(items: readonly T[], index: number, value: T): T[] 
  * @returns A new array with the item removed or appended.
  */
 export function toggleItem<T>(
-  items: readonly T[],
+  items: ReadonlyArray<T>,
   item: T,
   equalsFn: EqualityComparer<T> = Equality.strictEquals,
 ): T[] {
@@ -204,7 +204,10 @@ export function toggleItem<T>(
  * @param second The list supplying each pair's second slot.
  * @returns A new array of `[first, second]` tuples, `min(first.length, second.length)` long.
  */
-export function zip<TFirst, TSecond>(first: readonly TFirst[], second: readonly TSecond[]): Array<[TFirst, TSecond]> {
+export function zip<TFirst, TSecond>(
+  first: ReadonlyArray<TFirst>,
+  second: ReadonlyArray<TSecond>,
+): Array<[TFirst, TSecond]> {
   const length = Math.min(first.length, second.length);
   const result: Array<[TFirst, TSecond]> = [];
   for (let index = 0; index < length; index += 1) {

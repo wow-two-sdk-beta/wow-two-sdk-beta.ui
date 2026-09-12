@@ -1,32 +1,32 @@
 <script lang="ts">
 export interface TableOfContentsItem {
-  id: string;
+  readonly id: string;
 
-  /** React typed this `ReactNode`; the scalar form is what an array item can carry — the `#label` scoped slot is the rich override. */
-  label: string | number;
+  /** The item's label — scalar; an array item carries no rich content. The `#label` slot is the rich override. */
+  readonly label: string | number;
 
   /** Indent level. 0 = top, 1 = nested, … */
-  depth?: number;
+  readonly depth?: number;
 }
 
 export interface TableOfContentsProps {
-  items?: ReadonlyArray<TableOfContentsItem>;
+  readonly items?: ReadonlyArray<TableOfContentsItem>;
 
   /**
    * The element whose headings are auto-extracted. React took a `RefObject`;
    * Vue template refs unwrap to the element itself, so pass the element
    * (`sourceRef` from `useTemplateRef`).
    */
-  source?: HTMLElement | null;
+  readonly source?: HTMLElement | null;
 
   /** The CSS selector used with `source`. Default `h2, h3`. */
-  headingSelector?: string;
+  readonly headingSelector?: string;
 
   /** The override for the auto-derived active id. `undefined` keeps the derived value. */
-  activeId?: string | null;
+  readonly activeId?: string | null;
 
   /** The sticky toggle — applies `sticky top-4 self-start` helper classes. */
-  isSticky?: boolean;
+  readonly isSticky?: boolean;
 }
 
 function depthFromTagName(tag: string): number {
@@ -37,12 +37,12 @@ function depthFromTagName(tag: string): number {
 
 <script setup lang="ts">
 import { computed, shallowRef, useAttrs, useTemplateRef, watch } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useScrollSpy } from '../scrollSpy/UseScrollSpy';
 
 /**
- * Outline of headings — `items` (explicit) or `source` (auto-extract).
- * Active entry derived from `useScrollSpy` over the headings' IDs.
+ * Renders an outline of headings, taken from `items` (explicit) or `source` (auto-extracted).
+ * The active entry is derived from `useScrollSpy` over the headings' IDs.
  */
 defineOptions({ name: 'TableOfContents', inheritAttrs: false });
 

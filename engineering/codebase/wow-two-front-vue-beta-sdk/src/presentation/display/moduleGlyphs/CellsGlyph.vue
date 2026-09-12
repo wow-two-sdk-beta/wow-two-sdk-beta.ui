@@ -10,7 +10,7 @@ export interface CellsGlyphProps extends GlyphProps {
 
 <script setup lang="ts">
 import { useTemplateRef } from 'vue';
-import { CELL_POSITIONS, CELL_SIZE } from './ModuleGlyphs';
+import { CellPositions, CellSize } from './ModuleGlyphs';
 
 /** Renders a three-cell glyph with the given corner radius. */
 defineOptions({ name: 'CellsGlyph' });
@@ -28,12 +28,12 @@ defineExpose({ el });
 <template>
   <svg ref="el" viewBox="0 0 24 24" :width="props.size" :height="props.size" aria-hidden="true">
     <rect
-      v-for="x in CELL_POSITIONS"
+      v-for="x in CellPositions"
       :key="x"
       :x="x"
       :y="9.5"
-      :width="CELL_SIZE"
-      :height="CELL_SIZE"
+      :width="CellSize"
+      :height="CellSize"
       :rx="props.cornerRx"
       fill="currentColor"
     />

@@ -7,17 +7,17 @@ export interface HoverCardTriggerProps {
    * React declared this prop but always cloned the child regardless; honouring it
    * gives the same default with an escape hatch when the slot is not a single element.
    */
-  asChild?: boolean;
+  readonly asChild?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef, watch, type ComponentPublicInstance } from 'vue';
-import { toHtmlElement } from '../OverlayHelpers';
+import { OverlayExtensions } from '../OverlayExtensions';
 import { Primitive } from '../../../foundation/primitives';
 import { useHoverCardContext } from './HoverCard.vue';
 
-/* Opens the enclosing `HoverCard` on hover / focus and doubles as its positioning anchor. */
+/** Renders the element that opens the enclosing `HoverCard` on hover or focus, and anchors it. */
 defineOptions({ name: 'HoverCardTrigger', inheritAttrs: false });
 
 /** The trigger element — React's `children`, typed there as a single `ReactElement`. */
@@ -33,7 +33,7 @@ const inner = useTemplateRef<ComponentPublicInstance>('inner');
 watch(
   inner,
   (instance) => {
-    context.triggerEl.value = toHtmlElement(instance?.$el);
+    context.triggerEl.value = OverlayExtensions.toHtmlElement(instance?.$el);
   },
   { immediate: true, flush: 'post' },
 );

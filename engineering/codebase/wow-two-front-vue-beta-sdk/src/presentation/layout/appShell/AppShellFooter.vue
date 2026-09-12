@@ -11,9 +11,9 @@ export type AppShellFooterProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/* Bottom bar of the shell — the `footer` grid area. */
+/** Renders the shell's bottom bar into the `footer` grid area. */
 defineOptions({ name: 'AppShellFooter', inheritAttrs: false });
 
 /** The footer content — React's `children`. */

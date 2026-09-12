@@ -1,17 +1,47 @@
 # Avatar
 
-## Purpose
-Person / entity image with initials fallback. Single component — no `Avatar.Image` / `Avatar.Fallback` slots in v0; pass `fallback` directly when initials aren't enough.
+Renders a user image avatar that falls back to initials, with tone, ring, and loading skeleton.
+
+Source: [Avatar.vue](Avatar.vue).
+
+Public import: `import { Avatar } from '@wow-two-beta/ui-vue/presentation/display';`.
+
+## Contract
+
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default |
-|---|---|---|
-| `src` | `string` | — |
-| `name` | `string` | `''` |
-| `fallback` | `ReactNode` | — |
-| `alt` | `string` | `name` |
-| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'` |
-| `shape` | `'circle' \| 'square'` | `'circle'` |
 
-## Dependencies
-Foundation: `utils/cn`, `tailwind-variants`. No imports of other atoms — fallback initials are rendered inline.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `shape` | `AvatarShape` | no | — | The silhouette. |
+| `tone` | `AvatarTone` | no | — | The tone palette (`none` cedes color to autoColor). |
+| `bgStyle` | `AvatarBackground` | no | — | The background fill style. |
+| `ring` | `AvatarRing` | no | — | The focus/emphasis ring tone. |
+| `isLoading` | `boolean` | no | `undefined` | The skeleton state — pulses the tile and hides its content. |
+| `src` | `string` | no | — | The image source; falls back to `name` initials or `fallback` on error. |
+| `name` | `string` | no | `''` | The person/entity name — used to derive initials when no image. |
+| `fallback` | `string \| number` | no | — | The custom fallback (overrides initials). Rich content goes through the `fallback` slot. |
+| `alt` | `string` | no | — | The alt text for the underlying `<img>` (defaults to `name`). |
+| `canAutoColor` | `boolean` | no | `undefined` | The auto-color flag — derives a deterministic tint from the `name` hash. A non-neutral `tone` or a non-solid `bgStyle` overrides it. |
+| `size` | `AvatarSize` | no | — | The size — preset → variant class · number/string → square inline · object → explicit dims. |
+
+## Emits
+
+None declared.
+
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `fallback` | `fallback?(): unknown;` | The custom fallback content — wins over the `fallback` prop and the derived initials. |
+
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [DisplayExamples.ts](../../../../apps/playground/src/gallery/fixtures/DisplayExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

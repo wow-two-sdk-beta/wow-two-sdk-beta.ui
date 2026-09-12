@@ -39,11 +39,11 @@ export interface XhrUploadTransportOptions {
   /** The multipart field name the file is sent under. Defaults to `file`. */
   readonly fieldName?: string;
 
-  /** Whether to send cookies / TLS client certs cross-origin (`XMLHttpRequest.withCredentials`). Defaults to `false`. */
+  /** Whether to send cookies / TLS client certs cross-origin (`XMLHttpRequest.withCredentials`). Defaults `false`. */
   readonly withCredentials?: boolean;
 }
 
-/** Creates the `AbortError`-named rejection every cancellation path shares — see `isAbortError` in `foundation/errors`. */
+/** Creates the `AbortError`-named rejection every cancellation path shares — recognized by `isAbortError`. */
 function createAbortError(): Error {
   const error = new Error('The upload was aborted.');
   error.name = 'AbortError';

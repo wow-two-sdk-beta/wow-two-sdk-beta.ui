@@ -1,46 +1,57 @@
 # MarkdownEditor
 
-## Purpose
-Markdown input with live HTML preview. Toolbar inserts common syntax around the selection. Uses `marked` for parsing.
+Renders a markdown pane, a formatting toolbar and a sanitized live preview, in split, edit or preview view.
 
-## Anatomy
-```
-<MarkdownEditor>
-  ├── Toolbar (Bold / Italic / Code / Link / List / Quote / H1 / H2)
-  └── Body
-       ├── editor pane (textarea)
-       └── preview pane (rendered HTML)
-</MarkdownEditor>
-```
+Source: [MarkdownEditor.vue](MarkdownEditor.vue).
 
-`view`: `'split' | 'edit' | 'preview'` — three modes.
+Public import: `import { MarkdownEditor } from '@wow-two-beta/ui-vue/presentation/forms';`.
 
-## Required behaviors
-- Toolbar buttons wrap the current selection (or insert at cursor) with markdown syntax.
-- Edit pane is a `<textarea>` (no syntax highlighting; first-gen).
-- Preview re-renders on `value` change via `marked.parse(value)`.
-- `renderPreview` prop overrides the parser if consumer wants to swap engines.
+## Contract
 
-## Visual states
-`split` (default) · `edit` (full-width edit) · `preview` (full-width preview) · `disabled` · `read-only`
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
+
+- Default preview escapes raw HTML and filters link/image URL schemes with UrlExtensions.
+- The preview slot replaces this renderer; its caller owns the trust policy for any custom HTML.
+- URL bindings select an allowed scheme through UrlExtensions before rendering. Custom slots remain caller-owned content.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `value` / `defaultValue` / `onValueChange` | controlled | uncontrolled | |
-| `view` / `defaultView` / `onViewChange` | controlled | `'split'` | |
-| `renderPreview` | `(markdown: string) => ReactNode` | uses `marked.parse` | Custom parser |
-| `disabled` / `readOnly` | `boolean` | `false` | |
-| `minHeight` | `string` | `'18rem'` | |
 
-## Composition
-Single component; toolbar internal. `renderPreview` slot lets consumers route to MDX, `marked` with extensions, `markdown-it`, etc.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `modelValue` | `string` | no | `undefined` | The markdown source, controlled. The `v-model` binding target. |
+| `defaultValue` | `string` | no | — | The initial markdown source when uncontrolled. |
+| `view` | `MarkdownEditorView` | no | `undefined` | The pane layout, controlled. The `v-model:view` binding target. |
+| `defaultView` | `MarkdownEditorView` | no | `undefined` | The initial pane layout when uncontrolled. Default `split`. |
+| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
+| `minHeight` | `string` | no | `'18rem'` | The CSS minHeight on the surface (default `18rem`). |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `readOnly` | `boolean` | no | `undefined` | The read-only state — the legacy alias. Falls back to the form control's `isReadOnly`. |
+| `readonly` | `boolean` | no | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
+| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
 
-## Accessibility
-- Toolbar = `role="toolbar"`; each button has `aria-label`.
-- View mode = segmented control (`role="radiogroup"`).
-- Editor pane: `<textarea>` with native semantics.
-- Preview pane: `aria-live="polite"` so SR users get notified of changes.
+## Emits
 
-## Dependencies
-Foundation: `utils`, `icons`. Same domain: nothing. External: `marked`.
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: string];` | Fires when the reader edits the markdown, by typing or via a toolbar action — the `v-model` half. |
+| `update:view` | `'update:view': [view: MarkdownEditorView];` | Fires when the reader picks a different pane layout — the `v-model:view` half. |
+
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `preview` | `preview?(props: { markdown: string }): unknown;` | Replaces the rendered preview pane. Filling it opts out of the built-in `marked` render, and the consumer owns sanitizing. |
+
+## Exposed handle
+
+`{ el: textarea }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [PreviewTrust.dom.test.ts](../../../../tests/unit/presentation/forms/PreviewTrust.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

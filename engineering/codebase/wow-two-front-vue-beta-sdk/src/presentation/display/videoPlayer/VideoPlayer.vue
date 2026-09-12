@@ -16,35 +16,35 @@ export const VideoTrackKind = {
 export type VideoTrackKind = (typeof VideoTrackKind)[keyof typeof VideoTrackKind];
 
 export interface VideoTrack {
-  src: string;
-  srcLang: string;
-  label: string;
-  kind?: VideoTrackKind;
-  default?: boolean;
+  readonly src: string;
+  readonly srcLang: string;
+  readonly label: string;
+  readonly kind?: VideoTrackKind;
+  readonly default?: boolean;
 }
 
 export interface VideoPlayerProps {
   /** The video source URL. */
-  src: string;
+  readonly src: string;
   /** The preview image shown before playback. */
-  poster?: string;
+  readonly poster?: string;
   /** The caption/subtitle tracks rendered as `<track>` children. */
-  tracks?: ReadonlyArray<VideoTrack>;
+  readonly tracks?: ReadonlyArray<VideoTrack>;
   /** The CSS `aspect-ratio` of the frame. Default `16 / 9`. */
-  aspectRatio?: string | number;
+  readonly aspectRatio?: string | number;
   /** The autoplay state, forwarded to the native `<video>`. */
-  autoPlay?: boolean;
+  readonly autoPlay?: boolean;
   /** The loop state, forwarded to the native `<video>`. */
-  loop?: boolean;
+  readonly loop?: boolean;
   /** The initial muted state — seeds the internal toggle, exactly as React's `muted` did. */
-  muted?: boolean;
+  readonly muted?: boolean;
   /** The initial volume in 0..1. Default `1`. */
-  defaultVolume?: number;
+  readonly defaultVolume?: number;
   /** The initial playback rate. Default `1`. */
-  defaultPlaybackRate?: number;
+  readonly defaultPlaybackRate?: number;
 }
 
-const SPEEDS: ReadonlyArray<number> = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const PlaybackRates: ReadonlyArray<number> = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 function formatTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
@@ -57,13 +57,14 @@ function formatTime(seconds: number): string {
 }
 
 /** The idle delay, in ms, before the controls bar fades out during playback. */
-const IDLE_HIDE_MS = 3000;
+const IdleHideMs = 3000;
 
-const ICON_BUTTON_CLASS =
+const IconButtonClass =
   'inline-flex h-7 w-7 items-center justify-center rounded text-white/80 hover:bg-white/20 hover:text-white';
 </script>
 
 <script setup lang="ts">
+import { UrlExtensions } from '../../../foundation/dom';
 import { computed, onBeforeUnmount, onMounted, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import {
   Captions,
@@ -76,12 +77,13 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 
 /**
- * Custom-controls video player. Click video to toggle play; controls
- * auto-hide after 3s during playback; keyboard shortcuts (Space/F/M/C/←/→/↑/↓).
+ * Renders a video player whose custom controls auto-hide 3s into playback.
+ *
+ * Click the video to toggle play. Keyboard shortcuts: Space / F / M / C and the arrow keys.
  */
 defineOptions({ name: 'VideoPlayer', inheritAttrs: false });
 
@@ -213,7 +215,7 @@ function bumpControls(): void {
   if (playing.value) {
     idleTimer = window.setTimeout(() => {
       showControls.value = false;
-    }, IDLE_HIDE_MS);
+    }, IdleHideMs);
   }
 }
 
@@ -311,7 +313,7 @@ function onRangeInput(event: Event): void {
 
 const classes = computed(() =>
   cn(
-    'group relative overflow-hidden rounded-md bg-black text-white shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'group relative overflow-hidden rounded-md bg-black text-white shadow-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     attrs.class as string | undefined,
   ),
 );
@@ -356,7 +358,7 @@ defineExpose({ el });
   >
     <video
       ref="el"
-      :src="src"
+      :src="UrlExtensions.safeResource(src)"
       :poster="poster"
       :autoplay="autoPlay"
       :loop="loop"
@@ -370,9 +372,9 @@ defineExpose({ el });
       @click="onVideoClick"
     >
       <track
-        v-for="(item, index) in tracks"
-        :key="index"
-        :src="item.src"
+        v-for="item in tracks"
+        :key="item.src"
+        :src="UrlExtensions.safeResource(item.src)"
         :srclang="item.srcLang"
         :label="item.label"
         :kind="item.kind ?? 'captions'"
@@ -419,7 +421,7 @@ defineExpose({ el });
       <button
         type="button"
         :aria-label="isMuted || volume === 0 ? 'Unmute' : 'Mute'"
-        :class="ICON_BUTTON_CLASS"
+        :class="IconButtonClass"
         @click="isMuted = !isMuted"
       >
         <Icon :icon="isMuted || volume === 0 ? VolumeX : Volume2" :size="14" />
@@ -429,25 +431,25 @@ defineExpose({ el });
         aria-label="Playback speed"
         class="h-7 rounded-sm border border-white/20 bg-black/40 px-1 text-xs"
       >
-        <option v-for="rate in SPEEDS" :key="rate" :value="rate" class="text-foreground">{{ rate }}×</option>
+        <option v-for="rate in PlaybackRates" :key="rate" :value="rate" class="text-foreground">{{ rate }}×</option>
       </select>
       <button
         v-if="hasTracks"
         type="button"
         :aria-label="captionsOn ? 'Hide captions' : 'Show captions'"
         :aria-pressed="captionsOn"
-        :class="ICON_BUTTON_CLASS"
+        :class="IconButtonClass"
         @click="captionsOn = !captionsOn"
       >
         <Icon :icon="captionsOn ? Captions : CaptionsOff" :size="14" />
       </button>
-      <button type="button" aria-label="Picture in picture" :class="ICON_BUTTON_CLASS" @click="togglePiP">
+      <button type="button" aria-label="Picture in picture" :class="IconButtonClass" @click="togglePiP">
         <Icon :icon="PictureInPicture2" :size="14" />
       </button>
       <button
         type="button"
         :aria-label="fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-        :class="ICON_BUTTON_CLASS"
+        :class="IconButtonClass"
         @click="toggleFullscreen"
       >
         <Icon :icon="fullscreen ? Minimize : Maximize" :size="14" />

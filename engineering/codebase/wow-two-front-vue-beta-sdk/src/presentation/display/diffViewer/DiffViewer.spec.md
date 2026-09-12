@@ -1,45 +1,44 @@
 # DiffViewer
 
-## Purpose
-Side-by-side or unified line-diff between two text strings. Own minimal LCS-based implementation — no external diff library.
+Renders a line-level diff in split or unified columns, from its own LCS pass.
 
-## Anatomy
-```
-<DiffViewer left right view="split|unified" />
-```
+Source: [DiffViewer.vue](DiffViewer.vue).
 
-`split` = left/right columns aligned by row.
-`unified` = single column with `+` and `-` line markers.
+Public import: `import { DiffViewer } from '@wow-two-beta/ui-vue/presentation/display';`.
 
-## Required behaviors
-- Compute line-level diff using LCS (Longest Common Subsequence).
-- Mark unchanged / added / removed (+ optional `modified` for replaced lines).
-- Render with line numbers per side.
-- "+/− N" stats slot at top.
+## Contract
 
-## Visual states
-`split` (default) · `unified` · `empty (identical)`
+- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default | Why |
-|---|---|---|---|
-| `left` | `string` | required | Original |
-| `right` | `string` | required | Modified |
-| `view` | `'split' \| 'unified'` | `'split'` | |
-| `leftLabel` | `ReactNode` | `'Before'` | |
-| `rightLabel` | `ReactNode` | `'After'` | |
-| `hasStats` | `boolean` | `true` | "+10 −3" header |
 
-## Composition
-Single component (no slots). Future iteration: word-level highlight inside changed lines.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `left` | `string` | yes | `''` | Declared by the source contract. |
+| `right` | `string` | yes | `''` | Declared by the source contract. |
+| `view` | `DiffView` | no | `DiffView.Split` | Declared by the source contract. |
+| `leftLabel` | `string \| number` | no | `'Before'` | The label for the original text. Default `"Before"`. Rich content → the `leftLabel` slot. |
+| `rightLabel` | `string \| number` | no | `'After'` | The label for the modified text. Default `"After"`. Rich content → the `rightLabel` slot. |
+| `hasStats` | `boolean` | no | `true` | Declared by the source contract. |
 
-## Accessibility
-- Each row tagged `data-state` (`unchanged`/`added`/`removed`).
-- Stats announced via `<Announce>` when diff updates? — deferred (would re-announce on every prop change).
+## Emits
 
-## Dependencies
-Foundation: `utils`. No cross-domain. No external lib.
+None declared.
 
-## Known limitations
-- Line-level only — no intra-line word/char highlight.
-- O(n×m) memory; not suitable for huge diffs (>10k lines per side).
+## Slots
+
+| Slot | Signature | Meaning |
+|---|---|---|
+| `leftLabel` | `leftLabel(): unknown;` | The left-label override, when a plain string is not enough. |
+| `rightLabel` | `rightLabel(): unknown;` | The right-label override, when a plain string is not enough. |
+
+## Exposed handle
+
+`{ el }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [DisplayExamples.ts](../../../../apps/playground/src/gallery/fixtures/DisplayExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [DisplayRequiredProps.dom.test.ts](../../../../tests/unit/presentation/display/DisplayRequiredProps.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import * as sweepOverlays from '@wow-two-beta/ui-vue/presentation/overlays';
 import { ref } from 'vue';
 import * as nav from '@wow-two-beta/ui-vue/presentation/nav';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
@@ -31,17 +32,17 @@ const {
   NavigationMenuTrigger,
   NavigationMenuContent,
   NavigationMenuLink,
-  CommandPalette,
-  CommandPaletteContent,
-  CommandPaletteInput,
-  CommandPaletteList,
-  CommandPaletteGroup,
-  CommandPaletteItem,
-  CommandPaletteEmpty,
-  CommandPaletteSeparator,
+  CommandPaletteModal,
+  CommandPaletteModalContent,
+  CommandPaletteModalInput,
+  CommandPaletteModalList,
+  CommandPaletteModalGroup,
+  CommandPaletteModalItem,
+  CommandPaletteModalEmpty,
+  CommandPaletteModalSeparator,
   ScrollSpy,
   TableOfContents,
-} = nav;
+} = { ...nav, ...sweepOverlays };
 
 const covered = [
   'Breadcrumb',
@@ -68,14 +69,14 @@ const covered = [
   'NavigationMenuTrigger',
   'NavigationMenuContent',
   'NavigationMenuLink',
-  'CommandPalette',
-  'CommandPaletteContent',
-  'CommandPaletteInput',
-  'CommandPaletteList',
-  'CommandPaletteGroup',
-  'CommandPaletteItem',
-  'CommandPaletteEmpty',
-  'CommandPaletteSeparator',
+  'CommandPaletteModal',
+  'CommandPaletteModalContent',
+  'CommandPaletteModalInput',
+  'CommandPaletteModalList',
+  'CommandPaletteModalGroup',
+  'CommandPaletteModalItem',
+  'CommandPaletteModalEmpty',
+  'CommandPaletteModalSeparator',
   'ScrollSpy',
   'TableOfContents',
 ];
@@ -120,9 +121,7 @@ const menuAnchor = ref<HTMLElement | null>(null);
             <template #icon><Inbox :size="14" /></template>
             Active item
             <template #trailing>
-              <span class="rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">
-                12
-              </span>
+              <span class="rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground"> 12 </span>
             </template>
           </NavItem>
           <NavItem>
@@ -136,7 +135,7 @@ const menuAnchor = ref<HTMLElement | null>(null);
         <button ref="menuAnchor" type="button" class="mb-2 rounded-md border border-border px-2 py-1 text-xs">
           anchor element
         </button>
-        <Menu :is-open="true" :anchor="menuAnchor" class="w-56">
+        <Menu :open="true" :anchor="menuAnchor" class="w-56">
           <MenuLabel>Account</MenuLabel>
           <MenuGroup label="Workspace">
             <MenuItem>Profile</MenuItem>
@@ -166,9 +165,7 @@ const menuAnchor = ref<HTMLElement | null>(null);
       <Demo name="ContextMenu" note="right-click the grey box">
         <ContextMenu>
           <ContextMenuTrigger>
-            <div class="grid h-20 place-items-center rounded-md bg-muted text-xs">
-              right-click me
-            </div>
+            <div class="grid h-20 place-items-center rounded-md bg-muted text-xs">right-click me</div>
           </ContextMenuTrigger>
           <ContextMenuContent>
             <MenuItem>Cut</MenuItem>
@@ -219,24 +216,24 @@ const menuAnchor = ref<HTMLElement | null>(null);
         </NavigationMenu>
       </Demo>
 
-      <Demo name="CommandPalette" note="click to open the portalled palette">
+      <Demo name="CommandPaletteModal" note="click to open the portalled palette">
         <Button variant="outline" size="sm" @click="paletteOpen = true">Open palette</Button>
-        <CommandPalette v-model:open="paletteOpen">
-          <CommandPaletteContent>
-            <CommandPaletteInput placeholder="Type a command…" />
-            <CommandPaletteList>
-              <CommandPaletteGroup label="Files">
-                <CommandPaletteItem value="new-file" search-text="new file">New file</CommandPaletteItem>
-                <CommandPaletteItem value="open-file" search-text="open file">Open file</CommandPaletteItem>
-              </CommandPaletteGroup>
-              <CommandPaletteSeparator />
-              <CommandPaletteGroup label="Settings">
-                <CommandPaletteItem value="theme" search-text="theme">Change theme</CommandPaletteItem>
-              </CommandPaletteGroup>
-              <CommandPaletteEmpty>No results.</CommandPaletteEmpty>
-            </CommandPaletteList>
-          </CommandPaletteContent>
-        </CommandPalette>
+        <CommandPaletteModal v-model:open="paletteOpen">
+          <CommandPaletteModalContent>
+            <CommandPaletteModalInput placeholder="Type a command…" />
+            <CommandPaletteModalList>
+              <CommandPaletteModalGroup label="Files">
+                <CommandPaletteModalItem value="new-file" search-text="new file">New file</CommandPaletteModalItem>
+                <CommandPaletteModalItem value="open-file" search-text="open file">Open file</CommandPaletteModalItem>
+              </CommandPaletteModalGroup>
+              <CommandPaletteModalSeparator />
+              <CommandPaletteModalGroup label="Settings">
+                <CommandPaletteModalItem value="theme" search-text="theme">Change theme</CommandPaletteModalItem>
+              </CommandPaletteModalGroup>
+              <CommandPaletteModalEmpty>No results.</CommandPaletteModalEmpty>
+            </CommandPaletteModalList>
+          </CommandPaletteModalContent>
+        </CommandPaletteModal>
       </Demo>
 
       <Demo name="ScrollSpy" note="scroll the inner box — the active id should follow">
@@ -245,9 +242,7 @@ const menuAnchor = ref<HTMLElement | null>(null);
             <div>
               <p class="mb-1 text-xs text-subtle-foreground">active = {{ activeId ?? 'null' }}</p>
               <div class="h-24 overflow-auto rounded-md border border-border">
-                <div v-for="id in ['s1', 's2', 's3']" :id="id" :key="id" class="h-16 p-2 text-xs">
-                  section {{ id }}
-                </div>
+                <div v-for="id in ['s1', 's2', 's3']" :id="id" :key="id" class="h-16 p-2 text-xs">section {{ id }}</div>
               </div>
             </div>
           </template>
@@ -266,9 +261,7 @@ const menuAnchor = ref<HTMLElement | null>(null);
       </Demo>
     </div>
 
-    <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">
-      auto-mounted tail
-    </h3>
+    <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
     <AutoGroup :namespace="nav" :covered="covered" />
   </div>
 </template>

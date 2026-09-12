@@ -46,7 +46,7 @@ export const TableKey: InjectionKey<TableContextValue> = Symbol('wow-two.table')
  * React's `createContext` default value, preserved so a stray `<TableCell>`
  * still picks the cozy padding rather than throwing.
  */
-export const DEFAULT_TABLE_CONTEXT: TableContextValue = {
+export const DefaultTableContext: TableContextValue = {
   isStriped: false,
   isHoverable: false,
   density: TableDensity.Cozy,
@@ -54,17 +54,17 @@ export const DEFAULT_TABLE_CONTEXT: TableContextValue = {
 
 /** Reads the enclosing `Table` state, falling back to the cozy defaults. */
 export function useTableContext(): TableContextValue {
-  return inject(TableKey, DEFAULT_TABLE_CONTEXT);
+  return inject(TableKey, DefaultTableContext);
 }
 
-export const DENSITY_CELL: Record<TableDensity, string> = {
+export const DensityCell: Record<TableDensity, string> = {
   compact: 'px-2 py-1.5 text-sm',
   cozy: 'px-3 py-2 text-sm',
   comfortable: 'px-4 py-3 text-sm',
   roomy: 'px-5 py-4 text-sm',
 };
 
-export const WRAPPER_RADIUS: Record<TableRadius, string> = {
+export const WrapperRadius: Record<TableRadius, string> = {
   none: 'rounded-none',
   sm: 'rounded-sm',
   md: 'rounded-md',

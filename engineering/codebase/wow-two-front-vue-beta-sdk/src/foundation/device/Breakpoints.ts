@@ -3,7 +3,7 @@
 // WHY NO DEFAULT SCALE: this library is Tailwind-v4 token-driven, so the app owns its breakpoints in its `@theme`
 // block. A scale hardcoded here would be a second source of truth that silently disagrees with the CSS the same
 // app ships — a layout that switches at 768px in JS and 720px in CSS is a bug no test in this repo could see.
-// `TAILWIND_BREAKPOINTS` is offered as a constant the caller may opt into, never as a fallback a composable reaches for.
+// `TailwindBreakpoints` is offered as a constant the caller may opt into, never a fallback a composable reaches for.
 //
 // Queries are plain `(min-width: …)` sorted WIDEST FIRST, so "the first query that matches" is the active
 // breakpoint. Mutually-exclusive bands (`min` and `max` together) are the alternative and were rejected: bands
@@ -18,7 +18,7 @@ export type BreakpointScale = Readonly<Record<string, number>>;
  * Tailwind v4's default breakpoint scale, in CSS pixels. Opt-in: pass it to `useBreakpoint` explicitly. An app
  * that customised its `@theme` breakpoints must pass its own map instead, or JS and CSS will disagree.
  */
-export const TAILWIND_BREAKPOINTS = {
+export const TailwindBreakpoints = {
   /** ≥ 640px. */
   sm: 640,
   /** ≥ 768px. */
@@ -36,7 +36,7 @@ export const TAILWIND_BREAKPOINTS = {
  * eight covers every mainstream scale with room to spare (Tailwind ships 5, Bootstrap 6). See `UseBreakpoint.ts`
  * for why the count has to be a compile-time constant at all.
  */
-export const MAX_BREAKPOINTS = 8;
+export const MaxBreakpoints = 8;
 
 /** One breakpoint compiled to the media query that detects it. */
 export interface BreakpointQuery<TKey extends string = string> {
@@ -60,7 +60,7 @@ export interface BreakpointQuery<TKey extends string = string> {
  */
 export function toBreakpointQueries<TScale extends BreakpointScale>(
   scale: TScale,
-): readonly BreakpointQuery<Extract<keyof TScale, string>>[] {
+): ReadonlyArray<BreakpointQuery<Extract<keyof TScale, string>>> {
   return Object.entries(scale)
     .filter(([, minWidth]) => Number.isFinite(minWidth) && minWidth >= 0)
     .sort(([, left], [, right]) => right - left)
@@ -77,13 +77,13 @@ export function toBreakpointQueries<TScale extends BreakpointScale>(
  *
  * @param queries Compiled queries, widest first, as returned by {@link toBreakpointQueries}.
  * @param matches Match results positionally aligned with `queries`. A shorter array reads as "did not match" for
- * the missing tail, which is how a scale larger than {@link MAX_BREAKPOINTS} loses its narrowest entries.
+ * the missing tail, which is how a scale larger than {@link MaxBreakpoints} loses its narrowest entries.
  * @returns The key of the widest matching breakpoint, or `null` when the viewport is narrower than every entry —
  * the implicit mobile-first base band, which by definition has no key of its own.
  */
 export function resolveBreakpoint<TKey extends string>(
-  queries: readonly BreakpointQuery<TKey>[],
-  matches: readonly boolean[],
+  queries: ReadonlyArray<BreakpointQuery<TKey>>,
+  matches: ReadonlyArray<boolean>,
 ): TKey | null {
   for (const [index, entry] of queries.entries()) {
     if (matches[index] === true) return entry.key;

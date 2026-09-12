@@ -11,13 +11,10 @@ export interface PercentInputProps extends NumberInputProps {}
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import NumberInput from '../numberInput/NumberInput.vue';
 
-/**
- * `NumberInput` with a trailing `%` decoration. Input value remains the
- * bare number (interpret as 0–100 in your form).
- */
+/** Renders a `NumberInput` with a trailing `%` decoration; the typed value stays the bare 0–100 number. */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'PercentInput', inheritAttrs: false });
@@ -27,13 +24,13 @@ const props = defineProps<PercentInputProps>();
 const attrs = useAttrs();
 
 /*
- * No `defineEmits` on purpose: `update:modelValue` / `value-change` are NOT re-declared, so a
+ * No `defineEmits` on purpose: `update:modelValue` are NOT re-declared, so a
  * consumer's listeners stay in `useAttrs()` and reach `NumberInput` through the passthrough
  * below — declaring them here would strip the listeners and silently break `v-model`.
  */
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const wrapperClass = computed(() => cn('relative', attrs.class as ClassValue));

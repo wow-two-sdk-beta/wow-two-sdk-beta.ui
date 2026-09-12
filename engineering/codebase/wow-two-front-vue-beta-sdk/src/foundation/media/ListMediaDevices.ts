@@ -1,21 +1,3 @@
-// Device inventory — `enumerateDevices` regrouped into the three buckets a UI actually renders (a camera picker,
-// a microphone picker, an output picker), instead of one flat array every consumer re-filters by a `kind` string.
-//
-// THE LABEL GOTCHA, and the reason this module documents more than it computes: before capture permission is
-// granted, browsers return the devices with `label: ''` and (in most engines) an empty `deviceId`. The privacy
-// reason is sound — "Logitech BRIO" plus "Yeti Nano" is a fingerprint — but the consequence catches everyone:
-// a device picker built on a cold `enumerateDevices()` renders a list of blank rows. The sequence that works is
-// request a stream first, THEN enumerate, and the labels are populated. Counts are honest either way, which is
-// what makes `hasCamera` / `hasMicrophone` usable *before* prompting.
-//
-// Reported as a total shape rather than a discriminated result: every arm of this call is "here are the devices
-// I could see", and zero cameras behaves identically whether the API was missing or the machine has none. The
-// `supported` flag preserves the distinction for the one caller that needs it — a picker that wants to say "this
-// browser cannot list devices" rather than "no cameras found".
-//
-// Never throws. `enumerateDevices` can reject (a permissions policy blocking the feature) and can, on a partial
-// implementation, resolve with something other than an array; both land on empty groups.
-
 import { mediaDevicesWith } from './CanCaptureMedia';
 
 /**
@@ -25,20 +7,23 @@ import { mediaDevicesWith } from './CanCaptureMedia';
  * module header. Group membership and counts are accurate regardless.
  */
 export interface MediaDeviceGroups {
-  /** Whether `enumerateDevices` was reachable at all. `false` means every group is empty because the API is absent (SSR, older browser), not because the machine has no devices. */
+  /**
+   * Whether `enumerateDevices` was reachable at all. `false` means every group is empty because the API is
+   * absent (SSR, older browser), not because the machine has no devices.
+   */
   readonly supported: boolean;
 
   /** Video inputs — `kind === 'videoinput'`. Webcams, virtual cameras, capture cards. */
-  readonly cameras: readonly MediaDeviceInfo[];
+  readonly cameras: ReadonlyArray<MediaDeviceInfo>;
 
   /** Audio inputs — `kind === 'audioinput'`. Microphones, line-ins, virtual audio devices. */
-  readonly microphones: readonly MediaDeviceInfo[];
+  readonly microphones: ReadonlyArray<MediaDeviceInfo>;
 
-  /** Audio outputs — `kind === 'audiooutput'`. Speakers and headsets. Absent entirely on Firefox, which does not enumerate outputs. */
-  readonly speakers: readonly MediaDeviceInfo[];
+  /** Audio outputs — `kind === 'audiooutput'`. Speakers and headsets. Always empty on Firefox, which omits them. */
+  readonly speakers: ReadonlyArray<MediaDeviceInfo>;
 }
 
-/** Builds the empty answer for a given support verdict — the shape both the absent-API and failed-call paths return. */
+/** Builds the empty answer for a support verdict — the shape both the absent-API and failed-call paths return. */
 function emptyGroups(supported: boolean): MediaDeviceGroups {
   return { supported, cameras: [], microphones: [], speakers: [] };
 }

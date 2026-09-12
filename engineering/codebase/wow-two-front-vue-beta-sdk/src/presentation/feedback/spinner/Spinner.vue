@@ -1,25 +1,24 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 import type { SpinnerTone } from './Spinner.variants';
 
 export interface SpinnerProps {
   /** The diameter step. */
-  size?: Size;
+  readonly size?: Size;
   /** The color tone. */
-  tone?: SpinnerTone;
+  readonly tone?: SpinnerTone;
   /** The accessible label. Default `"Loading"`. */
-  label?: string;
+  readonly label?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { spinnerVariants } from './Spinner.variants';
 
 /**
- * Indeterminate loading spinner. Renders a spinning circle and a visually
- * hidden text label for screen readers.
+ * Renders an indeterminate spinning circle plus a visually hidden label for screen readers.
  *
  * Distinct from `foundation/icons`' `Spinner`: that one is an em-sized SVG
  * glyph, this one is the bordered circle with its own `size` / `tone` scale.

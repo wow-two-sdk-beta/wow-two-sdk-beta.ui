@@ -16,16 +16,16 @@ export type SessionListener<TUser = unknown> = (session: AuthSession<TUser>) => 
  *   in-flight me-resolve to settle before allowing or redirecting.
  */
 export interface AuthBridge<TUser = unknown> {
-  /** Fires the 401 signal — pass as the api client's `onUnauthorized`; safe to call with no provider mounted (no-op). */
+  /** Fires the 401 signal — pass as the api client's `onUnauthorized`; a no-op with no provider mounted. */
   onUnauthorized(error?: unknown): void;
 
-  /** Resolves whether the session is authenticated, waiting for an unsettled session to settle — matches the router guard's `isAuthenticated` callback shape. */
+  /** Resolves whether the session is authenticated, waiting for an unsettled session to settle. */
   isAuthenticated(): Promise<boolean>;
 
   /** Reads the latest published session snapshot (`unknown` until a provider publishes). */
   getSession(): AuthSession<TUser>;
 
-  /** Publishes a session snapshot — called by `AuthProvider` on every transition; call manually only in custom (non-provider) integrations. */
+  /** Publishes a session snapshot — `AuthProvider` publishes every transition; call it manually only without one. */
   publishSession(session: AuthSession<TUser>): void;
 
   /** Subscribes to bridged 401s — used by `AuthProvider`; returns an unsubscribe. */
@@ -40,7 +40,7 @@ function isSettled(session: AuthSession<unknown>): boolean {
   return session.status === AuthStatus.Authenticated || session.status === AuthStatus.Anonymous;
 }
 
-/** Creates an {@link AuthBridge} — one per app, module scope, shared by the api client, the router guards, and the `AuthProvider`. */
+/** Creates an {@link AuthBridge} — one per app, at module scope, shared by the api client, guards, and provider. */
 export function createAuthBridge<TUser = unknown>(): AuthBridge<TUser> {
   let session: AuthSession<TUser> = { status: AuthStatus.Unknown, user: null };
   const unauthorizedListeners = new Set<UnauthorizedListener>();
@@ -49,7 +49,15 @@ export function createAuthBridge<TUser = unknown>(): AuthBridge<TUser> {
 
   return {
     onUnauthorized(error?: unknown): void {
-      for (const listener of [...unauthorizedListeners]) listener(error);
+      const failures: unknown[] = [];
+      for (const listener of [...unauthorizedListeners]) {
+        try {
+          listener(error);
+        } catch (failure) {
+          failures.push(failure);
+        }
+      }
+      if (failures.length) throw new AggregateError(failures, 'An authentication listener failed.');
     },
 
     isAuthenticated(): Promise<boolean> {
@@ -61,12 +69,23 @@ export function createAuthBridge<TUser = unknown>(): AuthBridge<TUser> {
 
     publishSession(next: AuthSession<TUser>): void {
       session = next;
-      for (const listener of [...sessionListeners]) listener(next);
-      if (!isSettled(next)) return;
+      const failures: unknown[] = [];
+      for (const listener of [...sessionListeners]) {
+        try {
+          listener(next);
+        } catch (failure) {
+          failures.push(failure);
+        }
+      }
+      if (!isSettled(next)) {
+        if (failures.length) throw new AggregateError(failures, 'A session listener failed.');
+        return;
+      }
       const waiters = settleWaiters;
       settleWaiters = [];
       const authenticated = next.status === AuthStatus.Authenticated;
       for (const waiter of waiters) waiter(authenticated);
+      if (failures.length) throw new AggregateError(failures, 'A session listener failed.');
     },
 
     subscribeUnauthorized(listener: UnauthorizedListener): () => void {

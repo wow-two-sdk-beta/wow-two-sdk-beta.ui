@@ -1,13 +1,55 @@
 # NumberInput
 
-## Purpose
-`<input type="number">` with stepper buttons. Steppers are raw `<button>` to keep the strict atom rule (NumberInput is L3, so importing Button would make this an atom-on-atom composition).
+Renders a numeric input flanked by minus and plus buttons that step the value by `step`.
+
+Source: [NumberInput.vue](NumberInput.vue).
+
+Public import: `import { NumberInput } from '@wow-two-beta/ui-vue/presentation/forms';`.
+
+## Contract
+
+- Each controlled axis has one Vue model name and one update event. Primary values use `modelValue` / `update:modelValue`; disclosure uses `open` / `update:open`. Named axes use their declared `update:*` event. Defaults seed uncontrolled state once; external updates do not emit intent.
+- The committed value is a finite number or null for an empty input. An invalid native numeric draft does not commit.
+- Stepper buttons honor disabled and readonly; input mode is decimal.
+- Native form reset requests the original seed through the state owner and restores the resulting DOM representation; a cancelled reset changes nothing.
+- The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
+- Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
-| Name | Type | Default |
-|---|---|---|
-| `step` | `number` | `1` |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` |
 
-## Dependencies
-Foundation: `utils/cn`, `icons/Icon`, `primitives/formControlContext`. Same-domain: `forms/InputStyles`.
+| Prop | Type | Required | Default | Meaning |
+|---|---|---|---|---|
+| `size` | `InputSize` | no | — | The control size. |
+| `state` | `InputState` | no | — | The validity surface. |
+| `border` | `InputBorder` | no | — | The border weight. |
+| `ring` | `InputRing` | no | — | The focus-ring weight. |
+| `step` | `number` | no | `1` | The increment granularity of the stepper buttons and arrow keys. Default 1. |
+| `incrementLabel` | `string` | no | `'Increment'` | Accessible text for the increment action. |
+| `decrementLabel` | `string` | no | `'Decrement'` | Accessible text for the decrement action. |
+| `modelValue` | `number \| null` | no | — | The value, controlled. The `v-model` binding target. Emits a finite number, or null when cleared. Invalid drafts do not commit. |
+| `defaultValue` | `number \| null` | no | — | The initial value when uncontrolled. |
+| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
+| `readOnly` | `boolean` | no | `undefined` | The read-only state — the legacy alias. Falls back to the form control's `isReadOnly`. |
+| `readonly` | `boolean` | no | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
+
+## Emits
+
+| Event | Signature | Meaning |
+|---|---|---|
+| `update:modelValue` | `'update:modelValue': [value: number \| null];` | Fires when the reader types or steps the number — the `v-model` half. |
+
+## Slots
+
+None declared.
+
+## Exposed handle
+
+`{ el: root }`. Read this through a component template ref after mount; the referenced DOM node may be absent while unmounted.
+
+## Verification
+
+- Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
+- Focused test references: [EditingBehavior.dom.test.ts](../../../../tests/unit/presentation/forms/EditingBehavior.dom.test.ts), [Forms.contract.dom.test.ts](../../../../tests/unit/presentation/forms/Forms.contract.dom.test.ts). Consult the named test assertions for the behavior actually covered.
+- Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.

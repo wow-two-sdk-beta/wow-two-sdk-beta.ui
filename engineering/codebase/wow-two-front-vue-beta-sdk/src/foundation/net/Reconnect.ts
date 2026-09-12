@@ -48,7 +48,7 @@ export const DefaultReconnectPolicy: RetryPolicy = {
 
 /** Configures a {@link createReconnectScheduler} instance. Every member is optional. */
 export interface ReconnectSchedulerOptions {
-  /** The retry policy driving the delays, or `false` to disable reconnection entirely. Default {@link DefaultReconnectPolicy}. */
+  /** Retry policy driving the delays, or `false` to disable reconnection. Default {@link DefaultReconnectPolicy}. */
   readonly retry?: RetryPolicy | false;
 
   /** The randomness feeding jitter — injectable so a test can pin an exact delay. Default `Math.random`. */

@@ -81,10 +81,16 @@ export interface PollerOptions {
   /** Whether to suspend while the browser reports no network link. Default `true`. */
   readonly pauseWhenOffline?: boolean;
 
-  /** Whether returning from a suspension polls at once instead of waiting a full interval. Default `true` — the data is already stale. */
+  /**
+   * Whether returning from a suspension polls at once instead of waiting a full interval. Default `true` — the
+   * data is already stale.
+   */
   readonly refreshOnResume?: boolean;
 
-  /** Receives an error thrown or rejected by the poll. The chain continues regardless — a failed poll is not a reason to stop polling. */
+  /**
+   * Receives an error thrown or rejected by the poll. The chain continues regardless — a failed poll is not a
+   * reason to stop polling.
+   */
   readonly onError?: (error: Error) => void;
 
   /** Fires on every state transition — the seam for a "paused (offline)" indicator. */
@@ -102,7 +108,7 @@ export interface Poller {
   /** Suspends polling until `resume()`. Independent of the automatic hidden / offline suspensions. */
   pause(): void;
 
-  /** Clears the caller's suspension. Polling stays suspended if the tab is still hidden or the browser still offline. */
+  /** Clears the caller's suspension. Polling stays suspended while the tab is hidden or the browser offline. */
   resume(): void;
 
   /** Stops polling, clears the pending timer, and detaches the visibility and connectivity listeners. Idempotent. */

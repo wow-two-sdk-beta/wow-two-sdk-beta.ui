@@ -1,16 +1,16 @@
 <script lang="ts">
 export interface CarouselDotProps {
   /** The slide this dot jumps to. */
-  slideIndex: number;
+  readonly slideIndex: number;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { useCarouselContext } from './CarouselContext';
 
-/** One pagination dot. React shipped it as `Carousel.Dot`. */
+/** Renders one pagination dot that jumps to its slide; React shipped it as `Carousel.Dot`. */
 defineOptions({ name: 'CarouselDot', inheritAttrs: false });
 
 const props = defineProps<CarouselDotProps>();
@@ -33,7 +33,7 @@ function onClick(event: MouseEvent): void {
 
 const classes = computed(() =>
   cn(
-    'h-1.5 rounded-full bg-border transition-all hover:bg-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'h-1.5 rounded-full bg-border transition-all hover:bg-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     isActive.value ? 'w-6 bg-primary hover:bg-primary' : 'w-1.5',
     attrs.class as string | undefined,
   ),

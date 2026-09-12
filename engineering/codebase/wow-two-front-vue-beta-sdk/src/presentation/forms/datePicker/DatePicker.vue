@@ -1,71 +1,70 @@
 <script lang="ts">
 import type { Temporal } from 'temporal-polyfill';
-import type { SelectSize } from '../select';
+import type { SelectPickerSize } from '../selectPicker';
 import type { InputState } from '../InputStyles';
 
 export interface DatePickerProps {
-  /** The selected date, controlled — React's spelling, which wins when both are set. */
-  value?: Temporal.PlainDate | null;
-
   /** The selected date, controlled. The `v-model` binding target. */
-  modelValue?: Temporal.PlainDate | null;
+  readonly modelValue?: Temporal.PlainDate | null;
 
   /** The uncontrolled initial selection. */
-  defaultValue?: Temporal.PlainDate | null;
+  readonly defaultValue?: Temporal.PlainDate | null;
 
   /** The empty-state text on the trigger. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /**
    * The trigger's date formatter.
    *
    * Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do.
    */
-  format?: (date: Temporal.PlainDate) => string;
+  readonly format?: (date: Temporal.PlainDate) => string;
 
   /** The minimum selectable date. */
-  min?: Temporal.PlainDate | null;
+  readonly min?: Temporal.PlainDate | null;
 
   /** The maximum selectable date. */
-  max?: Temporal.PlainDate | null;
+  readonly max?: Temporal.PlainDate | null;
 
   /** The custom per-day disable predicate. Also a returning prop. */
-  isDisabled?: (date: Temporal.PlainDate) => boolean;
+  readonly isDisabled?: (date: Temporal.PlainDate) => boolean;
 
   /** The invalid surface override. Falls back to the surrounding form control's `isInvalid`. */
-  isInvalid?: boolean;
+  readonly isInvalid?: boolean;
 
   /** The hidden input name; when set, a hidden input ships the ISO value with form submission. */
-  name?: string;
+  readonly name?: string;
 
   /** The trigger size. */
-  size?: SelectSize;
+  readonly size?: SelectPickerSize;
 
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
 
   /** The trigger's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Calendar as CalendarIcon } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
-import { selectTriggerVariants } from '../select/Select.variants';
+import { selectTriggerVariants } from '../selectPicker/SelectPicker.variants';
 import { InputState as InputStateValue } from '../InputStyles';
 import { formatISODate, today } from '../DateExtensions';
-import Calendar from '../calendar/Calendar.vue';
+import CalendarPicker from '../calendarPicker/CalendarPicker.vue';
 
-/** Trigger button + popover `Calendar`. */
+/** Renders a trigger button that opens a popover `CalendarPicker` and shows the picked date. */
 /* `inheritAttrs: false` so `class` folds into the trigger's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'DatePicker', inheritAttrs: false });
@@ -80,16 +79,14 @@ const props = withDefaults(defineProps<DatePickerProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader picks a day in the popover. The `v-model` half. */
   'update:modelValue': [date: Temporal.PlainDate | null];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [date: Temporal.PlainDate | null];
 }>();
 
 const attrs = useAttrs();
 
 /* Inherits id/disabled/invalid/labelledby/describedby from a surrounding <Field>;
-   standalone props win when provided, context fills the gaps (Select parity). */
+   standalone props win when provided, context fills the gaps (SelectPicker parity). */
 const field = useFormControl();
 
 const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
@@ -98,11 +95,10 @@ const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid);
 const controlled = useControlled<Temporal.PlainDate | null>({
   /* `??` is wrong here — `null` is a MEANINGFUL selection, and `??` would fall through it
      to `modelValue`. Only `undefined` means "not controlled". */
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -122,7 +118,7 @@ const triggerState = computed(
 const displayText = computed(() => (date.value ? props.format(date.value) : props.placeholder));
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel`. */
-const ariaLabel = computed(() => attrs['aria-label'] as string | undefined);
+const ariaLabel = computed(() => attrs[AriaAttribute.Label] as string | undefined);
 
 const triggerId = computed(() => props.id ?? field?.id);
 /* Names the trigger from the Field label when present; an explicit aria-label always wins. */
@@ -133,9 +129,9 @@ const ariaInvalid = computed(() => triggerState.value === InputStateValue.Invali
 const defaultMonth = computed(() => date.value ?? today());
 const hiddenValue = computed(() => formatISODate(date.value));
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-label']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.Label]);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const triggerClass = computed(() =>
@@ -148,10 +144,15 @@ const trigger = useTemplateRef<{ el: HTMLElement | null }>('trigger');
 
 /** The rendered trigger — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: computed(() => trigger.value?.el ?? null) });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
-  <Popover v-model:open="open" placement="bottom-start" :offset="6">
+  <Popover :key="formResetRevision" v-model:open="open" placement="bottom-start" :offset="6">
     <PopoverTrigger
       ref="trigger"
       :id="triggerId"
@@ -169,15 +170,21 @@ defineExpose({ el: computed(() => trigger.value?.el ?? null) });
       <CalendarIcon class="h-4 w-4 shrink-0 text-muted-foreground" />
     </PopoverTrigger>
     <PopoverContent is-bare>
-      <Calendar
-        :value="date"
+      <CalendarPicker
+        :model-value="date"
         :default-month="defaultMonth"
         :min="min"
         :max="max"
         :is-disabled="isDisabled"
-        @value-change="onCalendarChange"
+        @update:modelValue="onCalendarChange"
       />
     </PopoverContent>
     <input v-if="name" type="hidden" :name="name" :value="hiddenValue" />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
+    />
   </Popover>
 </template>

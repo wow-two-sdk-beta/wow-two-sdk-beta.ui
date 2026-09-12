@@ -23,34 +23,30 @@ export function useActionSheetContext(): ActionSheetContextValue {
  */
 export interface ActionSheetProps {
   /** The open state, controlled. The `v-model:open` binding target. */
-  open?: boolean;
-
-  /** The open state, controlled — the house spelling of `open`; `open` wins when both are set. */
-  isOpen?: boolean;
+  readonly open?: boolean;
 
   /** The initial open state when uncontrolled. Default `false`. */
-  defaultOpen?: boolean;
+  readonly defaultOpen?: boolean;
 
   /** The heading above the action rows. Use the `title` slot for rich content. */
-  title?: string;
+  readonly title?: string;
 
   /** The supporting line under the heading. Use the `description` slot for rich content. */
-  description?: string;
+  readonly description?: string;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, provide, useAttrs, useSlots } from 'vue';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import Drawer from '../drawer/Drawer.vue';
 import DrawerContent from '../drawer/DrawerContent.vue';
 import OverlayTitle from '../OverlayTitle.vue';
 import OverlayDescription from '../OverlayDescription.vue';
 
 /**
- * iOS-style action sheet — opinionated bottom Drawer with stacked button rows
- * and a separated Cancel.
+ * Renders an iOS-style action sheet — a bottom `Drawer` of stacked button rows and a split Cancel.
  */
 defineOptions({ name: 'ActionSheet', inheritAttrs: false });
 
@@ -63,20 +59,17 @@ defineSlots<{
   description?(): unknown;
 }>();
 
-/** `open` / `isOpen` / the node-ish props default to `undefined` so an absent prop cannot read as a set one. */
+/** `open` / the node-ish props default to `undefined` so an absent prop cannot read as a set one. */
 const props = withDefaults(defineProps<ActionSheetProps>(), {
   open: undefined,
-  isOpen: undefined,
   defaultOpen: false,
   title: undefined,
   description: undefined,
 });
 
 const emit = defineEmits<{
-  /** The `v-model:open` half. */
+  /** Fires when the sheet opens or closes — the `v-model:open` half. */
   'update:open': [open: boolean];
-  /** Replaces React's `onOpenChange`. */
-  'open-change': [open: boolean];
 }>();
 
 const attrs = useAttrs();
@@ -88,11 +81,10 @@ const slots = useSlots();
  * interceptable).
  */
 const controlled = useControlled<boolean>({
-  controlled: () => (props.open !== undefined ? props.open : props.isOpen),
+  controlled: () => props.open,
   default: () => props.defaultOpen,
   onChange: (value) => {
     emit('update:open', value);
-    emit('open-change', value);
   },
 });
 
@@ -109,7 +101,7 @@ const classes = computed(() =>
 </script>
 
 <template>
-  <Drawer :open="resolvedOpen" side="bottom" @open-change="controlled.setValue">
+  <Drawer :open="resolvedOpen" side="bottom" @update:open="controlled.setValue">
     <DrawerContent :class="classes">
       <div v-if="hasTitle || hasDescription" class="px-3 py-2 text-center">
         <OverlayTitle v-if="hasTitle" class="text-sm font-medium text-muted-foreground">

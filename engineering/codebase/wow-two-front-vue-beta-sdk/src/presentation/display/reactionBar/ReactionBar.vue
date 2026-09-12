@@ -1,44 +1,46 @@
 <script lang="ts">
 export interface Reaction {
   /** Stable id (typically the emoji or shortcode). */
-  key: string;
+  readonly key: string;
 
   /** Emoji displayed in the chip. Rich content → the `emoji` scoped slot. */
-  emoji: string | number;
+  readonly emoji: string | number;
 
   /** Total count of users who reacted. */
-  count: number;
+  readonly count: number;
 
   /** Whether the current viewer has reacted with this. */
-  isReactedByMe?: boolean;
+  readonly isReactedByMe?: boolean;
 
   /** Optional list of user names — surfaced in the chip's `title`. */
-  users?: ReadonlyArray<string>;
+  readonly users?: ReadonlyArray<string>;
 }
 
 export interface ReactionBarProps {
-  reactions: ReadonlyArray<Reaction>;
+  readonly reactions: ReadonlyArray<Reaction>;
 
   /** The trailing "add reaction" button's visibility. Default true. */
-  hasAddButton?: boolean;
+  readonly hasAddButton?: boolean;
 
   /** The compact mode — emoji only, no counts. */
-  isCompact?: boolean;
+  readonly isCompact?: boolean;
 
   /** The empty-chip visibility — renders chips with `count === 0`. Default false. */
-  hasEmpty?: boolean;
+  readonly hasEmpty?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, getCurrentInstance, useAttrs, useTemplateRef } from 'vue';
 import { SmilePlus } from 'lucide-vue-next';
-import { cn, dataAttr } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
+import { dataAttr } from '../../../foundation/dom';
 
 /**
- * Row of reaction chips with optional add-reaction button. Each chip emits
- * `@react` with its key; the trailing `+` emits `@add` to open a picker. Pair
- * with `forms/ReactionPicker` to wire the add flow.
+ * Renders a row of reaction chips with an optional trailing add-reaction button.
+ *
+ * Each chip emits `@react` with its key; the trailing `+` emits `@add` to open a picker. Pair with
+ * `forms/ReactionPicker` to wire the add flow.
  */
 defineOptions({ name: 'ReactionBar', inheritAttrs: false });
 
@@ -63,7 +65,7 @@ const props = withDefaults(defineProps<ReactionBarProps>(), {
 });
 
 const emit = defineEmits<{
-  /** Emits the key of the toggled reaction chip. */
+  /** Fires when the reader toggles a reaction chip, with that chip's key. */
   react: [key: string];
 
   /** Fires when the trailing "add" button is activated (opens a picker). */
@@ -87,7 +89,7 @@ const visible = computed(() => (props.hasEmpty ? props.reactions : props.reactio
 const chipClasses = (reaction: Reaction): string =>
   cn(
     'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs leading-none transition-colors',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     reaction.isReactedByMe
       ? 'border-primary bg-primary-soft text-primary-soft-foreground'
       : 'border-border bg-background hover:bg-muted',
@@ -127,7 +129,7 @@ defineExpose({ el });
       v-if="hasAdd()"
       type="button"
       aria-label="Add reaction"
-      class="inline-flex items-center justify-center rounded-full border border-dashed border-border px-2 py-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      class="inline-flex items-center justify-center rounded-full border border-dashed border-border px-2 py-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
       @click="emit('add')"
     >
       <SmilePlus class="h-3.5 w-3.5" />

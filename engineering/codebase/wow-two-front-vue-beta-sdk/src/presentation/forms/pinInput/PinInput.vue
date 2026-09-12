@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 
 /** Defines the character set a pin-input cell accepts. */
 export const PinInputType = {
@@ -13,32 +13,29 @@ export type PinInputType = (typeof PinInputType)[keyof typeof PinInputType];
 
 export interface PinInputProps {
   /** The number of digit cells. Default 6. */
-  length?: number;
-
-  /** The value, controlled (full string) — React's spelling, which wins when both are set. */
-  value?: string;
+  readonly length?: number;
 
   /** The value, controlled (full string). The `v-model` binding target. */
-  modelValue?: string;
+  readonly modelValue?: string;
 
   /** The uncontrolled initial value. */
-  defaultValue?: string;
+  readonly defaultValue?: string;
 
   /** The allowed characters — digits (`numeric`) or any single char (`alphanumeric`). Default `numeric`. */
-  type?: PinInputType;
+  readonly type?: PinInputType;
 
   /** The cell visual size. Default `md`. */
-  size?: Size;
+  readonly size?: Size;
 
   /** The masked mode — renders each cell as `*` (good for verification codes). */
-  isMasked?: boolean;
+  readonly isMasked?: boolean;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 }
 
 /* Sizes not listed fall back to the `md` row at the call site. */
-const SIZE: Partial<Record<Size, string>> = {
+const SizeClass: Partial<Record<Size, string>> = {
   sm: 'h-9 w-9 text-base',
   md: 'h-11 w-11 text-lg',
   lg: 'h-14 w-14 text-xl',
@@ -46,17 +43,15 @@ const SIZE: Partial<Record<Size, string>> = {
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn, Size as SizeValue } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn, Size as SizeValue } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputState } from '../InputStyles';
 
-/**
- * One-time-code / PIN input — N single-character cells with auto-advance,
- * paste-spread, and backspace-to-previous behavior.
- */
+/** Renders a row of single-character PIN cells with auto-advance, paste-spread and backspace-to-previous. */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'PinInput', inheritAttrs: false });
@@ -72,11 +67,9 @@ const props = withDefaults(defineProps<PinInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader types, pastes or deletes a character — the `v-model` half. */
   'update:modelValue': [value: string];
-  /** Emits the value whenever it changes. Replaces React's `onValueChange`. */
-  'value-change': [value: string];
-  /** Emits the value when the user fills the final cell. Replaces React's `onComplete`. */
+  /** Fires when the reader fills the final cell, carrying the complete code. */
   complete: [value: string];
 }>();
 
@@ -89,13 +82,12 @@ function toCells(s: string): ReadonlyArray<string> {
 
 const controlled = useControlled<ReadonlyArray<string>>({
   controlled: () => {
-    const external = props.value !== undefined ? props.value : props.modelValue;
+    const external = props.modelValue;
     return external === undefined ? undefined : toCells(external);
   },
   default: () => toCells(props.defaultValue ?? ''),
   onChange: (next) => {
     emit('update:modelValue', next.join(''));
-    emit('value-change', next.join(''));
   },
 });
 
@@ -177,13 +169,13 @@ const cellClass = computed(() =>
   cn(
     inputBaseVariants({ state: isInvalid.value ? InputState.Invalid : InputState.Default }),
     'text-center font-medium',
-    SIZE[props.size] ?? SIZE.md,
+    SizeClass[props.size] ?? SizeClass.md,
   ),
 );
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() => cn('inline-flex gap-2', attrs.class as ClassValue));
@@ -192,10 +184,16 @@ const root = useTemplateRef<HTMLDivElement>('root');
 
 /** The rendered wrapper — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: root });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  controlled.reset();
+});
 </script>
 
 <template>
-  <div ref="root" :class="rootClass" v-bind="passthroughAttrs">
+  <div :key="formResetRevision" ref="root" :class="rootClass" v-bind="passthroughAttrs">
+    <!-- Keyed on the position: the cells never reorder, and a PIN repeats characters freely. -->
     <input
       v-for="(ch, i) in cells"
       :key="i"
@@ -216,6 +214,12 @@ defineExpose({ el: root });
       @input="onCellInput(i, $event)"
       @keydown="onCellKeydown(i, $event)"
       @paste="onPaste"
+    />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
     />
   </div>
 </template>

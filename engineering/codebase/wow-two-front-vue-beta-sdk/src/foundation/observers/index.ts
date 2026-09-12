@@ -1,10 +1,7 @@
 // observers — foundation seam. The browser's element-watching APIs as headless composables plus Vue-free cores:
 // `IntersectionObserver` (is it on screen, and how much) and `MutationObserver` (did the DOM under it change).
 //
-// RESIZE IS NOT HERE. `useResizeObserver` already ships in `foundation/hooks` — import it from there. A second
-// resize wrapper in this slice would be two composables answering the same question with slightly different cleanup
-// semantics, which is exactly the drift a foundation layer exists to prevent. This slice is intersection and
-// mutation only.
+// Resize subscriptions share this capability through useResizeObserver.
 //
 // HOUSE RULES, which consumers should follow too:
 //
@@ -35,10 +32,9 @@
 //    `steps: 100` ladder on fifty elements is five thousand potential updates per scroll. Sample as coarsely
 //    as the UI actually reads.
 //  - Motion. Nothing here animates, so nothing here consults `useReducedMotion`. A consumer that TWEENS a
-//    reveal or scrubs on `ratio` owns that call at its own layer (`foundation/hooks`).
+//    reveal or scrubs on `ratio` owns that call at its own layer (`foundation/device`).
 //
 // NOT HERE, on purpose:
-//  - `ResizeObserver` — see above, it lives in `foundation/hooks`.
 //  - `PerformanceObserver` / `ReportingObserver`. They observe the DOCUMENT's behaviour, not an element's, and
 //    belong with instrumentation rather than in a UI element-watching slice.
 //  - Scroll position. `IntersectionObserver` answers "is it visible", not "where is the scrollbar" —
@@ -59,13 +55,15 @@ export { observeMutation, supportsMutationObserver, type MutationOptions } from 
 export { visibilityThresholds } from './VisibilitySteps';
 
 // Is it on screen — the lazy-load / reveal-on-scroll primitive, with permanent `once`
-export { useInView, type UseInViewOptions, type InViewState } from './UseInView';
+export { useInView, type UseInViewOptions, type InViewState } from './hooks/UseInView';
 
 // How much of it is on screen — `useInView` over a generated threshold ladder
-export { useVisibility, type UseVisibilityOptions, type VisibilityState } from './UseVisibility';
+export { useVisibility, type UseVisibilityOptions, type VisibilityState } from './hooks/UseVisibility';
 
 // Many targets, ONE observer — the long-list form
-export { useIntersectionObserver, type UseIntersectionObserverOptions } from './UseIntersectionObserver';
+export { useIntersectionObserver, type UseIntersectionObserverOptions } from './hooks/UseIntersectionObserver';
 
 // Did the DOM under it change — for what Vue does not own
-export { useMutationObserver, type UseMutationObserverOptions } from './UseMutationObserver';
+export { useMutationObserver, type UseMutationObserverOptions } from './hooks/UseMutationObserver';
+
+export * from './hooks/UseResizeObserver';

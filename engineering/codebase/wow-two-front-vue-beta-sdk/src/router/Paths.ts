@@ -15,12 +15,12 @@ export type PathParams<Template extends string> = {
   readonly [Key in PathParamName<Template>]: string;
 };
 
-/** Defines a path builder's argument tuple — empty when the template declares no `:params`, else one required params object. */
+/** Defines a path builder's argument tuple — empty when the template has no `:params`, else one params object. */
 export type PathBuilderArgs<Template extends string> = [PathParamName<Template>] extends [never]
   ? []
   : [params: PathParams<Template>];
 
-/** Defines a typed path builder — call with the template's params for the concrete href; `.pattern` is the route-table template. */
+/** Defines a typed path builder — call with the template's params for the href; `.pattern` is the route template. */
 export interface PathBuilder<Template extends string> {
   (...args: PathBuilderArgs<Template>): string;
 
@@ -30,7 +30,7 @@ export interface PathBuilder<Template extends string> {
 
 const ParamPattern = /:([A-Za-z0-9_]+)/g;
 
-/** Creates a typed path builder from a route template — substitutes + URL-encodes each `:param`, and carries the template as `.pattern`. */
+/** Creates a typed path builder — substitutes + URL-encodes each `:param`, and carries the template as `.pattern`. */
 export function definePath<const Template extends string>(template: Template): PathBuilder<Template> {
   const build = (params: Record<string, string> = {}): string =>
     template.replace(ParamPattern, (_match: string, name: string) => encodeURIComponent(params[name] ?? ''));

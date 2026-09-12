@@ -1,0 +1,297 @@
+import { h, type VNode } from 'vue';
+import { Temporal } from 'temporal-polyfill';
+import {
+  AccordionGroup,
+  AccordionGroupContent,
+  AccordionGroupItem,
+  AccordionGroupTrigger,
+  ActivityTimeline,
+  ActivityItem,
+  AnimatedNumberText,
+  AnnotationBadge,
+  AudioPlayer,
+  AudioWaveformPreview,
+  Avatar,
+  AvatarGroup,
+  Badge,
+  BadgeOverlay,
+  Card,
+  CardBody,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  Carousel,
+  CarouselDot,
+  CarouselDots,
+  CarouselNext,
+  CarouselPrev,
+  CarouselSlide,
+  CarouselSlides,
+  CarouselViewport,
+  CellsGlyph,
+  ChatBubbleCard,
+  CodeText,
+  CollapsibleGroup,
+  CollapsibleGroupContent,
+  CollapsibleGroupTrigger,
+  Comment,
+  CommentThreadGroup,
+  ConfettiOverlay,
+  CountBadge,
+  CountUpText,
+  DataTable,
+  DaySeparator,
+  DescriptionGroup,
+  DiffViewer,
+  DotsGlyph,
+  EmptyState,
+  EventCalendarViewer,
+  EyebrowText,
+  FeatureCard,
+  FrameGlyph,
+  GanttTimeline,
+  GradientText,
+  Heading,
+  HeatmapCalendarGrid,
+  HighlightText,
+  HorizontalBarsGlyph,
+  ImagePreview,
+  InfoRow,
+  KbdText,
+  KeyboardShortcutText,
+  ListGroup,
+  ListGroupItem,
+  MarkText,
+  MarqueeGroup,
+  MessageGroup,
+  MetaInlineText,
+  MetricBadge,
+  NotificationIndicator,
+  PdfViewer,
+  PricingCard,
+  QuoteText,
+  RadiusGlyph,
+  ReactionBar,
+  ScheduleView,
+  ScrollRevealGroup,
+  SectionHeading,
+  SnippetText,
+  Sparkline,
+  StatCard,
+  Status,
+  StepCard,
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  TabsGroup,
+  TabsGroupList,
+  TabsGroupPanel,
+  TabsGroupTab,
+  Tag,
+  Text,
+  ThreadView,
+  Timeline,
+  TimelineDescription,
+  TimelineItem,
+  TimelineTitle,
+  TreeViewer,
+  TreeViewerGroup,
+  TreeViewerItem,
+  TypewriterText,
+  VerticalBarsGlyph,
+  VideoPlayer,
+} from '../../../../../src/presentation/display';
+import {
+  DataGridEditor,
+  NodeEditor,
+  SortableGroup,
+  SortableGroupHandle,
+  SortableGroupMoveButton,
+  SortableGroupItem,
+} from '../../../../../src/presentation/forms';
+import { SeparatorLayout, SwipeActionsLayout, TiltLayout } from '../../../../../src/presentation/layout';
+import { Tooltip } from '../../../../../src/presentation/overlays';
+import { smokeCase, type SmokeCase } from './Example';
+
+/* One task is enough to exercise the whole GanttTimeline render path — the tier asks whether it renders
+   at all, not whether the bars land in the right columns. */
+const ganttTask = {
+  id: 't1',
+  label: 'Port the SDK',
+  start: Temporal.PlainDate.from('2026-01-05'),
+  end: Temporal.PlainDate.from('2026-01-09'),
+};
+
+/* DataGridEditor is generic over its row. `PropsOf` instantiates that type parameter at its
+   constraint, so the row arrives as `unknown` here and the narrowing has to be explicit — the
+   generic cannot be recovered from a conditional type. The cast is confined to these two
+   callbacks; everything else about the case is still fully checked. */
+interface GridRow {
+  id: string;
+  name: string;
+}
+
+const gridRows: readonly GridRow[] = [{ id: 'r1', name: 'Ada' }];
+
+/* Wrappers for the compound parts — each renders the part inside the root whose `provide` it
+   injects, so the part is smoke-tested in the shape it actually ships in. */
+const inCollapsible = (node: VNode): VNode => h(CollapsibleGroup, { defaultOpen: true }, () => node);
+
+const inAccordion = (node: VNode): VNode => h(AccordionGroup, { defaultValue: 'item-1' }, () => node);
+
+const inAccordionItem = (node: VNode): VNode => inAccordion(h(AccordionGroupItem, { value: 'item-1' }, () => node));
+
+const inTabs = (node: VNode): VNode => h(TabsGroup, { defaultValue: 'tab-1' }, () => node);
+const inTabsList = (node: VNode): VNode => inTabs(h(TabsGroupList, null, () => node));
+
+const inTree = (node: VNode): VNode => h(TreeViewer, null, () => node);
+/* TreeViewerGroup renders its children inside `Presence :is-present="isExpanded"`, so the branch has
+   to start expanded for the slot to exist at all. */
+const inExpandedTree = (node: VNode): VNode => h(TreeViewer, { defaultExpanded: ['group-1'] }, () => node);
+
+const inCarousel = (node: VNode): VNode => h(Carousel, null, () => node);
+const inCarouselViewport = (node: VNode): VNode => inCarousel(h(CarouselViewport, null, () => node));
+
+const inSortable = (node: VNode): VNode => h(SortableGroup, null, () => node);
+const inSortableItem = (node: VNode): VNode => inSortable(h(SortableGroupItem, { index: 0 }, () => node));
+
+/**
+ * Every component `@wow-two-beta/ui-vue/presentation/display` exports, as smoke cases.
+ * Imported through the public barrel on purpose — a component missing from `index.ts` fails
+ * here before a consumer finds it.
+ */
+export const displayExamples: readonly SmokeCase[] = [
+  smokeCase('Heading', Heading, {}, { slot: true }),
+  smokeCase('Text', Text, {}, { slot: true }),
+  smokeCase('CodeText', CodeText, {}, { slot: true }),
+  smokeCase('KbdText', KbdText, {}, { slot: true }),
+  smokeCase('ImagePreview', ImagePreview, {}),
+  smokeCase('Avatar', Avatar, {}),
+  smokeCase('Badge', Badge, {}, { slot: true }),
+  smokeCase('Tag', Tag, {}, { slot: true }),
+  smokeCase('SeparatorLayout', SeparatorLayout, {}),
+  smokeCase('MarkText', MarkText, {}, { slot: true }),
+  smokeCase('QuoteText', QuoteText, {}, { slot: true }),
+  smokeCase('Card', Card, {}, { slot: true }),
+  smokeCase('CardHeader', CardHeader, {}, { slot: true }),
+  smokeCase('CardTitle', CardTitle, {}, { slot: true }),
+  smokeCase('CardDescription', CardDescription, {}, { slot: true }),
+  smokeCase('CardBody', CardBody, {}, { slot: true }),
+  smokeCase('CardFooter', CardFooter, {}, { slot: true }),
+  smokeCase('AvatarGroup', AvatarGroup, {}),
+  smokeCase('Tooltip', Tooltip, {}, { slot: true }),
+  smokeCase('EmptyState', EmptyState, { title: 'Nothing here' }),
+  smokeCase('StatCard', StatCard, { label: 'Revenue', value: '1.2k' }),
+  smokeCase('SnippetText', SnippetText, { text: 'pnpm add @wow-two-beta/ui-vue' }),
+  smokeCase('NotificationIndicator', NotificationIndicator, {}),
+  smokeCase('CountBadge', CountBadge, { value: 3 }),
+  smokeCase('Status', Status, {}, { slot: true }),
+  smokeCase('KeyboardShortcutText', KeyboardShortcutText, { keys: ['Meta', 'K'] }),
+  smokeCase('DescriptionGroup', DescriptionGroup, { items: [{ label: 'Plan', value: 'Pro' }] }),
+  smokeCase('InfoRow', InfoRow, {}),
+  smokeCase('MetricBadge', MetricBadge, { label: 'CPU', value: '42%' }),
+  smokeCase('EyebrowText', EyebrowText, {}, { slot: true }),
+  smokeCase('MetaInlineText', MetaInlineText, {}, { slot: true }),
+  smokeCase('BadgeOverlay', BadgeOverlay, {}, { slot: true }),
+  smokeCase('SectionHeading', SectionHeading, {}),
+  smokeCase('HighlightText', HighlightText, { text: 'hello world', query: 'world' }),
+  smokeCase('CollapsibleGroup', CollapsibleGroup, {}, { slot: true }),
+  smokeCase('CollapsibleGroupTrigger', CollapsibleGroupTrigger, {}, { slot: true, wrap: inCollapsible }),
+  smokeCase('CollapsibleGroupContent', CollapsibleGroupContent, {}, { slot: true, wrap: inCollapsible }),
+  smokeCase('AccordionGroup', AccordionGroup, {}, { slot: true }),
+  smokeCase('AccordionGroupItem', AccordionGroupItem, { value: 'item-1' }, { slot: true, wrap: inAccordion }),
+  smokeCase('AccordionGroupTrigger', AccordionGroupTrigger, {}, { slot: true, wrap: inAccordionItem }),
+  smokeCase('AccordionGroupContent', AccordionGroupContent, {}, { slot: true, wrap: inAccordionItem }),
+  smokeCase('TabsGroup', TabsGroup, {}, { slot: true }),
+  smokeCase('TabsGroupList', TabsGroupList, {}, { slot: true, wrap: inTabs }),
+  smokeCase('TabsGroupTab', TabsGroupTab, { value: 'tab-1' }, { slot: true, wrap: inTabsList }),
+  smokeCase('TabsGroupPanel', TabsGroupPanel, { value: 'tab-1' }, { slot: true, wrap: inTabs }),
+  smokeCase('ListGroup', ListGroup, {}, { slot: true }),
+  smokeCase('ListGroupItem', ListGroupItem, {}, { slot: true }),
+  smokeCase('Timeline', Timeline, {}),
+  smokeCase('TimelineItem', TimelineItem, {}, { slot: true }),
+  smokeCase('TimelineTitle', TimelineTitle, {}, { slot: true }),
+  smokeCase('TimelineDescription', TimelineDescription, {}, { slot: true }),
+  smokeCase('TreeViewer', TreeViewer, {}, { slot: true }),
+  smokeCase(
+    'TreeViewerGroup',
+    TreeViewerGroup,
+    { value: 'group-1', label: 'Group' },
+    {
+      slot: true,
+      wrap: inExpandedTree,
+    },
+  ),
+  smokeCase('TreeViewerItem', TreeViewerItem, { value: 'item-1' }, { slot: true, wrap: inTree }),
+  smokeCase('Table', Table, {}, { slot: true }),
+  smokeCase('TableHead', TableHead, {}, { slot: true }),
+  smokeCase('TableBody', TableBody, {}, { slot: true }),
+  smokeCase('TableFooter', TableFooter, {}, { slot: true }),
+  smokeCase('TableRow', TableRow, {}, { slot: true }),
+  smokeCase('TableHeaderCell', TableHeaderCell, {}, { slot: true }),
+  smokeCase('TableCell', TableCell, {}, { slot: true }),
+  smokeCase('TableCaption', TableCaption, {}, { slot: true }),
+  smokeCase('DataTable', DataTable, { columns: [{ key: 'name', header: 'Name' }], data: [{ name: 'Ada' }] }),
+  smokeCase('Carousel', Carousel, {}, { slot: true }),
+  smokeCase('CarouselViewport', CarouselViewport, {}, { slot: true, wrap: inCarousel }),
+  smokeCase('CarouselSlides', CarouselSlides, {}, { wrap: inCarouselViewport }),
+  smokeCase('CarouselSlide', CarouselSlide, {}, { slot: true, wrap: inCarouselViewport }),
+  smokeCase('CarouselPrev', CarouselPrev, {}, { slot: true, wrap: inCarousel }),
+  smokeCase('CarouselNext', CarouselNext, {}, { slot: true, wrap: inCarousel }),
+  smokeCase('CarouselDots', CarouselDots, {}, { wrap: inCarousel }),
+  smokeCase('CarouselDot', CarouselDot, { slideIndex: 0 }, { wrap: inCarousel }),
+  smokeCase('SwipeActionsLayout', SwipeActionsLayout, {}, { slot: true }),
+  smokeCase('DiffViewer', DiffViewer, { left: 'one', right: 'two' }),
+  smokeCase('Sparkline', Sparkline, { data: [1, 4, 2, 8] }),
+  smokeCase('RadiusGlyph', RadiusGlyph, { extent: 0.5 }),
+  smokeCase('FrameGlyph', FrameGlyph, { frameRx: 0.25, pupilRoundness: 0.5 }),
+  smokeCase('DotsGlyph', DotsGlyph, {}),
+  smokeCase('VerticalBarsGlyph', VerticalBarsGlyph, {}),
+  smokeCase('HorizontalBarsGlyph', HorizontalBarsGlyph, {}),
+  smokeCase('CellsGlyph', CellsGlyph, { cornerRx: 0.3 }),
+  smokeCase('HeatmapCalendarGrid', HeatmapCalendarGrid, { values: new Map<Temporal.PlainDate, number>() }),
+  smokeCase('DataGridEditor', DataGridEditor, {
+    columns: [{ key: 'name', header: 'Name', accessor: (row) => (row as GridRow).name }],
+    rows: gridRows,
+    rowKey: (row) => (row as GridRow).id,
+  }),
+  smokeCase('NodeEditor', NodeEditor, { nodes: [{ id: 'n1', x: 0, y: 0 }] }),
+  smokeCase('AudioWaveformPreview', AudioWaveformPreview, { peaks: [0.2, 0.8, 0.4] }),
+  smokeCase('AudioPlayer', AudioPlayer, { src: 'https://example.test/audio.mp3' }),
+  smokeCase('VideoPlayer', VideoPlayer, { src: 'https://example.test/video.mp4' }),
+  smokeCase('PdfViewer', PdfViewer, { src: 'https://example.test/doc.pdf' }),
+  smokeCase('ScheduleView', ScheduleView, { resources: [{ id: 'r1', label: 'Room 1' }], bookings: [] }),
+  smokeCase('GanttTimeline', GanttTimeline, { tasks: [ganttTask] }),
+  smokeCase('EventCalendarViewer', EventCalendarViewer, { events: [] }),
+  smokeCase('GradientText', GradientText, {}, { slot: true }),
+  smokeCase('CountUpText', CountUpText, { to: 100 }),
+  smokeCase('AnimatedNumberText', AnimatedNumberText, { value: 42 }),
+  smokeCase('ScrollRevealGroup', ScrollRevealGroup, {}, { slot: true }),
+  smokeCase('TiltLayout', TiltLayout, {}, { slot: true }),
+  smokeCase('MarqueeGroup', MarqueeGroup, {}, { slot: true }),
+  smokeCase('TypewriterText', TypewriterText, { text: 'hello' }),
+  smokeCase('ConfettiOverlay', ConfettiOverlay, {}),
+  smokeCase('AnnotationBadge', AnnotationBadge, {}, { slot: true }),
+  smokeCase('ReactionBar', ReactionBar, { reactions: [{ key: 'up', emoji: '\u{1F44D}', count: 2 }] }),
+  smokeCase('ChatBubbleCard', ChatBubbleCard, {}, { slot: true }),
+  smokeCase('MessageGroup', MessageGroup, {}, { slot: true }),
+  smokeCase('DaySeparator', DaySeparator, { label: 'Today' }),
+  smokeCase('ThreadView', ThreadView, {}, { slot: true }),
+  smokeCase('CommentThreadGroup', CommentThreadGroup, {}, { slot: true }),
+  smokeCase('Comment', Comment, { author: 'Ada' }, { slot: true }),
+  smokeCase('ActivityTimeline', ActivityTimeline, {}, { slot: true }),
+  smokeCase('ActivityItem', ActivityItem, {}, { slot: true }),
+  smokeCase('FeatureCard', FeatureCard, { title: 'Fast' }, { slot: true }),
+  smokeCase('StepCard', StepCard, { step: 1, title: 'Install' }, { slot: true }),
+  smokeCase('PricingCard', PricingCard, { name: 'Pro', price: '$9', features: ['Unlimited seats'] }, { slot: true }),
+  smokeCase('SortableGroup', SortableGroup, {}, { slot: true }),
+  smokeCase('SortableGroupItem', SortableGroupItem, { index: 0 }, { slot: true, wrap: inSortable }),
+  smokeCase('SortableGroupMoveButton', SortableGroupMoveButton, { direction: 'next' }, { wrap: inSortableItem }),
+  smokeCase('SortableGroupHandle', SortableGroupHandle, {}, { slot: true, wrap: inSortableItem }),
+];

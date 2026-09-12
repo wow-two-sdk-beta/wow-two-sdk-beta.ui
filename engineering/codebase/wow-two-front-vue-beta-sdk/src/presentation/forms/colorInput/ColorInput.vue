@@ -1,58 +1,53 @@
 <script lang="ts">
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
-import type { SwatchShape } from '../colorSwatch';
+import type { SwatchShape } from '../../display/colorSwatchPreview';
 
 export interface ColorInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
   /** The validity surface. */
-  state?: InputState;
+  readonly state?: InputState;
   /** The border weight. */
-  border?: InputBorder;
+  readonly border?: InputBorder;
   /** The focus-ring weight. */
-  ring?: InputRing;
-
-  /** The committed hex, controlled — React's spelling, which wins when both are set. */
-  value?: string | null;
+  readonly ring?: InputRing;
 
   /** The committed hex, controlled. The `v-model` binding target. */
-  modelValue?: string | null;
+  readonly modelValue?: string | null;
 
   /** The initial hex when uncontrolled. */
-  defaultValue?: string | null;
+  readonly defaultValue?: string | null;
 
   /** The swatch outline shape shown inside the field. */
-  swatchShape?: SwatchShape;
+  readonly swatchShape?: SwatchShape;
 
   /** Whether a committed hex keeps its alpha channel (`#RRGGBBAA`). */
-  hasAlpha?: boolean;
+  readonly hasAlpha?: boolean;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 import { formatHex, parseHex } from '../ColorExtensions';
-import ColorSwatch from '../colorSwatch/ColorSwatch.vue';
-import { SwatchShape as SwatchShapeValue } from '../colorSwatch';
+import ColorSwatchPreview from '../../display/colorSwatchPreview/ColorSwatchPreview.vue';
+import { SwatchShape as SwatchShapeValue } from '../../display/colorSwatchPreview';
 
-/**
- * Hex text field with a live swatch adornment. The draft text is free-form while
- * typing and only commits on blur / Enter — an unparseable draft reverts.
- */
+/** Renders a hex text field with a live swatch, committing on blur or Enter and reverting an unparseable draft. */
 /* `inheritAttrs: false` so `class` folds into the input's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'ColorInput', inheritAttrs: false });
@@ -68,10 +63,8 @@ const props = withDefaults(defineProps<ColorInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader commits a new hex on blur or Enter — the `v-model` half. */
   'update:modelValue': [value: string | null];
-  /** Replaces React's `onValueChange`. Native `input` / `change` / `blur` / `keydown` stay fallthrough. */
-  'value-change': [value: string | null];
 }>();
 
 const attrs = useAttrs();
@@ -82,11 +75,10 @@ const ctx = useFormControl();
 const controlled = useControlled<string | null>({
   /* `??` is wrong here — `null` is a MEANINGFUL committed value ("no color"), and `??` would
      fall through it to `modelValue`. Only `undefined` means "not controlled". */
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? null,
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -123,16 +115,18 @@ function commit(): void {
 }
 
 function onInput(event: Event): void {
+  if ((event as InputEvent).isComposing) return;
   draft.value = (event.target as HTMLInputElement).value;
 }
 
-/* Runs after any caller-supplied `@blur` (declared after `v-bind`), exactly as React's
-   `onBlur?.(e)` ran before `commit()`. React did not gate this one on `defaultPrevented`. */
+/* Runs after any caller-supplied `@blur` (declared after `v-bind`). Not gated on
+   `defaultPrevented`, unlike `onKeydown` below. */
 function onBlur(): void {
   commit();
 }
 
 function onKeydown(event: KeyboardEvent): void {
+  if (event.isComposing) return;
   if (event.defaultPrevented) return;
   if (event.key === 'Enter') {
     event.preventDefault();
@@ -148,9 +142,9 @@ const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'value']);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const inputClass = computed(() =>
@@ -168,14 +162,18 @@ const inputClass = computed(() =>
 
 const root = useTemplateRef<HTMLInputElement>('root');
 
-/** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+/** The rendered `<input>`. */
+useNativeFormReset(root, controlled.reset, () => {
+  if (root.value) root.value.value = String(draft.value ?? '');
+});
+
 defineExpose({ el: root });
 </script>
 
 <template>
   <div class="relative inline-flex w-full items-stretch">
     <span class="pointer-events-none absolute inset-y-0 left-2 flex items-center">
-      <ColorSwatch :color="swatchColor" size="sm" :shape="swatchShape" />
+      <ColorSwatchPreview :color="swatchColor" size="sm" :shape="swatchShape" />
     </span>
     <input
       ref="root"
@@ -192,6 +190,7 @@ defineExpose({ el: root });
       :class="inputClass"
       v-bind="passthroughAttrs"
       @input="onInput"
+      @compositionend="onInput"
       @blur="onBlur"
       @keydown="onKeydown"
     />

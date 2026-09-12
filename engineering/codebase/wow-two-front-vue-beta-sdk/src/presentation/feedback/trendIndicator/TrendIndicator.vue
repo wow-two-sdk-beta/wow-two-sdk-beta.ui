@@ -1,56 +1,63 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 
 export interface TrendIndicatorProps {
   /** The numeric delta — sign drives direction. */
-  value: number;
+  readonly value: number;
 
   /** The optional value formatter (default: `${sign}${value}%`). Rich content → the `value` slot. */
-  format?: (value: number) => string;
+  readonly format?: (value: number) => string;
 
   /** The inverse-direction flag — when `true`, an increase reads as bad (e.g. error rate, churn). */
-  isInverse?: boolean;
+  readonly isInverse?: boolean;
 
   /** The small trailing label, e.g. "vs last week". Rich content → the `label` slot. */
-  label?: string;
+  readonly label?: string;
 
   /** The text + icon scale. */
-  size?: Size;
+  readonly size?: Size;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { Minus, TrendingDown, TrendingUp } from 'lucide-vue-next';
-import { cn, Size as SizeToken } from '../../../foundation/utils';
+import { cn, Size as SizeToken } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 
 /* Only xs/sm/md carry a scale; other `Size` members fall through to `md` at
    the lookup below. */
-const SIZE_TEXT: Partial<Record<Size, string>> = {
+const SizeText: Partial<Record<Size, string>> = {
   xs: 'text-xs',
   sm: 'text-sm',
   md: 'text-base',
 };
-const SIZE_ICON: Partial<Record<Size, number>> = {
+const SizeIcon: Partial<Record<Size, number>> = {
   xs: 12,
   sm: 14,
   md: 16,
 };
 
-const ARROW = {
+const DirectionIcon = {
   up: TrendingUp,
   down: TrendingDown,
   flat: Minus,
 };
 
 /**
- * Up / down / flat arrow + value + optional label. Used inside `Stat` and
- * dashboard tiles. Pass `isInverse` for metrics where higher is worse.
+ * Renders an up / down / flat arrow beside a value and an optional label.
+ * Used inside `StatCard` and dashboard tiles. Pass `isInverse` for metrics where higher is worse.
  */
 defineOptions({ name: 'TrendIndicator', inheritAttrs: false });
 
 const props = withDefaults(defineProps<TrendIndicatorProps>(), { size: SizeToken.Sm });
+
+defineSlots<{
+  /** The formatted delta — receives the raw `value` and its `display` string. */
+  value?(props: { value: number; display: string }): unknown;
+  /** The trailing label. Falls back to the `label` prop. */
+  label?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const slots = useSlots();
@@ -66,20 +73,20 @@ const tone = computed(() =>
   direction.value === 'flat' ? 'text-muted-foreground' : positive.value ? 'text-success' : 'text-destructive',
 );
 
-const arrow = computed(() => ARROW[direction.value]);
+const arrow = computed(() => DirectionIcon[direction.value]);
 
 const display = computed(() =>
   props.format ? props.format(props.value) : `${props.value > 0 ? '+' : ''}${props.value}%`,
 );
 
-const iconSize = computed(() => SIZE_ICON[props.size] ?? SIZE_ICON.md);
+const iconSize = computed(() => SizeIcon[props.size] ?? SizeIcon.md);
 
 const hasLabel = computed(() => Boolean(props.label) || Boolean(slots.label));
 
 const classes = computed(() =>
   cn(
     'inline-flex items-center gap-1 font-medium',
-    SIZE_TEXT[props.size] ?? SIZE_TEXT.md,
+    SizeText[props.size] ?? SizeText.md,
     tone.value,
     attrs.class as string | undefined,
   ),

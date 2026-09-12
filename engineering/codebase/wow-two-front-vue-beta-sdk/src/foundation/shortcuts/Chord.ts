@@ -4,7 +4,7 @@
 // Matching compares a `KeyboardEvent` against a parsed chord; formatting renders it for a `<kbd>` hint. No Vue,
 // no listeners — `UseHotkeys.ts` binds these to the DOM.
 
-import { Key } from '../utils/KeyboardExtensions';
+import { Key } from '../dom/enums/Key';
 
 /** The modifier tokens a chord string accepts. `Mod` is platform-adaptive (⌘ on Apple, Ctrl elsewhere). */
 export const Modifier = {
@@ -39,8 +39,8 @@ export interface Chord {
 /** The `KeyboardEvent` fields a chord match reads — a structural subset satisfied by native DOM events. */
 export type KeyboardEventLike = Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'altKey'>;
 
-/** Named-key aliases (case-insensitive) → canonical `KeyboardEvent.key`. Lets `esc`/`up`/`del` stand in for the verbose form. */
-const KEY_ALIASES: Readonly<Record<string, string>> = {
+/** Named-key aliases (case-insensitive) → canonical `KeyboardEvent.key` — `esc`/`up`/`del` for the verbose form. */
+const KeyAliases: Readonly<Record<string, string>> = {
   esc: Key.Escape,
   escape: Key.Escape,
   enter: Key.Enter,
@@ -63,7 +63,7 @@ const KEY_ALIASES: Readonly<Record<string, string>> = {
   plus: '+',
 };
 
-/** Detects an Apple platform (for `mod` → ⌘ and symbol formatting). SSR-safe; pass `platformHint` to force it in tests. */
+/** Detects an Apple platform (for `mod` → ⌘ and symbol formatting). SSR-safe; `platformHint` forces it in tests. */
 export function isApplePlatform(platformHint?: string): boolean {
   if (platformHint !== undefined) return /mac|iphone|ipad|ipod/i.test(platformHint);
   if (typeof navigator === 'undefined') return false;
@@ -80,7 +80,7 @@ export interface ChordPlatformOptions {
 
 /** Normalizes one non-modifier token to a canonical `KeyboardEvent.key`. */
 function normalizeKey(token: string): string {
-  const alias = KEY_ALIASES[token];
+  const alias = KeyAliases[token];
   if (alias !== undefined) return alias;
   // Function keys: `f1`..`f12` → `F1`..`F12`.
   if (/^f\d{1,2}$/.test(token)) return token.toUpperCase();
@@ -157,7 +157,7 @@ export function matchesChord(event: KeyboardEventLike, chord: Chord): boolean {
 }
 
 /** Arrow/space display glyphs used when rendering a chord. */
-const DISPLAY_KEYS: Readonly<Record<string, string>> = {
+const DisplayKeys: Readonly<Record<string, string>> = {
   [Key.ArrowUp]: '↑',
   [Key.ArrowDown]: '↓',
   [Key.ArrowLeft]: '←',
@@ -168,7 +168,7 @@ const DISPLAY_KEYS: Readonly<Record<string, string>> = {
 
 /** Renders a chord's main key for display — glyph for arrows/space/enter, uppercased single letters, else as-is. */
 function displayKey(key: string): string {
-  const glyph = DISPLAY_KEYS[key];
+  const glyph = DisplayKeys[key];
   if (glyph !== undefined) return glyph;
   return key.length === 1 ? key.toUpperCase() : key;
 }

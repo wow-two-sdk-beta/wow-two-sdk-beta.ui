@@ -1,4 +1,4 @@
-export * from './backdrop';
+export * from './backdropOverlay';
 export * from './modal';
 export * from './alertModal';
 export * from './drawer';
@@ -6,3 +6,6 @@ export * from './popover';
 export * from './hoverCard';
 export * from './actionSheet';
 export * from './bottomSheet';
+export * from './tourPopover';
+export * from './tooltip';
+export * from './commandPaletteModal';

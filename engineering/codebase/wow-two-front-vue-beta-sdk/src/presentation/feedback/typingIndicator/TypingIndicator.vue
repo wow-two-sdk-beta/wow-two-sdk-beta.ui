@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 
 /** Defines the TypingIndicator dot tone. */
 export const TypingTone = {
@@ -15,40 +15,40 @@ export type TypingTone = (typeof TypingTone)[keyof typeof TypingTone];
 
 export interface TypingIndicatorProps {
   /** The optional name(s) of who is typing — rendered as a leading label. Rich content → the `who` slot. */
-  who?: string;
+  readonly who?: string;
 
   /** The visual size of the bouncing dots. */
-  size?: Size;
+  readonly size?: Size;
 
   /** The color of the dots; defaults to muted. */
-  tone?: TypingTone;
+  readonly tone?: TypingTone;
 
   /** The subtle-mode flag — tones down dot opacity at rest (between bounces). */
-  isSubtle?: boolean;
+  readonly isSubtle?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
-import { cn, Size as SizeToken } from '../../../foundation/utils';
+import { cn, Size as SizeToken } from '../../../foundation/styles';
 
 /* Only sm/md/lg carry a dot size; other `Size` members fall through to `md`. */
-const SIZE: Partial<Record<Size, string>> = {
+const SizeDot: Partial<Record<Size, string>> = {
   sm: 'h-1 w-1',
   md: 'h-1.5 w-1.5',
   lg: 'h-2 w-2',
 };
 
-const TONE: Record<TypingTone, string> = {
+const ToneClass: Record<TypingTone, string> = {
   muted: 'bg-muted-foreground',
   primary: 'bg-primary',
   foreground: 'bg-foreground',
 };
 
 /**
- * Three-dot "someone is typing" indicator. Honors `prefers-reduced-motion`
- * via Tailwind's `motion-safe:` / `motion-reduce:` modifiers — dots stay
- * visible at full opacity when motion is reduced.
+ * Renders an optional "who" label beside three animating dots — the "someone is typing" cue.
+ * Honors `prefers-reduced-motion` via Tailwind's `motion-safe:` / `motion-reduce:` modifiers — dots
+ * stay visible at full opacity when motion is reduced.
  */
 defineOptions({ name: 'TypingIndicator', inheritAttrs: false });
 
@@ -56,6 +56,11 @@ const props = withDefaults(defineProps<TypingIndicatorProps>(), {
   size: SizeToken.Md,
   tone: TypingTone.Muted,
 });
+
+defineSlots<{
+  /** The "who is typing" label. Falls back to the `who` prop. */
+  who?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const slots = useSlots();
@@ -66,8 +71,8 @@ const hasWho = computed(() => Boolean(props.who) || Boolean(slots.who));
 const dot = computed(() =>
   cn(
     'inline-block rounded-full motion-safe:animate-bounce',
-    SIZE[props.size] ?? SIZE.md,
-    TONE[props.tone],
+    SizeDot[props.size] ?? SizeDot.md,
+    ToneClass[props.tone],
     props.isSubtle && 'motion-safe:opacity-60',
   ),
 );

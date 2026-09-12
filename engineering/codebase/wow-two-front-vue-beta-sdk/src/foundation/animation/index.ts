@@ -13,7 +13,7 @@
 //
 //  - REDUCED MOTION IS A PARAMETER, NOT A LOOKUP. Every pure entry point takes an explicit `reducedMotion`
 //    option, so it stays testable (and usable) outside Vue. Only the Vue layer (`useFlip`,
-//    `AnimatedLayout`) calls `foundation/hooks`' `useReducedMotion`, and an explicit option still overrides it.
+//    `AnimatedLayout`) calls `foundation/device`' `useReducedMotion`, and an explicit option still overrides it.
 //    Reduced motion NEVER skips the state change — it commits the final state instantly (`animate`) or leaves
 //    the already-committed layout alone (`playFlip`).
 //
@@ -26,7 +26,7 @@
 //    after paint makes the animation visibly jump. `useFlip` encodes this.
 //
 // NOT HERE, on purpose:
-//  - `useReducedMotion` — it lives in `foundation/hooks` and is not re-exported; one export site per composable.
+//  - `useReducedMotion` — it lives in `foundation/device` and is not re-exported; one export site per composable.
 //  - Scroll, gesture, and media-driven motion — separate foundation seams own those inputs.
 //  - Spring/physics integration and enter/exit choreography — this is the primitive layer they would build on.
 
@@ -34,7 +34,7 @@ export {
   animate,
   applyFinalKeyframe,
   noopAnimationHandle,
-  ANIMATION_DEFAULTS,
+  AnimationDefaults,
   type AnimateOptions,
   type AnimationHandle,
   type AnimationKeyframes,
@@ -46,7 +46,7 @@ export {
   isIdentityFlip,
   formatFlipTransform,
   playFlip,
-  IDENTITY_FLIP_TRANSFORM,
+  IdentityFlipTransform,
   type FlipOptions,
   type FlipTransform,
   type RectLike,
@@ -54,4 +54,7 @@ export {
 
 export { useFlip, type UseFlipOptions } from './UseFlip';
 
-export { AnimatedLayout, type AnimatedLayoutProps } from './AnimatedLayout';
+export { AnimatedLayout, type AnimatedLayoutProps } from './animatedLayout';
+
+export { TransitionExtensions } from './TransitionExtensions';
+export type { PresenceAnimationDurationProp, PresenceAnimationDuration } from './TransitionExtensions';

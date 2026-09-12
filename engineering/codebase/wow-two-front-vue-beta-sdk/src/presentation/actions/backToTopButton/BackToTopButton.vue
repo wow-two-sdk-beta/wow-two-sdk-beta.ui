@@ -1,35 +1,37 @@
 <script lang="ts">
 import type { ButtonHTMLAttributes, VNodeChild } from 'vue';
-import type { OverlayPosition } from '../../../foundation/utils';
+import type { OverlayPosition } from '../../../foundation/styles';
 
 /* Native button attributes stay in attribute fallthrough rather than becoming runtime props. */
 export interface BackToTopButtonProps extends /* @vue-ignore */ ButtonHTMLAttributes {
   /** The scroll distance (px) before the button appears. Default 400. */
-  threshold?: number;
+  readonly threshold?: number;
 
   /** The scrollable element to scope to. Defaults to the window. */
-  scrollContainer?: HTMLElement | null;
+  readonly scrollContainer?: HTMLElement | null;
 
   /** The anchor position on the viewport. Default `bottom-right`. */
-  position?: OverlayPosition;
+  readonly position?: OverlayPosition;
 
   /** The visible label. Omit for icon-only. Prefer the `label` named slot. */
-  label?: VNodeChild;
+  readonly label?: VNodeChild;
 
   /** The button type. Default `ButtonType.Button`. */
-  type?: ButtonType;
+  readonly type?: ButtonType;
 }
 </script>
 
 <script setup lang="ts">
-import { computed, defineComponent, shallowRef, useAttrs, useSlots, useTemplateRef, watchPostEffect } from 'vue';
+import { computed, defineComponent, shallowRef, useAttrs, useTemplateRef, watchPostEffect } from 'vue';
 import { ArrowUp } from 'lucide-vue-next';
 import type { ClassValue } from 'clsx';
-import { ButtonType, cn, OverlayPosition as OverlayPositionValue } from '../../../foundation/utils';
+import { AriaAttribute, ButtonType } from '../../../foundation/dom';
+import { cn, OverlayPosition as OverlayPositionValue } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
+/** Renders a floating button that appears past a scroll threshold and returns the page to the top. */
 defineOptions({ name: 'BackToTopButton', inheritAttrs: false });
 
 const props = withDefaults(defineProps<BackToTopButtonProps>(), {
@@ -43,10 +45,14 @@ const props = withDefaults(defineProps<BackToTopButtonProps>(), {
   label: undefined,
 });
 
-const attrs = useAttrs();
-const slots = useSlots();
+const slots = defineSlots<{
+  /** The visible label beside the arrow. Falls back to the `label` prop, then to icon-only. */
+  label?(): unknown;
+}>();
 
-const POSITION: Record<OverlayPosition, string> = {
+const attrs = useAttrs();
+
+const PositionClasses: Record<OverlayPosition, string> = {
   'bottom-right': 'bottom-6 right-6',
   'bottom-left': 'bottom-6 left-6',
   'bottom-center': 'bottom-6 left-1/2 -translate-x-1/2',
@@ -81,18 +87,18 @@ watchPostEffect((onCleanup) => {
 /* `aria-label` is read off `attrs`, not `props`: Vue camelizes declared prop keys, so a declared
    `'aria-label'` would arrive as `props.ariaLabel` and never render. It is stripped from the
    forwarded attrs and re-bound below, so the resolved value is the one that lands. */
-const ariaLabel = computed(() => (attrs['aria-label'] as string | undefined) ?? 'Back to top');
+const ariaLabel = computed(() => (attrs[AriaAttribute.Label] as string | undefined) ?? 'Back to top');
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-label']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.Label]);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
   cn(
-    'fixed z-banner inline-flex items-center justify-center gap-2 rounded-full bg-card text-card-foreground shadow-lg ring-1 ring-border transition-all hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+    'fixed z-banner inline-flex items-center justify-center gap-2 rounded-full bg-card text-card-foreground shadow-lg ring-1 ring-border transition-all hover:shadow-xl focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     hasLabel.value ? 'h-11 px-4 text-sm font-medium' : 'h-11 w-11',
-    POSITION[props.position],
+    PositionClasses[props.position],
     attrs.class as ClassValue,
   ),
 );

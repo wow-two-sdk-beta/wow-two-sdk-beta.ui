@@ -26,7 +26,7 @@
 import { findIndexByOffsetAccessor } from './Measurements';
 
 /** The default number of off-screen items kept mounted on each side — enough to cover a fast flick's first frames. */
-export const DEFAULT_OVERSCAN = 3;
+export const DefaultOverscan = 3;
 
 /** Where a `scrollToIndex` should land the target item within the viewport. */
 export type ScrollAlignment =
@@ -58,7 +58,7 @@ export interface VirtualRange {
 }
 
 /** The empty-list range: renders nothing, reserves nothing. */
-export const EMPTY_RANGE: VirtualRange = {
+export const EmptyRange: VirtualRange = {
   startIndex: 0,
   endIndex: -1,
   paddingStart: 0,
@@ -70,7 +70,7 @@ export interface ComputeRangeOptions {
   /** Current scroll position of the container along the list's axis, in pixels. Clamped into the scrollable range. */
   readonly scrollOffset: number;
 
-  /** Visible size of the container along the list's axis, in pixels (`clientHeight`, or `clientWidth` when horizontal). */
+  /** Visible size of the container along the list's axis, in pixels — `clientHeight`, or `clientWidth` horizontal. */
   readonly viewportSize: number;
 
   /** How many items the list has. Floored to a non-negative integer. */
@@ -83,7 +83,10 @@ export interface ComputeRangeOptions {
    */
   readonly estimateSize?: number | ((index: number) => number);
 
-  /** Extra items rendered beyond each edge of the viewport. Defaults to `0` here; `useVirtualList` defaults it to {@link DEFAULT_OVERSCAN}. */
+  /**
+   * Extra items rendered beyond each edge of the viewport. Defaults to `0`; `useVirtualList` overrides that
+   * with {@link DefaultOverscan}.
+   */
   readonly overscan?: number;
 
   /**
@@ -156,7 +159,7 @@ function resolveOffsetAt(options: ComputeRangeOptions, itemCount: number): (inde
  */
 export function computeRange(options: ComputeRangeOptions): VirtualRange {
   const itemCount = Number.isFinite(options.itemCount) ? Math.max(0, Math.floor(options.itemCount)) : 0;
-  if (itemCount === 0) return EMPTY_RANGE;
+  if (itemCount === 0) return EmptyRange;
 
   const overscan = Math.max(0, Math.floor(finite(options.overscan ?? 0)));
   const viewportSize = Math.max(0, finite(options.viewportSize));

@@ -1,12 +1,13 @@
-import { FLUENT_VALIDATION_CODES, FLUENT_VALIDATION_PARAMS, type FieldIssue } from '../validation/Messages';
+import { FluentValidationCodes, FluentValidationParameters, type FieldIssue } from '../validators/Messages';
 
 import { ApiError } from './ApiError';
+import type { ApiFailure } from './ApiFailure';
 
 /*
  * Reads the per-field validation failures out of a thrown error's problem body.
  *
  * TWO READERS, ONE PARSE. `fieldIssues` is the wide one — it keeps each failure's rule code and
- * operands, which is what a message catalogue keys on (`foundation/validation/Messages.ts`).
+ * operands, which is what a message catalogue keys on (`foundation/validators/Messages.ts`).
  * `fieldErrors` is the narrow one, kept for the `Record<string, string[]>` shape the forms engine has
  * always exposed; it delegates and drops everything but the message.
  *
@@ -25,7 +26,7 @@ import { ApiError } from './ApiError';
 /** Normalizes a source rule code onto the shared vocabulary, passing an unknown code through unchanged. */
 function normalizeCode(code: unknown): string | undefined {
   if (typeof code !== 'string' || code.length === 0) return undefined;
-  return FLUENT_VALIDATION_CODES[code] ?? code;
+  return FluentValidationCodes[code] ?? code;
 }
 
 /** Renames a payload's operand keys onto the vocabulary's (`MaxLength` → `max`), keeping unlisted ones. */
@@ -34,7 +35,7 @@ function normalizeParams(params: unknown): Readonly<Record<string, unknown>> | u
   const normalized: Record<string, unknown> = {};
   let count = 0;
   for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
-    normalized[FLUENT_VALIDATION_PARAMS[key] ?? key] = value;
+    normalized[FluentValidationParameters[key] ?? key] = value;
     count += 1;
   }
   return count > 0 ? normalized : undefined;
@@ -49,11 +50,12 @@ function normalizeParams(params: unknown): Readonly<Record<string, unknown>> | u
  * non-`ApiError`, no problem body, no `errors` member — yields `{}` so callers can map unconditionally.
  */
 export function fieldIssues(error: unknown): Record<string, FieldIssue[]> {
-  if (!(error instanceof ApiError)) return {};
-  const errors = error.problem?.errors;
+  const failure = error instanceof ApiError ? error.failure : error;
+  if (failure === null || typeof failure !== 'object' || !('problem' in failure)) return {};
+  const errors = (failure as ApiFailure).problem?.errors;
 
   if (Array.isArray(errors)) {
-    const map: Record<string, FieldIssue[]> = {};
+    const map: Record<string, FieldIssue[]> = Object.create(null);
     for (const entry of errors as unknown[]) {
       if (entry === null || typeof entry !== 'object') continue;
       const { property, message, code, params } = entry as {
@@ -73,7 +75,7 @@ export function fieldIssues(error: unknown): Record<string, FieldIssue[]> {
   }
 
   if (errors !== null && typeof errors === 'object') {
-    const map: Record<string, FieldIssue[]> = {};
+    const map: Record<string, FieldIssue[]> = Object.create(null);
     for (const [field, value] of Object.entries(errors)) {
       // The ModelState shape carries messages only — no code, so these never reach a catalogue entry
       // and render exactly as the server wrote them.
@@ -95,7 +97,7 @@ export function fieldIssues(error: unknown): Record<string, FieldIssue[]> {
  */
 export function fieldErrors(error: unknown): Record<string, string[]> {
   const issues = fieldIssues(error);
-  const map: Record<string, string[]> = {};
+  const map: Record<string, string[]> = Object.create(null);
   for (const [field, entries] of Object.entries(issues)) {
     map[field] = entries.map((issue) => issue.message);
   }

@@ -3,53 +3,50 @@ import type { InputSize, InputState } from '../InputStyles';
 
 export interface CronInputProps {
   /** The control size. */
-  size?: InputSize;
+  readonly size?: InputSize;
 
   /** The validity surface. */
-  state?: InputState;
-
-  /** The cron string, controlled — React's spelling, which wins when both are set. */
-  value?: string;
+  readonly state?: InputState;
 
   /** The cron string, controlled. The `v-model` binding target. */
-  modelValue?: string;
+  readonly modelValue?: string;
 
   /** The initial cron string when uncontrolled. Defaults to the every-5-minutes expression. */
-  defaultValue?: string;
+  readonly defaultValue?: string;
 
   /** The empty-state placeholder. */
-  placeholder?: string;
+  readonly placeholder?: string;
 
   /** The invalid surface override. Falls back to the surrounding form control's `isInvalid`. */
-  isInvalid?: boolean;
+  readonly isInvalid?: boolean;
 
   /** Whether the human-readable readout renders under the input. Default `true`. */
-  hasPreview?: boolean;
+  readonly hasPreview?: boolean;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  disabled?: boolean;
+  readonly disabled?: boolean;
 
   /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
-  readOnly?: boolean;
+  readonly readOnly?: boolean;
 
-  /** The DOM spelling of {@link CronInputProps.readOnly}, which wins when both are set. */
-  readonly?: boolean;
+  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  readonly readonly?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
-  required?: boolean;
+  readonly required?: boolean;
 
   /** The hidden input name; the hidden input emits the cron string. */
-  name?: string;
+  readonly name?: string;
 }
 /* React also inherited `Omit<InputBaseVariants, 'size' | 'state'>` — the `border` / `ring`
    axes — but never forwarded them to `inputBaseVariants`, so they were dead props that landed
    on the DOM as unknown attributes. Only the two axes the original consumed are declared here. */
 
-const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTH_NAMES = [
+const WeekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MonthNames = [
   'January',
   'February',
   'March',
@@ -187,7 +184,7 @@ function parseCron(value: string): string {
     month.kind === CronFieldKind.Every &&
     (dow.kind === CronFieldKind.List || dow.kind === CronFieldKind.Specific)
   ) {
-    return `At ${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')} on ${describeField(dow, WEEKDAY_NAMES)}`;
+    return `At ${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')} on ${describeField(dow, WeekdayNames)}`;
   }
   if (
     minute.kind === CronFieldKind.Every &&
@@ -203,23 +200,25 @@ function parseCron(value: string): string {
   if (minute.kind !== CronFieldKind.Every) parts2.push(`minute: ${describeField(minute, undefined, 'minute')}`);
   if (hour.kind !== CronFieldKind.Every) parts2.push(`hour: ${describeField(hour, undefined, 'hour')}`);
   if (dom.kind !== CronFieldKind.Every) parts2.push(`day: ${describeField(dom)}`);
-  if (month.kind !== CronFieldKind.Every) parts2.push(`month: ${describeField(month, ['', ...MONTH_NAMES])}`);
-  if (dow.kind !== CronFieldKind.Every) parts2.push(`weekday: ${describeField(dow, WEEKDAY_NAMES)}`);
+  if (month.kind !== CronFieldKind.Every) parts2.push(`month: ${describeField(month, ['', ...MonthNames])}`);
+  if (dow.kind !== CronFieldKind.Every) parts2.push(`weekday: ${describeField(dow, WeekdayNames)}`);
   return parts2.length === 0 ? 'Every minute' : parts2.join(' · ');
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
 
 /**
- * Cron-string input with human-readable preview. Supports asterisk, N,
- * step (asterisk-slash-N), N-M, N,M,O per field. Quartz extensions
+ * Renders a cron-string input with a live plain-English preview of when the expression fires.
+ * Supports asterisk, N, step (asterisk-slash-N), N-M, N,M,O per field. Quartz extensions
  * (?, L, W, #) deferred.
  *
  * Form-aware: inside a `Field`/`form.Field` the inner input takes the context
@@ -235,7 +234,6 @@ const props = withDefaults(defineProps<CronInputProps>(), {
   hasPreview: true,
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
-  value: undefined,
   modelValue: undefined,
   isInvalid: undefined,
   disabled: undefined,
@@ -245,10 +243,8 @@ const props = withDefaults(defineProps<CronInputProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model` half. */
+  /** Fires when the reader edits the cron expression. The `v-model` half. */
   'update:modelValue': [value: string];
-  /** Replaces React's `onValueChange`. */
-  'value-change': [value: string];
 }>();
 
 const attrs = useAttrs();
@@ -257,11 +253,10 @@ const input = useTemplateRef<HTMLInputElement>('input');
 const ctx = useFormControl();
 
 const controlled = useControlled<string>({
-  controlled: () => (props.value !== undefined ? props.value : props.modelValue),
+  controlled: () => props.modelValue,
   default: () => props.defaultValue ?? '*/5 * * * *',
   onChange: (next) => {
     emit('update:modelValue', next);
-    emit('value-change', next);
   },
 });
 
@@ -276,12 +271,13 @@ const isError = computed(
 const inputState = computed(() => (isError.value ? InputStateValue.Invalid : (props.state ?? InputStateValue.Default)));
 
 function onInput(event: Event): void {
+  if ((event as InputEvent).isComposing) return;
   controlled.setValue((event.target as HTMLInputElement).value);
 }
 
 /* Never a declared prop — a declared `'aria-describedby'` would arrive as
    `props.ariaDescribedby` and stop reaching the DOM. */
-const ariaDescribedBy = computed(() => attrs['aria-describedby'] as string | undefined);
+const ariaDescribedBy = computed(() => attrs[AriaAttribute.DescribedBy] as string | undefined);
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
@@ -289,9 +285,9 @@ const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isRea
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const describedBy = computed(() => ariaDescribedBy.value ?? ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'aria-describedby']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.DescribedBy]);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const wrapperClass = computed(() => cn('flex flex-col gap-1', attrs.class as ClassValue));
@@ -301,6 +297,10 @@ const inputClass = computed(() => cn(inputBaseVariants({ size: props.size, state
 const previewClass = computed(() => cn('px-1 text-xs', isError.value ? 'text-destructive' : 'text-muted-foreground'));
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
+useNativeFormReset(input, controlled.reset, () => {
+  if (input.value) input.value.value = String(cron.value ?? '');
+});
+
 defineExpose({ el: input });
 </script>
 
@@ -321,6 +321,7 @@ defineExpose({ el: input });
       :class="inputClass"
       v-bind="passthroughAttrs"
       @input="onInput"
+      @compositionend="onInput"
     />
     <div v-if="hasPreview" aria-live="polite" :class="previewClass">{{ preview }}</div>
     <input v-if="name" type="hidden" :name="name" :value="cron" />

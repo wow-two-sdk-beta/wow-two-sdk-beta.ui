@@ -33,14 +33,14 @@ export interface Measurements {
    * Cumulative start offsets, length `count + 1` and non-decreasing. `offsets[i]` is item `i`'s start edge;
    * `offsets[count]` is the list's total size.
    */
-  readonly offsets: readonly number[];
+  readonly offsets: ReadonlyArray<number>;
 
   /** The number of items described. Always a non-negative integer. */
   readonly count: number;
 }
 
 /** The zero-item measurements — a shared, identity-stable empty value. */
-export const EMPTY_MEASUREMENTS: Measurements = { offsets: [0], count: 0 };
+export const EmptyMeasurements: Measurements = { offsets: [0], count: 0 };
 
 /**
  * Builds cumulative offsets by running `sizeAt` once per item. O(n), and the only O(n) pass in a steady-state
@@ -52,7 +52,7 @@ export const EMPTY_MEASUREMENTS: Measurements = { offsets: [0], count: 0 };
  */
 export function buildMeasurements(count: number, sizeAt: (index: number) => number): Measurements {
   const safeCount = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
-  if (safeCount === 0) return EMPTY_MEASUREMENTS;
+  if (safeCount === 0) return EmptyMeasurements;
 
   const offsets = new Array<number>(safeCount + 1);
   offsets[0] = 0;

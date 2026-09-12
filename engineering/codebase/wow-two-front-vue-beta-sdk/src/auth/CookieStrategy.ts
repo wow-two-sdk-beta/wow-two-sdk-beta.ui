@@ -1,35 +1,39 @@
-import { ApiError, type ApiClient } from '../foundation/http';
+import { ResultExtensions, type AppError, type Result } from '../foundation/results';
+import { type ApiClient, type ApiDecoder } from '../foundation/http';
 
 import type { AuthResolveContext, AuthStrategy } from './AuthSession';
 
-/** Defines the slice of the SDK `ApiClient` the cookie strategy calls — any object with `get`/`post` fits (fakes included). */
+/** Defines the slice of `ApiClient` the cookie strategy calls — any object with `get`/`post` fits, fakes included. */
 export type CookieAuthClient = Pick<ApiClient, 'get' | 'post'>;
 
 /** Defines the context passed to a cookie strategy's custom `signIn` delegate. */
 export interface CookieSignInContext extends AuthResolveContext {
-  /** The strategy's HTTP client — call sign-in endpoints (guest creation, credential/ID-token exchange) through it. */
+  /** The strategy's HTTP client — call sign-in endpoints (guest creation, token exchange) through it. */
   readonly client: CookieAuthClient;
 }
 
 /** Defines the options for {@link createCookieStrategy}. */
 export interface CreateCookieStrategyOptions<TUser, TSignInInput = unknown> {
-  /** The HTTP client the strategy calls — the app's `createApiClient` (same-origin, or `credentials: 'include'` cross-origin). */
+  /** The HTTP client the strategy calls — the app's `createApiClient`, same-origin or `credentials: 'include'`. */
   readonly client: CookieAuthClient;
+
+  /** Validates and decodes the user payload at the transport edge. */
+  readonly decodeUser: ApiDecoder<TUser>;
 
   /** The me-resolve endpoint (GET). Default `/api/identity/me` — the backend SDK identity baseline. */
   readonly mePath?: string;
 
-  /** The sign-out endpoint (POST). Default `/api/identity/sign-out`; pass `null` to skip the server call and clear locally only. */
+  /** The sign-out endpoint (POST). Default `/api/identity/sign-out`; `null` skips it and clears locally only. */
   readonly signOutPath?: string | null;
 
-  /** Treats a 200 me-response as signed out (e.g. smart-qr's `kind === 'anonymous'` guest gate). Default: every resolved user counts as authenticated. */
+  /** Treats a 200 me-response as signed out (guest gate). Default: every resolved user is authenticated. */
   readonly isAnonymous?: (user: TUser) => boolean;
 
-  /** A custom sign-in exchange (guest creation, password post, Google ID-token swap) — return the user to authenticate immediately. */
+  /** A custom sign-in exchange (guest creation, password post, ID-token swap) — return the user to authenticate. */
   readonly signIn?: (
     input: TSignInInput,
     context: CookieSignInContext,
-  ) => Promise<TUser | null | void> | TUser | null | void;
+  ) => Promise<Result<TUser | null | void, AppError>> | Result<TUser | null | void, AppError>;
 }
 
 /**
@@ -44,23 +48,14 @@ export function createCookieStrategy<TUser, TSignInInput = unknown>(
   const { client, mePath = '/api/identity/me', signOutPath = '/api/identity/sign-out', isAnonymous, signIn } = options;
 
   const strategy: AuthStrategy<TUser, TSignInInput> = {
-    async resolveUser(context: AuthResolveContext): Promise<TUser | null> {
-      let user: TUser | undefined;
-      try {
-        user = await client.get<TUser>(mePath, context.signal ? { signal: context.signal } : undefined);
-      } catch (error) {
-        // 401 = simply signed out — not a failure. Anything else propagates: the provider settles
-        // anonymous and reports it via `onResolveError` (the drydock/smart-qr posture).
-        if (error instanceof ApiError && error.status === 401) return null;
-        throw error;
-      }
-      if (user == null) return null;
-      return isAnonymous?.(user) ? null : user;
+    async resolveUser(context: AuthResolveContext): Promise<Result<TUser | null, AppError>> {
+      const outcome = await client.get(mePath, { ...context, decode: options.decodeUser });
+      if (!outcome.ok) return outcome.failure.status === 401 ? ResultExtensions.ok(null) : outcome;
+      return ResultExtensions.ok(isAnonymous?.(outcome.value) ? null : outcome.value);
     },
-
-    async signOut(context: AuthResolveContext): Promise<void> {
-      if (signOutPath === null) return;
-      await client.post<void>(signOutPath, context.signal ? { signal: context.signal } : undefined);
+    async signOut(context: AuthResolveContext): Promise<Result<void, AppError>> {
+      if (signOutPath === null) return ResultExtensions.ok(undefined);
+      return client.post(signOutPath, { ...context, response: 'empty' });
     },
   };
 

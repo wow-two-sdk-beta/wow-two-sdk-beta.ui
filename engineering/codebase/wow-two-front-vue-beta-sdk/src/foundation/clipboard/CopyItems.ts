@@ -1,19 +1,3 @@
-// The multi-format write — one clipboard entry carrying the same content in several MIME types at once.
-//
-// WHY MULTI-FORMAT IS THE POINT. The clipboard holds ONE item with MANY representations, and the paste target
-// picks the richest one it understands. Write `text/html` alone and a plain `<textarea>` receives nothing; write
-// `text/plain` alone and a rich editor receives markup-free text. Writing both in a SINGLE `write` call means
-// pasting into Word or Notion keeps the formatting while pasting into a terminal still works. Two sequential
-// `writeText` + `write` calls do NOT achieve this — the second overwrites the first.
-//
-// `copyBlob` is the single-format case of the same call, spelled for the payload consumers actually reach for
-// (a generated PNG, a canvas export).
-//
-// Legacy degradation is text-only, and only from a string arm. `document.execCommand('copy')` can put text on
-// the clipboard and nothing else, so a rich write degrades to its `text/plain` representation or not at all. A
-// `Blob`-valued text arm is skipped rather than awaited: reading it is async, while the legacy path is
-// synchronous and must stay inside the user gesture that authorized the copy.
-
 import {
   reportClipboardOutcome,
   toClipboardFailure,
@@ -64,13 +48,14 @@ function toBlobRecord(items: ClipboardWriteItems): Record<string, Blob> {
 async function writeItemsThroughApi(items: ClipboardWriteItems): Promise<ClipboardWriteResult> {
   const write = clipboardMethod('write');
   const ClipboardItemConstructor = clipboardItemConstructor();
-  if (write === undefined || ClipboardItemConstructor === undefined) return { status: 'unsupported' };
+  if (write === undefined || ClipboardItemConstructor === undefined)
+    return { ok: false, failure: { status: 'unsupported' } };
 
   try {
     await write([new ClipboardItemConstructor(toBlobRecord(items))]);
-    return { status: 'copied' };
+    return { ok: true, value: undefined };
   } catch (error) {
-    return toClipboardFailure(error);
+    return { ok: false, failure: toClipboardFailure(error) };
   }
 }
 
@@ -95,14 +80,20 @@ export async function copyItems(
   try {
     if (typeof items !== 'object' || items === null) {
       return reportClipboardOutcome(
-        { status: 'failed', error: new TypeError('copyItems expects an object keyed by MIME type.') } as const,
+        {
+          ok: false,
+          failure: { status: 'failed', error: new TypeError('copyItems expects an object keyed by MIME type.') },
+        } as const,
         options?.onError,
       );
     }
 
     if (Object.keys(items).length === 0) {
       return reportClipboardOutcome(
-        { status: 'failed', error: new Error('copyItems was given no representations to write.') } as const,
+        {
+          ok: false,
+          failure: { status: 'failed', error: new Error('copyItems was given no representations to write.') },
+        } as const,
         options?.onError,
       );
     }
@@ -110,7 +101,7 @@ export async function copyItems(
     const result = withLegacyFallback(await writeItemsThroughApi(items), plainTextArm(items), options);
     return reportClipboardOutcome(result, options?.onError);
   } catch (error) {
-    return reportClipboardOutcome(toClipboardFailure(error), options?.onError);
+    return reportClipboardOutcome({ ok: false, failure: toClipboardFailure(error) }, options?.onError);
   }
 }
 
@@ -138,7 +129,7 @@ export async function copyBlob(
   try {
     if (typeof blob !== 'object' || blob === null) {
       return reportClipboardOutcome(
-        { status: 'failed', error: new TypeError('copyBlob expects a Blob.') } as const,
+        { ok: false, failure: { status: 'failed', error: new TypeError('copyBlob expects a Blob.') } } as const,
         options?.onError,
       );
     }
@@ -148,6 +139,6 @@ export async function copyBlob(
 
     return await copyItems({ [type]: blob }, options);
   } catch (error) {
-    return reportClipboardOutcome(toClipboardFailure(error), options?.onError);
+    return reportClipboardOutcome({ ok: false, failure: toClipboardFailure(error) }, options?.onError);
   }
 }

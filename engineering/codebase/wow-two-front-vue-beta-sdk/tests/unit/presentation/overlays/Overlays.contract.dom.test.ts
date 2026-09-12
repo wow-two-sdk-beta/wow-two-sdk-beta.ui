@@ -49,7 +49,7 @@ describe('overlays — open state', () => {
    *
    * Vue coerces an absent optional `boolean` prop to `false` unless the declaration owns an
    * explicit `undefined` default. A root that lost that default reads as controlled-and-closed
-   * the moment nothing is passed, and `Tour.isOpen` shipped exactly that way — the component
+   * the moment nothing is passed, and `TourPopover.open` shipped exactly that way — the component
    * could never open. Passing NO open prop at all is the only shape that catches it.
    */
   it.each([

@@ -5,7 +5,7 @@
 // `titleId`, `descriptionId`, and a `close()` action on the key below. The
 // shared subcomponents inject it.
 //
-// Naming convention: `Overlay*` for shared chrome pieces; consumers re-export
+// Naming convention: `AnchorLayout*` for shared chrome pieces; consumers re-export
 // them under their own name (e.g. `ModalHeader = OverlayHeader`).
 //
 // React's `OverlayChromeProvider` — the context Provider rendered as an element
@@ -30,6 +30,6 @@ export const overlayChromeContextKey: InjectionKey<OverlayChromeContextValue> = 
 export function useOverlayChromeContext(): OverlayChromeContextValue {
   const context = inject(overlayChromeContextKey, null);
   if (!context)
-    throw new Error('Overlay chrome subcomponents must be used inside an OverlayChromeProvider (Modal / Drawer)');
+    throw new Error('AnchorLayout chrome subcomponents must be used inside an OverlayChromeProvider (Modal / Drawer)');
   return context;
 }

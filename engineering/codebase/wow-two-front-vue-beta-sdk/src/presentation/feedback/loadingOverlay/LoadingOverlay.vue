@@ -1,40 +1,40 @@
 <script lang="ts">
-import type { Size } from '../../../foundation/utils';
+import type { Size } from '../../../foundation/styles';
 import type { SpinnerTone } from '../spinner/Spinner.variants';
 
 export interface LoadingOverlayProps {
   /** The mount state. Default `true`. */
-  isOpen?: boolean;
+  readonly isOpen?: boolean;
 
   /** The caption under the spinner. Default `"Loading…"`. Rich content → the `label` slot. */
-  label?: string;
+  readonly label?: string;
 
-  /** The inline-positioning toggle — positions the scrim absolutely inside the parent (parent must be `position: relative`). */
-  isInline?: boolean;
+  /** The inline-positioning toggle — the scrim sits absolutely inside the parent (must be `position: relative`). */
+  readonly isInline?: boolean;
 
   /** The backdrop-blur toggle. */
-  hasBlur?: boolean;
+  readonly hasBlur?: boolean;
 
   /** The spinner diameter step. Default `lg`. */
-  spinnerSize?: Size;
+  readonly spinnerSize?: Size;
 
   /** The spinner color tone. Default `brand`. */
-  spinnerTone?: SpinnerTone;
+  readonly spinnerTone?: SpinnerTone;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
-import { cn, Size as SizeToken } from '../../../foundation/utils';
+import { cn, Size as SizeToken } from '../../../foundation/styles';
 import { Presence } from '../../../foundation/primitives';
-import Backdrop from '../../overlays/backdrop/Backdrop.vue';
+import BackdropOverlay from '../../overlays/backdropOverlay/BackdropOverlay.vue';
 import Spinner from '../spinner/Spinner.vue';
 import { SpinnerTone as SpinnerToneToken } from '../spinner/Spinner.variants';
 
 /**
- * Scrim + centered spinner — blocks interaction with a region during a long task.
+ * Renders a scrim and centered spinner that block interaction with a region during a long task.
  * `isInline` scopes the scrim to a `position: relative` parent; default covers the
- * viewport via `Backdrop`.
+ * viewport via `BackdropOverlay`.
  *
  * React split the scrim into a `forwardRef` `LoadingScrim` so the two branches
  * could share it and `Presence` had a spreadable node to clone. Vue's `Presence`
@@ -62,19 +62,19 @@ const el = useTemplateRef<HTMLDivElement>('el');
 
 const hasLabel = computed(() => Boolean(props.label) || Boolean(slots.label));
 
-/** React fell back to `"Loading"` whenever `label` was not a plain string; here the same guard covers a caller who blanks the caption. */
+/** Falls back to `"Loading"` when the caller blanks the caption. */
 const spinnerLabel = computed(() => props.label || 'Loading');
 
 /*
  * `data-state` is injected by <Presence>; the fade tokens are gated on it so
  * enter plays on mount and exit plays before Presence defers the unmount.
  * The inline scrim carries the tint and the blur itself; the viewport one is
- * click-through and leaves both to the portalled `Backdrop` behind it.
+ * click-through and leaves both to the portalled `BackdropOverlay` behind it.
  */
 const classes = computed(() =>
   cn(
     'flex flex-col items-center justify-center gap-3',
-    'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
+    'motion-safe:data-[state=isOpen]:animate-(--animate-fade-in)',
     'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
     'motion-reduce:animate-none',
     props.isInline
@@ -94,9 +94,9 @@ defineExpose({ el });
 </script>
 
 <template>
-  <!-- `Backdrop` self-wraps in `Presence`; driving `is-open` with `isOpen` lets its
+  <!-- `BackdropOverlay` self-wraps in `Presence`; driving `is-isOpen` with `isOpen` lets its
        fade-out play before it defers its own unmount. -->
-  <Backdrop v-if="!props.isInline" :is-open="props.isOpen" :is-blurred="props.hasBlur" class="bg-background/70" />
+  <BackdropOverlay v-if="!props.isInline" :isOpen="props.isOpen" :is-blurred="props.hasBlur" class="bg-background/70" />
   <Presence :is-present="props.isOpen">
     <div ref="el" role="status" v-bind="rest" :class="classes">
       <Spinner :size="props.spinnerSize" :tone="props.spinnerTone" :label="spinnerLabel" />

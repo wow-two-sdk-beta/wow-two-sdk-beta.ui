@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import * as sweepDisplay from '@wow-two-beta/ui-vue/presentation/display';
+import * as sweepFeedback from '@wow-two-beta/ui-vue/presentation/feedback';
+import * as sweepLayout from '@wow-two-beta/ui-vue/presentation/layout';
 import { computed, ref } from 'vue';
 import { Temporal } from 'temporal-polyfill';
 import { Star } from 'lucide-vue-next';
@@ -8,12 +11,18 @@ import Matrix from '../gallery/Matrix.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
 
 const {
-  Label,
+  CodeEditor,
+  NodeEditor,
+  SortableGroup,
+  SortableGroupItem,
+  SortableGroupHandle,
+  SortableGroupMoveButton,
+  LabelText,
   Field,
-  Fieldset,
-  Legend,
-  FormHelperText,
-  FormErrorMessage,
+  FieldsetLayout,
+  LegendText,
+  FieldHelperText,
+  FieldErrorCallout,
   TextInput,
   TextAreaInput,
   EmailInput,
@@ -22,45 +31,45 @@ const {
   NumberInput,
   PasswordInput,
   SearchInput,
-  Checkbox,
-  Radio,
-  Switch,
-  Slider,
+  CheckboxInput,
+  RadioInput,
+  SwitchInput,
+  SliderInput,
   CheckboxField,
   RadioField,
   SwitchField,
   CheckboxGroup,
   RadioGroup,
   PinInput,
-  CharacterCount,
-  InputAddon,
+  CharacterCountCallout,
+  InputAddonLayout,
   InputGroup,
-  LabeledInput,
-  PasswordStrength,
+  LabeledField,
+  PasswordStrengthCallout,
   TagsInput,
-  Listbox,
-  ListboxItem,
-  ListboxGroup,
-  ListboxSeparator,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  MultiSelect,
-  MultiSelectTrigger,
-  MultiSelectContent,
-  MultiSelectItem,
-  Combobox,
-  ComboboxInput,
-  ComboboxContent,
-  ComboboxItem,
-  ComboboxGroup,
-  ComboboxEmpty,
+  ListboxPicker,
+  ListboxPickerItem,
+  ListboxPickerGroup,
+  ListboxPickerSeparator,
+  SelectPicker,
+  SelectPickerTrigger,
+  SelectPickerValue,
+  SelectPickerContent,
+  SelectPickerItem,
+  MultiSelectPicker,
+  MultiSelectPickerTrigger,
+  MultiSelectPickerContent,
+  MultiSelectPickerItem,
+  ComboboxPicker,
+  ComboboxPickerInput,
+  ComboboxPickerContent,
+  ComboboxPickerItem,
+  ComboboxPickerGroup,
+  ComboboxPickerEmpty,
   ChoiceCard,
   MaskedInput,
-  Calendar,
-  RangeCalendar,
+  CalendarPicker,
+  RangeCalendarPicker,
   DatePicker,
   DateRangePicker,
   DateInput,
@@ -68,31 +77,31 @@ const {
   TimeInput,
   TimePicker,
   RecurrenceEditor,
-  ColorSwatch,
+  ColorSwatchPreview,
   ColorSwatchPicker,
-  Knob,
-  Stepper,
-  StepperList,
-  StepperStep,
-  StepperPanel,
-  Wizard,
-  WizardSteps,
-  WizardStep,
-  WizardFooter,
-  Editable,
-  EditablePreview,
+  KnobInput,
+  StepperGroup,
+  StepperGroupList,
+  StepperGroupStep,
+  StepperGroupPanel,
+  WizardForm,
+  WizardFormSteps,
+  WizardFormStep,
+  WizardFormFooter,
   EditableInput,
-  EditableSubmit,
-  EditableCancel,
-} = forms;
+  EditableInputPreview,
+  EditableInputInput,
+  EditableInputSubmit,
+  EditableInputCancel,
+} = { ...forms, ...sweepDisplay, ...sweepFeedback, ...sweepLayout };
 
 const covered = [
-  'Label',
+  'LabelText',
   'Field',
-  'Fieldset',
-  'Legend',
-  'FormHelperText',
-  'FormErrorMessage',
+  'FieldsetLayout',
+  'LegendText',
+  'FieldHelperText',
+  'FieldErrorCallout',
   'TextInput',
   'TextAreaInput',
   'EmailInput',
@@ -101,45 +110,45 @@ const covered = [
   'NumberInput',
   'PasswordInput',
   'SearchInput',
-  'Checkbox',
-  'Radio',
-  'Switch',
-  'Slider',
+  'CheckboxInput',
+  'RadioInput',
+  'SwitchInput',
+  'SliderInput',
   'CheckboxField',
   'RadioField',
   'SwitchField',
   'CheckboxGroup',
   'RadioGroup',
   'PinInput',
-  'CharacterCount',
-  'InputAddon',
+  'CharacterCountCallout',
+  'InputAddonLayout',
   'InputGroup',
-  'LabeledInput',
-  'PasswordStrength',
+  'LabeledField',
+  'PasswordStrengthCallout',
   'TagsInput',
-  'Listbox',
-  'ListboxItem',
-  'ListboxGroup',
-  'ListboxSeparator',
-  'Select',
-  'SelectTrigger',
-  'SelectValue',
-  'SelectContent',
-  'SelectItem',
-  'MultiSelect',
-  'MultiSelectTrigger',
-  'MultiSelectContent',
-  'MultiSelectItem',
-  'Combobox',
-  'ComboboxInput',
-  'ComboboxContent',
-  'ComboboxItem',
-  'ComboboxGroup',
-  'ComboboxEmpty',
+  'ListboxPicker',
+  'ListboxPickerItem',
+  'ListboxPickerGroup',
+  'ListboxPickerSeparator',
+  'SelectPicker',
+  'SelectPickerTrigger',
+  'SelectPickerValue',
+  'SelectPickerContent',
+  'SelectPickerItem',
+  'MultiSelectPicker',
+  'MultiSelectPickerTrigger',
+  'MultiSelectPickerContent',
+  'MultiSelectPickerItem',
+  'ComboboxPicker',
+  'ComboboxPickerInput',
+  'ComboboxPickerContent',
+  'ComboboxPickerItem',
+  'ComboboxPickerGroup',
+  'ComboboxPickerEmpty',
   'ChoiceCard',
   'MaskedInput',
-  'Calendar',
-  'RangeCalendar',
+  'CalendarPicker',
+  'RangeCalendarPicker',
   'DatePicker',
   'DateRangePicker',
   'DateInput',
@@ -147,22 +156,22 @@ const covered = [
   'TimeInput',
   'TimePicker',
   'RecurrenceEditor',
-  'ColorSwatch',
+  'ColorSwatchPreview',
   'ColorSwatchPicker',
-  'Knob',
-  'Stepper',
-  'StepperList',
-  'StepperStep',
-  'StepperPanel',
-  'Wizard',
-  'WizardSteps',
-  'WizardStep',
-  'WizardFooter',
-  'Editable',
-  'EditablePreview',
+  'KnobInput',
+  'StepperGroup',
+  'StepperGroupList',
+  'StepperGroupStep',
+  'StepperGroupPanel',
+  'WizardForm',
+  'WizardFormSteps',
+  'WizardFormStep',
+  'WizardFormFooter',
   'EditableInput',
-  'EditableSubmit',
-  'EditableCancel',
+  'EditableInputPreview',
+  'EditableInputInput',
+  'EditableInputSubmit',
+  'EditableInputCancel',
 ];
 
 /** Nine options — enough to overflow a `max-visible-tags=3` trigger and show the `+N` block. */
@@ -195,8 +204,20 @@ const CHECKBOX_VARIANTS = ['solid', 'soft', 'outline', 'ghost', 'glass', 'glass-
 const TONES = ['primary', 'neutral', 'danger', 'success', 'warning'] as const;
 const BORDERS = ['none', 'xs', 'sm', 'md', 'lg', 'xl'] as const;
 
+const code = ref('const greeting = "Hello";');
+const orderedSteps = ref(['Design', 'Build', 'Verify']);
+const graphNodes = ref([
+  { id: 'start', label: 'Start', x: 40, y: 70 },
+  { id: 'finish', label: 'Finish', x: 260, y: 170 },
+]);
+function reorderSteps(from: number, to: number): void {
+  const next = [...orderedSteps.value];
+  const item = next.splice(from, 1)[0];
+  if (item !== undefined) next.splice(to, 0, item);
+  orderedSteps.value = next;
+}
 const text = ref('typed value');
-const num = ref(42);
+const num = ref<number | null>(42);
 const switched = ref(true);
 const slider = ref(40);
 const pin = ref('12');
@@ -215,8 +236,8 @@ function greekLabel(value: string): string | null {
   return GREEK.find((o) => o.value === value)?.label ?? null;
 }
 
-/* Filtering is the consumer's job — `Combobox` registers whatever rows are rendered. Groups
-   left empty by the query drop out, so `ComboboxEmpty` can gate on the group count. */
+/* Filtering is the consumer's job — `ComboboxPicker` registers whatever rows are rendered. Groups
+   left empty by the query drop out, so `ComboboxPickerEmpty` can gate on the group count. */
 const comboGroups = computed(() => {
   const q = comboQuery.value.trim().toLowerCase();
   return FRUIT_GROUPS.map((g) => ({
@@ -249,40 +270,25 @@ const stamp = ref<Temporal.PlainDateTime | null>(
     <h2 class="font-mono text-sm font-bold uppercase tracking-wide">forms</h2>
 
     <Demo name="TextInput" note="size × state — invalid must be visibly different">
-      <Matrix
-        row-axis="size"
-        col-axis="state"
-        :rows="INPUT_SIZES"
-        :cols="['default', 'invalid']"
-      >
+      <Matrix row-axis="size" col-axis="state" :rows="INPUT_SIZES" :cols="['default', 'invalid']">
         <template #default="{ row, col }">
-          <TextInput
-            :size="row as never"
-            :state="col as never"
-            placeholder="placeholder"
-            class="w-40"
-          />
+          <TextInput :size="row as never" :state="col as never" placeholder="placeholder" class="w-40" />
         </template>
       </Matrix>
     </Demo>
 
     <Demo name="TextInput" note="border × ring">
-      <Matrix
-        row-axis="border"
-        col-axis="ring"
-        :rows="BORDERS"
-        :cols="['none', 'sm', 'md', 'lg']"
-      >
+      <Matrix row-axis="border" col-axis="ring" :rows="BORDERS" :cols="['none', 'sm', 'md', 'lg']">
         <template #default="{ row, col }">
           <TextInput :border="row as never" :ring="col as never" class="w-28" placeholder="Aa" />
         </template>
       </Matrix>
     </Demo>
 
-    <Demo name="Checkbox" note="variant × tone, checked">
+    <Demo name="CheckboxInput" note="variant × tone, checked">
       <Matrix row-axis="variant" col-axis="tone" :rows="CHECKBOX_VARIANTS" :cols="TONES">
         <template #default="{ row, col }">
-          <Checkbox :variant="row as never" :tone="col as never" :default-checked="true" />
+          <CheckboxInput :variant="row as never" :tone="col as never" :default-value="true" />
         </template>
       </Matrix>
     </Demo>
@@ -301,22 +307,22 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         </div>
       </Demo>
 
-      <Demo name="Checkbox / Radio / Switch" note="size axis + disabled + indeterminate">
+      <Demo name="CheckboxInput / RadioInput / SwitchInput" note="size axis + disabled + indeterminate">
         <div class="space-y-3">
           <div class="flex items-center gap-3">
-            <Checkbox v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-checked />
-            <Checkbox is-indeterminate />
-            <Checkbox disabled />
-            <Checkbox default-checked disabled />
+            <CheckboxInput v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-value />
+            <CheckboxInput is-indeterminate />
+            <CheckboxInput disabled />
+            <CheckboxInput default-value disabled />
           </div>
           <div class="flex items-center gap-3">
-            <Radio v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-checked />
-            <Radio disabled />
+            <RadioInput v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-value />
+            <RadioInput disabled />
           </div>
           <div class="flex items-center gap-3">
-            <Switch v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-checked />
-            <Switch v-model="switched" />
-            <Switch disabled />
+            <SwitchInput v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-value />
+            <SwitchInput v-model="switched" />
+            <SwitchInput disabled />
           </div>
         </div>
       </Demo>
@@ -335,28 +341,28 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         </div>
       </Demo>
 
-      <Demo name="Label / FormHelperText / FormErrorMessage / Fieldset / Legend">
-        <Fieldset>
-          <Legend>Contact</Legend>
-          <Label is-required for="pg-name">Name</Label>
+      <Demo name="LabelText / FieldHelperText / FieldErrorCallout / FieldsetLayout / LegendText">
+        <FieldsetLayout>
+          <LegendText>Contact</LegendText>
+          <LabelText is-required for="pg-name">Name</LabelText>
           <TextInput id="pg-name" placeholder="Ada" />
-          <FormHelperText>Your full legal name.</FormHelperText>
-          <FormErrorMessage message="Name is required." />
-        </Fieldset>
+          <FieldHelperText>Your full legal name.</FieldHelperText>
+          <FieldErrorCallout message="Name is required." />
+        </FieldsetLayout>
       </Demo>
 
-      <Demo name="Slider" note="size axis">
+      <Demo name="SliderInput" note="size axis">
         <div class="space-y-3">
-          <Slider v-for="s in ['sm', 'md', 'lg']" :key="s" v-model="slider" :size="s as never" />
+          <SliderInput v-for="s in ['sm', 'md', 'lg']" :key="s" v-model="slider" :size="s as never" />
           <p class="text-xs text-subtle-foreground">value = {{ slider }}</p>
         </div>
       </Demo>
 
-      <Demo name="Knob" note="drag to rotate">
+      <Demo name="KnobInput" note="drag to rotate">
         <div class="flex items-center gap-4">
-          <Knob v-model="knob" />
-          <Knob :model-value="80" tone="success" />
-          <Knob :model-value="15" tone="danger" />
+          <KnobInput v-model="knob" />
+          <KnobInput :model-value="80" tone="success" />
+          <KnobInput :model-value="15" tone="danger" />
           <span class="text-xs text-subtle-foreground">{{ knob }}</span>
         </div>
       </Demo>
@@ -391,35 +397,35 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         </div>
       </Demo>
 
-      <!-- `InputAddon` WRAPS the input — the addons are its own `leading`/`trailing` props,
+      <!-- `InputAddonLayout` WRAPS the input — the addons are its own `leading`/`trailing` props,
            not siblings. Used as siblings inside an `InputGroup` the input becomes a group
            segment and takes `[&>*]:rounded-none`, which is the square-bordered input that
            looked like a component bug. `InputGroup` is for joining whole controls. -->
-      <Demo name="InputGroup / InputAddon / LabeledInput" note="focus a segment — the ring rings the group">
+      <Demo name="InputGroup / InputAddonLayout / LabeledField" note="focus a segment — the ring rings the group">
         <div class="space-y-2">
-          <InputAddon leading="https://" trailing=".io">
+          <InputAddonLayout leading="https://" trailing=".io">
             <TextInput placeholder="example.com" />
-          </InputAddon>
+          </InputAddonLayout>
           <InputGroup>
             <TextInput placeholder="First" />
             <TextInput placeholder="Last" />
           </InputGroup>
           <!-- The default slot is SCOPED: React cloned the child to inject the label's id,
                Vue hands it to the consumer to bind. Unbound, the label points at nothing. -->
-          <LabeledInput label="Amount" trailing="USD">
+          <LabeledField label="Amount" trailing="USD">
             <template #default="{ id }">
               <TextInput :id="id" placeholder="0.00" />
             </template>
-          </LabeledInput>
+          </LabeledField>
         </div>
       </Demo>
 
-      <Demo name="CharacterCount / PasswordStrength">
+      <Demo name="CharacterCountCallout / PasswordStrengthCallout">
         <div class="space-y-3">
-          <CharacterCount :value="42" :max="120" is-max-shown />
-          <CharacterCount :value="130" :max="120" />
-          <PasswordStrength value="hunter2" :score="1" />
-          <PasswordStrength value="c0rrect-h0rse-battery" :score="4" />
+          <CharacterCountCallout :value="42" :max="120" is-max-shown />
+          <CharacterCountCallout :value="130" :max="120" />
+          <PasswordStrengthCallout value="hunter2" :score="1" />
+          <PasswordStrengthCallout value="c0rrect-h0rse-battery" :score="4" />
         </div>
       </Demo>
 
@@ -428,141 +434,117 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         <p class="mt-1 text-xs text-subtle-foreground">{{ tags }}</p>
       </Demo>
 
-      <Demo name="Listbox" note="groups, separators, selection indicator">
-        <Listbox v-model="listboxValue" class="w-56">
-          <ListboxGroup label="Fruit">
-            <ListboxItem value="a">Apple</ListboxItem>
-            <ListboxItem value="b">Banana</ListboxItem>
-          </ListboxGroup>
-          <ListboxSeparator />
-          <ListboxGroup label="Veg">
-            <ListboxItem value="c">Carrot</ListboxItem>
-            <ListboxItem value="d" is-disabled>Disabled</ListboxItem>
-          </ListboxGroup>
-        </Listbox>
+      <Demo name="ListboxPicker" note="groups, separators, selection indicator">
+        <ListboxPicker v-model="listboxValue" class="w-56">
+          <ListboxPickerGroup label="Fruit">
+            <ListboxPickerItem value="a">Apple</ListboxPickerItem>
+            <ListboxPickerItem value="b">Banana</ListboxPickerItem>
+          </ListboxPickerGroup>
+          <ListboxPickerSeparator />
+          <ListboxPickerGroup label="Veg">
+            <ListboxPickerItem value="c">Carrot</ListboxPickerItem>
+            <ListboxPickerItem value="d" is-disabled>Disabled</ListboxPickerItem>
+          </ListboxPickerGroup>
+        </ListboxPicker>
       </Demo>
 
-      <!-- The trigger shows the RAW KEY until the content has mounted once: `SelectValue`
+      <!-- The trigger shows the RAW KEY until the content has mounted once: `SelectPickerValue`
            resolves label → item registry → captured label → cache → `getOptionLabel` →
            `serializeKey`. With a preset value and a never-opened menu only the last step
            can fire, so pass `getOptionLabel` (or `options`) to label a closed trigger. -->
-      <Demo name="Select" note="preset value, menu never opened — shows the raw key 'b'">
-        <Select v-model="selected">
-          <SelectTrigger><SelectValue placeholder="Pick one" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem :item-key="'a'" label="Alpha" />
-            <SelectItem :item-key="'b'" label="Beta" />
-            <SelectItem :item-key="'c'" label="Gamma" is-disabled />
-          </SelectContent>
-        </Select>
+      <Demo name="SelectPicker" note="preset value, menu never opened — shows the raw key 'b'">
+        <SelectPicker v-model="selected">
+          <SelectPickerTrigger><SelectPickerValue placeholder="Pick one" /></SelectPickerTrigger>
+          <SelectPickerContent>
+            <SelectPickerItem :item-key="'a'" label="Alpha" />
+            <SelectPickerItem :item-key="'b'" label="Beta" />
+            <SelectPickerItem :item-key="'c'" label="Gamma" is-disabled />
+          </SelectPickerContent>
+        </SelectPicker>
         <p class="mt-1 text-xs text-subtle-foreground">value = {{ selected }}</p>
 
         <p class="mt-3 mb-1 text-xs text-subtle-foreground">same, with `getOptionLabel`:</p>
-        <Select
+        <SelectPicker
           v-model="selected"
           :get-option-label="(k) => ({ a: 'Alpha', b: 'Beta', c: 'Gamma' })[k as string] ?? null"
         >
-          <SelectTrigger><SelectValue placeholder="Pick one" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem :item-key="'a'" label="Alpha" />
-            <SelectItem :item-key="'b'" label="Beta" />
-          </SelectContent>
-        </Select>
+          <SelectPickerTrigger><SelectPickerValue placeholder="Pick one" /></SelectPickerTrigger>
+          <SelectPickerContent>
+            <SelectPickerItem :item-key="'a'" label="Alpha" />
+            <SelectPickerItem :item-key="'b'" label="Beta" />
+          </SelectPickerContent>
+        </SelectPicker>
       </Demo>
 
-      <Demo name="Select" note="size axis on the trigger">
+      <Demo name="SelectPicker" note="size axis on the trigger">
         <div class="space-y-2">
-          <Select v-for="s in INPUT_SIZES" :key="s">
-            <SelectTrigger :size="s"><SelectValue :placeholder="`size ${s}`" /></SelectTrigger>
-            <SelectContent><SelectItem :item-key="'x'" label="Item" /></SelectContent>
-          </Select>
+          <SelectPicker v-for="s in INPUT_SIZES" :key="s">
+            <SelectPickerTrigger :size="s"><SelectPickerValue :placeholder="`size ${s}`" /></SelectPickerTrigger>
+            <SelectPickerContent><SelectPickerItem :item-key="'x'" label="Item" /></SelectPickerContent>
+          </SelectPicker>
         </div>
       </Demo>
 
       <!-- `label` is not optional decoration: the chip registry cannot capture a slot, so a
            row with only slot content registers under its raw `value` and the trigger shows
            "a" instead of "Alpha". The slot still renders the row. -->
-      <Demo name="MultiSelect" note="selected values render as tags in the trigger">
-        <MultiSelect v-model="multi" :get-option-label="greekLabel">
-          <MultiSelectTrigger />
-          <MultiSelectContent>
-            <MultiSelectItem
-              v-for="o in GREEK"
-              :key="o.value"
-              :value="o.value"
-              :label="o.label"
-            >
+      <Demo name="MultiSelectPicker" note="selected values render as tags in the trigger">
+        <MultiSelectPicker v-model="multi" :get-option-label="greekLabel">
+          <MultiSelectPickerTrigger />
+          <MultiSelectPickerContent>
+            <MultiSelectPickerItem v-for="o in GREEK" :key="o.value" :value="o.value" :label="o.label">
               {{ o.label }}
-            </MultiSelectItem>
-          </MultiSelectContent>
-        </MultiSelect>
+            </MultiSelectPickerItem>
+          </MultiSelectPickerContent>
+        </MultiSelectPicker>
         <p class="mt-1 text-xs text-subtle-foreground">{{ multi }}</p>
       </Demo>
 
-      <Demo name="MultiSelect" note="9 selected, max-visible-tags=3 — the rest collapse to +N">
-        <MultiSelect v-model="multiMany" :get-option-label="greekLabel">
-          <MultiSelectTrigger :max-visible-tags="3" />
-          <MultiSelectContent>
-            <MultiSelectItem
-              v-for="o in GREEK"
-              :key="o.value"
-              :value="o.value"
-              :label="o.label"
-            >
+      <Demo name="MultiSelectPicker" note="9 selected, max-visible-tags=3 — the rest collapse to +N">
+        <MultiSelectPicker v-model="multiMany" :get-option-label="greekLabel">
+          <MultiSelectPickerTrigger :max-visible-tags="3" />
+          <MultiSelectPickerContent>
+            <MultiSelectPickerItem v-for="o in GREEK" :key="o.value" :value="o.value" :label="o.label">
               {{ o.label }}
-            </MultiSelectItem>
-          </MultiSelectContent>
-        </MultiSelect>
+            </MultiSelectPickerItem>
+          </MultiSelectPickerContent>
+        </MultiSelectPicker>
         <p class="mt-2 mb-1 text-xs text-subtle-foreground">uncapped — every chip, trigger wraps:</p>
-        <MultiSelect v-model="multiMany" :get-option-label="greekLabel">
-          <MultiSelectTrigger />
-          <MultiSelectContent>
-            <MultiSelectItem
-              v-for="o in GREEK"
-              :key="o.value"
-              :value="o.value"
-              :label="o.label"
-            >
+        <MultiSelectPicker v-model="multiMany" :get-option-label="greekLabel">
+          <MultiSelectPickerTrigger />
+          <MultiSelectPickerContent>
+            <MultiSelectPickerItem v-for="o in GREEK" :key="o.value" :value="o.value" :label="o.label">
               {{ o.label }}
-            </MultiSelectItem>
-          </MultiSelectContent>
-        </MultiSelect>
+            </MultiSelectPickerItem>
+          </MultiSelectPickerContent>
+        </MultiSelectPicker>
       </Demo>
 
-      <!-- Filtering is the CONSUMER's job — `Combobox` is a registry over whatever rows are
-           rendered, and `ComboboxEmpty` has no gate of its own. Rendering every row plus an
+      <!-- Filtering is the CONSUMER's job — `ComboboxPicker` is a registry over whatever rows are
+           rendered, and `ComboboxPickerEmpty` has no gate of its own. Rendering every row plus an
            always-on Empty gives blank options under a permanent "No matches.". `label` feeds
            the fill-on-select registry; the row text is the default slot. -->
-      <Demo name="Combobox / ComboboxGroup" note="type to filter — 'an' keeps Banana">
-        <Combobox v-model="combo" v-model:input-value="comboQuery">
-          <ComboboxInput placeholder="Search fruit…" />
-          <ComboboxContent>
-            <ComboboxGroup
-              v-for="group in comboGroups"
-              :key="group.label"
-              :label="group.label"
-            >
-              <ComboboxItem
-                v-for="f in group.items"
-                :key="f"
-                :value="f"
-                :label="f"
-              >
+      <Demo name="ComboboxPicker / ComboboxPickerGroup" note="type to filter — 'an' keeps Banana">
+        <ComboboxPicker v-model="combo" v-model:input-value="comboQuery">
+          <ComboboxPickerInput placeholder="Search fruit…" />
+          <ComboboxPickerContent>
+            <ComboboxPickerGroup v-for="group in comboGroups" :key="group.label" :label="group.label">
+              <ComboboxPickerItem v-for="f in group.items" :key="f" :value="f" :label="f">
                 {{ f }}
-              </ComboboxItem>
-            </ComboboxGroup>
-            <ComboboxEmpty v-if="comboGroups.length === 0">No matches.</ComboboxEmpty>
-          </ComboboxContent>
-        </Combobox>
+              </ComboboxPickerItem>
+            </ComboboxPickerGroup>
+            <ComboboxPickerEmpty v-if="comboGroups.length === 0">No matches.</ComboboxPickerEmpty>
+          </ComboboxPickerContent>
+        </ComboboxPicker>
         <p class="mt-1 text-xs text-subtle-foreground">value = {{ combo || '—' }}</p>
       </Demo>
 
-      <Demo name="Calendar" note="hover the selected day — it must stay white-on-accent">
-        <Calendar v-model="day" />
+      <Demo name="CalendarPicker" note="hover the selected day — it must stay white-on-accent">
+        <CalendarPicker v-model="day" />
       </Demo>
 
-      <Demo name="RangeCalendar" note="hover a range end and the run between — both keep their fill">
-        <RangeCalendar v-model="range" />
+      <Demo name="RangeCalendarPicker" note="hover a range end and the run between — both keep their fill">
+        <RangeCalendarPicker v-model="range" />
       </Demo>
 
       <Demo name="DatePicker" note="click to open the calendar popover">
@@ -576,7 +558,7 @@ const stamp = ref<Temporal.PlainDateTime | null>(
       <!-- The three below are the ex-native-picker family. All of them now open OUR popover;
            `native` is the documented opt-in that hands the panel back to the browser. Both
            variants are shown so the difference is one glance apart. -->
-      <Demo name="DateInput" note="typed YYYY-MM-DD + Calendar popover — `native` is the opt-out">
+      <Demo name="DateInput" note="typed YYYY-MM-DD + CalendarPicker popover — `native` is the opt-out">
         <div class="space-y-2">
           <DateInput v-model="day" class="w-44" />
           <DateInput native class="w-44" />
@@ -592,7 +574,7 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         </div>
       </Demo>
 
-      <Demo name="DateTimeInput" note="typed date + time with a Calendar/columns popover">
+      <Demo name="DateTimeInput" note="typed date + time with a CalendarPicker/columns popover">
         <div class="space-y-2">
           <DateTimeInput v-model="stamp" class="w-60" />
           <DateTimeInput native class="w-60" />
@@ -604,7 +586,7 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         <TimePicker v-model="clock" placeholder="Pick a time" />
       </Demo>
 
-      <Demo name="RecurrenceEditor" note="end-mode radios are the styled Radio; end date is DatePicker">
+      <Demo name="RecurrenceEditor" note="end-mode radios are the styled RadioInput; end date is DatePicker">
         <RecurrenceEditor />
       </Demo>
 
@@ -612,18 +594,13 @@ const stamp = ref<Temporal.PlainDateTime | null>(
            fixed swatches with two-axis roving focus, same as the React original. The
            component that opens a picker surface is `ColorPicker`. -->
       <Demo
-        name="ColorSwatch / ColorSwatchPicker"
+        name="ColorSwatchPreview / ColorSwatchPicker"
         note="picker = inline palette, no popover — use ColorPicker for that"
       >
         <div class="space-y-3">
-          <Matrix
-            row-axis="size"
-            col-axis="shape"
-            :rows="['xs', 'sm', 'md', 'lg']"
-            :cols="['square', 'circle']"
-          >
+          <Matrix row-axis="size" col-axis="shape" :rows="['xs', 'sm', 'md', 'lg']" :cols="['square', 'circle']">
             <template #default="{ row, col }">
-              <ColorSwatch color="#7c3aed" :size="row as never" :shape="col as never" />
+              <ColorSwatchPreview color="#7c3aed" :size="row as never" :shape="col as never" />
             </template>
           </Matrix>
           <ColorSwatchPicker
@@ -666,43 +643,71 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         </div>
       </Demo>
 
-      <Demo name="Stepper" note="step statuses pending / active / complete">
-        <Stepper default-value="profile">
-          <StepperList>
-            <StepperStep value="account">Account</StepperStep>
-            <StepperStep value="profile">Profile</StepperStep>
-            <StepperStep value="done" is-disabled>Done</StepperStep>
-          </StepperList>
-          <StepperPanel value="account"><p class="p-2 text-sm">Account panel</p></StepperPanel>
-          <StepperPanel value="profile"><p class="p-2 text-sm">Profile panel</p></StepperPanel>
-        </Stepper>
+      <Demo name="StepperGroup" note="step statuses pending / active / complete">
+        <StepperGroup default-value="profile">
+          <StepperGroupList>
+            <StepperGroupStep value="account">Account</StepperGroupStep>
+            <StepperGroupStep value="profile">Profile</StepperGroupStep>
+            <StepperGroupStep value="done" is-disabled>Done</StepperGroupStep>
+          </StepperGroupList>
+          <StepperGroupPanel value="account"><p class="p-2 text-sm">Account panel</p></StepperGroupPanel>
+          <StepperGroupPanel value="profile"><p class="p-2 text-sm">Profile panel</p></StepperGroupPanel>
+        </StepperGroup>
       </Demo>
 
-      <!-- `WizardSteps` renders the tablist from the CONTEXT REGISTRY and has no slot;
-           the `WizardStep` panels are its SIBLINGS, not its children. Nesting them inside
-           `WizardSteps` renders an empty tablist and no panels. -->
-      <Demo name="Wizard" note="steps register from sibling panels, not from WizardSteps' slot">
-        <Wizard default-current-step="one">
-          <WizardSteps />
-          <WizardStep id="one" label="One"><p class="text-sm">Panel one</p></WizardStep>
-          <WizardStep id="two" label="Two" is-final><p class="text-sm">Panel two</p></WizardStep>
-          <WizardFooter />
-        </Wizard>
+      <!-- `WizardFormSteps` renders the tablist from the CONTEXT REGISTRY and has no slot;
+           the `WizardFormStep` panels are its SIBLINGS, not its children. Nesting them inside
+           `WizardFormSteps` renders an empty tablist and no panels. -->
+      <Demo name="WizardForm" note="steps register from sibling panels, not from WizardFormSteps' slot">
+        <WizardForm default-current-step="one">
+          <WizardFormSteps />
+          <WizardFormStep id="one" label="One"><p class="text-sm">Panel one</p></WizardFormStep>
+          <WizardFormStep id="two" label="Two" is-final><p class="text-sm">Panel two</p></WizardFormStep>
+          <WizardFormFooter />
+        </WizardForm>
       </Demo>
 
-      <Demo name="Editable" note="click the preview to enter edit mode">
-        <Editable v-model="editable">
-          <EditablePreview />
-          <EditableInput />
-          <EditableSubmit>Save</EditableSubmit>
-          <EditableCancel>Cancel</EditableCancel>
-        </Editable>
+      <Demo name="EditableInput" note="click the preview to enter edit mode">
+        <EditableInput v-model="editable">
+          <EditableInputPreview />
+          <EditableInputInput />
+          <EditableInputSubmit>Save</EditableInputSubmit>
+          <EditableInputCancel>Cancel</EditableInputCancel>
+        </EditableInput>
       </Demo>
     </div>
 
-    <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">
-      auto-mounted tail
-    </h3>
-    <AutoGroup :namespace="forms" :covered="covered" />
+    <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
+    <Demo name="CodeEditor" note="Escape then Tab leaves the editor">
+      <CodeEditor v-model="code" aria-label="Example source code" />
+    </Demo>
+    <Demo name="SortableGroup" note="Drag the handle or use the movement buttons">
+      <SortableGroup @reorder="reorderSteps">
+        <SortableGroupItem v-for="(step, index) in orderedSteps" :key="step" :index="index" class="flex gap-3 p-2">
+          <SortableGroupHandle :aria-label="`Move ${step}`">↕</SortableGroupHandle>
+          <span>{{ step }}</span>
+          <SortableGroupMoveButton direction="previous" />
+          <SortableGroupMoveButton direction="next" />
+        </SortableGroupItem>
+      </SortableGroup>
+    </Demo>
+    <Demo name="NodeEditor" note="Focus a node and use arrows, or select it and click a movement action">
+      <NodeEditor
+        :nodes="graphNodes"
+        @update:nodes="graphNodes = $event.map((node) => ({ ...node, label: String(node.label ?? node.id) }))"
+      />
+    </Demo>
+    <AutoGroup
+      :namespace="forms"
+      :covered="[
+        ...covered,
+        'CodeEditor',
+        'NodeEditor',
+        'SortableGroup',
+        'SortableGroupItem',
+        'SortableGroupHandle',
+        'SortableGroupMoveButton',
+      ]"
+    />
   </div>
 </template>

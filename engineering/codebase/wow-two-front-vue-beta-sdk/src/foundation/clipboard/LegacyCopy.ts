@@ -1,23 +1,4 @@
-// The deprecated write path: a hidden `<textarea>`, selected, copied with `document.execCommand('copy')`, and
-// removed. Opt-in only, via `legacyFallback: true`.
-//
-// WHY IT EXISTS AT ALL. `navigator.clipboard` requires a secure context. Any page served over plain HTTP — a LAN
-// tool, a staging box on an IP address, an embedded device's admin UI — has no Clipboard API whatsoever, and
-// neither does Safari before 13.1. In those places `execCommand` is not the worse option, it is the only one.
-//
-// WHY IT IS OPT-IN. `document.execCommand` is deprecated: removed from the standard, kept alive by web
-// compatibility, and free to disappear from any engine. It is also synchronous and re-entrant into layout, which
-// makes it a jank source on a large payload. A consumer should choose that trade, not inherit it.
-//
-// THE ELEMENT IS ALWAYS REMOVED. Removal is in a `finally`, not on the success path — if `execCommand` throws
-// (a hardened page, an extension patching it), an early `return` would leave a focus-stealing textarea in the
-// DOM forever, and every retry would leave another. The same `finally` restores focus to whatever had it, since
-// selecting the textarea takes focus away from the button the user just clicked and losing it mid-interaction
-// strands a keyboard user.
-//
-// The textarea is positioned rather than `display: none` / `hidden`: an element outside the layout tree cannot
-// be selected, and an unselected textarea copies nothing.
-
+import { AriaAttribute } from '../dom';
 import { toClipboardFailure, type ClipboardCopyOptions, type ClipboardWriteResult } from './ClipboardResult';
 import { canLegacyCopy } from './ClipboardSupport';
 
@@ -66,20 +47,20 @@ function detach(element: HTMLTextAreaElement): void {
  * @deprecated Prefer `copyText`, which uses the Clipboard API and falls back here only on `legacyFallback: true`.
  */
 export function legacyCopyText(text: string): ClipboardWriteResult {
-  if (!canLegacyCopy()) return { status: 'unsupported' };
+  if (!canLegacyCopy()) return { ok: false, failure: { status: 'unsupported' } };
 
   let element: HTMLTextAreaElement | undefined;
   let previouslyFocused: Element | null = null;
 
   try {
     const body: unknown = document.body;
-    if (typeof body !== 'object' || body === null) return { status: 'unsupported' };
+    if (typeof body !== 'object' || body === null) return { ok: false, failure: { status: 'unsupported' } };
 
     previouslyFocused = document.activeElement;
 
     element = document.createElement('textarea');
     element.value = text;
-    element.setAttribute('aria-hidden', 'true');
+    element.setAttribute(AriaAttribute.Hidden, 'true');
     element.setAttribute('tabindex', '-1');
     element.setAttribute('readonly', 'readonly');
     element.style.cssText = HiddenTextareaCss;
@@ -92,10 +73,13 @@ export function legacyCopyText(text: string): ClipboardWriteResult {
 
     const copied = document.execCommand('copy');
     return copied
-      ? { status: 'copied' }
-      : { status: 'failed', error: new Error('document.execCommand("copy") reported failure.') };
+      ? { ok: true, value: undefined }
+      : {
+          ok: false,
+          failure: { status: 'failed', error: new Error('document.execCommand("copy") reported failure.') },
+        };
   } catch (error) {
-    return toClipboardFailure(error);
+    return { ok: false, failure: toClipboardFailure(error) };
   } finally {
     if (element !== undefined) detach(element);
     restoreFocus(previouslyFocused);
@@ -127,11 +111,11 @@ export function withLegacyFallback(
   text: string | undefined,
   options: ClipboardCopyOptions | undefined,
 ): ClipboardWriteResult {
-  if (modern.status === 'copied') return modern;
+  if (modern.ok) return modern;
   if (options?.legacyFallback !== true) return modern;
   if (text === undefined) return modern;
 
   const legacy = legacyCopyText(text);
-  if (legacy.status === 'copied') return legacy;
-  return modern.status === 'unsupported' ? legacy : modern;
+  if (legacy.ok) return legacy;
+  return modern.failure.status === 'unsupported' ? legacy : modern;
 }

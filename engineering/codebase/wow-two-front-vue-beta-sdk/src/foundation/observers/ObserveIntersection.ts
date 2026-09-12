@@ -34,14 +34,14 @@ export interface IntersectionOptions {
    * Visible fraction(s), each `0`–`1`, at which the callback fires. A single number fires on crossing it in
    * either direction; an array fires at every listed step. Defaults to `0` (any pixel).
    */
-  readonly threshold?: number | readonly number[];
+  readonly threshold?: number | ReadonlyArray<number>;
 }
 
 /** A disposer that is safe to call more than once. */
 export type Disposer = () => void;
 
 /** Shared no-op for the unsupported path, so the caller's cleanup is unconditional. */
-const NOOP: Disposer = () => {};
+const NoopDisposer: Disposer = () => {};
 
 /** Whether a usable `IntersectionObserver` exists — false on the server and in pre-2019 browsers. */
 export function supportsIntersectionObserver(): boolean {
@@ -101,7 +101,7 @@ export function observeIntersection(
   callback: (entry: IntersectionObserverEntry, observer: IntersectionObserver) => void,
   options?: IntersectionOptions,
 ): Disposer {
-  if (!supportsIntersectionObserver()) return NOOP;
+  if (!supportsIntersectionObserver()) return NoopDisposer;
 
   const observer = new IntersectionObserver((entries, self) => {
     for (const entry of entries) callback(entry, self);

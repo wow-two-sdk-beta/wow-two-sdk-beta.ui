@@ -1,16 +1,16 @@
 <script lang="ts">
 export interface PaginationProps {
   /** The total page count (1-based). */
-  total: number;
+  readonly total: number;
 
   /** The current page (1-based). The `v-model:page` binding target. */
-  page: number;
+  readonly page: number;
 
   /** The number of page buttons surrounding the current. Default `1` (so 1 + current + 1 = 3). */
-  siblings?: number;
+  readonly siblings?: number;
 
   /** The hide-first/last toggle (just show prev/next + numbers). */
-  hideFirstLast?: boolean;
+  readonly hideFirstLast?: boolean;
 }
 
 function range(start: number, end: number): ReadonlyArray<number> {
@@ -29,19 +29,19 @@ function buildPages(total: number, page: number, siblings: number): ReadonlyArra
   return pages;
 }
 
-const BASE_BTN =
-  'inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-transparent px-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50';
+const BaseButton =
+  'inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-transparent px-2 text-sm transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50';
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 
 /**
- * Compact page-number row with prev/next + ellipses for skipped ranges.
- * Stateless — consumer drives `page` and reacts to `page-change`.
+ * Renders a compact page-number row with prev / next arrows and ellipses for skipped ranges.
+ * Stateless — the consumer drives `page` and reacts to `update:page`.
  */
 defineOptions({ name: 'Pagination', inheritAttrs: false });
 
@@ -51,11 +51,8 @@ const props = withDefaults(defineProps<PaginationProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model:page` half. */
+  /** Fires when the reader lands on a different page — the `v-model:page` half. */
   'update:page': [page: number];
-
-  /** Replaces React's `onPageChange` — emits the new page on click. */
-  'page-change': [page: number];
 }>();
 
 const attrs = useAttrs();
@@ -66,7 +63,6 @@ const pages = computed(() => buildPages(props.total, props.page, props.siblings)
 function go(page: number): void {
   const next = Math.min(props.total, Math.max(1, page));
   emit('update:page', next);
-  emit('page-change', next);
 }
 
 const classes = computed(() => cn('inline-flex items-center gap-1', attrs.class as string | undefined));
@@ -87,7 +83,7 @@ defineExpose({ el });
       type="button"
       aria-label="First page"
       :disabled="props.page <= 1"
-      :class="cn(BASE_BTN, 'hover:bg-muted')"
+      :class="cn(BaseButton, 'hover:bg-muted')"
       @click="go(1)"
     >
       <Icon :icon="ChevronsLeft" :size="16" />
@@ -96,7 +92,7 @@ defineExpose({ el });
       type="button"
       aria-label="Previous page"
       :disabled="props.page <= 1"
-      :class="cn(BASE_BTN, 'hover:bg-muted')"
+      :class="cn(BaseButton, 'hover:bg-muted')"
       @click="go(props.page - 1)"
     >
       <Icon :icon="ChevronLeft" :size="16" />
@@ -108,7 +104,9 @@ defineExpose({ el });
         :key="p"
         type="button"
         :aria-current="p === props.page ? 'page' : undefined"
-        :class="cn(BASE_BTN, p === props.page ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted')"
+        :class="
+          cn(BaseButton, p === props.page ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted')
+        "
         @click="go(p)"
       >
         {{ p }}
@@ -118,7 +116,7 @@ defineExpose({ el });
       type="button"
       aria-label="Next page"
       :disabled="props.page >= props.total"
-      :class="cn(BASE_BTN, 'hover:bg-muted')"
+      :class="cn(BaseButton, 'hover:bg-muted')"
       @click="go(props.page + 1)"
     >
       <Icon :icon="ChevronRight" :size="16" />
@@ -128,7 +126,7 @@ defineExpose({ el });
       type="button"
       aria-label="Last page"
       :disabled="props.page >= props.total"
-      :class="cn(BASE_BTN, 'hover:bg-muted')"
+      :class="cn(BaseButton, 'hover:bg-muted')"
       @click="go(props.total)"
     >
       <Icon :icon="ChevronsRight" :size="16" />

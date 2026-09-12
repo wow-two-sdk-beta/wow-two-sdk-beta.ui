@@ -1,49 +1,42 @@
 <script lang="ts">
-/** The saturation / value pair a `ColorArea` commits. */
-export interface ColorAreaChange {
-  saturation: number;
-  value: number;
-}
-
 export interface ColorAreaProps {
   /** The hue the square is tinted with (0–360). */
-  hue?: number;
+  readonly hue?: number;
 
   /** The saturation, controlled (0–1). The `v-model:saturation` binding target. */
-  saturation?: number;
+  readonly saturation?: number;
 
   /** The initial saturation when uncontrolled. */
-  defaultSaturation?: number;
+  readonly defaultSaturation?: number;
 
   /** The brightness/value, controlled (0–1). The `v-model:value` binding target. */
-  value?: number;
+  readonly value?: number;
 
   /** The initial value when uncontrolled. */
-  defaultValue?: number;
+  readonly defaultValue?: number;
 
   /** The arrow-key increment. `PageUp`/`PageDown` move ten steps. */
-  step?: number;
+  readonly step?: number;
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
-  isDisabled?: boolean;
+  readonly isDisabled?: boolean;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
-  id?: string;
+  readonly id?: string;
 }
 </script>
 
 <script setup lang="ts">
+import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
-import { cn } from '../../../foundation/utils';
-import { useControlled } from '../../../foundation/hooks';
+import { AriaAttribute } from '../../../foundation/dom';
+import { cn } from '../../../foundation/styles';
+import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { clamp01, hsvToHex } from '../ColorExtensions';
 
-/**
- * Two-axis saturation / value square. Pointer-draggable and fully keyboard
- * operable as an ARIA `slider`.
- */
+/** Renders a two-axis saturation/value square, pointer-draggable and keyboard-operable as an ARIA slider. */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'ColorArea', inheritAttrs: false });
@@ -57,15 +50,10 @@ const props = withDefaults(defineProps<ColorAreaProps>(), {
 });
 
 const emit = defineEmits<{
-  /** The `v-model:saturation` half. */
+  /** Fires when a drag or arrow key lands the thumb on a new saturation — the `v-model:saturation` half. */
   'update:saturation': [value: number];
-  /** The `v-model:value` half. */
+  /** Fires when a drag or arrow key lands the thumb on a new brightness — the `v-model:value` half. */
   'update:value': [value: number];
-  /**
-   * Replaces React's `onValueChange`. Carries BOTH axes in one payload, as the React
-   * original did — the two `update:*` emits above are the Vue `v-model` idiom beside it.
-   */
-  'value-change': [next: ColorAreaChange];
 }>();
 
 const attrs = useAttrs();
@@ -73,10 +61,12 @@ const attrs = useAttrs();
 const saturationControlled = useControlled<number>({
   controlled: () => props.saturation,
   default: () => props.defaultSaturation ?? 1,
+  onChange: (next) => emit('update:saturation', next),
 });
 const valueControlled = useControlled<number>({
   controlled: () => props.value,
   default: () => props.defaultValue ?? 1,
+  onChange: (next) => emit('update:value', next),
 });
 
 const s = saturationControlled.value;
@@ -88,7 +78,7 @@ const disabled = computed(() => props.isDisabled ?? ctx?.isDisabled ?? false);
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel` and
    stop reaching the DOM. It is read off the attrs so it can be relocated onto the track. */
-const ariaLabel = computed(() => attrs['aria-label'] as string | undefined);
+const ariaLabel = computed(() => attrs[AriaAttribute.Label] as string | undefined);
 
 /* Names the area from the Field label when present; an explicit aria-label always wins. */
 const labelledBy = computed(() => (!ariaLabel.value ? ctx?.labelledBy : undefined));
@@ -100,9 +90,6 @@ function commit(nextS: number, nextV: number): void {
   const cv = clamp01(nextV);
   saturationControlled.setValue(cs);
   valueControlled.setValue(cv);
-  emit('update:saturation', cs);
-  emit('update:value', cv);
-  emit('value-change', { saturation: cs, value: cv });
 }
 
 /* `getBoundingClientRect` is safe unguarded — pointer handlers never run on the server. */
@@ -130,6 +117,7 @@ function onPointermove(event: PointerEvent): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
+  if (event.isComposing) return;
   if (event.defaultPrevented) return;
   if (disabled.value) return;
   const big = props.step * 10;
@@ -189,14 +177,14 @@ const valueText = computed(() => `saturation ${(s.value * 100).toFixed(0)}%, val
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
-const OWNED_ATTRS: ReadonlySet<string> = new Set(['class', 'style', 'aria-label']);
+const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'style', AriaAttribute.Label]);
 const passthroughAttrs = computed(() =>
-  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OWNED_ATTRS.has(key))),
+  Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
 const rootClass = computed(() =>
   cn(
-    'relative aspect-square w-full select-none rounded-md border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'relative aspect-square w-full select-none rounded-md border border-border focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     disabled.value && 'pointer-events-none opacity-50',
     attrs.class as ClassValue,
   ),
@@ -204,10 +192,17 @@ const rootClass = computed(() =>
 
 /** The rendered element — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: track });
+
+const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
+const formResetRevision = useNativeFormReset(formResetAnchor, () => {
+  saturationControlled.reset();
+  valueControlled.reset();
+});
 </script>
 
 <template>
   <div
+    :key="formResetRevision"
     ref="track"
     role="slider"
     :id="controlId"
@@ -230,6 +225,12 @@ defineExpose({ el: track });
       aria-hidden="true"
       :style="thumbStyle"
       class="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md ring-1 ring-black/20"
+    />
+    <input
+      ref="formResetAnchor"
+      type="hidden"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      aria-hidden="true"
     />
   </div>
 </template>

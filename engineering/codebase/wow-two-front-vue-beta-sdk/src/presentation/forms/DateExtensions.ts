@@ -1,4 +1,4 @@
-// Shared date helpers for Calendar / DatePicker / DateInput / RangeCalendar.
+// Shared date helpers for CalendarPicker / DatePicker / DateInput / RangeCalendarPicker.
 // Co-located in `forms/` so imports stay within-domain.
 //
 // Temporal-based — the ecosystem standardizes on the Temporal API (dates =
@@ -8,8 +8,8 @@
 
 import { Temporal } from 'temporal-polyfill';
 
-export const WEEKDAYS_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-export const MONTHS_LONG = [
+export const WeekdayLabelsShort = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+export const MonthLabelsLong = [
   'January',
   'February',
   'March',
@@ -68,7 +68,10 @@ export function daysInMonth(year: number, month: number): number {
  * `year`/`month` are 1-indexed (Temporal convention). Cells outside the target
  * month carry `outOfMonth: true`.
  */
-export function buildMonthGrid(year: number, month: number): { date: Temporal.PlainDate; outOfMonth: boolean }[] {
+export function buildMonthGrid(
+  year: number,
+  month: number,
+): ReadonlyArray<{ date: Temporal.PlainDate; outOfMonth: boolean }> {
   const first = Temporal.PlainDate.from({ year, month, day: 1 });
   const start = first.subtract({ days: sundayIndex(first) });
   const cells: { date: Temporal.PlainDate; outOfMonth: boolean }[] = [];
@@ -178,7 +181,7 @@ export function isWeekend(d: Temporal.PlainDate): boolean {
 }
 
 // ── Datetime helpers (ZonedDateTime) ──────────────────────────────────────
-// EventCalendar / ScheduleView model absolute instants (a wall-clock time in a
+// EventCalendarViewer / ScheduleView model absolute instants (a wall-clock time in a
 // specific zone) — the `Temporal.ZonedDateTime` peer of .NET `DateTimeOffset`.
 // The grid + navigation still project down to `Temporal.PlainDate` (via the
 // helpers above); these cover the intra-day time-slot math the grid needs.

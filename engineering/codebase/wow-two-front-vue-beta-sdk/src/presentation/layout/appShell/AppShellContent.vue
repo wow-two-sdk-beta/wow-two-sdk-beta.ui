@@ -11,9 +11,9 @@ export type AppShellContentProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 
-/* The scrolling region inside `AppShellMain` — header, sidebar and footer stay put. */
+/** Renders the scrolling region inside `AppShellMain` — header, sidebar and footer stay put. */
 defineOptions({ name: 'AppShellContent', inheritAttrs: false });
 
 /** The scrolling content — React's `children`. */

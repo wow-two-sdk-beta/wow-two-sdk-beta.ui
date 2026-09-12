@@ -5,25 +5,25 @@ type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface HeadingProps {
   /** The semantic heading level (1–6). Default 2. Visual size is independent — set via `size`. */
-  level?: HeadingLevel;
+  readonly level?: HeadingLevel;
   /** The visual size step. */
-  size?: HeadingSize;
+  readonly size?: HeadingSize;
   /** The font weight. */
-  weight?: HeadingWeight;
+  readonly weight?: HeadingWeight;
   /** The text alignment. */
-  align?: HeadingAlign;
+  readonly align?: HeadingAlign;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn } from '../../../foundation/utils';
+import { cn } from '../../../foundation/styles';
 import { headingVariants } from './Heading.variants';
 
 /**
- * Semantic heading. `level` controls the rendered tag (`h1`–`h6`); `size`
- * controls the visual scale independently — so a visually-large heading
- * can still be the right outline level.
+ * Renders a semantic heading whose tag (`h1`-`h6`) and visual size are set independently.
+ *
+ * So a visually-large heading can still sit at the right outline level.
  */
 defineOptions({ name: 'Heading', inheritAttrs: false });
 

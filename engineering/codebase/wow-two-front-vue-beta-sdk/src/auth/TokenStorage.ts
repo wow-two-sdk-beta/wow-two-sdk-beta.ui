@@ -1,4 +1,4 @@
-/** Defines where a bearer strategy keeps its token — implement over `localStorage`/`StorageBroker` when a session must survive reloads. */
+/** Defines a bearer credential store. Use isolated memory by default; persistence needs explicit app policy. */
 export interface TokenStorage {
   /** Reads the stored token, or `null` when signed out. */
   get(): string | null;
@@ -7,7 +7,7 @@ export interface TokenStorage {
   set(token: string | null): void;
 }
 
-/** Creates the default in-memory token storage — deliberately never persisted, so a reload requires re-login (keeps the token off disk). */
+/** Creates the default in-memory token storage — never persisted, so a reload requires re-login. */
 export function createMemoryTokenStorage(): TokenStorage {
   let token: string | null = null;
   return {

@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { SurfaceTone } from '../../../foundation/utils';
-import type { ContainerProps } from '../container';
+import type { SurfaceTone } from '../../../foundation/styles';
+import type { ContainerLayoutProps } from '../containerLayout';
 import type { SectionPaddingY } from './Section.variants';
 
 export interface SectionProps {
@@ -9,30 +9,30 @@ export interface SectionProps {
    * surface treatment (low-alpha tinted fill + `border-border`). Omit for a
    * transparent band (no fill, no border).
    */
-  tone?: SurfaceTone;
+  readonly tone?: SurfaceTone;
 
-  /** The max-width of the inner centered `Container`. Passthrough to `Container.size`. Default `lg`. */
-  containerSize?: ContainerProps['size'];
+  /** The max-width of the inner centered `ContainerLayout`. Passthrough to `ContainerLayout.size`. Default `lg`. */
+  readonly containerSize?: ContainerLayoutProps['size'];
 
   /** The vertical padding (the band's top/bottom rhythm). Default `md`. */
-  py?: SectionPaddingY;
+  readonly py?: SectionPaddingY;
 
-  /** The full-bleed mode — renders a `<section>` with no inner `Container` (edge-to-edge content). */
-  bleed?: boolean;
+  /** The full-bleed mode — renders a `<section>` with no inner `ContainerLayout` (edge-to-edge content). */
+  readonly bleed?: boolean;
 }
 </script>
 
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
-import { cn, surfaceVariants } from '../../../foundation/utils';
-import Container from '../container/Container.vue';
+import { cn, surfaceVariants } from '../../../foundation/styles';
+import ContainerLayout from '../containerLayout/ContainerLayout.vue';
 import { sectionVariants } from './Section.variants';
 
 /**
- * Full-bleed `<section>` band with an inner centered `Container`. The repetitive
+ * Renders a full-bleed `<section>` band with an inner centered `ContainerLayout`. The repetitive
  * marketing "section band" pattern: optional tinted (shadow-less) background,
  * passthrough container width, and vertical padding. Pass `bleed` to drop the
- * inner Container for edge-to-edge content.
+ * inner ContainerLayout for edge-to-edge content.
  */
 /* `<section>` is a live HTML element, but SFC templates are case-sensitive
    (`<Section>` ≠ `<section>`) and this is a library component — imported, never
@@ -40,6 +40,11 @@ import { sectionVariants } from './Section.variants';
 defineOptions({ name: 'Section', inheritAttrs: false });
 
 const props = withDefaults(defineProps<SectionProps>(), { bleed: false });
+
+defineSlots<{
+  /** The band content — wrapped in a `ContainerLayout` unless `bleed` is set. */
+  default?(): unknown;
+}>();
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
@@ -64,6 +69,6 @@ defineExpose({ el });
 <template>
   <section ref="el" v-bind="rest" :class="classes">
     <slot v-if="props.bleed" />
-    <Container v-else :size="props.containerSize"><slot /></Container>
+    <ContainerLayout v-else :size="props.containerSize"><slot /></ContainerLayout>
   </section>
 </template>

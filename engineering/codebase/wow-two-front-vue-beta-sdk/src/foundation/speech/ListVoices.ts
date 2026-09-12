@@ -1,36 +1,10 @@
-// THE most common bug in this API, and the reason this file exists: `speechSynthesis.getVoices()` returns an
-// EMPTY ARRAY on first call. The voice list is populated asynchronously — Chrome fetches remote voices, and every
-// engine loads them off the main thread — so a component that renders `getVoices()` on mount renders an empty
-// picker, forever, because nothing re-renders it when the list lands. The signal is a `voiceschanged` event, and
-// the fix a consumer eventually writes by hand is exactly `listVoices`.
-//
-// `listVoices` therefore returns a PROMISE that waits for the list, with three subtleties the naive version
-// misses, each of which turns the wait back into an empty array:
-//  1. `voiceschanged` can fire with the list STILL empty. Chrome fires it once during initialization before any
-//     voice is registered. Resolving there hands back exactly the empty array this function exists to avoid, so
-//     an empty payload is ignored and the wait continues.
-//  2. Some engines never fire the event at all — they simply populate the list a few hundred milliseconds in.
-//     The timeout therefore RE-READS `getVoices()` rather than resolving with what it had at subscribe time, so a
-//     silent late population still lands.
-//  3. The wait must be bounded. On a device with genuinely no voices the event never comes, and an unbounded
-//     promise would hang the component that awaited it. `DefaultVoicesTimeoutMs` bounds it and resolves with
-//     whatever exists — possibly nothing, which is a truthful answer a UI can render.
-//
-// The subscription supports BOTH wiring styles. Older WebKit exposes only the `onvoiceschanged` property and no
-// `addEventListener` for it; where the property is used, the previous handler is chained and restored on
-// unsubscribe rather than clobbered, so this slice cannot silently break a consumer's own listener.
-//
-// Language matching lives here too (`voicesForLang`), because "the voices for this locale" is what a caller
-// actually wants and BCP-47 tags do not compare with `===`: a `de` request must match a `de-DE` voice, and engines
-// report tags in mixed case and occasionally with an underscore (`en_US`).
-
 import { speechSynthesisWith } from './SpeechSupport';
 
 /** How long {@link listVoices} waits for a populated list before answering with whatever exists. */
 export const DefaultVoicesTimeoutMs = 1000;
 
 /** The empty answer, shared so an unsupported environment does not allocate a new array per call. */
-const NoVoices: readonly SpeechSynthesisVoice[] = [];
+const NoVoices: ReadonlyArray<SpeechSynthesisVoice> = [];
 
 /** Tunes the wait for an asynchronously-populated voice list. */
 export interface ListVoicesOptions {
@@ -39,7 +13,7 @@ export interface ListVoicesOptions {
 }
 
 /** Reads the engine's current list, guarded — a partial polyfill can return a non-array or throw outright. */
-function readVoices(synth: SpeechSynthesis): readonly SpeechSynthesisVoice[] {
+function readVoices(synth: SpeechSynthesis): ReadonlyArray<SpeechSynthesisVoice> {
   try {
     const voices: unknown = synth.getVoices();
     return Array.isArray(voices) ? (voices as SpeechSynthesisVoice[]) : NoVoices;
@@ -59,7 +33,7 @@ function readVoices(synth: SpeechSynthesis): readonly SpeechSynthesisVoice[] {
  *
  * @returns The voices the engine has registered so far.
  */
-export function listVoicesSync(): readonly SpeechSynthesisVoice[] {
+export function listVoicesSync(): ReadonlyArray<SpeechSynthesisVoice> {
   const synth = speechSynthesisWith('getVoices');
   return synth === undefined ? NoVoices : readVoices(synth);
 }
@@ -127,7 +101,7 @@ export function onVoicesChanged(listener: () => void): () => void {
  * @param options The wait bound. Defaults to {@link DefaultVoicesTimeoutMs}.
  * @returns The voices, or `[]`.
  */
-export function listVoices(options?: ListVoicesOptions): Promise<readonly SpeechSynthesisVoice[]> {
+export function listVoices(options?: ListVoicesOptions): Promise<ReadonlyArray<SpeechSynthesisVoice>> {
   const synth = speechSynthesisWith('getVoices');
   if (synth === undefined) return Promise.resolve(NoVoices);
 
@@ -170,7 +144,7 @@ function primarySubtag(tag: string): string {
 }
 
 /** Sorts the engine's default voice first within a tier; otherwise preserves the engine's own order. */
-function defaultFirst(voices: readonly SpeechSynthesisVoice[]): readonly SpeechSynthesisVoice[] {
+function defaultFirst(voices: ReadonlyArray<SpeechSynthesisVoice>): ReadonlyArray<SpeechSynthesisVoice> {
   return [...voices].sort((left, right) => Number(right.default === true) - Number(left.default === true));
 }
 
@@ -187,7 +161,10 @@ function defaultFirst(voices: readonly SpeechSynthesisVoice[]): readonly SpeechS
  * @param lang A BCP-47 tag (`de`, `en-GB`). Same vocabulary as `foundation/i18n`'s locale.
  * @returns The matching voices, best match first. Empty when nothing matches.
  */
-export function voicesForLang(voices: readonly SpeechSynthesisVoice[], lang: string): readonly SpeechSynthesisVoice[] {
+export function voicesForLang(
+  voices: ReadonlyArray<SpeechSynthesisVoice>,
+  lang: string,
+): ReadonlyArray<SpeechSynthesisVoice> {
   const wanted = normalizeTag(lang);
   if (wanted === '') return NoVoices;
 
