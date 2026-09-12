@@ -15,7 +15,7 @@
 import type { Command } from './Command';
 
 /** The rank of a command the query excludes — compare against this to test a match. */
-export const NO_MATCH = Number.POSITIVE_INFINITY;
+export const NoMatch = Number.POSITIVE_INFINITY;
 
 /** The tier a match landed in — lower sorts first. Exported so a surface can label or style a match by its origin. */
 export const CommandMatchRank = {
@@ -32,7 +32,7 @@ export const CommandMatchRank = {
 export type CommandMatchRank = (typeof CommandMatchRank)[keyof typeof CommandMatchRank];
 
 /**
- * Scores one command against a query — a {@link CommandMatchRank} when it matches, {@link NO_MATCH} when it
+ * Scores one command against a query — a {@link CommandMatchRank} when it matches, {@link NoMatch} when it
  * doesn't. Case-insensitive; the query is trimmed. An empty query matches everything at the best rank.
  */
 export function rankCommand(command: Command, query: string): number {
@@ -51,7 +51,7 @@ export function rankCommand(command: Command, query: string): number {
   const group = command.group;
   if (group !== undefined && group.toLowerCase().includes(needle)) return CommandMatchRank.Group;
 
-  return NO_MATCH;
+  return NoMatch;
 }
 
 /**
@@ -61,13 +61,13 @@ export function rankCommand(command: Command, query: string): number {
  *
  * Availability is NOT applied here — pass `registry.available()` when the palette should hide blocked commands.
  */
-export function searchCommands(commands: readonly Command[], query: string): readonly Command[] {
+export function searchCommands(commands: ReadonlyArray<Command>, query: string): ReadonlyArray<Command> {
   if (query.trim() === '') return commands;
 
   const matches: { readonly command: Command; readonly rank: number; readonly index: number }[] = [];
   commands.forEach((command, index) => {
     const rank = rankCommand(command, query);
-    if (rank !== NO_MATCH) matches.push({ command, rank, index });
+    if (rank !== NoMatch) matches.push({ command, rank, index });
   });
 
   matches.sort((left, right) => left.rank - right.rank || left.index - right.index);

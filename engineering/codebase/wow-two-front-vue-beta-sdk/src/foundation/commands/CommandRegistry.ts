@@ -8,51 +8,54 @@
 //   must not make the palette's rows jump around.
 // - A `register` disposer removes only the entry it registered. A stale disposer firing after a replace is a
 //   no-op — exactly what an effect cleanup racing a re-registration needs (cleanup runs after the next register).
-// - `run` never throws. A missing id, a `when()`-blocked command, a throwing predicate, and a rejecting handler
-//   all resolve to a `CommandRunOutcome`, with the error routed to `onError`. A keystroke handler shouldn't need
-//   a try/catch, and a palette shouldn't crash because one command misbehaves.
+// - Expected missing/blocked/handler failures resolve to CommandRunResult. Programmer exceptions from
+//   predicates or handlers are reported to onError, then reject instead of masquerading as recoverable failures.
 // - Mutations bump a monotonic `version()` on top of notifying listeners. A subscribing composable needs a
 //   snapshot whose identity is stable between mutations; `list()` / `available()` build fresh arrays every call
 //   and would look changed on every read. The version number is the stable cursor those composables read instead.
 // - `registerAll` applies every entry then notifies ONCE, so registering a screen's ten commands wakes
 //   subscribers a single time.
 
-import { CommandRunOutcome, isCommandAvailable, type Command, type CommandContext } from './Command';
+import { ResultExtensions } from '../results';
+import { CommandRunFailureCode } from './CommandRunFailureCode';
+import type { CommandRunResult } from './models/CommandRunResult';
 
-/** Receives an error thrown or rejected by a command's `run` (or its `when` predicate), alongside the offending command. */
+import { isCommandAvailable, type Command, type CommandContext } from './Command';
+
+/** Receives an error thrown or rejected by a command's `run` (or its `when` predicate), with the offending command. */
 export type CommandErrorHandler = (error: unknown, command: Command) => void;
 
-/** Notified after any registry mutation — register, replace, or unregister. Carries no payload; re-read the registry. */
+/** Notified after any registry mutation — register, replace, or unregister. No payload; re-read the registry. */
 export type CommandRegistryListener = () => void;
 
 /** Tunes a registry at creation. */
 export interface CommandRegistryOptions {
-  /** Where a failing `run` is reported. Omitted → failures are swallowed and surface only as a `'failed'` outcome. */
+  /** Reports a programmer exception before the run promise rejects with it. */
   readonly onError?: CommandErrorHandler;
 }
 
 /** The headless command store — registration, lookup, availability, execution, and change notification. */
 export interface CommandRegistry {
-  /** Registers (or replaces, when the `id` already exists) a command; returns a disposer that removes exactly this entry. */
+  /** Registers (or replaces, when the `id` exists) a command; returns a disposer removing exactly this entry. */
   readonly register: (command: Command) => () => void;
 
   /** Registers many commands with a single change notification; returns one disposer removing all of them. */
-  readonly registerAll: (commands: readonly Command[]) => () => void;
+  readonly registerAll: (commands: ReadonlyArray<Command>) => () => void;
 
   /** Removes the command under `id`; returns whether anything was removed. */
   readonly unregister: (id: string) => boolean;
 
-  /** Looks up one command by id — `undefined` when absent. Identity is stable between mutations (safe as a snapshot). */
+  /** Looks up a command by id — `undefined` when absent. Identity is stable between mutations (safe to snapshot). */
   readonly get: (id: string) => Command | undefined;
 
   /** Every registered command in insertion order (a replaced entry keeps its original slot). Fresh array per call. */
   readonly list: () => readonly Command[];
 
-  /** The subset of `list()` that `isCommandAvailable` accepts — what a palette should actually show. Fresh array per call. */
+  /** The subset of `list()` that `isCommandAvailable` accepts — what a palette should show. Fresh array per call. */
   readonly available: () => readonly Command[];
 
-  /** Executes a command by id. Never throws — see {@link CommandRunOutcome}. An async handler is awaited. */
-  readonly run: (id: string, context?: CommandContext) => Promise<CommandRunOutcome>;
+  /** Executes a command by id. Expected failures return Result; programmer errors reject after reporting. */
+  readonly run: (id: string, context?: CommandContext) => Promise<CommandRunResult>;
 
   /** Subscribes to mutations; returns an unsubscribe. */
   readonly subscribe: (listener: CommandRegistryListener) => () => void;
@@ -92,7 +95,7 @@ export function createCommandRegistry(options?: CommandRegistryOptions): Command
       };
     },
 
-    registerAll(commands: readonly Command[]): () => void {
+    registerAll(commands: ReadonlyArray<Command>): () => void {
       const registered = [...commands];
       for (const command of registered) entries.set(command.id, command);
       notify();
@@ -113,25 +116,27 @@ export function createCommandRegistry(options?: CommandRegistryOptions): Command
       return entries.get(id);
     },
 
-    list(): readonly Command[] {
+    list(): ReadonlyArray<Command> {
       return [...entries.values()];
     },
 
-    available(): readonly Command[] {
+    available(): ReadonlyArray<Command> {
       return [...entries.values()].filter(isCommandAvailable);
     },
 
-    async run(id: string, context?: CommandContext): Promise<CommandRunOutcome> {
+    async run(id: string, context?: CommandContext): Promise<CommandRunResult> {
       const command = entries.get(id);
-      if (command === undefined) return CommandRunOutcome.NotFound;
+      if (command === undefined) return ResultExtensions.fail({ code: CommandRunFailureCode.NotFound });
       try {
-        // Inside the try so a throwing `when` degrades to `'failed'` rather than escaping the "never throws" promise.
-        if (!isCommandAvailable(command)) return CommandRunOutcome.Unavailable;
-        await command.run(context);
-        return CommandRunOutcome.Ran;
+        // A predicate bug is reported with the same command context as a handler bug.
+        if (!isCommandAvailable(command)) return ResultExtensions.fail({ code: CommandRunFailureCode.Unavailable });
+        const result = await command.run(context);
+        return result === undefined || result.ok
+          ? ResultExtensions.ok(undefined)
+          : ResultExtensions.fail({ code: CommandRunFailureCode.Failed, error: result.failure });
       } catch (error) {
         options?.onError?.(error, command);
-        return CommandRunOutcome.Failed;
+        throw error;
       }
     },
 

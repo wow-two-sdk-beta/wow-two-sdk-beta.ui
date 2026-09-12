@@ -15,10 +15,10 @@
 
 import { toValue, type MaybeRefOrGetter } from 'vue';
 
-import { useHotkeyMap, type HotkeyOptions } from '../shortcuts';
+import { useHotkeyMap, type HotkeyOptions } from '../../shortcuts';
 
-import type { CommandContext } from './Command';
-import type { CommandRegistry } from './CommandRegistry';
+import type { CommandContext } from '../Command';
+import type { CommandRegistry } from '../CommandRegistry';
 import { useCommandRegistryVersion } from './UseCommandRegistry';
 
 /** Tunes command-shortcut binding — every `useHotkeyMap` option, plus the payload passed to the command. */
@@ -34,7 +34,7 @@ export interface CommandShortcutOptions extends HotkeyOptions {
  * Binds the chord of every available command in `registry`, running the command on trigger. Re-binds whenever the
  * registry changes. Commands without a `shortcut`, and commands `when()`/`enabled` currently blocks, bind nothing.
  *
- * Failures are swallowed by design — `registry.run` never throws and routes errors to the registry's `onError`.
+ * Expected failures settle normally; programmer exceptions are reported by the registry and remain rejected.
  */
 export function useCommandShortcuts(registry: CommandRegistry, options?: CommandShortcutOptions): void {
   const version = useCommandRegistryVersion(registry);

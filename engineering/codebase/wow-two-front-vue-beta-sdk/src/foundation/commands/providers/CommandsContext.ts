@@ -29,9 +29,9 @@ import {
   type MaybeRefOrGetter,
 } from 'vue';
 
-import { isCommandAvailable, type Command } from './Command';
-import { createCommandRegistry, type CommandErrorHandler, type CommandRegistry } from './CommandRegistry';
-import { useCommandRegistryVersion } from './UseCommandRegistry';
+import { isCommandAvailable, type Command } from '../Command';
+import { createCommandRegistry, type CommandErrorHandler, type CommandRegistry } from '../CommandRegistry';
+import { useCommandRegistryVersion } from '../hooks/UseCommandRegistry';
 
 /** The injection key — React's `createContext(undefined)` becomes a key plus an explicit throw at the read site. */
 export const CommandsKey: InjectionKey<CommandRegistry> = Symbol('wow-two.commands');
@@ -104,7 +104,7 @@ function metadataSignature(command: Command): string {
  * snapshot captured when the watcher last ran. Metadata comes from the snapshot — it is covered by the
  * signature, so it can't drift.
  */
-function bindToLatest(command: Command, latest: MaybeRefOrGetter<readonly Command[]>): Command {
+function bindToLatest(command: Command, latest: MaybeRefOrGetter<ReadonlyArray<Command>>): Command {
   const id = command.id;
   const resolve = (): Command | undefined => toValue(latest).find((candidate) => candidate.id === id);
   return {
@@ -125,7 +125,10 @@ function bindToLatest(command: Command, latest: MaybeRefOrGetter<readonly Comman
  *
  * Pass `registry` to target a specific registry; otherwise the ambient one is used (and a missing provider throws).
  */
-export function useRegisterCommands(commands: MaybeRefOrGetter<readonly Command[]>, registry?: CommandRegistry): void {
+export function useRegisterCommands(
+  commands: MaybeRefOrGetter<ReadonlyArray<Command>>,
+  registry?: CommandRegistry,
+): void {
   const target = registry ?? inject(CommandsKey, undefined);
   if (target === undefined) {
     throw new Error('useRegisterCommands must be used inside a <CommandsProvider>, or given an explicit registry');

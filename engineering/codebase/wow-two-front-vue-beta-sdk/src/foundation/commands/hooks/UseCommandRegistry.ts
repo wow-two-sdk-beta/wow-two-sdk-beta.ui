@@ -14,8 +14,8 @@
 
 import { computed, onMounted, onScopeDispose, shallowRef, type ComputedRef, type ShallowRef } from 'vue';
 
-import type { Command } from './Command';
-import type { CommandRegistry } from './CommandRegistry';
+import type { Command } from '../Command';
+import type { CommandRegistry } from '../CommandRegistry';
 
 /**
  * Subscribes to a registry's mutations and returns its current version counter. The building block behind
@@ -44,7 +44,7 @@ export function useCommandRegistryVersion(registry: CommandRegistry): Readonly<S
 }
 
 /** Every registered command in insertion order, updating the caller whenever the registry mutates. */
-export function useCommandList(registry: CommandRegistry): ComputedRef<readonly Command[]> {
+export function useCommandList(registry: CommandRegistry): ComputedRef<ReadonlyArray<Command>> {
   const version = useCommandRegistryVersion(registry);
   // `version` is the mutation cursor that invalidates the list — touched, then discarded.
   return computed(() => {
@@ -60,7 +60,7 @@ export function useCommandList(registry: CommandRegistry): ComputedRef<readonly 
  * `when` predicate closing over unrelated state won't re-run on its own. Keep predicates over state the registry
  * sees (re-register on change — `useRegisterCommands` does this for you), not over free-floating variables.
  */
-export function useAvailableCommands(registry: CommandRegistry): ComputedRef<readonly Command[]> {
+export function useAvailableCommands(registry: CommandRegistry): ComputedRef<ReadonlyArray<Command>> {
   const version = useCommandRegistryVersion(registry);
   return computed(() => {
     void version.value;

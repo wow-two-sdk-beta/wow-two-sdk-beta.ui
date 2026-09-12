@@ -13,7 +13,7 @@
 // displays and what the keyboard triggers can't drift apart.
 
 // Contract — the vocabulary every other file in the slice speaks
-export { CommandRunOutcome, isCommandAvailable, type Command, type CommandContext } from './Command';
+export { isCommandAvailable, type Command, type CommandContext } from './Command';
 
 // Registry — the headless store
 export {
@@ -25,20 +25,30 @@ export {
 } from './CommandRegistry';
 
 // Search — pure, ranked filtering for a palette's input
-export { CommandMatchRank, NO_MATCH, rankCommand, searchCommands } from './SearchCommands';
+export { CommandMatchRank, NoMatch, rankCommand, searchCommands } from './SearchCommands';
 
 // Display — the `⌘K` / `Ctrl+K` label for a command's chord
 export { commandShortcutLabel } from './CommandShortcut';
 
 // Vue — registry subscription primitives (explicit registry)
-export { useAvailableCommands, useCommandList, useCommandRegistryVersion } from './UseCommandRegistry';
+export { useAvailableCommands, useCommandList, useCommandRegistryVersion } from './hooks/UseCommandRegistry';
 
 // Vue — shortcut binding
-export { useCommandShortcuts, type CommandShortcutOptions } from './UseCommandShortcuts';
+export { useCommandShortcuts, type CommandShortcutOptions } from './hooks/UseCommandShortcuts';
 
 // Vue — ambient registry seam. `CommandsProvider` is an SFC, so it needs its own named re-export; the
 // provide/inject half lives in `CommandsContext.ts` as `provideCommands`, for a component that owns a registry
 // and wants no wrapper element.
-export { CommandsKey, provideCommands, useCommand, useCommands, useRegisterCommands } from './CommandsContext';
+export {
+  CommandsKey,
+  provideCommands,
+  useCommand,
+  useCommands,
+  useRegisterCommands,
+} from './providers/CommandsContext';
 
-export { default as CommandsProvider, type CommandsProviderProps } from './CommandsProvider.vue';
+export { default as CommandsProvider, type CommandsProviderProps } from './providers/CommandsProvider.vue';
+
+export { CommandRunFailureCode } from './CommandRunFailureCode';
+export type { CommandRunFailure } from './models/CommandRunFailure';
+export type { CommandRunResult } from './models/CommandRunResult';
