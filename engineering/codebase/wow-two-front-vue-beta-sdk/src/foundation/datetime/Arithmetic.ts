@@ -15,7 +15,7 @@
 // day-of-month is parked at 1 before the month shift and re-applied clamped afterwards to prevent it.
 // `addYears` routes through `addMonths`, so Feb 29 + 1 year = Feb 28 by the same rule.
 
-import { cloneDate, daysInMonth, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from './Internals';
+import { cloneDate, daysInMonth, MsPerHour, MsPerMinute, MsPerSecond } from './Internals';
 
 /** Adds `amount` calendar days (may be negative); preserves wall-clock time across a DST boundary. */
 export function addDays(date: Date, amount: number): Date {
@@ -72,7 +72,7 @@ export function subYears(date: Date, amount: number): Date {
 /** Adds `amount` hours of elapsed time; wall-clock time shifts across a DST boundary. */
 export function addHours(date: Date, amount: number): Date {
   const result = cloneDate(date);
-  result.setTime(result.getTime() + amount * MS_PER_HOUR);
+  result.setTime(result.getTime() + amount * MsPerHour);
   return result;
 }
 
@@ -84,7 +84,7 @@ export function subHours(date: Date, amount: number): Date {
 /** Adds `amount` minutes of elapsed time. */
 export function addMinutes(date: Date, amount: number): Date {
   const result = cloneDate(date);
-  result.setTime(result.getTime() + amount * MS_PER_MINUTE);
+  result.setTime(result.getTime() + amount * MsPerMinute);
   return result;
 }
 
@@ -96,7 +96,7 @@ export function subMinutes(date: Date, amount: number): Date {
 /** Adds `amount` seconds of elapsed time. */
 export function addSeconds(date: Date, amount: number): Date {
   const result = cloneDate(date);
-  result.setTime(result.getTime() + amount * MS_PER_SECOND);
+  result.setTime(result.getTime() + amount * MsPerSecond);
   return result;
 }
 

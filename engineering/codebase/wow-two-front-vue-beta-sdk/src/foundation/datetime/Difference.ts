@@ -18,21 +18,21 @@
 
 import { addMonths } from './Arithmetic';
 import { startOfDay } from './Boundaries';
-import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from './Internals';
+import { MsPerDay, MsPerHour, MsPerMinute, MsPerSecond } from './Internals';
 
 /** Signed whole SECONDS from `from` to `to`, truncated toward zero. Positive when `to` is later. */
 export function differenceInSeconds(from: Date, to: Date): number {
-  return Math.trunc((to.getTime() - from.getTime()) / MS_PER_SECOND);
+  return Math.trunc((to.getTime() - from.getTime()) / MsPerSecond);
 }
 
 /** Signed whole MINUTES from `from` to `to`, truncated toward zero. Positive when `to` is later. */
 export function differenceInMinutes(from: Date, to: Date): number {
-  return Math.trunc((to.getTime() - from.getTime()) / MS_PER_MINUTE);
+  return Math.trunc((to.getTime() - from.getTime()) / MsPerMinute);
 }
 
 /** Signed whole HOURS of elapsed time from `from` to `to`, truncated toward zero. Positive when `to` is later. */
 export function differenceInHours(from: Date, to: Date): number {
-  return Math.trunc((to.getTime() - from.getTime()) / MS_PER_HOUR);
+  return Math.trunc((to.getTime() - from.getTime()) / MsPerHour);
 }
 
 /**
@@ -41,7 +41,7 @@ export function differenceInHours(from: Date, to: Date): number {
  * produces an off-by-one. Positive when `to` is later.
  */
 export function differenceInDays(from: Date, to: Date): number {
-  return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / MS_PER_DAY);
+  return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / MsPerDay);
 }
 
 /**

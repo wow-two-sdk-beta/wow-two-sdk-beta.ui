@@ -14,11 +14,11 @@
 //
 // Parsing is strict + anchored: only the two accepted shapes parse, everything else returns `null`. No
 // `Invalid Date` is ever returned, so a `Date` that leaves this module is always safe to store in state.
-// The accepted shapes mirror `foundation/http/temporalReviver` (`T` separator, no space) so a value that
-// the API client would upgrade to a `Temporal.*` is exactly a value this module parses.
+// Date-time input uses an ISO `T` separator (no space). These are local Date utilities;
+// declared API wire fields use TemporalCodecs and their separate validation contracts.
 
-const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
-const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d{1,9})?(Z|[+-]\d{2}:?\d{2})?$/;
+const DateOnly = /^(\d{4})-(\d{2})-(\d{2})$/;
+const DateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d{1,9})?(Z|[+-]\d{2}:?\d{2})?$/;
 
 /**
  * Narrows `value` to a usable `Date` — a `Date` instance whose time is not `NaN`. Use it before any
@@ -43,7 +43,7 @@ export function parseIsoDate(value: string): Date | null {
   const text = value.trim();
   if (text === '') return null;
 
-  const dateOnly = DATE_ONLY.exec(text);
+  const dateOnly = DateOnly.exec(text);
   if (dateOnly !== null) {
     const year = Number(dateOnly[1]);
     const month = Number(dateOnly[2]);
@@ -63,7 +63,7 @@ export function parseIsoDate(value: string): Date | null {
     return result;
   }
 
-  if (!DATE_TIME.test(text)) return null;
+  if (!DateTime.test(text)) return null;
 
   const parsed = new Date(text);
   return isValidDate(parsed) ? parsed : null;

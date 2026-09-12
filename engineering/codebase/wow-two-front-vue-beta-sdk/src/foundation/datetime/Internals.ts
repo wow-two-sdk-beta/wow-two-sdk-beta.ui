@@ -11,16 +11,16 @@
 //     local noon so a DST midnight-transition zone can't shift the probe onto an adjacent day.
 
 /** Milliseconds in one second. */
-export const MS_PER_SECOND = 1000;
+export const MsPerSecond = 1000;
 
 /** Milliseconds in one minute. */
-export const MS_PER_MINUTE = 60_000;
+export const MsPerMinute = 60_000;
 
 /** Milliseconds in one hour. */
-export const MS_PER_HOUR = 3_600_000;
+export const MsPerHour = 3_600_000;
 
 /** Milliseconds in one 24-hour period (nominal — a DST day is 23 or 25 hours). */
-export const MS_PER_DAY = 86_400_000;
+export const MsPerDay = 86_400_000;
 
 /** Copies a `Date` by timestamp. An invalid input yields an equally-invalid copy (`NaN` time). */
 export function cloneDate(date: Date): Date {

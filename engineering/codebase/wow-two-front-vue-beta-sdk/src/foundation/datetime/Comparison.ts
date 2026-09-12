@@ -88,7 +88,7 @@ export function isFuture(date: Date, now: Date = new Date()): boolean {
 // Shared scan for `minDate`/`maxDate`. Invalid dates are skipped so one bad entry can't win by way of a
 // `NaN` comparison; if every input is invalid the (invalid) first one is returned so the arity contract
 // — "at least one date in, exactly one date out" — never degrades into `null`.
-function select(first: Date, rest: readonly Date[], keep: (candidate: number, best: number) => boolean): Date {
+function select(first: Date, rest: ReadonlyArray<Date>, keep: (candidate: number, best: number) => boolean): Date {
   const candidates = [first, ...rest].filter(isValidDate);
   let best = candidates.at(0) ?? first;
   for (const candidate of candidates) {
@@ -98,12 +98,12 @@ function select(first: Date, rest: readonly Date[], keep: (candidate: number, be
 }
 
 /** Returns a copy of the earliest of the given dates. Invalid dates are ignored unless all of them are. */
-export function minDate(first: Date, ...rest: readonly Date[]): Date {
+export function minDate(first: Date, ...rest: ReadonlyArray<Date>): Date {
   return select(first, rest, (candidate, best) => candidate < best);
 }
 
 /** Returns a copy of the latest of the given dates. Invalid dates are ignored unless all of them are. */
-export function maxDate(first: Date, ...rest: readonly Date[]): Date {
+export function maxDate(first: Date, ...rest: ReadonlyArray<Date>): Date {
   return select(first, rest, (candidate, best) => candidate > best);
 }
 
