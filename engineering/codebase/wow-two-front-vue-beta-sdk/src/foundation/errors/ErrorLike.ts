@@ -53,7 +53,7 @@ export function isError(value: unknown): value is Error {
   }
 }
 
-/** Checks whether a value is structurally an {@link ErrorLike} — an object (or function) whose `message` reads as a string. */
+/** Checks whether a value is structurally an {@link ErrorLike} — an object or function with a string `message`. */
 export function isErrorLike(value: unknown): value is ErrorLike {
   return isObjectLike(value) && typeof readMember(value, 'message') === 'string';
 }

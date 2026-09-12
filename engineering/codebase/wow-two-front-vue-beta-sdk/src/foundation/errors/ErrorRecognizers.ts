@@ -1,6 +1,6 @@
 import { isObjectLike, readMember } from './ErrorLike';
 
-/** Reads a value's `name` as a string — the single property both recognizers key off. Guarded, so a throwing getter reads as absent. */
+/** Reads a value's `name` as a string — the property both recognizers key off. A throwing getter reads as absent. */
 function nameOf(value: unknown): string | undefined {
   if (!isObjectLike(value)) return undefined;
   const name = readMember(value, 'name');

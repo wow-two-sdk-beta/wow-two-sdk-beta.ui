@@ -17,7 +17,7 @@ export interface LogSink {
   /** The name used in `onError` reporting — the only way a handler can tell which sink failed. */
   readonly name?: string;
 
-  /** Receives one record, already filtered by level and redacted. Treat it as read-only; it is shared across the fan-out. */
+  /** Receives one record, already filtered by level and redacted. Treat it as read-only; shared across the fan-out. */
   write(record: LogRecord): void;
 }
 
@@ -30,5 +30,8 @@ export interface LogSinkErrorContext {
   readonly record: LogRecord;
 }
 
-/** Defines the sink-failure handler — logging must never break the caller, so every sink throw lands here instead of propagating. */
+/**
+ * Defines the sink-failure handler — logging must never break the caller, so every sink throw lands here
+ * instead of propagating.
+ */
 export type LogErrorHandler = (error: unknown, context: LogSinkErrorContext) => void;

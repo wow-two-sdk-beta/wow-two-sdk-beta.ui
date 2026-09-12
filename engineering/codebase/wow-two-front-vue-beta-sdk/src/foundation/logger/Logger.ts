@@ -45,18 +45,18 @@ export interface LoggerOptions {
   readonly level?: LogLevel;
 
   /** The sinks records fan out to. Copied on construction; empty means every call is a no-op. */
-  readonly sinks?: readonly LogSink[];
+  readonly sinks?: ReadonlyArray<LogSink>;
 
   /** The base structured fields merged into every record — service name, release, session id. */
   readonly context?: LogContext;
 
   /** The context keys whose values are masked, at any depth, case-insensitively. Default {@link DefaultRedactKeys}. */
-  readonly redactKeys?: readonly string[];
+  readonly redactKeys?: ReadonlyArray<string>;
 
   /** The placeholder written over a redacted value. Default {@link DefaultRedactionMask}. */
   readonly redactionMask?: string;
 
-  /** Receives every sink failure. Omitted means failures are swallowed — a broken sink is never worth an app crash. */
+  /** Receives every sink failure. Omitted → failures are swallowed; a broken sink is never worth an app crash. */
   readonly onError?: LogErrorHandler;
 
   /** Supplies the record timestamp (epoch ms) — injectable for deterministic tests. Default `Date.now`. */
@@ -80,13 +80,22 @@ export interface Logger {
   /** Emits at `error` with structured context only. */
   error(message: string, context?: LogContext): void;
 
-  /** Emits at `error` with a caught value, serialized onto the record's `error`. Pass `undefined` to log context under a `message` key. */
+  /**
+   * Emits at `error` with a caught value, serialized onto the record's `error`. Pass `undefined` to log context
+   * under a `message` key.
+   */
   error(message: string, error: unknown, context?: LogContext): void;
 
-  /** Creates a logger whose records carry this one's context merged with `context` — the child's keys win. Sinks, level, and config are shared. */
+  /**
+   * Creates a logger whose records carry this one's context merged with `context` — the child's keys win.
+   * Sinks, level, and config are shared.
+   */
   child(context: LogContext): Logger;
 
-  /** Moves the threshold for the WHOLE logger tree at runtime — an unknown value is ignored rather than silently muting output. */
+  /**
+   * Moves the threshold for the WHOLE logger tree at runtime — an unknown value is ignored rather than silently
+   * muting output.
+   */
   setLevel(level: LogLevel): void;
 
   /** Reads the current threshold. */
@@ -99,10 +108,10 @@ export interface Logger {
 /** Holds everything a logger tree shares — every field but `level` is fixed at construction. */
 interface LoggerCore {
   /** The sinks every record in the tree fans out to. */
-  readonly sinks: readonly LogSink[];
+  readonly sinks: ReadonlyArray<LogSink>;
 
   /** The keys redacted from every context in the tree. */
-  readonly redactKeys: readonly string[];
+  readonly redactKeys: ReadonlyArray<string>;
 
   /** The mask written over a redacted value. */
   readonly mask: string;
@@ -127,9 +136,9 @@ function copyContext(context: LogContext | undefined): LogContext {
   }
 }
 
-/** Builds one logger node over a shared core and an already-safe context — the root and every child go through here. */
+/** Builds a logger node over a shared core and an already-safe context — the root and every child go through it. */
 function createLoggerFrom(core: LoggerCore, context: LogContext): Logger {
-  /** Routes a sink failure to `onError` — a handler that itself throws is swallowed, since there is nowhere left to report. */
+  /** Routes a sink failure to `onError` — a throwing handler is swallowed, since nowhere is left to report. */
   const report = (error: unknown, sink: LogSink, record: LogRecord): void => {
     if (!core.onError) return;
     try {

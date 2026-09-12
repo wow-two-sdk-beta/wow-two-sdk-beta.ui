@@ -15,7 +15,7 @@
 import type { SerializedError } from '../errors';
 import type { LogLevel } from './LogLevel';
 
-/** Defines the structured fields attached to a record — the "what was happening" that a message string alone cannot carry. */
+/** Defines the structured fields on a record — the "what was happening" that a message string alone cannot carry. */
 export type LogContext = Record<string, unknown>;
 
 /** Defines one emitted log entry — the payload handed to every registered sink. */
@@ -29,7 +29,7 @@ export interface LogRecord {
   /** When the record was created (epoch ms), stamped at call time — never at delivery time. */
   readonly timestamp: number;
 
-  /** The merged and redacted structured fields — logger context first, call-site keys winning. Empty when there were none. */
+  /** The merged and redacted fields — logger context first, call-site keys winning. Empty when there were none. */
   readonly context: LogContext;
 
   /** The serialized failure, when one was logged. Omitted otherwise. */

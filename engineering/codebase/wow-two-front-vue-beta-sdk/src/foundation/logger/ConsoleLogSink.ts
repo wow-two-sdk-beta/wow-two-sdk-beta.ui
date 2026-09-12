@@ -23,7 +23,10 @@ export interface ConsoleLogSinkOptions {
   readonly prefix?: string;
 }
 
-/** Resolves the console method a level routes to. `Silent` never reaches a sink; it returns `undefined` to keep the switch exhaustive. */
+/**
+ * Resolves the console method a level routes to. `Silent` never reaches a sink; it returns `undefined` to keep
+ * the switch exhaustive.
+ */
 function resolveMethod(level: LogLevel): ((...args: unknown[]) => void) | undefined {
   switch (level) {
     case LogLevel.Trace:
@@ -41,7 +44,10 @@ function resolveMethod(level: LogLevel): ((...args: unknown[]) => void) | undefi
   }
 }
 
-/** Creates a sink that writes each record to the matching `console` method — the development destination, opt-in like every other wire. */
+/**
+ * Creates a sink that writes each record to the matching `console` method — the development destination, opt-in
+ * like every other wire.
+ */
 export function consoleLogSink(options: ConsoleLogSinkOptions = {}): LogSink {
   const prefix = options.prefix ?? '[log]';
 

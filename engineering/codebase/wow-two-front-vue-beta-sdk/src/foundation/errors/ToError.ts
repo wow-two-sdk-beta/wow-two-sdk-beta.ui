@@ -1,9 +1,15 @@
 import { isError, isObjectLike, readMember } from './ErrorLike';
 
-/** Provides the last-resort message used when normalization itself fails — the final rung of the never-throw contract. Internal; not barrelled. */
+/**
+ * Provides the last-resort message used when normalization itself fails — the final rung of the never-throw
+ * contract. Internal; not barrelled.
+ */
 export const UnknownErrorMessage = 'Unknown error';
 
-/** Names a value by its constructor for the unserializable tag — `Object.create(null)` has none, hence the `'value'` floor. */
+/**
+ * Names a value by its constructor for the unserializable tag — `Object.create(null)` has none, hence the
+ * `'value'` floor.
+ */
 function constructorNameOf(value: object): string {
   const constructor = readMember(value, 'constructor');
   const name = isObjectLike(constructor) ? readMember(constructor, 'name') : undefined;

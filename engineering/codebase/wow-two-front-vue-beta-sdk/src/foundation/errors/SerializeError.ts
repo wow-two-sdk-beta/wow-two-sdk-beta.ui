@@ -2,21 +2,30 @@ import { DefaultMaxCauseDepth, flattenErrorChain } from './ErrorChain';
 import { readMember } from './ErrorLike';
 import { UnknownErrorMessage } from './ToError';
 
-/** Defines the JSON-safe projection of an error produced by {@link serializeError}. Every member is a plain value — no getters, no prototype, no cycles. */
+/**
+ * Defines the JSON-safe projection of an error produced by {@link serializeError}. Every member is a plain
+ * value — no getters, no prototype, no cycles.
+ */
 export interface SerializedError {
   /** The error kind — the source's `name`, or `'Error'` when it had none. */
   readonly name: string;
 
-  /** The failure description — the source's `message`, or `''` when it had none (this is a log record, not UI copy). */
+  /** The failure description — the source's `message`, or `''` when it had none (a log record, not UI copy). */
   readonly message: string;
 
   /** The captured stack trace. Omitted when the source had none. */
   readonly stack?: string;
 
-  /** The machine-readable code. Omitted unless the source carried a string or number `code` — other types are dropped to keep the payload JSON-safe. */
+  /**
+   * The machine-readable code. Omitted unless the source carried a string or number `code` — other types are
+   * dropped to keep the payload JSON-safe.
+   */
   readonly code?: string | number;
 
-  /** The serialized underlying failure. Omitted at the root of the chain, and wherever the depth cap or a cycle stopped the walk. */
+  /**
+   * The serialized underlying failure. Omitted at the root of the chain, and wherever the depth cap or a cycle
+   * stopped the walk.
+   */
   readonly cause?: SerializedError;
 }
 

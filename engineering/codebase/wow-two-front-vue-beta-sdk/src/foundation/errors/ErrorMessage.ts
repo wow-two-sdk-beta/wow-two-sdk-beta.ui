@@ -1,6 +1,6 @@
 import { isObjectLike, readMember } from './ErrorLike';
 
-/** Provides the message shown when a caught value carries nothing a person could read. Also the floor when a caller's own fallback is blank. */
+/** Provides the message shown when a caught value carries nothing readable. Also the floor for a blank fallback. */
 export const DefaultErrorMessage = 'Something went wrong';
 
 /**

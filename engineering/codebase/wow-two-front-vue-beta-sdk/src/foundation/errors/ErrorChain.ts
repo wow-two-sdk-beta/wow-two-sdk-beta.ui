@@ -8,7 +8,7 @@ import { toError } from './ToError';
  */
 export const DefaultMaxCauseDepth = 8;
 
-/** Resolves a caller-supplied cap to a usable one — at least 1 link (the head is always returned), and never `NaN` / `Infinity`. */
+/** Resolves a caller-supplied cap — at least 1 link (the head is always returned), never `NaN` / `Infinity`. */
 function resolveCap(maxDepth: number): number {
   return Number.isFinite(maxDepth) ? Math.max(1, Math.trunc(maxDepth)) : DefaultMaxCauseDepth;
 }

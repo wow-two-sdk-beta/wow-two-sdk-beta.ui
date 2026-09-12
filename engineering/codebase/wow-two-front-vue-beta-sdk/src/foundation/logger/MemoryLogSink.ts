@@ -11,7 +11,7 @@ import type { LogSink } from './LogSink';
 /** Defines the in-memory sink returned by {@link memoryLogSink} — a sink plus the capture it records. */
 export interface MemoryLogSink extends LogSink {
   /** Every record written, in emit order. */
-  readonly records: readonly LogRecord[];
+  readonly records: ReadonlyArray<LogRecord>;
 
   /** Clears the capture — for a `beforeEach` reset of a shared instance. */
   reset(): void;

@@ -11,7 +11,10 @@
 // Severities are spaced by ten so a consumer can slot a custom level between two of ours without
 // renumbering the set.
 
-/** Defines the severity a record is emitted at — ordered `Trace` (finest) through `Error`, with `Silent` as the off switch. */
+/**
+ * Defines the severity a record is emitted at — ordered `Trace` (finest) through `Error`, with `Silent` as the
+ * off switch.
+ */
 export const LogLevel = {
   /** Refers to the finest-grained diagnostics — per-iteration detail, off in every deployed environment. */
   Trace: 'trace',
@@ -29,7 +32,10 @@ export const LogLevel = {
 
 export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel];
 
-/** Provides the numeric severity of each level — the ordering {@link isLevelEnabled} compares on. `Silent` is infinite, so nothing clears it. */
+/**
+ * Provides the numeric severity of each level — the ordering {@link isLevelEnabled} compares on. `Silent` is
+ * infinite, so nothing clears it.
+ */
 export const LogLevelSeverity: Readonly<Record<LogLevel, number>> = {
   [LogLevel.Trace]: 10,
   [LogLevel.Debug]: 20,

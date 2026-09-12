@@ -28,7 +28,7 @@
 import type { LogContext } from './LogRecord';
 
 /** Provides the context keys redacted by default — the credential names that show up in practically every payload. */
-export const DefaultRedactKeys: readonly string[] = ['password', 'token', 'secret', 'authorization', 'apiKey'];
+export const DefaultRedactKeys: ReadonlyArray<string> = ['password', 'token', 'secret', 'authorization', 'apiKey'];
 
 /** Provides the placeholder written over a redacted value. */
 export const DefaultRedactionMask = '[redacted]';
@@ -39,10 +39,10 @@ export const CircularMarker = '[circular]';
 /** Provides the placeholder written where reading a property threw — a getter or a `Proxy` trap. */
 export const UnreadableMarker = '[unreadable]';
 
-/** Provides the placeholder written where the walk hit {@link DefaultMaxRedactDepth} — fail-closed, so nothing below it escapes unredacted. */
+/** Provides the placeholder written at {@link DefaultMaxRedactDepth} — fail-closed, so nothing below escapes. */
 export const TruncatedMarker = '[truncated]';
 
-/** Provides how many levels the walk descends before truncating — deep enough for any real context, shallow enough to bound the work. */
+/** Provides how many levels the walk descends before truncating — deep enough for real context, still bounded. */
 export const DefaultMaxRedactDepth = 8;
 
 /**
@@ -69,7 +69,7 @@ function readProperty(source: Record<string, unknown>, key: string): unknown {
 }
 
 /** Lists a source's own enumerable keys without trusting it — an `ownKeys` trap can throw. */
-function readKeys(source: Record<string, unknown>): readonly string[] {
+function readKeys(source: Record<string, unknown>): ReadonlyArray<string> {
   try {
     return Object.keys(source);
   } catch {
@@ -125,7 +125,7 @@ function redactValue(
  */
 export function redactContext(
   context: LogContext,
-  redactKeys: readonly string[] = DefaultRedactKeys,
+  redactKeys: ReadonlyArray<string> = DefaultRedactKeys,
   mask: string = DefaultRedactionMask,
 ): LogContext {
   try {
