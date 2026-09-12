@@ -3,10 +3,10 @@
 //
 // Scope boundary — this slice does NOT format for humans:
 //  - Locale-aware display (`date`, `time`, `relativeTime`) belongs to `foundation/i18n` (`Intl`-backed).
-//  - Compact elapsed-time humanizing (`3m 20s`) belongs to `foundation/format` (`formatDuration`).
-//  - The only strings here are MACHINE strings: ISO-8601 in (`parseIsoDate`) and out (`toIsoDateString`).
+//  - Compact elapsed-time humanizing (`3m 20s`) belongs to `foundation/formatters` (`formatDuration`).
+//  - Wire fields use explicit TemporalCodecs. The older Date helpers remain local-calendar utilities.
 //
-// Slice-wide contracts, uniform across every export:
+// Date utility contracts (TemporalCodecs has its separate adjacent wire specification):
 //  - IMMUTABLE — every op returns a new `Date`; no input is ever mutated.
 //  - LOCAL — boundaries, day math, and ISO date-only serialization use local wall-clock fields, never
 //    UTC. `toISOString().slice(0, 10)` shifts the day for most of the planet; `toIsoDateString` doesn't.
@@ -78,3 +78,5 @@ export {
 export { eachDayOfInterval, isWithinInterval, overlaps, type DateInterval, type OverlapOptions } from './Interval';
 
 export { isValidDate, parseIsoDate, toIsoDateString } from './IsoDate';
+
+export { TemporalCodecs, type TemporalFieldCodec } from './TemporalCodecs';
