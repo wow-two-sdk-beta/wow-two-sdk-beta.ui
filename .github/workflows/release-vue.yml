@@ -49,7 +49,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install browser
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Typecheck
         run: pnpm typecheck
@@ -57,8 +60,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Build
-        run: pnpm build
+      - name: Format
+        run: pnpm format:check
+
+      - name: Tests
+        run: pnpm test
 
       - name: Bump patch version
         id: bump
@@ -68,9 +74,15 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "::notice::Releasing @wow-two-beta/ui-vue v$VERSION"
 
+      - name: Build
+        run: pnpm build
+
+      - name: Packed consumer
+        run: pnpm check:package --install --output "$RUNNER_TEMP/ui-vue.tgz"
+
       # --- npm publish: the release gate. Everything below must NOT block it. ---
       - name: Publish to npm
-        run: npm publish --access public
+        run: npm publish "$RUNNER_TEMP/ui-vue.tgz" --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
