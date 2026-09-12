@@ -12,6 +12,12 @@
 
 ## 0. Verdict legend
 
+Vue exact-number scope (2026-09-12): **NOW** — SDK-owned immutable numeric values, explicit exact arithmetic,
+lossless JSON parsing/encoding and an HTTP codec seam. `bignumber.js` and `lossless-json` are private engines.
+Native operator overloading and universal exact transcendental arithmetic are **SKIP**; explicit precision
+and rounding govern operations without finite decimal results. Existing Vue clients are not globally
+migrated by this prototype. React remains parked.
+
 | Code | Meaning |
 |---|---|
 | **DONE** | Already shipped (snapshot 2026-05-04) |

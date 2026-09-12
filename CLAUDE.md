@@ -2,9 +2,24 @@
 
 ## What is this
 
-The `@wow-two-beta/ui` package — beta-forever React UI library for the wow-two ecosystem. Intentionally pre-1.0. Ship as much as possible to feed real consumers (haven first); distill into a clean `@wow-two/ui` only after the platform layer below stabilizes.
+Two independently built beta packages: React `@wow-two-beta/ui` and Vue `@wow-two-beta/ui-vue`, under
+`engineering/codebase/wow-two-front-beta-sdk/` and `engineering/codebase/wow-two-front-vue-beta-sdk/`.
+Both remain intentionally pre-1.0. The active sweep is Vue; the legacy React-specific sections below apply only to React.
 
-> **Beta-forever rules**: no CHANGELOG, no PR gates, push directly to main, fix-forward when broken. CI builds + auto-bumps `0.0.y` on each main push. Tests exist (`pnpm test`) but are not a CI gate yet — see `engineering/architecture/testing.md`.
+> **Beta-forever rules**: no CHANGELOG, no PR gates, direct main releases, fix-forward when broken. Package-scoped CI auto-bumps `0.0.y`. Vue release CI gates types, lint, format, tests, build and the actual packed consumer; the legacy React workflow and guidance remain separate.
+
+## Vue sweep scope
+
+- The active conventions sweep targets `engineering/codebase/wow-two-front-vue-beta-sdk/` (`@wow-two-beta/ui-vue`).
+- React implementation and release are parked; the React-specific guidance below does not override the Vue sweep.
+- Vue source follows the workspace frontend conventions; instance API contracts live in adjacent `*.spec.md` files.
+- Vue tests and executable demos live under `tests/` and `apps/playground/`; do not add colocated React stories.
+- Vue utility roles use the owning convention's suffix; do not add `*Helpers.ts` or duplicate `*.standard.md` rules.
+- The sweep includes specifications and behavior verification; deferring standardization does not apply to it.
+- Run commands from the Vue package directory; the repository root is not a pnpm package.
+- Validate typecheck, SFC compilation, lint, format, tests, build and the packed artifact before release.
+- Existing staged/unstaged work belongs to the shared sweep; preserve it and record each implementation lane.
+- Versioning remains beta `0.0.y`; radical changes are permitted and there are no production consumers.
 
 ## Tech catalog & roadmap
 
@@ -108,7 +123,7 @@ Templates exist at [`engineering/architecture/templates/component-standard.md`](
 
 ## Out of scope (deliberately deferred)
 
-- No CI test gate yet (suite exists, runs locally; Actions wiring later). Broken on main → fix-forward.
+- React's legacy CI test-gate guidance is unchanged. Vue release CI runs the complete package gates.
 - No CHANGELOG. Git log is the changelog.
 - No PR review. Push to main.
 - No graduation/distill rule yet. Beta-forever until platform layer matures.

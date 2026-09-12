@@ -2249,6 +2249,7 @@ The **Standard Schema spec** ([standard-schema.dev](https://standard-schema.dev)
 | Number | **big.js** | Arbitrary precision decimals |
 | Number | **decimal.js / decimal.js-light** | Same niche; richer |
 | Number | **bignumber.js** | Same niche |
+| JSON | **lossless-json** | Preserve numeric tokens before binary64 conversion |
 | Number | **fraction.js** | Rational numbers |
 | Number | **mathjs** | Full math library |
 | Color | **chroma-js** | Color manipulation, scales |
