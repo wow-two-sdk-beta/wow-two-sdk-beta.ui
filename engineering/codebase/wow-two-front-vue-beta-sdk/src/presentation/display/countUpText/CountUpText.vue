@@ -31,7 +31,7 @@ const defaultFormat = (v: number): string => v.toFixed(0);
 </script>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useAttrs, useTemplateRef, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useReducedMotion } from '../../../foundation/device';
 
@@ -73,12 +73,16 @@ function animate(): () => void {
   const to = props.to;
   const duration = props.duration;
   const easing = props.easing;
+  if (!Number.isFinite(duration) || duration <= 0 || from === to) {
+    current.value = to;
+    return () => undefined;
+  }
   const start = performance.now();
   let raf = 0;
 
   const tick = (now: number): void => {
     const t = Math.min(1, (now - start) / duration);
-    current.value = from + (to - from) * easing(t);
+    current.value = t < 1 ? from + (to - from) * easing(t) : to;
     if (t < 1) raf = requestAnimationFrame(tick);
   };
 
@@ -86,11 +90,7 @@ function animate(): () => void {
   return () => cancelAnimationFrame(raf);
 }
 
-/*
- * React's `useEffect` on `[to, from, duration, easing, canTriggerOnView]`. Kicked
- * off from `onMounted` instead of an `immediate` watcher because the
- * IntersectionObserver branch needs the element, which only exists after mount.
- */
+/** Cancels stale work and observes the current root until its first viewport entry. */
 function run(): void {
   cleanup?.();
   cleanup = undefined;
@@ -101,13 +101,15 @@ function run(): void {
   }
 
   const node = el.value;
-  if (props.canTriggerOnView && typeof IntersectionObserver !== 'undefined' && node) {
+  if (!node) return;
+  if (props.canTriggerOnView && !started && typeof IntersectionObserver !== 'undefined') {
     let cancel: (() => void) | undefined;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting && !started) {
             started = true;
+            observer.disconnect();
             cancel = animate();
           }
         }
@@ -125,9 +127,19 @@ function run(): void {
   cleanup = animate();
 }
 
-onMounted(run);
-
-watch([() => props.to, () => props.from, () => props.duration, () => props.easing, () => props.canTriggerOnView], run);
+watch(
+  [
+    el,
+    reducedMotion,
+    () => props.to,
+    () => props.from,
+    () => props.duration,
+    () => props.easing,
+    () => props.canTriggerOnView,
+  ],
+  run,
+  { flush: 'post' },
+);
 
 onBeforeUnmount(() => cleanup?.());
 

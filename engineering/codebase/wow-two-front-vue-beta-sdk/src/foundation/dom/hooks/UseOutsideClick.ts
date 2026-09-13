@@ -24,17 +24,25 @@ export function useOutsideClick(
   watchPostEffect((onCleanup) => {
     if (!toValue(enabled) || typeof document === 'undefined') return;
 
+    const documents = new Set([document]);
+    for (const candidate of targetList) {
+      const owner = toValue(candidate)?.ownerDocument;
+      if (owner) documents.add(owner);
+    }
+
     const onPointerDown = (e: PointerEvent): void => {
       const target = e.target as Node | null;
       if (!target) return;
       for (const candidate of targetList) {
         const element = toValue(candidate);
-        if (element && element.contains(target)) return;
+        if (element && (e.composedPath().includes(element) || element.contains(target))) return;
       }
       handler(e);
     };
 
-    document.addEventListener('pointerdown', onPointerDown, true);
-    onCleanup(() => document.removeEventListener('pointerdown', onPointerDown, true));
+    for (const owner of documents) owner.addEventListener('pointerdown', onPointerDown, true);
+    onCleanup(() => {
+      for (const owner of documents) owner.removeEventListener('pointerdown', onPointerDown, true);
+    });
   });
 }

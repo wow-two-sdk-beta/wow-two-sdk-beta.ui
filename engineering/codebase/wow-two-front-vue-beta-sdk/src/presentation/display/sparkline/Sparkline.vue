@@ -122,8 +122,16 @@ const geometry = computed<SparklineGeometry>(() => {
   const { data, width, height } = props;
   if (data.length === 0) return EmptyGeometry;
 
-  const min = props.min ?? Math.min(...data);
-  const max = props.max ?? Math.max(...data);
+  let seriesMin = Number.POSITIVE_INFINITY;
+  let seriesMax = Number.NEGATIVE_INFINITY;
+  if (props.min === undefined || props.max === undefined) {
+    for (const value of data) {
+      seriesMin = Math.min(seriesMin, value);
+      seriesMax = Math.max(seriesMax, value);
+    }
+  }
+  const min = props.min ?? seriesMin;
+  const max = props.max ?? seriesMax;
   const range = max - min || 1;
   const stepX = data.length === 1 ? 0 : width / (data.length - 1);
   const pad = 1; // keep stroke inside the box

@@ -120,6 +120,12 @@ function rebuild(target: VNode, props: AnyProps, children: unknown): VNode {
   const rebuilt = h(target.type as never, props, children as never);
   rebuilt.ref = target.ref;
   rebuilt.key = target.key;
+  // These belong to the child vnode rather than its props; losing them drops
+  // v-show/custom directives, transition hooks and the caller's scoped CSS.
+  rebuilt.dirs = target.dirs;
+  rebuilt.transition = target.transition;
+  rebuilt.scopeId = target.scopeId;
+  if ('slotScopeIds' in target) Object.assign(rebuilt, { slotScopeIds: target.slotScopeIds });
   return rebuilt;
 }
 

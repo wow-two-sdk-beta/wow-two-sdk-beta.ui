@@ -14,6 +14,7 @@ export interface ComboboxPickerInputProps {
 </script>
 
 <script setup lang="ts">
+import { DomOrderExtensions } from '../../../foundation/dom';
 import { computed, useAttrs } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
@@ -40,11 +41,18 @@ function setRef(node: unknown): void {
 /* `document` is reached only from a keydown handler, which cannot fire during SSR. */
 function setActiveAndScroll(id: string): void {
   ctx.setActiveId(id);
-  document.getElementById(id)?.scrollIntoView({ block: 'nearest' });
+  ctx.inputEl.value?.ownerDocument.getElementById(id)?.scrollIntoView({ block: 'nearest' });
+}
+
+function enabledItems() {
+  return DomOrderExtensions.inDocumentOrder(
+    ctx.items.filter((item) => !item.isDisabled),
+    (item) => ctx.inputEl.value?.ownerDocument.getElementById(item.id),
+  );
 }
 
 function moveActive(direction: 1 | -1): void {
-  const list = ctx.items.filter((i) => !i.isDisabled);
+  const list = enabledItems();
   if (list.length === 0) return;
   const idx = list.findIndex((i) => i.id === ctx.activeId);
   let nextIdx = idx + direction;
@@ -74,14 +82,14 @@ function onKeydown(event: KeyboardEvent): void {
     case 'Home':
       if (ctx.open) {
         event.preventDefault();
-        const first = ctx.items.find((i) => !i.isDisabled);
+        const first = enabledItems()[0];
         if (first) setActiveAndScroll(first.id);
       }
       break;
     case 'End':
       if (ctx.open) {
         event.preventDefault();
-        const list = ctx.items.filter((i) => !i.isDisabled);
+        const list = enabledItems();
         const last = list[list.length - 1];
         if (last) setActiveAndScroll(last.id);
       }

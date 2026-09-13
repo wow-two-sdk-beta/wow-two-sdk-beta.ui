@@ -27,7 +27,8 @@ export function useScrollLock(enabled: MaybeRefOrGetter<boolean> = true): void {
       originalPaddingRight = body.style.paddingRight;
       body.style.overflow = 'hidden';
       if (scrollbarWidth > 0) {
-        body.style.paddingRight = `${scrollbarWidth}px`;
+        const padding = Number.parseFloat(window.getComputedStyle(body).paddingRight) || 0;
+        body.style.paddingRight = `${padding + scrollbarWidth}px`;
       }
     }
     lockCount += 1;

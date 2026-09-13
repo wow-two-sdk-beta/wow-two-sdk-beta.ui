@@ -148,10 +148,13 @@ const sortedData = computed<ReadonlyArray<T>>(() => {
   const column = props.columns.find((entry) => entry.key === active.columnKey);
   const accessor = column?.accessor;
   if (!accessor) return props.data;
-  return [...props.data].sort((a, b) => {
-    const result = defaultCompare(accessor(a), accessor(b));
-    return active.direction === SortDirection.Asc ? result : -result;
-  });
+  return props.data
+    .map((row) => ({ row, value: accessor(row) }))
+    .sort((a, b) => {
+      const result = defaultCompare(a.value, b.value);
+      return active.direction === SortDirection.Asc ? result : -result;
+    })
+    .map(({ row }) => row);
 });
 
 function cycleSort(columnKey: string): void {

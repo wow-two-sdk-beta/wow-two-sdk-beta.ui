@@ -18,6 +18,7 @@ export interface MenuItemProps {
 </script>
 
 <script setup lang="ts">
+import { DomOrderExtensions } from '../../../foundation/dom';
 import { computed, onScopeDispose, shallowRef, useAttrs, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { dataAttr } from '../../../foundation/dom';
@@ -61,7 +62,10 @@ watch(
 onScopeDispose(() => menu.unregisterItem(id));
 
 function moveFocus(target: 1 | -1 | 'first' | 'last'): void {
-  const list = menu.items.filter((i) => !i.disabled);
+  const list = DomOrderExtensions.inDocumentOrder(
+    menu.items.filter((i) => !i.disabled),
+    (item) => item.el,
+  );
   if (list.length === 0) return;
   if (target === 'first' || target === 'last') {
     list[target === 'first' ? 0 : list.length - 1]?.el?.focus();

@@ -10,6 +10,7 @@ export interface RovingFocusGroupProps extends /* @vue-ignore */ HTMLAttributes 
 </script>
 
 <script setup lang="ts">
+import { DomOrderExtensions } from '../../dom';
 import { provide, shallowRef, useTemplateRef, watch } from 'vue';
 import { Direction, useDirection } from '../directionProvider';
 import {
@@ -58,7 +59,9 @@ function setFocusedId(id: string): void {
 }
 
 function register(id: string, node: HTMLElement | null): void {
-  if (!items.some((item) => item.id === id)) {
+  const existing = items.find((item) => item.id === id);
+  if (existing) existing.node = node;
+  else {
     const entry: ItemEntry = { id, node };
     // Insert by DOM order (not mount order) so dynamically inserted
     // items navigate in visual order.
@@ -104,7 +107,10 @@ watch(
 );
 
 function onItemKeyDown(event: KeyboardEvent, id: string): void {
-  const idx = items.findIndex((item) => item.id === id);
+  if (event.defaultPrevented || event.isComposing) return;
+  // Keyed children may move without remounting. Resolve visual order when navigating.
+  const ordered = DomOrderExtensions.inDocumentOrder(items, (item) => item.node);
+  const idx = ordered.findIndex((item) => item.id === id);
   if (idx === -1) return;
   const isVert = props.orientation === Orientation.Vertical || props.orientation === Orientation.Both;
   const isHoriz = props.orientation === Orientation.Horizontal || props.orientation === Orientation.Both;
@@ -116,13 +122,13 @@ function onItemKeyDown(event: KeyboardEvent, id: string): void {
   // found; Home / End land on the first / last *enabled* item.
   let next: ItemEntry | undefined;
   if ((event.key === nextHorizKey && isHoriz) || (event.key === 'ArrowDown' && isVert)) {
-    next = findEnabled(items, idx + 1, 1, props.canLoop);
+    next = findEnabled(ordered, idx + 1, 1, props.canLoop);
   } else if ((event.key === prevHorizKey && isHoriz) || (event.key === 'ArrowUp' && isVert)) {
-    next = findEnabled(items, idx - 1, -1, props.canLoop);
+    next = findEnabled(ordered, idx - 1, -1, props.canLoop);
   } else if (event.key === 'Home') {
-    next = findEnabled(items, 0, 1, false);
+    next = findEnabled(ordered, 0, 1, false);
   } else if (event.key === 'End') {
-    next = findEnabled(items, items.length - 1, -1, false);
+    next = findEnabled(ordered, ordered.length - 1, -1, false);
   } else {
     return;
   }

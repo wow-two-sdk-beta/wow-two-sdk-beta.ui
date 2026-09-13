@@ -1,4 +1,4 @@
-import { shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
+import { onMounted, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
 
 /**
  * The `useScrollSpy` tuning knobs.
@@ -24,6 +24,10 @@ export function useScrollSpy(
   options: UseScrollSpyOptions = {},
 ): Readonly<ShallowRef<string | null>> {
   const activeId = shallowRef<string | null>(null);
+  const mounted = shallowRef(false);
+  onMounted(() => {
+    mounted.value = true;
+  });
 
   watch(
     [
@@ -31,8 +35,11 @@ export function useScrollSpy(
       () => toValue(options.rootMargin) ?? '0px 0px -60% 0px',
       () => toValue(options.threshold) ?? 0,
       () => toValue(options.root) ?? null,
+      mounted,
     ],
-    ([idList, rootMargin, threshold, root], _previous, onCleanup) => {
+    ([idList, rootMargin, threshold, root, isMounted], _previous, onCleanup) => {
+      activeId.value = null;
+      if (!isMounted) return;
       /* `immediate: true` makes this watcher run during SSR too (Vue skips only the
          non-immediate post-flush ones), where neither `document` nor
          `IntersectionObserver` exists. */
@@ -52,7 +59,10 @@ export function useScrollSpy(
               seen.delete(e.target.id);
             }
           }
-          if (seen.size === 0) return;
+          if (seen.size === 0) {
+            activeId.value = null;
+            return;
+          }
           // Pick the section whose top is closest to (but above) the rootMargin band.
           let bestId: string | null = null;
           let bestTop = Number.POSITIVE_INFINITY;

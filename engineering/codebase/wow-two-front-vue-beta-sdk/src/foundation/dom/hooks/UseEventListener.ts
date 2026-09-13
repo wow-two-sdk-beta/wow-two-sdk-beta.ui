@@ -26,9 +26,10 @@ export function useEventListener<K extends string>(
     if (!element) return;
     // Capture options at attach time — remove must use the same capture flag.
     const listenerOptions = toValue(options);
+    const capture = typeof listenerOptions === 'boolean' ? listenerOptions : (listenerOptions?.capture ?? false);
     const type = toValue(event);
     const listener = (e: Event): void => handler(e);
     element.addEventListener(type, listener, listenerOptions);
-    onCleanup(() => element.removeEventListener(type, listener, listenerOptions));
+    onCleanup(() => element.removeEventListener(type, listener, capture));
   });
 }

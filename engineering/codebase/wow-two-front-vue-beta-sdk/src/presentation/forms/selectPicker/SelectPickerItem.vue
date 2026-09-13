@@ -59,7 +59,10 @@ watch(
     text: itemText.value,
     isDisabled: props.isDisabled,
   }),
-  (entry) => ctx.registerItem(entry),
+  (entry, previous) => {
+    if (previous && !Object.is(previous.itemKey, entry.itemKey)) ctx.unregisterItem(previous.itemKey);
+    ctx.registerItem(entry);
+  },
   { immediate: true },
 );
 onBeforeUnmount(() => ctx.unregisterItem(props.itemKey));

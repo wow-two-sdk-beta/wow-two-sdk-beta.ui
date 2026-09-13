@@ -8,18 +8,21 @@ Public import: `import { AnimatedNumberText } from '@wow-two-beta/ui-vue/present
 
 ## Contract
 
+- Non-positive or non-finite durations settle at the target without starting animation frames.
+- Enabling reduced motion cancels the active tween and displays the target.
+
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `value` | `number` | yes | — | The target value — every change tweens the display from where it currently sits. |
-| `duration` | `number` | no | `500` | The tween length in ms. Default `500`. |
-| `easing` | `(t: number) => number` | no | `easeOutCubic` | The easing applied to the tween's normalized time. Default `easeOutCubic`. |
-| `format` | `(value: number) => string` | no | `defaultFormat` | The value formatter. Rich content → the `value` slot. |
-| `as` | `ElementTag` | no | `'span'` | The rendered tag. Default `span`. |
+| Prop       | Type                        | Required | Default         | Meaning                                                                          |
+| ---------- | --------------------------- | -------- | --------------- | -------------------------------------------------------------------------------- |
+| `value`    | `number`                    | yes      | —               | The target value — every change tweens the display from where it currently sits. |
+| `duration` | `number`                    | no       | `500`           | The tween length in ms. Default `500`.                                           |
+| `easing`   | `(t: number) => number`     | no       | `easeOutCubic`  | The easing applied to the tween's normalized time. Default `easeOutCubic`.       |
+| `format`   | `(value: number) => string` | no       | `defaultFormat` | The value formatter. Rich content → the `value` slot.                            |
+| `as`       | `ElementTag`                | no       | `'span'`        | The rendered tag. Default `span`.                                                |
 
 ## Emits
 
@@ -27,8 +30,8 @@ None declared.
 
 ## Slots
 
-| Slot | Signature | Meaning |
-|---|---|---|
+| Slot    | Signature                                                     | Meaning                                                                     |
+| ------- | ------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `value` | `value?(props: { value: number; display: string }): unknown;` | The rich override for the formatted number — receives the live tween value. |
 
 ## Exposed handle

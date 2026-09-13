@@ -215,10 +215,16 @@ function fitView(): void {
     viewport.value = { x: 0, y: 0, zoom: 1 };
     return;
   }
-  const minX = Math.min(...props.nodes.map((node) => node.x));
-  const minY = Math.min(...props.nodes.map((node) => node.y));
-  const maxX = Math.max(...props.nodes.map((node) => node.x + props.nodeWidth));
-  const maxY = Math.max(...props.nodes.map((node) => node.y + props.nodeHeight));
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+  for (const node of props.nodes) {
+    minX = Math.min(minX, node.x);
+    minY = Math.min(minY, node.y);
+    maxX = Math.max(maxX, node.x + props.nodeWidth);
+    maxY = Math.max(maxY, node.y + props.nodeHeight);
+  }
   const width = maxX - minX;
   const height = maxY - minY;
   const rect = el.value?.getBoundingClientRect();

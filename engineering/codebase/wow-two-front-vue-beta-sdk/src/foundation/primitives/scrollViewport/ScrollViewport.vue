@@ -25,7 +25,7 @@ export interface ScrollViewportProps extends /* @vue-ignore */ HTMLAttributes {
 </script>
 
 <script setup lang="ts">
-import { computed, useAttrs, useTemplateRef, type CSSProperties } from 'vue';
+import { computed, normalizeStyle, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../styles/Cn';
 import { useReducedMotion } from '../../device/hooks/UseReducedMotion';
 
@@ -66,14 +66,16 @@ const reducedMotion = useReducedMotion();
 
 const transitionsOn = computed(() => props.animate && !reducedMotion.value);
 
-const sizeStyle = computed<CSSProperties>(() => ({
-  height: props.height,
-  maxHeight: props.maxHeight,
-  // `stable` reserves the gutter on the block-end/inline-end edge so a
-  // toggling vertical scrollbar never reflows the content width.
-  scrollbarGutter: 'stable',
-  ...(attrs.style as CSSProperties | undefined),
-}));
+const sizeStyle = computed(() =>
+  normalizeStyle([
+    {
+      height: typeof props.height === 'number' ? `${props.height}px` : props.height,
+      maxHeight: typeof props.maxHeight === 'number' ? `${props.maxHeight}px` : props.maxHeight,
+      scrollbarGutter: 'stable',
+    },
+    attrs.style,
+  ]),
+);
 
 const classes = computed(() =>
   cn(

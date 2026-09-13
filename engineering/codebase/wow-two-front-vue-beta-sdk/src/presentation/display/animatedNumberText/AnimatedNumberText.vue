@@ -58,16 +58,11 @@ const current = ref(props.value);
 /* React held this in a `useRef` — a mutable non-render value, so a plain `let`. */
 let from = props.value;
 
-/*
- * React's `useEffect` on `[value, duration, easing]`. `reducedMotion` is read
- * inside the callback rather than watched, matching React's read-at-effect-time
- * (it was never a dependency there either). `immediate` covers the mount run,
- * which short-circuits because `from === to`.
- */
+/** Retargets from the displayed value and settles immediately when motion is disabled. */
 watch(
-  [() => props.value, () => props.duration, () => props.easing],
+  [reducedMotion, () => props.value, () => props.duration, () => props.easing],
   (_next, _previous, onCleanup) => {
-    if (reducedMotion.value) {
+    if (reducedMotion.value || !Number.isFinite(props.duration) || props.duration <= 0) {
       current.value = props.value;
       from = props.value;
       return;

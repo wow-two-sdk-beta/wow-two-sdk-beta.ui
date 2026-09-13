@@ -65,6 +65,7 @@ export interface ListboxPickerProps {
 </script>
 
 <script setup lang="ts">
+import { DomOrderExtensions } from '../../../foundation/dom';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, onMounted, provide, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -183,11 +184,15 @@ function activateById(id: string): void {
   /* Event-driven only, so `document` is always defined here — but the guard keeps the
      function safe if it is ever reached from a render-time path under SSR. */
   if (typeof document === 'undefined') return;
-  document.getElementById(id)?.scrollIntoView({ block: 'nearest' });
+  root.value?.ownerDocument.getElementById(id)?.scrollIntoView({ block: 'nearest' });
+}
+
+function orderedItems(): ItemEntry[] {
+  return DomOrderExtensions.inDocumentOrder(items, (item) => root.value?.ownerDocument.getElementById(item.id));
 }
 
 function moveActive(direction: 1 | -1, jump = 1): void {
-  const list = items.filter((i) => !i.isDisabled);
+  const list = orderedItems().filter((i) => !i.isDisabled);
   if (list.length === 0) return;
   const currentIdx = list.findIndex((i) => i.id === activeId.value);
   let nextIdx = currentIdx + direction * jump;
@@ -202,10 +207,10 @@ function moveActive(direction: 1 | -1, jump = 1): void {
    option (`document.getElementById` inside the user-event path → SSR-safe), so arbitrary
    children work without threading a label prop. Disabled options are skipped by the matcher. */
 const typeahead = useTypeahead<ItemEntry>({
-  items: () => items,
+  items: orderedItems,
   getLabel: (entry) => (typeof document === 'undefined' ? '' : (document.getElementById(entry.id)?.textContent ?? '')),
   isDisabled: (entry) => entry.isDisabled,
-  getActiveIndex: () => items.findIndex((i) => i.id === activeId.value),
+  getActiveIndex: () => orderedItems().findIndex((i) => i.id === activeId.value),
   onMatch: (entry) => activateById(entry.id),
 });
 

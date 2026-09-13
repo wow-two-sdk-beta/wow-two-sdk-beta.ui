@@ -14,6 +14,7 @@ const DefaultPlaceholder = 'Type a command…';
 </script>
 
 <script setup lang="ts">
+import { DomOrderExtensions } from '../../../foundation/dom';
 import { computed, shallowRef, useAttrs, watch } from 'vue';
 import { Search } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
@@ -49,7 +50,10 @@ watch(
 
 function visibleItems(): ReadonlyArray<CommandItemEntry> {
   const search = context.inputValue.value;
-  return context.items.value.filter((i) => !i.disabled && (search === '' || context.filter(i.searchText, search)));
+  return DomOrderExtensions.inDocumentOrder(
+    context.items.value.filter((i) => !i.disabled && (search === '' || context.filter(i.searchText, search))),
+    (item) => context.inputEl.value?.ownerDocument.getElementById(item.id),
+  );
 }
 
 // Auto-set first match when the filter or the item registry changes.
@@ -78,7 +82,7 @@ function moveActive(direction: 1 | -1): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-  if (event.defaultPrevented) return;
+  if (event.defaultPrevented || event.isComposing) return;
   switch (event.key) {
     case 'ArrowDown':
       event.preventDefault();

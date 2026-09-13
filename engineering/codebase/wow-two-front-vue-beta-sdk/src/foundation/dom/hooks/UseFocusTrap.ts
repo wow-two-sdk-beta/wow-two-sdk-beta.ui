@@ -1,26 +1,23 @@
 import { toValue, watchPostEffect, type MaybeRefOrGetter } from 'vue';
-import { AriaAttribute } from '../enums/AriaAttribute';
 
-const FocusableSelector = [
-  'a[href]',
-  'button:not([disabled])',
-  'input:not([disabled])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  '[tabindex]:not([tabindex="-1"])',
-  '[contenteditable="true"]',
-].join(',');
+const FocusableSelector = 'a[href],button,input,select,textarea,[tabindex],[contenteditable="true"]';
 
 function isVisible(el: HTMLElement): boolean {
   // checkVisibility covers display/visibility/content-visibility; the
   // getClientRects fallback (older engines) still includes position:fixed
   // elements, which `offsetParent !== null` would wrongly exclude.
-  return el.checkVisibility?.() ?? el.getClientRects().length > 0;
+  return (
+    el.checkVisibility?.({ visibilityProperty: true, contentVisibilityAuto: true }) ?? el.getClientRects().length > 0
+  );
 }
 
 function getFocusable(container: HTMLElement): ReadonlyArray<HTMLElement> {
   return Array.from(container.querySelectorAll<HTMLElement>(FocusableSelector)).filter(
-    (el) => el.getAttribute(AriaAttribute.Hidden) !== 'true' && isVisible(el),
+    (el) =>
+      (!el.hasAttribute('tabindex') || el.tabIndex >= 0) &&
+      !el.matches(':disabled,input[type="hidden"]') &&
+      !el.closest('[hidden],[inert],[aria-hidden="true"]') &&
+      isVisible(el),
   );
 }
 
@@ -44,6 +41,7 @@ export function useFocusTrap(
   watchPostEffect((onCleanup) => {
     const container = toValue(target);
     if (!toValue(enabled) || !container) return;
+    const document = container.ownerDocument;
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
     const previousTabIndex = container.getAttribute('tabindex');
@@ -59,7 +57,7 @@ export function useFocusTrap(
     }
 
     const onKeyDown = (e: KeyboardEvent): void => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab' || e.defaultPrevented) return;
       const items = getFocusable(container);
       if (items.length === 0) {
         e.preventDefault();
@@ -85,7 +83,7 @@ export function useFocusTrap(
         if (previousTabIndex === null) container.removeAttribute('tabindex');
         else container.setAttribute('tabindex', previousTabIndex);
       }
-      previouslyFocused?.focus?.();
+      if (previouslyFocused?.isConnected && !previouslyFocused.closest('[inert]')) previouslyFocused.focus?.();
     });
   });
 }

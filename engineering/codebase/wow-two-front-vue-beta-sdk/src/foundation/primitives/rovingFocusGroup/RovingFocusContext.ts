@@ -1,7 +1,6 @@
 import {
   computed,
   inject,
-  onMounted,
   onScopeDispose,
   reactive,
   shallowRef,
@@ -141,30 +140,28 @@ export function useRovingFocusItem(options: UseRovingFocusItemOptions = {}): Use
   const id = useId();
   const node = shallowRef<HTMLElement | null>(null);
 
-  let observer: MutationObserver | null = null;
+  // A compound child can replace its root without remounting its component.
+  watch(
+    node,
+    (el, _previous, onCleanup) => {
+      if (!context) return;
+      if (!el) {
+        context.unregister(id);
+        return;
+      }
+      context.register(id, el);
+      context.ensureEnabledStop(id);
+      const observer = new MutationObserver(() => context.ensureEnabledStop(id));
+      observer.observe(el, {
+        attributes: true,
+        attributeFilter: ['disabled', AriaAttribute.Disabled, 'data-disabled'],
+      });
+      onCleanup(() => observer.disconnect());
+    },
+    { immediate: true, flush: 'post' },
+  );
 
-  onMounted(() => {
-    const el = node.value;
-    context?.register(id, el);
-    // Disabled state lives on the DOM node (`disabled` / `aria-disabled` /
-    // `data-disabled`) and can change without re-registering. React re-validated
-    // after every render; Vue has no every-render hook, so the node is observed
-    // directly — narrower, and it catches changes React's render-driven check
-    // would have missed entirely (an attribute set outside Vue).
-    context?.ensureEnabledStop(id);
-    if (!el || !context) return;
-    observer = new MutationObserver(() => context.ensureEnabledStop(id));
-    observer.observe(el, {
-      attributes: true,
-      attributeFilter: ['disabled', AriaAttribute.Disabled, 'data-disabled'],
-    });
-  });
-
-  onScopeDispose(() => {
-    observer?.disconnect();
-    observer = null;
-    context?.unregister(id);
-  });
+  onScopeDispose(() => context?.unregister(id));
 
   // Move DOM focus only after user interaction — never on initial mount.
   watch(
