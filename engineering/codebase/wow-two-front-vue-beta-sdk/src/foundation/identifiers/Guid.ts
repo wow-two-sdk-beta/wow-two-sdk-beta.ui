@@ -53,18 +53,18 @@ const empty = '00000000-0000-0000-0000-000000000000' as Guid;
 
 /** Narrows a `string` to `Guid` when it is a legal hyphenated GUID (any version — permissive, like `Guid.Parse`). */
 function isGuid(s: string): s is Guid {
-  return HyphenD.test(s);
+  return typeof s === 'string' && HyphenD.exec(s)?.[0] === s;
 }
 
 /** Validates + brands (lowercased); **throws** on a non-GUID string — the `Guid.Parse` parallel. */
 function parse(s: string): Guid {
-  if (!HyphenD.test(s)) throw new TypeError(`Invalid GUID: "${s}"`);
+  if (!(typeof s === 'string' && HyphenD.exec(s)?.[0] === s)) throw new TypeError(`Invalid GUID: "${s}"`);
   return s.toLowerCase() as Guid;
 }
 
 /** Validates + brands (lowercased); returns `undefined` on failure — the `Guid.TryParse` parallel. */
 function tryParse(s: string): Guid | undefined {
-  return HyphenD.test(s) ? (s.toLowerCase() as Guid) : undefined;
+  return typeof s === 'string' && HyphenD.exec(s)?.[0] === s ? (s.toLowerCase() as Guid) : undefined;
 }
 
 /** Case-insensitive value equality — the `Guid.Equals` parallel. */
@@ -81,7 +81,7 @@ function compare(a: Guid, b: Guid): number {
 
 /** Reads the version nibble (`7`, `4`, …); `undefined` if not a GUID — the `Guid.Version` parallel. */
 function version(s: string): number | undefined {
-  return HyphenD.test(s) ? parseInt(s[14]!, 16) : undefined;
+  return typeof s === 'string' && HyphenD.exec(s)?.[0] === s ? parseInt(s[14]!, 16) : undefined;
 }
 
 /** Identity — a `Guid` already is its `D`-string; kept for .NET `ToString("D")` symmetry. */

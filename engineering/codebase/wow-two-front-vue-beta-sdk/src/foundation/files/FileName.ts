@@ -44,24 +44,27 @@ const ReservedCharacters = /[/\\<>:"|?*]+/g;
  * spaces. Truncates to `maxLength` while preserving the extension. Returns `'file'` when nothing usable remains.
  */
 export function safeFileName(name: string, options?: SafeFileNameOptions): string {
-  const replacement = options?.replacement ?? '-';
-  const maxLength = Math.max(1, options?.maxLength ?? 255);
+  const replacement = (options?.replacement ?? '-').replace(ControlCharacters, '').replace(ReservedCharacters, '-');
+  const requestedLength = options?.maxLength ?? 255;
+  const maxLength = Number.isFinite(requestedLength) ? Math.max(1, Math.trunc(requestedLength)) : 255;
 
   const cleaned = name
     .replace(ControlCharacters, '')
-    .replace(ReservedCharacters, replacement)
+    .replace(ReservedCharacters, () => replacement)
     .replace(/\s+/g, ' ')
     .replace(/^[.\s]+|[.\s]+$/g, '')
     .trim();
 
-  if (cleaned === '') return 'file';
+  if (cleaned === '') return 'file'.slice(0, maxLength);
   if (cleaned.length <= maxLength) return cleaned;
 
   // Truncate the base, keep the extension so the file still opens with the right handler.
   const extension = fileExtension(cleaned);
-  if (extension === '') return cleaned.slice(0, maxLength);
+  if (extension === '') return cleaned.slice(0, maxLength).replace(/[.\s]+$/g, '') || 'file'.slice(0, maxLength);
 
   const suffix = `.${extension}`;
-  const headLength = Math.max(1, maxLength - suffix.length);
+  if (suffix.length >= maxLength)
+    return cleaned.slice(0, maxLength).replace(/[.\s]+$/g, '') || 'file'.slice(0, maxLength);
+  const headLength = maxLength - suffix.length;
   return fileBaseName(cleaned).slice(0, headLength) + suffix;
 }

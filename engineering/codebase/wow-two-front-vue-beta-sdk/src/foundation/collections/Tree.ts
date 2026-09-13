@@ -15,12 +15,9 @@
 //   2. CYCLE — a parent chain that loops (`a → b → c → a`, or a row that is its own parent). Every row ON
 //      the cycle is PROMOTED TO A ROOT and its upward link is severed. Rows merely BELOW a cycle keep
 //      their parent and nest normally under whichever cycle member became a root. Nothing is dropped and
-//      every row appears exactly once. Detection is an explicit upward walk per row with an on-path set,
-//      so it terminates by construction.
+//      every row appears exactly once. Detection visits each parent edge once, so building is O(n).
 //
-// The node builder additionally guards on the id currently being expanded. That is not redundant with the
-// cycle detection above: it covers DUPLICATE ids, where two different rows claim the same id and the
-// parent index can otherwise hand a row back to itself.
+// Duplicate ids resolve to the first owner. Every input row has exactly one output node.
 //
 // `flattenTree` / `findInTree` take a `childrenKey` because a consumer's own nested shape (`items`,
 // `nodes`, `subRows`) is as common as this slice's own, and both guard against a self-referential node so
@@ -59,80 +56,42 @@ export interface BuildTreeOptions<T, TId> {
  * @returns A new array of root nodes.
  */
 export function buildTree<T, TId>(items: ReadonlyArray<T>, options: BuildTreeOptions<T, TId>): TreeNode<T>[] {
-  const { id, parentId } = options;
-
-  const byId = new Map<TId, T>();
-  for (const item of items) {
-    const key = id(item);
-    if (!byId.has(key)) byId.set(key, item);
-  }
-
-  const cyclicIds = detectCyclicIds(items, byId, id, parentId);
-
-  const childrenById = new Map<TId, T[]>();
-  const roots: T[] = [];
-  for (const item of items) {
-    const parent = parentId(item);
-    const isRoot = parent === null || parent === undefined || !byId.has(parent) || cyclicIds.has(id(item));
-    if (isRoot) {
-      roots.push(item);
-      continue;
-    }
-    const siblings = childrenById.get(parent);
-    if (siblings) siblings.push(item);
-    else childrenById.set(parent, [item]);
-  }
-
-  const expanding = new Set<TId>();
-  const toNode = (item: T): TreeNode<T> => {
-    const key = id(item);
-    // Duplicate-id guard: a second row claiming an id already on the path would otherwise re-expand the
-    // same child list forever. It renders as a leaf instead.
-    if (expanding.has(key)) return { item, children: [] };
-    expanding.add(key);
-    const children = (childrenById.get(key) ?? []).map(toNode);
-    expanding.delete(key);
-    return { item, children };
-  };
-
-  return roots.map(toNode);
-}
-
-/**
- * Collects every id that sits ON a parent cycle. Walks upward from each item with an on-path set, so the
- * walk is bounded by the chain length and a loop is caught the moment it revisits an id.
- */
-function detectCyclicIds<T, TId>(
-  items: ReadonlyArray<T>,
-  byId: ReadonlyMap<TId, T>,
-  id: (item: T) => TId,
-  parentId: (item: T) => TId | null | undefined,
-): Set<TId> {
-  const cyclicIds = new Set<TId>();
-  for (const item of items) {
-    const start = id(item);
-    if (cyclicIds.has(start)) continue;
-
-    const path: TId[] = [];
-    const onPath = new Set<TId>();
-    let currentId: TId | undefined = start;
-    while (currentId !== undefined) {
-      if (onPath.has(currentId)) {
-        // Only the suffix from the revisited id onwards is the loop; anything before it merely leads in.
-        const loopStart = path.indexOf(currentId);
-        for (let index = loopStart; index < path.length; index += 1) {
-          cyclicIds.add(path[index] as TId);
-        }
+  const byId = new Map<TId, number>();
+  const nodes = items.map((item, index) => {
+    const key = options.id(item);
+    if (!byId.has(key)) byId.set(key, index);
+    return { item, children: [] as TreeNode<T>[] };
+  });
+  const parents = items.map((item) => {
+    const key = options.parentId(item);
+    return key === null || key === undefined ? undefined : byId.get(key);
+  });
+  // Each parent edge is visited once. A completed chain never needs walking again.
+  const completed = new Set<number>();
+  const cyclic = new Set<number>();
+  for (let index = 0; index < nodes.length; index++) {
+    const path: number[] = [];
+    const positions = new Map<number, number>();
+    let current: number | undefined = index;
+    while (current !== undefined && !completed.has(current)) {
+      const position = positions.get(current);
+      if (position !== undefined) {
+        for (let offset = position; offset < path.length; offset++) cyclic.add(path[offset]!);
         break;
       }
-      const owner = byId.get(currentId);
-      if (owner === undefined) break;
-      onPath.add(currentId);
-      path.push(currentId);
-      currentId = parentId(owner) ?? undefined;
+      positions.set(current, path.length);
+      path.push(current);
+      current = parents[current];
     }
+    for (const visited of path) completed.add(visited);
   }
-  return cyclicIds;
+  const roots: TreeNode<T>[] = [];
+  nodes.forEach((node, index) => {
+    const parent = parents[index];
+    if (parent === undefined || cyclic.has(index)) roots.push(node);
+    else nodes[parent]!.children.push(node);
+  });
+  return roots;
 }
 
 /** Reads a node's children under the configured key, treating anything non-array as "no children". */
@@ -156,16 +115,14 @@ export function flattenTree<TNode extends object>(
   childrenKey: PropertyKey = 'children',
 ): TNode[] {
   const result: TNode[] = [];
-  const visited = new Set<TNode>();
-  const walk = (level: ReadonlyArray<TNode>): void => {
-    for (const node of level) {
-      if (visited.has(node)) continue;
-      visited.add(node);
+  findInTree(
+    nodes,
+    (node) => {
       result.push(node);
-      walk(readChildren(node, childrenKey));
-    }
-  };
-  walk(nodes);
+      return false;
+    },
+    childrenKey,
+  );
   return result;
 }
 
@@ -184,17 +141,20 @@ export function findInTree<TNode extends object>(
   childrenKey: PropertyKey = 'children',
 ): TNode | undefined {
   const visited = new Set<TNode>();
-  const walk = (level: ReadonlyArray<TNode>, depth: number): TNode | undefined => {
-    for (const node of level) {
-      if (visited.has(node)) continue;
-      visited.add(node);
-      if (predicate(node, depth)) return node;
-      const found = walk(readChildren(node, childrenKey), depth + 1);
-      if (found !== undefined) return found;
+  const stack = [{ nodes, index: 0 }];
+  while (stack.length > 0) {
+    const frame = stack[stack.length - 1]!;
+    if (frame.index >= frame.nodes.length) {
+      stack.pop();
+      continue;
     }
-    return undefined;
-  };
-  return walk(nodes, 0);
+    const node = frame.nodes[frame.index++]!;
+    if (visited.has(node)) continue;
+    visited.add(node);
+    if (predicate(node, stack.length - 1)) return node;
+    stack.push({ nodes: readChildren(node, childrenKey), index: 0 });
+  }
+  return undefined;
 }
 
 /**
@@ -206,15 +166,33 @@ export function findInTree<TNode extends object>(
  * @param nodes The roots to map; never mutated.
  * @param mapFn Produces the replacement item from the current item and its 0-based depth.
  * @returns A new tree of new nodes.
+ * @throws {TypeError} When the input contains a cycle; shared subtrees remain supported.
  */
 export function mapTree<T, TResult>(
   nodes: ReadonlyArray<TreeNode<T>>,
   mapFn: (item: T, depth: number) => TResult,
 ): TreeNode<TResult>[] {
-  const walk = (level: ReadonlyArray<TreeNode<T>>, depth: number): TreeNode<TResult>[] =>
-    level.map((node) => ({
-      item: mapFn(node.item, depth),
-      children: walk(node.children, depth + 1),
-    }));
-  return walk(nodes, 0);
+  const result: TreeNode<TResult>[] = [];
+  const active = new Set<TreeNode<T>>();
+  const stack: Array<{
+    nodes: ReadonlyArray<TreeNode<T>>;
+    index: number;
+    output: TreeNode<TResult>[];
+    owner?: TreeNode<T>;
+  }> = [{ nodes, index: 0, output: result }];
+  while (stack.length > 0) {
+    const frame = stack[stack.length - 1]!;
+    if (frame.index >= frame.nodes.length) {
+      if (frame.owner) active.delete(frame.owner);
+      stack.pop();
+      continue;
+    }
+    const node = frame.nodes[frame.index++]!;
+    if (active.has(node)) throw new TypeError('mapTree: cyclic input is not a tree.');
+    const children: TreeNode<TResult>[] = [];
+    frame.output.push({ item: mapFn(node.item, stack.length - 1), children });
+    active.add(node);
+    stack.push({ nodes: node.children, index: 0, output: children, owner: node });
+  }
+  return result;
 }

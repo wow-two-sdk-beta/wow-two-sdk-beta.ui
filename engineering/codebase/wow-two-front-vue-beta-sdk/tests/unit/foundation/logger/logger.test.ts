@@ -87,3 +87,11 @@ describe('sink isolation', () => {
     expect(failures).toHaveLength(1);
   });
 });
+
+it('retains prototype-named data while redacting its nested secrets', () => {
+  const output = redactContext(JSON.parse('{"__proto__":{"password":"secret"},"keep":1}'));
+  expect(Object.getPrototypeOf(output)).toBe(Object.prototype);
+  expect(Object.hasOwn(output, '__proto__')).toBe(true);
+  expect(output['__proto__']).toEqual({ password: '[redacted]' });
+  expect(output['keep']).toBe(1);
+});

@@ -152,7 +152,7 @@ export function insertAt<T>(items: ReadonlyArray<T>, index: number, value: T): T
 export function removeAt<T>(items: ReadonlyArray<T>, index: number): T[] {
   const result = [...items];
   const at = Math.trunc(index);
-  if (at < 0 || at >= result.length) return result;
+  if (!Number.isFinite(at) || at < 0 || at >= result.length) return result;
   result.splice(at, 1);
   return result;
 }
@@ -169,7 +169,7 @@ export function removeAt<T>(items: ReadonlyArray<T>, index: number): T[] {
 export function replaceAt<T>(items: ReadonlyArray<T>, index: number, value: T): T[] {
   const result = [...items];
   const at = Math.trunc(index);
-  if (at < 0 || at >= result.length) return result;
+  if (!Number.isFinite(at) || at < 0 || at >= result.length) return result;
   result[at] = value;
   return result;
 }
@@ -253,10 +253,11 @@ export function range(start: number, end: number, step = 1): number[] {
     throw new RangeError(`range: step must be a non-zero finite number, received ${String(step)}`);
   }
   const result: number[] = [];
-  if (step > 0) {
-    for (let value = start; value < end; value += step) result.push(value);
-  } else {
-    for (let value = start; value > end; value += step) result.push(value);
+  for (let value = start; step > 0 ? value < end : value > end;) {
+    result.push(value);
+    const next = value + step;
+    if (next === value) throw new RangeError('range: step cannot advance at this magnitude.');
+    value = next;
   }
   return result;
 }

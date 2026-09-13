@@ -74,102 +74,117 @@ function work(
   return parse(calculateDecimal(operation, a.digits === '' ? '0' : a.text, b.digits === '' ? '0' : b.text, options));
 }
 
-function make(value: DecimalParts): ExactNumberValue {
-  const instance = Object.freeze({
-    add(other: ExactNumberValue) {
-      return work('add', instance, other);
-    },
-    subtract(other: ExactNumberValue) {
-      return work('subtract', instance, other);
-    },
-    multiply(other: ExactNumberValue) {
-      return work('multiply', instance, other);
-    },
-    divide(other: ExactNumberValue, options: NumberRoundingOptions) {
-      return work('divide', instance, other, options);
-    },
-    round(options: NumberRoundingOptions) {
-      return work('round', instance, instance, options);
-    },
-    modulo(other: ExactNumberValue) {
-      return work('modulo', instance, other);
-    },
-    compare(other: ExactNumberValue): Result<-1 | 0 | 1, NumberFailure> {
-      const b = parts(other);
-      if (value.digits === '') return ResultExtensions.ok(b.digits === '' ? 0 : b.negative ? 1 : -1);
-      if (b.digits === '') return ResultExtensions.ok(value.negative ? -1 : 1);
-      if (value.negative !== b.negative) return ResultExtensions.ok(value.negative ? -1 : 1);
-      const leftOrder = value.power + BigInt(value.digits.length);
-      const rightOrder = b.power + BigInt(b.digits.length);
-      let comparison: -1 | 0 | 1 = leftOrder < rightOrder ? -1 : leftOrder > rightOrder ? 1 : 0;
-      if (comparison === 0) {
-        // Equal decimal order: compare coefficients with virtual trailing zeros, never expand powers.
-        for (let i = 0; i < Math.max(value.digits.length, b.digits.length); i++) {
-          const leftDigit = value.digits[i] ?? '0';
-          const rightDigit = b.digits[i] ?? '0';
-          if (leftDigit !== rightDigit) {
-            comparison = leftDigit < rightDigit ? -1 : 1;
-            break;
-          }
+// Shared frozen methods avoid allocating a closure set for every JSON numeric token.
+const ExactNumberPrototype = Object.freeze<ExactNumberValue>({
+  add(other: ExactNumberValue) {
+    return work('add', this, other);
+  },
+  subtract(other: ExactNumberValue) {
+    return work('subtract', this, other);
+  },
+  multiply(other: ExactNumberValue) {
+    return work('multiply', this, other);
+  },
+  divide(other: ExactNumberValue, options: NumberRoundingOptions) {
+    return work('divide', this, other, options);
+  },
+  round(options: NumberRoundingOptions) {
+    return work('round', this, this, options);
+  },
+  modulo(other: ExactNumberValue) {
+    return work('modulo', this, other);
+  },
+  compare(other: ExactNumberValue): Result<-1 | 0 | 1, NumberFailure> {
+    const value = parts(this);
+    const b = parts(other);
+    if (value.digits === '') return ResultExtensions.ok(b.digits === '' ? 0 : b.negative ? 1 : -1);
+    if (b.digits === '') return ResultExtensions.ok(value.negative ? -1 : 1);
+    if (value.negative !== b.negative) return ResultExtensions.ok(value.negative ? -1 : 1);
+    const leftOrder = value.power + BigInt(value.digits.length);
+    const rightOrder = b.power + BigInt(b.digits.length);
+    let comparison: -1 | 0 | 1 = leftOrder < rightOrder ? -1 : leftOrder > rightOrder ? 1 : 0;
+    if (comparison === 0) {
+      // Equal decimal order: compare coefficients with virtual trailing zeros, never expand powers.
+      for (let i = 0; i < Math.max(value.digits.length, b.digits.length); i++) {
+        const leftDigit = value.digits[i] ?? '0';
+        const rightDigit = b.digits[i] ?? '0';
+        if (leftDigit !== rightDigit) {
+          comparison = leftDigit < rightDigit ? -1 : 1;
+          break;
         }
       }
-      return ResultExtensions.ok(value.negative ? (comparison === -1 ? 1 : comparison === 1 ? -1 : 0) : comparison);
-    },
-    equals(other: ExactNumberValue): Result<boolean, NumberFailure> {
-      return ResultExtensions.map(instance.compare(other), (comparison) => comparison === 0);
-    },
-    negate() {
-      return make({
-        ...value,
-        text: value.negative ? value.text.slice(1) : '-' + value.text,
-        negative: !value.negative,
-      });
-    },
-    absolute() {
-      return value.negative ? instance.negate() : instance;
-    },
-    isZero() {
-      return value.digits === '';
-    },
-    isInteger() {
-      return value.digits === '' || value.power >= 0n;
-    },
-    isNegativeZero() {
-      return value.digits === '' && value.negative;
-    },
-    toBigInt(): Result<bigint, NumberFailure> {
-      if (!instance.isInteger())
-        return fail(NumberFailureCode.NonInteger, 'A fractional value cannot become an integer.');
-      if (!withinWorkBudget(value))
-        return fail(NumberFailureCode.ResourceLimit, 'The integer conversion work budget was exceeded.');
-      return ResultExtensions.ok(value.digits === '' ? 0n : BigInt(decimalIntegerText(value.text)));
-    },
-    toSafeInteger(): Result<number, NumberFailure> {
-      const integer = instance.toBigInt();
-      if (!integer.ok) return integer;
-      if (integer.value < BigInt(Number.MIN_SAFE_INTEGER) || integer.value > BigInt(Number.MAX_SAFE_INTEGER))
-        return fail(NumberFailureCode.UnsafeConversion, 'The integer is outside the safe native number range.');
-      return ResultExtensions.ok(value.negative && integer.value === 0n ? -0 : Number(integer.value));
-    },
-    toApproximateNumber(): Result<number, NumberFailure> {
-      const native = Number(value.text);
-      return !Number.isFinite(native) || (native === 0 && value.digits !== '')
-        ? fail(NumberFailureCode.UnsafeConversion, 'The native number would overflow or underflow.')
-        : ResultExtensions.ok(native);
-    },
-    toString() {
-      return value.text;
-    },
-    toJSON(): never {
-      throw new TypeError('Serialize ExactNumber with LosslessJson.stringify.');
-    },
-    [Symbol.toPrimitive](hint: string): string {
-      if (hint === 'string') return value.text;
-      throw new TypeError('Use explicit ExactNumber arithmetic or conversion methods.');
-    },
-  }) as ExactNumberValue;
+    }
+    return ResultExtensions.ok(value.negative ? (comparison === -1 ? 1 : comparison === 1 ? -1 : 0) : comparison);
+  },
+  equals(other: ExactNumberValue): Result<boolean, NumberFailure> {
+    return ResultExtensions.map(this.compare(other), (comparison) => comparison === 0);
+  },
+  negate() {
+    const value = parts(this);
+    return make({
+      ...value,
+      text: value.negative ? value.text.slice(1) : '-' + value.text,
+      negative: !value.negative,
+    });
+  },
+  absolute() {
+    const value = parts(this);
+    return value.negative ? this.negate() : this;
+  },
+  isZero() {
+    const value = parts(this);
+    return value.digits === '';
+  },
+  isInteger() {
+    const value = parts(this);
+    return value.digits === '' || value.power >= 0n;
+  },
+  isNegativeZero() {
+    const value = parts(this);
+    return value.digits === '' && value.negative;
+  },
+  toBigInt(): Result<bigint, NumberFailure> {
+    const value = parts(this);
+    if (!this.isInteger()) return fail(NumberFailureCode.NonInteger, 'A fractional value cannot become an integer.');
+    if (!withinWorkBudget(value))
+      return fail(NumberFailureCode.ResourceLimit, 'The integer conversion work budget was exceeded.');
+    return ResultExtensions.ok(value.digits === '' ? 0n : BigInt(decimalIntegerText(value.text)));
+  },
+  toSafeInteger(): Result<number, NumberFailure> {
+    const value = parts(this);
+    const integer = this.toBigInt();
+    if (!integer.ok) return integer;
+    if (integer.value < BigInt(Number.MIN_SAFE_INTEGER) || integer.value > BigInt(Number.MAX_SAFE_INTEGER))
+      return fail(NumberFailureCode.UnsafeConversion, 'The integer is outside the safe native number range.');
+    return ResultExtensions.ok(value.negative && integer.value === 0n ? -0 : Number(integer.value));
+  },
+  toApproximateNumber(): Result<number, NumberFailure> {
+    const value = parts(this);
+    const native = Number(value.text);
+    return !Number.isFinite(native) || (native === 0 && value.digits !== '')
+      ? fail(NumberFailureCode.UnsafeConversion, 'The native number would overflow or underflow.')
+      : ResultExtensions.ok(native);
+  },
+  toString() {
+    const value = parts(this);
+    return value.text;
+  },
+  toJSON(): never {
+    throw new TypeError('Serialize ExactNumber with LosslessJson.stringify.');
+  },
+  [Symbol.toPrimitive](hint: string): string {
+    const value = parts(this);
+    if (hint === 'string') return value.text;
+    throw new TypeError('Use explicit ExactNumber arithmetic or conversion methods.');
+  },
+} as ExactNumberValue);
+
+function make(value: DecimalParts): ExactNumberValue {
+  const instance = Object.create(ExactNumberPrototype) as ExactNumberValue;
+  // One shared own function keeps structuredClone/postMessage/IndexedDB from silently losing the value.
+  Object.defineProperty(instance, 'toJSON', { value: ExactNumberPrototype.toJSON, enumerable: true });
   Values.set(instance, value);
-  return instance;
+  return Object.freeze(instance);
 }
 
 function parse(text: string): Result<ExactNumberValue, NumberFailure> {

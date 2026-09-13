@@ -17,6 +17,8 @@
 // Date-time input uses an ISO `T` separator (no space). These are local Date utilities;
 // declared API wire fields use TemporalCodecs and their separate validation contracts.
 
+import { daysInMonth } from './Internals';
+
 const DateOnly = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d{1,9})?(Z|[+-]\d{2}:?\d{2})?$/;
 
@@ -64,6 +66,10 @@ export function parseIsoDate(value: string): Date | null {
   }
 
   if (!DateTime.test(text)) return null;
+  const year = Number(text.slice(0, 4));
+  const month = Number(text.slice(5, 7));
+  const day = Number(text.slice(8, 10));
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month - 1)) return null;
 
   const parsed = new Date(text);
   return isValidDate(parsed) ? parsed : null;

@@ -7,7 +7,7 @@
  * are generated (not literal clones) — the seed captures the *vibe* (hue family,
  * neutral temperature, accent scheme, surface character).
  *
- * `THEMES` is the resolved array; `getTheme(id)` looks one up.
+ * `THEMES` resolves and caches entries on first access; `getTheme(id)` looks one up.
  * ------------------------------------------------------------------------- */
 
 import type { Theme, ThemeSeed } from './Theme';
@@ -272,22 +272,48 @@ const CandidateSeeds: ReadonlyArray<ThemeSeed> = [...ThemeSeeds, ...PoolSeeds];
  * The generator-built presets. AA-proven by the engine but not yet validated
  * against a real app surface → `generateTheme` stamps them `status: "candidate"`.
  */
-const CandidateThemes: ReadonlyArray<Theme> = CandidateSeeds.map(generateTheme);
+const ResolvedCandidates = new Map<ThemeSeed, Theme>();
+
+/** Dense array accessors defer expensive color generation until that entry is read. */
+function createThemeCatalog(): ReadonlyArray<Theme> {
+  const themes = [...AuthoredThemes];
+  for (const seed of CandidateSeeds) {
+    Object.defineProperty(themes, themes.length, {
+      enumerable: true,
+      get: () => {
+        let resolved = ResolvedCandidates.get(seed);
+        if (resolved === undefined) {
+          resolved = generateTheme(seed);
+          ResolvedCandidates.set(seed, resolved);
+        }
+        return resolved;
+      },
+    });
+  }
+  return Object.freeze(themes);
+}
 
 /**
  * The full registry: validated (real-app-proven) themes FIRST, then the curated
  * candidate presets. Order here = order in the emitted stylesheet / manifest.
  */
-export const THEMES: ReadonlyArray<Theme> = [...AuthoredThemes, ...CandidateThemes];
+export const THEMES: ReadonlyArray<Theme> = createThemeCatalog();
 
 /** Look up a theme by id. Returns `undefined` when absent. */
 export function getTheme(id: string): Theme | undefined {
-  return THEMES.find((t) => t.id === id);
+  const index = ThemeIds.indexOf(id);
+  return index < 0 ? undefined : THEMES[index];
 }
 
 /** Themes proven against a real app surface (`status === "validated"`). */
 export function validatedThemes(): ReadonlyArray<Theme> {
-  return THEMES.filter((t) => t.status === ThemeStatus.Validated);
+  return [
+    ...AuthoredThemes.filter((theme) => theme.status === ThemeStatus.Validated),
+    ...CandidateSeeds.flatMap((seed) => {
+      const theme = ResolvedCandidates.get(seed);
+      return theme?.status === ThemeStatus.Validated ? [theme] : [];
+    }),
+  ];
 }
 
 /** Engine-proven curated presets not yet app-validated (`status === "candidate"`). */
@@ -296,4 +322,13 @@ export function candidateThemes(): ReadonlyArray<Theme> {
 }
 
 /** Ids of all curated themes, in registry order. */
-export const ThemeIds: ReadonlyArray<string> = THEMES.map((t) => t.id);
+export const ThemeIds: ReadonlyArray<string> = [
+  ...AuthoredThemes.map((theme) => theme.id),
+  ...CandidateSeeds.map((seed) => seed.id),
+];
+
+/** Lightweight catalog metadata; reading this list does not generate candidate colors. */
+export const ThemeCatalog: ReadonlyArray<Pick<Theme, 'id' | 'name' | 'status'>> = [
+  ...AuthoredThemes.map(({ id, name, status }) => ({ id, name, status })),
+  ...CandidateSeeds.map(({ id, name }) => ({ id, name, status: ThemeStatus.Candidate })),
+];

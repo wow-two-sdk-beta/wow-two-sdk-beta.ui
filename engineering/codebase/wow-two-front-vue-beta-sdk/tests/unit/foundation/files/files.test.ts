@@ -74,3 +74,18 @@ describe('filename helpers', () => {
     expect(safeFileName('a'.repeat(400) + '.pdf', { maxLength: 20 })).toMatch(/\.pdf$/);
   });
 });
+
+it('keeps sanitized filenames within the chosen length even with long extensions', () => {
+  expect(safeFileName('a.verylongextension', { maxLength: 3 }).length).toBeLessThanOrEqual(3);
+  expect(safeFileName('', { maxLength: 1 })).toBe('f');
+  expect(safeFileName('a/b', { replacement: '/' })).not.toContain('/');
+});
+
+it('treats filename replacement text literally rather than as substitution syntax', () => {
+  expect(safeFileName('a/b', { replacement: '$&' })).toBe('a$&b');
+  expect(safeFileName('a/b/c', { replacement: '$`' })).not.toContain('/');
+});
+
+it('removes a trailing space introduced by filename truncation', () => {
+  expect(safeFileName('abc def', { maxLength: 4 })).toBe('abc');
+});

@@ -25,6 +25,7 @@
 // equal as plain numbers. Bit-equality is the right reading for a buffer.
 
 import { Equality } from './Equality';
+import { ExactNumber } from '../numbers';
 
 /**
  * Compares two arrays element-by-element with `Object.is` — no recursion, no allocation.
@@ -40,7 +41,10 @@ import { Equality } from './Equality';
 export function arrayShallowEqual<T>(first: ReadonlyArray<T>, second: ReadonlyArray<T>): boolean {
   if (first === second) return true;
   if (first.length !== second.length) return false;
-  return first.every((item, index) => Object.is(item, second[index]));
+  for (let index = 0; index < first.length; index++) {
+    if (!Object.is(first[index], second[index])) return false;
+  }
+  return true;
 }
 
 /**
@@ -87,6 +91,9 @@ function deepEqualWithin(first: unknown, second: unknown, seen: Map<object, Set<
   if (Object.is(first, second)) return true;
   if (first === null || second === null) return false;
   if (typeof first !== 'object' || typeof second !== 'object') return false;
+  if (ExactNumber.isExactNumber(first) || ExactNumber.isExactNumber(second)) {
+    return Equality.shallowEquals(first as Record<string, unknown>, second as Record<string, unknown>);
+  }
 
   const partners = seen.get(first);
   if (partners?.has(second)) return true;
@@ -127,7 +134,10 @@ function compareObjects(first: object, second: object, seen: Map<object, Set<obj
   if (Array.isArray(first) || Array.isArray(second)) {
     if (!Array.isArray(first) || !Array.isArray(second)) return false;
     if (first.length !== second.length) return false;
-    return first.every((item, index) => deepEqualWithin(item, second[index], seen));
+    for (let index = 0; index < first.length; index++) {
+      if (!deepEqualWithin(first[index], second[index], seen)) return false;
+    }
+    return true;
   }
   if (first instanceof Map || second instanceof Map) {
     if (!(first instanceof Map) || !(second instanceof Map)) return false;

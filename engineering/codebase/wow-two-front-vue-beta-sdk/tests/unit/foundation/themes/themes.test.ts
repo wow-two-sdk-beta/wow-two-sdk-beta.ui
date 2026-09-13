@@ -76,3 +76,16 @@ describe('the curated registry', () => {
     expect(getTheme(first?.id ?? '')).toBe(first);
   });
 });
+
+it('rejects malformed OKLCH numeric fields instead of accepting parseFloat prefixes', () => {
+  expect(parseColor('oklch(50..2% 0.1 30)')).toBeNull();
+  expect(parseColor('oklch(. 0.1 30)')).toBeNull();
+  expect(parseColor('oklch(50% 0.1 -30)')?.h).toBe(330);
+});
+it('resolves catalog entries consistently through lookup and array access', () => {
+  const theme = getTheme('wow');
+  expect(theme).toBeDefined();
+  expect(THEMES.find((entry) => entry.id === 'wow')).toBe(theme);
+  expect(getTheme('wow')).toBe(theme);
+  expect(getTheme('missing-theme')).toBeUndefined();
+});

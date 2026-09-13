@@ -69,7 +69,7 @@ export function mapValues(
   const record = source as Record<string, unknown>;
   const mapped: Record<string, unknown> = {};
   for (const key of Object.keys(record)) {
-    mapped[key] = mapFn(record[key] as never, key as never);
+    defineEntry(mapped, key, mapFn(record[key] as never, key as never));
   }
   return mapped;
 }
@@ -88,7 +88,7 @@ export function mapValues(
 export function pickKeys<T extends object, TKey extends keyof T>(source: T, keys: ReadonlyArray<TKey>): Pick<T, TKey> {
   const result = {} as Pick<T, TKey>;
   for (const key of keys) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) result[key] = source[key];
+    if (Object.prototype.hasOwnProperty.call(source, key)) defineEntry(result, key, source[key]);
   }
   return result;
 }
@@ -106,7 +106,7 @@ export function omitKeys<T extends object, TKey extends keyof T>(source: T, keys
   const record = source as Record<string, unknown>;
   const result: Record<string, unknown> = {};
   for (const key of Object.keys(record)) {
-    if (!omitted.has(key)) result[key] = record[key];
+    if (!omitted.has(key)) defineEntry(result, key, record[key]);
   }
   return result as Omit<T, TKey>;
 }
@@ -122,7 +122,7 @@ export function entriesToRecord<TKey extends PropertyKey, TValue>(
   entries: Iterable<readonly [TKey, TValue]>,
 ): Record<TKey, TValue> {
   const result = {} as Record<TKey, TValue>;
-  for (const [key, value] of entries) result[key] = value;
+  for (const [key, value] of entries) defineEntry(result, key, value);
   return result;
 }
 
@@ -151,6 +151,11 @@ export function invertRecord<TKey extends PropertyKey, TValue extends PropertyKe
   record: Readonly<Record<TKey, TValue>>,
 ): Record<TValue, TKey> {
   const result = {} as Record<TValue, TKey>;
-  for (const [key, value] of recordToEntries(record)) result[value] = key;
+  for (const [key, value] of recordToEntries(record)) defineEntry(result, value, key);
   return result;
+}
+
+/** Defines data without invoking Object.prototype's legacy __proto__ setter. */
+function defineEntry(target: object, key: PropertyKey, value: unknown): void {
+  Object.defineProperty(target, key, { value, writable: true, enumerable: true, configurable: true });
 }

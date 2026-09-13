@@ -56,3 +56,11 @@ describe('equality', () => {
     ).toBe(true);
   });
 });
+
+it('rejects a GUID token with a trailing newline', () => {
+  const input = '00000000-0000-0000-0000-000000000000\n';
+  expect(Guid.isGuid(input)).toBe(false);
+  expect(Guid.tryParse(input)).toBeUndefined();
+  expect(() => Guid.parse(input)).toThrow(TypeError);
+  expect(Guid.version(input)).toBeUndefined();
+});

@@ -1,5 +1,7 @@
 /* Provides reusable equality comparers for selection components and diff checks. */
 
+import { ExactNumber } from '../numbers';
+
 /** Represents a function that decides whether two values are equal. */
 export type EqualityComparer<T> = (a: T, b: T) => boolean;
 
@@ -21,6 +23,11 @@ export const Equality = {
   shallowEquals: <T extends Record<string, unknown>>(a: T, b: T): boolean => {
     if (Object.is(a, b)) return true;
     if (a == null || b == null) return false;
+    if (ExactNumber.isExactNumber(a) || ExactNumber.isExactNumber(b)) {
+      if (!ExactNumber.isExactNumber(a) || !ExactNumber.isExactNumber(b)) return false;
+      const equal = a.equals(b);
+      return equal.ok && equal.value;
+    }
     const ak = Object.keys(a);
     const bk = Object.keys(b);
     if (ak.length !== bk.length) return false;

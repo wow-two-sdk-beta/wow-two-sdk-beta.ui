@@ -220,7 +220,7 @@ export function contrastRatioCompositeCss(
 // Parsing back from emitted token strings (for the validator)
 // ---------------------------------------------------------------------------
 
-const OklchRegex = /^oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)\s*\)$/i;
+const OklchRegex = /^oklch\(\s*([+-]?(?:\d*\.)?\d+)%?\s+([+-]?(?:\d*\.)?\d+)\s+([+-]?(?:\d*\.)?\d+)\s*\)$/i;
 
 /** Parse a token color string (`oklch(L% C H)` or hex) back into OKLCH. Returns null if unparseable. */
 export function parseColor(value: string): Oklch | null {
@@ -230,7 +230,10 @@ export function parseColor(value: string): Oklch | null {
     const lRaw = parseFloat(m[1]);
     // L written as a percent (e.g. `62.5%`) or a 0–1 number.
     const l = v.includes('%') ? lRaw / 100 : lRaw;
-    return { l, c: parseFloat(m[2]), h: parseFloat(m[3]) };
+    const c = Number(m[2]);
+    const h = Number(m[3]);
+    if (![l, c, h].every(Number.isFinite) || l < 0 || l > 1 || c < 0) return null;
+    return { l, c, h: normalizeHue(h) };
   }
   if (v.startsWith('#')) {
     const srgb = parseHex(v);

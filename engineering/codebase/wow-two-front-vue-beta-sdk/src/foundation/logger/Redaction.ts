@@ -103,9 +103,12 @@ function redactValue(
 
     const copy: Record<string, unknown> = {};
     for (const key of readKeys(value)) {
-      copy[key] = keys.has(key.toLowerCase())
-        ? mask
-        : redactValue(readProperty(value, key), keys, mask, depth + 1, path);
+      Object.defineProperty(copy, key, {
+        value: keys.has(key.toLowerCase()) ? mask : redactValue(readProperty(value, key), keys, mask, depth + 1, path),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
     }
     return copy;
   } finally {

@@ -45,6 +45,7 @@ export interface OverlapOptions {
  * nor skips a day.
  */
 export function eachDayOfInterval(start: Date, end: Date): Date[] {
+  if (start.getTime() > end.getTime()) return [];
   const last = startOfDay(end).getTime();
   const days: Date[] = [];
   let cursor = startOfDay(start);

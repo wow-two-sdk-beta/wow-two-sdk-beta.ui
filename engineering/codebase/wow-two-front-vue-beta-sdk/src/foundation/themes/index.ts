@@ -46,4 +46,4 @@ export { validateTheme, contrastPairs, AaText, AaUi } from './Validate';
 export { themeToCss, emitAllThemesCss, emitThemesManifest, type ThemeManifestEntry } from './Css';
 
 // Curated registry
-export { THEMES, ThemeSeeds, ThemeIds, getTheme, validatedThemes, candidateThemes } from './Registry';
+export { THEMES, ThemeSeeds, ThemeIds, ThemeCatalog, getTheme, validatedThemes, candidateThemes } from './Registry';

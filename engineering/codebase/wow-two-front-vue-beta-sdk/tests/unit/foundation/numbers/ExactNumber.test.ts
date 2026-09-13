@@ -199,3 +199,22 @@ describe('ExactNumber', () => {
     expect(n('1').round(rounding(NumberLimits.maxDecimalPlaces + 1)).ok).toBe(false);
   });
 });
+
+it('shares immutable methods while preserving independent private numeric values', () => {
+  const a = n('1.00'),
+    b = n('2.00');
+  expect(a.add).toBe(b.add);
+  expect(Object.isFrozen(Object.getPrototypeOf(a))).toBe(true);
+  expect(text(a.add(b))).toBe('3');
+  expect(a.toString()).toBe('1.00');
+  expect(b.toString()).toBe('2.00');
+  const forged = Object.create(Object.getPrototypeOf(a)) as ExactNumber;
+  expect(ExactNumber.isExactNumber(forged)).toBe(false);
+  expect(() => forged.toString()).toThrow(TypeError);
+  const detached = a.toString;
+  expect(() => detached()).toThrow(TypeError);
+});
+
+it('rejects structured cloning rather than silently losing an exact numeric value', () => {
+  expect(() => structuredClone({ amount: n('123.45') })).toThrow();
+});

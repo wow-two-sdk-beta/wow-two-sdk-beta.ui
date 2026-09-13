@@ -10,6 +10,8 @@ Immutable finite decimal values and explicit arithmetic. Public entry: `@wow-two
 
 `ExactNumber.isExactNumber(unknown)` narrows actual instances created by this SDK module. Instances are frozen, carry no public mutable vendor object, and cannot be constructed structurally. The SDK owns the public type; arithmetic vendors do not appear in its declarations.
 
+Instances share a frozen prototype. Call methods on their receiver (`value.add(other)`); use a wrapper such as `() => value.toString()` when passing a method as a callback. Detached methods are not bound. Native structured cloning (including worker messages and IndexedDB) is deliberately rejected; transfer lossless JSON text and decode it at the destination.
+
 ## Instance API
 
 | Method                                          | Contract                                                                                  |
