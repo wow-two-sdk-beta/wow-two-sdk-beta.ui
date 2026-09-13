@@ -17,13 +17,13 @@ export const diagnostics = reactive<Diagnostic[]>([]);
 
 /** Records a diagnostic, collapsing repeats of the same component+message. */
 export function record(kind: Diagnostic['kind'], message: string, component: string): void {
-  const key = `${kind}::${component}::${message}`;
+  const key = JSON.stringify([kind, component, message]);
   const existing = byKey.get(key);
   if (existing) {
     existing.count += 1;
     return;
   }
-  const entry: Diagnostic = { kind, message, component, count: 1 };
+  const entry = reactive<Diagnostic>({ kind, message, component, count: 1 });
   byKey.set(key, entry);
   diagnostics.push(entry);
 }

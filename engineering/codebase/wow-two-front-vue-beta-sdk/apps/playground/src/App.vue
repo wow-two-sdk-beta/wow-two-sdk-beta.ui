@@ -1,32 +1,29 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, defineAsyncComponent, ref } from 'vue';
+import { useGroupNavigation } from './navigation';
 import { isDark, themeId, themes } from './theme';
 import { diagnostics } from './diagnostics';
-import LayoutGroup from './groups/LayoutGroup.vue';
-import ActionsGroup from './groups/ActionsGroup.vue';
-import FormsGroup from './groups/FormsGroup.vue';
-import DisplayGroup from './groups/DisplayGroup.vue';
-import FeedbackGroup from './groups/FeedbackGroup.vue';
-import NavGroup from './groups/NavGroup.vue';
-import OverlaysGroup from './groups/OverlaysGroup.vue';
 
 /* One group at a time. A single page holding every component is slow to
    scroll, slow to re-render on a theme switch, and impossible to screenshot
    usefully — the whole point of the gallery is looking at it. */
 const GROUPS = [
-  { key: 'layout', label: 'layout', view: LayoutGroup },
-  { key: 'actions', label: 'actions', view: ActionsGroup },
-  { key: 'forms', label: 'forms', view: FormsGroup },
-  { key: 'display', label: 'display', view: DisplayGroup },
-  { key: 'feedback', label: 'feedback', view: FeedbackGroup },
-  { key: 'nav', label: 'nav', view: NavGroup },
-  { key: 'overlays', label: 'overlays', view: OverlaysGroup },
+  { key: 'layout', label: 'layout', view: defineAsyncComponent(() => import('./groups/LayoutGroup.vue')) },
+  { key: 'actions', label: 'actions', view: defineAsyncComponent(() => import('./groups/ActionsGroup.vue')) },
+  { key: 'forms', label: 'forms', view: defineAsyncComponent(() => import('./groups/FormsGroup.vue')) },
+  { key: 'display', label: 'display', view: defineAsyncComponent(() => import('./groups/DisplayGroup.vue')) },
+  { key: 'feedback', label: 'feedback', view: defineAsyncComponent(() => import('./groups/FeedbackGroup.vue')) },
+  { key: 'nav', label: 'nav', view: defineAsyncComponent(() => import('./groups/NavGroup.vue')) },
+  { key: 'overlays', label: 'overlays', view: defineAsyncComponent(() => import('./groups/OverlaysGroup.vue')) },
 ] as const;
 
-const active = ref<string>(new URLSearchParams(location.search).get('g') ?? 'layout');
+const { active, hrefFor, navigate } = useGroupNavigation(
+  GROUPS.map((group) => group.key),
+  'layout',
+);
 const showDiagnostics = ref(false);
 
-const activeView = computed(() => GROUPS.find((g) => g.key === active.value)?.view ?? LayoutGroup);
+const activeView = computed(() => GROUPS.find((g) => g.key === active.value)?.view ?? GROUPS[0].view);
 
 const errorCount = computed(() => diagnostics.filter((d) => d.kind === 'error').length);
 const warnCount = computed(() => diagnostics.filter((d) => d.kind === 'warn').length);
@@ -43,7 +40,8 @@ const warnCount = computed(() => diagnostics.filter((d) => d.kind === 'warn').le
         <a
           v-for="g in GROUPS"
           :key="g.key"
-          :href="`?g=${g.key}`"
+          :href="hrefFor(g.key)"
+          @click="navigate($event, g.key)"
           :aria-current="active === g.key ? 'page' : undefined"
           class="rounded-md px-2 py-1 font-mono text-xs transition-colors"
           :class="active === g.key ? 'bg-primary text-primary-foreground' : 'text-subtle-foreground hover:bg-muted'"
@@ -65,6 +63,7 @@ const warnCount = computed(() => diagnostics.filter((d) => d.kind === 'warn').le
         </button>
 
         <select
+          aria-label="Theme"
           v-model="themeId"
           class="rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground"
           data-testid="theme-select"

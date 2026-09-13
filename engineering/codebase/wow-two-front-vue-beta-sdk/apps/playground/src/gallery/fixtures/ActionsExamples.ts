@@ -15,14 +15,6 @@ import {
   ToolbarLink,
   ToolbarSeparator,
 } from '../../../../../src/presentation/actions';
-import { LinkItem } from '../../../../../src/presentation/nav';
-import {
-  OptionTilePicker,
-  OptionTileGroupField,
-  SegmentedPicker,
-  ToggleInput,
-  ToggleGroup,
-} from '../../../../../src/presentation/forms';
 import { smokeCase, type SmokeCase } from './Example';
 
 /**
@@ -32,19 +24,19 @@ import { smokeCase, type SmokeCase } from './Example';
  */
 export const actionsExamples: readonly SmokeCase[] = [
   smokeCase('Button', Button, {}, { slot: true }),
-  smokeCase('LinkItem', LinkItem, {}, { slot: true }),
+
   smokeCase('ButtonGroup', ButtonGroup, {}, { slot: true }),
-  smokeCase('ToggleInput', ToggleInput, {}, { slot: true }),
-  smokeCase('ToggleGroup', ToggleGroup, {}, { slot: true }),
-  smokeCase('OptionTilePicker', OptionTilePicker, { selected: false, label: 'Option' }, { slot: true }),
-  smokeCase('OptionTileGroupField', OptionTileGroupField, { label: 'Tiles' }, { slot: true }),
-  smokeCase('SegmentedPicker', SegmentedPicker, {}, { slot: true }),
+
   // `aria-label` is required through FabButton's `@vue-ignore`d heritage and reaches the DOM as a
   // fallthrough attr — never as a declared prop. `Actions.a11y.dom.test.ts` pins that it lands.
   smokeCase('FabButton', FabButton, { 'aria-label': 'Create' }, { slot: true }),
+
   smokeCase('CopyButton', CopyButton, { text: 'copied', 'aria-label': 'Copy' }, { slot: true }),
+
   smokeCase('DisclosureButton', DisclosureButton, {}, { slot: true }),
+
   smokeCase('BackToTopButton', BackToTopButton, {}),
+
   // No slot (Google draws the button into the host, so there is nothing to probe) and no client
   // id: an id would send the breadth tier off to fetch the real GIS script. The unconfigured path
   // is a supported state — apps without a client id stay guest-only — so this covers setup and the
@@ -53,6 +45,7 @@ export const actionsExamples: readonly SmokeCase[] = [
   smokeCase('GoogleSignInButton', GoogleSignInButton, {}),
 
   smokeCase('Toolbar', Toolbar, {}, { slot: true }),
+
   smokeCase(
     'ToolbarButton',
     ToolbarButton,
@@ -62,6 +55,7 @@ export const actionsExamples: readonly SmokeCase[] = [
       wrap: (node) => h(Toolbar, null, () => node),
     },
   ),
+
   smokeCase(
     'ToolbarLink',
     ToolbarLink,
@@ -71,6 +65,7 @@ export const actionsExamples: readonly SmokeCase[] = [
       wrap: (node) => h(Toolbar, null, () => node),
     },
   ),
+
   smokeCase(
     'ToolbarSeparator',
     ToolbarSeparator,
@@ -84,6 +79,7 @@ export const actionsExamples: readonly SmokeCase[] = [
   // actions) and drops anything matching neither, so a generic probe node proves nothing. The
   // two real child types are covered by the `SpeedDialGroupTrigger` / `SpeedDialGroupAction` cases below.
   smokeCase('SpeedDialGroup', SpeedDialGroup, {}),
+
   smokeCase(
     'SpeedDialGroupTrigger',
     SpeedDialGroupTrigger,
@@ -92,6 +88,7 @@ export const actionsExamples: readonly SmokeCase[] = [
       wrap: (node) => h(SpeedDialGroup, null, () => node),
     },
   ),
+
   smokeCase(
     'SpeedDialGroupAction',
     SpeedDialGroupAction,

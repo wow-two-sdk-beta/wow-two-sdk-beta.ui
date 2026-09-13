@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Button } from '@wow-two-beta/ui/presentation/actions';
 import {
   Badge,
@@ -34,7 +34,7 @@ const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger'> = {
 /* A representative product screen built entirely from real lib components and
    theme tokens — the canonical "how does this theme feel" surface. Local state
    only (Select + input), no props: the surrounding wrapper decides the theme. */
-export function PreviewBoard() {
+export const PreviewBoard = memo(function PreviewBoard() {
   const [plan, setPlan] = useState<string | null>('pro');
 
   return (
@@ -163,4 +163,4 @@ export function PreviewBoard() {
       </div>
     </div>
   );
-}
+});

@@ -22,7 +22,6 @@ import {
   StatusIndicator,
   Toast,
   ToastSimple,
-  Toaster,
   Tour,
   TrendIndicator,
   TypingIndicator,
@@ -145,7 +144,6 @@ export default function FeedbackGallery() {
   return (
     <div className="space-y-12">
       {/* Mounted once for the whole page; triggered from the Toasts section. */}
-      <Toaster position="bottom-right" defaultDuration={4000} />
 
       {/* ------------------------------ Alerts ------------------------------ */}
       <section className="space-y-4">

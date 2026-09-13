@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
 interface ThemeContextValue {
   dark: boolean;
@@ -22,8 +22,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(false);
   const [haven, setHaven] = useState(false);
 
+  const value = useMemo(() => ({ dark, haven, setDark, setHaven }), [dark, haven]);
+
   return (
-    <ThemeContext.Provider value={{ dark, haven, setDark, setHaven }}>
+    <ThemeContext.Provider value={value}>
       <div
         className={[
           dark && 'dark',

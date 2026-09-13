@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
   generateTheme,
   themeToCss,
-  validateTheme,
   contrastPairs,
   contrastRatioCss,
   type AccentMode,
@@ -48,7 +47,7 @@ export default function GeneratorPage() {
   );
 
   const css = useMemo(() => themeToCss(theme), [theme]);
-  const meta = useMemo(() => validateTheme(theme), [theme]);
+  const meta = theme.meta;
 
   // Per-pair pass/fail for the active mode's token set.
   const set = dark ? theme.dark : theme.light;

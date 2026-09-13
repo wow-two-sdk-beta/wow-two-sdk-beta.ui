@@ -1,0 +1,3 @@
+/* Include the SDK utility classes used by source aliases in this app. */
+@import '@wow-two-beta/ui/styles.css';
+@source "../../../src";

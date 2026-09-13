@@ -15,7 +15,7 @@ export default function ExportPage() {
   const tokenJson = useMemo(
     () =>
       JSON.stringify(
-        { id: theme.id, name: theme.id, light: theme.light, dark: theme.dark },
+        { id: theme.id, name: theme.name, light: theme.light, dark: theme.dark },
         null,
         2,
       ),

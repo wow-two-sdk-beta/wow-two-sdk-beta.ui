@@ -1,22 +1,23 @@
 <script setup lang="ts">
-import * as sweepForms from '@wow-two-beta/ui-vue/presentation/forms';
-import * as sweepNav from '@wow-two-beta/ui-vue/presentation/nav';
+import {
+  ToggleInput,
+  ToggleGroup,
+  OptionTilePicker,
+  OptionTileGroupField,
+  SegmentedPicker,
+} from '@wow-two-beta/ui-vue/presentation/forms';
+import { LinkItem } from '@wow-two-beta/ui-vue/presentation/nav';
 import { ref } from 'vue';
 import * as actions from '@wow-two-beta/ui-vue/presentation/actions';
 import { Check, Copy, Pencil, Plus, Share2, Star, Trash2 } from 'lucide-vue-next';
 import Demo from '../gallery/Demo.vue';
 import Matrix from '../gallery/Matrix.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
+import { actionsExamples } from '../gallery/fixtures/ActionsExamples';
 
 const {
   Button,
-  LinkItem,
   ButtonGroup,
-  ToggleInput,
-  ToggleGroup,
-  OptionTilePicker,
-  OptionTileGroupField,
-  SegmentedPicker,
   FabButton,
   CopyButton,
   DisclosureButton,
@@ -26,10 +27,9 @@ const {
   ToolbarLink,
   SpeedDialGroup,
   SpeedDialGroupTrigger,
-
   SpeedDialGroupAction,
   BackToTopButton,
-} = { ...actions, ...sweepForms, ...sweepNav };
+} = actions;
 
 const covered = [
   'Button',
@@ -326,6 +326,6 @@ const tile = ref('b');
     </div>
 
     <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
-    <AutoGroup :namespace="actions" :covered="covered" />
+    <AutoGroup :examples="actionsExamples" :namespace="actions" :covered="covered" />
   </div>
 </template>

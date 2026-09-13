@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import * as sweepDisplay from '@wow-two-beta/ui-vue/presentation/display';
+import {
+  NotificationCenterGroup,
+  NotificationItem,
+  OnboardingChecklistCard,
+  OnboardingChecklistCardTask,
+} from '@wow-two-beta/ui-vue/presentation/display';
 import { ref } from 'vue';
 import * as feedback from '@wow-two-beta/ui-vue/presentation/feedback';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
@@ -7,6 +12,7 @@ import { Info } from 'lucide-vue-next';
 import Demo from '../gallery/Demo.vue';
 import Matrix from '../gallery/Matrix.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
+import { feedbackExamples } from '../gallery/fixtures/FeedbackExamples';
 
 const {
   Alert,
@@ -29,13 +35,9 @@ const {
   TypingIndicator,
   LoadingOverlay,
   LoadingState,
-  NotificationCenterGroup,
-  NotificationItem,
-  OnboardingChecklistCard,
-  OnboardingChecklistCardTask,
   UndoBar,
   LiveCursorIndicator,
-} = { ...feedback, ...sweepDisplay };
+} = feedback;
 
 const covered = [
   'Alert',
@@ -286,6 +288,6 @@ const overlayOn = ref(false);
     </div>
 
     <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
-    <AutoGroup :namespace="feedback" :covered="covered" />
+    <AutoGroup :examples="feedbackExamples" :namespace="feedback" :covered="covered" />
   </div>
 </template>

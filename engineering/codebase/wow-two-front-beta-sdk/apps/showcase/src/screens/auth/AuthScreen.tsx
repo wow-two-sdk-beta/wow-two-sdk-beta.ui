@@ -397,7 +397,7 @@ export default function AuthScreen() {
               Start over
             </Button>
             <Button asChild>
-              <a href="/">Go to showcase</a>
+              <a href="#/">Go to showcase</a>
             </Button>
           </Card.Footer>
         </Card>

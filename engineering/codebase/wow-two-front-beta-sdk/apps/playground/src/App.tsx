@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SupplyFilterBarMock } from './scenarios/SupplyFilterBarMock';
 import './themes/haven.css';
 
@@ -15,6 +15,17 @@ export function App() {
   const [haven, setHaven] = useState(true);
 
   const Active = SCENARIOS[scenario].Component;
+
+  useEffect(() => {
+    const wasDark = document.body.classList.contains('dark');
+    const hadHaven = document.body.classList.contains('theme-haven');
+    document.body.classList.toggle('dark', dark);
+    document.body.classList.toggle('theme-haven', haven);
+    return () => {
+      document.body.classList.toggle('dark', wasDark);
+      document.body.classList.toggle('theme-haven', hadHaven);
+    };
+  }, [dark, haven]);
 
   return (
     <div className={[dark && 'dark', haven && 'theme-haven'].filter(Boolean).join(' ')}>

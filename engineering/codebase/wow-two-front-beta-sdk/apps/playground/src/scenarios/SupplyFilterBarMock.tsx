@@ -41,7 +41,7 @@ export function SupplyFilterBarMock() {
           <Select<Contact>
             value={contact}
             onValueChange={(opt) => setContact(opt?.itemKey ?? null)}
-            clearable
+            isClearable
           >
             <Select.Trigger size="xs" className="w-40">
               <Select.Value placeholder="All" />
@@ -52,7 +52,7 @@ export function SupplyFilterBarMock() {
                   key={opt.itemKey}
                   itemKey={opt.itemKey}
                   label={opt.label}
-                  disabled={opt.meta === 0}
+                  isDisabled={opt.meta === 0}
                 >
                   <span className="flex-1">{opt.label}</span>
                   <span className="ml-2 text-xs text-subtle-foreground">{opt.meta}</span>
@@ -66,7 +66,7 @@ export function SupplyFilterBarMock() {
           <Select<ListingType>
             value={listingType}
             onValueChange={(opt) => setListingType(opt?.itemKey ?? null)}
-            clearable
+            isClearable
           >
             <Select.Trigger size="xs" className="w-40">
               <Select.Value placeholder="All" />
@@ -90,7 +90,7 @@ export function SupplyFilterBarMock() {
           <Select<number>
             value={rooms}
             onValueChange={(opt) => setRooms(opt?.itemKey ?? null)}
-            clearable
+            isClearable
           >
             <Select.Trigger size="xs" className="w-40">
               <Select.Value placeholder="All" />

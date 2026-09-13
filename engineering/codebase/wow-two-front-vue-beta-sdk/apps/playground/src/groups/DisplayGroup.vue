@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import * as sweepLayout from '@wow-two-beta/ui-vue/presentation/layout';
-import * as sweepOverlays from '@wow-two-beta/ui-vue/presentation/overlays';
+import { SeparatorLayout } from '@wow-two-beta/ui-vue/presentation/layout';
+import { Tooltip } from '@wow-two-beta/ui-vue/presentation/overlays';
 import * as display from '@wow-two-beta/ui-vue/presentation/display';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
 import { Inbox } from 'lucide-vue-next';
 import Demo from '../gallery/Demo.vue';
 import Matrix from '../gallery/Matrix.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
+import { displayExamples } from '../gallery/fixtures/DisplayExamples';
 
 const {
   Badge,
@@ -55,7 +56,6 @@ const {
   CollapsibleGroup,
   CollapsibleGroupTrigger,
   CollapsibleGroupContent,
-  SeparatorLayout,
   EmptyState,
   Sparkline,
   Timeline,
@@ -84,8 +84,7 @@ const {
   CarouselDots,
   ActivityTimeline,
   ActivityItem,
-  Tooltip,
-} = { ...display, ...sweepLayout, ...sweepOverlays };
+} = display;
 
 const covered = [
   'Badge',
@@ -597,6 +596,6 @@ const ROWS = [
     </div>
 
     <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
-    <AutoGroup :namespace="display" :covered="covered" />
+    <AutoGroup :examples="displayExamples" :namespace="display" :covered="covered" />
   </div>
 </template>

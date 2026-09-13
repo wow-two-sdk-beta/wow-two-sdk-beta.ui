@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import * as sweepOverlays from '@wow-two-beta/ui-vue/presentation/overlays';
+import {
+  CommandPaletteModal,
+  CommandPaletteModalContent,
+  CommandPaletteModalInput,
+  CommandPaletteModalList,
+  CommandPaletteModalGroup,
+  CommandPaletteModalItem,
+  CommandPaletteModalEmpty,
+  CommandPaletteModalSeparator,
+} from '@wow-two-beta/ui-vue/presentation/overlays';
 import { ref } from 'vue';
 import * as nav from '@wow-two-beta/ui-vue/presentation/nav';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
 import { Home, Inbox, Settings } from 'lucide-vue-next';
 import Demo from '../gallery/Demo.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
+import { navExamples } from '../gallery/fixtures/NavExamples';
 
 const {
   Breadcrumb,
@@ -32,17 +42,9 @@ const {
   NavigationMenuTrigger,
   NavigationMenuContent,
   NavigationMenuLink,
-  CommandPaletteModal,
-  CommandPaletteModalContent,
-  CommandPaletteModalInput,
-  CommandPaletteModalList,
-  CommandPaletteModalGroup,
-  CommandPaletteModalItem,
-  CommandPaletteModalEmpty,
-  CommandPaletteModalSeparator,
   ScrollSpy,
   TableOfContents,
-} = { ...nav, ...sweepOverlays };
+} = nav;
 
 const covered = [
   'Breadcrumb',
@@ -262,6 +264,6 @@ const menuAnchor = ref<HTMLElement | null>(null);
     </div>
 
     <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
-    <AutoGroup :namespace="nav" :covered="covered" />
+    <AutoGroup :examples="navExamples" :namespace="nav" :covered="covered" />
   </div>
 </template>

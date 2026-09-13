@@ -29,6 +29,7 @@ export function ThemePreviewScope({
   return (
     <div
       aria-hidden={ariaHidden}
+      inert={ariaHidden || undefined}
       className={cn(`theme-${themeId}`, isDark && 'dark', 'bg-background text-foreground', className)}
     >
       {children}

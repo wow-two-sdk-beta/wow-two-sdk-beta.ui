@@ -1,7 +1,20 @@
 <script setup lang="ts">
-import * as sweepDisplay from '@wow-two-beta/ui-vue/presentation/display';
-import * as sweepFeedback from '@wow-two-beta/ui-vue/presentation/feedback';
-import * as sweepLayout from '@wow-two-beta/ui-vue/presentation/layout';
+import {
+  LabelText,
+  LegendText,
+  FieldHelperText,
+  ColorSwatchPreview,
+  StepperGroup,
+  StepperGroupList,
+  StepperGroupStep,
+  StepperGroupPanel,
+} from '@wow-two-beta/ui-vue/presentation/display';
+import {
+  FieldErrorCallout,
+  CharacterCountCallout,
+  PasswordStrengthCallout,
+} from '@wow-two-beta/ui-vue/presentation/feedback';
+import { FieldsetLayout, InputAddonLayout, InputGroup } from '@wow-two-beta/ui-vue/presentation/layout';
 import { computed, ref } from 'vue';
 import { Temporal } from 'temporal-polyfill';
 import { Star } from 'lucide-vue-next';
@@ -9,6 +22,7 @@ import * as forms from '@wow-two-beta/ui-vue/presentation/forms';
 import Demo from '../gallery/Demo.vue';
 import Matrix from '../gallery/Matrix.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
+import { formsExamples } from '../gallery/fixtures/FormsExamples';
 
 const {
   CodeEditor,
@@ -17,12 +31,7 @@ const {
   SortableGroupItem,
   SortableGroupHandle,
   SortableGroupMoveButton,
-  LabelText,
   Field,
-  FieldsetLayout,
-  LegendText,
-  FieldHelperText,
-  FieldErrorCallout,
   TextInput,
   TextAreaInput,
   EmailInput,
@@ -41,11 +50,7 @@ const {
   CheckboxGroup,
   RadioGroup,
   PinInput,
-  CharacterCountCallout,
-  InputAddonLayout,
-  InputGroup,
   LabeledField,
-  PasswordStrengthCallout,
   TagsInput,
   ListboxPicker,
   ListboxPickerItem,
@@ -77,13 +82,8 @@ const {
   TimeInput,
   TimePicker,
   RecurrenceEditor,
-  ColorSwatchPreview,
   ColorSwatchPicker,
   KnobInput,
-  StepperGroup,
-  StepperGroupList,
-  StepperGroupStep,
-  StepperGroupPanel,
   WizardForm,
   WizardFormSteps,
   WizardFormStep,
@@ -93,7 +93,7 @@ const {
   EditableInputInput,
   EditableInputSubmit,
   EditableInputCancel,
-} = { ...forms, ...sweepDisplay, ...sweepFeedback, ...sweepLayout };
+} = forms;
 
 const covered = [
   'LabelText',
@@ -698,6 +698,7 @@ const stamp = ref<Temporal.PlainDateTime | null>(
       />
     </Demo>
     <AutoGroup
+      :examples="formsExamples"
       :namespace="forms"
       :covered="[
         ...covered,

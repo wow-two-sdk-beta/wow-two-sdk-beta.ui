@@ -45,10 +45,13 @@ export function ThemeStudioProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const themeClass = `theme-${themeId}`;
+    const hadThemeClass = document.body.classList.contains(themeClass);
+    const wasDark = document.body.classList.contains('dark');
     document.body.classList.add(themeClass);
     document.body.classList.toggle('dark', dark);
     return () => {
-      document.body.classList.remove(themeClass);
+      document.body.classList.toggle(themeClass, hadThemeClass);
+      document.body.classList.toggle('dark', wasDark);
     };
   }, [themeId, dark]);
 

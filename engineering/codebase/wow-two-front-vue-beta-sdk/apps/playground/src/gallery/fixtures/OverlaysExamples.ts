@@ -1,5 +1,14 @@
-import { h, type VNode } from 'vue';
 import {
+  Tooltip,
+  TourPopover,
+  CommandPaletteModal,
+  CommandPaletteModalContent,
+  CommandPaletteModalInput,
+  CommandPaletteModalList,
+  CommandPaletteModalGroup,
+  CommandPaletteModalItem,
+  CommandPaletteModalEmpty,
+  CommandPaletteModalSeparator,
   ActionSheet,
   ActionSheetAction,
   ActionSheetCancel,
@@ -38,7 +47,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '../../../../../src/presentation/overlays';
+import { h, type VNode } from 'vue';
 import { smokeCase, type SmokeCase } from './Example';
+
+const inCommandPalette = (node: VNode): VNode => h(CommandPaletteModal, { defaultOpen: true }, () => node);
+
+const inCommandPaletteContent = (node: VNode): VNode =>
+  inCommandPalette(h(CommandPaletteModalContent, null, () => node));
+
+const inCommandPaletteList = (node: VNode): VNode =>
+  inCommandPaletteContent(h(CommandPaletteModalList, null, () => node));
 
 /*
  * Wrappers for the compound parts. Each root is opened via its UNCONTROLLED path (`defaultOpen`),
@@ -72,6 +90,7 @@ export const overlaysExamples: readonly SmokeCase[] = [
   smokeCase('BackdropOverlay', BackdropOverlay, {}, { slot: true }),
 
   smokeCase('Modal', Modal, {}, { slot: true }),
+
   smokeCase(
     'ModalTrigger',
     ModalTrigger,
@@ -81,6 +100,7 @@ export const overlaysExamples: readonly SmokeCase[] = [
       wrap: (node) => h(Modal, null, () => node),
     },
   ),
+
   smokeCase(
     'ModalContent',
     ModalContent,
@@ -90,14 +110,21 @@ export const overlaysExamples: readonly SmokeCase[] = [
       wrap: (node) => h(Modal, { defaultOpen: true }, () => node),
     },
   ),
+
   smokeCase('ModalHeader', ModalHeader, {}, { slot: true, wrap: inOpenModal }),
+
   smokeCase('ModalTitle', ModalTitle, {}, { slot: true, wrap: inOpenModal }),
+
   smokeCase('ModalDescription', ModalDescription, {}, { slot: true, wrap: inOpenModal }),
+
   smokeCase('ModalBody', ModalBody, {}, { slot: true, wrap: inOpenModal }),
+
   smokeCase('ModalFooter', ModalFooter, {}, { slot: true, wrap: inOpenModal }),
+
   smokeCase('ModalClose', ModalClose, {}, { slot: true, wrap: inOpenModal }),
 
   smokeCase('AlertModal', AlertModal, {}, { slot: true }),
+
   smokeCase(
     'AlertModalContent',
     AlertModalContent,
@@ -107,10 +134,13 @@ export const overlaysExamples: readonly SmokeCase[] = [
       wrap: (node) => h(AlertModal, { defaultOpen: true }, () => node),
     },
   ),
+
   smokeCase('AlertModalAction', AlertModalAction, {}, { slot: true, wrap: inOpenAlertModal }),
+
   smokeCase('AlertModalCancel', AlertModalCancel, {}, { slot: true, wrap: inOpenAlertModal }),
 
   smokeCase('Drawer', Drawer, {}, { slot: true }),
+
   smokeCase(
     'DrawerTrigger',
     DrawerTrigger,
@@ -120,6 +150,7 @@ export const overlaysExamples: readonly SmokeCase[] = [
       wrap: (node) => h(Drawer, null, () => node),
     },
   ),
+
   smokeCase(
     'DrawerContent',
     DrawerContent,
@@ -129,16 +160,25 @@ export const overlaysExamples: readonly SmokeCase[] = [
       wrap: (node) => h(Drawer, { defaultOpen: true }, () => node),
     },
   ),
+
   smokeCase('DrawerHeader', DrawerHeader, {}, { slot: true, wrap: inOpenDrawer }),
+
   smokeCase('DrawerTitle', DrawerTitle, {}, { slot: true, wrap: inOpenDrawer }),
+
   smokeCase('DrawerDescription', DrawerDescription, {}, { slot: true, wrap: inOpenDrawer }),
+
   smokeCase('DrawerBody', DrawerBody, {}, { slot: true, wrap: inOpenDrawer }),
+
   smokeCase('DrawerFooter', DrawerFooter, {}, { slot: true, wrap: inOpenDrawer }),
+
   smokeCase('DrawerClose', DrawerClose, {}, { slot: true, wrap: inOpenDrawer }),
 
   smokeCase('Popover', Popover, {}, { slot: true }),
+
   smokeCase('PopoverTrigger', PopoverTrigger, {}, { slot: true, wrap: inPopover }),
+
   smokeCase('PopoverContent', PopoverContent, {}, { slot: true, wrap: inPopover }),
+
   smokeCase(
     'PopoverArrow',
     PopoverArrow,
@@ -149,8 +189,11 @@ export const overlaysExamples: readonly SmokeCase[] = [
   ),
 
   smokeCase('HoverCard', HoverCard, {}, { slot: true }),
+
   smokeCase('HoverCardTrigger', HoverCardTrigger, {}, { slot: true, wrap: inHoverCard }),
+
   smokeCase('HoverCardContent', HoverCardContent, {}, { slot: true, wrap: inHoverCard }),
+
   smokeCase(
     'HoverCardArrow',
     HoverCardArrow,
@@ -163,11 +206,15 @@ export const overlaysExamples: readonly SmokeCase[] = [
   // Opened via the uncontrolled path so the slot is actually rendered — these two roots host
   // their content directly rather than through a `*Content` part.
   smokeCase('ActionSheet', ActionSheet, { defaultOpen: true }, { slot: true }),
+
   smokeCase('ActionSheetAction', ActionSheetAction, {}, { slot: true, wrap: inOpenActionSheet }),
+
   smokeCase('ActionSheetCancel', ActionSheetCancel, {}, { slot: true, wrap: inOpenActionSheet }),
 
   smokeCase('BottomSheet', BottomSheet, { defaultOpen: true }, { slot: true }),
+
   smokeCase('BottomSheetTitle', BottomSheetTitle, {}, { slot: true, wrap: inOpenBottomSheet }),
+
   smokeCase(
     'BottomSheetDescription',
     BottomSheetDescription,
@@ -177,4 +224,29 @@ export const overlaysExamples: readonly SmokeCase[] = [
       wrap: inOpenBottomSheet,
     },
   ),
+
+  smokeCase('Tooltip', Tooltip, {}, { slot: true }),
+
+  smokeCase('TourPopover', TourPopover, { steps: [{ target: '#tour-anchor', title: 'Step one' }] }),
+
+  smokeCase('CommandPaletteModal', CommandPaletteModal, {}, { slot: true }),
+
+  smokeCase('CommandPaletteModalContent', CommandPaletteModalContent, {}, { slot: true, wrap: inCommandPalette }),
+
+  smokeCase('CommandPaletteModalInput', CommandPaletteModalInput, {}, { wrap: inCommandPaletteContent }),
+
+  smokeCase('CommandPaletteModalList', CommandPaletteModalList, {}, { slot: true, wrap: inCommandPaletteContent }),
+
+  smokeCase('CommandPaletteModalGroup', CommandPaletteModalGroup, {}, { slot: true, wrap: inCommandPaletteList }),
+
+  smokeCase(
+    'CommandPaletteModalItem',
+    CommandPaletteModalItem,
+    { value: 'open-settings' },
+    { slot: true, wrap: inCommandPaletteList },
+  ),
+
+  smokeCase('CommandPaletteModalEmpty', CommandPaletteModalEmpty, {}, { slot: true, wrap: inCommandPaletteList }),
+
+  smokeCase('CommandPaletteModalSeparator', CommandPaletteModalSeparator, {}, { wrap: inCommandPaletteList }),
 ];

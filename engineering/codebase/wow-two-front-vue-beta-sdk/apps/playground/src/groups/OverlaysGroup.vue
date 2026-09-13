@@ -4,6 +4,7 @@ import * as overlays from '@wow-two-beta/ui-vue/presentation/overlays';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
 import Demo from '../gallery/Demo.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
+import { overlaysExamples } from '../gallery/fixtures/OverlaysExamples';
 
 const {
   Modal,
@@ -260,6 +261,6 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
     </div>
 
     <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
-    <AutoGroup :namespace="overlays" :covered="covered" />
+    <AutoGroup :examples="overlaysExamples" :namespace="overlays" :covered="covered" />
   </div>
 </template>

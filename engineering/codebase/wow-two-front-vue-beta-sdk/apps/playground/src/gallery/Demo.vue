@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onErrorCaptured, ref } from 'vue';
+import { record } from '../diagnostics';
 
 /**
  * Wraps one component's demo in a labelled card with a render-error boundary.
@@ -9,7 +10,7 @@ import { onErrorCaptured, ref } from 'vue';
  * rendered in place, so the page keeps scrolling and the failure is visible
  * exactly where it happened.
  */
-defineProps<{
+const props = defineProps<{
   /** The component (or cluster) this card shows. */
   name: string;
   /** Optional one-line note — what the demo is proving. */
@@ -42,6 +43,7 @@ onErrorCaptured((err) => {
   if (message.value === null) {
     message.value = err instanceof Error ? err.message : String(err);
     stack.value = err instanceof Error ? (err.stack ?? null) : null;
+    record('error', message.value, props.name);
   }
   return false;
 });

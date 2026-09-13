@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import * as sweepForms from '@wow-two-beta/ui-vue/presentation/forms';
+import { ControlGroupField } from '@wow-two-beta/ui-vue/presentation/forms';
 import * as layout from '@wow-two-beta/ui-vue/presentation/layout';
 import { cn } from '@wow-two-beta/ui-vue/foundation/styles';
 import Demo from '../gallery/Demo.vue';
 import Matrix from '../gallery/Matrix.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
+import { layoutExamples } from '../gallery/fixtures/LayoutExamples';
 
 const {
   BoxLayout,
@@ -18,7 +19,6 @@ const {
   SpacerLayout,
   CenterLayout,
   DividerLayout,
-  ControlGroupField,
   ScrollArea,
   InlineLayout,
   ClusterLayout,
@@ -31,7 +31,7 @@ const {
   ResizablePanel,
   ResizableSeparator,
   AnchorLayout,
-} = { ...layout, ...sweepForms };
+} = layout;
 
 /** Names every component the curated section below renders. */
 const covered = [
@@ -399,6 +399,6 @@ const FLEX_CASES = [
     </div>
 
     <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
-    <AutoGroup :namespace="layout" :covered="covered" />
+    <AutoGroup :examples="layoutExamples" :namespace="layout" :covered="covered" />
   </div>
 </template>

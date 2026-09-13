@@ -68,7 +68,7 @@ const MEDIA: MediaItem[] = [
     id: 'med-001',
     title: 'Aurora over the ridge',
     caption: 'Hero artwork for the Q3 launch announcement.',
-    src: '/samples/poster-aurora.svg',
+    src: './samples/poster-aurora.svg',
     kind: 'photo',
     sizeKb: 2,
     ownerId: 'usr-002',
@@ -77,7 +77,7 @@ const MEDIA: MediaItem[] = [
     id: 'med-002',
     title: 'Golden hour dunes',
     caption: 'Warm-palette cover used in the billing emails.',
-    src: '/samples/poster-dunes.svg',
+    src: './samples/poster-dunes.svg',
     kind: 'photo',
     sizeKb: 2,
     ownerId: 'usr-004',
@@ -86,7 +86,7 @@ const MEDIA: MediaItem[] = [
     id: 'med-003',
     title: 'Edge node topology',
     caption: 'Infra diagram from the deploy pipeline runbook.',
-    src: '/samples/poster-circuit.svg',
+    src: './samples/poster-circuit.svg',
     kind: 'diagram',
     sizeKb: 2,
     ownerId: 'usr-005',
@@ -95,7 +95,7 @@ const MEDIA: MediaItem[] = [
     id: 'med-004',
     title: 'Tidal layers',
     caption: 'Render exploration for the marketing splash.',
-    src: '/samples/poster-waves.svg',
+    src: './samples/poster-waves.svg',
     kind: 'render',
     sizeKb: 1,
     ownerId: 'usr-007',
@@ -104,7 +104,7 @@ const MEDIA: MediaItem[] = [
     id: 'med-005',
     title: 'Violet summit line',
     caption: 'Night-mode wallpaper shipped with the desktop app.',
-    src: '/samples/poster-summit.svg',
+    src: './samples/poster-summit.svg',
     kind: 'render',
     sizeKb: 2,
     ownerId: 'usr-009',
@@ -113,7 +113,7 @@ const MEDIA: MediaItem[] = [
     id: 'med-006',
     title: 'Release 2.4 walkthrough',
     caption: 'Poster frame for the release video (source pending).',
-    src: '/samples/poster-video.svg',
+    src: './samples/poster-video.svg',
     kind: 'diagram',
     sizeKb: 2,
     ownerId: 'usr-011',
@@ -366,9 +366,9 @@ export default function MediaScreen() {
         />
         <div className="grid gap-4 sm:grid-cols-3">
           {([
-            { ratio: 16 / 9, label: '16 : 9', src: '/samples/poster-waves.svg' },
-            { ratio: 4 / 3, label: '4 : 3', src: '/samples/poster-dunes.svg' },
-            { ratio: 1, label: '1 : 1', src: '/samples/poster-summit.svg' },
+            { ratio: 16 / 9, label: '16 : 9', src: './samples/poster-waves.svg' },
+            { ratio: 4 / 3, label: '4 : 3', src: './samples/poster-dunes.svg' },
+            { ratio: 1, label: '1 : 1', src: './samples/poster-summit.svg' },
           ] as const).map((demo) => (
             <Frame key={demo.label} padding="2" radius="lg" className="space-y-2">
               <AspectRatio ratio={demo.ratio} className="overflow-hidden rounded-md">
@@ -395,7 +395,7 @@ export default function MediaScreen() {
             <Frame surface="card" padding="0" radius="md" className="overflow-hidden">
               <AspectRatio ratio={16 / 9}>
                 <Image
-                  src="/samples/poster-aurora.svg"
+                  src="./samples/poster-aurora.svg"
                   alt="Tilt demo poster"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
@@ -413,7 +413,7 @@ export default function MediaScreen() {
           description="AudioPlayer over a generated 1-second silent WAV, plus a standalone seekable waveform."
         />
         <Frame padding="4" radius="lg">
-          <AudioPlayer src="/samples/silence.wav" peaks={AUDIO_PEAKS} />
+          <AudioPlayer src="./samples/silence.wav" peaks={AUDIO_PEAKS} />
         </Frame>
         <Frame surface="muted" padding="4" radius="lg" className="space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -442,7 +442,7 @@ export default function MediaScreen() {
         />
         <VideoPlayer
           src=""
-          poster="/samples/poster-video.svg"
+          poster="./samples/poster-video.svg"
           aspectRatio="16 / 9"
           muted
           className="overflow-hidden rounded-lg border border-border"
@@ -456,7 +456,7 @@ export default function MediaScreen() {
           description="PDFViewer over a hand-assembled 900-byte one-page PDF served from /samples."
         />
         <PDFViewer
-          src="/samples/sample.pdf"
+          src="./samples/sample.pdf"
           title="Sample one-pager"
           pageCount={1}
           height="28rem"

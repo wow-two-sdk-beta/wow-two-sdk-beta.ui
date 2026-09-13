@@ -7,7 +7,7 @@ import { installThemesCss } from './theme';
 /* The themes stylesheet is emitted at BUILD time into `dist/themes.css`. The
    gallery runs against source, so it emits the same CSS at boot from the live
    registry — which also exercises the ported themes engine on every load. */
-installThemesCss();
+const disposeThemes = installThemesCss();
 
 const app = createApp(App);
 
@@ -28,3 +28,10 @@ app.config.errorHandler = (err, instance, info) => {
 };
 
 app.mount('#app');
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    app.unmount();
+    disposeThemes();
+  });
+}
