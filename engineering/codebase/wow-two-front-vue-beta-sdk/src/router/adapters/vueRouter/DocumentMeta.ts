@@ -64,7 +64,8 @@ export function installDocumentMeta(router: Router): () => void {
   // without the component.
   let managed: ReadonlyMap<string, { attribute: MetaAttribute; key: string }> = new Map();
 
-  return router.afterEach((to) => {
+  return router.afterEach((to, _from, failure) => {
+    if (failure) return;
     const meta: RouteMeta | undefined = deepestHandleValue(to, (handle) => resolveHandleValue(handle.meta, to));
 
     const next = new Map<string, { attribute: MetaAttribute; key: string }>([

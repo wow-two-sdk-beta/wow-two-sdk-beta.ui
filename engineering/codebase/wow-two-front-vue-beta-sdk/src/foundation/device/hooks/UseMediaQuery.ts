@@ -10,27 +10,30 @@ import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrG
  * counterpart of the original's `useSyncExternalStore`: subscribe on mount,
  * unsubscribe when the scope is disposed.
  */
+/** Subscribes to one media query and reports its initial browser value. */
+export function subscribeMediaQuery(query: string, onChange: (matches: boolean) => void): () => void {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return () => undefined;
+  const list = window.matchMedia(query);
+  const listener = (event: MediaQueryListEvent): void => onChange(event.matches);
+  list.addEventListener('change', listener);
+  onChange(list.matches);
+  return () => list.removeEventListener('change', listener);
+}
+
 export function useMediaQuery(query: MaybeRefOrGetter<string>): Readonly<ShallowRef<boolean>> {
   const matches = shallowRef(false);
 
-  let mql: MediaQueryList | null = null;
-  const onChange = (event: MediaQueryListEvent): void => {
-    matches.value = event.matches;
-  };
-
+  let dispose: (() => void) | undefined;
   function unsubscribe(): void {
-    mql?.removeEventListener('change', onChange);
-    mql = null;
+    dispose?.();
+    dispose = undefined;
   }
-
   function subscribe(): void {
     unsubscribe();
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-    mql = window.matchMedia(toValue(query));
-    matches.value = mql.matches;
-    mql.addEventListener('change', onChange);
+    dispose = subscribeMediaQuery(toValue(query), (value) => {
+      matches.value = value;
+    });
   }
-
   onMounted(subscribe);
   // A changed query is a new subscription; `subscribe` drops the old listener first.
   watch(() => toValue(query), subscribe);

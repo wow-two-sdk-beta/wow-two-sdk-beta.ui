@@ -7,9 +7,12 @@ const prefetched = new WeakSet<LazyRoute>();
 export function prefetch(importer: LazyRoute): void {
   if (prefetched.has(importer)) return;
   prefetched.add(importer);
-  void importer().catch(() => {
-    // Prefetch is best-effort — a failed warm-up is retried by the router's own lazy load on navigation.
-  });
+  void Promise.resolve()
+    .then(importer)
+    .catch(() => {
+      prefetched.delete(importer);
+      // Prefetch is best-effort — a failed warm-up is retried by the router's own lazy load on navigation.
+    });
 }
 
 /**

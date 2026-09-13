@@ -50,6 +50,7 @@ export interface Limiter {
  * `concurrency` is clamped to at least `1`; a fractional value is floored.
  */
 export function pLimit(concurrency: number): Limiter {
+  if (Number.isNaN(concurrency)) throw new RangeError('Concurrency must be a number.');
   const limit = Math.max(1, Math.floor(concurrency));
   const queue: (() => void)[] = [];
   let active = 0;

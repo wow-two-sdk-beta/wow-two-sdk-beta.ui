@@ -131,6 +131,7 @@ export function useUploadQueue<TResult = unknown>(
     transport: { upload: (file, context) => toValue(options).transport.upload(file, context) },
   });
 
+  onScopeDispose(queue.clear);
   const { items, state } = useUploadQueueSnapshot(queue);
 
   return {

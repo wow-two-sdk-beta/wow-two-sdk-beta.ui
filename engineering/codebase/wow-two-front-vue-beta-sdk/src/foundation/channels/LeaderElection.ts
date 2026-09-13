@@ -281,7 +281,7 @@ export function createLeaderElection(name: string, options?: LeaderElectionOptio
     emit(loseListeners);
   }
 
-  channel.subscribe((signal) => {
+  const unsubscribe = channel.subscribe((signal) => {
     if (closed) return;
 
     // A peer on an older bundle could send anything; the union is a compile-time contract only.
@@ -390,6 +390,7 @@ export function createLeaderElection(name: string, options?: LeaderElectionOptio
       clearWatch();
       clearClaim();
       clearHeartbeat();
+      unsubscribe();
       becomeListeners.clear();
       loseListeners.clear();
 

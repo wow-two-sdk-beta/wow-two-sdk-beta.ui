@@ -66,7 +66,7 @@ export function withTimeout<T>(promise: PromiseLike<T>, ms: number, options: Wit
   const { signal, onTimeout, message } = options;
 
   if (!Number.isFinite(ms) || ms <= 0) return abortable(promise, signal);
-  if (signal?.aborted === true) return Promise.reject(abortErrorFor(signal));
+  if (signal?.aborted === true) return abortable(promise, signal);
 
   return new Promise<T>((resolve, reject) => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -105,7 +105,7 @@ export function withTimeout<T>(promise: PromiseLike<T>, ms: number, options: Wit
       signal.addEventListener('abort', listener, { once: true });
     }
 
-    promise.then(
+    void Promise.resolve(promise).then(
       (value) => {
         cleanup();
         resolve(value);

@@ -68,7 +68,7 @@ export function resolveSubmitFailure(
   resolveMessage?: ResolveValidationMessage,
 ): SubmitFailureResolution {
   const mapped = mapSubmitError(error);
-  const matched: Record<string, string[]> = {};
+  const matched: Record<string, string[]> = Object.create(null);
   let unplaced = false;
   for (const [serverPath, entries] of Object.entries(mapped)) {
     const formPath = mapFieldPath(serverPath);

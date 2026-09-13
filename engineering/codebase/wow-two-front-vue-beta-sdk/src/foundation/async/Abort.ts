@@ -56,7 +56,10 @@ export function abortErrorFor(signal: AbortSignal): AbortError {
  */
 export function abortable<T>(promise: PromiseLike<T>, signal?: AbortSignal): Promise<T> {
   if (signal === undefined) return Promise.resolve(promise);
-  if (signal.aborted) return Promise.reject(abortErrorFor(signal));
+  if (signal.aborted) {
+    void Promise.resolve(promise).catch(() => undefined);
+    return Promise.reject(abortErrorFor(signal));
+  }
 
   return new Promise<T>((resolve, reject) => {
     const onAbort = (): void => {
@@ -66,7 +69,7 @@ export function abortable<T>(promise: PromiseLike<T>, signal?: AbortSignal): Pro
 
     // Both handlers detach the listener before settling. Redundant with `once` on the abort path, and
     // load-bearing on every other path: a promise that resolves normally must not leave a listener behind.
-    promise.then(
+    void Promise.resolve(promise).then(
       (value) => {
         signal.removeEventListener('abort', onAbort);
         resolve(value);

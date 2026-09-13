@@ -123,7 +123,7 @@ const EmptyMessages: ReadonlyArray<string> = Object.freeze([]);
 function toEngineValidationError(errors: Record<string, ReadonlyArray<string>>): unknown {
   const paths = Object.keys(errors);
   if (paths.length === 0) return undefined;
-  const fields: Record<string, ReadonlyArray<string>> = {};
+  const fields: Record<string, ReadonlyArray<string>> = Object.create(null);
   let form: ReadonlyArray<string> | undefined;
   for (const path of paths) {
     if (path === '') form = errors[path];

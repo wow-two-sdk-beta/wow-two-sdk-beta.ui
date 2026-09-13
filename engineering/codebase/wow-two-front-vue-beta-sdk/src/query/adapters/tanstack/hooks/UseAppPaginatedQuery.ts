@@ -68,13 +68,16 @@ export function useAppPaginatedQuery<TItem, TPage>({
   enabled,
   meta,
 }: UseAppPaginatedQueryOptions<TItem, TPage>): UseAppPaginatedQueryReturn<TItem, TPage> {
-  const query = useQuery<TPage, Error, TPage, QueryKey>(() => ({
-    queryKey: [...toValue(key), toValue(page)],
-    queryFn: ({ signal }) => resolveQueryResult(queryFn({ page: toValue(page), signal })),
-    placeholderData: keepPreviousData,
-    enabled: toValue(enabled),
-    meta,
-  }));
+  const query = useQuery<TPage, Error, TPage, QueryKey>(() => {
+    const currentPage = toValue(page);
+    return {
+      queryKey: [...toValue(key), currentPage],
+      queryFn: ({ signal }) => resolveQueryResult(queryFn({ page: currentPage, signal })),
+      placeholderData: keepPreviousData,
+      enabled: toValue(enabled),
+      meta,
+    };
+  });
 
   const items = computed<ReadonlyArray<TItem>>(() => {
     const data = query.data.value;

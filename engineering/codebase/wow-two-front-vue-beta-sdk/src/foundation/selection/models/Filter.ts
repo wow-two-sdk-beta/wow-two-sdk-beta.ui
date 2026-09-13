@@ -23,6 +23,7 @@
 // An absent field value (`null` / `undefined` / `NaN`) matches ONLY a nullish `equals` (or an `in` list
 // containing one). Every other operator rejects it — there is no ordering or substring of an absence.
 
+import { ExactNumber } from '../../numbers';
 import { Temporal } from 'temporal-polyfill';
 
 import { isNullish, readField, toText, type FieldAccessors, type LocaleOptions } from './Field';
@@ -113,6 +114,7 @@ function valuesEqual(a: unknown, b: unknown, isCaseSensitive: boolean, locale: s
     return foldText(a, isCaseSensitive, locale) === foldText(b, isCaseSensitive, locale);
   }
   if (Object.is(a, b)) return true;
+  if (ExactNumber.isExactNumber(a) && ExactNumber.isExactNumber(b)) return compareValues(a, b, { locale }) === 0;
   if (isDateLike(a) && isDateLike(b)) return compareValues(a, b, { locale }) === 0;
   return false;
 }

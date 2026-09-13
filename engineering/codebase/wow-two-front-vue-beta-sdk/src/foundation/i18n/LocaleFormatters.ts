@@ -2,18 +2,7 @@ import { computed, type ComputedRef } from 'vue';
 
 import { useLocale } from './providers/LocaleContext';
 
-// `Intl` instances are cached across components by locale + options — constructing them is the expensive part,
-// so a shared module cache keeps `useLocaleFormatters` allocation-free after warm-up.
-const intlCache = new Map<string, unknown>();
-function memo<T>(cacheKey: string, make: () => T): T {
-  let instance = intlCache.get(cacheKey) as T | undefined;
-  if (instance === undefined) {
-    instance = make();
-    intlCache.set(cacheKey, instance);
-  }
-  return instance;
-}
-const optKey = (options: object | undefined): string => (options ? JSON.stringify(options) : '');
+import { intlOptionsKey as optKey, memoIntl as memo } from './IntlCache';
 
 /** Locale-bound `Intl` formatters — the surface every embedded-text component formats through. */
 export interface LocaleFormatters {

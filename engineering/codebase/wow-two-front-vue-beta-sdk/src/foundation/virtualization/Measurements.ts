@@ -87,7 +87,7 @@ export function itemOffset(measurements: Measurements, index: number): number {
  * @returns The item's size in pixels, or 0 when the index is out of range.
  */
 export function itemSize(measurements: Measurements, index: number): number {
-  if (index < 0 || index >= measurements.count) return 0;
+  if (!Number.isInteger(index) || index < 0 || index >= measurements.count) return 0;
   return itemOffset(measurements, index + 1) - itemOffset(measurements, index);
 }
 
@@ -123,7 +123,7 @@ export function findIndexByOffsetAccessor(offsetAt: (index: number) => number, c
   // Item 0 starts at 0 and `target >= 0`, so index 0 always satisfies the predicate — the seed is never wrong.
   let best = 0;
   while (low <= high) {
-    const mid = (low + high) >>> 1;
+    const mid = Math.floor(low + (high - low) / 2);
     if (offsetAt(mid) <= target) {
       best = mid;
       low = mid + 1;
@@ -157,7 +157,7 @@ export function findIndexAtOffset(measurements: Measurements, offset: number): n
  * @returns New measurements, or the original when nothing changed.
  */
 export function withMeasuredSize(measurements: Measurements, index: number, size: number): Measurements {
-  if (index < 0 || index >= measurements.count) return measurements;
+  if (!Number.isInteger(index) || index < 0 || index >= measurements.count) return measurements;
 
   const next = normalizeSize(size);
   const delta = next - itemSize(measurements, index);

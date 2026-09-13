@@ -45,7 +45,8 @@ export function usePasteHandler(
     if ((toValue(options?.enabled) ?? true) === false) return;
 
     // Resolved lazily and guarded: importing this in an SSR pass must never touch `window`.
-    const node: EventTarget | null = toValue(options?.target) ?? (typeof window === 'undefined' ? null : window);
+    const node: EventTarget | null =
+      options?.target !== undefined ? (toValue(options.target) ?? null) : typeof window === 'undefined' ? null : window;
     if (node === null || typeof node.addEventListener !== 'function') return;
 
     // Captured at attach time so remove uses the same behaviour the listener was bound with.

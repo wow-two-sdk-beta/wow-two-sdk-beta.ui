@@ -27,7 +27,7 @@ import type { SubmitFailureResolution } from '../../SubmitErrors';
 
 type ErrorMap = Readonly<Record<string, ReadonlyArray<string>>>;
 
-const EmptyMap: ErrorMap = Object.freeze({});
+const EmptyMap: ErrorMap = Object.freeze(Object.create(null) as Record<string, ReadonlyArray<string>>);
 
 /** The adapter-owned slice merged with TanStack state into the contract's form/field state. */
 export interface TanstackOverlayState<TValues extends object> {
@@ -80,7 +80,7 @@ export interface TanstackFormOverlay<TValues extends object> {
 }
 
 function normalizeErrorMap(errors: Record<string, ReadonlyArray<string>>): ErrorMap {
-  const normalized: Record<string, ReadonlyArray<string>> = {};
+  const normalized: Record<string, ReadonlyArray<string>> = Object.create(null);
   for (const [path, messages] of Object.entries(errors)) normalized[path] = [...messages];
   return normalized;
 }

@@ -1,4 +1,14 @@
-import { computed, inject, provide, toValue, type ComputedRef, type InjectionKey, type MaybeRefOrGetter } from 'vue';
+import {
+  computed,
+  inject,
+  provide,
+  toValue,
+  unref,
+  type ComputedRef,
+  type InjectionKey,
+  type MaybeRef,
+  type MaybeRefOrGetter,
+} from 'vue';
 
 /** Interpolation variables for a message template (`Hello {name}` + `{ name: 'Sam' }`). */
 export type MessageVars = Record<string, string | number>;
@@ -9,7 +19,9 @@ export type Messages = Record<string, string> | ((key: string, vars?: MessageVar
 /** Replaces `{token}` placeholders from `vars`; leaves unknown tokens untouched. */
 export function interpolate(template: string, vars?: MessageVars): string {
   if (!vars) return template;
-  return template.replace(/\{(\w+)\}/g, (match, token: string) => (token in vars ? String(vars[token]) : match));
+  return template.replace(/\{(\w+)\}/g, (match, token: string) =>
+    Object.hasOwn(vars, token) ? String(vars[token]) : match,
+  );
 }
 
 /** Resolves a message: consumer `messages` override (dict or callback) → SDK-authored `fallback` → the raw key. */
@@ -20,7 +32,8 @@ export function resolveMessage(
   fallback?: string,
 ): string {
   if (typeof messages === 'function') return messages(key, vars);
-  return interpolate(messages?.[key] ?? fallback ?? key, vars);
+  const template = messages && Object.hasOwn(messages, key) ? messages[key] : undefined;
+  return interpolate(template ?? fallback ?? key, vars);
 }
 
 /**
@@ -48,14 +61,15 @@ export const LocaleKey: InjectionKey<LocaleContextValue> = Symbol('wow-two.local
  *
  * The deterministic fallback matches server and initial client rendering. Applications can pass the same
  * request locale to both, or explicitly switch to browser preferences after hydration.
+ * Message callbacks are values; wrap a reactive message source in a ref or computed.
  */
 export function provideLocale(
   locale?: MaybeRefOrGetter<string | undefined>,
-  messages?: MaybeRefOrGetter<Messages | undefined>,
+  messages?: MaybeRef<Messages | undefined>,
 ): LocaleContextValue {
   const value: LocaleContextValue = {
     locale: computed(() => toValue(locale) ?? DefaultLocale),
-    t: (key, vars, fallback) => resolveMessage(toValue(messages), key, vars, fallback),
+    t: (key, vars, fallback) => resolveMessage(unref(messages), key, vars, fallback),
   };
   provide(LocaleKey, value);
   return value;

@@ -62,17 +62,21 @@ export function useNotificationPermission(): NotificationPermissionControls {
     unsubscribe = undefined;
   });
 
-  const request = async (): Promise<NotificationPermissionState> => {
+  let pending: Promise<NotificationPermissionState> | undefined;
+  const request = (): Promise<NotificationPermissionState> => {
+    if (pending !== undefined) return pending;
+    if (!active) return Promise.resolve(permission.value);
     requesting.value = true;
-    try {
-      const outcome = await requestNotificationPermission();
-      permission.value = outcome;
-      return outcome;
-    } finally {
-      // `requestNotificationPermission` is contractually throw-free, but a state machine that can strand itself
-      // at `requesting` would disable the button forever, so the reset does not depend on that holding.
-      requesting.value = false;
-    }
+    pending = requestNotificationPermission()
+      .then((outcome) => {
+        if (active) permission.value = outcome;
+        return outcome;
+      })
+      .finally(() => {
+        pending = undefined;
+        if (active) requesting.value = false;
+      });
+    return pending;
   };
 
   return {

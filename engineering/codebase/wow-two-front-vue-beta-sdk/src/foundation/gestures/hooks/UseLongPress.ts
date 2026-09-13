@@ -113,9 +113,8 @@ export function useLongPress(
       cancel(); // Drifted too far — this is a drag, not a hold.
     }
 
-    function onPointerEnd(): void {
-      // Released (or cancelled) before the timer elapsed. If it had elapsed, `state` is already `null`.
-      cancel();
+    function onPointerEnd(event: PointerEvent): void {
+      if (state?.pointerId === event.pointerId) cancel();
     }
 
     function onPointerDown(event: PointerEvent): void {

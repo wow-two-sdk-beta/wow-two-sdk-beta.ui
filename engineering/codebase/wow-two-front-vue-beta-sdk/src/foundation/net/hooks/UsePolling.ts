@@ -1,24 +1,14 @@
-// Vue binding for `createPoller` — one loop per scope, stopped when the scope is disposed.
-//
-// THE LIFETIME RULE THIS ENFORCES: a poller holds a timer plus a `visibilitychange` and two connectivity
-// listeners. A disposed scope that never stopped its poller keeps all four, keeps issuing requests, and keeps
-// writing into state that no longer renders — except it also costs a request every interval, forever.
-//
-// BUILT FROM `onMounted`, NEVER FROM AN IMMEDIATE WATCHER. `createPoller` attaches its `visibilitychange`
-// listener to `document` and its connectivity listeners to `window`; an immediate watcher also runs during a
-// server render, where neither exists. `onMounted` is client-only by construction.
-//
-// `fn` IS READ THROUGH `toValue` AT CALL TIME rather than captured. A component's `setup` runs once, so the
-// React original's infinite-restart hazard (a fresh `fn` identity every render, each render caused by the
-// previous poll's own state write) simply cannot occur here — but reading it per tick is still the right
-// contract, because it lets a caller pass a getter whose target changes without rebuilding the loop.
-//
-// The suspend rules (hidden tab, offline) belong to the poller itself, not to this composable, so a
-// framework-free caller gets identical behaviour — see `CreatePoller.ts`. In particular this composable does
-// NOT call `useOnlineStatus`: doing so would update reactive state on every connectivity flip merely to tell
-// the poller something it already knows from the same events.
-
-import { onMounted, onScopeDispose, shallowRef, toValue, watch, type MaybeRefOrGetter, type ShallowRef } from 'vue';
+import {
+  onMounted,
+  onScopeDispose,
+  shallowRef,
+  toValue,
+  unref,
+  watch,
+  type MaybeRef,
+  type MaybeRefOrGetter,
+  type ShallowRef,
+} from 'vue';
 
 import { PollerState, createPoller, type PollFn, type Poller, type PollerOptions } from '../CreatePoller';
 
@@ -42,14 +32,14 @@ export interface PollingHandle {
  * the browser is offline.
  *
  * The loop stops when the scope is disposed and is rebuilt whenever `intervalMs` changes. `fn` is read fresh
- * on each tick, so a getter whose target changes needs no rebuild.
+ * on each tick, so a ref whose target changes needs no rebuild.
  *
  * @param fn - The work to repeat; a returned promise is awaited before the next tick is scheduled.
  * @param options - Interval and suspension behaviour, read once when the loop is built; handler callbacks are
  *   re-read per emission, so a ref or getter keeps them live.
  * @returns The poller state and `pause` / `resume` / `stop`.
  */
-export function usePolling(fn: MaybeRefOrGetter<PollFn>, options: MaybeRefOrGetter<PollerOptions> = {}): PollingHandle {
+export function usePolling(fn: MaybeRef<PollFn>, options: MaybeRefOrGetter<PollerOptions> = {}): PollingHandle {
   const state = shallowRef<PollerState>(PollerState.Idle);
 
   let poller: Poller | null = null;
@@ -63,7 +53,7 @@ export function usePolling(fn: MaybeRefOrGetter<PollFn>, options: MaybeRefOrGett
     teardown();
 
     const current = toValue(options);
-    const next = createPoller(() => toValue(fn)(), {
+    const next = createPoller(() => unref(fn)(), {
       ...current,
       intervalMs: current.intervalMs,
       onStateChange: (value) => {

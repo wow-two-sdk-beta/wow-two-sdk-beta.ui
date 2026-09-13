@@ -108,16 +108,27 @@ export function loadGoogleIdentity(): Promise<GoogleAccountsId> {
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${GoogleIdentityScriptSrc}"]`);
     const script = existing ?? document.createElement('script');
 
+    const cleanup = (): void => {
+      script.removeEventListener('load', settle);
+      script.removeEventListener('error', fail);
+    };
+    const fail = (): void => {
+      cleanup();
+      script.remove();
+      reject(new Error('Google Identity Services failed to load.'));
+    };
     const settle = (): void => {
+      cleanup();
       const api = globalThis.google?.accounts?.id;
       if (api) resolve(api);
-      else reject(new Error('Google Identity Services loaded without an accounts.id client.'));
+      else {
+        script.remove();
+        reject(new Error('Google Identity Services loaded without an accounts.id client.'));
+      }
     };
 
     script.addEventListener('load', settle, { once: true });
-    script.addEventListener('error', () => reject(new Error('Google Identity Services failed to load.')), {
-      once: true,
-    });
+    script.addEventListener('error', fail, { once: true });
 
     if (!existing) {
       script.src = GoogleIdentityScriptSrc;
@@ -188,6 +199,7 @@ export function useGoogleIdentity(options: UseGoogleIdentityOptions): GoogleIden
   const client = ref<GoogleAccountsId | null>(null);
 
   let disposed = false;
+  let generation = 0;
 
   function fail(cause: Error): void {
     if (disposed) return;
@@ -198,6 +210,9 @@ export function useGoogleIdentity(options: UseGoogleIdentityOptions): GoogleIden
   }
 
   async function initialize(clientId: string | undefined): Promise<void> {
+    const current = ++generation;
+    const isCurrent = (): boolean => !disposed && current === generation && toValue(options.clientId) === clientId;
+    client.value = null;
     if (!clientId) {
       client.value = null;
       error.value = null;
@@ -212,12 +227,12 @@ export function useGoogleIdentity(options: UseGoogleIdentityOptions): GoogleIden
       const api = await loadGoogleIdentity();
 
       // The client id may have changed (or the scope torn down) while the script was in flight.
-      if (disposed || toValue(options.clientId) !== clientId) return;
+      if (!isCurrent()) return;
 
       api.initialize({
         client_id: clientId,
         callback: (response: GoogleCredentialResponse) => {
-          if (response.credential) options.onCredential(response.credential, response);
+          if (isCurrent() && response.credential) options.onCredential(response.credential, response);
         },
         auto_select: toValue(options.autoSelect) ?? false,
         cancel_on_tap_outside: toValue(options.cancelOnTapOutside) ?? true,
@@ -226,7 +241,7 @@ export function useGoogleIdentity(options: UseGoogleIdentityOptions): GoogleIden
       client.value = api;
       status.value = GoogleIdentityStatus.Ready;
     } catch (cause) {
-      fail(cause instanceof Error ? cause : new Error('Google Identity Services failed to load.'));
+      if (isCurrent()) fail(cause instanceof Error ? cause : new Error('Google Identity Services failed to load.'));
     }
   }
 
@@ -241,6 +256,8 @@ export function useGoogleIdentity(options: UseGoogleIdentityOptions): GoogleIden
 
   onScopeDispose(() => {
     disposed = true;
+    generation += 1;
+    client.value = null;
   });
 
   return {

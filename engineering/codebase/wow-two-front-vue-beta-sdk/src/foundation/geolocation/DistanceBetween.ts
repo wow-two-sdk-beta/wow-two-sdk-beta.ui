@@ -44,5 +44,6 @@ export function distanceBetween(a: LatLng, b: LatLng): number {
   const chord =
     Math.sin(halfLatitudeDelta) ** 2 + Math.cos(latitudeA) * Math.cos(latitudeB) * Math.sin(halfLongitudeDelta) ** 2;
 
-  return 2 * EarthRadiusMetres * Math.atan2(Math.sqrt(chord), Math.sqrt(1 - chord));
+  const clamped = Math.min(1, Math.max(0, chord));
+  return 2 * EarthRadiusMetres * Math.atan2(Math.sqrt(clamped), Math.sqrt(1 - clamped));
 }

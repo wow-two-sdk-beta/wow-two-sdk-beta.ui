@@ -72,7 +72,10 @@ export function probeIndexedDb(timeoutMs: number = DefaultProbeTimeoutMs): Promi
     let settled = false;
     /** Answers once, clears the timer, and best-effort removes the probe database. */
     const answer = (supported: boolean, database?: IDBDatabase): void => {
-      if (settled) return;
+      if (settled) {
+        database?.close();
+        return;
+      }
       settled = true;
       clearTimeout(timer);
 

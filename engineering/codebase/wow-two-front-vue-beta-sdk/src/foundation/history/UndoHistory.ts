@@ -39,9 +39,24 @@ export interface UndoableAction {
 }
 
 /** The travel work one entry carries, once the core has taken ownership of the label and coalescing key. */
-interface ActionPayload {
+interface SingleAction {
   readonly do: () => void;
   readonly undo: () => void;
+}
+
+type ActionPayload = SingleAction | { readonly previous: ActionPayload; readonly next: ActionPayload };
+
+/** Replays grouped actions iteratively without consuming the JavaScript call stack. */
+function applyActions(payload: ActionPayload, forward: boolean): void {
+  const pending = [payload];
+  while (pending.length > 0) {
+    const current = pending.pop()!;
+    if ('previous' in current) {
+      if (forward) pending.push(current.next, current.previous);
+      else pending.push(current.previous, current.next);
+    } else if (forward) current.do();
+    else current.undo();
+  }
 }
 
 /** A history of reversible actions — {@link createUndoHistory}'s product. */
@@ -70,19 +85,9 @@ export interface UndoHistory extends HistoryStore {
  */
 export function createUndoHistory(options?: HistoryOptions): UndoHistory {
   const core = createHistoryCore<ActionPayload>({
-    applyForward: (payload) => payload.do(),
-    applyBackward: (payload) => payload.undo(),
-    mergePayloads: (previous, next) => ({
-      do: () => {
-        previous.do();
-        next.do();
-      },
-      undo: () => {
-        // Reverse order — the later edit must be taken back before the one it was layered on.
-        next.undo();
-        previous.undo();
-      },
-    }),
+    applyForward: (payload) => applyActions(payload, true),
+    applyBackward: (payload) => applyActions(payload, false),
+    mergePayloads: (previous, next) => ({ previous, next }),
     options,
   });
 

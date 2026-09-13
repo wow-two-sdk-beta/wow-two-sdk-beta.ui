@@ -8,6 +8,10 @@ import { ExactNumber } from '../foundation/numbers';
  * deep variant.)
  */
 export function deepEqual(a: unknown, b: unknown): boolean {
+  return compare(a, b);
+}
+
+function compare(a: unknown, b: unknown, seen?: WeakMap<object, WeakSet<object>>): boolean {
   if (Object.is(a, b)) return true;
   if (ExactNumber.isExactNumber(a) || ExactNumber.isExactNumber(b)) {
     if (!ExactNumber.isExactNumber(a) || !ExactNumber.isExactNumber(b)) return false;
@@ -18,20 +22,8 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   if (a instanceof Date || b instanceof Date) {
     return a instanceof Date && b instanceof Date && a.getTime() === b.getTime();
   }
-  // `File`/`Blob` have no enumerable keys, so the plain-object branch would treat any two
-  // as equal and a file-swap would never re-flip dirty. Compare `File` by its identifying
-  // metadata (name / size / lastModified / type); a `Blob` carries none, so identity only
-  // (`Object.is` above already returned for the same ref). `File extends Blob` → check first.
-  if (typeof File !== 'undefined' && (a instanceof File || b instanceof File)) {
-    return (
-      a instanceof File &&
-      b instanceof File &&
-      a.name === b.name &&
-      a.size === b.size &&
-      a.lastModified === b.lastModified &&
-      a.type === b.type
-    );
-  }
+  // File metadata does not identify its bytes; immutable upload values compare by identity.
+  if (typeof File !== 'undefined' && (a instanceof File || b instanceof File)) return false;
   if (typeof Blob !== 'undefined' && (a instanceof Blob || b instanceof Blob)) {
     // A bare `Blob` carries no name/lastModified — identity is the only safe signal, and
     // `Object.is` above already returned for the same ref, so distinct refs read as changed
@@ -40,23 +32,28 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   }
   if (Array.isArray(a) || Array.isArray(b)) {
     if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
-    return a.every((item, index) => deepEqual(item, b[index]));
   }
   if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
     const prototypeA: unknown = Object.getPrototypeOf(a);
     const prototypeB: unknown = Object.getPrototypeOf(b);
     if (
-      (prototypeA !== Object.prototype && prototypeA !== null) ||
-      (prototypeB !== Object.prototype && prototypeB !== null)
+      !Array.isArray(a) &&
+      ((prototypeA !== Object.prototype && prototypeA !== null) ||
+        (prototypeB !== Object.prototype && prototypeB !== null))
     )
       return false;
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
+    seen ??= new WeakMap<object, WeakSet<object>>();
+    const previous = seen.get(a);
+    if (previous?.has(b)) return true;
+    if (previous) previous.add(b);
+    else seen.set(a, new WeakSet([b]));
+    const keysA = Reflect.ownKeys(a).filter((key) => Object.prototype.propertyIsEnumerable.call(a, key));
+    const keysB = Reflect.ownKeys(b).filter((key) => Object.prototype.propertyIsEnumerable.call(b, key));
     if (keysA.length !== keysB.length) return false;
     return keysA.every(
       (key) =>
         Object.prototype.hasOwnProperty.call(b, key) &&
-        deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]),
+        compare((a as Record<PropertyKey, unknown>)[key], (b as Record<PropertyKey, unknown>)[key], seen),
     );
   }
   return false;

@@ -86,11 +86,14 @@ export function useSpeechRecognition(
 
   /** Guards state writes after teardown — the pass-through callbacks still fire, the reactive state does not. */
   let disposed = false;
+  let generation = 0;
   let recognizer: SpeechRecognizer | null = null;
 
   function getRecognizer(): SpeechRecognizer {
     if (recognizer !== null) return recognizer;
 
+    const operation = ++generation;
+    const current = (): boolean => !disposed && operation === generation;
     const created = createSpeechRecognizer({
       lang: toValue(options)?.lang ?? locale.value,
       continuous: toValue(options)?.continuous,
@@ -100,44 +103,43 @@ export function useSpeechRecognition(
       maxAlternatives: toValue(options)?.maxAlternatives,
 
       onStart: (): void => {
-        if (!disposed) {
-          listening.value = true;
-          error.value = null;
-        }
+        if (!current()) return;
+        listening.value = true;
+        error.value = null;
         toValue(options)?.onStart?.();
       },
 
       onEnd: (): void => {
-        if (!disposed) {
-          listening.value = false;
-          // Uncommitted text belongs to a session that no longer exists; keeping it would render as live speech.
-          interimTranscript.value = '';
-        }
+        if (!current()) return;
+        listening.value = false;
+        interimTranscript.value = '';
         toValue(options)?.onEnd?.();
       },
 
       onError: (failure): void => {
-        if (!disposed) error.value = failure;
+        if (!current()) return;
+        error.value = failure;
         toValue(options)?.onError?.(failure);
       },
 
       onResult: (result): void => {
-        if (!disposed) {
-          if (result.isFinal) {
-            transcript.value = appendPhrase(transcript.value, result.transcript);
-            interimTranscript.value = '';
-          } else {
-            interimTranscript.value = result.transcript;
-          }
+        if (!current()) return;
+        if (result.isFinal) {
+          transcript.value = appendPhrase(transcript.value, result.transcript);
+          interimTranscript.value = '';
+        } else {
+          interimTranscript.value = result.transcript;
         }
         toValue(options)?.onResult?.(result);
       },
 
       onFinal: (text): void => {
+        if (!current()) return;
         toValue(options)?.onFinal?.(text);
       },
 
       onInterim: (text): void => {
+        if (!current()) return;
         toValue(options)?.onInterim?.(text);
       },
     });
@@ -146,7 +148,8 @@ export function useSpeechRecognition(
     return created;
   }
 
-  const start = (): RecognizerStartResult => getRecognizer().start();
+  const start = (): RecognizerStartResult =>
+    disposed ? { ok: false, failure: { status: 'unsupported' } } : getRecognizer().start();
 
   // `stop` / `abort` read the field instead of the getter: nothing can be running if nothing was ever built, and
   // constructing a recognizer in order to stop it would open the very session being cancelled.
@@ -178,6 +181,9 @@ export function useSpeechRecognition(
       () => toValue(options)?.interimResults ?? true,
     ],
     () => {
+      generation++;
+      listening.value = false;
+      interimTranscript.value = '';
       recognizer?.abort();
       recognizer = null;
     },

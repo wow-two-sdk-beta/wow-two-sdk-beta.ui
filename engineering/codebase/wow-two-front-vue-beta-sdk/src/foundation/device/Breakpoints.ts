@@ -31,13 +31,6 @@ export const TailwindBreakpoints = {
   '2xl': 1536,
 } as const;
 
-/**
- * How many breakpoints a scale may contain. `useBreakpoint` fans out to exactly this many `useMediaQuery` calls;
- * eight covers every mainstream scale with room to spare (Tailwind ships 5, Bootstrap 6). See `UseBreakpoint.ts`
- * for why the count has to be a compile-time constant at all.
- */
-export const MaxBreakpoints = 8;
-
 /** One breakpoint compiled to the media query that detects it. */
 export interface BreakpointQuery<TKey extends string = string> {
   /** The scale key this query stands for. */
@@ -77,7 +70,7 @@ export function toBreakpointQueries<TScale extends BreakpointScale>(
  *
  * @param queries Compiled queries, widest first, as returned by {@link toBreakpointQueries}.
  * @param matches Match results positionally aligned with `queries`. A shorter array reads as "did not match" for
- * the missing tail, which is how a scale larger than {@link MaxBreakpoints} loses its narrowest entries.
+ * the missing tail.
  * @returns The key of the widest matching breakpoint, or `null` when the viewport is narrower than every entry —
  * the implicit mobile-first base band, which by definition has no key of its own.
  */

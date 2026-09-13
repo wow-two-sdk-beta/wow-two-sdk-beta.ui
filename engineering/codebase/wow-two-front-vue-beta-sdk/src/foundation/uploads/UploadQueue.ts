@@ -160,7 +160,10 @@ function sleep(ms: number, signal: AbortSignal): Promise<void> {
  */
 export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions<TResult>): UploadQueue<TResult> {
   const { transport, accept, maxSize } = options;
-  const concurrency = Math.max(1, Math.floor(options.concurrency ?? DefaultUploadConcurrency));
+  const requestedConcurrency = options.concurrency ?? DefaultUploadConcurrency;
+  const concurrency = Number.isFinite(requestedConcurrency)
+    ? Math.max(1, Math.floor(requestedConcurrency))
+    : DefaultUploadConcurrency;
   const retryPolicy: RetryPolicy | false = options.retry ?? DefaultRetryPolicy;
 
   const entries = new Map<string, UploadItem<TResult>>();
@@ -399,7 +402,6 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
     remove(id: string): boolean {
       if (!entries.has(id)) return false;
       controllers.get(id)?.abort();
-      controllers.delete(id);
       entries.delete(id);
       notify();
       pump();
@@ -407,11 +409,9 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
     },
 
     clear(): void {
-      cancelAll();
       entries.clear();
-      // Dropped rather than awaited: a transport that ignores its abort must not wedge the pool forever. The
-      // orphaned `runItem` finishes into `patch`, which no-ops on the vanished ids.
-      controllers.clear();
+      // A slot belongs to the transport until it settles, even when its item has been removed.
+      for (const controller of controllers.values()) controller.abort();
       notify();
     },
 

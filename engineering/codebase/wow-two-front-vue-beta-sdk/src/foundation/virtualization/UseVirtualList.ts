@@ -289,7 +289,7 @@ export function useVirtualList(options: UseVirtualListOptions): VirtualList {
     if (!Number.isFinite(size) || size < 0) return;
 
     const current = measurements.value;
-    if (index < 0 || index >= current.count) return;
+    if (!Number.isInteger(index) || index < 0 || index >= current.count) return;
 
     const previous = itemSize(current, index);
     // The guard that stops a measure -> render -> measure loop dead. Everything below re-derives.

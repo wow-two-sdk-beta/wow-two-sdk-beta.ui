@@ -17,7 +17,7 @@
 //   with `literal()` if a nil is meaningful in that field.
 // - `isoDate()` accepts a calendar date (`YYYY-MM-DD`) ONLY, not a full ISO 8601 timestamp, and confirms
 //   the date exists by round-tripping it — `2025-02-30` matches the pattern but is not a day. Years are
-//   compared after the round trip, so a year below 0100 is rejected (`Date.UTC` remaps two-digit years).
+//   compared after the round trip, including the four-digit years below 0100.
 
 import { string, type StringValidator } from './Primitives';
 
@@ -25,10 +25,10 @@ import { string, type StringValidator } from './Primitives';
 const EmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** RFC 4122 layout: 8-4-4-4-12 hex, version nibble 1–8, variant nibble 8/9/a/b. */
-const UuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$(?![\s\S])/i;
 
 /** Calendar date only — four-digit year, two-digit month, two-digit day. */
-const IsoDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+const IsoDatePattern = /^\d{4}-\d{2}-\d{2}$(?![\s\S])/;
 
 /** Accepts an email-shaped string. Pragmatic check — see the header for what it deliberately does not do. */
 export function email(message = 'must be a valid email address'): StringValidator {
@@ -70,7 +70,8 @@ export function isoDate(message = 'must be a valid ISO date (YYYY-MM-DD)'): Stri
 
         // Round-trip through UTC: an overflowing day (`2025-02-30`) lands on a different date, so
         // comparing the parts back out is what proves the calendar date is real.
-        const parsed = new Date(Date.UTC(year, month - 1, day));
+        const parsed = new Date(0);
+        parsed.setUTCFullYear(year, month - 1, day);
         return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
       },
       message,

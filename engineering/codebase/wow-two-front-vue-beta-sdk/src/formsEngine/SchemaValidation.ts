@@ -40,7 +40,7 @@ export function issuePathToString(path: StandardSchemaV1.Issue['path']): string 
 /** Folds failure issues into `path → messages`; a success result yields `{}`. */
 export function resultToFieldErrors(result: StandardSchemaV1.Result<unknown>): Record<string, ReadonlyArray<string>> {
   if (!result.issues) return {};
-  const errors: Record<string, string[]> = {};
+  const errors: Record<string, string[]> = Object.create(null);
   for (const issue of result.issues) {
     const path = issuePathToString(issue.path);
     (errors[path] ??= []).push(issue.message);
@@ -69,7 +69,7 @@ function nativeResultToFieldErrors(
   resolveMessage?: ResolveValidationMessage,
 ): Record<string, ReadonlyArray<string>> {
   if (result.ok) return {};
-  const errors: Record<string, string[]> = {};
+  const errors: Record<string, string[]> = Object.create(null);
   for (const issue of result.failure.issues) {
     const path = formatPath(issue.path as ReadonlyArray<PathKey>);
     const message = resolveMessage

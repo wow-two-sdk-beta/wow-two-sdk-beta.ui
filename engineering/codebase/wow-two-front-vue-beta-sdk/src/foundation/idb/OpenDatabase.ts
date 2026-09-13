@@ -177,7 +177,14 @@ export function openDatabase(name: string, options: OpenDatabaseOptions = {}): P
     };
 
     request.onblocked = () => {
-      onBlocked?.();
+      if (settled) return;
+      try {
+        onBlocked?.();
+      } catch (error) {
+        if (claim()) reject(toError(error));
+        return;
+      }
+      if (blockedTimer !== undefined) return;
 
       // Do not reject immediately — the common case is another tab closing within a few hundred ms, after
       // which the open proceeds normally. Reject only if it stays stuck.
@@ -233,7 +240,14 @@ export function deleteDatabase(name: string, options: DeleteDatabaseOptions = {}
     };
 
     request.onblocked = () => {
-      onBlocked?.();
+      if (settled) return;
+      try {
+        onBlocked?.();
+      } catch (error) {
+        if (claim()) reject(toError(error));
+        return;
+      }
+      if (blockedTimer !== undefined) return;
 
       blockedTimer = setTimeout(() => {
         if (!settled) {

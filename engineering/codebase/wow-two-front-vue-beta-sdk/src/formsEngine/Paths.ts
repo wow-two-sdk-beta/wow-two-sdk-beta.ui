@@ -65,6 +65,7 @@ export function getPath(target: unknown, path: string): unknown {
   let current: unknown = target;
   for (const segment of parsePath(path)) {
     if (current === null || typeof current !== 'object') return undefined;
+    if (!Object.hasOwn(current, segment)) return undefined;
     current = (current as Record<PropertyKey, unknown>)[segment];
   }
   return current;
@@ -82,9 +83,8 @@ export function hasPath(target: unknown, path: string): boolean {
     if (current === null || typeof current !== 'object') return false;
     if (Array.isArray(current)) {
       if (typeof segment !== 'number' || segment < 0 || segment >= current.length) return false;
-    } else if (!(String(segment) in current)) {
-      return false;
     }
+    if (!Object.hasOwn(current, segment)) return false;
     current = (current as Record<PropertyKey, unknown>)[segment];
   }
   return true;
@@ -109,7 +109,13 @@ function setAtDepth(current: unknown, segments: ReadonlyArray<PathKey>, depth: n
     current !== null && typeof current === 'object' && !Array.isArray(current)
       ? { ...(current as Record<string, unknown>) }
       : {};
-  object[segment] = setAtDepth(object[segment], segments, depth + 1, value);
+  const previous = Object.hasOwn(object, segment) ? object[segment] : undefined;
+  Object.defineProperty(object, segment, {
+    value: setAtDepth(previous, segments, depth + 1, value),
+    enumerable: true,
+    configurable: true,
+    writable: true,
+  });
   return object;
 }
 
@@ -194,7 +200,7 @@ export function remapPathMap(
   arrayPath: string,
   operation: ArrayOperation,
 ): Readonly<Record<string, ReadonlyArray<string>>> {
-  const next: Record<string, ReadonlyArray<string>> = {};
+  const next: Record<string, ReadonlyArray<string>> = Object.create(null);
   for (const [key, messages] of Object.entries(map)) {
     const remapped = remapPathKey(key, arrayPath, operation);
     if (remapped !== null) next[remapped] = messages;

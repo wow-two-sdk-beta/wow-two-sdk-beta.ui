@@ -33,7 +33,7 @@ import { defaultMapFieldPath, resolveSubmitFailure, toSubmitError } from '../../
 type ErrorMap = Readonly<Record<string, ReadonlyArray<string>>>;
 
 const EmptyErrors: ReadonlyArray<string> = Object.freeze([]);
-const EmptyMap: ErrorMap = Object.freeze({});
+const EmptyMap: ErrorMap = Object.freeze(Object.create(null) as Record<string, ReadonlyArray<string>>);
 
 /** The per-field slice the `Field` glue reads — identity-stable while its members are unchanged. */
 export interface HouseFieldState {
@@ -88,7 +88,7 @@ function mergeErrors(client: ErrorMap, server: ErrorMap): ErrorMap {
   const serverKeys = Object.keys(server);
   if (serverKeys.length === 0) return client;
   if (clientKeys.length === 0) return server;
-  const merged: Record<string, ReadonlyArray<string>> = { ...client };
+  const merged: Record<string, ReadonlyArray<string>> = Object.assign(Object.create(null), client);
   for (const key of serverKeys) {
     const existing = merged[key];
     merged[key] = existing ? [...existing, ...(server[key] ?? [])] : (server[key] ?? EmptyErrors);
@@ -110,7 +110,7 @@ function fieldStatesEqual(a: HouseFieldState, b: HouseFieldState): boolean {
 }
 
 function normalizeErrorMap(errors: Record<string, ReadonlyArray<string>>): ErrorMap {
-  const normalized: Record<string, ReadonlyArray<string>> = {};
+  const normalized: Record<string, ReadonlyArray<string>> = Object.create(null);
   for (const [path, messages] of Object.entries(errors)) normalized[path] = [...messages];
   return normalized;
 }
@@ -468,7 +468,7 @@ export function createHouseFormEngine<TValues extends object, TOutput = TValues>
       const retained = Object.fromEntries(
         Object.entries(peek().clientErrors).filter(([path]) => !includesValidationPath(path, options.fields)),
       );
-      patch({ clientErrors: { ...retained, ...errors }, isValidating: false });
+      patch({ clientErrors: Object.assign(Object.create(null), retained, errors), isValidating: false });
       return Object.keys(errors).length === 0;
     }
     if (peek().submitCount === 0) patch({ submitCount: 1 });

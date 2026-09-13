@@ -18,6 +18,7 @@
 // `Intl.Collator`. There is no second collator in this slice, deliberately: text ordering must not differ
 // between a DataTable header and a headless `applySort` call.
 
+import { ExactNumber } from '../../numbers';
 import { Temporal } from 'temporal-polyfill';
 
 import { compareStrings } from '../../i18n/Compare';
@@ -62,6 +63,11 @@ export interface ToggleSortOptions {
  */
 export function compareValues(a: unknown, b: unknown, options: LocaleOptions = {}): number {
   if (Object.is(a, b)) return 0;
+  if (ExactNumber.isExactNumber(a) && ExactNumber.isExactNumber(b)) {
+    const comparison = a.compare(b);
+    if (comparison.ok) return comparison.value;
+    throw new TypeError('Exact numeric values could not be compared');
+  }
   if (typeof a === 'number' && typeof b === 'number') return a - b;
   if (typeof a === 'bigint' && typeof b === 'bigint') return a < b ? -1 : a > b ? 1 : 0;
   if (typeof a === 'boolean' && typeof b === 'boolean') return Number(a) - Number(b);

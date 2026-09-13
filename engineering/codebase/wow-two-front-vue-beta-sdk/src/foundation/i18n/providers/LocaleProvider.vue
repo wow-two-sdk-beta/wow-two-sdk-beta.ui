@@ -11,6 +11,7 @@ export interface LocaleProviderProps {
 </script>
 
 <script setup lang="ts">
+import { toRef } from 'vue';
 import { provideLocale } from './LocaleContext';
 
 /**
@@ -26,10 +27,7 @@ defineSlots<{
   default(): unknown;
 }>();
 
-provideLocale(
-  () => props.locale,
-  () => props.messages,
-);
+provideLocale(() => props.locale, toRef(props, 'messages'));
 </script>
 
 <template>

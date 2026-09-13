@@ -72,6 +72,7 @@ export function useSpeechSynthesis(): SpeechSynthesisControls {
   let inFlight = 0;
 
   const speak = async (text: string, options?: SpeakOptions): Promise<SpeechSpeakResult> => {
+    if (disposed) return { ok: false, failure: { status: 'cancelled' } };
     inFlight += 1;
     if (!disposed) {
       speaking.value = true;

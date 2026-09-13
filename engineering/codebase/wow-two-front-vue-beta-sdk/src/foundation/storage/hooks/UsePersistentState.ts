@@ -77,13 +77,13 @@ export function usePersistentState<T>(
   /** Adopts the persisted value for the current key — a hit wins over what is held, a miss leaves it alone. */
   function hydrate(): void {
     const persisted = broker.read<T>(toValue(key));
-    if (persisted !== null) state.value = persisted;
+    state.value = persisted ?? initial;
   }
 
   onMounted(hydrate);
   // A key swap re-reads from the new slot. Adoption assigns `state` directly, never through `setValue`, so
   // reading a value never writes it back.
-  watch(() => toValue(key), hydrate);
+  watch(() => toValue(key), hydrate, { flush: 'sync' });
 
   // Adopt writes made under the same key in another tab. Guarded so a non-localStorage or SSR context attaches
   // no listener. `event.newValue === null` means the key was removed elsewhere — fall back to `initial`.
@@ -94,7 +94,8 @@ export function usePersistentState<T>(
 
     function onStorage(event: StorageEvent): void {
       const currentKey = toValue(key);
-      if (event.key !== currentKey) return;
+      if (event.storageArea !== null && event.storageArea !== window.localStorage) return;
+      if (event.key !== null && event.key !== currentKey) return;
       state.value = event.newValue === null ? initial : (broker.read<T>(currentKey) ?? initial);
     }
 

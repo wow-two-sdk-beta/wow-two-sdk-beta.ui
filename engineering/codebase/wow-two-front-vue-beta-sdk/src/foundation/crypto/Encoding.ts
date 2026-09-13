@@ -68,7 +68,7 @@ export function bytesToHex(bytes: Uint8Array): string {
  * {@link bytesToHex}.
  */
 export function hexToBytes(hex: string): Uint8Array {
-  if (!HexString.test(hex)) {
+  if (HexString.exec(hex)?.[0] !== hex) {
     throw new TypeError(
       `hexToBytes: expected an even-length string of hex digits, got "${hex}" (length ${hex.length}).`,
     );
@@ -102,7 +102,7 @@ export function bytesToBase64(bytes: Uint8Array): string {
  * `-_` included), on over-padding, and on an impossible length. Inverse of {@link bytesToBase64}.
  */
 export function base64ToBytes(base64: string): Uint8Array {
-  if (!Base64String.test(base64)) {
+  if (Base64String.exec(base64)?.[0] !== base64) {
     throw new TypeError(
       `base64ToBytes: expected a canonical standard-base64 string (alphabet A-Za-z0-9+/ with optional ` +
         `= padding), got "${base64}".`,
@@ -131,7 +131,7 @@ export function bytesToBase64Url(bytes: Uint8Array): string {
  * standard-base64 `+` and `/`, which signal that {@link base64ToBytes} was the intended decoder.
  */
 export function base64UrlToBytes(base64Url: string): Uint8Array {
-  if (!Base64UrlString.test(base64Url)) {
+  if (Base64UrlString.exec(base64Url)?.[0] !== base64Url) {
     throw new TypeError(
       `base64UrlToBytes: expected a base64url string (alphabet A-Za-z0-9-_ with optional = padding), got ` +
         `"${base64Url}".`,

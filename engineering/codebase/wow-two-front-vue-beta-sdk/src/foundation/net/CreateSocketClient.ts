@@ -314,7 +314,9 @@ export function createSocketClient<TIn = unknown, TOut = unknown>(
     on('open', () => {
       scheduler.reset();
       setState(ConnectionState.Open);
+      if (closedByCaller || connection !== target) return;
       onOpen?.();
+      if (closedByCaller || connection !== target) return;
       // Flush AFTER `onOpen`, so a handler that sends a subscribe/auth frame on connect lands ahead of the
       // backlog rather than behind it — the ordering a protocol with a handshake requires.
       flushQueue(target);

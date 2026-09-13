@@ -154,6 +154,10 @@ export async function runInWorker<TArgs extends readonly unknown[], TValue>(
         reject(toError(event.error ?? event.message ?? 'Worker failed to start'));
       });
 
+      instance.addEventListener('messageerror', () => {
+        done();
+        reject(new Error('Worker reply could not be deserialized'));
+      });
       const transfer = options?.transfer;
       if (transfer !== undefined && transfer.length > 0) instance.postMessage(args, [...transfer]);
       else instance.postMessage(args);

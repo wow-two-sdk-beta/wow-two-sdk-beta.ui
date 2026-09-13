@@ -23,7 +23,8 @@ export function installDocumentTitle(router: Router, options: DocumentTitleOptio
   if (typeof document === 'undefined') return () => {};
 
   const { suffix } = options;
-  return router.afterEach((to) => {
+  return router.afterEach((to, _from, failure) => {
+    if (failure) return;
     // `handle.title` may be a resolver — a `:slug` page's title is not knowable statically. One
     // returning `undefined` falls through to the next-shallowest match, as an absent literal does.
     const title = deepestHandleValue(to, (handle) => resolveHandleValue(handle.title, to));

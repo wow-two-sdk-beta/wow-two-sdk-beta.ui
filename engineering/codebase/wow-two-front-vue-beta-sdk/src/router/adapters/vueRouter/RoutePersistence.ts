@@ -46,7 +46,8 @@ export function installRoutePersistence(router: Router, options: RoutePersistenc
     return true;
   });
 
-  const unregisterPersist = router.afterEach((to) => {
+  const unregisterPersist = router.afterEach((to, _from, failure) => {
+    if (failure) return;
     writeRoute(storageKey, to.fullPath);
   });
 

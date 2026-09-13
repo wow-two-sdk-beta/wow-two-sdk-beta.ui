@@ -83,7 +83,7 @@ export function useTypeahead<T>(options: UseTypeaheadOptions<T>): UseTypeaheadRe
   onScopeDispose(clearTimer);
 
   function onKeyDown(event: KeyboardEvent): boolean {
-    if (!isEnabled()) return false;
+    if (!isEnabled() || event.isComposing) return false;
     if (!isPrintableKey(event)) return false;
 
     const isSpace = event.key === ' ';

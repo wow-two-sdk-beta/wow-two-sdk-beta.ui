@@ -33,7 +33,7 @@ export interface SwipePayload {
   readonly distance: number;
   /** Release speed along that same axis, in px/ms, over the recent movement window. Always positive. */
   readonly velocity: number;
-  /** The pointer event that ended the gesture — `pointerup`, or `pointercancel` if the browser took the pointer. */
+  /** The pointerup event that completed the gesture; cancelled pointers never produce a swipe. */
   readonly event: PointerEvent;
 }
 
@@ -83,6 +83,7 @@ export function useSwipe(
     target,
     {
       onDragEnd: (payload: DragPayload): void => {
+        if (payload.event.type === 'pointercancel') return;
         const opts = toValue(options);
         const direction = swipeDirection(payload.dx, payload.dy);
         if (direction === null) return; // Pressed and released without moving — not a swipe.
