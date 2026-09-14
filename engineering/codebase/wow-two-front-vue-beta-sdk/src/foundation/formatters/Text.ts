@@ -50,24 +50,23 @@ export function titleCase(text: string): string {
 
 /** Tunes slug generation. */
 export interface SlugifyOptions {
-  /** The word separator. Defaults to `-`. */
+  /** The literal word separator; empty joins words without a separator. Defaults to `-`. */
   readonly separator?: string;
 }
 
 /**
  * Builds a URL-safe slug: strips diacritics (NFKD normalize + drop combining marks), lower-cases, replaces every
- * run of non-alphanumeric characters with the separator, and trims leading/trailing separators.
+ * interior run of non-alphanumeric characters with the literal separator, and removes edge punctuation.
  * `"Héllo, World!"` → `"hello-world"`.
  */
 export function slugify(text: string, options?: SlugifyOptions): string {
   const separator = options?.separator ?? '-';
-  const escaped = separator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return text
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '') // combining diacritical marks split off by NFKD
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, separator)
-    .replace(new RegExp(`^${escaped}+|${escaped}+$`, 'g'), '');
+    .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '')
+    .replace(/[^a-z0-9]+/g, () => separator);
 }
 
 /** Tunes initials extraction. */
@@ -100,7 +99,7 @@ export function initials(name: string, options?: InitialsOptions): string {
 
 /** Tunes masking. */
 export interface MaskOptions {
-  /** Number of characters left visible. Defaults to `4`. */
+  /** Number of characters left visible. Defaults to `4`; invalid counts mask every character. */
   readonly visible?: number;
 
   /** The mask character. Defaults to `•`. */
@@ -113,9 +112,11 @@ export interface MaskOptions {
 /**
  * Masks all but the last (or first) `visible` characters — for rendering partial secrets / PII (`"4242…4242"` →
  * `"••••••••••••4242"`). When the text is no longer than `visible`, every character is masked.
+ * Nonfinite, fractional and negative visibility counts also mask every character.
  */
 export function maskString(text: string, options?: MaskOptions): string {
-  const visible = Math.max(0, options?.visible ?? 4);
+  const requestedVisible = options?.visible ?? 4;
+  const visible = Number.isInteger(requestedVisible) && requestedVisible >= 0 ? requestedVisible : 0;
   const maskChar = options?.mask ?? '•';
   const side = options?.side ?? 'end';
 

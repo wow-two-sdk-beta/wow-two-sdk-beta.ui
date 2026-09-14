@@ -164,7 +164,7 @@ function resolveRadius(radius: RadiusProp | undefined): CSSProperties | undefine
   if (typeof radius === 'number') return { borderRadius: `${radius}px` };
   if (radius === 'none') return { borderRadius: 0 };
   if (radius === 'full') return { borderRadius: '9999px' };
-  if (radius in RadiusTokenToCss) {
+  if (Object.hasOwn(RadiusTokenToCss, radius)) {
     return {
       borderRadius: RadiusTokenToCss[radius as Exclude<RadiusToken, 'none' | 'full'>],
     };

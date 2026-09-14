@@ -54,6 +54,28 @@ describe('text helpers', () => {
     expect(slugify('Hello, World! 2026')).toBe('hello-world-2026');
   });
 
+  it('treats custom slug separators literally and removes only source edge punctuation', () => {
+    expect(slugify('! Héllo, World! ', { separator: '' })).toBe('helloworld');
+    expect(slugify('!Hello World!', { separator: '$&' })).toBe('hello$&world');
+    expect(slugify('!Hello World!', { separator: '$`' })).toBe('hello$`world');
+    expect(slugify('!Hello World!', { separator: '.*' })).toBe('hello.*world');
+    expect(slugify('abc!def!', { separator: 'ab' })).toBe('abcabdef');
+    expect(slugify('?!', { separator: '' })).toBe('');
+  });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, -1, 2.5])(
+    'masks the entire secret for invalid visibility %s',
+    (visible) => {
+      expect(maskString('secret-value', { visible })).toBe('•'.repeat(12));
+      expect(maskString('secret-value', { visible, side: 'start' })).toBe('•'.repeat(12));
+    },
+  );
+
+  it('masks everything for zero visibility and preserves a valid prefix count', () => {
+    expect(maskString('secret-value', { visible: 0 })).toBe('•'.repeat(12));
+    expect(maskString('secret-value', { visible: 3, side: 'start' })).toBe('sec' + '•'.repeat(9));
+  });
+
   it('derives initials from a name', () => {
     expect(initials('Ada Lovelace')).toBe('AL');
   });
