@@ -1,7 +1,9 @@
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { resolveSourcePath, indexCaseMismatches } from './source-paths.mjs';
 
 // The nonvisual capability gate includes type imports: contracts must remain acyclic too.
 // Forms and presentation have separate sweep owners. Pass --all to include their capability nodes.
@@ -23,14 +25,23 @@ function files(directory) {
   });
 }
 
+const sourceFiles = files(root);
+const exactPaths = new Set(sourceFiles);
+const trackedPaths = execFileSync('git', ['ls-files', '-z', '--', 'src'], {
+  cwd: path.dirname(root.slice(0, -1)),
+  encoding: 'utf8',
+})
+  .split('\0')
+  .filter(Boolean)
+  .map((file) => path.resolve(root, '..', file));
+const indexCasing = indexCaseMismatches(trackedPaths, sourceFiles);
+
 function reference(file, specifier) {
   if (!specifier.startsWith('.') && !specifier.startsWith('@src/')) return;
   const base = specifier.startsWith('@src/')
     ? path.join(root, specifier.slice(5))
     : path.resolve(path.dirname(file), specifier);
-  const target = [base, base + '.ts', base + '.tsx', base + '.vue', path.join(base, 'index.ts')].find(
-    (candidate) => fs.existsSync(candidate) && fs.statSync(candidate).isFile(),
-  );
+  const target = resolveSourcePath(base, exactPaths);
   if (!target) {
     unresolved.push({ file: path.relative(root, file), specifier });
     return;
@@ -43,7 +54,7 @@ function reference(file, specifier) {
   }
 }
 
-for (const file of files(root)) {
+for (const file of sourceFiles) {
   const owner = capability(file);
   if (excluded.has(owner)) continue;
   if (!graph.has(owner)) graph.set(owner, new Set());
@@ -103,6 +114,16 @@ for (const node of graph.keys()) {
   }
 }
 console.log(
-  JSON.stringify({ capabilities: graph.size, crossCapabilityReferences: edges.length, cycles, unresolved }, null, 2),
+  JSON.stringify(
+    {
+      capabilities: graph.size,
+      crossCapabilityReferences: edges.length,
+      cycles,
+      unresolved,
+      indexCaseMismatches: indexCasing,
+    },
+    null,
+    2,
+  ),
 );
-if (cycles.length || unresolved.length) process.exitCode = 1;
+if (cycles.length || unresolved.length || indexCasing.length) process.exitCode = 1;

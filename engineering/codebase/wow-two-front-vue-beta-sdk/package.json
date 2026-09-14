@@ -1,7 +1,7 @@
 {
   "name": "@wow-two-beta/ui-vue",
   "version": "0.0.5",
-  "description": "Beta-forever Vue 3 UI library for the wow-two ecosystem — the Vue port of @wow-two-beta/ui.",
+  "description": "Beta-forever Vue 3 UI library for the wow-two ecosystem \u2014 the Vue port of @wow-two-beta/ui.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -389,11 +389,11 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:unit": "vitest run --project unit",
-    "test:browser": "vitest run --project browser",
+    "test:browser": "vitest run --project chromium --project chromium-forced-colors",
     "coverage": "vitest run --coverage",
     "prepublishOnly": "pnpm typecheck && pnpm build && pnpm check:package",
     "check:package": "node scripts/check-package.mjs",
-    "check:capabilities": "node scripts/check-capabilities.mjs --all",
+    "check:capabilities": "node --test scripts/source-paths.test.mjs && node scripts/check-capabilities.mjs --all",
     "check:sfc": "node scripts/check-sfc.mjs",
     "playground": "pnpm --filter playground dev"
   },

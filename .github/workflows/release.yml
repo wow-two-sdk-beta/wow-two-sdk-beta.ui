@@ -9,7 +9,8 @@ on:
     branches: [main]
     paths:
       - 'engineering/codebase/wow-two-front-beta-sdk/**'
-      - '.github/workflows/release.yml'
+      - '!engineering/codebase/wow-two-front-beta-sdk/apps/**'
+  # App-only changes do not publish the parked React SDK. Workflow changes can be dispatched explicitly.
   workflow_dispatch:
 
 permissions:

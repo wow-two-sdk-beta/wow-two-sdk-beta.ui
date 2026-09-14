@@ -10,6 +10,7 @@ on:
     paths:
       - 'engineering/codebase/wow-two-front-vue-beta-sdk/**'
       - '.github/workflows/release-vue.yml'
+      - '.github/scripts/vue-release-version*'
   workflow_dispatch:
 
 permissions:
@@ -21,6 +22,7 @@ concurrency:
 
 jobs:
   release:
+    if: github.ref == 'refs/heads/main'
     name: validate · bump · publish
     runs-on: ubuntu-latest
     outputs:
@@ -30,20 +32,21 @@ jobs:
         working-directory: engineering/codebase/wow-two-front-vue-beta-sdk
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6.1.0
         with:
           # version inferred from packageManager field in the nested package.json
           package_json_file: engineering/codebase/wow-two-front-vue-beta-sdk/package.json
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
           cache-dependency-path: engineering/codebase/wow-two-front-vue-beta-sdk/pnpm-lock.yaml
           registry-url: 'https://registry.npmjs.org'
@@ -69,18 +72,31 @@ jobs:
       - name: Bump patch version
         id: bump
         run: |
-          pnpm version patch --no-git-tag-version
-          VERSION=$(node -p "require('./package.json').version")
+          node --test ../../../.github/scripts/vue-release-version.test.mjs
+          VERSION=$(node ../../../.github/scripts/vue-release-version.mjs)
+          pnpm version "$VERSION" --no-git-tag-version
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "::notice::Releasing @wow-two-beta/ui-vue v$VERSION"
 
       - name: Build
         run: pnpm build
 
+      - name: Playground
+        run: pnpm --filter playground build
+
+      - name: Playground browser smoke
+        run: node apps/playground/tests/gallery-smoke.mjs
+
       - name: Packed consumer
         run: pnpm check:package --install --output "$RUNNER_TEMP/ui-vue.tgz"
 
-      # --- npm publish: the release gate. Everything below must NOT block it. ---
+      # Stop if main changed while this checkout was being verified.
+      - name: Verify release source
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          test "$(git rev-parse FETCH_HEAD)" = "$(git rev-parse HEAD)"
+
+      # Publish exactly the artifact exercised by the consumer gate.
       - name: Publish to npm
         run: npm publish "$RUNNER_TEMP/ui-vue.tgz" --access public
         env:
@@ -92,20 +108,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add package.json
           git commit -m "chore: release ui-vue v${{ steps.bump.outputs.version }} [skip ci]"
-          # `release.yml` bumps the React package on the same push and races us to `main`.
-          # Whoever lands second gets `! [rejected] main -> main (fetch first)` — which is what
-          # happened on ui-vue v0.0.2: npm had the package, `main` never got the bump, and the
-          # next run would have tried to republish a version that already existed. Rebasing the
-          # one-line bump onto whatever landed first is always safe; the two touch different files.
-          #
-          # TAG AFTER THE REBASE, never before. A rebase replays the bump commit under a new SHA,
-          # and an annotated tag made beforehand keeps pointing at the orphaned original — so
-          # `--follow-tags` skips it (it only pushes tags reachable from the pushed commits) and
-          # `gh release create` then fails with "tag exists locally but has not been pushed".
-          # That is exactly how ui-vue v0.0.3 published to npm with no tag and no GitHub Release.
-          git pull --rebase origin "${GITHUB_REF_NAME}"
+          # Never rebase the release after packing: the tag must identify the tested source.
+          # If a human advances main, the atomic push fails without moving either ref.
+          # A later run selects a patch beyond any already-published npm version.
           git tag -a "ui-vue-v${{ steps.bump.outputs.version }}" -m "ui-vue v${{ steps.bump.outputs.version }}"
-          git push --follow-tags
+          git push --atomic origin HEAD:refs/heads/main "refs/tags/ui-vue-v${{ steps.bump.outputs.version }}"
 
       - name: Create GitHub Release
         env:
@@ -150,6 +157,7 @@ jobs:
             CHANGELOG=$(
               section 'feat'     'Features'
               section 'fix'      'Fixes'
+              section 'perf'     'Performance'
               section 'refactor' 'Refactors'
               section 'docs'     'Docs'
               section 'chore'    'Chores'

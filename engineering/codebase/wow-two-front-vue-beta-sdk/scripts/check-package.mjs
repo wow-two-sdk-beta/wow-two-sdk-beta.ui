@@ -9,6 +9,7 @@ import {
   realpathSync,
   rmSync,
   symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -91,7 +92,10 @@ try {
   importEntries(core);
 
   // Exercise numeric values from the actual archive, with no source aliases or development transforms.
-  run(process.execPath, ['--input-type=module', '-e', `
+  run(process.execPath, [
+    '--input-type=module',
+    '-e',
+    `
     import { ExactNumber } from '${published.name}/foundation/numbers';
     import { LosslessJson } from '${published.name}/foundation/json';
     const parsed = LosslessJson.parse('{"id":9223372036854775807,"amount":0.1}');
@@ -102,7 +106,8 @@ try {
     const encoded = LosslessJson.stringify({ id: parsed.value.id, amount: sum.value });
     if (!encoded.ok || encoded.value !== '{"id":9223372036854775807,"amount":0.3}')
       throw new Error('Packed numeric wire round trip failed');
-  `]);
+  `,
+  ]);
 
   // Compile through package exports without optional peers or source aliases.
   const typecheck = (keys, cwd = scratch) => {
@@ -141,7 +146,8 @@ try {
     }
     importEntries([key]);
     typecheck([key]);
-    for (const peer of peers) rmSync(join(modules, peer));
+    // These entries are directory symlinks; unlink the fixture without following its target.
+    for (const peer of peers) unlinkSync(join(modules, peer));
   }
   for (const peers of Object.values(adapters)) for (const peer of peers) linkDependency(peer);
   typecheck(entries.map(([key]) => key));
