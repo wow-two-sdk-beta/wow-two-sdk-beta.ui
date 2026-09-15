@@ -3,11 +3,14 @@ import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import { playwright } from '@vitest/browser-playwright';
 import { fileURLToPath } from 'node:url';
+import { libSourceAliases } from './apps/lib-source-alias.mjs';
 
 // Tests live under `tests/` (source-only `src/`); they reach back into source via the
 // `@src/*` alias (mirrors the `tsconfig.json` path). Applied per project so every project
 // (unit · ssr · dom · browser) resolves it.
-const srcAlias = { '@src': fileURLToPath(new URL('./src', import.meta.url)) };
+const srcAlias = libSourceAliases(fileURLToPath(new URL('.', import.meta.url)), [
+  { find: '@src', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+]);
 
 /* The two suffixes the smoke layer routes on, excluded from every project that is not theirs. */
 const smokeSuffixes = ['**/*.ssr.test.ts', '**/*.dom.test.ts'];

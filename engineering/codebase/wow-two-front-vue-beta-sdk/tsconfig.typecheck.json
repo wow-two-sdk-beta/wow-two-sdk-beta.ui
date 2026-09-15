@@ -4,6 +4,16 @@
   // vite-plugin-dts against tsconfig.json, which stays source-only — tests must never emit
   // into `dist`.
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Tests import playground modules; resolve their public subpaths to source before dist exists.
+    "paths": {
+      "@src/*": ["src/*"],
+      "@wow-two-beta/ui-vue": ["src/index.ts"],
+      "@wow-two-beta/ui-vue/foundation/*": ["src/foundation/*/index.ts"],
+      "@wow-two-beta/ui-vue/domain/*": ["src/domain/*/index.ts"],
+      "@wow-two-beta/ui-vue/presentation/*": ["src/presentation/*/index.ts"]
+    }
+  },
   "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.vue"],
   "exclude": ["node_modules", "dist"]
 }

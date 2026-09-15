@@ -1,6 +1,6 @@
 # Vue SDK optimization sweep
 
-*Verified locally: 2026-09-13. Implementation push confirmed by the owner: 2026-09-14. Hosted release verification remains open.*
+*Sweep verified locally: 2026-09-13. Clean-build CI correction verified: 2026-09-15. Hosted publication remains open.*
 
 ## Scope and evidence
 
@@ -74,6 +74,13 @@ Release changes:
 - Keep Vue and React concurrency groups separate. A shared group can evict a pending run from the other package because GitHub retains only one pending run per group.
 - Exclude React app-only edits from automatic React publication. React package behavior/release upgrades and its legacy advisory test workflow remain parked; its existing automatic test retry is not used by the gated Vue release.
 
+September 15 follow-up: [run 34932447116](https://github.com/wow-two-sdk-beta/wow-two-sdk-beta.ui/actions/runs/34932447116)
+at `f6c396c` failed in typechecking before publication. Playground state tests import `theme.ts`, whose public theme
+subpath resolved to `dist`; the test TypeScript configuration lacked the playground's source aliases. Existing local
+build output masked the dependency. A temporary package copy without `dist` reproduced both CI diagnostics and two
+DOM test failures. The test TypeScript configuration now resolves playground public subpaths to source; Vitest reuses
+the playground's manifest-derived source aliases. Declaration-build and published-package resolution stay unchanged.
+
 npm and Git are separate systems: a push arriving after the final head check can still leave npm published while the atomic Git push fails. The next run can recover by advancing beyond the published version. This is explicit recovery, not a claim of a cross-system atomic release. npm credentials and the complete hosted workflow require verification against the run triggered by the owner's push.
 
 ## Combined verification
@@ -88,7 +95,12 @@ npm and Git are separate systems: a push arriving after the final head check can
 - All three React app browser checks passed, including theme-studio applied CSS updates and retained form input.
 - Packed export/type/JavaScript/CSS checks and a fresh npm consumer installation passed. Optional-peer symlink cleanup uses `unlinkSync`, preserving the linked dependency.
 - The final two native checks ran through manual approval under the workspace sandbox configuration; Full access was unnecessary. `/private/tmp/sdk-native-verification.json` records all four native check groups with exit code 0.
-- The owner committed and pushed the implementation through `b678a59`. No agent commit or push was performed during this handover. The resulting hosted release, npm version and tag have not yet been verified.
+- September 15 correction: `vue-tsc` and all 1,774 unit/DOM/SSR plus 30 Chromium tests passed in the temporary copy
+  without `dist`. Full `pnpm typecheck` (including the Git-index gate and 407 SFCs), ESLint and changed-config formatting
+  passed in the SDK checkout. The temporary copy reused installed dependencies; it was not a fresh dependency install.
+- GitHub confirms the owner's documentation commit `f6c396c` reached main. Its release failed as diagnosed above.
+  The correction awaits the owner's commit/push and a successful hosted run; npm version and matching tag remain open.
+  No agent commit or push was performed during this handover.
 
 ## Remaining analysis candidates
 
