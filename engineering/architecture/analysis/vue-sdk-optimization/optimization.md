@@ -81,7 +81,29 @@ build output masked the dependency. A temporary package copy without `dist` repr
 DOM test failures. The test TypeScript configuration now resolves playground public subpaths to source; Vitest reuses
 the playground's manifest-derived source aliases. Declaration-build and published-package resolution stay unchanged.
 
-npm and Git are separate systems: a push arriving after the final head check can still leave npm published while the atomic Git push fails. The next run can recover by advancing beyond the published version. This is explicit recovery, not a claim of a cross-system atomic release. npm credentials and the complete hosted workflow require verification against the run triggered by the owner's push.
+npm and Git are separate systems: a push arriving after the final head check can still leave npm published while the atomic Git push fails. The next run can recover by advancing beyond the published version. This is explicit recovery, not a claim of a cross-system atomic release.
+
+September 15 publishing follow-up: run `34934970480` at `2f6aa63` passed every validation, build, playground,
+packed-consumer and source gate. npm rejected publication of `0.0.6` with `E404`; the registry remains at `0.0.5`.
+The publish step received a masked token. The signed-in npm account `sulton-max` retains package write access,
+but its only listed token, `npm-token`, expired August 18, 2026. It had package read/write and bypass-2FA enabled.
+The GitHub secret's exact identity cannot be matched through read-only secret metadata; expiration is the likely
+cause, not a proven equality between that token and `NPM_TOKEN`.
+
+Prepared [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/): the Vue job requests `id-token: write`
+and publishes the same verified tarball without a stored npm token. Removed setup-node's token-placeholder npmrc;
+the publish command names the public registry explicitly. Node 24 is retained; npm requires CLI 11.5.1 or newer.
+Workflow YAML and all shell step syntax pass; three release-version helper tests pass. Hosted OIDC publication
+is not verified. Before pushing this change, the owner must authorize the package-side trusted publisher:
+
+- Provider: GitHub Actions.
+- Organization: `wow-two-sdk-beta`.
+- Repository: `wow-two-sdk-beta.ui`.
+- Workflow: `release-vue.yml`.
+- Environment: empty (the workflow declares none).
+- Direct `npm publish`: allowed, matching the existing automatic release flow.
+
+No npm settings or GitHub secrets were changed. Creating this trust still requires owner confirmation.
 
 ## Combined verification
 

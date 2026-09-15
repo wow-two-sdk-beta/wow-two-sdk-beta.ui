@@ -25,6 +25,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
     name: validate · bump · publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write # npm trusted publisher for release-vue.yml
     outputs:
       version: ${{ steps.bump.outputs.version }}
     defaults:
@@ -49,7 +52,6 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
           cache-dependency-path: engineering/codebase/wow-two-front-vue-beta-sdk/pnpm-lock.yaml
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -97,10 +99,10 @@ jobs:
           test "$(git rev-parse FETCH_HEAD)" = "$(git rev-parse HEAD)"
 
       # Publish exactly the artifact exercised by the consumer gate.
+      # npm authorizes this repository/workflow through its trusted publisher.
+      # No stored npm token or token-bearing setup-node npmrc is needed.
       - name: Publish to npm
-        run: npm publish "$RUNNER_TEMP/ui-vue.tgz" --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish "$RUNNER_TEMP/ui-vue.tgz" --access public --registry=https://registry.npmjs.org
 
       - name: Commit + tag version bump
         run: |
