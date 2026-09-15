@@ -1,0 +1,66 @@
+{
+  "before": [
+    {
+      "count": 100000,
+      "parseMs": 123.47666699439287,
+      "retainedBytes": 162693064,
+      "themeImportMs": 257.56008300185204,
+      "themeLookupMs": 0.026083000004291534,
+      "selected": "wow"
+    },
+    {
+      "count": 100000,
+      "parseMs": 113.70679099857807,
+      "retainedBytes": 162712792,
+      "themeImportMs": 262.0445419996977,
+      "themeLookupMs": 0.022958002984523773,
+      "selected": "wow"
+    },
+    {
+      "count": 100000,
+      "parseMs": 114.51354199647903,
+      "retainedBytes": 162714096,
+      "themeImportMs": 261.05579199641943,
+      "themeLookupMs": 0.021874994039535522,
+      "selected": "wow"
+    }
+  ],
+  "beforeMedian": {
+    "parseMs": 114.51354199647903,
+    "retainedBytes": 162712792,
+    "themeImportMs": 261.05579199641943,
+    "themeLookupMs": 0.022958002984523773
+  },
+  "after": [
+    {
+      "count": 100000,
+      "parseMs": 59.388791002333164,
+      "retainedBytes": 27657728,
+      "themeImportMs": 27.89725000411272,
+      "themeLookupMs": 3.015166997909546,
+      "selected": "wow"
+    },
+    {
+      "count": 100000,
+      "parseMs": 60.23737499862909,
+      "retainedBytes": 27661856,
+      "themeImportMs": 27.86233299970627,
+      "themeLookupMs": 2.8691250011324883,
+      "selected": "wow"
+    },
+    {
+      "count": 100000,
+      "parseMs": 60.64054200053215,
+      "retainedBytes": 27628808,
+      "themeImportMs": 28.02691600471735,
+      "themeLookupMs": 3.14512500166893,
+      "selected": "wow"
+    }
+  ],
+  "afterMedian": {
+    "parseMs": 60.23737499862909,
+    "retainedBytes": 27657728,
+    "themeImportMs": 27.89725000411272,
+    "themeLookupMs": 3.015166997909546
+  }
+}

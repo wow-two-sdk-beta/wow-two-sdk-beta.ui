@@ -1,0 +1,1197 @@
+{
+  "scope": [
+    "animation",
+    "channels",
+    "clipboard",
+    "crypto",
+    "device",
+    "geolocation",
+    "gestures",
+    "idb",
+    "media",
+    "net",
+    "notifications",
+    "observers",
+    "screen",
+    "selection",
+    "share",
+    "shortcuts",
+    "speech",
+    "uploads",
+    "virtualization",
+    "workers"
+  ],
+  "fileCount": 195,
+  "files": [
+    {
+      "path": "src/foundation/animation/Animate.ts",
+      "sha256": "4b8fe951ee0da230d24533ef42e4871b97790ff8dacc03e0488491c05cb5f876",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/animation/Flip.ts",
+      "sha256": "b6496730e26216637496fd52f06a4ce33aad2f671860e8481fcb229d45c1249b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/animation/TransitionExtensions.ts",
+      "sha256": "490ed2cdc5ba2a01c6d94ab5e26365bb49cbc983c49b1aae88e9703ae606cad5",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/animation/UseFlip.ts",
+      "sha256": "a9f2fe4fbfd3ce77ecf17fb8d25a5eb790d6c5316f3789472e075770359edf67",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/animation/animatedLayout/AnimatedLayout.spec.md",
+      "sha256": "70c9fc48506ab5364cf02500cdbfbbf458590e079cf992398c447d4a76b98e2c",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/animation/animatedLayout/AnimatedLayout.ts",
+      "sha256": "a55c340f17246a1b75741f6960266c1d27b04cacbac3e1890d90ca0564c83470",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/animation/animatedLayout/index.ts",
+      "sha256": "5395402db5fcd18101b266a5e2f5f316cbab065ccd87b00d6891df2da83d00e7",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/animation/index.ts",
+      "sha256": "d804b4438d81aa15028f9a161b096ebb7336cbcc66b9b6d553a9edc4fde03bbf",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/channels/CreateSyncChannel.ts",
+      "sha256": "498536216e966ee0595b416b0eed681b71b2762f160806a3219c160b189aa1a9",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/channels/LeaderElection.ts",
+      "sha256": "02e00e2862eb94294ca1cdb331a6d64827c43d8e16db9b942e8bb5e64cb37e17",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/channels/MemorySyncHub.ts",
+      "sha256": "caa609e43e7e260e979cea2464493f3dd5bcf706a316706c5528ce59eeddf039",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/channels/SyncChannel.ts",
+      "sha256": "c3054e0301becdd9d05cbb9ce4b8e484ba11ab059d06c3f2c74297bd8bb3d36e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/channels/hooks/UseBroadcastState.ts",
+      "sha256": "f2f2591d44b54574bbbaf25e85f497b4e2df6a4adfee546fba7cb1da84787fd3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/channels/hooks/UseLeaderElection.ts",
+      "sha256": "c56b4cf8dab0a57cce024454f5fc643efcaeb0b33b5e5ac99c4d5fd230b217a8",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/channels/hooks/UseSyncChannel.ts",
+      "sha256": "0cfe92cc1b58fceaf311565b1ab872e9718b5c675e5d0e000de580abc235e349",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/channels/index.ts",
+      "sha256": "b093e89e64f853aa84c9fadb847c8ed4c549ed2f4575de2f2f0d833eab653f1d",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/ClipboardFailureCode.ts",
+      "sha256": "923080c8e457464e3ae153db86d71dced4df2a72b95ad3e8530287aabc2b4552",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/ClipboardPermission.ts",
+      "sha256": "286722ef8c956dff73b20e3fbd5c7112f9252e1b7e8fae82daf0c2fe3049eac4",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/ClipboardResult.ts",
+      "sha256": "ee02ecc5155f6c045fffbf27e626bf438fb6c3093f42748ceb1d8e27e84fb6e3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/ClipboardSupport.ts",
+      "sha256": "5a86f6357422e232a711f4eafeca989dd2ccf2a834d4e750277727ccda505a0c",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/CopyItems.ts",
+      "sha256": "2caa7ccd0a0042416bd3f598cca637fd33944e75a87e869295a7aa2701bcd206",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/CopyText.ts",
+      "sha256": "725e45299c6a3f50fecf230de5a4d59e1293006cb3d5c63ab005b2f7a731fadd",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/LegacyCopy.ts",
+      "sha256": "37a396c65004ca050b6e1b5c92abc67ad8c29555766061219486a7219d6426d5",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/PasteItems.ts",
+      "sha256": "669bec6ab66673618f307c3f820a93d70ba296ab79ebfd319197475fdf54e0aa",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/ReadClipboard.ts",
+      "sha256": "814da8b0beada21e7a0ba005d3bf93e8f562a58633e4010cf0fde8aace658016",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/hooks/UseClipboard.ts",
+      "sha256": "fac2cb66354d6a744420072cfc32f08aeb2946be5240789ab4ad356b73d5a457",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/hooks/UseClipboardCopy.ts",
+      "sha256": "20d0197a9150d05bd77f889829b2ea889be16eb1393f311085275f7314868a7b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/hooks/UsePasteHandler.ts",
+      "sha256": "cd814849e95e4f5056aa0d2a3f039a8a33db623083684cfc8d8d94439f0cdfe5",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/clipboard/index.ts",
+      "sha256": "2485a7e13ba09261d612726b771040caa4749b937dbd767ce2dc2910bc216817",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/models/ClipboardFailure.ts",
+      "sha256": "ffef1a0ec3de8abee4e7f1d80ed8ebc9d74ce135b458b6902253bbf890770899",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/models/ClipboardReadItemsResult.ts",
+      "sha256": "6c69024f86e8b68d6fe9bf6e71a8c37feef13f270c41e34782db753caee58f14",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/models/ClipboardReadTextResult.ts",
+      "sha256": "178cd084e087d0cc94cb6d61a4e6229557a5d71f30f647e589d73d0213269a1b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/clipboard/models/ClipboardWriteResult.ts",
+      "sha256": "78a4c3383528ff9e9b1f5d18435fdde3cfb23973bc2bb632ffd09b5f1f3282b3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/crypto/Digest.ts",
+      "sha256": "8feea775850963801a03231bbb83d173d2216fc5ea3c192badd65c125efbb73c",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/crypto/Encoding.ts",
+      "sha256": "16b35fc3659eb9350353d6cef3e14e9dc54c4c2e4b6843bf860458f91ef7e398",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/crypto/HashObject.ts",
+      "sha256": "7499a952f5a3e0602ec5f07e187067212c0c1d6c6117936d8d94b368eb4e72e9",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/crypto/Random.ts",
+      "sha256": "789dd07b21893413ede6690e54ffc51393c69fa48531270b3597f9304a5ecc3f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/crypto/TimingSafeEqual.ts",
+      "sha256": "c0ff819841112e23010c07f3cb9142de6b724e24075c24dee322e97a8e96297c",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/crypto/WebCrypto.ts",
+      "sha256": "822188e071a70c2881fbe1f5ddb72fa8a6c2348604b2ccde17119883cac2bb29",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/crypto/index.ts",
+      "sha256": "056b08d7ccbab53bfdfe5b23ae5240667b6345aca7b6be620c41595c299c11d3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/device/Breakpoints.ts",
+      "sha256": "9f4a51aaa60bb5cc8ea06b59bd5dbaff33d5dc9a5f0bd9abd918bc956ec85496",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/device/Platform.ts",
+      "sha256": "cceb38710b606c49424d0f75baea608461eb2dfc61cadadcb49f9fafa2076845",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/device/enums/DisplayMode.ts",
+      "sha256": "eec5e19dbdbae2e677bce05cc3b6605782859d20978e4859ee3f66bf8afe104d",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/device/enums/PointerType.ts",
+      "sha256": "f6b10f43750092c189667f3032ed44e8f5f2063fa448dc58e6e17d81cc49a5c8",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/device/hooks/UseBreakpoint.ts",
+      "sha256": "920c30dcf3d9326fb0c5b161e0e57b48e40775ec9464db863f0bcf6e7bf76a51",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/device/hooks/UseDisplayMode.ts",
+      "sha256": "0712cd9517e82c711c37b6648ed286666a49a292b581a845da9ba9f3bcb29884",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/device/hooks/UseMediaQuery.ts",
+      "sha256": "9aa3362cf1b06d725f5f0dd4b3a16d59dccbbfbe78371e393456298c7e56ef1c",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/device/hooks/UseOnlineStatus.ts",
+      "sha256": "768980ee4d8547b171dbbf0d5b4cf57b7f95d010329f65e7ecd52a189074aba9",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/device/hooks/UsePointer.ts",
+      "sha256": "0f6fa1218c3999338cb75e142478c7b6310cd8ccf0f2ec43f31a86c108d50e96",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/device/hooks/UseReducedMotion.ts",
+      "sha256": "dcf40bb2f3045af663ffbe15cbae366b8b61143f8df168e17eedbd62fee86bc2",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/device/index.ts",
+      "sha256": "ed95c7288ac33d6ae4e4f5df76bf881d5f08d96eaf7e70ce908788b3e6640e2a",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/geolocation/CanLocate.ts",
+      "sha256": "25287fb8b6d886232bc550d58082e9c9501f7a6fb0cfe95d804d0241fd03036e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/DistanceBetween.ts",
+      "sha256": "bcd8d15e8670ba938da82dd95f246765ce27d685c34d987a1cffc6b3e4c09253",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/geolocation/GeolocationPermission.ts",
+      "sha256": "e1f1a2d05c4b2c63e27c9833d22fa502260d7139a752150102ed255e7adca9f7",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/GetCurrentPosition.ts",
+      "sha256": "60978857c3ff5fd4401d5b87227fff5ac562ae4c2ea9a0bc8cce52d366869795",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/PositionFailureCode.ts",
+      "sha256": "20d8e13b6aa4c9438a42421c1ace5c5e992db1d39a7fc202a30b080378f5f3db",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/PositionMapping.ts",
+      "sha256": "d3b843c3bafa24053c303e8a7da50c863c6841c97c800d85948c9cbd79070218",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/WatchPosition.ts",
+      "sha256": "5c2926b9f2ff425b3c6b902a7e18d4badab397a70dea3c6c17d9ab81c94376d3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/hooks/UseGeolocation.ts",
+      "sha256": "4565dd79f6d5c47e2de4892713a1319b6a63b45aa27bdee44156a2b8da2983bd",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/hooks/UseWatchPosition.ts",
+      "sha256": "d03e77f179b8edc771fe0fc7875e4d87f3d9979c0ae4f430023caab5e3eec0f2",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/index.ts",
+      "sha256": "ff4d42f2a1f1cad9c05cd756626a6446325b0baa1881e56936a2033ff9cef3f3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/models/Coordinates.ts",
+      "sha256": "f9466cec58d9f766f52a86524170301e7eef2c428886b235bb5288f8cbdde12a",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/models/GeolocationReading.ts",
+      "sha256": "b4fea154636cc6dbb8b5f150421a4152db663a544c99d615de7451f8ebaff904",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/models/PositionFailure.ts",
+      "sha256": "e48ef6900d131c2eb32b33e2239124d546e074ee4aa75f104ac721322755b43a",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/geolocation/models/PositionReadResult.ts",
+      "sha256": "ae2424e724b7059ef4f6fd411b8f486cfbd490524b2821f6961ebe01c513c3ea",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/gestures/GestureMath.ts",
+      "sha256": "8686c40cfed5c9c064dc66953c76fc5df4e6eeee4af2a1d4c79297220d55791b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/gestures/enums/GestureAxis.ts",
+      "sha256": "3e3e3ac493ceda6eb021956f5a0720c6672f8243ab0d12609aac2b8e449ab7d4",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/gestures/enums/SwipeDirection.ts",
+      "sha256": "14145e8560763ad27ac3681def7b8a17ccc769dc021daa00de431910b3560696",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/gestures/hooks/UseDrag.ts",
+      "sha256": "6b307ce5854c8ca56a7f1d93000ef08797b56d7c059d2db19919c20ee67789fb",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/gestures/hooks/UseLongPress.ts",
+      "sha256": "ebfdf34db3981c390651960fa332f5955c0cef8e61214985758588b2e122a92b",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/gestures/hooks/UsePinch.ts",
+      "sha256": "796f16628609bbfcf9c6e400f2fd020b7316ef63d02bebea92dd848855200535",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/gestures/hooks/UseSwipe.ts",
+      "sha256": "f642657036025cd7ab6d3bad6f2d56fa6d532a7eb0ed8bc2bdcb271a9465ca07",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/gestures/index.ts",
+      "sha256": "63afd9f93545abc4ff48296bbb41db0e42eee381889017fe2138e4ec2de2870b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/idb/IdbPromises.ts",
+      "sha256": "a4678a3b0c343ad74a384f317d8fa9406d930bf09c00f4940387a217a28a497b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/idb/IndexedDbSupport.ts",
+      "sha256": "6ac48a61a0c2bc341f5a4440f7ed338ae183b5852461e4989f0c5bbbaca91ed3",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/idb/KeyValueStore.ts",
+      "sha256": "a47ab8e1252f1ead609f616fe691ced373f850c7e3ee8ecf76dcd27c600816f4",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/idb/OpenDatabase.ts",
+      "sha256": "9e61695182989b05e6e2c3a554765bda864dc3fd567787e77aa41929b5d8b23f",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/idb/Transactions.ts",
+      "sha256": "080decfbb3ef2baf9a1303253637980b297a41e3c2ae3f536c5cd35319ef5b8e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/idb/index.ts",
+      "sha256": "7eccec63eaae558a4054bbd095fc3c7f5ccae1ddb642c8aa15be59ce2a3b3685",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/CanCaptureMedia.ts",
+      "sha256": "a723661d744240168c070b6efbb3d36ff5f64c4e4fee50b21a55c2cb48c4b4e5",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/FacingMode.ts",
+      "sha256": "94708525b2a6725bb3954861f4c4f4c2024bf9ed1a61fbb84799c4cdd8f62955",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/ListMediaDevices.ts",
+      "sha256": "63b7f48312436860ff3f179ebbfb90e23d88fa36da8443c73bee6bc95b10dff2",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/MediaPermission.ts",
+      "sha256": "0508774aa0b8a660be71c438486023937987a3759f1bb15179cf099424e7b475",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/MediaStreamFailureCode.ts",
+      "sha256": "70d71c30cc036448ef6c56f81a1b3899f8ed81976f22c6aeea97826b23631223",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/MediaStreamMapping.ts",
+      "sha256": "61e4b3e6e82ea0575d4407472d354a4983fc4aee037a80e2b320550b962779c4",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/RequestMediaStream.ts",
+      "sha256": "a939dd2b3bf41bebcee75ee52d783b8b7c782b4fd47c2516bf1b717a7686c23e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/StopMediaStream.ts",
+      "sha256": "be6867552b9254c0fc57ab280545b9f37649d1a3ed0608cbce1aa59bd628fc8a",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/UseMediaStream.ts",
+      "sha256": "9017992f9efdc7525f4a1d8a92d7b097e27c52e1c4fba356ed507bf1cae5b9a1",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/index.ts",
+      "sha256": "ae270aa999d3658dff6b9f1c66249813ce86ec6830c14b967faed2532772b0ec",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/models/MediaStreamFailure.ts",
+      "sha256": "4d7eee7c233a29a646fe41748ebcb9246c4e618c8fcdd76353506a464e511772",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/media/models/MediaStreamRequestResult.ts",
+      "sha256": "760527fe7745b4feba200d26773bd63d5663cfd3faef93be336a59062447dfed",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/net/ConnectionState.ts",
+      "sha256": "f9870d1cd5e3f6c6ddb40bd3bc05b6e153653a8dd63614d7fe05a48224cdde83",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/net/CreateEventStream.ts",
+      "sha256": "cbc42cdb6399dddf0d8f665c1528a95e738f22a1f154c911c9524d57d66d3bfb",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/net/CreatePoller.ts",
+      "sha256": "9c90de696b28d8bfc203604b45218b229291477ae37bc51719e35a6a8f91dc05",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/net/CreateSocketClient.ts",
+      "sha256": "0931df786d4bca4f2b798b10113035dd1bac6faa596e33a32ca72a93cb9dac5b",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/net/Liveness.ts",
+      "sha256": "47372ac5b2abac76affffbcd1b27bf2428374aeda98fd46fa422bb818bf7a831",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/net/Reconnect.ts",
+      "sha256": "db90a59cb6781d1ba3961709b43231f3530126eb549ecb6e574ce29e4d882d69",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/net/hooks/UseEventStream.ts",
+      "sha256": "44c33ff0ae378171c9622fab5e9231d1f21751143061d109a97ab762a13e564f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/net/hooks/UsePolling.ts",
+      "sha256": "158c23030e71b606ff8dc84fb65d2c197447cc641f36b640fb1032acfb123006",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/net/hooks/UseSocket.ts",
+      "sha256": "783c870d528094cf534962ea825fc91c4c63565b360a70f1de9ac263d8e23da3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/net/index.ts",
+      "sha256": "f492ef48b38632610e4965fb279ec428d45012e474ccbab36a61cfc2743eeaf1",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/CanNotify.ts",
+      "sha256": "26804ffa25834817d8adc79c377eab5ebba959b93dfe7c85f1ecb4acdda5cbab",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/NotificationFailureCode.ts",
+      "sha256": "665ffc9e1a104504c3934dbe31c30ce36d2c9ad04c55589776c99c608c5e763b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/NotificationPermission.ts",
+      "sha256": "89c2c11bd16930393faee8b34a378b7103b57620120dc8178d39005ca36805c8",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/Notify.ts",
+      "sha256": "26d344d2d005cee0d2c414471b9f71f93d665022a0fb53aabfc9c44b1a99ca32",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/QueryPermission.ts",
+      "sha256": "b905df92c44dca964f22d3615d9469c8616365b781f736002a98c83a69b118ec",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/hooks/UseNotificationPermission.ts",
+      "sha256": "91787c25702dc2bebfe1b03d0bbfb8e08807d2044d25bf3bb32bac943b02ae28",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/notifications/hooks/UsePermissionState.ts",
+      "sha256": "6c8973885e8d92c40a6f986c1729308177a38c55d8eed606555bb3b8e340955a",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/index.ts",
+      "sha256": "2e805b0c256c4bfed0c68e4d0b99b1c151b1542e29553934549d376d0cba0356",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/models/NotificationFailure.ts",
+      "sha256": "053e115880858c73c20c5c3d385f369a82c7179bb2926e9385f1b95549ab5ac7",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/notifications/models/NotificationShowResult.ts",
+      "sha256": "6496b8d0c2ffe8d0016c1213e091202e4ec365504a14e1a5021d6f8b5c36dec4",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/ObserveIntersection.ts",
+      "sha256": "ffd9c903d468f01f9c1d05a2d627dc4610cebdf71797d3d98f31bd60402d92a3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/ObserveMutation.ts",
+      "sha256": "a54f6b6335daeaa5435dd8f4c665abc8f7e6d691b84ddbf8157189e6b36bad7b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/VisibilitySteps.ts",
+      "sha256": "8245c97236d9a514d968d0c1d52d15c4539449c7b615097537ff63915a43f6a1",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/hooks/UseInView.ts",
+      "sha256": "4ea49cc30dd5b6e3f80ad623dfe286ca13b1528579be6c510c3a51be40118460",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/hooks/UseIntersectionObserver.ts",
+      "sha256": "67c919b1a2e249ac9a86507fa0c8ffff077ab5d381bc3a6da1cbec001f9a7ee8",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/hooks/UseMutationObserver.ts",
+      "sha256": "3e6d3da0891067dac4ff88b3a7a0f97a52d75051fc96837f37c81aad7a408c88",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/hooks/UseResizeObserver.ts",
+      "sha256": "7ca178674f6f83dac94f46a57ca79f54c77cea79eedcfba49e2fa8e16e559968",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/hooks/UseVisibility.ts",
+      "sha256": "7052c455e98186641cb03b740b45dbe5c439c9be4d92a545ae972f3b7597636f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/observers/index.ts",
+      "sha256": "cbece92b42a82839b6963536a3064b84ccc096250c1c86d875d669f77ac1e1df",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/Fullscreen.ts",
+      "sha256": "0f0ee8b3555ca331c93c0dd5d27618da50dd92097e865245398f3a3d811ed536",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/ScreenEnvironment.ts",
+      "sha256": "2caefd25acb295b37d4e1c8b7df45358a13f28c4bc458cbdd6109d2a1b382c6c",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/ScreenOrientation.ts",
+      "sha256": "5184584b4ca169b95bf852b8a1d2c29ab1cc84e4197a82271d70f918e767e302",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/ScreenOutcome.ts",
+      "sha256": "88a768f898fb40cd325dc7114410f26817c746163184e7238fba5fe7a841b98e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/WakeLock.ts",
+      "sha256": "31adf0f710855d3efd6bc9c3f6fb290cf4495cf0273ca8c724195a6d5ddfd92f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/enums/OrientationLockFailureCode.ts",
+      "sha256": "5072bcaefb77089afe360d39962f5c66634f9d78d047859a8c271303864340ee",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/enums/ScreenFailureCode.ts",
+      "sha256": "c5f978c2e849d922f4e1c0704a7669c8b9438a424c857a9f7437f1436ac0968b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/hooks/UseFullscreen.ts",
+      "sha256": "238656104f2bab9b8e612f0d6fcfb808b30ce4babd987388ea2b0b09cca88f4d",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/hooks/UseOrientation.ts",
+      "sha256": "a48e8e2175632dfa9008764a6cb5a55b0aefc71ecc3a8ce128e9a6a5f68c2d5a",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/hooks/UseWakeLock.ts",
+      "sha256": "b28f65cb3dd5623e5135f7a2afba09b127610a1f02f97f301ef65e4f50975e87",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/index.ts",
+      "sha256": "83bf89b6bef29bac4b3e9f8e7f267d1379e704381ee29b01345485d8355e506c",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/models/OrientationLockFailure.ts",
+      "sha256": "b5019851cd9efab789ae483e5c2f911ce1116af51d8050598572e1e215317ec6",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/models/OrientationLockResult.ts",
+      "sha256": "0fc63cce54d7198dce5b9be354b1d0b77a145918c2679412a4610bff11ff5a52",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/models/ScreenFailure.ts",
+      "sha256": "126c4e693512a4a023ab2151082753acdedb41b78d70da09381d9bfc1f75e513",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/screen/models/ScreenRequestResult.ts",
+      "sha256": "4ff13f6750daf895a7ca042445dc28e95f531d14b384fe125d2d7bf6c7ffc329",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/selection/hooks/UseFilters.ts",
+      "sha256": "493f03c46a14df9163275c46843d9bb4c570a14a0f5467f7f6f89dd15a6e35fd",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/selection/hooks/UseSelection.ts",
+      "sha256": "51a228d29d15e078b53572371618a2c6134ecb4d448d916574bf4e5ab8b7454f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/selection/hooks/UseSort.ts",
+      "sha256": "583b688e87a8343a8bac8a800ec5a7c3db1849fc8f1d4ab5f9b0a4e0aaa8a1bf",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/selection/hooks/UseTypeahead.ts",
+      "sha256": "203277be4958703d714d1ef8bb3ce1e338491a1764720291f89b5f6a753aed16",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/selection/index.ts",
+      "sha256": "b5f46dcfaa14d61b8e7017bb96c743e8586bb90bfdd673450b78ee7cc713d84e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/selection/models/Field.ts",
+      "sha256": "7b4c45952758cae9e7f96b3b2f97e955debd3d9d43e49999a67efcd95a33aa64",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/selection/models/Filter.ts",
+      "sha256": "7f990bd824b462afdd8dec2036b7135546d33d5bf069dbe81cd207b1f95b7a9a",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/selection/models/Selection.ts",
+      "sha256": "11df755b7b2259127340ad55303162d4614c14038c272b8a13407dba9bd58b64",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/selection/models/Sort.ts",
+      "sha256": "deff78a4c8c39656e31e5eb97bf12095d1b587608c0791616f8863f2480f505c",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/share/CanShare.ts",
+      "sha256": "ce97961b902eaceb3b84e12efe2554e33e2bda94ddae4fa270fff45ef49e4708",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/Share.ts",
+      "sha256": "ed4649f8daeffeb03187c7932dbc757c78e56c761920341ddfdeb1c78a59a39b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/ShareData.ts",
+      "sha256": "7af4c9580eee11c9f38a92c1a9e0241368db0fc4a3046dc0ef742bb50f2afb13",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/ShareFailureCode.ts",
+      "sha256": "8f14309b87e1a313ffd7922101903eca04880079a930b5b9e0c9c18f9b1030b6",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/ShareOrCopy.ts",
+      "sha256": "03438baf7040cb18cea3fac1c9d09622837add6207beea7cbcc624f17875c40b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/UseShare.ts",
+      "sha256": "f4ef80cbe848bd21e7695d49fafc409c5ee32e3818110ad0f4d40506c7a479de",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/index.ts",
+      "sha256": "542bd25a0e4353501a1ea13450cf9c7d01e74aaf23be78e18796a4faa7ea1d5e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/models/ShareFailure.ts",
+      "sha256": "05263e3ba6587f6b2ecf658b5fe47bd32888b970c1e565a807d697479955e27f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/models/ShareSendOrCopyResult.ts",
+      "sha256": "41b9682b74215e48e5d066f891684108407cda925d948d596a10df1cac00e3f0",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/share/models/ShareSendResult.ts",
+      "sha256": "99e25f17e32f1565e85f3779b3c033e0a8d518b0744d05467de58425d548814f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/shortcuts/Chord.ts",
+      "sha256": "f4e0927d4e8c08ad57557a1ce53929311be262051c3afa3b690ad4fea1d05dec",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/shortcuts/hooks/UseEscape.ts",
+      "sha256": "e8e906c4f60fa44643e9fbb4c10081f9bd4b398a27cd97942570ce28cfffef0c",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/shortcuts/hooks/UseHotkeys.ts",
+      "sha256": "d21f5ee58ae83067eb706735a585075019403b98369a030735840d380bcc91e9",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/shortcuts/index.ts",
+      "sha256": "e64eab32f3adb6369aecf015d32fc91d5a7edffc8c5aeac95d268413079d6f65",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/CreateSpeechRecognizer.ts",
+      "sha256": "3782c0bb0fae8eacc2b50c8584a894801c211004b4af242327b1232a1f749b7f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/ListVoices.ts",
+      "sha256": "bdb47a90c19717b3a604eb825707f38d69b17366a7e5491d803af112870748a9",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/Speak.ts",
+      "sha256": "d5cf02356e9095a24d1d0706fd9c127feda29ef7a7adcebe8dddf765a5d9007a",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/SpeechControls.ts",
+      "sha256": "f1a492f6b19e00d7026bcdd53cf0a97deec1a463e4e1ff8c8d14db6e10bf0ec3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/SpeechRecognitionResult.ts",
+      "sha256": "ae6ea60a45ae73af13ea0e823b1b71512147f0a1f98aaa8fdcba6ea9655b6e82",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/SpeechRecognitionTypes.ts",
+      "sha256": "21d638e179563a19fcaf3813a1b1fe849380fe5f965c45bf30257289bb2b63a0",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/SpeechResult.ts",
+      "sha256": "b27a3b8cf7ddae28ee50393406a4a86ab645c0eb24419e7dd92d130167d93b6d",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/SpeechSupport.ts",
+      "sha256": "5bdb5e17b4983b09a73bf2e77f0547a5379fbf76f09d6de13173936e69af7a94",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/enums/RecognizerStartFailureCode.ts",
+      "sha256": "03c96762498dd406056fe224d3cc46e65199292bcb1600b9105a3766a1e710be",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/enums/SpeechFailureCode.ts",
+      "sha256": "d79a1e9d9b68f163770c50dd3084eb54c5ae01c92060687977e23b83f5a59923",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/hooks/UseSpeechRecognition.ts",
+      "sha256": "9adb9ee8aee8111d6fc88a4a60b424c472bb2ca314cd4d509dd7c7584bbc14a9",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/speech/hooks/UseSpeechSynthesis.ts",
+      "sha256": "cadb650bd1d91d9cb9255486cb6dec9763ce7df2f3766d30d0b5e902238c9b0a",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/speech/index.ts",
+      "sha256": "01bfc3bfc38544fc650afdd798bb0a37bb41b91ed1baff9c63e82c9d5e1efcfc",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/models/RecognizerStartFailure.ts",
+      "sha256": "5e968c4d9ac2c1bd9abaa5af3e171ca84857f3d01d68d2b5bd715295df983f9e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/models/RecognizerStartResult.ts",
+      "sha256": "8278ca0cdc29785d11333499d70c906976dbc611135a4da6b41816e9295824fd",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/models/SpeechFailure.ts",
+      "sha256": "09fcfc226a3e37e9fcb21c642099282dc866300c9660e9176cc6854c817786a5",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/speech/models/SpeechSpeakResult.ts",
+      "sha256": "4480a165d59a93df0e559e845f94eefe4e9d37ba057971fdde39df30fa6d636f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/uploads/UploadItem.ts",
+      "sha256": "c3930db09b927abd7c5ec378d038a5592164fee72a258d20d47f4bfb1109a067",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/uploads/UploadQueue.ts",
+      "sha256": "20c5ee122a1961d629f25fe32cb119dae2ea4b640f277bc31c23496d548efd64",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/uploads/UploadTransport.ts",
+      "sha256": "01b0b156431e43b1cca4976ed694339f21f0ae90e63d83965d367a9a59f66b98",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/uploads/UseUploadQueue.ts",
+      "sha256": "56ff177029d13d3b56a62651753e32d66b23583da8d5e3a0141f6c7b097d4f0c",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/uploads/XhrUploadTransport.ts",
+      "sha256": "8ac7008872d04db505f76847269c13c65daa9d4aaaa2ecc3b8e2272e5d5d8ccd",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/uploads/index.ts",
+      "sha256": "e8e297422aafc9509787cd0a7ed355c38ef71e9b5b3d5300f438deec5ae7e097",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/virtualization/Measurements.ts",
+      "sha256": "b25e77c79873f1c02fea999d6154395b9d06cb69f2b6045fea4c14c878599168",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/virtualization/UseVirtualList.ts",
+      "sha256": "0f51a41af20abefa090695f8ba96f1cccc0008ba4cd6e1255da24cb684338c94",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/virtualization/Windowing.ts",
+      "sha256": "b7ace8575d4647abfd6adc45f59e15a8dc049db8917042ec23b558919fecfea3",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/virtualization/index.ts",
+      "sha256": "78ce51da422b010a1b7d9dd333aaf0cc3b7d0586436135778a5aa31cae8fd904",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/RunInWorker.ts",
+      "sha256": "7b7979537c6a76c3fd45b75e056a2f33015be7ee08a31f8e4e2b1e4442984f86",
+      "review": "manual implementation and public contract review",
+      "disposition": "fixed with focused regression"
+    },
+    {
+      "path": "src/foundation/workers/UseWorker.ts",
+      "sha256": "9c0f1045fb3788e634ea9d262949763992f98636279769dc8ad3d5615b5b15fd",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/WorkerClient.ts",
+      "sha256": "19538c8f4529a673a1037a7176ea7a521aeda6c27adbf9b771fedbb8d08f0033",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/WorkerHost.ts",
+      "sha256": "e3c6c07c2b131236401bb821f4fb629838f6654119dd7df6ed27fdffb01f053b",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/WorkerProtocol.ts",
+      "sha256": "bedbe67d35d6f300f6432f468560c7d716dd10970b999ec4c26ccb811f9c65ee",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/WorkerRunFailureCode.ts",
+      "sha256": "a4f0cead695e29ef9b5de8dd06cf55e72c30778a6433674a9e26ef89f1526c60",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/WorkerSupport.ts",
+      "sha256": "a31838de055f93978b9477340520d8eb0380b8f96d964d7b822cd7ad34be14da",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/index.ts",
+      "sha256": "a7dafcdb4ca783348cf837c693de2604a3ef3dec807a74ea81cb6ba2d49f409f",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/models/WorkerRunFailure.ts",
+      "sha256": "c03ba6b161f080f53acf8d20421bc71d6dd26213955808ccac2438c0c0673c26",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    },
+    {
+      "path": "src/foundation/workers/models/WorkerRunResult.ts",
+      "sha256": "e3008859616625e50f7833600983c34a4c033ed63f4fe276dd467d16a34b759e",
+      "review": "manual implementation and public contract review",
+      "disposition": "reviewed; no change selected"
+    }
+  ]
+}

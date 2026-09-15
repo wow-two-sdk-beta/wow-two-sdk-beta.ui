@@ -304,6 +304,29 @@ native HTML tags, ARIA strings and independent domain enums keep their platform/
 | `display/Sortable` | `forms/SortableGroup` |
 | `nav/CommandPalette` | `overlays/CommandPaletteModal` |
 
+## Core optimization corrections
+
+This batch corrects beta APIs without compatibility aliases. There are no production consumers.
+
+| API | Current contract |
+| --- | --- |
+| `ExactNumber` instance methods | Methods use their receiver. Use `values.map(value => value.toString())`, not a detached method reference. Values remain frozen and comparisons/arithmetic remain exact. |
+| `ExactNumber` transport | Native `structuredClone`, worker messages and IndexedDB structured cloning reject exact values. Use `LosslessJson` text to retain numeric tokens; ordinary JSON stringifies exact values as strings. |
+| Generic value equality | Direct exact numeric values compare numerically. Shallow comparison of containing objects still compares their property values by identity. |
+| `buildTree` | Each input produces one node. Duplicate IDs resolve children to the first matching owner; cycles are exposed as roots instead of recursing forever. |
+| `mapTree` | Cyclic node graphs throw `TypeError`; arbitrarily deep acyclic trees use iterative traversal. |
+| `maskString` visibility | Only nonnegative integer counts are valid. Invalid counts mask the whole string instead of exposing it. |
+| `slugify` separator | A literal string, including empty strings and replacement/regex metacharacters. |
+| `provideLocale` messages | A function is a translator value. Use a ref/computed for a changing translator; a getter returning another translator is not interpreted implicitly. |
+| `QueryProvider.client` | Captured for the provider subtree lifetime. Remount the provider to switch clients. |
+| `usePolling` | Accepts a direct callback or a ref holding one. Reactive indirection can use `usePolling(() => currentCallback.value())`. |
+| `MaxBreakpoints` | Removed. Every entry in the supplied scale receives a listener. |
+| Upload queue removal/clear | Abort requests immediately, but occupied slots remain until transports settle. Custom transports must honor their `AbortSignal`. |
+| Form dirty state | Files/Blobs compare by identity; matching metadata does not establish matching bytes. |
+| Theme enumeration | `ThemeCatalog` exposes lightweight declared metadata; `getTheme` generates only the requested candidate. Iterating `THEMES` still materializes all entries. |
+
+The three legacy React apps received app-only corrections. The React library API is unchanged by this optimization batch.
+
 ## Verification
 
 Run `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`, `pnpm build` and

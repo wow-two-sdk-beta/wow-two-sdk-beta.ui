@@ -1,0 +1,665 @@
+{
+  "boundary": "Root inventory excludes paths assigned to the three core/component agents. Hashes are snapshot evidence, not a proof of behavior. Supporting-core report specifies its semantic inspection.",
+  "files": [
+    {
+      "path": "src/index.ts",
+      "lines": 23,
+      "sha256": "803302f834af8025a51784e7a6118fae74ade3c4a010f3988a1e6fc048292087",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/ExactNumber.ts",
+      "lines": 223,
+      "sha256": "1b9aebf9232d236af76edd83d30e7ad9457987fe8ca614a577a6cc441fcc08e7",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/index.ts",
+      "lines": 6,
+      "sha256": "2dbaf442addfbb5b4f939e37493fbc7638b90dd6fa4fa35b882ca98c7cfc9e05",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/NumberLimits.ts",
+      "lines": 7,
+      "sha256": "55364af276c7114598051c7762ba520982d2b4cf5bbd52a1efa2a4e85eaf93fa",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/enums/NumberRounding.ts",
+      "lines": 13,
+      "sha256": "fe72839273dd605fe6c9ca129501869494083923dd1d55336f08f36992c11ebe",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/enums/NumberFailureCode.ts",
+      "lines": 10,
+      "sha256": "68bcaa3e474ac9fa87f25097b39746834865df46c17c27d25330b92c56bae4bd",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/models/ExactNumber.ts",
+      "lines": 47,
+      "sha256": "9aa5d1c86c8f63ee6844a10975d05d11c9d7e5d47e4a9c202427e4fc87cca9e5",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/models/NumberFailure.ts",
+      "lines": 6,
+      "sha256": "7fa66c4d41e3759804b04c55900e28cf9a2b27d95015bdcabf6418ba4843a892",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/models/NumberRoundingOptions.ts",
+      "lines": 6,
+      "sha256": "0165dd5e750cf9e98d9ad50ae7393d96d902d3d6b4692e7704d964bb411017f4",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/numbers/adapters/bignumber/DecimalArithmetic.ts",
+      "lines": 48,
+      "sha256": "69f146dab307693991ee71be42daa251882e701a63c4ce54f9b898055dad7fc0",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/logger/MemoryLogSink.ts",
+      "lines": 39,
+      "sha256": "9f9ce29eb24dc34ece5f9f21bebcdcc3ee40393ad141bfa74401fd0dceb0d804",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/logger/Logger.ts",
+      "lines": 251,
+      "sha256": "b95a0eb02a6840f556bab97a639b5f41b101cc20196fefa0ff927db5ada686ca",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/logger/ConsoleLogSink.ts",
+      "lines": 65,
+      "sha256": "b2c66eceda4cc0fd3722e7c847fc9d20c44d551c77f947f41545839feae981a7",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/logger/LogLevel.ts",
+      "lines": 69,
+      "sha256": "73f7ec1da6619b2686c8edf8a0a0dc1cca88c6ead8042235b00353f176b8c575",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/logger/LogSink.ts",
+      "lines": 37,
+      "sha256": "00840e6ddc22c34c1d8e6b026d539fb03e0e0ba026bffca11339c3a31bfa7487",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/logger/index.ts",
+      "lines": 54,
+      "sha256": "68c0d7cffe173a9998a503afef512ef14a42969c7eaf928fbd862574d3d399ff",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/logger/Redaction.ts",
+      "lines": 143,
+      "sha256": "071b9c307ea56916aef64bdcb52bd1b35fd53325593616e9244fb70f591c4f4b",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/logger/LogRecord.ts",
+      "lines": 37,
+      "sha256": "2523cdf88613c2f81c6d6d0cda7aa5e466eb99072b48721f02e760f25bfa9bde",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/Comparison.ts",
+      "lines": 120,
+      "sha256": "6b1148ef9076c39a91000e33345d5eed31bc77f57954f549adb92c9224516622",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/IsoDate.ts",
+      "lines": 99,
+      "sha256": "4b07ec56189dfdbb808343720889abff6ecf1a3d182a24a7dafc331d11868e38",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/Difference.ts",
+      "lines": 78,
+      "sha256": "7506e215f26eadb6c8c7c93fb321924475a291a430c8a6a23ee7265aaacfc1aa",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/Boundaries.ts",
+      "lines": 88,
+      "sha256": "04a1c42e9ee734ef0b7870881079ba612b0f10bc79c737ef50709af5d2de0211",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/index.ts",
+      "lines": 82,
+      "sha256": "0f410b637318267dad8f7987f5224ce7041dc5a387be3b9f125904d0e025fc96",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/Interval.ts",
+      "lines": 95,
+      "sha256": "efc3aab2fb60d02754e914c033f7f83838dd937ff2eeb0595d39a0d455f6a70e",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/TemporalCodecs.ts",
+      "lines": 143,
+      "sha256": "6731d750beaf56bbd9550e82c1843df52797172a3a454cecac8bc37e922c1962",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/Internals.ts",
+      "lines": 35,
+      "sha256": "88b0500cb2242ea72ccfb0329289693c0becbf8903c50adea8e622eea48d6a0e",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/datetime/Arithmetic.ts",
+      "lines": 106,
+      "sha256": "94301a0da0798ea6bd018b8ca0203110f0786b9267f6d8507188d2ff28defeb7",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/formatters/Count.ts",
+      "lines": 34,
+      "sha256": "29982dfd82262a7b0b9fa42c941a1d68babab11461a7f8285faf7534a62bf427",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/formatters/Bytes.ts",
+      "lines": 46,
+      "sha256": "8e468f20f9d2ca3d8138f1742888f125caca180b0eb98f9c102c9a59f95f3847",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/formatters/Text.ts",
+      "lines": 127,
+      "sha256": "176f0f4c2dea4bc71a2c385cb0f3ee4ad065c98ae65c0926be7f469753a28283",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/formatters/Duration.ts",
+      "lines": 45,
+      "sha256": "033db0b55c0fc9ec77713ac54ae15b317db5290876679e6f887730a572171ec1",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/formatters/index.ts",
+      "lines": 21,
+      "sha256": "e94331e766d35dfb935c14a9078f9a50d2f60b8b34555f6ac6df1d89e8e176c4",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/identifiers/UseId.ts",
+      "lines": 13,
+      "sha256": "364722978542338207c1af7d951c5b2188a5ad143834e9eeae73208f1bcabf56",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/identifiers/Guid.ts",
+      "lines": 104,
+      "sha256": "8c0d80c6b4479f34722ce4b0563944979e1b00a2ab7a675ed8923c684afe6c19",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/identifiers/index.ts",
+      "lines": 3,
+      "sha256": "5a6b17b723ad9d61b29bb3940fb0b2829179a24187e5511abdbc6b24452bfb7b",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/results/AppErrorType.ts",
+      "lines": 14,
+      "sha256": "c7d033764b606c30d0e15f6d3585d9501cf07c8b429df7f7cda9577f697e39d5",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/results/AppErrorFactory.ts",
+      "lines": 42,
+      "sha256": "adc1374a8471fbfa75ddcb515ff4444f22152921686eed858e30a35968bc0850",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/results/index.ts",
+      "lines": 5,
+      "sha256": "18ac39783d6f9cf0f60b358684fd99e55f3d21e083f52849e1d9f2e377c3f673",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/results/ResultExtensions.ts",
+      "lines": 60,
+      "sha256": "e1849fbb90bd6ac66497e3bf5c019de9ff715134c2a01a970bc676c5d750935f",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/results/models/Result.ts",
+      "lines": 5,
+      "sha256": "995564660082f822fcd042347c35957496e0a7f8f461003cb55779b4d218c0e3",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/results/models/AppError.ts",
+      "lines": 11,
+      "sha256": "60e202cda020b9b1957463d8fb418fcabe0832d3573ed5a59bd634128f28cd8e",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/SurfaceStyles.ts",
+      "lines": 189,
+      "sha256": "ce822538ff11954543a148ee25843580d4fafff9e9d69093f0c601eea6689738",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/Cn.ts",
+      "lines": 10,
+      "sha256": "c0dcb4304514ec47199f6e1d1d81307c8bf74a4249357515def0019309ce52ed",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/Tv.ts",
+      "lines": 3,
+      "sha256": "1cfec56353b3553e316b8cd28b1445345ff3ed3f1e08fe77a503864731ec87df",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/index.ts",
+      "lines": 31,
+      "sha256": "998eb8d02b8c9550d1a91ca7006b21522766bffbb53ff7cfecdf1d0ba2d7759a",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/constants/Layers.ts",
+      "lines": 39,
+      "sha256": "d5f92213063e91b00af9f4c8aa552ec66230bd9b66204196448356fbb95f80c4",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/constants/Tones.ts",
+      "lines": 113,
+      "sha256": "ae8addf4e87abc8c275bce8b10f338c2bbe4d946b786dae53ad0b5ca678e4ce4",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/ProgressTone.ts",
+      "lines": 17,
+      "sha256": "c2ce5be29c81aba14a0a5d36c2face60fcfb4ad880bd799a417ce551441a91ac",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/StyleTokens.ts",
+      "lines": 78,
+      "sha256": "30b0a1dd7fba85c33b4c8f15d8fe532032677d0a23cd207613d4dbce82715a5f",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/Side.ts",
+      "lines": 15,
+      "sha256": "05ca0ad08a84cbf6c4467f7473aaa21f2298a86f182729c4362947b219d44c2c",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/CornerPosition.ts",
+      "lines": 15,
+      "sha256": "574a30bb34f21e9fc111f5bb2d36d2616dd0d2ac47630164fbd78030e5d70932",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/OverlayPosition.ts",
+      "lines": 20,
+      "sha256": "d47dd5d2c5a92cfa187609c30d2b479a9aaeb8402acca5bd6fbbbb7f4f4b6468",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/Severity.ts",
+      "lines": 17,
+      "sha256": "fae615d97f8e5a54cf8858b438342791086fe2847a3913357ef0733242142723",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/Orientation.ts",
+      "lines": 11,
+      "sha256": "1a89e25a62b0e357a0459e2bc57c08d01529e69ae951da98ae4fede1573baa58",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/Align.ts",
+      "lines": 13,
+      "sha256": "99ac14dd016b378ab4ba2a25bec54d8c67b212ca82033dec253f0aef2c6ac401",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/enums/StatusTone.ts",
+      "lines": 17,
+      "sha256": "6124e608257caf34d22c46cc9cdedc95fe7a5992557602390a0b6ad3cb43f179",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/extensions/ColorExtensions.ts",
+      "lines": 101,
+      "sha256": "ecbb21e2d02f241e43c757848ae74f6c9454ec4a488eea02413df33fb4224793",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/styles/extensions/CssExtensions.ts",
+      "lines": 254,
+      "sha256": "a3aa7ca754db33f051705dd5ff4cb8d827438d80d0edbd4b3c40a36330ed6190",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/json/LosslessJson.ts",
+      "lines": 157,
+      "sha256": "c425f4f39ac475e4a5cf7a9daff285f843fd4852edf9b7ae852430c7b4926bfe",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/json/JsonText.ts",
+      "lines": 77,
+      "sha256": "da6a0d5529a8beb6ca11f806d29e2a4f3b757180938aa5400c8f06fa87734291",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/json/index.ts",
+      "lines": 5,
+      "sha256": "c688d19ad7d1d1d3ca38aaa83f67d13abaf56e0bbf05c85580adef9395aa63c2",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/json/JsonLimits.ts",
+      "lines": 2,
+      "sha256": "25085368aaa16e931fc8cde6b0d2541b1483bbcc96369af5406d391e1ae1e6aa",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/json/JsonFailureCode.ts",
+      "lines": 9,
+      "sha256": "f5fdced3dafe2890c2f2781c4a3833a0c275b5fed875810923830112f4ad8806",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/json/models/LosslessJsonValue.ts",
+      "lines": 4,
+      "sha256": "dff602cf9cd6266ea2a4e880ca3e5275ad5151293623acd8ff0e8683fa331e50",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/json/models/JsonFailure.ts",
+      "lines": 6,
+      "sha256": "7a96eeebf443ef84a47ad063ecd8c56939c5c3b7c49747d56d4609bd2db3267b",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/json/adapters/losslessJson/JsonAdapter.ts",
+      "lines": 22,
+      "sha256": "6c5d208b70248afa598d7688a3ead77359a9602aefd24da65e76605950f5a7ec",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/resilience/RetryPolicy.ts",
+      "lines": 54,
+      "sha256": "8e9e7af568db6ca7523210a105f4ec2597a8839ff7555c9155cf683e616f2c5e",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/resilience/RetryDelay.ts",
+      "lines": 51,
+      "sha256": "2f1bd767d6e761ca0053396adcb8032ea616eed04e8a73db3df9efd6979c23e4",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/resilience/index.ts",
+      "lines": 7,
+      "sha256": "e99ca5c1b8a5943f9c1d5403823939606f1a7fd1462ac663495a251f899b4c44",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/resilience/enums/BackoffStrategy.ts",
+      "lines": 11,
+      "sha256": "728abb52995397f196e58f07b20205edead0f3b8a3af7e3cac6d8262bcac606e",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/resilience/enums/JitterStrategy.ts",
+      "lines": 13,
+      "sha256": "912eda433a05ff942d21b25cc7a5dcbeaf7396bb5bee349e7c35b982152b2b46",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/optionals/OptionalExtensions.ts",
+      "lines": 15,
+      "sha256": "d21f027ae99d9c46afae4aeb6a90bb7129dc0f9eb55ae2547283b114694b1d3d",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/optionals/index.ts",
+      "lines": 3,
+      "sha256": "7e6f3b75a2e6fd499376edc074a28b04886e549bb3224d7f7d919b0733eeebd3",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/files/FileName.ts",
+      "lines": 70,
+      "sha256": "0bf995bc983f6ce5c380e56d132c598b5089919b84f4f76d1098dd54b20c56ea",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/files/ReadFile.ts",
+      "lines": 35,
+      "sha256": "1ac404dd7cda72ab0c784a706dc96234c16f43524bd87ca368216be53567ddb8",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/files/Accept.ts",
+      "lines": 75,
+      "sha256": "a5c02df39af8e9ddf968146bdb8d5659e29649dd38422639d67e965cc5be5ff7",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/files/DownloadFile.ts",
+      "lines": 44,
+      "sha256": "5ed30d4f556e318556ededba8495622436e53a57d0fdbb1f84f819fe1cf03e3f",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/files/index.ts",
+      "lines": 19,
+      "sha256": "19dfc46c0a4323a633cbd91b6f88fa7269828b0606ca18f647cb84aa88db8502",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/errors/ErrorLike.ts",
+      "lines": 59,
+      "sha256": "24e2f07a820d0c497190efded931b21a5b2859dd90afad08da19766cfe44990b",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/errors/ToError.ts",
+      "lines": 98,
+      "sha256": "cb71c90251c9d02912b3d1493dcdf13faf4285fd04c74c91082784211bb93635",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/errors/ErrorMessage.ts",
+      "lines": 41,
+      "sha256": "1eed1c1581928843dda3a0f7139301ea57120d617f20b83c56f52a03b95e7905",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/errors/SerializeError.ts",
+      "lines": 71,
+      "sha256": "8781a6d1894934f57021fb5eea79c73cfc50fc3a6a6ffa3e5161e3e6669ee6b0",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/errors/index.ts",
+      "lines": 27,
+      "sha256": "f9ba503f3e1e85620f9d28ca038f73e247c8d4b1b6cd791a1f6306133949e8d3",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/errors/ErrorChain.ts",
+      "lines": 61,
+      "sha256": "a3b4a4daf9d198a19cd686873744312752b5e679b5e689b4afb460af554e4eed",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/errors/ErrorRecognizers.ts",
+      "lines": 32,
+      "sha256": "ec690bf30f54fe759130e9626fa6423ad48989671ed13cb7b30ede5eb2e7ec08",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/collections/Equality.ts",
+      "lines": 36,
+      "sha256": "af40307738161be539270f811f08311d24aadd692f92bf95eaaf6f0e366ad93e",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/collections/Comparison.ts",
+      "lines": 226,
+      "sha256": "5f62afd1b1a36ceca3ce762cff642ddcae4e4a348b7247fe61be8a6fbd9728ee",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/collections/Records.ts",
+      "lines": 161,
+      "sha256": "15769bdf278d9538753d6e99e188fb5e08095d48a902328ee2c0c33921e6cc08",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/collections/index.ts",
+      "lines": 55,
+      "sha256": "75d7903d3d0c4cbd6e1b0fc831bcea06087dc40efa5a59565d1cfc19926a36e3",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/collections/Tree.ts",
+      "lines": 198,
+      "sha256": "e678ad1e9d7bfbb7c6d5b814de4b30f03db6cc7f9643f56f022543255d2db2a2",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/collections/SetOps.ts",
+      "lines": 124,
+      "sha256": "c61b3068b81768cbceb070af8a74c611deb6d657ab45fb90f4da4d043f21894a",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/collections/Arrays.ts",
+      "lines": 263,
+      "sha256": "9a124dfe838fa11c9e06dd85ef7b28341c4a63e21dba67291d55bd7468c605de",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/ForegroundContrast.ts",
+      "lines": 40,
+      "sha256": "b50d2c4b38df4b30a575390f390a18d41cff1b24147ad606e74d2f17d5af3368",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/Css.ts",
+      "lines": 80,
+      "sha256": "f009c236ae7de9f91825d63bf5398d3e3523b8353e5010cd60ec4d273b110522",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/Validate.ts",
+      "lines": 102,
+      "sha256": "77a600e8d94a1928414d6b73bbf52796ae2cdcfad0b9010dfd2c9a6eda12dace",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/Tokens.ts",
+      "lines": 85,
+      "sha256": "91bc558f57975327fa732e8f5a58fcd18071353d5f12d2e3866ded04540bb6fe",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/Registry.ts",
+      "lines": 334,
+      "sha256": "20c80be891d8acedb3bc388ccbbcabc235fc2a142b0943f5aedd6e43521e9651",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/Generate.ts",
+      "lines": 318,
+      "sha256": "9cbe3e92f235abebabaed35b261fca2313c65a3493c7d08418ac94acc1205a2f",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/index.ts",
+      "lines": 49,
+      "sha256": "323de8488419a26936b21203388ed13f90c5192ba152a76b2a52e310d9d4039d",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/Oklch.ts",
+      "lines": 275,
+      "sha256": "41d08cb3de74f5645f570c557d7185d793ac5e6db937a1000118015a7613ff3b",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/Theme.ts",
+      "lines": 150,
+      "sha256": "06d60fc468c83130e48b64e19e7921d576d3a8351b0a7b88f7907d1e8559410a",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/constants/Pool.ts",
+      "lines": 809,
+      "sha256": "71a2dc7e8e204397acbc4c04f48cd8a436e07ed3c16ca55038e19f8565164470",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/foundation/themes/constants/Authored.ts",
+      "lines": 170,
+      "sha256": "80f7d577cbeae40f37a255c9918afc55de01373cbad0f5fa564168727db4ed4a",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/domain/color/Gradient.ts",
+      "lines": 101,
+      "sha256": "a187181cb89495c2caf0feee01f17afcb6b4c06b59a860f87a2d98da0b85d88d",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/domain/color/index.ts",
+      "lines": 5,
+      "sha256": "4dff37674735f8c0bd004d17b0ae5d6e0c2a44e855be93c7fcec87d9e16fa7f7",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/domain/color/GradientType.ts",
+      "lines": 9,
+      "sha256": "a25a05d5ee58ff028fbc1c4f3e6a6134b951abeb3c4cf4b0164a98f84e9e3f08",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/domain/emoji/EmojiCatalogData.ts",
+      "lines": 1883,
+      "sha256": "e6e241c1dbaf94f892b18ad252dffec9c2bdf70d71ed6a105174588c49b0dab8",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/domain/emoji/EmojiCatalog.ts",
+      "lines": 60,
+      "sha256": "7186d90685077d4f0f988cddce8796cce8a76e3ddbcedb7c12b6a0441d917cfd",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/domain/emoji/EmojiCategory.ts",
+      "lines": 21,
+      "sha256": "72db8a97c0d3b2ed88db94222f6731473aab8f122def7cd6bdf413af60cfedcd",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    },
+    {
+      "path": "src/domain/emoji/index.ts",
+      "lines": 6,
+      "sha256": "e0d927c67763500dda0906e57197b36313957e5549134a1e3358ba33e7823303",
+      "inspection": "root pure-core inspection and capability inventory; supporting review distinguished in supporting-core report"
+    }
+  ]
+}

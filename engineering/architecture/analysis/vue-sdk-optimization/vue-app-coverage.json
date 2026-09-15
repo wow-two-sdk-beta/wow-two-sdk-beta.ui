@@ -1,0 +1,160 @@
+{
+  "file_count": 31,
+  "files": [
+    {
+      "path": "apps/playground/index.html",
+      "sha256": "dfd80cc37f0ad24a7c129b8e72b911c768b6d1aebedc0b3f4320da201541ef61",
+      "review": "configuration and entrypoint reviewed; unchanged"
+    },
+    {
+      "path": "apps/playground/package.json",
+      "sha256": "bb286200f8e093720e95424966e249a8910d3de6a16b08bb99a52084bd65d5df",
+      "review": "configuration and entrypoint reviewed; unchanged"
+    },
+    {
+      "path": "apps/playground/src/App.vue",
+      "sha256": "428169f4090efe9802bb4b32da5fd3608796975bfa1392188ecc00bae724a99f",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/diagnostics.ts",
+      "sha256": "89e31343c51d5cab92982ef99d0dd78862f614ac5f274f1e47e733f691846496",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/AutoGroup.vue",
+      "sha256": "4c0dc40dc58c3cb6269b98479b514a43566787c851ecd0a693461025099bd149",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/Demo.vue",
+      "sha256": "7b590baacd27f9bdc70a21702b7c0ddd5c014ef7a2306b30d46de4f629b8cc42",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/ExampleRenderer.vue",
+      "sha256": "f62322aadfe98e5f8f00d9fdc45b580a01a87f708cb9061626edcb3614ac6398",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/Matrix.vue",
+      "sha256": "3c79ee0fbaa491ac6d2ccb22536d58cbd568680c99bc4ce84776764686eb6ac4",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/auto.ts",
+      "sha256": "74ef83deb68dd61708c0b715c0794d763e985a80377d9e0b5eb82510ca8c4a51",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/ActionsExamples.ts",
+      "sha256": "e486f1bf44bdbed81cb251f3a6dc7607406cbf292da9cc6458d2ba54d767b3cd",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/DisplayExamples.ts",
+      "sha256": "ea59c5fac77852cdf43897dad2213b368a55df28ef626020d7a56e04820129c9",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/Example.ts",
+      "sha256": "506e8f1fbb9f8d765dc844b601063f3f54ddd165c593d77a997562107d577bd9",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/FeedbackExamples.ts",
+      "sha256": "debd5944d7db38ad8dac11c5d390bec246e7a18fb65a40b2aa1b4daecf422e69",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/FormsExamples.ts",
+      "sha256": "5b7d13c15cc914b2520f04174810f0ed11ff7db954b4a83ab13779752ac3bff8",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/LayoutExamples.ts",
+      "sha256": "4d391e9f3ef9ef5f88ad472c12df33612c19837db70ad754773e6c1f59410ec3",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/NavExamples.ts",
+      "sha256": "17c45b971450eeb0e5c5d1c2f5ac9a5ca53159cef28bdd60eb3560e3badcbff7",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/OverlaysExamples.ts",
+      "sha256": "9d9677f58cda30599d24aad7c82de9d3d677e6629f1bf4530b42ed3bf786bbc9",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/gallery/fixtures/index.ts",
+      "sha256": "3a805ccb9fb9125087d15e3aa7dbf067d40ee1cdaf5aa4e7e5a1c75cbe19aa63",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/groups/ActionsGroup.vue",
+      "sha256": "898b7076afdc831ca1d8828e6d5684af0f30a5e8f2b6c8a360dbdce651535644",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/groups/DisplayGroup.vue",
+      "sha256": "568b0b4543e65fd6755e350cf1882dba897faeb130d9791757962b29ad564bef",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/groups/FeedbackGroup.vue",
+      "sha256": "eafcc50f81d007ce18c54e1aec96e29f9cb5b1ebfa921c68815eee9352f61c3f",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/groups/FormsGroup.vue",
+      "sha256": "d1b4aceb848602021bc26b9609ef6550588b596b279bb985b3c1fd230ef169e1",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/groups/LayoutGroup.vue",
+      "sha256": "b418416391a2784e857f2989a990a664e37240c1859e04175d78c53ac97b6eee",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/groups/NavGroup.vue",
+      "sha256": "c55eae7e642b00957ac3ac389f94a4fc7ec881b671be0629836e7a053524cb0b",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/groups/OverlaysGroup.vue",
+      "sha256": "657ca33631b3d6d4e41e0defcacbdf47e49feaeab3a4a1a890055946768d4ad6",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/main.ts",
+      "sha256": "b069208c8bb1a0977cdc5d8bf4b35a1daf59420d468439c884c17d01b8f50e84",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/navigation.ts",
+      "sha256": "26d20ccc4c762acf5e9dc8ef6ca2d99a10cc06f00d591cb88f54217ea71b5d5c",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/styles.css",
+      "sha256": "bc16f3eccef97ddf60ec209b7630c406532cb22ef7ba53c6c9f191c5c82a8916",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/src/theme.ts",
+      "sha256": "1cfc657e01ab38088b89a229f544bb2a2c6a851bf8eff159d48e4c20ce867fe2",
+      "review": "implementation and bindings reviewed"
+    },
+    {
+      "path": "apps/playground/tsconfig.json",
+      "sha256": "63f29ab0814db49c9a37ca60eb8d958ff2a98a21691bb37ef07f7c52826f568d",
+      "review": "configuration and entrypoint reviewed; unchanged"
+    },
+    {
+      "path": "apps/playground/vite.config.ts",
+      "sha256": "49f464064be328c0e1cbfd6daaeaf3c7766e64b18a29afe0ffa9fe98c1058468",
+      "review": "configuration and entrypoint reviewed; unchanged"
+    }
+  ]
+}
