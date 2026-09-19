@@ -37,14 +37,14 @@ the qualified root-handle contract and a consumer-usage inventory.
 ### Vue progress — 2026-09-13
 
 The tables below retain the original queue and historical measurements. The Vue implementation sweep is
-complete and committed in `3ae7df7` plus its preparatory commits. Final combined gates pass; publication
-remains open in row 42. React/app rows and broad exact-number adoption remain outside this sweep.
+complete and committed in `3ae7df7` plus its preparatory commits. Final combined gates and hosted publication
+pass. React/app rows and broad exact-number adoption remain outside this sweep.
 
 | Rows | Current Vue disposition |
 |---|---|
 | 31 | Package-aware instructions and Vue-only ownership applied; React/app rows parked |
 | 30, 23 | ARIA vocabulary and all three live-prop boundaries fixed; regression tests pass |
-| 32, 42 | Manifest-driven entries, strict packed consumers and verified-tarball release gate implemented |
+| 32, 42 | Manifest-driven entries, strict packed consumers and verified `0.0.6` release implemented |
 | 7, 25 | 109 component families renamed/reclassified; current types/SFC/playground build pass |
 | 12–14, 36, 40 | Shared Result, schema-preserving HTTP/query/auth boundaries and auth races fixed |
 | 38 | Both adapters preserve parsed output, submit snapshots and trailing autosave; shared regressions pass |
@@ -64,7 +64,8 @@ Final current-source gates pass: 93 Node/DOM/SSR test files / 1,639 tests, 30 Ch
 types, lint, formatting, capability graph, library/playground builds and an independent fresh npm consumer.
 The [final verification report](../../../../../system/sessions/frontend-conventions-sweep/vue-final-verification.md)
 links current evidence for the real-browser, isolated fresh-install and registry checks.
-All verification gates pass. No package has been released; row 42's publication step remains open.
+All verification gates pass. Run `34998940096`, attempt 2, published `@wow-two-beta/ui-vue@0.0.6` with npm
+trusted-publisher provenance and created matching tag and GitHub release `ui-vue-v0.0.6` on 2026-09-19.
 
 ### Original row inventory
 

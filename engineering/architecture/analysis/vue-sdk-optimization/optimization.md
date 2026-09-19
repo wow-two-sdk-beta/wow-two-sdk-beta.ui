@@ -1,6 +1,6 @@
 # Vue SDK optimization sweep
 
-*Sweep verified locally: 2026-09-13. Clean-build CI correction verified: 2026-09-15. Hosted publication remains open.*
+*Sweep verified locally: 2026-09-13. Clean-build CI correction verified: 2026-09-15. Hosted publication verified: 2026-09-19.*
 
 ## Scope and evidence
 
@@ -120,9 +120,10 @@ No npm settings or GitHub secrets were changed. Creating this trust still requir
 - September 15 correction: `vue-tsc` and all 1,774 unit/DOM/SSR plus 30 Chromium tests passed in the temporary copy
   without `dist`. Full `pnpm typecheck` (including the Git-index gate and 407 SFCs), ESLint and changed-config formatting
   passed in the SDK checkout. The temporary copy reused installed dependencies; it was not a fresh dependency install.
-- GitHub confirms the owner's documentation commit `f6c396c` reached main. Its release failed as diagnosed above.
-  The correction awaits the owner's commit/push and a successful hosted run; npm version and matching tag remain open.
-  No agent commit or push was performed during this handover.
+- GitHub run `34998940096`, attempt 2, passed every hosted gate and published `@wow-two-beta/ui-vue@0.0.6`
+  through npm trusted publishing. The public tarball has signed provenance and integrity
+  `sha512-n14JnUL46s4VZljI8qZkn8uEoBbmPHAoN2cXhrKFWz9qCX7yhXbPN/Xt59hgXM/OPsl3LGXRbc+AnV9PwhQRLA==`.
+  Release commit `e2ca132`, tag `ui-vue-v0.0.6` and the matching GitHub release are published.
 
 ## Remaining analysis candidates
 
@@ -137,4 +138,4 @@ These are proposals for the next discussion, not hidden incomplete fixes in the 
 7. Device and visual coverage: WebKit/Firefox, real media/speech/notification permissions, and Smart QR app visual validation remain explicit platform checks.
 8. React library and release: remain parked. App-only repairs do not establish Vue/React parity.
 
-Release confirmation precedes prioritizing those candidates. The owner pushed the implementation; verify the resulting Actions run, npm version and matching Git tag. Documentation and benchmark tooling remain in the final handover batch.
+Release confirmation is complete. Prioritize these candidates from current product needs and measured workloads.
