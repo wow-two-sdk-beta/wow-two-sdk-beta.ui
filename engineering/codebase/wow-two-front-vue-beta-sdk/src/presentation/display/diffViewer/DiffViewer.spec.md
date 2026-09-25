@@ -11,6 +11,14 @@ Public import: `import { DiffViewer } from '@wow-two-beta/ui-vue/presentation/di
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Difference algorithm
+
+The internal Hirschberg LCS pass uses linear working memory; worst-case time remains quadratic.
+Common prefixes/suffixes and disjoint line sets skip the expensive pass. Both input texts and
+one-based line numbers reconstruct exactly; an optimal tie may select a different unchanged occurrence.
+Rendering remains eager, so very large diffs still need application-level paging or a future virtual view.
+Regression: `tests/unit/presentation/display/DiffAndWaveform.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |

@@ -34,8 +34,11 @@ export interface PresenceIndicatorProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn, Size as SizeToken } from '../../../foundation/styles';
+
+const locale = useLocale();
 
 const StatusBackground: Record<PresenceStatus, string> = {
   online: 'bg-success',
@@ -109,7 +112,7 @@ defineExpose({ el });
   <span
     ref="el"
     role="status"
-    :aria-label="props.label ?? StatusLabel[props.status]"
+    :aria-label="props.label ?? locale.t('PresenceIndicator.' + props.status, undefined, StatusLabel[props.status])"
     :data-status="props.status"
     v-bind="rest"
     :class="classes"

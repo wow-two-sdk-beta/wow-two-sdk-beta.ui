@@ -10,6 +10,8 @@ Public import: `import { Button } from '@wow-two-beta/ui-vue/presentation/action
 
 - Unmount disposes the subscriptions, listeners or timers registered by this implementation.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
+- Disabled, loading and skeleton states block activation before child or caller handlers, including slotted links.
+- Becoming inactive cancels a pending long press. Disabled targets leave the tab order; loading targets retain focus.
 
 ## Props
 
@@ -71,3 +73,6 @@ Inherited contracts: `extends /* @vue-ignore */ ButtonAttributes`. These members
 - Public render fixture: [ActionsExamples.ts](../../../../apps/playground/src/gallery/fixtures/ActionsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Focused test references: [Actions.a11y.dom.test.ts](../../../../tests/unit/presentation/actions/Actions.a11y.dom.test.ts), [Focus.browser.test.ts](../../../../tests/unit/presentation/actions/Focus.browser.test.ts), [GoogleSignInButton.dom.test.ts](../../../../tests/unit/presentation/actions/GoogleSignInButton.dom.test.ts), [EditingBehavior.dom.test.ts](../../../../tests/unit/presentation/forms/EditingBehavior.dom.test.ts). Consult the named test assertions for the behavior actually covered.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+A pointer leaving the action ends its owned press, because release may target another element.
+Secondary pointer buttons and composing keys cannot start presses. Non-finite long-press delays use the default.

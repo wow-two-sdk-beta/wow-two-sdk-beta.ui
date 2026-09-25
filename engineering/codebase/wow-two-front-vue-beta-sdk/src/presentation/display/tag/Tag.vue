@@ -11,6 +11,7 @@ export interface TagProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, getCurrentInstance, useAttrs, useTemplateRef } from 'vue';
 import { X } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
@@ -30,7 +31,8 @@ defineOptions({ name: 'Tag', inheritAttrs: false });
 /** The tag copy — React's optional `children`. */
 defineSlots<{ default?(): unknown }>();
 
-const props = withDefaults(defineProps<TagProps>(), { closeLabel: 'Remove' });
+const componentProps = withDefaults(defineProps<TagProps>(), {});
+const props = useLocaleDefaults(componentProps, 'Tag', { closeLabel: 'Remove' });
 
 /** Replaces React's `onClose`; omitting `@close` omits the close button. */
 const emit = defineEmits<{

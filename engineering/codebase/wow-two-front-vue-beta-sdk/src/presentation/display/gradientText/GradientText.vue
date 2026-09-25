@@ -60,6 +60,7 @@ const DirToDeg: Record<GradientTextDirection, number> = {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, ref, normalizeStyle, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 
@@ -74,15 +75,17 @@ defineOptions({ name: 'GradientText', inheritAttrs: false });
 /** The gradient-filled copy — React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<GradientTextProps>(), {
-  pauseLabel: 'Pause animation',
-  resumeLabel: 'Resume animation',
+const componentProps = withDefaults(defineProps<GradientTextProps>(), {
   from: 'var(--color-primary)',
   via: undefined,
   to: 'var(--color-accent, var(--color-primary))',
   direction: 'r',
   isAnimated: undefined,
   as: 'span',
+});
+const props = useLocaleDefaults(componentProps, 'GradientText', {
+  pauseLabel: 'Pause animation',
+  resumeLabel: 'Resume animation',
 });
 
 const paused = ref(false);
@@ -131,6 +134,6 @@ defineExpose({ el });
     class="ml-2 rounded border px-2 py-1 text-sm motion-reduce:hidden"
     @click="paused = !paused"
   >
-    {{ paused ? resumeLabel : pauseLabel }}
+    {{ paused ? props.resumeLabel : props.pauseLabel }}
   </button>
 </template>

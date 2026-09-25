@@ -11,6 +11,16 @@ Public import: `import { AudioWaveformPreview } from '@wow-two-beta/ui-vue/prese
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Geometry and interaction
+
+Invalid non-positive dimensions/bar width fall back to defaults; invalid/negative gaps use the default.
+Amplitudes and playback position normalize for display. Bars never outnumber source samples or horizontal
+pixels; sparse samples spread across the width. Empty data renders one flat bar. This bounds derived work
+by the provided data rather than allocating from an unchecked dimension.
+Explicit `isInteractive=false`, canceled events and composing keyboard input suppress seeking.
+A zero-sized SVG cannot produce a seek fraction. Static images omit slider-only ARIA values.
+Regression: `tests/unit/presentation/display/DiffAndWaveform.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |

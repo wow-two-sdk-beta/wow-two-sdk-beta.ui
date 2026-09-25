@@ -18,6 +18,7 @@ export interface CarouselProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, onMounted, provide, ref, useAttrs, useTemplateRef, watch, watchEffect } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
@@ -35,14 +36,16 @@ defineOptions({ name: 'Carousel', inheritAttrs: false });
 /** The viewport, nav buttons and dots — React's required `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<CarouselProps>(), {
+const componentProps = withDefaults(defineProps<CarouselProps>(), {
   index: undefined,
   defaultIndex: 0,
   canLoop: false,
   autoPlay: undefined,
+  slidesCount: undefined,
+});
+const props = useLocaleDefaults(componentProps, 'Carousel', {
   pauseLabel: 'Pause slides',
   resumeLabel: 'Resume slides',
-  slidesCount: undefined,
 });
 
 const emit = defineEmits<{
@@ -53,7 +56,7 @@ const emit = defineEmits<{
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const { value: index, setValue: setIndexState } = useControlled<number>({
+const { value: activeIndex, setValue: setIndexState } = useControlled<number>({
   controlled: () => props.index,
   default: props.defaultIndex,
   onChange: (next) => emit('update:index', next),
@@ -93,11 +96,11 @@ function setIndex(target: number): void {
 }
 
 function prev(): void {
-  setIndex(index.value - 1);
+  setIndex(activeIndex.value - 1);
 }
 
 function next(): void {
-  setIndex(index.value + 1);
+  setIndex(activeIndex.value + 1);
 }
 
 function setPaused(value: boolean): void {
@@ -111,7 +114,7 @@ watchEffect((onCleanup) => {
   const interval = props.autoPlay;
   const loop = props.canLoop;
   const total = count.value;
-  const current = index.value;
+  const current = activeIndex.value;
   if (
     !mounted.value ||
     !interval ||
@@ -133,7 +136,7 @@ watchEffect((onCleanup) => {
    every already-mounted child. */
 provide<CarouselContextValue>(CarouselKey, {
   get index() {
-    return index.value;
+    return activeIndex.value;
   },
   setIndex,
   get count() {

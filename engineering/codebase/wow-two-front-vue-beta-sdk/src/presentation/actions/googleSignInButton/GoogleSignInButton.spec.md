@@ -8,29 +8,26 @@ Public import: `import { GoogleSignInButton } from '@wow-two-beta/ui-vue/present
 
 ## Contract
 
-- Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Call `provideGoogleIdentity` once in an ancestor setup. Buttons inject that owner and never initialize GIS or own credential callbacks.
+- Multiple buttons share one client configuration and deliver credentials exactly once to the owner.
+- Configure client ID, auto-select and credential/error callbacks on the owner. Empty client ID renders no host.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `clientId` | `string` | no | — | The OAuth client id. Empty renders nothing, so an app without one configured stays guest-only. |
-| `theme` | `GoogleButtonOptions['theme']` | no | `'outline'` | The button surface. Default `outline`. |
-| `size` | `GoogleButtonOptions['size']` | no | `'large'` | The button height band. Default `large`. |
-| `text` | `GoogleButtonOptions['text']` | no | `'signin_with'` | The label wording. Default `signin_with`. |
-| `shape` | `GoogleButtonOptions['shape']` | no | `'rectangular'` | The button outline. Default `rectangular`. |
-| `width` | `number` | no | — | The rendered width in px. GIS caps this at 400; omit to size to the host element. |
-| `logoAlignment` | `GoogleButtonOptions['logo_alignment']` | no | `'left'` | The logo placement. Default `left`. |
-| `locale` | `string` | no | — | The BCP-47 locale for the button copy. Defaults to the browser's. |
-| `autoSelect` | `boolean` | no | `false` | Whether GIS may sign a returning user in without a click. Default `false`. |
+| Prop            | Type                                    | Required | Default         | Meaning                                                                           |
+| --------------- | --------------------------------------- | -------- | --------------- | --------------------------------------------------------------------------------- |
+| `theme`         | `GoogleButtonOptions['theme']`          | no       | `'outline'`     | The button surface. Default `outline`.                                            |
+| `size`          | `GoogleButtonOptions['size']`           | no       | `'large'`       | The button height band. Default `large`.                                          |
+| `text`          | `GoogleButtonOptions['text']`           | no       | `'signin_with'` | The label wording. Default `signin_with`.                                         |
+| `shape`         | `GoogleButtonOptions['shape']`          | no       | `'rectangular'` | The button outline. Default `rectangular`.                                        |
+| `width`         | `number`                                | no       | —               | The rendered width in px. GIS caps this at 400; omit to size to the host element. |
+| `logoAlignment` | `GoogleButtonOptions['logo_alignment']` | no       | `'left'`        | The logo placement. Default `left`.                                               |
+| `locale`        | `string`                                | no       | —               | The BCP-47 locale for the button copy. Defaults to the browser's.                 |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
-| `credential` | `credential: [credential: string, response: GoogleCredentialResponse];` | Fires when the reader completes Google sign-in — carries the signed ID token and the raw GIS response. |
-| `error` | `error: [error: Error];` | Fires when the GIS script fails to load or initialize. The button renders nothing once this fires. |
+None. Credentials and failures are delivered to the ancestor owner callbacks.
 
 ## Slots
 

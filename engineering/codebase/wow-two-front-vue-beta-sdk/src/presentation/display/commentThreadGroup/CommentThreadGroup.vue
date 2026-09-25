@@ -7,8 +7,11 @@ export interface CommentThreadGroupProps {}
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
+
+const locale = useLocale();
 
 /**
  * Renders the root of a nested comment tree, owning the ARIA `tree` role and nothing else.
@@ -35,5 +38,13 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div ref="el" role="tree" aria-label="Comments" v-bind="rest" :class="classes"><slot /></div>
+  <div
+    ref="el"
+    role="tree"
+    :aria-label="locale.t('CommentThreadGroup.comments', undefined, 'Comments')"
+    v-bind="rest"
+    :class="classes"
+  >
+    <slot />
+  </div>
 </template>

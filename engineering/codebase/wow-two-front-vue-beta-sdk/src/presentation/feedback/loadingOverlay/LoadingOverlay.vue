@@ -24,12 +24,16 @@ export interface LoadingOverlayProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { cn, Size as SizeToken } from '../../../foundation/styles';
 import { Presence } from '../../../foundation/primitives';
 import BackdropOverlay from '../../overlays/backdropOverlay/BackdropOverlay.vue';
 import Spinner from '../spinner/Spinner.vue';
 import { SpinnerTone as SpinnerToneToken } from '../spinner/Spinner.variants';
+
+const locale = useLocale();
 
 /**
  * Renders a scrim and centered spinner that block interaction with a region during a long task.
@@ -47,14 +51,14 @@ defineOptions({ name: 'LoadingOverlay', inheritAttrs: false });
 /** Extra content below the label — React's `children`. */
 defineSlots<{ default?(): unknown; label?(): unknown }>();
 
-const props = withDefaults(defineProps<LoadingOverlayProps>(), {
+const componentProps = withDefaults(defineProps<LoadingOverlayProps>(), {
   isOpen: true,
-  label: 'Loading…',
   isInline: false,
   hasBlur: false,
   spinnerSize: SizeToken.Lg,
   spinnerTone: SpinnerToneToken.Brand,
 });
+const props = useLocaleDefaults(componentProps, 'LoadingOverlay', { label: 'Loading…' });
 
 const attrs = useAttrs();
 const slots = useSlots();
@@ -63,7 +67,7 @@ const el = useTemplateRef<HTMLDivElement>('el');
 const hasLabel = computed(() => Boolean(props.label) || Boolean(slots.label));
 
 /** Falls back to `"Loading"` when the caller blanks the caption. */
-const spinnerLabel = computed(() => props.label || 'Loading');
+const spinnerLabel = computed(() => props.label || locale.t('LoadingOverlay.loading', undefined, 'Loading'));
 
 /*
  * `data-state` is injected by <Presence>; the fade tokens are gated on it so

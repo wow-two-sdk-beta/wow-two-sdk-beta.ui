@@ -89,30 +89,41 @@ class ToastHostStore {
     this.emit();
   }
 
-  /** Shows a sticky loading toast, updated in place to success / error when `promise` settles. Returns `promise`. */
+  /** Shows a sticky loading toast; returns the full content-update and promise settlement chain. */
   promise<T>(promise: Promise<T>, opts: ToastPromiseOptions<T>): Promise<T> {
     const id = this.toast({ ...normalizeContent(opts.loading), severity: 'info', duration: Infinity });
     const settle = (content: ToastContent, severity: ToastSeverity) =>
       this.update(id, { ...normalizeContent(content), severity, duration: opts.duration });
-    promise.then(
-      (value) => settle(typeof opts.success === 'function' ? opts.success(value) : opts.success, 'success'),
-      (err) => settle(typeof opts.error === 'function' ? opts.error(err) : opts.error, 'danger'),
+    return promise.then(
+      (value) => {
+        settle(typeof opts.success === 'function' ? opts.success(value) : opts.success, 'success');
+        return value;
+      },
+      (err: unknown) => {
+        settle(typeof opts.error === 'function' ? opts.error(err) : opts.error, 'danger');
+        throw err;
+      },
     );
-    return promise;
   }
 
   dismiss(id: string): void {
     const entry = this.items.find((t) => t.id === id);
     this.items = this.items.filter((t) => t.id !== id);
-    entry?.onDismiss?.();
-    this.emit();
+    try {
+      entry?.onDismiss?.();
+    } finally {
+      this.emit();
+    }
   }
 
   dismissAll(): void {
     const gone = this.items;
     this.items = [];
-    for (const t of gone) t.onDismiss?.();
-    this.emit();
+    try {
+      for (const t of gone) t.onDismiss?.();
+    } finally {
+      this.emit();
+    }
   }
 
   subscribe(fn: Listener): () => void {
@@ -189,6 +200,7 @@ interface VisibleToast extends ToastEntry {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import {
   computed,
   defineComponent,
@@ -203,6 +215,8 @@ import {
 import { cn, OverlayPosition as OverlayPositionToken } from '../../../foundation/styles';
 import { Announce, Portal, Presence } from '../../../foundation/primitives';
 import Toast from '../toast/Toast.vue';
+
+const locale = useLocale();
 
 /** Renders a `ToastNode` — either a plain string or a caller-built VNode. */
 const ToastNodeView = defineComponent({
@@ -230,7 +244,9 @@ const props = withDefaults(defineProps<ToastHostProps>(), {
 const attrs = useAttrs();
 
 const items = shallowRef<ReadonlyArray<ToastEntry>>([]);
-const paused = ref(false);
+const hovered = ref(false);
+const focused = ref(false);
+const paused = computed(() => props.canPauseOnHover && (hovered.value || focused.value));
 
 /* Non-reactive state — mutated across ticks, never rendered. */
 const timers = new Map<string, number>();
@@ -346,23 +362,34 @@ onUnmounted(() => {
   timers.clear();
 });
 
-const handlePause = () => {
-  if (!props.canPauseOnHover || paused.value) return;
-  paused.value = true;
-  for (const [id, handle] of timers) {
-    window.clearTimeout(handle);
-    const start = startedAt.get(id) ?? Date.now();
-    const previous = remaining.get(id) ?? 0;
-    const elapsed = Date.now() - start;
-    remaining.set(id, Math.max(0, previous - elapsed));
-  }
-  timers.clear();
-};
+watch(
+  paused,
+  (isPaused) => {
+    if (!isPaused) return;
+    for (const [id, handle] of timers) {
+      window.clearTimeout(handle);
+      const start = startedAt.get(id) ?? Date.now();
+      remaining.set(id, Math.max(0, (remaining.get(id) ?? 0) - (Date.now() - start)));
+    }
+    timers.clear();
+  },
+  { flush: 'sync' },
+);
 
-const handleResume = () => {
-  if (!props.canPauseOnHover || !paused.value) return;
-  paused.value = false;
-};
+watch(
+  () => rendered.value.length,
+  (count) => {
+    if (count === 0) {
+      hovered.value = false;
+      focused.value = false;
+    }
+  },
+);
+
+function onFocusout(event: FocusEvent): void {
+  const stack = event.currentTarget as HTMLElement;
+  if (!(event.relatedTarget instanceof Node) || !stack.contains(event.relatedTarget)) focused.value = false;
+}
 
 const stackClasses = computed(() =>
   cn(
@@ -382,13 +409,13 @@ const stackStyle = computed(() => ({ gap: `${props.gap}px` }));
   <Portal>
     <div
       v-if="rendered.length > 0"
-      aria-label="Notifications"
+      :aria-label="locale.t('ToastHost.notifications', undefined, 'Notifications')"
       :style="stackStyle"
       :class="stackClasses"
-      @mouseenter="handlePause"
-      @mouseleave="handleResume"
-      @focus="handlePause"
-      @blur="handleResume"
+      @mouseenter="hovered = true"
+      @mouseleave="hovered = false"
+      @focusin="focused = true"
+      @focusout="onFocusout"
     >
       <Presence v-for="t in rendered" :key="t.id" :is-present="t.present">
         <!--

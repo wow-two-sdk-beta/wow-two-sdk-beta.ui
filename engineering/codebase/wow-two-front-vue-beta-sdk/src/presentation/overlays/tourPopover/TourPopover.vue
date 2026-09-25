@@ -34,6 +34,7 @@ export interface TourPopoverProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, ref, shallowRef, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { Key } from '../../../foundation/dom';
@@ -41,6 +42,8 @@ import { useControlled } from '../../../foundation/state';
 import { useId } from '../../../foundation/identifiers';
 import { useReducedMotion } from '../../../foundation/device';
 import { Announce, Portal, Presence } from '../../../foundation/primitives';
+
+const locale = useLocale();
 
 interface Rect {
   top: number;
@@ -306,7 +309,7 @@ const onTooltipAnimationEnd = () => {
           <span class="text-xs text-muted-foreground"> {{ stepIndex + 1 }} / {{ props.steps.length }} </span>
           <div class="flex items-center gap-2">
             <button type="button" class="text-xs text-muted-foreground hover:text-foreground" @click="skip">
-              Skip
+              {{ locale.t('TourPopover.skip', undefined, 'Skip') }}
             </button>
             <button
               v-if="stepIndex > 0"
@@ -314,7 +317,7 @@ const onTooltipAnimationEnd = () => {
               class="inline-flex h-7 items-center rounded-md border border-border bg-background px-2.5 text-xs font-medium hover:bg-muted"
               @click="goPrev"
             >
-              Back
+              {{ locale.t('TourPopover.back', undefined, 'Back') }}
             </button>
             <button
               type="button"

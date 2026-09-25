@@ -16,10 +16,14 @@ interface MonthCell {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, type StyleValue } from 'vue';
 import { cn } from '../../../foundation/styles';
-import { WeekdayLabelsShort, formatZonedTime, isToday, isZonedDayInRange } from '../../forms/DateExtensions';
-import { startOfCellInstant, startOfWeek } from './EventCalendarViewerTypes';
+import { formatZonedTime, isToday } from '../../forms/DateExtensions';
+import { startOfWeek } from './EventCalendarViewerTypes';
+import { intersectsCalendarDay } from './EventCalendarViewerLayout';
+
+const locale = useLocale();
 
 /** Renders the month grid of an `EventCalendarViewer`. Internal — never exported from the folder. */
 defineOptions({ name: 'MonthView' });
@@ -35,7 +39,11 @@ const emit = defineEmits<{
 
 /** Reorder weekdays per weekStart. */
 const weekdayHeaders = computed(() =>
-  Array.from({ length: 7 }, (_, i) => WeekdayLabelsShort[(i + props.weekStart) % 7]!),
+  Array.from({ length: 7 }, (_, i) =>
+    startOfWeek(props.focusDay, props.weekStart)
+      .add({ days: i })
+      .toLocaleString(locale.locale.value, { weekday: 'short' }),
+  ),
 );
 
 /* Build a 42-cell grid whose first column matches weekStart so dates land
@@ -50,8 +58,17 @@ const cells = computed<Array<MonthCell>>(() => {
   });
 });
 
-function eventsForDay(day: Temporal.PlainDate): Array<EventCalendarViewerEvent> {
-  return props.events.filter((e) => isZonedDayInRange(startOfCellInstant(day, props.timeZone), e.start, e.end));
+const dayEvents = computed(
+  () =>
+    new Map(
+      cells.value.map((cell) => [
+        cell.day.toString(),
+        props.events.filter((event) => intersectsCalendarDay(event, cell.day, props.timeZone)),
+      ]),
+    ),
+);
+function eventsForDay(day: Temporal.PlainDate): ReadonlyArray<EventCalendarViewerEvent> {
+  return dayEvents.value.get(day.toString()) ?? [];
 }
 
 function cellClass(cell: MonthCell): string {
@@ -84,7 +101,14 @@ function eventStyle(e: EventCalendarViewerEvent): StyleValue {
 
 function eventLabel(e: EventCalendarViewerEvent): string {
   /* A numeric title falls back to the id, so the accessible name is always a string. */
-  return `${typeof e.title === 'string' ? e.title : e.id} at ${formatZonedTime(e.start)}`;
+  return locale.t(
+    'EventCalendarViewer.eventAt',
+    {
+      title: String(e.title ?? e.id),
+      time: formatZonedTime(e.start.withTimeZone(props.timeZone), locale.locale.value),
+    },
+    '{title} at {time}',
+  );
 }
 
 function onEvent(ev: MouseEvent, e: EventCalendarViewerEvent): void {
@@ -120,11 +144,11 @@ const CellStyle: StyleValue = { minHeight: '96px' };
           :aria-label="eventLabel(e)"
           @click="onEvent($event, e)"
         >
-          {{ e.isAllDay ? '• ' : '' }}{{ e.title ?? '(no title)' }}
+          {{ e.isAllDay ? '• ' : '' }}{{ e.title ?? locale.t('EventCalendarViewer.untitled', undefined, '(no title)') }}
         </button>
-        <span v-if="eventsForDay(cell.day).length > 3" class="px-1 text-[10px] text-muted-foreground"
-          >+{{ eventsForDay(cell.day).length - 3 }} more</span
-        >
+        <span v-if="eventsForDay(cell.day).length > 3" class="px-1 text-[10px] text-muted-foreground">{{
+          locale.t('MonthView.more', { count: eventsForDay(cell.day).length - 3 }, '+{count} more')
+        }}</span>
       </div>
     </div>
   </div>

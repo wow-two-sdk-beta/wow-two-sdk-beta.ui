@@ -12,8 +12,9 @@ export {
   GoogleIdentityStatus,
   loadGoogleIdentity,
   useGoogleIdentity,
+  provideGoogleIdentity,
   type GoogleButtonOptions,
   type GoogleCredentialResponse,
   type GoogleIdentityApi,
-  type UseGoogleIdentityOptions,
+  type ProvideGoogleIdentityOptions,
 } from './GoogleIdentity';

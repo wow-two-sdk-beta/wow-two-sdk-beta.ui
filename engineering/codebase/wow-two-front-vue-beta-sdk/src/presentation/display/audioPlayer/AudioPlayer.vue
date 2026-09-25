@@ -30,12 +30,15 @@ function formatTime(seconds: number): string {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { UrlExtensions } from '../../../foundation/dom';
 import { computed, onMounted, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import { Pause, Play, Volume2, VolumeX } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import { AudioWaveformPreview } from '../audioWaveformPreview';
+
+const locale = useLocale();
 
 /**
  * Renders an audio player with play/pause, a scrubber, volume, and speed over a native `<audio>`.
@@ -68,12 +71,14 @@ const attrs = useAttrs();
 /** The native `<audio>` — React exposed it through `useImperativeHandle`. */
 const el = useTemplateRef<HTMLAudioElement>('el');
 
-const playing = ref(!!props.autoPlay);
+const playing = ref(false);
 const currentTime = ref(0);
 const duration = ref(0);
-const volume = ref(props.defaultVolume);
+const volume = ref(Number.isFinite(props.defaultVolume) ? Math.max(0, Math.min(1, props.defaultVolume)) : 1);
 const muted = ref(false);
-const speed = ref(props.defaultPlaybackRate);
+const speed = ref(
+  Number.isFinite(props.defaultPlaybackRate) && props.defaultPlaybackRate > 0 ? props.defaultPlaybackRate : 1,
+);
 
 /** Push the three imperative settings onto the element — React's `useEffect`. */
 function applyAudioSettings(): void {
@@ -81,11 +86,24 @@ function applyAudioSettings(): void {
   if (!audio) return;
   audio.volume = volume.value;
   audio.muted = muted.value;
-  audio.playbackRate = speed.value;
+  try {
+    audio.playbackRate = speed.value;
+  } catch {
+    // Playback-rate support varies by media engine; retain a valid native default.
+    speed.value = 1;
+    audio.playbackRate = 1;
+  }
 }
 
 onMounted(applyAudioSettings);
 watch([volume, muted, speed], applyAudioSettings, { flush: 'post' });
+
+function resetMediaState(): void {
+  playing.value = false;
+  currentTime.value = 0;
+  duration.value = 0;
+}
+watch(() => props.src, resetMediaState, { flush: 'post' });
 
 function togglePlay(): void {
   const audio = el.value;
@@ -162,7 +180,7 @@ function onNativeTimeUpdate(): void {
 
 function onNativeLoadedMetadata(): void {
   const audio = el.value;
-  if (audio) duration.value = audio.duration || 0;
+  if (audio) duration.value = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
 }
 
 function onNativeEnded(): void {
@@ -207,7 +225,7 @@ defineExpose({ el });
 <template>
   <div
     role="region"
-    aria-label="Audio player"
+    :aria-label="locale.t('AudioPlayer.audioPlayer', undefined, 'Audio player')"
     :tabindex="0"
     :data-playing="playing || undefined"
     :class="classes"
@@ -223,11 +241,13 @@ defineExpose({ el });
       @pause="onNativePause"
       @timeupdate="onNativeTimeUpdate"
       @loadedmetadata="onNativeLoadedMetadata"
+      @durationchange="onNativeLoadedMetadata"
+      @emptied="resetMediaState"
       @ended="onNativeEnded"
     />
     <button
       type="button"
-      :aria-label="playing ? 'Pause' : 'Play'"
+      :aria-label="locale.t(playing ? 'AudioPlayer.pause' : 'AudioPlayer.play', undefined, playing ? 'Pause' : 'Play')"
       :class="cn(PlayToggleClasses, isCompact ? 'h-7 w-7' : 'h-9 w-9')"
       @click="togglePlay"
     >
@@ -249,7 +269,7 @@ defineExpose({ el });
         v-else
         type="range"
         role="slider"
-        aria-label="Seek"
+        :aria-label="locale.t('AudioPlayer.seek', undefined, 'Seek')"
         :aria-valuetext="formatTime(currentTime)"
         :min="0"
         :max="duration || 0"
@@ -264,7 +284,7 @@ defineExpose({ el });
     }}</span>
     <button
       type="button"
-      :aria-label="muted ? 'Unmute' : 'Mute'"
+      :aria-label="locale.t(muted ? 'AudioPlayer.unmute' : 'AudioPlayer.mute', undefined, muted ? 'Unmute' : 'Mute')"
       class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
       @click="muted = !muted"
     >
@@ -272,7 +292,7 @@ defineExpose({ el });
     </button>
     <select
       v-model="speed"
-      aria-label="Playback speed"
+      :aria-label="locale.t('AudioPlayer.playbackSpeed', undefined, 'Playback speed')"
       class="h-7 rounded-sm border border-input bg-background px-1 text-xs"
     >
       <option v-for="rate in PlaybackRates" :key="rate" :value="rate">{{ rate }}×</option>

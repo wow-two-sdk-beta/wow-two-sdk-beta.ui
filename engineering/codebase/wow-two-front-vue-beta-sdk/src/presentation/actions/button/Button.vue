@@ -115,6 +115,7 @@ import {
   onBeforeUnmount,
   useAttrs,
   useTemplateRef,
+  watch,
   watchEffect,
   type ComponentPublicInstance,
   type StyleValue,
@@ -238,7 +239,9 @@ const dataState = computed<ButtonDataState | undefined>(() =>
 );
 
 const safeLongPressDelay = computed(() =>
-  props.longPressDelay < PressExtensions.longPressDelay.min || props.longPressDelay > PressExtensions.longPressDelay.max
+  !Number.isFinite(props.longPressDelay) ||
+  props.longPressDelay < PressExtensions.longPressDelay.min ||
+  props.longPressDelay > PressExtensions.longPressDelay.max
     ? PressExtensions.longPressDelay.default
     : props.longPressDelay,
 );
@@ -333,6 +336,13 @@ function cancelLongPress(): void {
   }
 }
 
+watch(isInactive, (inactive) => {
+  if (!inactive) return;
+  cancelLongPress();
+  isPressing = false;
+  longPressFired = false;
+});
+
 function endPress(event: PressEvent<HTMLButtonElement>): void {
   if (isPressing) {
     isPressing = false;
@@ -341,7 +351,7 @@ function endPress(event: PressEvent<HTMLButtonElement>): void {
 }
 
 function handlePointerDown(event: PointerEvent): void {
-  if (isInactive.value) return;
+  if (isInactive.value || event.defaultPrevented || (event.button != null && event.button !== 0)) return;
   // Cancel any pending timer, then arm only on the first pointer of a gesture — a second
   // pointer-down must not stack a second long-press timer.
   cancelLongPress();
@@ -352,6 +362,7 @@ function handlePointerDown(event: PointerEvent): void {
     emit('press-start', pressEvent);
     if (hasLongPressListener()) {
       longPressTimer = setTimeout(() => {
+        if (isInactive.value) return;
         longPressFired = true;
         emit('long-press', pressEvent);
         longPressTimer = undefined;
@@ -370,16 +381,16 @@ function handlePointerCancel(event: PointerEvent): void {
   endPress(event as PressEvent<HTMLButtonElement>);
 }
 
-function handlePointerLeave(): void {
-  // Pointer leaving cancels a pending long-press but does NOT end the press itself —
-  // pointer-up/cancel handlers do that. Matches React Aria.
+function handlePointerLeave(event: PointerEvent): void {
+  // The subsequent pointerup may target elsewhere; release this gesture at its boundary.
   cancelLongPress();
+  endPress(event as PressEvent<HTMLButtonElement>);
 }
 
 const isActivationKey = (event: KeyboardEvent) => event.key === Key.Space || event.key === Key.Enter;
 
 function handleKeyDown(event: KeyboardEvent): void {
-  if (isInactive.value) return;
+  if (isInactive.value || event.defaultPrevented || event.isComposing) return;
   if (isActivationKey(event) && !event.repeat && !isPressing) {
     isPressing = true;
     longPressFired = false;
@@ -416,7 +427,8 @@ const debouncedOnClick = useDebounceHandler(
 );
 
 function handleClick(event: MouseEvent): void {
-  if (loadingActive.value || skeletonActive.value) {
+  if (event.defaultPrevented) return;
+  if (isInactive.value) {
     // Block native activation too — e.g. `type="submit"` must not submit while loading.
     event.preventDefault();
     return;
@@ -461,8 +473,8 @@ const rootProps = computed(() => ({
   style: overrideStyle.value,
   disabled: OptionalExtensions.from(resolvedDisabled.value, true),
   [AriaAttribute.Busy]: OptionalExtensions.from(loadingActive.value || skeletonActive.value, true),
-  [AriaAttribute.Disabled]: OptionalExtensions.from(loadingActive.value || skeletonActive.value, true),
-  tabindex: OptionalExtensions.from(skeletonActive.value, -1),
+  [AriaAttribute.Disabled]: OptionalExtensions.from(isInactive.value, true),
+  tabindex: OptionalExtensions.from(skeletonActive.value || resolvedDisabled.value, -1),
   'data-state': dataState.value,
   onClick: handleClick,
   onPointerdown: composeEventHandlers(consumerHandler<PointerEvent>('onPointerdown'), handlePointerDown),

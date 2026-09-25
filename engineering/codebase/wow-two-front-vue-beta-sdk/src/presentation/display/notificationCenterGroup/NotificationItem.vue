@@ -21,10 +21,13 @@ export interface NotificationItemProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, getCurrentInstance, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { X } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Key } from '../../../foundation/dom';
+
+const locale = useLocale();
 
 /** Renders one notification row — icon, title, description, timestamp, and an unread dot. */
 defineOptions({ name: 'NotificationItem', inheritAttrs: false });
@@ -160,7 +163,7 @@ defineExpose({ el });
     <button
       v-if="hasDismiss()"
       type="button"
-      aria-label="Dismiss notification"
+      :aria-label="locale.t('NotificationItem.dismissNotification', undefined, 'Dismiss notification')"
       :class="
         cn(
           DismissRestingClasses,

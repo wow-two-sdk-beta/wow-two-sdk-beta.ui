@@ -43,10 +43,13 @@ export interface ScheduleViewProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
 import { formatZonedTime, minutesBetween, nowZoned, zonedAtHour } from '../../forms/DateExtensions';
+
+const locale = useLocale();
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
@@ -182,7 +185,13 @@ defineExpose({ el: root });
 <template>
   <!-- Timeline layout, no 2D keyboard nav — ARIA grid (grid > row > gridcell)
        would be a lie; group + labeled slot/booking buttons is honest. -->
-  <div ref="root" role="group" aria-label="Schedule" :class="rootClass" v-bind="passthroughAttrs">
+  <div
+    ref="root"
+    role="group"
+    :aria-label="locale.t('ScheduleView.schedule', undefined, 'Schedule')"
+    :class="rootClass"
+    v-bind="passthroughAttrs"
+  >
     <!-- Hour header -->
     <div class="sticky top-0 z-raised flex border-b border-border bg-muted/40">
       <div class="w-32 shrink-0 border-r border-border px-3 py-2 text-xs font-medium text-muted-foreground">

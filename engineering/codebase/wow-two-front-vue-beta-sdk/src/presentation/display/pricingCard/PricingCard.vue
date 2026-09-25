@@ -29,6 +29,7 @@ export interface PricingCardProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import type { ComponentElement } from '../../../foundation/primitives';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { Check } from 'lucide-vue-next';
@@ -69,12 +70,12 @@ defineSlots<{
   default(): unknown;
 }>();
 
-const props = withDefaults(defineProps<PricingCardProps>(), {
+const componentProps = withDefaults(defineProps<PricingCardProps>(), {
   cadence: undefined,
   tagline: undefined,
   featured: false,
-  badgeLabel: 'Most popular',
 });
+const props = useLocaleDefaults(componentProps, 'PricingCard', { badgeLabel: 'Most popular' });
 
 const attrs = useAttrs();
 const el = useTemplateRef<ComponentElement>('el');

@@ -61,10 +61,13 @@ function* eachDay(from: Temporal.PlainDate, to: Temporal.PlainDate): Generator<T
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
 import { daysBetween, isWeekend, today } from '../../forms/DateExtensions';
+
+const locale = useLocale();
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
@@ -235,12 +238,18 @@ defineExpose({ el: root });
 </script>
 
 <template>
-  <div ref="root" role="grid" aria-label="GanttTimeline chart" :class="rootClass" v-bind="passthroughAttrs">
+  <div
+    ref="root"
+    role="grid"
+    :aria-label="locale.t('GanttTimeline.ganttTimelineChart', undefined, 'GanttTimeline chart')"
+    :class="rootClass"
+    v-bind="passthroughAttrs"
+  >
     <div class="flex">
       <!-- LabelText column -->
       <div class="shrink-0 border-r border-border bg-muted/30" :style="labelColumnStyle">
         <div class="border-b border-border px-3 py-2 text-xs font-medium text-muted-foreground" :style="rowStyle">
-          Task
+          {{ locale.t('GanttTimeline.task', undefined, 'Task') }}
         </div>
         <div
           v-for="task in tasks"

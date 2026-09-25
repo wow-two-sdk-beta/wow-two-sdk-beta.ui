@@ -17,6 +17,8 @@ export interface MenubarProps {
 
 <script setup lang="ts">
 import { computed, provide, useAttrs, useTemplateRef } from 'vue';
+import { NavExtensions } from '../NavExtensions';
+import { DomOrderExtensions } from '../../../foundation/dom';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
 import { RovingFocusGroup, type ComponentElement } from '../../../foundation/primitives';
@@ -64,12 +66,17 @@ function unregisterTrigger(id: string): void {
 }
 
 function moveAcross(fromId: string, direction: 1 | -1): void {
-  const index = triggers.findIndex((t) => t.id === fromId);
+  const ordered = DomOrderExtensions.inDocumentOrder(triggers, (item) => item.el).filter(
+    (item) => !NavExtensions.isDisabled(item.el),
+  );
+  const index = ordered.findIndex((t) => t.id === fromId);
   if (index === -1) return;
-  let nextIndex = index + direction;
-  if (nextIndex < 0) nextIndex = triggers.length - 1;
-  if (nextIndex >= triggers.length) nextIndex = 0;
-  const next = triggers[nextIndex];
+  const root = rootElement.value;
+  const rtl = root && root.ownerDocument.defaultView?.getComputedStyle(root).direction === 'rtl';
+  let nextIndex = index + (rtl ? -direction : direction);
+  if (nextIndex < 0) nextIndex = ordered.length - 1;
+  if (nextIndex >= ordered.length) nextIndex = 0;
+  const next = ordered[nextIndex];
   if (!next) return;
   next.el?.focus();
   // If a menu is already open, switch the open menu to follow focus.

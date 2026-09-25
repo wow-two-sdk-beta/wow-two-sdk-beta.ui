@@ -19,6 +19,7 @@ export interface SpeedDialGroupTriggerProps extends /* @vue-ignore */ Omit<Butto
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, defineComponent, useAttrs, useTemplateRef, watchPostEffect } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Plus, X } from 'lucide-vue-next';
@@ -27,6 +28,8 @@ import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import FabButton from '../fabButton/FabButton.vue';
 import { useSpeedDialContext } from './SpeedDialGroupContext';
+
+const locale = useLocale();
 
 /** Renders the speed dial's pinned FAB, swapping its glyph as the dial opens and closes. */
 defineOptions({ name: 'SpeedDialGroupTrigger', inheritAttrs: false });
@@ -53,7 +56,11 @@ const context = useSpeedDialContext();
 /* `aria-label` is read off `attrs`, not `props`: Vue camelizes declared prop keys, so a declared
    `'aria-label'` would arrive as `props.ariaLabel` and never render. It is stripped from the
    forwarded attrs and re-bound below, so the resolved value is the one that lands. */
-const ariaLabel = computed(() => (attrs[AriaAttribute.Label] as string | undefined) ?? 'Toggle actions');
+const ariaLabel = computed(
+  () =>
+    (attrs[AriaAttribute.Label] as string | undefined) ??
+    locale.t('SpeedDialGroupTrigger.label', undefined, 'Toggle actions'),
+);
 
 const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.Label]);
 const passthroughAttrs = computed(() =>
@@ -70,8 +77,9 @@ const fab = useTemplateRef('fab');
 /* Publishes the trigger element into the root's context — Escape and action-select return focus
    here. The React original threaded a shared `MutableRefObject` through `composeRefs`. */
 watchPostEffect(() => {
-  const node = fab.value?.$el;
-  context.triggerEl.value = node instanceof HTMLElement ? node : null;
+  const node = fab.value?.el;
+  const elementType = node?.ownerDocument.defaultView?.HTMLElement;
+  context.triggerEl.value = elementType && node instanceof elementType ? node : null;
 });
 
 const rootClass = computed(() =>

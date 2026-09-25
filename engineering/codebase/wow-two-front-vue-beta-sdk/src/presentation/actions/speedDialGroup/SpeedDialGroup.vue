@@ -20,7 +20,7 @@ export interface SpeedDialGroupProps {
 </script>
 
 <script setup lang="ts">
-import { computed, provide, shallowRef, useAttrs, useSlots, useTemplateRef, type VNode } from 'vue';
+import { computed, provide, shallowRef, useAttrs, useSlots, useTemplateRef, watch, type VNode } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn, OverlayPosition } from '../../../foundation/styles';
 import { Key } from '../../../foundation/dom';
@@ -95,10 +95,20 @@ const triggerEl = shallowRef<HTMLElement | null>(null);
 
 const resolvedDirection = computed(() => props.direction ?? PositionToDirection[props.position]);
 
-useEscape(() => {
+useEscape((event) => {
+  if (event.defaultPrevented) return;
   setOpen(false);
-  requestAnimationFrame(() => triggerEl.value?.focus());
 }, open);
+
+// Restore only while the closing dial owns focus; never queue a callback that can steal it later.
+watch(
+  open,
+  (isOpen) => {
+    const root = rootEl.value;
+    if (!isOpen && root?.contains(root.ownerDocument.activeElement)) triggerEl.value?.focus();
+  },
+  { flush: 'pre' },
+);
 
 useOutsideClick(
   rootEl,
@@ -135,13 +145,21 @@ const rootClass = computed(() => cn('fixed', PositionOffsets[props.position], at
 const stackClass = computed(() => DirectionToStack[resolvedDirection.value]);
 
 function handleKeydown(event: KeyboardEvent): void {
-  if (!open.value || (event.key !== Key.ArrowDown && event.key !== Key.ArrowUp)) return;
+  if (
+    event.defaultPrevented ||
+    event.isComposing ||
+    !open.value ||
+    (event.key !== Key.ArrowDown && event.key !== Key.ArrowUp)
+  )
+    return;
   const root = rootEl.value;
   if (!root) return;
-  const items = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+  const items = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).filter(
+    (item) => !item.matches(':disabled,[aria-disabled="true"],[data-disabled],[hidden]') && !item.closest('[inert]'),
+  );
   if (items.length === 0) return;
   event.preventDefault();
-  const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+  const currentIndex = items.indexOf(root.ownerDocument.activeElement as HTMLButtonElement);
   const nextIndex =
     currentIndex === -1
       ? event.key === Key.ArrowDown

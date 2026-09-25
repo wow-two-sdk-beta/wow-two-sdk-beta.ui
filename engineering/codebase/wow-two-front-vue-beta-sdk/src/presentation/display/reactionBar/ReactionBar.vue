@@ -31,10 +31,13 @@ export interface ReactionBarProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, getCurrentInstance, useAttrs, useTemplateRef } from 'vue';
 import { SmilePlus } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { dataAttr } from '../../../foundation/dom';
+
+const locale = useLocale();
 
 /**
  * Renders a row of reaction chips with an optional trailing add-reaction button.
@@ -110,7 +113,13 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div ref="el" role="group" aria-label="Reactions" v-bind="rest" :class="classes">
+  <div
+    ref="el"
+    role="group"
+    :aria-label="locale.t('ReactionBar.reactions', undefined, 'Reactions')"
+    v-bind="rest"
+    :class="classes"
+  >
     <button
       v-for="(reaction, index) in visible"
       :key="reaction.key"
@@ -128,7 +137,7 @@ defineExpose({ el });
     <button
       v-if="hasAdd()"
       type="button"
-      aria-label="Add reaction"
+      :aria-label="locale.t('ReactionBar.addReaction', undefined, 'Add reaction')"
       class="inline-flex items-center justify-center rounded-full border border-dashed border-border px-2 py-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
       @click="emit('add')"
     >

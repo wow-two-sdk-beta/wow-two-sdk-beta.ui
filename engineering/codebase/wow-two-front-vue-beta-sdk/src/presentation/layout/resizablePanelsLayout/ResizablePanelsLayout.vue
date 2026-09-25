@@ -36,7 +36,7 @@ export interface ResizableContextValue {
   unregisterSeparator: (token: symbol) => void;
   separatorIndex: (token: symbol) => number;
 
-  beginDrag: (separatorIndex: number, event: MouseEvent) => void;
+  beginDrag: (separatorIndex: number, event: MouseEvent) => boolean;
   nudge: (separatorIndex: number, deltaPct: number) => void;
   resetPair: (separatorIndex: number) => void;
 }
@@ -98,139 +98,85 @@ const controlled = useControlled<ReadonlyArray<number>>({
   onChange: (next) => emit('update:sizes', next),
 });
 
-/**
- * React counted its panels before the first render (`Children.forEach`) and
- * seeded state from that. Children register *after* this setup, so the seed is
- * applied here instead — and the same watcher covers React's "panel count
- * changed → reset to equal sizes" effect.
- */
-watch(
-  panelCount,
-  (count) => {
-    if (controlled.value.value.length === count) return;
-    if (props.defaultSizes && props.defaultSizes.length === count) {
-      controlled.setValue(props.defaultSizes);
-      return;
-    }
-    controlled.setValue(Array<number>(count).fill(100 / Math.max(count, 1)));
-  },
-  { immediate: true },
-);
+/** Registration derives a layout without emitting user intent into a controlled model. */
+const sizes = computed<ReadonlyArray<number>>(() => {
+  const count = panelCount.value;
+  if (controlled.value.value.length === count) return controlled.value.value;
+  if (props.defaultSizes?.length === count) return props.defaultSizes;
+  return Array<number>(count).fill(100 / Math.max(count, 1));
+});
 
-function findPanel(index: number): PanelInfo | undefined {
-  return panelEntries.value[index]?.info;
+function resizePair(separatorIndex: number, desiredA: number, current = sizes.value): void {
+  const a = separatorIndex;
+  const b = a + 1;
+  const aInfo = panelEntries.value[a]?.info;
+  const bInfo = panelEntries.value[b]?.info;
+  if (!aInfo || !bInfo) return;
+  const total = current[a]! + current[b]!;
+  const lower = Math.max(aInfo.minSize, total - bInfo.maxSize);
+  const upper = Math.min(aInfo.maxSize, total - bInfo.minSize);
+  if (![total, desiredA, lower, upper].every(Number.isFinite) || lower > upper) return;
+  const next = current.slice();
+  next[a] = Math.max(lower, Math.min(upper, desiredA));
+  next[b] = total - next[a]!;
+  if (next[a] !== sizes.value[a] || next[b] !== sizes.value[b]) controlled.setValue(next);
 }
 
 function applyDelta(separatorIndex: number, deltaPct: number): void {
-  const a = separatorIndex;
-  const b = separatorIndex + 1;
-  const aInfo = findPanel(a);
-  const bInfo = findPanel(b);
-  if (!aInfo || !bInfo) return;
-  const next = controlled.value.value.slice();
-  let nextA = next[a]! + deltaPct;
-  let nextB = next[b]! - deltaPct;
-
-  // Clamp by min/max — adjust deltaPct on overshoot.
-  if (nextA < aInfo.minSize) {
-    const adj = aInfo.minSize - nextA;
-    nextA += adj;
-    nextB -= adj;
-  }
-  if (nextB < bInfo.minSize) {
-    const adj = bInfo.minSize - nextB;
-    nextB += adj;
-    nextA -= adj;
-  }
-  if (nextA > aInfo.maxSize) {
-    const adj = nextA - aInfo.maxSize;
-    nextA -= adj;
-    nextB += adj;
-  }
-  if (nextB > bInfo.maxSize) {
-    const adj = nextB - bInfo.maxSize;
-    nextB -= adj;
-    nextA += adj;
-  }
-
-  next[a] = nextA;
-  next[b] = nextB;
-  controlled.setValue(next);
+  resizePair(separatorIndex, sizes.value[separatorIndex]! + deltaPct);
 }
 
 let dragCleanup: (() => void) | null = null;
-
-// Unmounting mid-drag must release the window listeners + body style overrides.
 onScopeDispose(() => dragCleanup?.());
+watch(
+  () => props.orientation,
+  () => dragCleanup?.(),
+);
 
-function beginDrag(separatorIndex: number, event: MouseEvent): void {
+function beginDrag(separatorIndex: number, event: MouseEvent): boolean {
+  dragCleanup?.();
   const container = el.value;
-  if (!container) return;
-  const startX = event.clientX;
-  const startY = event.clientY;
+  if (!container || !panelEntries.value[separatorIndex + 1]) return false;
+  const orientation = props.orientation;
   const rect = container.getBoundingClientRect();
-  const total = props.orientation === Orientation.Horizontal ? rect.width : rect.height;
-  if (total === 0) return;
-
-  const startSizes = controlled.value.value.slice();
-
+  const total = orientation === Orientation.Horizontal ? rect.width : rect.height;
+  if (!Number.isFinite(total) || total <= 0) return false;
+  const startSizes = sizes.value.slice();
+  const cursor = orientation === Orientation.Horizontal ? 'col-resize' : 'row-resize';
+  const style = document.body.style;
+  const previous = ['cursor', 'user-select'].map((name) => ({
+    name,
+    value: style.getPropertyValue(name),
+    priority: style.getPropertyPriority(name),
+  }));
   const onMove = (e: MouseEvent): void => {
-    const deltaPx = props.orientation === Orientation.Horizontal ? e.clientX - startX : e.clientY - startY;
-    const deltaPct = (deltaPx / total) * 100;
-    // Recompute against the start state, not the live state, to prevent drift.
-    const a = separatorIndex;
-    const b = separatorIndex + 1;
-    const aInfo = findPanel(a);
-    const bInfo = findPanel(b);
-    if (!aInfo || !bInfo) return;
-    let nextA = startSizes[a]! + deltaPct;
-    let nextB = startSizes[b]! - deltaPct;
-    nextA = Math.max(aInfo.minSize, Math.min(aInfo.maxSize, nextA));
-    nextB = Math.max(bInfo.minSize, Math.min(bInfo.maxSize, nextB));
-    // Restore the locked total after clamping.
-    const sum = nextA + nextB;
-    const startSum = startSizes[a]! + startSizes[b]!;
-    if (sum !== startSum) {
-      const diff = startSum - sum;
-      // Push surplus onto whichever side has slack.
-      if (nextA + diff <= aInfo.maxSize && nextA + diff >= aInfo.minSize) {
-        nextA = nextA + diff;
-      } else {
-        nextB = nextB + diff;
-      }
-    }
-    const next = startSizes.slice();
-    next[a] = nextA;
-    next[b] = nextB;
-    controlled.setValue(next);
+    const delta = orientation === Orientation.Horizontal ? e.clientX - event.clientX : e.clientY - event.clientY;
+    resizePair(separatorIndex, startSizes[separatorIndex]! + (delta / total) * 100, startSizes);
   };
-
   const onUp = (): void => {
     window.removeEventListener('mousemove', onMove);
     window.removeEventListener('mouseup', onUp);
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
+    for (const { name, value, priority } of previous) {
+      const ownedValue = name === 'cursor' ? cursor : 'none';
+      if (style.getPropertyValue(name) === ownedValue) style.setProperty(name, value, priority);
+    }
     dragCleanup = null;
   };
-
-  document.body.style.cursor = props.orientation === Orientation.Horizontal ? 'col-resize' : 'row-resize';
-  document.body.style.userSelect = 'none';
+  style.cursor = cursor;
+  style.userSelect = 'none';
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onUp);
   dragCleanup = onUp;
+  return true;
 }
 
 function resetPair(separatorIndex: number): void {
-  const a = separatorIndex;
-  const b = separatorIndex + 1;
-  const aInfo = findPanel(a);
-  const bInfo = findPanel(b);
+  const aInfo = panelEntries.value[separatorIndex]?.info;
+  const bInfo = panelEntries.value[separatorIndex + 1]?.info;
   if (!aInfo || !bInfo) return;
-  const next = controlled.value.value.slice();
-  const total = next[a]! + next[b]!;
-  next[a] = (total * aInfo.defaultSize) / (aInfo.defaultSize + bInfo.defaultSize);
-  next[b] = total - next[a]!;
-  controlled.setValue(next);
+  const total = sizes.value[separatorIndex]! + sizes.value[separatorIndex + 1]!;
+  const defaults = aInfo.defaultSize + bInfo.defaultSize;
+  resizePair(separatorIndex, defaults > 0 ? (total * aInfo.defaultSize) / defaults : total / 2);
 }
 
 provide(resizableContextKey, {
@@ -238,7 +184,7 @@ provide(resizableContextKey, {
     return props.orientation;
   },
   get sizes() {
-    return controlled.value.value;
+    return sizes.value;
   },
   get panels() {
     return panelEntries.value.map((entry) => entry.info);

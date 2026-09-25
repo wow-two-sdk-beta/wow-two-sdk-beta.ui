@@ -15,6 +15,7 @@ export interface UndoBarProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, getCurrentInstance, onUnmounted, ref, useAttrs, watch } from 'vue';
 import { cn, OverlayPosition as OverlayPositionToken, surfaceVariants } from '../../../foundation/styles';
 import { Portal, Presence } from '../../../foundation/primitives';
@@ -38,13 +39,13 @@ const PositionClass: Record<OverlayPosition, string> = {
  */
 defineOptions({ name: 'UndoBar', inheritAttrs: false });
 
-const props = withDefaults(defineProps<UndoBarProps>(), {
-  undoLabel: 'Undo',
+const componentProps = withDefaults(defineProps<UndoBarProps>(), {
   duration: 5000,
   canPauseOnHover: true,
   position: OverlayPositionToken.BottomCenter,
   hasCountdown: false,
 });
+const props = useLocaleDefaults(componentProps, 'UndoBar', { undoLabel: 'Undo' });
 
 const emit = defineEmits<{
   /** Fires when the bar opens or closes — it closes on auto-dismiss and right after Undo. */
@@ -69,7 +70,9 @@ const instance = getCurrentInstance();
 const hasUndo = () => Boolean(instance?.vnode.props?.onUndo);
 
 const progress = ref(1);
-const paused = ref(false);
+const hovered = ref(false);
+const focused = ref(false);
+const paused = computed(() => props.canPauseOnHover && (hovered.value || focused.value));
 
 /* `useRef` counterparts — read/written across ticks, never rendered. */
 let start = 0;
@@ -83,10 +86,16 @@ let raf: number | null = null;
  */
 watch(
   [() => props.open, () => props.duration, paused, () => props.hasCountdown],
-  ([isOpen, duration, isPaused, hasCountdown], _previous, onCleanup) => {
+  ([isOpen, duration, isPaused, hasCountdown], previous, onCleanup) => {
+    if (!previous[0] || previous[1] !== duration) {
+      remaining = duration;
+      progress.value = 1;
+    }
     if (!isOpen) {
       remaining = duration;
       progress.value = 1;
+      hovered.value = false;
+      focused.value = false;
       return;
     }
     if (duration === Infinity) {
@@ -136,9 +145,10 @@ onUnmounted(() => {
   if (raf != null) cancelAnimationFrame(raf);
 });
 
-const setPaused = (value: boolean) => {
-  if (props.canPauseOnHover) paused.value = value;
-};
+function onFocusout(event: FocusEvent): void {
+  const panel = event.currentTarget as HTMLElement;
+  if (!(event.relatedTarget instanceof Node) || !panel.contains(event.relatedTarget)) focused.value = false;
+}
 
 const onUndoClick = () => {
   emit('undo');
@@ -183,10 +193,10 @@ const showCountdown = computed(() => props.hasCountdown && props.duration !== In
           role="status"
           aria-live="polite"
           :class="panelClasses"
-          @mouseenter="setPaused(true)"
-          @mouseleave="setPaused(false)"
-          @focus="setPaused(true)"
-          @blur="setPaused(false)"
+          @mouseenter="hovered = true"
+          @mouseleave="hovered = false"
+          @focusin="focused = true"
+          @focusout="onFocusout"
         >
           <span class="flex-1">
             <slot name="message">{{ props.message }}</slot>

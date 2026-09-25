@@ -63,14 +63,16 @@ const baseId = useId();
 
 /* Reactive, unlike React's `useRef` array: `StepperGroupStep` derives its status and its connector
    visibility from this list at render time, so a sibling registering has to re-render it. */
-const steps = ref<Array<string>>([]);
+const steps = ref<Array<{ token: symbol; value: string }>>([]);
 
-function registerStep(value: string): void {
-  if (!steps.value.includes(value)) steps.value = [...steps.value, value];
+function registerStep(token: symbol, value: string): void {
+  const existing = steps.value.find((step) => step.token === token);
+  if (existing) existing.value = value;
+  else steps.value = [...steps.value, { token, value }];
 }
 
-function unregisterStep(value: string): void {
-  steps.value = steps.value.filter((x) => x !== value);
+function unregisterStep(token: symbol): void {
+  steps.value = steps.value.filter((step) => step.token !== token);
 }
 
 /* Live getters, not a snapshot — an orientation change on the root has to reach every
@@ -85,7 +87,7 @@ provide<StepperGroupContextValue>(StepperGroupKey, {
   },
   baseId,
   get steps() {
-    return steps.value;
+    return steps.value.map((step) => step.value);
   },
   registerStep,
   unregisterStep,

@@ -17,23 +17,21 @@ const HourPx = 48;
 <script setup lang="ts">
 import { computed, type StyleValue } from 'vue';
 import { cn } from '../../../foundation/styles';
+import { useLocale } from '../../../foundation/i18n';
+import { formatZonedTime, isToday, maxZoned, nowZoned } from '../../forms/DateExtensions';
 import {
-  formatZonedTime,
-  isToday,
-  isZonedDayInRange,
-  isZonedOnDay,
-  maxZoned,
-  minZoned,
-  minutesBetween,
-  nowZoned,
-  zonedAtHour,
-} from '../../forms/DateExtensions';
-import { startOfCellInstant } from './EventCalendarViewerTypes';
+  calendarHour,
+  calendarHourRange,
+  intersectsCalendarDay,
+  layoutCalendarEvents,
+  type CalendarEventLayout,
+} from './EventCalendarViewerLayout';
 
 /** Renders the week / day time grid of an `EventCalendarViewer`. Internal — never exported. */
 defineOptions({ name: 'TimeGridView' });
 
 const props = defineProps<TimeGridViewProps>();
+const locale = useLocale();
 
 const emit = defineEmits<{
   /** Fires when an event block is clicked. */
@@ -42,21 +40,31 @@ const emit = defineEmits<{
   'slot-click': [day: Temporal.PlainDate, hour?: number];
 }>();
 
-const startHour = computed(() => props.hourRange[0]);
-const endHour = computed(() => props.hourRange[1]);
+const range = computed(() => calendarHourRange(props.hourRange));
+const startHour = computed(() => range.value[0]);
+const endHour = computed(() => range.value[1]);
 const visibleHours = computed(() => endHour.value - startHour.value);
 
 const dayDates = computed(() => Array.from({ length: props.days }, (_, i) => props.firstDay.add({ days: i })));
 
-function eventsForDay(day: Temporal.PlainDate): Array<EventCalendarViewerEvent> {
-  return props.events.filter((e) => !e.isAllDay && isZonedOnDay(e.start, day));
-}
-
-function allDayForDay(day: Temporal.PlainDate): Array<EventCalendarViewerEvent> {
-  return props.events.filter(
-    (e) => e.isAllDay && isZonedDayInRange(startOfCellInstant(day, props.timeZone), e.start, e.end),
-  );
-}
+const layouts = computed(
+  () =>
+    new Map(
+      dayDates.value.map((day) => [
+        day.toString(),
+        layoutCalendarEvents(props.events, day, props.timeZone, range.value),
+      ]),
+    ),
+);
+const allDayEvents = computed(
+  () =>
+    new Map(
+      dayDates.value.map((day) => [
+        day.toString(),
+        props.events.filter((event) => event.isAllDay && intersectsCalendarDay(event, day, props.timeZone)),
+      ]),
+    ),
+);
 
 /* Numeric CSS lengths are spelled with their unit — React's style object auto-appended `px`,
    Vue's does not, so a bare `48` would be dropped as an invalid declaration. */
@@ -82,26 +90,20 @@ function dayHeaderClass(d: Temporal.PlainDate): string {
 }
 
 function dayHeaderLabel(d: Temporal.PlainDate): string {
-  return d.toLocaleString(undefined, { weekday: 'short', day: 'numeric' });
+  return d.toLocaleString(locale.locale.value, { weekday: 'short', day: 'numeric' });
 }
 
 function allDayClass(e: EventCalendarViewerEvent): string {
   return cn('truncate rounded-sm px-1 py-0.5', !e.color && 'bg-primary-soft text-primary-soft-foreground');
 }
 
-function eventStyle(e: EventCalendarViewerEvent, d: Temporal.PlainDate): StyleValue {
-  const dayStart = zonedAtHour(d, startHour.value, props.timeZone);
-  const dayEnd = zonedAtHour(d, endHour.value, props.timeZone);
-  const start = maxZoned(e.start, dayStart);
-  const end = minZoned(e.end, dayEnd);
-  const topMin = minutesBetween(dayStart, start);
-  const durMin = Math.max(15, minutesBetween(start, end));
+function eventStyle(item: CalendarEventLayout): StyleValue {
   return {
-    top: `${(topMin / 60) * HourPx}px`,
-    height: `${(durMin / 60) * HourPx}px`,
-    left: '2px',
-    right: '2px',
-    background: e.color,
+    top: `${((item.start - startHour.value * 60) / 60) * HourPx}px`,
+    height: `${((item.end - item.start) / 60) * HourPx}px`,
+    left: `calc(${(item.column / item.columns) * 100}% + 2px)`,
+    width: `calc(${100 / item.columns}% - 4px)`,
+    background: item.event.color,
   };
 }
 
@@ -113,8 +115,8 @@ function eventClass(e: EventCalendarViewerEvent): string {
 }
 
 function eventStartLabel(e: EventCalendarViewerEvent, d: Temporal.PlainDate): string {
-  const dayStart = zonedAtHour(d, startHour.value, props.timeZone);
-  return formatZonedTime(maxZoned(e.start, dayStart));
+  const dayStart = calendarHour(d, startHour.value, props.timeZone);
+  return formatZonedTime(maxZoned(e.start, dayStart).withTimeZone(props.timeZone), locale.locale.value);
 }
 
 /* Read on every render, exactly as React's per-render `nowZoned()` was — a `computed` would
@@ -122,8 +124,8 @@ function eventStartLabel(e: EventCalendarViewerEvent, d: Temporal.PlainDate): st
    global, so this is SSR-safe. */
 function todayLineTop(d: Temporal.PlainDate): string | undefined {
   if (!isToday(d)) return undefined;
-  const dayStart = zonedAtHour(d, startHour.value, props.timeZone);
-  const minutes = minutesBetween(dayStart, nowZoned());
+  const current = nowZoned().withTimeZone(props.timeZone);
+  const minutes = current.hour * 60 + current.minute - startHour.value * 60;
   if (minutes < 0 || minutes > visibleHours.value * 60) return undefined;
   return `${(minutes / 60) * HourPx}px`;
 }
@@ -163,14 +165,14 @@ function onEvent(ev: MouseEvent, e: EventCalendarViewerEvent): void {
         >
           <div class="flex flex-wrap gap-0.5">
             <button
-              v-for="e in allDayForDay(d)"
+              v-for="e in allDayEvents.get(d.toString())"
               :key="e.id"
               type="button"
               :style="{ background: e.color }"
               :class="allDayClass(e)"
               @click="onEvent($event, e)"
             >
-              {{ e.title ?? '(no title)' }}
+              {{ e.title ?? locale.t('EventCalendarViewer.untitled', undefined, '(no title)') }}
             </button>
           </div>
         </div>
@@ -182,10 +184,18 @@ function onEvent(ev: MouseEvent, e: EventCalendarViewerEvent): void {
           :style="columnStyle"
         >
           <!-- Hour grid lines -->
-          <div
+          <button
             v-for="i in visibleHours"
+            type="button"
+            :aria-label="
+              locale.t(
+                'EventCalendarViewer.slotAt',
+                { date: dayHeaderLabel(d), time: hourLabel(i - 1) },
+                '{date} at {time}',
+              )
+            "
             :key="i"
-            class="border-b border-border/60"
+            class="block w-full border-b border-border/60 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2"
             :style="HourStyle"
             @click="emit('slot-click', d, startHour + i - 1)"
           />
@@ -198,16 +208,18 @@ function onEvent(ev: MouseEvent, e: EventCalendarViewerEvent): void {
           />
           <!-- Events -->
           <button
-            v-for="e in eventsForDay(d)"
-            :key="e.id"
+            v-for="item in layouts.get(d.toString())"
+            :key="item.event.id"
             type="button"
-            :style="eventStyle(e, d)"
-            :class="eventClass(e)"
-            @click="onEvent($event, e)"
+            :style="eventStyle(item)"
+            :class="eventClass(item.event)"
+            @click="onEvent($event, item.event)"
           >
-            <div class="truncate">{{ e.title ?? '(no title)' }}</div>
+            <div class="truncate">
+              {{ item.event.title ?? locale.t('EventCalendarViewer.untitled', undefined, '(no title)') }}
+            </div>
             <div class="text-[10px] opacity-80 tabular-nums">
-              {{ eventStartLabel(e, d) }}
+              {{ eventStartLabel(item.event, d) }}
             </div>
           </button>
         </div>

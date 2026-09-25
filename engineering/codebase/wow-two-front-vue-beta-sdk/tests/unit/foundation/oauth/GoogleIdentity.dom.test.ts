@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
-import { GoogleIdentityStatus, loadGoogleIdentity, useGoogleIdentity } from '@src/foundation/oauth';
+import { GoogleIdentityStatus, loadGoogleIdentity, provideGoogleIdentity } from '@src/foundation/oauth';
 
 const ScriptSelector = 'script[src="https://accounts.google.com/gsi/client"]';
 
@@ -37,11 +37,11 @@ describe('Google Identity lifetime', () => {
     vi.stubGlobal('google', { accounts: { id: api } });
     const clientId = ref<string | undefined>('first');
     const credential = vi.fn();
-    let controls!: ReturnType<typeof useGoogleIdentity>;
+    let controls!: ReturnType<typeof provideGoogleIdentity>;
     const wrapper = mount(
       defineComponent({
         setup() {
-          controls = useGoogleIdentity({ clientId, onCredential: credential });
+          controls = provideGoogleIdentity({ clientId, onCredential: credential });
           return () => null;
         },
       }),

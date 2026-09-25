@@ -39,6 +39,7 @@ const CopyIndexes = [0, 1] as const;
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, ref, normalizeStyle, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useReducedMotion } from '../../../foundation/device';
@@ -53,13 +54,15 @@ defineOptions({ name: 'MarqueeGroup', inheritAttrs: false });
 /** The scrolled content — React's required `children`. Rendered once per copy. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<MarqueeGroupProps>(), {
+const componentProps = withDefaults(defineProps<MarqueeGroupProps>(), {
   direction: 'left',
   speed: 30,
   canPauseOnHover: true,
+  gap: 48,
+});
+const props = useLocaleDefaults(componentProps, 'MarqueeGroup', {
   pauseLabel: 'Pause animation',
   resumeLabel: 'Resume animation',
-  gap: 48,
 });
 
 const attrs = useAttrs();

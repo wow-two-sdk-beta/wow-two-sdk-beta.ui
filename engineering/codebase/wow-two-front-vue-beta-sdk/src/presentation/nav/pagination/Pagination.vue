@@ -6,7 +6,7 @@ export interface PaginationProps {
   /** The current page (1-based). The `v-model:page` binding target. */
   readonly page: number;
 
-  /** The number of page buttons surrounding the current. Default `1` (so 1 + current + 1 = 3). */
+  /** The number of page buttons surrounding the current. Default `1`. At most 50 neighbors per side are rendered. */
   readonly siblings?: number;
 
   /** The hide-first/last toggle (just show prev/next + numbers). */
@@ -14,7 +14,7 @@ export interface PaginationProps {
 }
 
 function range(start: number, end: number): ReadonlyArray<number> {
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  return Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i);
 }
 
 function buildPages(total: number, page: number, siblings: number): ReadonlyArray<number | 'ellipsis'> {
@@ -34,10 +34,13 @@ const BaseButton =
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
+
+const locale = useLocale();
 
 /**
  * Renders a compact page-number row with prev / next arrows and ellipses for skipped ranges.
@@ -58,10 +61,18 @@ const emit = defineEmits<{
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
 
-const pages = computed(() => buildPages(props.total, props.page, props.siblings));
+const total = computed(() => (Number.isSafeInteger(props.total) && props.total > 0 ? props.total : 1));
+const page = computed(() =>
+  Number.isFinite(props.page) ? Math.max(1, Math.min(total.value, Math.trunc(props.page))) : 1,
+);
+const siblings = computed(() =>
+  Number.isFinite(props.siblings) ? Math.max(0, Math.min(50, Math.trunc(props.siblings))) : 1,
+);
+const pages = computed(() => buildPages(total.value, page.value, siblings.value));
 
-function go(page: number): void {
-  const next = Math.min(props.total, Math.max(1, page));
+function go(target: number): void {
+  const next = Math.min(total.value, Math.max(1, target));
+  if (next === page.value) return;
   emit('update:page', next);
 }
 
@@ -77,12 +88,12 @@ defineExpose({ el });
 </script>
 
 <template>
-  <nav ref="el" aria-label="Pagination" v-bind="rest" :class="classes">
+  <nav ref="el" :aria-label="locale.t('Pagination.pagination', undefined, 'Pagination')" v-bind="rest" :class="classes">
     <button
       v-if="!props.hideFirstLast"
       type="button"
-      aria-label="First page"
-      :disabled="props.page <= 1"
+      :aria-label="locale.t('Pagination.firstPage', undefined, 'First page')"
+      :disabled="page <= 1"
       :class="cn(BaseButton, 'hover:bg-muted')"
       @click="go(1)"
     >
@@ -90,10 +101,10 @@ defineExpose({ el });
     </button>
     <button
       type="button"
-      aria-label="Previous page"
-      :disabled="props.page <= 1"
+      :aria-label="locale.t('Pagination.previousPage', undefined, 'Previous page')"
+      :disabled="page <= 1"
       :class="cn(BaseButton, 'hover:bg-muted')"
-      @click="go(props.page - 1)"
+      @click="go(page - 1)"
     >
       <Icon :icon="ChevronLeft" :size="16" />
     </button>
@@ -103,10 +114,8 @@ defineExpose({ el });
         v-else
         :key="p"
         type="button"
-        :aria-current="p === props.page ? 'page' : undefined"
-        :class="
-          cn(BaseButton, p === props.page ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted')
-        "
+        :aria-current="p === page ? 'page' : undefined"
+        :class="cn(BaseButton, p === page ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted')"
         @click="go(p)"
       >
         {{ p }}
@@ -114,20 +123,20 @@ defineExpose({ el });
     </template>
     <button
       type="button"
-      aria-label="Next page"
-      :disabled="props.page >= props.total"
+      :aria-label="locale.t('Pagination.nextPage', undefined, 'Next page')"
+      :disabled="page >= total"
       :class="cn(BaseButton, 'hover:bg-muted')"
-      @click="go(props.page + 1)"
+      @click="go(page + 1)"
     >
       <Icon :icon="ChevronRight" :size="16" />
     </button>
     <button
       v-if="!props.hideFirstLast"
       type="button"
-      aria-label="Last page"
-      :disabled="props.page >= props.total"
+      :aria-label="locale.t('Pagination.lastPage', undefined, 'Last page')"
+      :disabled="page >= total"
       :class="cn(BaseButton, 'hover:bg-muted')"
-      @click="go(props.total)"
+      @click="go(total)"
     >
       <Icon :icon="ChevronsRight" :size="16" />
     </button>

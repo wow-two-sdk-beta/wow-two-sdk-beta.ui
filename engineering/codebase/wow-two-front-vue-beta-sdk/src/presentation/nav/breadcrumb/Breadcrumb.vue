@@ -13,11 +13,14 @@ export interface BreadcrumbProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { UrlExtensions } from '../../../foundation/dom';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { ChevronRight } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
+
+const locale = useLocale();
 
 /**
  * Renders a linear trail of links and separators marking where the reader stands.
@@ -55,7 +58,7 @@ defineExpose({ el });
 <template>
   <!-- `aria-label` sits before `v-bind="rest"` so a consumer-supplied one wins,
        the precedence React got from spreading `{...props}` after it. -->
-  <nav ref="el" aria-label="Breadcrumb" v-bind="rest" :class="classes">
+  <nav ref="el" :aria-label="locale.t('Breadcrumb.breadcrumb', undefined, 'Breadcrumb')" v-bind="rest" :class="classes">
     <ol class="flex flex-wrap items-center gap-1.5">
       <template v-for="(item, i) in props.items" :key="item.href ?? item.label">
         <li>

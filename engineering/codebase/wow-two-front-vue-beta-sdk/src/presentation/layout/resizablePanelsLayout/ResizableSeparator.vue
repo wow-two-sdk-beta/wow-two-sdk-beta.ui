@@ -5,7 +5,7 @@ export interface ResizableSeparatorProps {
 </script>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref, useAttrs, useTemplateRef } from 'vue';
+import { computed, onScopeDispose, onUnmounted, ref, useAttrs, useTemplateRef } from 'vue';
 import { cn, Orientation } from '../../../foundation/styles';
 import { composeEventHandlers } from '../../../foundation/dom';
 import { useResizableContext } from './ResizablePanelsLayout.vue';
@@ -26,16 +26,21 @@ onUnmounted(() => context.unregisterSeparator(token));
 const index = computed(() => context.separatorIndex(token));
 const dragging = ref(false);
 
+let releaseDrag: (() => void) | undefined;
+onScopeDispose(() => releaseDrag?.());
+
 function handleMouseDown(e: MouseEvent): void {
-  if (props.isDisabled) return;
-  if (e.button !== 0) return;
+  if (props.isDisabled || e.defaultPrevented || e.button !== 0) return;
+  releaseDrag?.();
+  if (!context.beginDrag(index.value, e)) return;
   e.preventDefault();
   dragging.value = true;
-  context.beginDrag(index.value, e);
   const onUp = (): void => {
     dragging.value = false;
     window.removeEventListener('mouseup', onUp);
+    releaseDrag = undefined;
   };
+  releaseDrag = onUp;
   window.addEventListener('mouseup', onUp);
 }
 
@@ -82,6 +87,7 @@ function asHandler<E extends Event>(value: unknown): ((event: E) => void) | unde
  * called `preventDefault()`. Vue's own attr merge would run both unconditionally,
  * so the two are composed by hand through the house helper instead.
  */
+const onMousedown = computed(() => composeEventHandlers<MouseEvent>(asHandler(attrs.onMousedown), handleMouseDown));
 const onKeydown = computed(() => composeEventHandlers<KeyboardEvent>(asHandler(attrs.onKeydown), handleKeydown));
 const onDblclick = computed(() => composeEventHandlers<MouseEvent>(asHandler(attrs.onDblclick), handleDblclick));
 
@@ -103,7 +109,7 @@ const classes = computed(() =>
 
 /** Everything but `class` and the two composed listeners, all re-applied above. */
 const rest = computed(() => {
-  const { class: _class, onKeydown: _keydown, onDblclick: _dblclick, ...others } = attrs;
+  const { class: _class, onKeydown: _keydown, onDblclick: _dblclick, onMousedown: _mousedown, ...others } = attrs;
   return others;
 });
 
@@ -123,7 +129,7 @@ defineExpose({ el });
     :data-dragging="dragging || undefined"
     v-bind="rest"
     :class="classes"
-    @mousedown="handleMouseDown"
+    @mousedown="onMousedown"
     @keydown="onKeydown"
     @dblclick="onDblclick"
   />

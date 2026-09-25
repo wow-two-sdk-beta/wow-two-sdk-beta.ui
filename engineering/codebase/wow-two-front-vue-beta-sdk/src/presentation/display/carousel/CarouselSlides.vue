@@ -6,10 +6,13 @@ export interface CarouselSlidesProps {}
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, onMounted, onUpdated, useAttrs, useSlots, useTemplateRef, type VNode } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { renderableChildren } from '../../../foundation/primitives';
 import { useCarouselContext } from './CarouselContext';
+
+const locale = useLocale();
 
 /** Renders the sliding track, wrapping each child in its own `role="group"` slide frame. */
 defineOptions({ name: 'CarouselSlides', inheritAttrs: false });
@@ -69,8 +72,10 @@ defineExpose({ el });
         v-for="(child, slideIndex) in children"
         :key="child.key ?? slideIndex"
         role="group"
-        aria-roledescription="slide"
-        :aria-label="`${slideIndex + 1} of ${children.length}`"
+        :aria-roledescription="locale.t('CarouselSlides.slide', undefined, 'slide')"
+        :aria-label="
+          locale.t('CarouselSlides.position', { index: slideIndex + 1, total: children.length }, '{index} of {total}')
+        "
         :aria-hidden="slideIndex !== carousel.index || undefined"
         class="w-full shrink-0"
       >

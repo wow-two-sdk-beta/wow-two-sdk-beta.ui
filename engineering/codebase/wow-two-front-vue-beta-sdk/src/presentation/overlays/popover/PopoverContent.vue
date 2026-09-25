@@ -100,7 +100,6 @@ const rest = computed(() => {
 
 function handleEscape(): void {
   context.setOpen(false);
-  requestAnimationFrame(() => context.triggerEl.value?.focus());
 }
 
 function handleOutsidePointerDown(event: PointerEvent): void {

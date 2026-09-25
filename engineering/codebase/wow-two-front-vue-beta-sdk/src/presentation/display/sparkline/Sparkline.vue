@@ -92,6 +92,7 @@ const ToneClass: Record<SparklineTone, string> = {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useId } from '../../../foundation/identifiers';
@@ -103,7 +104,7 @@ import { useId } from '../../../foundation/identifiers';
  */
 defineOptions({ name: 'Sparkline', inheritAttrs: false });
 
-const props = withDefaults(defineProps<SparklineProps>(), {
+const componentProps = withDefaults(defineProps<SparklineProps>(), {
   variant: 'line',
   width: 120,
   height: 32,
@@ -111,8 +112,8 @@ const props = withDefaults(defineProps<SparklineProps>(), {
   min: undefined,
   max: undefined,
   hasLast: undefined,
-  ariaLabel: 'Trend',
 });
+const props = useLocaleDefaults(componentProps, 'Sparkline', { ariaLabel: 'Trend' });
 
 const attrs = useAttrs();
 const el = useTemplateRef<SVGSVGElement>('el');

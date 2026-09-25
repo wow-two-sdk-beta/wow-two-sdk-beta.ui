@@ -13,15 +13,15 @@ Internal implementation: compose through the family’s public exports in [index
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `focusDay` | `Temporal.PlainDate` | yes | — | Declared by the source contract. |
-| `events` | `ReadonlyArray<EventCalendarViewerEvent>` | yes | — | Declared by the source contract. |
+| Prop       | Type                                      | Required | Default | Meaning                          |
+| ---------- | ----------------------------------------- | -------- | ------- | -------------------------------- |
+| `focusDay` | `Temporal.PlainDate`                      | yes      | —       | Declared by the source contract. |
+| `events`   | `ReadonlyArray<EventCalendarViewerEvent>` | yes      | —       | Declared by the source contract. |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event         | Signature                                           | Meaning                              |
+| ------------- | --------------------------------------------------- | ------------------------------------ |
 | `event-click` | `'event-click': [event: EventCalendarViewerEvent];` | Fires when an agenda row is clicked. |
 
 ## Slots

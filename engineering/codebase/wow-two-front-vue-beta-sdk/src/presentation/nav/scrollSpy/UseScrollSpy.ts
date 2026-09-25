@@ -31,7 +31,7 @@ export function useScrollSpy(
 
   watch(
     [
-      () => toValue(ids),
+      () => [...toValue(ids)],
       () => toValue(options.rootMargin) ?? '0px 0px -60% 0px',
       () => toValue(options.threshold) ?? 0,
       () => toValue(options.root) ?? null,
@@ -47,11 +47,13 @@ export function useScrollSpy(
         return;
       }
 
+      let active = true;
       const seen = new Map<string, number>(); // id → top offset
       const elements = idList.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => el != null);
 
       const observer = new IntersectionObserver(
         (entries) => {
+          if (!active) return;
           for (const e of entries) {
             if (e.isIntersecting) {
               seen.set(e.target.id, e.boundingClientRect.top);
@@ -80,7 +82,10 @@ export function useScrollSpy(
       );
 
       for (const el of elements) observer.observe(el);
-      onCleanup(() => observer.disconnect());
+      onCleanup(() => {
+        active = false;
+        observer.disconnect();
+      });
     },
     { immediate: true, flush: 'post' },
   );

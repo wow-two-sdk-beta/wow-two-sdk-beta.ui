@@ -92,13 +92,22 @@ const buttonClass = computed(() =>
 /* Chained after the consumer's own click (attribute fallthrough puts theirs first) and skipped
    when they called `preventDefault()` — the original's `onClick?.(e); if (e.defaultPrevented) return`. */
 function handleClick(event: MouseEvent): void {
-  if (event.defaultPrevented) return;
+  if (
+    event.defaultPrevented ||
+    !context.open ||
+    root.value?.matches(':disabled,[aria-disabled="true"],[data-disabled]')
+  )
+    return;
   emit('select');
   context.setOpen(false);
-  requestAnimationFrame(() => context.triggerEl.value?.focus());
 }
 
 const root = useTemplateRef<HTMLButtonElement>('root');
+function handleClickCapture(event: MouseEvent): void {
+  if (context.open && !root.value?.matches(':disabled,[aria-disabled="true"],[data-disabled]')) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}
 
 /** The rendered element — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: root });
@@ -125,7 +134,15 @@ defineExpose({ el: root });
     >
       <slot name="tooltip"><TooltipProp v-if="tooltip !== undefined" /></slot>
     </span>
-    <button ref="root" v-bind="passthroughAttrs" :type="type" role="menuitem" :class="buttonClass" @click="handleClick">
+    <button
+      ref="root"
+      v-bind="passthroughAttrs"
+      :type="type"
+      role="menuitem"
+      :class="buttonClass"
+      @click.capture="handleClickCapture"
+      @click="handleClick"
+    >
       <!-- The default slot is the fallback, not a second API: React typed `children` away,
            so a Vue caller writing `<SpeedDialGroupAction><Pencil /></SpeedDialGroupAction>` — the
            idiomatic shape — got a silently empty button. Precedence stays `icon` slot →

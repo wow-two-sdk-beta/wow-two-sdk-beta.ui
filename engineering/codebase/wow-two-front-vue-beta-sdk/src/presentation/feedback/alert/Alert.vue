@@ -18,6 +18,7 @@ export interface AlertProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, getCurrentInstance, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { X } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
@@ -35,7 +36,8 @@ const CloseIcon = X;
  */
 defineOptions({ name: 'Alert', inheritAttrs: false });
 
-const props = withDefaults(defineProps<AlertProps>(), { closeLabel: 'Dismiss' });
+const componentProps = withDefaults(defineProps<AlertProps>(), {});
+const props = useLocaleDefaults(componentProps, 'Alert', { closeLabel: 'Dismiss' });
 
 /** Replaces React's `onClose`; omitting `@close` omits the close button. */
 const emit = defineEmits<{

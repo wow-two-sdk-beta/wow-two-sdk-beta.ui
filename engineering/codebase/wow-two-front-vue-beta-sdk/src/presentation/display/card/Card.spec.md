@@ -15,6 +15,7 @@ Public import: `import { Card } from '@wow-two-beta/ui-vue/presentation/display'
 
 | Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
+| `ambient` | `SurfaceAmbient` | no | — | The optional ambient surface treatment: `sheen`, `glow`, or `bevel`. |
 | `variant` | `SurfaceVariant` | no | — | The visual recipe — solid · soft · surface · outline · glass · elevated · flat · subtle. |
 | `tone` | `SurfaceTone` | no | — | The color tone the recipe is tinted with. |
 | `radius` | `SurfaceRadius` | no | — | The corner rounding. |

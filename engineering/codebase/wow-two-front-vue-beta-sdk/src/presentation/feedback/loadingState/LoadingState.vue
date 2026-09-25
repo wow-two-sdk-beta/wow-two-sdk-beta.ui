@@ -14,6 +14,7 @@ export interface LoadingStateProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { cn, Size as SizeToken } from '../../../foundation/styles';
 import Spinner from '../spinner/Spinner.vue';
@@ -27,10 +28,10 @@ import Spinner from '../spinner/Spinner.vue';
  */
 defineOptions({ name: 'LoadingState', inheritAttrs: false });
 
-const props = withDefaults(defineProps<LoadingStateProps>(), {
-  title: 'Loading…',
+const componentProps = withDefaults(defineProps<LoadingStateProps>(), {
   size: SizeToken.Lg,
 });
+const props = useLocaleDefaults(componentProps, 'LoadingState', { title: 'Loading…' });
 
 defineSlots<{
   /** The heading line under the spinner. Falls back to the `title` prop. */

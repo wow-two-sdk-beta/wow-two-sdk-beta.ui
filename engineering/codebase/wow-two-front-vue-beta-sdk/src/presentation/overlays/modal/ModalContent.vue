@@ -67,7 +67,6 @@ const dismissOnEscape = context.dismissOnEscape;
 
 function close(): void {
   context.setOpen(false);
-  requestAnimationFrame(() => context.triggerEl.value?.focus());
 }
 
 provide(overlayChromeContextKey, {

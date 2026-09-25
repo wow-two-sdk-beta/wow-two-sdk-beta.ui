@@ -47,10 +47,14 @@ export function useOnboardingChecklist(): OnboardingContextValue {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, provide, ref, shallowRef, useAttrs, useTemplateRef, watch } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
+
+const locale = useLocale();
 
 const ChevronDownIcon = ChevronDown;
 
@@ -61,12 +65,12 @@ const ChevronDownIcon = ChevronDown;
  */
 defineOptions({ name: 'OnboardingChecklistCard', inheritAttrs: false });
 
-const props = withDefaults(defineProps<OnboardingChecklistCardProps>(), {
-  title: 'Get started',
+const componentProps = withDefaults(defineProps<OnboardingChecklistCardProps>(), {
   defaultOpen: true,
   canDismissOnComplete: false,
   dismissDelay: 2000,
 });
+const props = useLocaleDefaults(componentProps, 'OnboardingChecklistCard', { title: 'Get started' });
 
 const emit = defineEmits<{
   /** Fires when the card dismisses itself, `dismissDelay` ms after the reader completes the last task. */
@@ -158,7 +162,9 @@ defineExpose({ el });
         <div class="text-sm font-medium text-foreground">
           <slot name="title">{{ props.title }}</slot>
         </div>
-        <div class="mt-1 text-xs text-muted-foreground">{{ done }} of {{ total }} tasks complete</div>
+        <div class="mt-1 text-xs text-muted-foreground">
+          {{ locale.t('OnboardingChecklistCard.progress', { done, total }, '{done} of {total} tasks complete') }}
+        </div>
         <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-border">
           <div :class="fillClasses" :style="fillStyle" />
         </div>

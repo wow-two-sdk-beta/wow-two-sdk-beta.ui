@@ -19,12 +19,15 @@ export interface SnippetTextProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { Check, Copy } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import { useClipboard } from '../../../foundation/clipboard';
 import CodeText from '../codeText/CodeText.vue';
+
+const locale = useLocale();
 
 const CopiedIcon = Check;
 const CopyIcon = Copy;
@@ -75,7 +78,12 @@ defineExpose({ el });
 <template>
   <div ref="el" v-bind="rest" :class="classes">
     <CodeText :variant="props.variant" class="flex-1 pr-10">{{ props.text }}</CodeText>
-    <button type="button" :aria-label="copied ? 'Copied' : 'Copy'" :class="buttonClasses" @click="onCopy">
+    <button
+      type="button"
+      :aria-label="locale.t(copied ? 'SnippetText.copied' : 'SnippetText.copy', undefined, copied ? 'Copied' : 'Copy')"
+      :class="buttonClasses"
+      @click="onCopy"
+    >
       <Icon :icon="copied ? CopiedIcon : CopyIcon" :size="14" />
     </button>
   </div>

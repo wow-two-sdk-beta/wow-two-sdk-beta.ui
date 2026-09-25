@@ -1,6 +1,7 @@
 <script lang="ts">
 import type {
   SurfaceElevation,
+  SurfaceAmbient,
   SurfacePadding,
   SurfaceRadius,
   SurfaceTone,
@@ -15,6 +16,8 @@ import type {
  * declaration, and `VariantProps<typeof surfaceVariants>` is opaque to it.
  */
 export interface CardProps {
+  /** The optional ambient surface treatment. */
+  readonly ambient?: SurfaceAmbient;
   /** The visual recipe — solid · soft · surface · outline · glass · elevated · flat · subtle. */
   readonly variant?: SurfaceVariant;
   /** The color tone the recipe is tinted with. */
@@ -56,6 +59,7 @@ const classes = computed(() =>
       radius: props.radius ?? 'lg',
       padding: props.padding ?? 'none',
       elevation: props.elevation ?? 1,
+      ambient: props.ambient,
     }),
     attrs.class as string | undefined,
   ),

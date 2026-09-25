@@ -22,12 +22,15 @@ export interface BackToTopButtonProps extends /* @vue-ignore */ ButtonHTMLAttrib
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, defineComponent, shallowRef, useAttrs, useTemplateRef, watchPostEffect } from 'vue';
 import { ArrowUp } from 'lucide-vue-next';
 import type { ClassValue } from 'clsx';
 import { AriaAttribute, ButtonType } from '../../../foundation/dom';
 import { cn, OverlayPosition as OverlayPositionValue } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
+
+const locale = useLocale();
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
@@ -87,7 +90,10 @@ watchPostEffect((onCleanup) => {
 /* `aria-label` is read off `attrs`, not `props`: Vue camelizes declared prop keys, so a declared
    `'aria-label'` would arrive as `props.ariaLabel` and never render. It is stripped from the
    forwarded attrs and re-bound below, so the resolved value is the one that lands. */
-const ariaLabel = computed(() => (attrs[AriaAttribute.Label] as string | undefined) ?? 'Back to top');
+const ariaLabel = computed(
+  () =>
+    (attrs[AriaAttribute.Label] as string | undefined) ?? locale.t('BackToTopButton.label', undefined, 'Back to top'),
+);
 
 const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.Label]);
 const passthroughAttrs = computed(() =>

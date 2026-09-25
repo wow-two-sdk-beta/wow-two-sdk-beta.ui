@@ -13,6 +13,7 @@ export interface SpinnerProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { spinnerVariants } from './Spinner.variants';
@@ -28,7 +29,8 @@ import { spinnerVariants } from './Spinner.variants';
  */
 defineOptions({ name: 'Spinner', inheritAttrs: false });
 
-const props = withDefaults(defineProps<SpinnerProps>(), { label: 'Loading' });
+const componentProps = withDefaults(defineProps<SpinnerProps>(), {});
+const props = useLocaleDefaults(componentProps, 'Spinner', { label: 'Loading' });
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLSpanElement>('el');

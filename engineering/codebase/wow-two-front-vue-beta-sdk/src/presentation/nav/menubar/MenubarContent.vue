@@ -48,10 +48,10 @@ const anchor = computed(() => menu.triggerEl.value);
 
 function handleClose(): void {
   menu.setOpen(false);
-  requestAnimationFrame(() => menu.triggerEl.value?.focus());
 }
 
 function handleKeydown(event: KeyboardEvent): void {
+  if (event.defaultPrevented || event.isComposing) return;
   // Arrow across menus while a popup is open — close current, open adjacent.
   switch (event.key) {
     case 'ArrowRight':

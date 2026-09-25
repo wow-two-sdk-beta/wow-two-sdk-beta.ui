@@ -29,8 +29,11 @@ export interface TypingIndicatorProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { cn, Size as SizeToken } from '../../../foundation/styles';
+
+const locale = useLocale();
 
 /* Only sm/md/lg carry a dot size; other `Size` members fall through to `md`. */
 const SizeDot: Partial<Record<Size, string>> = {
@@ -78,7 +81,11 @@ const dot = computed(() =>
 );
 
 /** Only the string `who` prop can name the typist; the slot form falls back to the generic label. */
-const ariaLabel = computed(() => (props.who ? `${props.who} is typing` : 'Typing'));
+const ariaLabel = computed(() =>
+  props.who
+    ? locale.t('TypingIndicator.named', { name: props.who }, '{name} is typing')
+    : locale.t('TypingIndicator.typing', undefined, 'Typing'),
+);
 
 const classes = computed(() =>
   cn('inline-flex items-center gap-2 text-xs text-muted-foreground', attrs.class as string | undefined),

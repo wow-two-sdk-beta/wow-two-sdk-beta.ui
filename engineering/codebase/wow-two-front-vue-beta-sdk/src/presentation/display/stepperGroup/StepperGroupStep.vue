@@ -12,7 +12,7 @@ export interface StepperGroupStepProps {
 </script>
 
 <script setup lang="ts">
-import { computed, mergeProps, onBeforeUnmount, onMounted, shallowRef, useAttrs, useSlots } from 'vue';
+import { computed, mergeProps, onBeforeUnmount, shallowRef, useAttrs, useSlots, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Check } from 'lucide-vue-next';
 import { cn, Orientation } from '../../../foundation/styles';
@@ -41,8 +41,13 @@ const item = useRovingFocusItem();
 
 /* Registration order follows mount order, which is DOM order — the same ordering React got
    from its mount effect. */
-onMounted(() => stepper.registerStep(props.value));
-onBeforeUnmount(() => stepper.unregisterStep(props.value));
+const token = Symbol('wow-two.stepperStep');
+watch(
+  () => props.value,
+  (value) => stepper.registerStep(token, value),
+  { immediate: true },
+);
+onBeforeUnmount(() => stepper.unregisterStep(token));
 
 /* One element, two consumers of `ref` — the roving group needs the node and `defineExpose`
    publishes it. React composed them with a callback ref; this is the same composition. */
@@ -64,7 +69,9 @@ const stepId = computed(() => `${stepper.baseId}-step-${props.value}`);
 const panelId = computed(() => `${stepper.baseId}-panel-${props.value}`);
 const stepNumber = computed(() => index.value + 1);
 
-const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
+const hasDescription = computed(
+  () => (props.description != null && props.description !== '') || Boolean(slots.description),
+);
 
 const showConnector = computed(
   () => stepper.orientation === Orientation.Horizontal && index.value < stepper.steps.length - 1,

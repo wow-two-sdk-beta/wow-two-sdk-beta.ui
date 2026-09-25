@@ -83,8 +83,11 @@ interface Bar {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
+
+const locale = useLocale();
 
 /**
  * Renders an SVG bar waveform from per-bin `peaks` amplitudes, seekable by click and arrow keys.
@@ -113,18 +116,31 @@ const props = withDefaults(defineProps<AudioWaveformPreviewProps>(), {
 const attrs = useAttrs();
 const el = useTemplateRef<SVGSVGElement>('el');
 
-const stepX = computed(() => props.barWidth + props.gap);
-const barCount = computed(() => Math.max(1, Math.floor(props.width / stepX.value)));
-const playedBars = computed(() => Math.round(props.progress * barCount.value));
+const positive = (value: number, fallback: number): number => (Number.isFinite(value) && value > 0 ? value : fallback);
+const resolvedWidth = computed(() => positive(props.width, 320));
+const resolvedHeight = computed(() => positive(props.height, 48));
+const resolvedBarWidth = computed(() => positive(props.barWidth, 2));
+const stepX = computed(() => resolvedBarWidth.value + (Number.isFinite(props.gap) && props.gap >= 0 ? props.gap : 1));
+// Do not invent amplitude samples or render more bars than horizontal pixels.
+const barCount = computed(() =>
+  Math.max(1, Math.min(props.peaks.length || 1, Math.floor(resolvedWidth.value / Math.max(1, stepX.value)))),
+);
+const resolvedProgress = computed(() =>
+  Number.isFinite(props.progress) ? Math.max(0, Math.min(1, props.progress)) : 0,
+);
+const playedBars = computed(() => Math.round(resolvedProgress.value * barCount.value));
 const resolvedInteractive = computed(() => props.isInteractive ?? props.onSeek != null);
 
 const bars = computed<ReadonlyArray<Bar>>(() =>
   sampleTo(props.peaks, barCount.value).map((amp, index) => {
-    const height = Math.max(1, amp * props.height);
+    const height = Math.max(
+      1,
+      (Number.isFinite(amp) ? Math.max(0, Math.min(1, Math.abs(amp))) : 0) * resolvedHeight.value,
+    );
     return {
       index,
-      x: index * stepX.value,
-      y: (props.height - height) / 2,
+      x: index * (resolvedWidth.value / barCount.value),
+      y: (resolvedHeight.value - height) / 2,
       height,
       isPlayed: index < playedBars.value,
     };
@@ -132,25 +148,26 @@ const bars = computed<ReadonlyArray<Bar>>(() =>
 );
 
 function seekFromX(clientX: number, rect: DOMRect): void {
+  if (!Number.isFinite(clientX) || !Number.isFinite(rect.width) || rect.width <= 0) return;
   const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
   props.onSeek?.(x / rect.width);
 }
 
 function onClick(event: MouseEvent): void {
-  if (!resolvedInteractive.value) return;
+  if (!resolvedInteractive.value || event.defaultPrevented) return;
   const rect = el.value?.getBoundingClientRect();
   if (rect) seekFromX(event.clientX, rect);
 }
 
 function onKeydown(event: KeyboardEvent): void {
   const seek = props.onSeek;
-  if (!seek) return;
+  if (!seek || !resolvedInteractive.value || event.defaultPrevented || event.isComposing) return;
   if (event.key === 'ArrowRight') {
     event.preventDefault();
-    seek(Math.min(1, props.progress + 0.05));
+    seek(Math.min(1, resolvedProgress.value + 0.05));
   } else if (event.key === 'ArrowLeft') {
     event.preventDefault();
-    seek(Math.max(0, props.progress - 0.05));
+    seek(Math.max(0, resolvedProgress.value - 0.05));
   } else if (event.key === 'Home') {
     event.preventDefault();
     seek(0);
@@ -185,14 +202,14 @@ defineExpose({ el });
   <svg
     ref="el"
     :role="resolvedInteractive ? 'slider' : 'img'"
-    aria-label="Audio waveform"
-    :aria-valuenow="Math.round(progress * 100)"
-    :aria-valuemin="0"
-    :aria-valuemax="100"
+    :aria-label="locale.t('AudioWaveformPreview.audioWaveform', undefined, 'Audio waveform')"
+    :aria-valuenow="resolvedInteractive ? Math.round(resolvedProgress * 100) : undefined"
+    :aria-valuemin="resolvedInteractive ? 0 : undefined"
+    :aria-valuemax="resolvedInteractive ? 100 : undefined"
     :tabindex="resolvedInteractive ? 0 : -1"
-    :width="width"
-    :height="height"
-    :viewBox="`0 0 ${width} ${height}`"
+    :width="resolvedWidth"
+    :height="resolvedHeight"
+    :viewBox="`0 0 ${resolvedWidth} ${resolvedHeight}`"
     preserveAspectRatio="none"
     v-bind="rest"
     :class="classes"
@@ -204,7 +221,7 @@ defineExpose({ el });
       :key="bar.index"
       :x="bar.x"
       :y="bar.y"
-      :width="barWidth"
+      :width="resolvedBarWidth"
       :height="bar.height"
       :rx="1"
       :class="bar.isPlayed ? 'fill-current' : 'fill-current opacity-30'"

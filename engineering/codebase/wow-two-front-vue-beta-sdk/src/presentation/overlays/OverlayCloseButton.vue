@@ -12,11 +12,14 @@ export interface OverlayCloseButtonProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import { X } from 'lucide-vue-next';
 import { cn } from '../../foundation/styles';
 import { Primitive } from '../../foundation/primitives';
 import { useOverlayChromeContext } from './OverlayChrome';
+
+const locale = useLocale();
 
 /** Renders the dismiss control of a Modal / Drawer panel; it closes the overlay and restores focus. */
 defineOptions({ name: 'OverlayCloseButton', inheritAttrs: false });
@@ -69,7 +72,7 @@ defineExpose({ el });
     as="button"
     :as-child="props.asChild"
     type="button"
-    :aria-label="slots.default ? undefined : 'Close'"
+    :aria-label="slots.default ? undefined : locale.t('OverlayCloseButton.close', undefined, 'Close')"
     v-bind="rest"
     :class="classes"
     @click="handleClick"

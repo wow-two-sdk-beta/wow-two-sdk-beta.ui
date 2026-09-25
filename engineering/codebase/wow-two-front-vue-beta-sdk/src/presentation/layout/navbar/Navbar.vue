@@ -1,9 +1,14 @@
 <script lang="ts">
+import type { HTMLAttributes } from 'vue';
 import type { SurfaceTone } from '../../../foundation/styles';
 import type { ContainerLayoutProps } from '../containerLayout';
 import type { NavbarHeight } from './Navbar.variants';
 
 export interface NavbarProps {
+  /** Native attributes forwarded to the inner `ContainerLayout`; its `class` is merged last. */
+  readonly containerAttrs?: HTMLAttributes;
+  /** Convenience class for the inner `ContainerLayout`, merged after `containerAttrs.class`. */
+  readonly containerClass?: HTMLAttributes['class'];
   /** The max-width of the inner centered `ContainerLayout`. Passthrough to `ContainerLayout.size`. Default `lg`. */
   readonly containerSize?: ContainerLayoutProps['size'];
   /** The band height. Default `md`. */
@@ -67,6 +72,17 @@ const classes = computed(() =>
 /** Push `end` to the trailing edge when there's no centre slot to absorb the slack. */
 const endClasses = computed(() => cn('flex min-w-0 items-center gap-3', !slots.center && 'ml-auto'));
 
+/** Inner-container classes with consumer spacing taking precedence. */
+const containerClasses = computed(() =>
+  cn('flex h-full items-center gap-3', props.containerAttrs?.class as string | undefined, props.containerClass),
+);
+
+/** Inner-container attributes except `class`, which is merged through `cn`. */
+const containerRest = computed(() => {
+  const { class: _class, ...others } = props.containerAttrs ?? {};
+  return others;
+});
+
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
   const { class: _class, ...others } = attrs;
@@ -78,7 +94,7 @@ defineExpose({ el });
 
 <template>
   <header ref="el" v-bind="rest" :class="classes">
-    <ContainerLayout :size="props.containerSize" class="flex h-full items-center gap-3">
+    <ContainerLayout v-bind="containerRest" :size="props.containerSize" :class="containerClasses">
       <slot v-if="$slots.default" />
       <template v-else>
         <div v-if="$slots.start" class="flex min-w-0 items-center gap-3">

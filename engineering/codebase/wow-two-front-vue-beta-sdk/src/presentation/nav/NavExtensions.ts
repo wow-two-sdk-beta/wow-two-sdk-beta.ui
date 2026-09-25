@@ -14,7 +14,12 @@ export const NavExtensions = {
    * correct as well as safe: there is no element to anchor to until hydration.
    */
   toHtmlElement(value: unknown): HTMLElement | null {
-    if (typeof HTMLElement === 'undefined') return null;
-    return value instanceof HTMLElement ? value : null;
+    const node = value as HTMLElement | null;
+    const elementType = node?.ownerDocument?.defaultView?.HTMLElement;
+    return elementType && node instanceof elementType ? node : null;
+  },
+  /** Native and ARIA inactive controls cannot open menus or receive roving focus. */
+  isDisabled(node: HTMLElement | null): boolean {
+    return !node || node.matches(':disabled,[aria-disabled="true"],[data-disabled]');
   },
 } as const;

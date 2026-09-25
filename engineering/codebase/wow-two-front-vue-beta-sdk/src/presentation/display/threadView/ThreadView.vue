@@ -19,10 +19,14 @@ export interface ThreadViewProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, getCurrentInstance, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { X as CloseIcon } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { renderableChildren } from '../../../foundation/primitives';
+
+const locale = useLocale();
 
 /**
  * Renders the chrome of a thread panel: header, parent message, reply-count separator, composer.
@@ -54,12 +58,12 @@ defineSlots<{
   composer(): unknown;
 }>();
 
-const props = withDefaults(defineProps<ThreadViewProps>(), {
-  title: 'Thread',
+const componentProps = withDefaults(defineProps<ThreadViewProps>(), {
   subtitle: undefined,
   replyCount: undefined,
   hasCloseButton: true,
 });
+const props = useLocaleDefaults(componentProps, 'ThreadView', { title: 'Thread' });
 
 /** Omitting `@close` omits the close button. */
 const emit = defineEmits<{
@@ -106,7 +110,13 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div ref="el" role="complementary" aria-label="Thread" v-bind="rest" :class="classes">
+  <div
+    ref="el"
+    role="complementary"
+    :aria-label="locale.t('ThreadView.thread', undefined, 'Thread')"
+    v-bind="rest"
+    :class="classes"
+  >
     <header class="flex items-start justify-between gap-2 border-b border-border px-4 py-3">
       <div class="min-w-0">
         <div class="text-sm font-semibold text-foreground">
@@ -119,7 +129,7 @@ defineExpose({ el });
       <button
         v-if="hasClose()"
         type="button"
-        aria-label="Close thread"
+        :aria-label="locale.t('ThreadView.closeThread', undefined, 'Close thread')"
         class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         @click="emit('close')"
       >

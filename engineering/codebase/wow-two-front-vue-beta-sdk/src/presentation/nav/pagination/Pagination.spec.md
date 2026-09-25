@@ -14,17 +14,17 @@ Public import: `import { Pagination } from '@wow-two-beta/ui-vue/presentation/na
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `total` | `number` | yes | — | The total page count (1-based). |
-| `page` | `number` | yes | — | The current page (1-based). The `v-model:page` binding target. |
-| `siblings` | `number` | no | `1` | The number of page buttons surrounding the current. Default `1` (so 1 + current + 1 = 3). |
-| `hideFirstLast` | `boolean` | no | `false` | The hide-first/last toggle (just show prev/next + numbers). |
+| Prop            | Type      | Required | Default | Meaning                                                                                   |
+| --------------- | --------- | -------- | ------- | ----------------------------------------------------------------------------------------- |
+| `total`         | `number`  | yes      | —       | The total page count (1-based).                                                           |
+| `page`          | `number`  | yes      | —       | The current page (1-based). The `v-model:page` binding target.                            |
+| `siblings`      | `number`  | no       | `1`     | The number of page buttons surrounding the current. Default `1` (so 1 + current + 1 = 3). |
+| `hideFirstLast` | `boolean` | no       | `false` | The hide-first/last toggle (just show prev/next + numbers).                               |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event         | Signature                        | Meaning                                                                    |
+| ------------- | -------------------------------- | -------------------------------------------------------------------------- |
 | `update:page` | `'update:page': [page: number];` | Fires when the reader lands on a different page — the `v-model:page` half. |
 
 ## Slots
@@ -39,3 +39,7 @@ None declared.
 
 - Public render fixture: [NavExamples.ts](../../../../apps/playground/src/gallery/fixtures/NavExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Interaction guarantees
+
+Nonfinite/invalid totals render one page. Current page normalizes to an integer within the total. Invalid siblings use the default; negative siblings use zero. At most 50 neighbors on each side are rendered, a UI allocation budget that does not truncate the dataset total. Choosing the current page emits no redundant update.

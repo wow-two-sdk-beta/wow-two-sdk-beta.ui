@@ -15,6 +15,8 @@ Public import: `import { Navbar } from '@wow-two-beta/ui-vue/presentation/layout
 
 | Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
+| `containerAttrs` | `HTMLAttributes` | no | — | Native attributes forwarded to the inner `ContainerLayout`; its `class` is merged last. |
+| `containerClass` | `HTMLAttributes['class']` | no | — | Convenience class for the inner `ContainerLayout`, merged after `containerAttrs.class`. |
 | `containerSize` | `ContainerLayoutProps['size']` | no | — | The max-width of the inner centered `ContainerLayout`. Passthrough to `ContainerLayout.size`. Default `lg`. |
 | `height` | `NavbarHeight` | no | — | The band height. Default `md`. |
 | `sticky` | `boolean` | no | `false` | The sticky pinning of the bar to the top of the scroll container. Default `false` (non-sticky). |

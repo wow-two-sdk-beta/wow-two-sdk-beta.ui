@@ -96,13 +96,25 @@ function clear(): void {
 
 function show(): void {
   clear();
-  openTimer = setTimeout(() => setOpen(true), props.openDelay);
+  if (props.isDisabled) return;
+  openTimer = setTimeout(() => {
+    if (!props.isDisabled) setOpen(true);
+  }, props.openDelay);
 }
 
 function hide(): void {
   clear();
   closeTimer = setTimeout(() => setOpen(false), props.closeDelay);
 }
+
+watch(
+  () => props.isDisabled,
+  (disabled) => {
+    if (!disabled) return;
+    clear();
+    setOpen(false);
+  },
+);
 
 /* Clear pending timers on unmount. */
 onBeforeUnmount(clear);

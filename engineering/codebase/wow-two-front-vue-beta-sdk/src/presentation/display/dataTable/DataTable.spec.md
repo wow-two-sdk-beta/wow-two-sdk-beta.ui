@@ -28,6 +28,15 @@ Public import: `import { DataTable } from '@wow-two-beta/ui-vue/presentation/dis
 | `isBare` | `boolean` | no | `undefined` | Declared by the source contract. |
 | `emptyContent` | `string \| number` | no | `'No results.'` | The empty-state text. Default `No results.`; override richly via the `emptyContent` slot. |
 
+## Column sorting and row interaction
+
+`DataTableColumn<T>.compare?: (left: T, right: T) => number` supplies a typed row comparator and
+works without an accessor. Otherwise each accessor runs once per row per sort; ExactNumber and bigint
+values compare numerically without conversion to native number. Strings use the active locale.
+Rows with `onRowClick` are keyboard focusable and activate through Enter/Space. Nested controls retain
+their own keyboard behavior. Supply a stable `rowKey` for rows that reorder.
+Regression: `tests/unit/presentation/display/CalendarAndTable.dom.test.ts`.
+
 ## Emits
 
 | Event | Signature | Meaning |

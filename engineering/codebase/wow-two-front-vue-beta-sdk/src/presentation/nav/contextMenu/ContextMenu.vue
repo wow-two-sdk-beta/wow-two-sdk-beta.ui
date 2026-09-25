@@ -26,61 +26,27 @@ const open = shallowRef(false);
 const anchor = shallowRef<HTMLElement | null>(null);
 const triggerEl = shallowRef<HTMLElement | null>(null);
 const restoreFocus: { current: HTMLElement | null } = { current: null };
-let restoreRaf = 0;
 
 /** Detaches the outgoing body-appended virtual anchor before adopting the new one. */
 function setAnchor(el: HTMLElement | null): void {
   const previous = anchor.value;
-  if (previous && typeof document !== 'undefined' && previous.parentNode === document.body) {
+  if (previous && previous.parentNode === previous.ownerDocument.body) {
     previous.remove();
   }
   anchor.value = el;
 }
 
 function setOpen(next: boolean): void {
-  // The trigger is a non-focusable div, so there is no trigger to hand focus
-  // back to (APG wants focus returned on close). The trigger captures the
-  // pre-gesture active element into `restoreFocus` on pointerdown (the
-  // browser's mousedown focus fixup may have already blurred it by the time
-  // `contextmenu` fires); fall back to the current active element for
-  // non-pointer opens.
   if (next && !open.value) {
-    cancelAnimationFrame(restoreRaf);
-    restoreFocus.current ??=
-      document.activeElement instanceof HTMLElement && document.activeElement !== document.body
-        ? document.activeElement
-        : null;
+    const document = triggerEl.value?.ownerDocument;
+    const active = document?.activeElement;
+    restoreFocus.current ??= active && 'focus' in active ? (active as HTMLElement) : triggerEl.value;
   }
   open.value = next;
-  if (next) return;
-
-  setAnchor(null);
-  const restoreTarget = restoreFocus.current;
-  restoreFocus.current = null;
-  // The menu stays mounted (and focus-trapped) through its exit animation,
-  // yanking focus straight back into itself — so retry each frame until the
-  // restore sticks (bounded; the exit lasts a few hundred ms at most).
-  // Reopening cancels the loop.
-  if (!restoreTarget) return;
-  let attempts = 0;
-  const tryRestore = (): void => {
-    restoreTarget.focus();
-    if (document.activeElement !== restoreTarget && attempts++ < 30) {
-      restoreRaf = requestAnimationFrame(tryRestore);
-    }
-  };
-  restoreRaf = requestAnimationFrame(tryRestore);
+  if (!next) setAnchor(null);
 }
 
-// Cancel a pending focus-restore loop, and drop the body-appended virtual
-// anchor, if the tree unmounts mid-close.
-onScopeDispose(() => {
-  if (typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(restoreRaf);
-  const current = anchor.value;
-  if (current && typeof document !== 'undefined' && current.parentNode === document.body) {
-    current.remove();
-  }
-});
+onScopeDispose(() => setAnchor(null));
 
 provide(contextMenuContextKey, { open, setOpen, anchor, setAnchor, triggerEl, restoreFocus });
 </script>

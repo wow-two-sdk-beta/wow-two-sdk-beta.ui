@@ -64,9 +64,12 @@ export interface ChatBubbleCardProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef, type Component } from 'vue';
 import { Check, CheckCheck, Clock, AlertTriangle } from 'lucide-vue-next';
 import { cn, Tones } from '../../../foundation/styles';
+
+const locale = useLocale();
 
 /**
  * Renders one chat message bubble with author, timestamp, delivery status, and a footer slot.
@@ -201,7 +204,17 @@ defineExpose({ el });
           ><slot name="timestamp">{{ props.timestamp }}</slot></span
         >
         <!-- aria-label is prohibited on a generic span — img role carries it. -->
-        <span v-if="showStatus && statusIcon" role="img" :aria-label="`Status: ${props.status}`">
+        <span
+          v-if="showStatus && statusIcon"
+          role="img"
+          :aria-label="
+            locale.t(
+              'ChatBubbleCard.status',
+              { status: locale.t('ChatBubbleCard.' + props.status, undefined, props.status) },
+              'Status: {status}',
+            )
+          "
+        >
           <component :is="statusIcon" :class="statusIconClass" />
         </span>
       </div>

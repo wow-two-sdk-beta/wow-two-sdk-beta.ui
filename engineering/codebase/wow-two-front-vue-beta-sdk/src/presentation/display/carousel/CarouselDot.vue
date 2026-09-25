@@ -6,9 +6,12 @@ export interface CarouselDotProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useCarouselContext } from './CarouselContext';
+
+const locale = useLocale();
 
 /** Renders one pagination dot that jumps to its slide; React shipped it as `Carousel.Dot`. */
 defineOptions({ name: 'CarouselDot', inheritAttrs: false });
@@ -53,7 +56,7 @@ defineExpose({ el });
   <button
     ref="el"
     type="button"
-    :aria-label="`Go to slide ${slideIndex + 1}`"
+    :aria-label="locale.t('CarouselDot.goToSlide', { index: slideIndex + 1 }, 'Go to slide {index}')"
     :aria-current="isActive || undefined"
     v-bind="rest"
     :class="classes"

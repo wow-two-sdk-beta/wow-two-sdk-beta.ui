@@ -14,24 +14,39 @@ Public import: `import { EventCalendarViewer } from '@wow-two-beta/ui-vue/presen
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `events` | `ReadonlyArray<EventCalendarViewerEvent>` | yes | `() => []` | Declared by the source contract. |
-| `view` | `EventCalendarViewerView` | no | — | The visible range mode, controlled. The `v-model:view` binding target. |
-| `defaultView` | `EventCalendarViewerView` | no | `EventCalendarViewerViewValue.Month` | The initial view when uncontrolled. |
-| `date` | `Temporal.ZonedDateTime` | no | — | The focused instant, controlled; its calendar day drives the visible month/week/day. The `v-model:date` binding target. |
-| `defaultDate` | `Temporal.ZonedDateTime` | no | — | The initial focused instant when uncontrolled. Defaults to now. |
-| `weekStart` | `0 \| 1` | no | `0` | Declared by the source contract. |
-| `hourRange` | `[number, number]` | no | `() => [0, 24]` | Declared by the source contract. |
+| Prop          | Type                                      | Required | Default                              | Meaning                                                                                                                 |
+| ------------- | ----------------------------------------- | -------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `events`      | `ReadonlyArray<EventCalendarViewerEvent>` | yes      | `() => []`                           | Declared by the source contract.                                                                                        |
+| `view`        | `EventCalendarViewerView`                 | no       | —                                    | The visible range mode, controlled. The `v-model:view` binding target.                                                  |
+| `defaultView` | `EventCalendarViewerView`                 | no       | `EventCalendarViewerViewValue.Month` | The initial view when uncontrolled.                                                                                     |
+| `date`        | `Temporal.ZonedDateTime`                  | no       | —                                    | The focused instant, controlled; its calendar day drives the visible month/week/day. The `v-model:date` binding target. |
+| `defaultDate` | `Temporal.ZonedDateTime`                  | no       | —                                    | The initial focused instant when uncontrolled. Defaults to now.                                                         |
+| `weekStart`   | `0 \| 1`                                  | no       | `0`                                  | Declared by the source contract.                                                                                        |
+| `hourRange`   | `[number, number]`                        | no       | `() => [0, 24]`                      | Declared by the source contract.                                                                                        |
+
+## Event projection
+
+The focused ZonedDateTime supplies the display zone. Events intersect displayed calendar days by
+absolute time, with exclusive end instants; an event ending at midnight is absent the following day.
+Zero-duration events appear on their start day; reversed intervals are ignored. Multi-day events
+continue through each visible day. Agenda rows are chronological and use the same boundary rule.
+`hourRange` uses integer hours from 0 through 24; 24 means next midnight. Invalid visual ranges use
+`[0,24]`. Grid events clip to the visible interval and overlapping groups receive separate columns.
+The grid uses wall-clock hours, with a minimum visual duration: DST repeated hours share the same
+axis position. When a fold reverses the end clock, the block uses clipped elapsed duration; its end
+position is an approximation on this 24-hour axis. Event labels/values retain their exact instants.
+Day/hour slots are keyboard buttons; the view selector uses pressed buttons. LocaleProvider supplies
+period/date labels, control labels and complete count messages.
+Regression: `tests/unit/presentation/display/CalendarAndTable.dom.test.ts`.
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
-| `update:view` | `'update:view': [view: EventCalendarViewerView];` | Fires when the reader switches view — the `v-model:view` half. |
-| `update:date` | `'update:date': [date: Temporal.ZonedDateTime];` | Fires when the focused date moves — the `v-model:date` half. |
-| `event-click` | `'event-click': [event: EventCalendarViewerEvent];` | Fires when the reader clicks an event block, with that event. |
-| `slot-click` | `'slot-click': [day: Temporal.PlainDate, hour?: number];` | Fires when the reader clicks an empty slot — `day` is the calendar day, `hour` the grid hour. |
+| Event         | Signature                                                 | Meaning                                                                                       |
+| ------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `update:view` | `'update:view': [view: EventCalendarViewerView];`         | Fires when the reader switches view — the `v-model:view` half.                                |
+| `update:date` | `'update:date': [date: Temporal.ZonedDateTime];`          | Fires when the focused date moves — the `v-model:date` half.                                  |
+| `event-click` | `'event-click': [event: EventCalendarViewerEvent];`       | Fires when the reader clicks an event block, with that event.                                 |
+| `slot-click`  | `'slot-click': [day: Temporal.PlainDate, hour?: number];` | Fires when the reader clicks an empty slot — `day` is the calendar day, `hour` the grid hour. |
 
 ## Slots
 

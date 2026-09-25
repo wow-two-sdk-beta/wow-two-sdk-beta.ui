@@ -50,6 +50,9 @@ export interface MenuProps {
 
   /** The shadow depth. */
   readonly elevation?: SurfaceElevation;
+
+  /** Optional pre-gesture focus target, restored only while this menu owns focus. */
+  readonly returnFocus?: () => HTMLElement | null;
 }
 </script>
 
@@ -57,6 +60,8 @@ export interface MenuProps {
 import { computed, provide, useAttrs } from 'vue';
 import { cn, surfaceVariants } from '../../../foundation/styles';
 import { AnchoredPositioner, DismissableLayer, FocusScope, Portal, Presence } from '../../../foundation/primitives';
+import { DomOrderExtensions } from '../../../foundation/dom';
+import { useTypeahead } from '../../../foundation/selection';
 import { MenuKey, type MenuItemEntry } from './MenuContext';
 import { menuVariants } from './Menu.variants';
 
@@ -141,9 +146,24 @@ function handleOutsidePointerDown(event: PointerEvent): void {
   emit('update:open', false);
 }
 
+const orderedItems = () => DomOrderExtensions.inDocumentOrder(items, (item) => item.el);
+const typeahead = useTypeahead({
+  items: orderedItems,
+  enabled: isMenuOpen,
+  getLabel: (item) => item.el?.textContent?.trim() ?? '',
+  isDisabled: (item) => item.disabled || !item.el?.isConnected,
+  getActiveIndex: () => orderedItems().findIndex((item) => item.el === item.el?.ownerDocument.activeElement),
+  onMatch: (item) => item.el?.focus(),
+});
+
 function handleKeydown(event: KeyboardEvent): void {
   emit('keydown', event);
-  if (event.defaultPrevented) return;
+  if (event.defaultPrevented || event.isComposing) return;
+  const target = event.target as HTMLElement;
+  if (!target.closest('input,textarea,[contenteditable="true"]') && typeahead.onKeyDown(event)) {
+    event.preventDefault();
+    return;
+  }
   if (event.key === 'Tab') {
     event.preventDefault();
     emit('update:open', false);
@@ -159,7 +179,7 @@ function handleKeydown(event: KeyboardEvent): void {
   <Portal>
     <AnchoredPositioner :anchor="props.anchor" :placement="props.placement" :offset="props.offset" class="z-dropdown">
       <Presence :is-present="isMenuOpen">
-        <FocusScope as-child trapped loop>
+        <FocusScope as-child trapped loop :return-focus="props.returnFocus">
           <DismissableLayer
             role="menu"
             :on-escape="handleEscape"

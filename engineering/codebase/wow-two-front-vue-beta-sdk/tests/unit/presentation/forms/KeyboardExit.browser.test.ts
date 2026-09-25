@@ -1,3 +1,4 @@
+import { nativeTab } from '../../../BrowserKeyboard';
 import { mount } from '@vue/test-utils';
 import { h, nextTick } from 'vue';
 import { expect, it } from 'vitest';
@@ -17,7 +18,7 @@ it('lets Escape then Tab leave the code editor in a real browser', async () => {
   try {
     wrapper.get('textarea').element.focus();
     await userEvent.keyboard('{Escape}');
-    await userEvent.tab();
+    await nativeTab();
     expect(document.activeElement?.id).toBe('after-editor');
   } finally {
     wrapper.unmount();
@@ -32,7 +33,7 @@ it('keeps every breadcrumb ancestor in native Tab order', async () => {
   try {
     const anchors = wrapper.findAll('a');
     anchors[0]!.element.focus();
-    await userEvent.tab();
+    await nativeTab();
     expect(document.activeElement).toBe(anchors[1]!.element);
   } finally {
     wrapper.unmount();
@@ -58,7 +59,7 @@ it('allows focus to leave a nonmodal popover', async () => {
     await nextTick();
     const inside = document.getElementById('inside-popover')!;
     inside.focus();
-    await userEvent.tab();
+    await nativeTab();
     expect(document.activeElement).not.toBe(inside);
     expect(document.getElementById('outside-popover')!.inert).toBe(false);
   } finally {

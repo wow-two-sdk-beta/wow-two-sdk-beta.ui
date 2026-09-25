@@ -17,7 +17,7 @@ export interface ContextMenuTriggerProps {
 const LongPressMs = 600;
 
 /** Build a zero-size virtual element at coordinates to anchor Floating UI. */
-function makeVirtualAnchor(x: number, y: number): HTMLElement {
+function makeVirtualAnchor(x: number, y: number, document: Document): HTMLElement {
   const el = document.createElement('div');
   el.style.position = 'fixed';
   el.style.left = `${x}px`;
@@ -53,6 +53,8 @@ const context = useContextMenuContext();
 const inner = useTemplateRef<ComponentPublicInstance>('inner');
 
 let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+let pointerFocusCaptured = false;
+let pressOrigin: { x: number; y: number; pointerId: number } | null = null;
 
 watch(
   inner,
@@ -65,37 +67,72 @@ watch(
 function clearLongPress(): void {
   if (longPressTimer) clearTimeout(longPressTimer);
   longPressTimer = null;
+  pressOrigin = null;
 }
 
 // Clear a pending long-press timer if the trigger unmounts mid-press.
 onScopeDispose(clearLongPress);
 
-function handleContextMenu(event: MouseEvent): void {
-  if (event.defaultPrevented || props.isDisabled) return;
-  event.preventDefault();
-  context.setAnchor(makeVirtualAnchor(event.clientX, event.clientY));
+function captureReturnFocus(): void {
+  if (context.open.value) return;
+  const document = el.value?.ownerDocument;
+  const active = document?.activeElement;
+  context.restoreFocus.current =
+    active && active !== document?.body && 'focus' in active ? (active as HTMLElement) : el.value;
+}
+
+function openAt(x: number, y: number): void {
+  const document = el.value?.ownerDocument;
+  if (!document || props.isDisabled) return;
+  context.setAnchor(makeVirtualAnchor(x, y, document));
   context.setOpen(true);
 }
 
+function handleContextMenu(event: MouseEvent): void {
+  clearLongPress();
+  if (event.defaultPrevented || props.isDisabled) return;
+  event.preventDefault();
+  if (!pointerFocusCaptured) captureReturnFocus();
+  pointerFocusCaptured = false;
+  openAt(event.clientX, event.clientY);
+}
+
 function handlePointerDown(event: PointerEvent): void {
-  // Capture the focus-restore target before the browser's mousedown focus
-  // fixup blurs it (this trigger is a non-focusable div, so the press moves
-  // focus to <body> before `contextmenu` fires). Only for gestures that can
-  // open the menu: right button / touch.
-  if (!props.isDisabled && !context.open.value && (event.button === 2 || event.pointerType === 'touch')) {
-    context.restoreFocus.current =
-      document.activeElement instanceof HTMLElement && document.activeElement !== document.body
-        ? document.activeElement
-        : null;
-  }
-  if (event.defaultPrevented || props.isDisabled || event.pointerType !== 'touch') return;
+  clearLongPress();
+  if (event.defaultPrevented || props.isDisabled) return;
+  pointerFocusCaptured = event.button === 2 || event.pointerType === 'touch';
+  if (pointerFocusCaptured) captureReturnFocus();
+  if (event.pointerType !== 'touch' || !event.isPrimary) return;
   const x = event.clientX;
   const y = event.clientY;
+  pressOrigin = { x, y, pointerId: event.pointerId };
   longPressTimer = setTimeout(() => {
-    context.setAnchor(makeVirtualAnchor(x, y));
-    context.setOpen(true);
+    clearLongPress();
+    openAt(x, y);
   }, LongPressMs);
 }
+
+function handlePointerMove(event: PointerEvent): void {
+  if (!pressOrigin || event.pointerId !== pressOrigin.pointerId) return;
+  if (Math.hypot(event.clientX - pressOrigin.x, event.clientY - pressOrigin.y) > 8) clearLongPress();
+}
+
+function handleKeydown(event: KeyboardEvent): void {
+  if (event.defaultPrevented || event.isComposing || props.isDisabled) return;
+  if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return;
+  event.preventDefault();
+  clearLongPress();
+  captureReturnFocus();
+  const rect = el.value?.getBoundingClientRect();
+  if (rect) openAt(rect.left, rect.bottom);
+}
+
+watch(
+  () => props.isDisabled,
+  (disabled) => {
+    if (disabled) clearLongPress();
+  },
+);
 
 /** `Primitive` renders the real element, so its `$el` is this component's root. */
 const el = computed(() => (inner.value?.$el ?? null) as HTMLElement | null);
@@ -111,9 +148,15 @@ defineExpose({ el });
     ref="inner"
     as="div"
     :as-child="asChild"
+    :tabindex="props.isDisabled ? -1 : 0"
+    aria-haspopup="menu"
+    :aria-expanded="context.open.value"
+    :aria-disabled="props.isDisabled || undefined"
     v-bind="attrs"
     @contextmenu="handleContextMenu"
     @pointerdown="handlePointerDown"
+    @pointermove="handlePointerMove"
+    @keydown="handleKeydown"
     @pointerup="clearLongPress"
     @pointercancel="clearLongPress"
   >

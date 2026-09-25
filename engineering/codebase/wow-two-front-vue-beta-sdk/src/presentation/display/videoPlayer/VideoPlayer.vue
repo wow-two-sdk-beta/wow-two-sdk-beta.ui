@@ -64,6 +64,7 @@ const IconButtonClass =
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { UrlExtensions } from '../../../foundation/dom';
 import { computed, onBeforeUnmount, onMounted, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import {
@@ -79,6 +80,8 @@ import {
 } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
+
+const locale = useLocale();
 
 /**
  * Renders a video player whose custom controls auto-hide 3s into playback.
@@ -106,20 +109,29 @@ const container = useTemplateRef<HTMLDivElement>('container');
 /** The native `<video>` — React exposed it through `useImperativeHandle`. */
 const el = useTemplateRef<HTMLVideoElement>('el');
 
-const playing = ref(!!props.autoPlay);
+const playing = ref(false);
 const currentTime = ref(0);
 const duration = ref(0);
-const volume = ref(props.defaultVolume);
+const volume = ref(Number.isFinite(props.defaultVolume) ? Math.max(0, Math.min(1, props.defaultVolume)) : 1);
 /**
  * Named apart from the `muted` prop, which only seeds it. A setup ref and a prop
  * of the same name collapse into one template binding, so the prop keeps its
  * React name and the state gets a distinct one.
  */
 const isMuted = ref(!!props.muted);
-const speed = ref(props.defaultPlaybackRate);
+const speed = ref(
+  Number.isFinite(props.defaultPlaybackRate) && props.defaultPlaybackRate > 0 ? props.defaultPlaybackRate : 1,
+);
 const fullscreen = ref(false);
-const captionsOn = ref(false);
+const captionsOn = ref(
+  props.tracks?.some(
+    (track) =>
+      track.default &&
+      (track.kind == null || track.kind === VideoTrackKind.Captions || track.kind === VideoTrackKind.Subtitles),
+  ) ?? false,
+);
 const showControls = ref(true);
+const focused = ref(false);
 
 let idleTimer: number | null = null;
 
@@ -129,20 +141,35 @@ function applyVideoSettings(): void {
   if (!video) return;
   video.volume = volume.value;
   video.muted = isMuted.value;
-  video.playbackRate = speed.value;
+  try {
+    video.playbackRate = speed.value;
+  } catch {
+    // Playback-rate support varies by media engine; retain a valid native default.
+    speed.value = 1;
+    video.playbackRate = 1;
+  }
 }
 
 onMounted(applyVideoSettings);
 watch([volume, isMuted, speed], applyVideoSettings, { flush: 'post' });
 
-/** Mirror the caption toggle onto every `TextTrack` — React's second `useEffect`. */
+/** Only one caption/subtitle track is shown; metadata and chapter tracks remain caller-owned. */
 function applyCaptionMode(): void {
   const video = el.value;
-  if (!video || !video.textTracks) return;
-  for (let i = 0; i < video.textTracks.length; i++) {
-    const track = video.textTracks[i];
-    if (track) track.mode = captionsOn.value ? 'showing' : 'hidden';
-  }
+  if (!video?.textTracks) return;
+  const tracks = Array.from(video.textTracks).filter(
+    (track) => track.kind === VideoTrackKind.Captions || track.kind === VideoTrackKind.Subtitles,
+  );
+  const preferred = props.tracks?.find(
+    (track) =>
+      track.default &&
+      (track.kind == null || track.kind === VideoTrackKind.Captions || track.kind === VideoTrackKind.Subtitles),
+  );
+  const selected =
+    tracks.find((track) => track.language === preferred?.srcLang && track.label === preferred?.label) ??
+    tracks.find((track) => track.mode === 'showing') ??
+    tracks[0];
+  for (const track of tracks) track.mode = captionsOn.value && track === selected ? 'showing' : 'hidden';
 }
 
 onMounted(applyCaptionMode);
@@ -159,6 +186,13 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', onFullscreenChange);
 });
+
+function resetMediaState(): void {
+  playing.value = false;
+  currentTime.value = 0;
+  duration.value = 0;
+}
+watch(() => props.src, resetMediaState, { flush: 'post' });
 
 function togglePlay(): void {
   const video = el.value;
@@ -181,7 +215,7 @@ function seekTo(seconds: number): void {
 function toggleFullscreen(): void {
   const node = container.value;
   if (!node) return;
-  if (!document.fullscreenElement) {
+  if (document.fullscreenElement !== node) {
     void node.requestFullscreen?.().catch(() => {
       /* denied by the user agent */
     });
@@ -195,7 +229,7 @@ function toggleFullscreen(): void {
 function togglePiP(): void {
   const video = el.value;
   if (!video) return;
-  if ('pictureInPictureElement' in document && document.pictureInPictureElement) {
+  if ('pictureInPictureElement' in document && document.pictureInPictureElement === video) {
     void (document as unknown as { exitPictureInPicture?: () => Promise<void> }).exitPictureInPicture?.()?.catch(() => {
       /* not in picture-in-picture */
     });
@@ -212,7 +246,7 @@ function togglePiP(): void {
 function bumpControls(): void {
   showControls.value = true;
   if (idleTimer != null) window.clearTimeout(idleTimer);
-  if (playing.value) {
+  if (playing.value && !focused.value) {
     idleTimer = window.setTimeout(() => {
       showControls.value = false;
     }, IdleHideMs);
@@ -220,13 +254,18 @@ function bumpControls(): void {
 }
 
 onMounted(bumpControls);
-watch(playing, bumpControls);
+watch([playing, focused], bumpControls);
 onBeforeUnmount(() => {
   if (idleTimer != null) window.clearTimeout(idleTimer);
 });
 
 function onMouseLeave(): void {
-  if (playing.value) showControls.value = false;
+  if (playing.value && !focused.value) showControls.value = false;
+}
+
+function onFocusout(event: FocusEvent): void {
+  const node = container.value;
+  if (!(event.relatedTarget instanceof Node) || !node?.contains(event.relatedTarget)) focused.value = false;
 }
 
 function onKeydown(event: KeyboardEvent): void {
@@ -268,7 +307,7 @@ function onKeydown(event: KeyboardEvent): void {
     case 'c':
     case 'C':
       event.preventDefault();
-      if (props.tracks && props.tracks.length > 0) captionsOn.value = !captionsOn.value;
+      if (hasTracks.value) captionsOn.value = !captionsOn.value;
       break;
   }
 }
@@ -299,7 +338,8 @@ function onNativeTimeUpdate(event: Event): void {
 function onNativeLoadedMetadata(event: Event): void {
   if (event.defaultPrevented) return;
   const video = el.value;
-  if (video) duration.value = video.duration || 0;
+  if (video) duration.value = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
+  applyCaptionMode();
 }
 
 function onVideoClick(event: MouseEvent): void {
@@ -330,7 +370,13 @@ const controlsClasses = computed(() =>
   ),
 );
 
-const hasTracks = computed(() => !!props.tracks && props.tracks.length > 0);
+const hasTracks = computed(
+  () =>
+    props.tracks?.some(
+      (track) =>
+        track.kind == null || track.kind === VideoTrackKind.Captions || track.kind === VideoTrackKind.Subtitles,
+    ) ?? false,
+);
 
 /**
  * Everything but `class` — and, exactly as in the React original, it lands on
@@ -348,18 +394,20 @@ defineExpose({ el });
   <div
     ref="container"
     role="region"
-    aria-label="Video player"
+    :aria-label="locale.t('VideoPlayer.videoPlayer', undefined, 'Video player')"
     :tabindex="0"
     :class="classes"
     :style="containerStyle"
     @keydown="onKeydown"
     @mousemove="bumpControls"
     @mouseleave="onMouseLeave"
+    @focusin="focused = true"
+    @focusout="onFocusout"
   >
     <video
       ref="el"
       :src="UrlExtensions.safeResource(src)"
-      :poster="poster"
+      :poster="UrlExtensions.safeResource(poster)"
       :autoplay="autoPlay"
       :loop="loop"
       :muted="isMuted"
@@ -367,8 +415,11 @@ defineExpose({ el });
       class="h-full w-full bg-black"
       @play="onNativePlay"
       @pause="onNativePause"
+      @ended="onNativePause"
       @timeupdate="onNativeTimeUpdate"
       @loadedmetadata="onNativeLoadedMetadata"
+      @durationchange="onNativeLoadedMetadata"
+      @emptied="resetMediaState"
       @click="onVideoClick"
     >
       <track
@@ -379,6 +430,7 @@ defineExpose({ el });
         :label="item.label"
         :kind="item.kind ?? 'captions'"
         :default="item.default"
+        @load="applyCaptionMode"
       />
     </video>
 
@@ -386,7 +438,7 @@ defineExpose({ el });
     <button
       v-if="!playing"
       type="button"
-      aria-label="Play"
+      :aria-label="locale.t('VideoPlayer.play', undefined, 'Play')"
       class="absolute inset-0 grid place-items-center bg-black/30 transition-opacity hover:bg-black/40"
       @click="togglePlay"
     >
@@ -399,7 +451,9 @@ defineExpose({ el });
     <div :class="controlsClasses">
       <button
         type="button"
-        :aria-label="playing ? 'Pause' : 'Play'"
+        :aria-label="
+          locale.t(playing ? 'VideoPlayer.pause' : 'VideoPlayer.play', undefined, playing ? 'Pause' : 'Play')
+        "
         class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30"
         @click="togglePlay"
       >
@@ -409,7 +463,7 @@ defineExpose({ el });
       <input
         type="range"
         role="slider"
-        aria-label="Seek"
+        :aria-label="locale.t('VideoPlayer.seek', undefined, 'Seek')"
         :aria-valuetext="formatTime(currentTime)"
         :min="0"
         :max="duration || 0"
@@ -420,7 +474,13 @@ defineExpose({ el });
       />
       <button
         type="button"
-        :aria-label="isMuted || volume === 0 ? 'Unmute' : 'Mute'"
+        :aria-label="
+          locale.t(
+            isMuted || volume === 0 ? 'VideoPlayer.unmute' : 'VideoPlayer.mute',
+            undefined,
+            isMuted || volume === 0 ? 'Unmute' : 'Mute',
+          )
+        "
         :class="IconButtonClass"
         @click="isMuted = !isMuted"
       >
@@ -428,7 +488,7 @@ defineExpose({ el });
       </button>
       <select
         v-model="speed"
-        aria-label="Playback speed"
+        :aria-label="locale.t('VideoPlayer.playbackSpeed', undefined, 'Playback speed')"
         class="h-7 rounded-sm border border-white/20 bg-black/40 px-1 text-xs"
       >
         <option v-for="rate in PlaybackRates" :key="rate" :value="rate" class="text-foreground">{{ rate }}×</option>
@@ -436,19 +496,36 @@ defineExpose({ el });
       <button
         v-if="hasTracks"
         type="button"
-        :aria-label="captionsOn ? 'Hide captions' : 'Show captions'"
+        :aria-label="
+          locale.t(
+            captionsOn ? 'VideoPlayer.hideCaptions' : 'VideoPlayer.showCaptions',
+            undefined,
+            captionsOn ? 'Hide captions' : 'Show captions',
+          )
+        "
         :aria-pressed="captionsOn"
         :class="IconButtonClass"
         @click="captionsOn = !captionsOn"
       >
         <Icon :icon="captionsOn ? Captions : CaptionsOff" :size="14" />
       </button>
-      <button type="button" aria-label="Picture in picture" :class="IconButtonClass" @click="togglePiP">
+      <button
+        type="button"
+        :aria-label="locale.t('VideoPlayer.pictureInPicture', undefined, 'Picture in picture')"
+        :class="IconButtonClass"
+        @click="togglePiP"
+      >
         <Icon :icon="PictureInPicture2" :size="14" />
       </button>
       <button
         type="button"
-        :aria-label="fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+        :aria-label="
+          locale.t(
+            fullscreen ? 'VideoPlayer.exitFullscreen' : 'VideoPlayer.enterFullscreen',
+            undefined,
+            fullscreen ? 'Exit fullscreen' : 'Enter fullscreen',
+          )
+        "
         :class="IconButtonClass"
         @click="toggleFullscreen"
       >

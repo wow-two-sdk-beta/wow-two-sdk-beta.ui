@@ -30,22 +30,6 @@ const ToneClasses: Record<HeatmapCalendarGridTone, ReadonlyArray<string>> = {
   muted: ['bg-muted/30', 'bg-muted', 'bg-muted-foreground/30', 'bg-muted-foreground/60', 'bg-muted-foreground'],
 };
 
-const DefaultMonths: ReadonlyArray<string> = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-const DefaultWeekdays: ReadonlyArray<string> = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 export interface HeatmapCalendarGridProps {
   /** The per-day counts, keyed by calendar date. */
   readonly values: Map<Temporal.PlainDate, number>;
@@ -94,10 +78,13 @@ interface MonthMarker {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { Temporal as TemporalRuntime } from 'temporal-polyfill';
 import { AriaAttribute } from '../../../foundation/dom';
 import { cn } from '../../../foundation/styles';
+
+const locale = useLocale();
 
 /**
  * Renders a year-long heatmap — 53 week columns x 7 weekday rows, tinted per day.
@@ -120,10 +107,27 @@ const props = withDefaults(defineProps<HeatmapCalendarGridProps>(), {
   levels: 5,
   tone: 'brand',
   onCellClick: undefined,
-  monthLabels: () => DefaultMonths,
-  weekdayLabels: () => DefaultWeekdays,
   hasLegend: true,
 });
+
+const monthLabels = computed(
+  () =>
+    props.monthLabels ??
+    Array.from({ length: 12 }, (_, i) =>
+      TemporalRuntime.PlainDate.from({ year: 2024, month: i + 1, day: 1 }).toLocaleString(locale.locale.value, {
+        month: 'short',
+      }),
+    ),
+);
+const weekdayLabels = computed(
+  () =>
+    props.weekdayLabels ??
+    Array.from({ length: 7 }, (_, i) =>
+      TemporalRuntime.PlainDate.from('2024-01-07')
+        .add({ days: i })
+        .toLocaleString(locale.locale.value, { weekday: 'short' }),
+    ),
+);
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
@@ -206,7 +210,7 @@ const colHeight = computed(() => 7 * (props.cellSize + props.gap));
 const weekdayOrder = computed(() =>
   Array.from({ length: 7 }, (_unused, i) => {
     const day = (i + props.weekStart) % 7;
-    return { day, label: props.weekdayLabels[day]! };
+    return { day, label: weekdayLabels.value[day]! };
   }),
 );
 
@@ -318,7 +322,7 @@ defineExpose({ el });
       </div>
     </div>
     <div v-if="hasLegend" class="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground">
-      <span>Less</span>
+      <span>{{ locale.t('HeatmapCalendarGrid.less', undefined, 'Less') }}</span>
       <span
         v-for="stepCls in toneSteps"
         :key="stepCls"
@@ -326,7 +330,7 @@ defineExpose({ el });
         :style="cellStyle"
         :class="cn('rounded-[2px]', stepCls)"
       />
-      <span>More</span>
+      <span>{{ locale.t('HeatmapCalendarGrid.more', undefined, 'More') }}</span>
     </div>
   </div>
 </template>

@@ -31,13 +31,6 @@ const DiffSide = {
 
 type DiffSide = (typeof DiffSide)[keyof typeof DiffSide];
 
-interface DiffRow {
-  op: DiffOp;
-  leftNum: number | null;
-  rightNum: number | null;
-  text: string;
-}
-
 export interface DiffViewerProps {
   readonly left: string;
   readonly right: string;
@@ -48,53 +41,13 @@ export interface DiffViewerProps {
   readonly rightLabel?: string | number;
   readonly hasStats?: boolean;
 }
-
-/**
- * LCS-based line diff. Returns ordered rows with `unchanged` / `added` /
- * `removed` operations. O(n×m) time + space.
- */
-function computeDiff(left: string, right: string): ReadonlyArray<DiffRow> {
-  const a = left.split('\n');
-  const b = right.split('\n');
-  const n = a.length;
-  const m = b.length;
-
-  // LCS table: dp[i][j] = LCS length of a[0..i] and b[0..j].
-  const dp: Array<Array<number>> = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-  for (let i = 1; i <= n; i++) {
-    for (let j = 1; j <= m; j++) {
-      if (a[i - 1] === b[j - 1]) dp[i]![j] = dp[i - 1]![j - 1]! + 1;
-      else dp[i]![j] = Math.max(dp[i - 1]![j]!, dp[i]![j - 1]!);
-    }
-  }
-
-  // Backtrack.
-  const rows: Array<DiffRow> = [];
-  let i = n;
-  let j = m;
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
-      rows.push({ op: DiffOp.Unchanged, leftNum: i, rightNum: j, text: a[i - 1]! });
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i]![j - 1]! >= dp[i - 1]![j]!)) {
-      rows.push({ op: DiffOp.Added, leftNum: null, rightNum: j, text: b[j - 1]! });
-      j--;
-    } else if (i > 0) {
-      rows.push({ op: DiffOp.Removed, leftNum: i, rightNum: null, text: a[i - 1]! });
-      i--;
-    } else {
-      break;
-    }
-  }
-  rows.reverse();
-  return rows;
-}
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
+import { computeDiff, type DiffRow } from './LineDiff';
 
 /**
  * Renders a line-level diff in split or unified columns, from its own LCS pass.
@@ -114,17 +67,16 @@ defineSlots<{
   rightLabel(): unknown;
 }>();
 
-const props = withDefaults(defineProps<DiffViewerProps>(), {
+const componentProps = withDefaults(defineProps<DiffViewerProps>(), {
   /* Both sides stay declared-required — Vue still warns when one is missing — but
      the defaults keep an absent (or transiently-undefined) value out of
      `computeDiff`, which called `.split` on it and took the whole page down. */
   left: '',
   right: '',
   view: DiffView.Split,
-  leftLabel: 'Before',
-  rightLabel: 'After',
   hasStats: true,
 });
+const props = useLocaleDefaults(componentProps, 'DiffViewer', { leftLabel: 'Before', rightLabel: 'After' });
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');

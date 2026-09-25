@@ -14,12 +14,15 @@ const DefaultPlaceholder = 'Type a command…';
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { DomOrderExtensions } from '../../../foundation/dom';
 import { computed, shallowRef, useAttrs, watch } from 'vue';
 import { Search } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import { useCommandPaletteContext, type CommandItemEntry } from './CommandPaletteModalContext';
+
+const locale = useLocale();
 
 /** Renders the palette's search field — a `role="combobox"` driving the option list. */
 defineOptions({ name: 'CommandPaletteModalInput', inheritAttrs: false });
@@ -78,11 +81,13 @@ function moveActive(direction: 1 | -1): void {
   if (index === -1) nextIndex = direction === 1 ? 0 : list.length - 1;
   if (nextIndex < 0) nextIndex = list.length - 1;
   if (nextIndex >= list.length) nextIndex = 0;
-  context.setActiveId(list[nextIndex]!.id);
+  const next = list[nextIndex]!;
+  context.setActiveId(next.id);
+  el.value?.ownerDocument.getElementById(next.id)?.scrollIntoView({ block: 'nearest' });
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-  if (event.defaultPrevented || event.isComposing) return;
+  if (event.defaultPrevented || event.isComposing || !context.open.value) return;
   switch (event.key) {
     case 'ArrowDown':
       event.preventDefault();
@@ -107,7 +112,7 @@ function handleKeydown(event: KeyboardEvent): void {
     case 'Enter': {
       const id = context.activeId.value;
       if (!id) return;
-      const entry = context.items.value.find((i) => i.id === id);
+      const entry = visibleItems().find((i) => i.id === id);
       if (!entry || entry.disabled) return;
       event.preventDefault();
       entry.select();
@@ -121,7 +126,11 @@ function handleInput(event: Event): void {
   context.setInputValue((event.target as HTMLInputElement).value);
 }
 
-const placeholder = computed(() => (attrs.placeholder as string | undefined) ?? DefaultPlaceholder);
+const placeholder = computed(
+  () =>
+    (attrs.placeholder as string | undefined) ??
+    locale.t('CommandPaletteModalInput.placeholder', undefined, DefaultPlaceholder),
+);
 
 const classes = computed(() =>
   cn(

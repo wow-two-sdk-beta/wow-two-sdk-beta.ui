@@ -10,8 +10,9 @@ export type NavigationMenuTriggerProps = Record<string, never>;
 </script>
 
 <script setup lang="ts">
-import { computed, shallowRef, useAttrs } from 'vue';
+import { computed, nextTick, shallowRef, useAttrs } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
+import { NavExtensions } from '../NavExtensions';
 import { cn } from '../../../foundation/styles';
 import { useRovingFocusItem } from '../../../foundation/primitives';
 import { useNavigationMenuContext, useNavigationMenuItemContext } from './NavigationMenuContext';
@@ -52,7 +53,7 @@ const isOpen = item.open;
 let wasOpenedByPointer = false;
 
 function handleClick(event: MouseEvent): void {
-  if (event.defaultPrevented) return;
+  if (event.defaultPrevented || NavExtensions.isDisabled(el.value)) return;
   if (wasOpenedByPointer) {
     // The hover-swap just opened this panel — keep it open.
     wasOpenedByPointer = false;
@@ -62,6 +63,7 @@ function handleClick(event: MouseEvent): void {
 }
 
 function handlePointerEnter(): void {
+  if (NavExtensions.isDisabled(el.value)) return;
   if (nav.activeId.value !== null && nav.activeId.value !== item.value) {
     nav.setActiveId(item.value);
     wasOpenedByPointer = true;
@@ -77,7 +79,18 @@ function handleFocus(): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-  if (event.defaultPrevented) return;
+  if (event.isComposing) return;
+  if (event.defaultPrevented || NavExtensions.isDisabled(el.value)) return;
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    nav.setActiveId(item.value);
+    void nextTick(() => {
+      if (!item.open.value || NavExtensions.isDisabled(el.value)) return;
+      const panel = el.value?.ownerDocument.getElementById(item.contentId);
+      panel?.querySelector<HTMLElement>('a[href],button:not(:disabled),[tabindex="0"]')?.focus();
+    });
+    return;
+  }
   roving.onKeydown(event);
 }
 

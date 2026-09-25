@@ -46,3 +46,5 @@ No explicit exposed handle.
 
 - Public render fixture: [DisplayExamples.ts](../../../../apps/playground/src/gallery/fixtures/DisplayExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+Disabling clears pending delays and closes uncontrolled state; re-enabling cannot resurrect an old hover timer.

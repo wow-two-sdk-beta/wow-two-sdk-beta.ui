@@ -11,6 +11,7 @@ export type MenubarTriggerProps = Record<string, never>;
 
 <script setup lang="ts">
 import { computed, shallowRef, useAttrs, watch } from 'vue';
+import { NavExtensions } from '../NavExtensions';
 import { cn } from '../../../foundation/styles';
 import { useRovingFocusItem } from '../../../foundation/primitives';
 import { useMenubarContext, useMenubarMenuContext } from './MenubarContext';
@@ -55,11 +56,12 @@ watch(
 const isOpen = menu.open;
 
 function handleClick(event: MouseEvent): void {
-  if (event.defaultPrevented) return;
+  if (event.defaultPrevented || NavExtensions.isDisabled(el.value)) return;
   menu.setOpen(!menu.open.value);
 }
 
 function handlePointerEnter(): void {
+  if (NavExtensions.isDisabled(el.value)) return;
   // If any menu is open, moving the pointer onto a trigger switches the active menu.
   if (bar.activeId.value !== null && bar.activeId.value !== menu.id) {
     bar.setActiveId(menu.id);
@@ -73,7 +75,8 @@ function handleFocus(): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-  if (event.defaultPrevented) return;
+  if (event.isComposing) return;
+  if (event.defaultPrevented || NavExtensions.isDisabled(el.value)) return;
   switch (event.key) {
     case 'ArrowDown':
     case 'Enter':

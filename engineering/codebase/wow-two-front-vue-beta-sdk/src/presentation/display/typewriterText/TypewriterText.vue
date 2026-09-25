@@ -35,6 +35,7 @@ export interface TypewriterTextProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, onBeforeUnmount, onMounted, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useReducedMotion } from '../../../foundation/device';
@@ -47,10 +48,8 @@ import { useReducedMotion } from '../../../foundation/device';
  */
 defineOptions({ name: 'TypewriterText', inheritAttrs: false });
 
-const props = withDefaults(defineProps<TypewriterTextProps>(), {
+const componentProps = withDefaults(defineProps<TypewriterTextProps>(), {
   typeSpeed: 60,
-  pauseLabel: 'Pause animation',
-  resumeLabel: 'Resume animation',
   deleteSpeed: 40,
   pauseBetween: 1500,
   // `undefined` is meaningful — it falls back to `phrases.length > 1`, and Vue
@@ -59,6 +58,10 @@ const props = withDefaults(defineProps<TypewriterTextProps>(), {
   hasCursor: true,
   cursorChar: '│',
   as: 'span',
+});
+const props = useLocaleDefaults(componentProps, 'TypewriterText', {
+  pauseLabel: 'Pause animation',
+  resumeLabel: 'Resume animation',
 });
 
 const attrs = useAttrs();
@@ -161,7 +164,7 @@ const fullText = computed(() =>
     : (phrases.value[phraseIndex.value] ?? '').slice(0, charIndex.value),
 );
 
-const hasCursor = computed(() => props.hasCursor && !reducedMotion.value && !paused.value);
+const showsCursor = computed(() => props.hasCursor && !reducedMotion.value && !paused.value);
 
 const classes = computed(() => cn('inline-block', attrs.class as string | undefined));
 
@@ -179,7 +182,7 @@ defineExpose({ el });
     <span class="sr-only">{{ phrases.join(' ') }}</span>
     <span aria-hidden="true"
       >{{ fullText
-      }}<span v-if="hasCursor" class="ml-0.5 inline-block motion-safe:animate-[blink-caret_1s_step-end_infinite]">{{
+      }}<span v-if="showsCursor" class="ml-0.5 inline-block motion-safe:animate-[blink-caret_1s_step-end_infinite]">{{
         props.cursorChar
       }}</span></span
     >

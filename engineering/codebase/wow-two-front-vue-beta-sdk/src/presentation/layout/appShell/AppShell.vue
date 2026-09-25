@@ -81,10 +81,13 @@ export interface AppShellProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, normalizeStyle, provide, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
 import { useMediaQuery } from '../../../foundation/device';
+
+const locale = useLocale();
 
 /**
  * Renders the top-level page frame. Children: `AppShellHeader` / `AppShellSidebar` /
@@ -170,7 +173,7 @@ defineExpose({ el });
       href="#app-shell-main"
       class="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-modal focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:shadow"
     >
-      Skip to content
+      {{ locale.t('AppShell.skipToContent', undefined, 'Skip to content') }}
     </a>
     <slot />
   </div>

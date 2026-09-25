@@ -14,21 +14,21 @@ Public import: `import { Menubar } from '@wow-two-beta/ui-vue/presentation/nav';
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `string \| null` | no | `undefined` | The id of the currently-open menu, or `null` if none. Controlled. |
-| `defaultValue` | `string \| null` | no | `null` | The initially-open menu id when uncontrolled. Default `null`. |
+| Prop           | Type             | Required | Default     | Meaning                                                           |
+| -------------- | ---------------- | -------- | ----------- | ----------------------------------------------------------------- |
+| `modelValue`   | `string \| null` | no       | `undefined` | The id of the currently-open menu, or `null` if none. Controlled. |
+| `defaultValue` | `string \| null` | no       | `null`      | The initially-open menu id when uncontrolled. Default `null`.     |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                       | Meaning                                                                                  |
+| ------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [value: string \| null];` | Fires when the reader opens a different menu — carries its id, or `null` once all close. |
 
 ## Slots
 
-| Slot | Signature | Meaning |
-|---|---|---|
+| Slot      | Signature            | Meaning                     |
+| --------- | -------------------- | --------------------------- |
 | `default` | `default(): unknown` | See the declared signature. |
 
 ## Exposed handle
@@ -40,3 +40,7 @@ Public import: `import { Menubar } from '@wow-two-beta/ui-vue/presentation/nav';
 - Public render fixture: [NavExamples.ts](../../../../apps/playground/src/gallery/fixtures/NavExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Focused test references: [LiveValues.dom.test.ts](../../../../tests/unit/presentation/nav/LiveValues.dom.test.ts). Consult the named test assertions for the behavior actually covered.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Interaction guarantees
+
+Open-menu arrow movement follows current DOM order, skips disabled triggers and respects RTL. Disabled triggers cannot open via hover or synthetic activation.

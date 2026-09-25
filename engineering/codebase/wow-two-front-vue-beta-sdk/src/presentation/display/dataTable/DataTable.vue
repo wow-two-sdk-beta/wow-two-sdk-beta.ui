@@ -1,6 +1,7 @@
 <script lang="ts">
 import { Temporal } from 'temporal-polyfill';
 import { compareStrings } from '../../../foundation/i18n';
+import { ExactNumber } from '../../../foundation/numbers';
 import type { TableDensity } from '../table';
 
 /** Defines the sort order of a DataTable column. */
@@ -45,6 +46,8 @@ export interface DataTableColumn<T> {
    */
   readonly cell?: (row: T, index: number) => unknown;
   readonly isSortable?: boolean;
+  /** Custom row comparison; takes precedence over accessor-based sorting. */
+  readonly compare?: (left: T, right: T) => number;
   readonly align?: DataTableColumnAlign;
   readonly width?: string;
 }
@@ -71,10 +74,15 @@ export interface DataTableProps<T> {
   readonly emptyContent?: string | number;
 }
 
-function defaultCompare(a: unknown, b: unknown): number {
+function defaultCompare(a: unknown, b: unknown, locale: string): number {
   if (a === b) return 0;
   if (a === null || a === undefined) return 1;
   if (b === null || b === undefined) return -1;
+  if (ExactNumber.isExactNumber(a) && ExactNumber.isExactNumber(b)) {
+    const result = a.compare(b);
+    if (result.ok) return result.value;
+  }
+  if (typeof a === 'bigint' && typeof b === 'bigint') return a < b ? -1 : 1;
   if (typeof a === 'number' && typeof b === 'number') return a - b;
   if (a instanceof Temporal.PlainDate && b instanceof Temporal.PlainDate) return Temporal.PlainDate.compare(a, b);
   if (a instanceof Temporal.PlainTime && b instanceof Temporal.PlainTime) return Temporal.PlainTime.compare(a, b);
@@ -86,12 +94,13 @@ function defaultCompare(a: unknown, b: unknown): number {
   // consumer may still put a `Date` in a column — this is a generic value
   // comparator, not a date-value API surface.
   if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
-  return compareStrings(String(a), String(b));
+  return compareStrings(String(a), String(b), locale);
 }
 </script>
 
 <script setup lang="ts" generic="T">
 import { computed } from 'vue';
+import { useLocale } from '../../../foundation/i18n';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
@@ -116,8 +125,10 @@ const props = withDefaults(defineProps<DataTableProps<T>>(), {
   isHoverable: undefined,
   density: undefined,
   isBare: undefined,
-  emptyContent: 'No results.',
 });
+
+const locale = useLocale();
+const emptyText = computed(() => props.emptyContent ?? locale.t('DataTable.emptyContent', undefined, 'No results.'));
 
 const emit = defineEmits<{
   /** Fires when the reader clicks a sortable header, with the next sort or `null` once cleared. */
@@ -147,11 +158,13 @@ const sortedData = computed<ReadonlyArray<T>>(() => {
   if (!active) return props.data;
   const column = props.columns.find((entry) => entry.key === active.columnKey);
   const accessor = column?.accessor;
-  if (!accessor) return props.data;
+  if (!accessor && !column?.compare) return props.data;
   return props.data
-    .map((row) => ({ row, value: accessor(row) }))
+    .map((row) => ({ row, value: column?.compare ? undefined : accessor?.(row) }))
     .sort((a, b) => {
-      const result = defaultCompare(a.value, b.value);
+      const result = column?.compare
+        ? column.compare(a.row, b.row)
+        : defaultCompare(a.value, b.value, locale.locale.value);
       return active.direction === SortDirection.Asc ? result : -result;
     })
     .map(({ row }) => row);
@@ -202,8 +215,24 @@ const rows = computed(() =>
     row,
     index,
     /* `onClick` only exists when a handler was supplied — React's `onClick={onRowClick ? … : undefined}`. */
-    attrs: props.onRowClick ? { onClick: (): void => props.onRowClick?.(row, index) } : ({} as Record<string, never>),
-    class: cn(props.onRowClick && 'cursor-pointer'),
+    attrs: props.onRowClick
+      ? {
+          tabindex: 0,
+          onClick: (event: MouseEvent): void => {
+            if (!event.defaultPrevented) props.onRowClick?.(row, index);
+          },
+          onKeydown: (event: KeyboardEvent): void => {
+            if (event.target !== event.currentTarget || event.defaultPrevented || !['Enter', ' '].includes(event.key))
+              return;
+            event.preventDefault();
+            props.onRowClick?.(row, index);
+          },
+        }
+      : ({} as Record<string, never>),
+    class: cn(
+      props.onRowClick &&
+        'cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2',
+    ),
   })),
 );
 
@@ -245,7 +274,7 @@ const SortButtonClass =
       <template v-if="rows.length === 0">
         <TableRow>
           <TableCell :colspan="columns.length" class="py-8 text-center text-muted-foreground">
-            <slot name="emptyContent">{{ emptyContent }}</slot>
+            <slot name="emptyContent">{{ emptyText }}</slot>
           </TableCell>
         </TableRow>
       </template>

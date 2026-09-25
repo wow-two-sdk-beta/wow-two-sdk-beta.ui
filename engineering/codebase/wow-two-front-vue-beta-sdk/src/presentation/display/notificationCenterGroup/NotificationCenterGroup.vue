@@ -9,10 +9,14 @@ export interface NotificationCenterGroupProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { Bell } from 'lucide-vue-next';
 import { cn, surfaceVariants } from '../../../foundation/styles';
 import { renderableChildren } from '../../../foundation/primitives';
+
+const locale = useLocale();
 
 /**
  * Renders a notification panel — title and count header, a scrolling item list, optional footer.
@@ -24,7 +28,8 @@ import { renderableChildren } from '../../../foundation/primitives';
  */
 defineOptions({ name: 'NotificationCenterGroup', inheritAttrs: false });
 
-const props = withDefaults(defineProps<NotificationCenterGroupProps>(), { title: 'Notifications' });
+const componentProps = withDefaults(defineProps<NotificationCenterGroupProps>(), {});
+const props = useLocaleDefaults(componentProps, 'NotificationCenterGroup', { title: 'Notifications' });
 
 defineSlots<{
   /** The `NotificationItem` children filling the scrolling list. */
@@ -67,7 +72,13 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div ref="el" role="region" aria-label="Notifications" v-bind="rest" :class="classes">
+  <div
+    ref="el"
+    role="region"
+    :aria-label="locale.t('NotificationCenterGroup.notifications', undefined, 'Notifications')"
+    v-bind="rest"
+    :class="classes"
+  >
     <header class="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
       <div class="flex items-center gap-2">
         <span class="text-sm font-semibold">
@@ -87,7 +98,9 @@ defineExpose({ el });
         <slot name="emptyState">
           <div class="flex flex-col items-center gap-2 px-4 py-10 text-center text-muted-foreground">
             <Bell class="h-6 w-6" />
-            <p class="text-sm">You're all caught up.</p>
+            <p class="text-sm">
+              {{ locale.t('NotificationCenterGroup.youreAllCaughtUp', undefined, "You're all caught up.") }}
+            </p>
           </div>
         </slot>
       </template>

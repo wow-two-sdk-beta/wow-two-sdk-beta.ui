@@ -7,11 +7,14 @@
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { ChevronLeft } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { Icon } from '../../../foundation/icons';
 import { useCarouselContext } from './CarouselContext';
+
+const locale = useLocale();
 
 /** Renders the step-back nav button; React shipped it as `Carousel.Prev`. */
 defineOptions({ name: 'CarouselPrev', inheritAttrs: false });
@@ -57,7 +60,7 @@ defineExpose({ el });
   <button
     ref="el"
     type="button"
-    aria-label="Previous slide"
+    :aria-label="locale.t('CarouselPrev.previousSlide', undefined, 'Previous slide')"
     :disabled="isDisabled"
     v-bind="rest"
     :class="classes"

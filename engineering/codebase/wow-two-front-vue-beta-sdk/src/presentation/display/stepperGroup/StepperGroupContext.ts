@@ -39,8 +39,8 @@ export interface StepperGroupContextValue {
    * A reactive array here closes that, and matches how `SelectPicker` registers its items.
    */
   readonly steps: ReadonlyArray<string>;
-  registerStep: (value: string) => void;
-  unregisterStep: (value: string) => void;
+  registerStep: (token: symbol, value: string) => void;
+  unregisterStep: (token: symbol) => void;
 }
 
 export const StepperGroupKey: InjectionKey<StepperGroupContextValue> = Symbol('wow-two.stepper');

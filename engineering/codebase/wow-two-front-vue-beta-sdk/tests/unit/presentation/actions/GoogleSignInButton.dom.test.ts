@@ -1,122 +1,128 @@
-import { flushPromises, mount } from '@vue/test-utils';
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { nextTick } from 'vue';
-
+import { defineComponent, h, nextTick, ref } from 'vue';
 import { GoogleSignInButton } from '@src/presentation/actions';
-
-/*
- * `dom` project (happy-dom). The GIS script itself is never fetched here — `loadGoogleIdentity`
- * short-circuits on an already-present `window.google.accounts.id`, which is exactly what a real
- * page looks like once the script has run. Stubbing at that seam covers the whole flow without a
- * network, and leaves the script-injection branch to the mount smoke case (where it never settles).
- *
- * The contract under test is the boundary: this package produces an ID token and nothing else. A
- * regression that starts POSTing the credential from inside the SDK would still pass a render
- * assertion, so the credential emit is asserted by value.
- */
+import { provideGoogleIdentity, type GoogleIdentityApi } from '@src/foundation/oauth';
 
 const ClientId = 'test-client-id.apps.googleusercontent.com';
-
-interface FakeGis {
+let gis: {
   initialize: ReturnType<typeof vi.fn>;
   renderButton: ReturnType<typeof vi.fn>;
   prompt: ReturnType<typeof vi.fn>;
   disableAutoSelect: ReturnType<typeof vi.fn>;
-}
-
-let gis: FakeGis;
-
-/** Drains the load promise, the status flip, and the render watcher's own tick. */
-async function settle(): Promise<void> {
+};
+const wrappers: VueWrapper[] = [];
+beforeEach(() => {
+  gis = { initialize: vi.fn(), renderButton: vi.fn(), prompt: vi.fn(), disableAutoSelect: vi.fn() };
+  vi.stubGlobal('google', { accounts: { id: gis } });
+});
+afterEach(() => {
+  wrappers
+    .splice(0)
+    .reverse()
+    .forEach((wrapper) => wrapper.unmount());
+  vi.unstubAllGlobals();
+});
+async function settle() {
   await flushPromises();
   await nextTick();
 }
-
-/** Invokes the `callback` GIS was initialized with — the browser's job on a completed sign-in. */
-function signInWith(credential: string | undefined): void {
-  const config = gis.initialize.mock.calls.at(-1)?.[0] as {
-    callback: (response: { credential?: string; select_by?: string }) => void;
-  };
-  config.callback({ credential, select_by: 'btn' });
+function owner(count = 1, configured = true) {
+  const clientId = ref<string | undefined>(configured ? ClientId : undefined);
+  const theme = ref<'outline' | 'filled_blue'>('outline');
+  const credential = vi.fn();
+  const error = vi.fn();
+  let controls!: GoogleIdentityApi;
+  const wrapper = mount(
+    defineComponent({
+      setup() {
+        controls = provideGoogleIdentity({ clientId, onCredential: credential, onError: error });
+        return () =>
+          h(
+            'section',
+            Array.from({ length: count }, () => h(GoogleSignInButton, { theme: theme.value })),
+          );
+      },
+    }),
+  );
+  wrappers.push(wrapper);
+  return { wrapper, clientId, theme, credential, error, controls };
+}
+function callback(index = -1): (response: { credential?: string }) => void {
+  return gis.initialize.mock.calls.at(index)![0].callback;
 }
 
-beforeEach(() => {
-  gis = {
-    initialize: vi.fn(),
-    renderButton: vi.fn(),
-    prompt: vi.fn(),
-    disableAutoSelect: vi.fn(),
-  };
-  (globalThis as { google?: unknown }).google = { accounts: { id: gis } };
-});
-
-afterEach(() => {
-  delete (globalThis as { google?: unknown }).google;
-});
-
-describe('GoogleSignInButton', () => {
-  it('initializes GIS with the client id and renders into its own host', async () => {
-    const wrapper = mount(GoogleSignInButton, { props: { clientId: ClientId } });
+describe('GoogleSignInButton shared owner', () => {
+  it('initializes once for multiple rendered buttons and delivers credentials once to their common owner', async () => {
+    const host = owner(2);
     await settle();
-
     expect(gis.initialize).toHaveBeenCalledTimes(1);
-    expect(gis.initialize.mock.calls.at(0)?.[0]).toMatchObject({ client_id: ClientId, auto_select: false });
-
-    expect(gis.renderButton).toHaveBeenCalledTimes(1);
-    expect(gis.renderButton.mock.calls.at(0)?.[0]).toBe(wrapper.element);
-    expect(gis.renderButton.mock.calls.at(0)?.[1]).toMatchObject({ theme: 'outline', size: 'large' });
+    expect(gis.renderButton).toHaveBeenCalledTimes(2);
+    const buttons = host.wrapper.findAllComponents(GoogleSignInButton);
+    expect(gis.renderButton.mock.calls.map((call) => call[0])).toEqual(buttons.map((button) => button.element));
+    callback()({ credential: 'id-token' });
+    expect(host.credential).toHaveBeenCalledOnce();
+    expect(host.credential.mock.calls[0]![0]).toBe('id-token');
+    callback()({});
+    expect(host.credential).toHaveBeenCalledOnce();
   });
 
-  it('emits the raw ID token and never posts it', async () => {
-    const wrapper = mount(GoogleSignInButton, { props: { clientId: ClientId } });
+  it('renders nothing without an owner client id', async () => {
+    const host = owner(1, false);
     await settle();
-
-    signInWith('id-token-abc');
-
-    expect(wrapper.emitted('credential')?.[0]?.[0]).toBe('id-token-abc');
-  });
-
-  it('ignores a dismissed prompt that carries no credential', async () => {
-    const wrapper = mount(GoogleSignInButton, { props: { clientId: ClientId } });
-    await settle();
-
-    signInWith(undefined);
-
-    expect(wrapper.emitted('credential')).toBeUndefined();
-  });
-
-  it('renders nothing and loads nothing without a client id', async () => {
-    const wrapper = mount(GoogleSignInButton, { props: {} });
-    await settle();
-
-    expect(wrapper.html()).toBe('<!--v-if-->');
+    expect(host.wrapper.findComponent(GoogleSignInButton).html()).toBe('<!--v-if-->');
     expect(gis.initialize).not.toHaveBeenCalled();
   });
 
-  it('re-initializes when the client id changes', async () => {
-    const wrapper = mount(GoogleSignInButton, { props: { clientId: ClientId } });
+  it('updates provider configuration while old callbacks cannot deliver credentials', async () => {
+    const host = owner();
     await settle();
-
-    await wrapper.setProps({ clientId: 'second-id.apps.googleusercontent.com' });
+    const stale = callback();
+    host.clientId.value = 'second-id';
+    stale({ credential: 'stale' });
     await settle();
-
+    callback()({ credential: 'current' });
     expect(gis.initialize).toHaveBeenCalledTimes(2);
-    expect(gis.initialize.mock.calls.at(1)?.[0]).toMatchObject({
-      client_id: 'second-id.apps.googleusercontent.com',
-    });
+    expect(host.credential).toHaveBeenCalledTimes(1);
+    expect(host.credential.mock.calls[0]![0]).toBe('current');
   });
 
-  it('clears the host before re-rendering so buttons do not stack', async () => {
-    const wrapper = mount(GoogleSignInButton, { props: { clientId: ClientId } });
+  it('clears Google-owned nodes before re-rendering appearance changes', async () => {
+    const host = owner();
     await settle();
-
-    // GIS appends its iframe on render; a second render must not leave the first behind.
-    wrapper.element.appendChild(document.createElement('div'));
-    await wrapper.setProps({ theme: 'filled_blue' });
+    const button = host.wrapper.findComponent(GoogleSignInButton);
+    button.element.appendChild(document.createElement('div'));
+    host.theme.value = 'filled_blue';
     await settle();
-
-    expect(wrapper.element.children).toHaveLength(0);
+    expect(button.element.children).toHaveLength(0);
     expect(gis.renderButton).toHaveBeenCalledTimes(2);
-    expect(gis.renderButton.mock.calls.at(1)?.[1]).toMatchObject({ theme: 'filled_blue' });
+    expect(gis.renderButton.mock.calls[1]![1]).toMatchObject({ theme: 'filled_blue' });
+  });
+
+  it('rejects a competing page owner without overwriting the first credential sink', async () => {
+    const first = owner();
+    await settle();
+    const second = owner();
+    await settle();
+    expect(gis.initialize).toHaveBeenCalledTimes(1);
+    expect(second.error).toHaveBeenCalledOnce();
+    callback()({ credential: 'first-only' });
+    expect(first.credential).toHaveBeenCalledOnce();
+    expect(second.credential).not.toHaveBeenCalled();
+  });
+
+  it('releases ownership on unmount and ignores the disposed callback', async () => {
+    const first = owner();
+    await settle();
+    const old = callback();
+    first.wrapper.unmount();
+    wrappers.pop();
+    const second = owner();
+    await settle();
+    old({ credential: 'disposed' });
+    callback()({ credential: 'active' });
+    expect(first.credential).not.toHaveBeenCalled();
+    expect(second.credential).toHaveBeenCalledOnce();
+    expect(gis.initialize).toHaveBeenCalledTimes(2);
   });
 });

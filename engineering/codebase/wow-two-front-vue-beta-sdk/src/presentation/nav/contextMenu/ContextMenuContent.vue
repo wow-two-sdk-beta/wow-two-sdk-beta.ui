@@ -61,6 +61,7 @@ const rest = computed(() => {
   <Menu
     :open="isOpen"
     :anchor="anchor"
+    :return-focus="() => context.restoreFocus.current"
     :placement="placement"
     :offset="offset"
     v-bind="rest"

@@ -15,11 +15,14 @@ export interface CommentProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, ref, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { ChevronDown, ChevronRight } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { dataAttr } from '../../../foundation/dom';
 import { renderableChildren } from '../../../foundation/primitives';
+
+const locale = useLocale();
 
 /**
  * Renders one comment: avatar and collapse rail, header line, body, actions, and nested replies.
@@ -117,7 +120,13 @@ defineExpose({ el });
       <button
         v-if="hasReplies()"
         type="button"
-        :aria-label="collapsed ? 'Expand replies' : 'Collapse replies'"
+        :aria-label="
+          locale.t(
+            collapsed ? 'Comment.expandReplies' : 'Comment.collapseReplies',
+            undefined,
+            collapsed ? 'Expand replies' : 'Collapse replies',
+          )
+        "
         class="flex flex-1 items-stretch -my-1 group/rail focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-full"
         @click="collapsed = !collapsed"
       >
@@ -154,7 +163,13 @@ defineExpose({ el });
         @click="collapsed = false"
       >
         <ChevronRight class="h-3 w-3" />
-        Show {{ replyCount() }} {{ replyCount() === 1 ? 'reply' : 'replies' }}
+        {{
+          locale.t(
+            replyCount() === 1 ? 'Comment.showReply' : 'Comment.showReplies',
+            { count: replyCount() },
+            replyCount() === 1 ? 'Show {count} reply' : 'Show {count} replies',
+          )
+        }}
       </button>
       <button
         v-if="hasReplies() && !collapsed"
@@ -162,8 +177,7 @@ defineExpose({ el });
         class="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded"
         @click="collapsed = true"
       >
-        <ChevronDown class="h-3 w-3" />
-        Collapse
+        <ChevronDown class="h-3 w-3" /> {{ locale.t('Comment.collapse', undefined, 'Collapse') }}
       </button>
     </div>
   </div>

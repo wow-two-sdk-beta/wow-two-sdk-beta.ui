@@ -21,9 +21,12 @@ export interface MessageGroupProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useAttrs, useTemplateRef } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
+
+const locale = useLocale();
 
 /**
  * Renders a scrolling message viewport with sticky auto-scroll and a jump-to-latest affordance.
@@ -141,7 +144,7 @@ defineExpose({ el, scrollToBottom, isAtBottom: isNearBottom });
     <button
       v-if="props.hasJumpToBottom && !atBottom"
       type="button"
-      aria-label="Jump to latest"
+      :aria-label="locale.t('MessageGroup.jumpToLatest', undefined, 'Jump to latest')"
       class="absolute bottom-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-md hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
       @click="scrollToBottom('smooth')"
     >

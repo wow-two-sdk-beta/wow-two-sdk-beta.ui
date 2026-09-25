@@ -25,9 +25,12 @@ function scorePassword(pw: string): 0 | 1 | 2 | 3 | 4 {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
+
+const locale = useLocale();
 
 /** Renders a four-bar password strength meter from naive 0–4 scoring, or from a `score` you supply. */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
@@ -47,7 +50,9 @@ const resolvedScore = computed<0 | 1 | 2 | 3 | 4>(
   () => props.score ?? (props.value.length === 0 ? 0 : scorePassword(props.value)),
 );
 
-const label = computed(() => StrengthLabels[resolvedScore.value] ?? '');
+const label = computed(() =>
+  locale.t('PasswordStrengthCallout.score' + resolvedScore.value, undefined, StrengthLabels[resolvedScore.value] ?? ''),
+);
 const tone = computed(() => ToneClass[resolvedScore.value] ?? 'bg-destructive');
 
 function barClass(index: number): string {

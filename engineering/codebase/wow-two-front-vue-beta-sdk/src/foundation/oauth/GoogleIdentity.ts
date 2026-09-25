@@ -1,4 +1,8 @@
 import {
+  inject,
+  provide,
+  shallowRef,
+  type InjectionKey,
   onMounted,
   onScopeDispose,
   readonly,
@@ -87,7 +91,9 @@ declare global {
 
 /* One in-flight promise per document. Never rejected-and-cached: a failed load is dropped so a
    later mount (a flaky network on the first paint) can retry rather than inherit the failure. */
-let scriptPromise: Promise<GoogleAccountsId> | null = null;
+const scriptPromises = new WeakMap<Document, Promise<GoogleAccountsId>>();
+const documentOwners = new WeakMap<Document, symbol>();
+const GoogleIdentityKey: InjectionKey<GoogleIdentityApi> = Symbol('google-identity');
 
 /**
  * Loads the Google Identity Services client, returning the shared `accounts.id` namespace.
@@ -102,13 +108,16 @@ export function loadGoogleIdentity(): Promise<GoogleAccountsId> {
 
   const loaded = globalThis.google?.accounts?.id;
   if (loaded) return Promise.resolve(loaded);
-  if (scriptPromise) return scriptPromise;
+  const cached = scriptPromises.get(document);
+  if (cached) return cached;
 
-  scriptPromise = new Promise<GoogleAccountsId>((resolve, reject) => {
+  const ownerDocument = document;
+  const scriptPromise = new Promise<GoogleAccountsId>((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${GoogleIdentityScriptSrc}"]`);
     const script = existing ?? document.createElement('script');
 
     const cleanup = (): void => {
+      clearTimeout(timer);
       script.removeEventListener('load', settle);
       script.removeEventListener('error', fail);
     };
@@ -127,6 +136,7 @@ export function loadGoogleIdentity(): Promise<GoogleAccountsId> {
       }
     };
 
+    const timer = setTimeout(fail, 15_000);
     script.addEventListener('load', settle, { once: true });
     script.addEventListener('error', fail, { once: true });
 
@@ -138,16 +148,17 @@ export function loadGoogleIdentity(): Promise<GoogleAccountsId> {
     }
   });
 
+  scriptPromises.set(ownerDocument, scriptPromise);
   // A rejected load must not poison later mounts.
   void scriptPromise.catch(() => {
-    scriptPromise = null;
+    if (scriptPromises.get(ownerDocument) === scriptPromise) scriptPromises.delete(ownerDocument);
   });
 
   return scriptPromise;
 }
 
-/** Defines the options {@link useGoogleIdentity} takes. */
-export interface UseGoogleIdentityOptions {
+/** Defines the options {@link provideGoogleIdentity} takes. */
+export interface ProvideGoogleIdentityOptions {
   /** OAuth client id. Empty / undefined keeps the status `unresolved` and loads nothing — app stays guest-only. */
   readonly clientId: MaybeRefOrGetter<string | undefined>;
 
@@ -183,7 +194,7 @@ export interface GoogleIdentityApi {
 }
 
 /**
- * Manages the Google Identity Services client for one component — script load, `initialize`, and the
+ * Provides one app-level Google Identity Services owner — script load, `initialize`, and the
  * credential callback.
  *
  * Headless by design: this module renders nothing, and never talks to the backend. The ID token is
@@ -193,10 +204,12 @@ export interface GoogleIdentityApi {
  * The client id is a `MaybeRefOrGetter` — pass a getter (`() => props.clientId`) to keep it reactive;
  * a change re-initializes against the new id.
  */
-export function useGoogleIdentity(options: UseGoogleIdentityOptions): GoogleIdentityApi {
+export function provideGoogleIdentity(options: ProvideGoogleIdentityOptions): GoogleIdentityApi {
   const status = ref<GoogleIdentityStatus>(GoogleIdentityStatus.Unresolved);
   const error = ref<Error | null>(null);
-  const client = ref<GoogleAccountsId | null>(null);
+  const client = shallowRef<GoogleAccountsId | null>(null);
+  const owner = Symbol('google-owner');
+  let ownerDocument: Document | undefined;
 
   let disposed = false;
   let generation = 0;
@@ -211,6 +224,13 @@ export function useGoogleIdentity(options: UseGoogleIdentityOptions): GoogleIden
 
   async function initialize(clientId: string | undefined): Promise<void> {
     const current = ++generation;
+    ownerDocument = document;
+    const activeOwner = documentOwners.get(ownerDocument);
+    if (activeOwner && activeOwner !== owner) {
+      fail(new Error('Google Identity already has an app-level owner in this document.'));
+      return;
+    }
+    documentOwners.set(ownerDocument, owner);
     const isCurrent = (): boolean => !disposed && current === generation && toValue(options.clientId) === clientId;
     client.value = null;
     if (!clientId) {
@@ -247,24 +267,34 @@ export function useGoogleIdentity(options: UseGoogleIdentityOptions): GoogleIden
 
   // Mount-only: `initialize` reaches for `document`, so it must not run during SSR.
   onMounted(() => {
-    void initialize(toValue(options.clientId));
     watch(
-      () => toValue(options.clientId),
-      (next) => void initialize(next),
+      () => [toValue(options.clientId), toValue(options.autoSelect), toValue(options.cancelOnTapOutside)] as const,
+      ([clientId]) => void initialize(clientId),
+      { immediate: true, flush: 'sync' },
     );
   });
 
   onScopeDispose(() => {
     disposed = true;
     generation += 1;
+    if (ownerDocument && documentOwners.get(ownerDocument) === owner) documentOwners.delete(ownerDocument);
     client.value = null;
   });
 
-  return {
+  const handle: GoogleIdentityApi = {
     status: readonly(status),
     error: shallowReadonly(error),
     renderButton: (target, buttonOptions) => client.value?.renderButton(target, buttonOptions ?? {}),
     prompt: () => client.value?.prompt(),
     disableAutoSelect: () => client.value?.disableAutoSelect(),
   };
+  provide(GoogleIdentityKey, handle);
+  return handle;
+}
+
+/** Reads the app-level identity owner; buttons never initialize or replace Google configuration. */
+export function useGoogleIdentity(): GoogleIdentityApi {
+  const owner = inject(GoogleIdentityKey, null);
+  if (!owner) throw new Error('useGoogleIdentity requires provideGoogleIdentity in an ancestor.');
+  return owner;
 }

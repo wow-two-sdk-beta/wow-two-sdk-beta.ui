@@ -20,11 +20,14 @@ const DefaultAriaLabel = 'Main navigation';
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, provide, useAttrs, useTemplateRef } from 'vue';
 import { AriaAttribute } from '../../../foundation/dom';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
 import { navigationMenuContextKey } from './NavigationMenuContext';
+
+const locale = useLocale();
 
 /** Renders the top-level site navigation bar, holding one expandable panel open at a time. */
 defineOptions({ name: 'NavigationMenu', inheritAttrs: false });
@@ -54,7 +57,10 @@ const { value: activeId, setValue: setActiveId } = useControlled<string | null>(
 
 provide(navigationMenuContextKey, { activeId, setActiveId });
 
-const ariaLabel = computed(() => (attrs[AriaAttribute.Label] as string | undefined) ?? DefaultAriaLabel);
+const ariaLabel = computed(
+  () =>
+    (attrs[AriaAttribute.Label] as string | undefined) ?? locale.t('NavigationMenu.label', undefined, DefaultAriaLabel),
+);
 
 const classes = computed(() => cn('relative', attrs.class as string | undefined));
 

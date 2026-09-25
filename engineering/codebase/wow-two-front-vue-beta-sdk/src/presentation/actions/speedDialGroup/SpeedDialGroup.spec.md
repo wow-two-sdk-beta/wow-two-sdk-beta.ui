@@ -14,18 +14,18 @@ Internal implementation: compose through the family’s public exports in [index
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `position` | `SpeedDialGroupPosition` | no | `OverlayPosition.BottomRight` | The viewport anchor. Default `bottom-right`. |
-| `direction` | `SpeedDialGroupDirection` | no | `undefined` | The axis the action items fan out along. Defaults to the one implied by `position`. |
-| `open` | `boolean` | no | `undefined` | The controlled open state. |
-| `defaultOpen` | `boolean` | no | `false` | The uncontrolled initial state. |
-| `gap` | `number` | no | `12` | The pixel gap between stacked action items. Default 12. |
+| Prop          | Type                      | Required | Default                       | Meaning                                                                             |
+| ------------- | ------------------------- | -------- | ----------------------------- | ----------------------------------------------------------------------------------- |
+| `position`    | `SpeedDialGroupPosition`  | no       | `OverlayPosition.BottomRight` | The viewport anchor. Default `bottom-right`.                                        |
+| `direction`   | `SpeedDialGroupDirection` | no       | `undefined`                   | The axis the action items fan out along. Defaults to the one implied by `position`. |
+| `open`        | `boolean`                 | no       | `undefined`                   | The controlled open state.                                                          |
+| `defaultOpen` | `boolean`                 | no       | `false`                       | The uncontrolled initial state.                                                     |
+| `gap`         | `number`                  | no       | `12`                          | The pixel gap between stacked action items. Default 12.                             |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event         | Signature                         | Meaning                                                           |
+| ------------- | --------------------------------- | ----------------------------------------------------------------- |
 | `update:open` | `'update:open': [open: boolean];` | Fires when the dial opens or closes, carrying the new open state. |
 
 ## Slots
@@ -40,3 +40,5 @@ None declared.
 
 - Public render fixture: [ActionsExamples.ts](../../../../apps/playground/src/gallery/fixtures/ActionsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+Arrow navigation uses current enabled action DOM order, skips native/ARIA-disabled items, and ignores composing or caller-cancelled keys. Closing restores the trigger only while the dial owns focus, including controlled close. No delayed focus callback can steal focus from a newly opened surface. Actions remaining during exit animation cannot run. Trigger anchoring uses the FAB's exposed DOM handle.

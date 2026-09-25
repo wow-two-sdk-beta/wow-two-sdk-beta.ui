@@ -8,9 +8,12 @@ export interface InlineSpinnerProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import Spinner from '../spinner/Spinner.vue';
+
+const locale = useLocale();
 
 /**
  * Renders a spinner beside a label on one line, for buttons, list rows, and mid-flow waits.
@@ -46,6 +49,6 @@ defineExpose({ el });
 <template>
   <span ref="el" v-bind="rest" :class="classes">
     <Spinner :size="props.size" :tone="props.tone" />
-    <slot>Loading…</slot>
+    <slot>{{ locale.t('InlineSpinner.loading', undefined, 'Loading…') }}</slot>
   </span>
 </template>

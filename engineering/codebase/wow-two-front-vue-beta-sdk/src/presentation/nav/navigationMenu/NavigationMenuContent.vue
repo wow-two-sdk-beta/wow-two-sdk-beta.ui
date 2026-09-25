@@ -64,8 +64,8 @@ watch(
 );
 
 function handleClose(): void {
+  if (el.value?.contains(el.value.ownerDocument.activeElement)) item.triggerEl.value?.focus();
   nav.setActiveId(null);
-  requestAnimationFrame(() => item.triggerEl.value?.focus());
 }
 
 function handleOutsidePointerDown(event: PointerEvent): void {

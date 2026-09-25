@@ -32,6 +32,7 @@ export interface EventCalendarViewerProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Temporal as TemporalValue } from 'temporal-polyfill';
@@ -39,7 +40,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
 import { Icon } from '../../../foundation/icons';
-import { MonthLabelsLong, addDays, nowZoned } from '../../forms/DateExtensions';
+import { addDays, nowZoned } from '../../forms/DateExtensions';
 import {
   EventCalendarViewerViews,
   EventCalendarViewerView as EventCalendarViewerViewValue,
@@ -48,6 +49,8 @@ import {
 import MonthView from './MonthView.vue';
 import TimeGridView from './TimeGridView.vue';
 import AgendaView from './AgendaView.vue';
+
+const locale = useLocale();
 
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
@@ -145,7 +148,7 @@ function goNext(): void {
 }
 
 function goToday(): void {
-  dateControlled.setValue(nowZoned());
+  dateControlled.setValue(nowZoned().withTimeZone(timeZone.value));
 }
 
 function setView(next: EventCalendarViewerView): void {
@@ -156,21 +159,25 @@ const title = computed(() => {
   const day = focusDay.value;
   switch (currentView.value) {
     case EventCalendarViewerViewValue.Month:
-      return `${MonthLabelsLong[day.month - 1]} ${day.year}`;
+      return day.toLocaleString(locale.locale.value, { month: 'long', year: 'numeric' });
     case EventCalendarViewerViewValue.Week: {
       const ws = startOfWeek(day, props.weekStart);
       const we = addDays(ws, 6);
-      return `${ws.toLocaleString(undefined, { month: 'short', day: 'numeric' })} – ${we.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      return `${ws.toLocaleString(locale.locale.value, { month: 'short', day: 'numeric' })} – ${we.toLocaleString(locale.locale.value, { month: 'short', day: 'numeric', year: 'numeric' })}`;
     }
     case EventCalendarViewerViewValue.Day:
-      return day.toLocaleString(undefined, {
+      return day.toLocaleString(locale.locale.value, {
         weekday: 'long',
         month: 'long',
         day: 'numeric',
         year: 'numeric',
       });
     case EventCalendarViewerViewValue.Agenda:
-      return `Upcoming from ${day.toLocaleString(undefined, { month: 'short', day: 'numeric' })}`;
+      return locale.t(
+        'EventCalendarViewer.upcomingFrom',
+        { date: day.toLocaleString(locale.locale.value, { month: 'short', day: 'numeric' }) },
+        'Upcoming from {date}',
+      );
   }
   return '';
 });
@@ -216,11 +223,11 @@ defineExpose({ el: root });
         class="inline-flex h-7 items-center rounded-md border border-border bg-background px-2.5 text-xs font-medium hover:bg-muted"
         @click="goToday"
       >
-        Today
+        {{ locale.t('EventCalendarViewer.today', undefined, 'Today') }}
       </button>
       <button
         type="button"
-        aria-label="Previous"
+        :aria-label="locale.t('EventCalendarViewer.previous', undefined, 'Previous')"
         class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
         @click="goPrev"
       >
@@ -228,7 +235,7 @@ defineExpose({ el: root });
       </button>
       <button
         type="button"
-        aria-label="Next"
+        :aria-label="locale.t('EventCalendarViewer.next', undefined, 'Next')"
         class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
         @click="goNext"
       >
@@ -236,20 +243,19 @@ defineExpose({ el: root });
       </button>
       <h3 class="ml-1 text-base font-semibold">{{ title }}</h3>
       <div
-        role="radiogroup"
-        aria-label="View"
+        role="group"
+        :aria-label="locale.t('EventCalendarViewer.view', undefined, 'View')"
         class="ml-auto flex items-center gap-0.5 rounded-md bg-card p-0.5 ring-1 ring-border"
       >
         <button
           v-for="v in EventCalendarViewerViews"
           :key="v"
           type="button"
-          role="radio"
-          :aria-checked="currentView === v"
+          :aria-pressed="currentView === v"
           :class="viewButtonClass(v)"
           @click="setView(v)"
         >
-          {{ v }}
+          {{ locale.t('EventCalendarViewer.' + v, undefined, v) }}
         </button>
       </div>
     </div>
@@ -285,6 +291,7 @@ defineExpose({ el: root });
         @slot-click="(day, hour) => emit('slot-click', day, hour)"
       />
       <AgendaView
+        :time-zone="timeZone"
         v-else-if="isAgenda"
         :focus-day="focusDay"
         :events="sortedEvents"

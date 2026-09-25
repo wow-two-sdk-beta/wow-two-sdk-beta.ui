@@ -1,4 +1,5 @@
-import { h } from 'vue';
+import { provideGoogleIdentity } from '../../../../../src/foundation/oauth';
+import { defineComponent, h } from 'vue';
 import {
   BackToTopButton,
   Button,
@@ -42,7 +43,22 @@ export const actionsExamples: readonly SmokeCase[] = [
   // is a supported state — apps without a client id stay guest-only — so this covers setup and the
   // SSR tier honestly, and `GoogleSignInButton.dom.test.ts` carries the rendered flow against a
   // stubbed client.
-  smokeCase('GoogleSignInButton', GoogleSignInButton, {}),
+  smokeCase(
+    'GoogleSignInButton',
+    GoogleSignInButton,
+    {},
+    {
+      wrap: (node) =>
+        h(
+          defineComponent({
+            setup() {
+              provideGoogleIdentity({ clientId: undefined, onCredential: () => {} });
+              return () => node;
+            },
+          }),
+        ),
+    },
+  ),
 
   smokeCase('Toolbar', Toolbar, {}, { slot: true }),
 

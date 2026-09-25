@@ -36,9 +36,12 @@ function depthFromTagName(tag: string): number {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, shallowRef, useAttrs, useTemplateRef, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useScrollSpy } from '../scrollSpy/UseScrollSpy';
+
+const locale = useLocale();
 
 /**
  * Renders an outline of headings, taken from `items` (explicit) or `source` (auto-extracted).
@@ -96,7 +99,13 @@ defineExpose({ el });
 
 <template>
   <!-- React returned `null` for an empty outline; `v-if` is the same gate. -->
-  <nav v-if="items.length > 0" ref="el" aria-label="Table of contents" v-bind="rest" :class="classes">
+  <nav
+    v-if="items.length > 0"
+    ref="el"
+    :aria-label="locale.t('TableOfContents.tableOfContents', undefined, 'Table of contents')"
+    v-bind="rest"
+    :class="classes"
+  >
     <ul class="space-y-1 text-sm">
       <li v-for="(item, i) in items" :key="item.id" :style="{ paddingLeft: `${(item.depth ?? 0) * 12}px` }">
         <a

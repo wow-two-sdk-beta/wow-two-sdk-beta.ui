@@ -9,9 +9,12 @@ export type ActionSheetCancelProps = Record<string, never>;
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useActionSheetContext } from './ActionSheet.vue';
+
+const locale = useLocale();
 
 /** Renders the separated dismiss row of an `ActionSheet`. */
 defineOptions({ name: 'ActionSheetCancel', inheritAttrs: false });
@@ -51,6 +54,6 @@ defineExpose({ el });
 <template>
   <!-- `type` sits before `v-bind`, so a caller-supplied `type` still wins — React's `type = 'button'` default. -->
   <button ref="el" type="button" v-bind="rest" :class="classes" @click="handleClick">
-    <slot>Cancel</slot>
+    <slot>{{ locale.t('ActionSheetCancel.cancel', undefined, 'Cancel') }}</slot>
   </button>
 </template>

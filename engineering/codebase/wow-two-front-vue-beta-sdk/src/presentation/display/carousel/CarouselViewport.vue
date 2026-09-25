@@ -8,10 +8,13 @@ export interface CarouselViewportProps {}
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { AriaAttribute } from '../../../foundation/dom';
 import { cn } from '../../../foundation/styles';
 import { useCarouselContext } from './CarouselContext';
+
+const locale = useLocale();
 
 /** Renders the clipping frame and owns the arrow-key seam; React shipped it as `Carousel.Viewport`. */
 defineOptions({ name: 'CarouselViewport', inheritAttrs: false });
@@ -24,7 +27,9 @@ const el = useTemplateRef<HTMLDivElement>('el');
 const carousel = useCarouselContext();
 
 /** The accessible label for the viewport. Default `'Carousel'`. */
-const ariaLabel = computed(() => (attrs[AriaAttribute.Label] as string | undefined) ?? 'Carousel');
+const ariaLabel = computed(
+  () => (attrs[AriaAttribute.Label] as string | undefined) ?? locale.t('CarouselViewport.label', undefined, 'Carousel'),
+);
 
 /**
  * Runs after a consumer's own `keydown` — `rest` sits ahead of this binding in
@@ -62,7 +67,7 @@ defineExpose({ el });
   <div
     ref="el"
     role="group"
-    aria-roledescription="carousel"
+    :aria-roledescription="locale.t('CarouselViewport.carousel', undefined, 'carousel')"
     :aria-label="ariaLabel"
     :tabindex="0"
     v-bind="rest"

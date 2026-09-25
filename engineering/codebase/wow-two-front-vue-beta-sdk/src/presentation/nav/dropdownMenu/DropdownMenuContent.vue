@@ -96,7 +96,6 @@ function setPanel(node: unknown): void {
 
 function handleClose(): void {
   context.setOpen(false);
-  requestAnimationFrame(() => context.triggerEl.value?.focus());
 }
 
 function handleAnimationEnd(): void {
