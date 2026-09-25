@@ -32,6 +32,9 @@ export interface WakeLockHandle {
 
   /** Releases the lock. Safe to call twice, and on an already-released lock. Never throws. */
   release: () => Promise<void>;
+
+  /** Subscribes to platform release, including battery/visibility revocation. */
+  subscribeRelease: (listener: () => void) => () => void;
 }
 
 /** Where a {@link holdWakeLock} sits: `idle` before its first request settles, then the last request's status. */
@@ -92,6 +95,23 @@ function toWakeLockHandle(sentinel: unknown, type: WakeLockKind): WakeLockHandle
       return readMember(sentinel, 'released') === true;
     },
 
+    subscribeRelease: (listener) => {
+      const add = readMember(sentinel, 'addEventListener');
+      const remove = readMember(sentinel, 'removeEventListener');
+      if (typeof add !== 'function' || typeof remove !== 'function') return () => {};
+      try {
+        add.call(sentinel, 'release', listener);
+      } catch {
+        return () => {};
+      }
+      return () => {
+        try {
+          remove.call(sentinel, 'release', listener);
+        } catch {
+          /* Released platform handle. */
+        }
+      };
+    },
     release: async (): Promise<void> => {
       const release = readMember(sentinel, 'release') as WakeLockRelease | undefined;
       if (!isFunction(release) || release === undefined) return;
@@ -157,6 +177,8 @@ export function holdWakeLock(options?: WakeLockHoldOptions): WakeLockHold {
   let handle: WakeLockHandle | null = null;
   let disposed = false;
   let acquiring = false;
+  let unsubscribeRelease: (() => void) | undefined;
+  const isHidden = (): boolean => readMember(getDocument(), 'visibilityState') === 'hidden';
 
   const publish = (next: WakeLockState): void => {
     state = next;
@@ -173,7 +195,7 @@ export function holdWakeLock(options?: WakeLockHoldOptions): WakeLockHold {
   };
 
   const acquire = async (): Promise<void> => {
-    if (disposed || acquiring) return;
+    if (disposed || acquiring || isHidden()) return;
     // Still holding a live lock — a `visible` → `visible` notification must not stack a second one.
     if (handle !== null && !handle.released) return;
 
@@ -181,7 +203,7 @@ export function holdWakeLock(options?: WakeLockHoldOptions): WakeLockHold {
     try {
       const result = await requestWakeLock(type);
 
-      if (disposed) {
+      if (disposed || isHidden()) {
         // Released while the request was in flight. Nothing is watching the state any more, but the lock itself
         // is real and would otherwise outlive the hold that owns it.
         if (result.ok) void result.value.release();
@@ -190,7 +212,16 @@ export function holdWakeLock(options?: WakeLockHoldOptions): WakeLockHold {
 
       if (result.ok) {
         handle = result.value;
-        publish({ held: true, status: 'ok', error: null });
+        const current = handle;
+        unsubscribeRelease?.();
+        unsubscribeRelease = current.subscribeRelease(() => {
+          if (disposed || handle !== current) return;
+          handle = null;
+          unsubscribeRelease?.();
+          unsubscribeRelease = undefined;
+          publish({ held: false, status: 'ok', error: null });
+        });
+        publish({ held: !current.released, status: 'ok', error: null });
         return;
       }
 
@@ -218,7 +249,11 @@ export function holdWakeLock(options?: WakeLockHoldOptions): WakeLockHold {
 
     // Hidden: the platform has already taken the lock back without telling us. Drop the handle so the next
     // `visible` re-requests, and report the loss so a consumer's indicator does not keep claiming it is held.
+    const hiddenHandle = handle;
     handle = null;
+    unsubscribeRelease?.();
+    unsubscribeRelease = undefined;
+    if (hiddenHandle) void hiddenHandle.release();
     if (state.held) publish({ held: false, status: state.status, error: state.error });
   };
 
@@ -241,6 +276,8 @@ export function holdWakeLock(options?: WakeLockHoldOptions): WakeLockHold {
 
       const current = handle;
       handle = null;
+      unsubscribeRelease?.();
+      unsubscribeRelease = undefined;
       if (current !== null) void current.release();
 
       // State is reset WITHOUT publishing. `release` runs from a scope-disposal cleanup, and calling back into a

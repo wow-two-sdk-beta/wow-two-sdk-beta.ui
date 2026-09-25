@@ -34,6 +34,8 @@ interface HubEndpoint {
 
   /** Reports whether the endpoint has closed and should be skipped. */
   isClosed(): boolean;
+
+  close(): void;
 }
 
 /** Represents an isolated in-process message bus standing in for one origin's set of browser tabs. */
@@ -94,6 +96,12 @@ export function memorySyncHub(): MemorySyncHub {
         name,
         receive,
         isClosed: () => closed,
+        close: () => {
+          if (closed) return;
+          closed = true;
+          listeners.clear();
+          endpoints.delete(endpoint);
+        },
       };
       endpoints.add(endpoint);
 
@@ -136,13 +144,7 @@ export function memorySyncHub(): MemorySyncHub {
           };
         },
 
-        close(): void {
-          if (closed) return;
-
-          closed = true;
-          listeners.clear();
-          endpoints.delete(endpoint);
-        },
+        close: endpoint.close,
       };
     },
 
@@ -153,7 +155,7 @@ export function memorySyncHub(): MemorySyncHub {
     },
 
     reset(): void {
-      endpoints.clear();
+      for (const endpoint of [...endpoints]) endpoint.close();
     },
   };
 }

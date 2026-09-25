@@ -42,8 +42,10 @@ function radiusDeclarations(theme: Theme, indent = '  '): string {
  */
 export function themeToCss(theme: Theme): string {
   const radius = radiusDeclarations(theme);
-  const light = `.theme-${theme.id} {\n${declarations(theme.light)}${radius}\n}`;
-  const dark = `.dark.theme-${theme.id} {\n${declarations(theme.dark)}\n}`;
+  const id = theme.id.replace(/[^a-zA-Z0-9_-]/gu, (character) => `\\${character.codePointAt(0)!.toString(16)} `);
+  const selector = `.theme-${id}`;
+  const light = `${selector} {\n${declarations(theme.light)}${radius}\n}`;
+  const dark = `.dark${selector}, .dark ${selector} {\n${declarations(theme.dark)}\n}`;
   return `${light}\n\n${dark}`;
 }
 

@@ -73,3 +73,19 @@ describe('failure', () => {
     expect((thrown as ConfigError).message).not.toContain('super-secret');
   });
 });
+
+it('ignores inherited source values and safely resolves reserved keys', () => {
+  const schema = { ['__proto__']: str(), constructor: str(), toString: str({ default: 'fallback' }) };
+  const config = defineConfig(schema, {
+    sources: [
+      Object.defineProperties(Object.create({ toString: 'inherited' }), {
+        ['__proto__']: { value: 'plain-data', enumerable: true },
+        constructor: { value: 'own', enumerable: true },
+      }),
+    ],
+  });
+  expect(Object.getPrototypeOf(config)).toBeNull();
+  expect(config.__proto__).toBe('plain-data');
+  expect(config.constructor).toBe('own');
+  expect(config.toString).toBe('fallback');
+});

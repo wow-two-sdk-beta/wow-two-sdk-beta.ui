@@ -1,5 +1,5 @@
+import { nativeTab } from '../../../BrowserKeyboard';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { userEvent } from 'vitest/browser';
 import { defineComponent, h, nextTick, ref, Teleport } from 'vue';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { FocusScope } from '@src/foundation/primitives/focusScope';
@@ -52,9 +52,9 @@ describe('FocusScope browser contract', () => {
     opener.focus();
     expect(document.activeElement).toBe(byText('first'));
     byText('last').focus();
-    await userEvent.tab();
+    await nativeTab();
     expect(document.activeElement).toBe(byText('first'));
-    await userEvent.tab({ shift: true });
+    await nativeTab({ shift: true });
     expect(document.activeElement).toBe(byText('last'));
     wrapper.unmount();
     wrappers.splice(wrappers.indexOf(wrapper), 1);
@@ -96,7 +96,7 @@ describe('FocusScope browser contract', () => {
     expect(child.closest('[inert]')).toBeNull();
     child.focus();
     expect(document.activeElement).toBe(child);
-    await userEvent.tab();
+    await nativeTab();
     expect(document.activeElement).toBe(byText('parent first'));
   });
 

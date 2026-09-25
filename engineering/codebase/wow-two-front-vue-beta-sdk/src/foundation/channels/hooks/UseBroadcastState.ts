@@ -96,6 +96,8 @@ export function useBroadcastState<T>(
   // unassignable until `T` is known. The cast pins it to the shape it always has here — same as `useControlled`.
   const current = shallowRef(initial) as ShallowRef<T>;
 
+  let currentKey = toValue(key);
+  let mounted = false;
   let channel: SyncChannel<BroadcastStateSignal<T>> | null = null;
   let unsubscribe: (() => void) | undefined;
 
@@ -109,7 +111,13 @@ export function useBroadcastState<T>(
   function open(): void {
     teardown();
 
-    const next = createSyncChannel<BroadcastStateSignal<T>>(`${ChannelPrefix}${toValue(key)}`, options);
+    const nextKey = toValue(key);
+    if (nextKey !== currentKey) {
+      current.value = initial;
+      currentKey = nextKey;
+    }
+    if (!mounted) return;
+    const next = createSyncChannel<BroadcastStateSignal<T>>(`${ChannelPrefix}${nextKey}`, options);
     channel = next;
 
     unsubscribe = next.subscribe((signal) => {
@@ -121,16 +129,22 @@ export function useBroadcastState<T>(
       }
 
       // A peer just opened and is asking to be caught up; answer with what this tab holds.
-      next.post({ kind: 'announce', value: current.value });
+      if (signal.kind === 'request') next.post({ kind: 'announce', value: current.value });
     });
 
     next.post({ kind: 'request' });
   }
 
-  onMounted(open);
-  // Non-immediate on purpose: an immediate watcher runs on the server, where `BroadcastChannel` is absent.
-  watch(() => toValue(key), open);
-  onScopeDispose(teardown);
+  onMounted(() => {
+    mounted = true;
+    open();
+  });
+  // Reset synchronously at key changes; platform channels only open after mount.
+  watch(() => toValue(key), open, { flush: 'sync' });
+  onScopeDispose(() => {
+    mounted = false;
+    teardown();
+  });
 
   const setValue: SetBroadcastState<T> = (next) => {
     // Resolved against the current value before the write, so the broadcast is never a side effect inside a

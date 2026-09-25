@@ -85,12 +85,14 @@ function attributeMatches(
 /** Reports whether a context satisfies a condition — every attribute matches, or the predicate returns `true`. */
 function conditionMatches(condition: StaticFlagCondition, context: EvaluationContext): boolean {
   if (typeof condition === 'function') return condition(context);
-  return Object.entries(condition).every(([attribute, expected]) => attributeMatches(context[attribute], expected));
+  return Object.entries(condition).every(
+    ([attribute, expected]) => Object.hasOwn(context, attribute) && attributeMatches(context[attribute], expected),
+  );
 }
 
 /** Reports whether a map entry is the long form — an object carrying a `value` property. */
 function isDefinition(entry: StaticFlagEntry): entry is StaticFlagDefinition<FlagValue> {
-  return typeof entry === 'object' && entry !== null && !Array.isArray(entry) && 'value' in entry;
+  return typeof entry === 'object' && entry !== null && !Array.isArray(entry) && Object.hasOwn(entry, 'value');
 }
 
 /**
@@ -101,7 +103,7 @@ function isDefinition(entry: StaticFlagEntry): entry is StaticFlagDefinition<Fla
  */
 export function staticFlagProvider(flags: StaticFlags = {}): FlagProvider {
   const resolve = (key: string, context: EvaluationContext): FlagResolution<FlagValue> | undefined => {
-    const entry = flags[key];
+    const entry = Object.hasOwn(flags, key) ? flags[key] : undefined;
     if (entry === undefined) return undefined; // not configured — the client uses the caller's default
 
     const definition: StaticFlagDefinition<FlagValue> = isDefinition(entry) ? entry : { value: entry };

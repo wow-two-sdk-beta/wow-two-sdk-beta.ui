@@ -1,9 +1,11 @@
+import { queryScope, withinQueryScope, assertQueryCurrent } from '../QueryLifetime';
+import type { RequestSnapshot } from '../../../../foundation/http/RequestScope';
 import { runOptimisticTransaction } from '../OptimisticTransactions';
 import { queryOutcome } from '../QueryOutcome';
 import { resolveQueryResult } from '../QueryOutcome';
 import type { ApiFailure } from '../../../../foundation/http';
 import type { Result } from '../../../../foundation/results';
-import { computed } from 'vue';
+import { onScopeDispose, computed } from 'vue';
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/vue-query';
 
 import type { Endpoint } from '../Endpoints';
@@ -28,7 +30,7 @@ export interface OptimisticTarget<TVars, TCached = unknown> {
 /** Defines options for `useOptimisticMutation`. */
 export interface UseOptimisticMutationOptions<TData, TVars> {
   /** Performs the mutation against the backend. */
-  readonly mutationFn: (vars: TVars) => Promise<Result<TData, ApiFailure>>;
+  readonly mutationFn: (vars: TVars, context: { readonly signal: AbortSignal }) => Promise<Result<TData, ApiFailure>>;
 
   /**
    * The cached queries this mutation patches — each is cancelled, snapshotted, and applied before
@@ -67,38 +69,48 @@ export function useOptimisticMutation<TData, TVars>({
 }: UseOptimisticMutationOptions<TData, TVars>): UseAppMutationReturn<TData, TVars> {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<TData, Error, TVars>({
-    mutationFn: (vars) =>
-      runOptimisticTransaction(queryClient, async () => {
-        const keys = targets.map((target) => resolveKey(target.key));
-        await Promise.all(keys.map((queryKey) => queryClient.cancelQueries({ queryKey, exact: true })));
-        const snapshots: TargetSnapshot[] = [];
-        try {
-          for (const target of targets) {
-            const queryKey = resolveKey(target.key);
-            const previous = queryClient.getQueryData(queryKey);
-            snapshots.push({ queryKey, previous });
-            queryClient.setQueryData(queryKey, () => target.apply(previous, vars));
+  const scope = queryScope(queryClient);
+  const mutation = useMutation<TData, Error, { vars: TVars; origin: RequestSnapshot }>({
+    mutationFn: ({ vars, origin }) =>
+      withinQueryScope(origin, () =>
+        runOptimisticTransaction(queryClient, async () => {
+          assertQueryCurrent(origin);
+          const keys = targets.map((target) => resolveKey(target.key));
+          await Promise.all(keys.map((queryKey) => queryClient.cancelQueries({ queryKey, exact: true })));
+          assertQueryCurrent(origin);
+          const snapshots: TargetSnapshot[] = [];
+          try {
+            for (const target of targets) {
+              const queryKey = resolveKey(target.key);
+              const previous = queryClient.getQueryData(queryKey);
+              snapshots.push({ queryKey, previous });
+              queryClient.setQueryData(queryKey, () => target.apply(previous, vars));
+            }
+            return await withinQueryScope(origin, () =>
+              resolveQueryResult(mutationFn(vars, { signal: origin.signal })),
+            );
+          } catch (error) {
+            // Reverse order also restores duplicate targets to the transaction's initial value.
+            if (!origin.isCurrent()) throw error;
+            for (const { queryKey, previous } of [...snapshots].reverse()) {
+              if (previous === undefined) queryClient.removeQueries({ queryKey, exact: true });
+              else queryClient.setQueryData(queryKey, () => previous);
+            }
+            throw error;
+          } finally {
+            // The transaction stays locked through reconciliation; the next snapshot sees settled data.
+            if (origin.isCurrent() && invalidateOnSettle)
+              await Promise.all(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey, exact: true })));
           }
-          return await resolveQueryResult(mutationFn(vars));
-        } catch (error) {
-          // Reverse order also restores duplicate targets to the transaction's initial value.
-          for (const { queryKey, previous } of [...snapshots].reverse()) {
-            if (previous === undefined) queryClient.removeQueries({ queryKey, exact: true });
-            else queryClient.setQueryData(queryKey, () => previous);
-          }
-          throw error;
-        } finally {
-          // The transaction stays locked through reconciliation; the next snapshot sees settled data.
-          if (invalidateOnSettle)
-            await Promise.all(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey, exact: true })));
-        }
-      }),
+        }),
+      ),
   });
 
+  const unsubscribe = scope.subscribe(mutation.reset);
+  onScopeDispose(unsubscribe);
   return {
-    mutate: mutation.mutate,
-    mutateAsync: (vars) => queryOutcome(() => mutation.mutateAsync(vars)),
+    mutate: (vars) => mutation.mutate({ vars, origin: scope.capture() }),
+    mutateAsync: (vars) => queryOutcome(() => mutation.mutateAsync({ vars, origin: scope.capture() })),
     data: mutation.data,
     loading: mutation.isPending,
     error: computed(() => (mutation.error.value ? toApiFailure(mutation.error.value) : null)),

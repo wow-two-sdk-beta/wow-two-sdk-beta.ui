@@ -18,6 +18,13 @@ function boundary<T>(operation: () => T, parsing = false): Result<T, JsonFailure
   }
 }
 
+export interface JsonStringifyOptions {
+  /** Indentation width, clamped to 0–10; defaults to compact output. */
+  readonly space?: number;
+  /** Sort own string keys at every object level; array order and numeric token spelling remain unchanged. */
+  readonly sortKeys?: boolean;
+}
+
 /** Lossless numeric JSON codec with explicit unsupported-value and resource failures. */
 export const LosslessJson = Object.freeze({
   parse(text: string): Result<LosslessJsonValue, JsonFailure> {
@@ -61,8 +68,10 @@ export const LosslessJson = Object.freeze({
       return restore(parsed);
     }, true);
   },
-  stringify(value: unknown): Result<string, JsonFailure> {
+  stringify(value: unknown, options: JsonStringifyOptions = {}): Result<string, JsonFailure> {
     return boundary(() => {
+      const space = options.space ?? 0;
+      const indent = Number.isFinite(space) ? Math.min(10, Math.max(0, Math.trunc(space))) : 0;
       const active = new WeakSet<object>();
       const keys = new Map<string, string>();
       let tokens = 0,
@@ -121,6 +130,7 @@ export const LosslessJson = Object.freeze({
         const properties = array ? Array.from({ length: item.length }, (_, index) => String(index)) : Object.keys(item);
         if (array && Object.keys(item).some((key) => !/^(0|[1-9]\d*)$/.test(key) || Number(key) >= item.length))
           rejectJson(JsonFailureCode.UnsupportedValue, 'Extra array properties cannot be serialized.');
+        if (!array && options.sortKeys) properties.sort();
         for (const key of properties) {
           const descriptor = Object.getOwnPropertyDescriptor(item, key);
           if (!descriptor || !('value' in descriptor))
@@ -135,14 +145,14 @@ export const LosslessJson = Object.freeze({
             keys.set(safe, key);
             spend(jsonStringLength(key, JsonLimits.maxCharacters - characters - 1) + 1);
           }
-          spend(1);
+          spend(1 + (indent > 0 ? (depth + 1) * indent + 2 : 0));
           (result as Record<string, unknown>)[safe] = prepare(descriptor.value, depth + 1);
         }
         active.delete(item);
         return result;
       };
       const normalized = prepare(value, 0);
-      const encoded = stringifyJson(normalized);
+      const encoded = stringifyJson(normalized, indent);
       // Restore only JSON key tokens; string values and exact numeric tokens are untouched.
       const output = rewriteJsonKeys(encoded, (key) => {
         const original = keys.get(key);

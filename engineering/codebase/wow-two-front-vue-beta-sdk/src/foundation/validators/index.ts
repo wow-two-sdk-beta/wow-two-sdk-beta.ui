@@ -1,6 +1,6 @@
-// validation — foundation seam. A small, dependency-free validator layer any slice can use: build a
+// validation — foundation seam. A small validator layer any slice can use: build a
 // validator with `string()`, `object({…})`, `array(…)`, run it with `validate(value)`, and get back
-// either the parsed value or every issue with its path. No Vue, no peer deps, no schema library.
+// either the parsed value or every issue with its path. No Vue, optional peers or schema library.
 //
 // WHY IT EXISTS, GIVEN `forms-engine` ALREADY VALIDATES: `forms-engine` speaks Standard Schema, but the
 // spec type lived THERE — above `foundation` in the layer graph. A config parser, a URL-param reader, or
@@ -18,7 +18,7 @@
 // are the right call for a large, evolving domain schema. This slice covers the boundary checks the SDK
 // itself performs, where adding a dependency to a zero-dependency package is not an option.
 //
-// THE CONTRACT: nothing here throws except `assertValid`, which throws only because the caller asked.
+// Expected invalid values return Result. Caller checks, transforms and invalid API configuration may throw.
 
 export {
   type PathSegmentKey,
@@ -46,9 +46,11 @@ export {
 export {
   StringValidator,
   NumberValidator,
+  ExactNumberValidator,
   DateValidator,
   string,
   number,
+  exactNumber,
   boolean,
   date,
   literal,

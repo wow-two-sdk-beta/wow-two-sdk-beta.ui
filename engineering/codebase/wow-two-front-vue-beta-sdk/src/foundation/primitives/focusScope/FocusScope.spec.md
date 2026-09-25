@@ -11,3 +11,5 @@ Initial focus selects an eligible control (excluding disabled/hidden/inert/negat
 `asChild` adopts the existing single component root through the shared ComponentElement contract. Dialog naming, aria-modal and visual scrim are the caller's presentation responsibilities. The primitive does not assign a dialog role.
 
 Verification: `tests/unit/foundation/primitives/FocusScope.browser.test.ts` exercises browser Tab, nested modal/nonmodal portals, inert restoration and lifecycle. Forced-colors uses the same keyboard contract.
+
+`returnFocus?: () => HTMLElement | null` supplies a pre-gesture target when browser pointer focus changes would otherwise lose the opener. The getter runs at teardown inside the existing ownership and remaining-scope guards. It cannot steal focus from a newer scope. Overlay wrappers rely on this restoration; they do not schedule independent retries.

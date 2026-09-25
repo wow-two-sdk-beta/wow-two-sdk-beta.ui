@@ -70,6 +70,7 @@ export interface CommandRegistry {
  */
 export function createCommandRegistry(options?: CommandRegistryOptions): CommandRegistry {
   const entries = new Map<string, Command>();
+  const registrations = new Map<string, symbol>();
   const listeners = new Set<CommandRegistryListener>();
   let revision = 0;
 
@@ -80,34 +81,44 @@ export function createCommandRegistry(options?: CommandRegistryOptions): Command
   }
 
   /** Removes `command` only if it is still the entry under its id; reports whether it removed anything. */
-  function removeExact(command: Command): boolean {
-    if (entries.get(command.id) !== command) return false;
-    entries.delete(command.id);
+  function removeExact(id: string, token: symbol): boolean {
+    if (registrations.get(id) !== token) return false;
+    entries.delete(id);
+    registrations.delete(id);
     return true;
   }
 
   return {
     register(command: Command): () => void {
-      entries.set(command.id, command);
+      const id = command.id;
+      const token = Symbol(id);
+      entries.set(id, command);
+      registrations.set(id, token);
       notify();
       return () => {
-        if (removeExact(command)) notify();
+        if (removeExact(id, token)) notify();
       };
     },
 
     registerAll(commands: ReadonlyArray<Command>): () => void {
-      const registered = [...commands];
-      for (const command of registered) entries.set(command.id, command);
+      const registered = commands.map((command) => {
+        const id = command.id;
+        const token = Symbol(id);
+        entries.set(id, command);
+        registrations.set(id, token);
+        return { id, token };
+      });
       notify();
       return () => {
         let removed = false;
-        for (const command of registered) removed = removeExact(command) || removed;
+        for (const { id, token } of registered) removed = removeExact(id, token) || removed;
         if (removed) notify();
       };
     },
 
     unregister(id: string): boolean {
       if (!entries.delete(id)) return false;
+      registrations.delete(id);
       notify();
       return true;
     },

@@ -51,6 +51,31 @@ describe('HTTP outcomes', () => {
       failure: { code: 'protocol' },
     });
   });
+  it('returns declared text, blob, and array-buffer bodies without JSON coercion', async () => {
+    const svg = '<svg viewBox="0 0 1 1" />';
+    expect(
+      await clientFor(new Response(svg, { headers: { 'Content-Type': 'image/svg+xml' } })).get('/preview', {
+        response: 'text',
+      }),
+    ).toEqual(ResultExtensions.ok(svg));
+
+    const blobResult = await clientFor(new Response('png', { headers: { 'Content-Type': 'image/png' } })).get(
+      '/image',
+      { response: 'blob' },
+    );
+    expect(blobResult.ok && blobResult.value.type).toBe('image/png');
+    expect(blobResult.ok && (await blobResult.value.text())).toBe('png');
+
+    const bufferResult = await clientFor(new Response(new Uint8Array([1, 2, 3]))).get('/file', {
+      response: 'arrayBuffer',
+    });
+    expect(bufferResult.ok && [...new Uint8Array(bufferResult.value)]).toEqual([1, 2, 3]);
+  });
+
+  it('still decodes problem details when a non-JSON success body was requested', async () => {
+    const outcome = await clientFor(json({ title: 'conflict' }, 409)).get('/preview', { response: 'text' });
+    expect(outcome).toMatchObject({ ok: false, failure: { code: 'http', status: 409 } });
+  });
   it('rejects malformed JSON, wrong content types, and missing envelopes', async () => {
     for (const response of [
       new Response('{', { headers: { 'Content-Type': 'application/json' } }),

@@ -89,6 +89,8 @@ export async function withTransaction<TResult>(
 
   // Attached before `fn` runs: `complete` can fire in the same turn the work finishes.
   const completion = transactionToPromise(transaction);
+  // Observe aborts immediately while a delegate may still be waiting for its own async work.
+  void completion.catch(() => undefined);
 
   let result: TResult;
   try {

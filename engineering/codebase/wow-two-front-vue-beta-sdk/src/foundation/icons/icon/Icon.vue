@@ -29,7 +29,9 @@ type NameAttribute = typeof AriaAttribute.Label;
  */
 type IconNameAttributes = Readonly<Partial<Record<NameAttribute, string>>>;
 
-export interface IconProps extends Omit<SVGAttributes, DerivedAttribute | NameAttribute>, IconNameAttributes {
+type NativeIconAttributes = Omit<SVGAttributes, DerivedAttribute | NameAttribute> & IconNameAttributes;
+
+export interface IconProps extends /* @vue-ignore */ NativeIconAttributes {
   /** The icon component — pass a `lucide-vue-next` icon, custom SVG component, or any matching shape. */
   readonly icon: IconAdapter;
 
@@ -40,6 +42,7 @@ export interface IconProps extends Omit<SVGAttributes, DerivedAttribute | NameAt
 
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
+import type { ClassValue } from 'clsx';
 import { cn } from '../../styles/Cn';
 
 /**
@@ -53,29 +56,26 @@ import { cn } from '../../styles/Cn';
  * the React original's trailing `{...rest}` — a caller-supplied attribute wins
  * over the wrapper's own binding.
  */
-defineOptions({ name: 'Icon' });
+defineOptions({ name: 'Icon', inheritAttrs: false });
 
-withDefaults(
-  defineProps<{
-    /** The icon component — pass a `lucide-vue-next` icon, custom SVG component, or any matching shape. */
-    icon: IconAdapter;
-    /** The pixel size of the rendered SVG. Default 20. */
-    size?: number;
-  }>(),
-  { size: 20 },
-);
+withDefaults(defineProps<IconProps>(), { size: 20 });
 
 const attrs = useAttrs();
 
 /** `aria-label` arrives as a fallthrough attr; its presence flips the icon from decorative to semantic. */
 const labelled = computed(() => attrs[AriaAttribute.Label] != null);
+const rest = computed(() => {
+  const { class: _class, ...others } = attrs;
+  return others;
+});
 </script>
 
 <template>
   <component
     :is="icon"
     :size="size"
-    :class="cn('shrink-0')"
+    v-bind="rest"
+    :class="cn('shrink-0', attrs.class as ClassValue)"
     :aria-hidden="labelled ? undefined : true"
     :role="labelled ? 'img' : undefined"
     focusable="false"

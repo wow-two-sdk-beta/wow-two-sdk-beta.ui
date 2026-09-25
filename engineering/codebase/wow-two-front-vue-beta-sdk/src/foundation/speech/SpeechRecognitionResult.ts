@@ -75,7 +75,7 @@ function stringMember(value: unknown, key: string): string | undefined {
 export function toSpeechRecognitionFailure(event: unknown): SpeechRecognitionFailure {
   const code = stringMember(event, 'error');
   const detail = stringMember(event, 'message');
-  const status = code === undefined ? 'failed' : (StatusByCode[code] ?? 'failed');
+  const status = code !== undefined && Object.hasOwn(StatusByCode, code) ? StatusByCode[code]! : 'failed';
 
   const message =
     detail === undefined || detail === ''

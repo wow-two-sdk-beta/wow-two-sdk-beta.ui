@@ -138,7 +138,11 @@ export function xhrUploadTransport<TResult = unknown>(options: XhrUploadTranspor
         });
 
         signal.addEventListener('abort', onAbort, { once: true });
-        request.send(body);
+        try {
+          request.send(body);
+        } catch (error) {
+          settle(() => reject(error));
+        }
       });
     },
   };

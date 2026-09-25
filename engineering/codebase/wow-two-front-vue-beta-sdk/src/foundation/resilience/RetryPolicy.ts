@@ -2,7 +2,7 @@ import { BackoffStrategy } from './enums/BackoffStrategy';
 import { JitterStrategy } from './enums/JitterStrategy';
 
 /** Provides the HTTP statuses treated as transient by default — network (`0`) plus the standard transient set. */
-export const DefaultTransientStatuses: ReadonlyArray<number> = [0, 408, 429, 500, 502, 503, 504];
+export const DefaultTransientStatuses: ReadonlyArray<number> = Object.freeze([0, 408, 429, 500, 502, 503, 504]);
 
 /** Defines the context passed to a retry's `onRetry` hook. */
 export interface RetryContext {
@@ -44,11 +44,11 @@ export interface RetryPolicy {
 }
 
 /** Provides the default retry policy — 2 exponential retries, full jitter, base 1s, cap 30s, transient statuses. */
-export const DefaultRetryPolicy: RetryPolicy = {
+export const DefaultRetryPolicy: RetryPolicy = Object.freeze({
   maxRetries: 2,
   backoff: BackoffStrategy.Exponential,
   baseDelayMs: 1_000,
   maxDelayMs: 30_000,
   jitter: JitterStrategy.Full,
   retryableStatuses: DefaultTransientStatuses,
-};
+});

@@ -12,6 +12,8 @@ export interface FocusScopeProps {
   readonly onUnmountAutoFocus?: (event: CustomEvent) => void;
   /** Merge into the single slot child instead of rendering a wrapper div. */
   readonly asChild?: boolean;
+  /** Resolve a pre-gesture return target at teardown; scope ownership still governs restoration. */
+  readonly returnFocus?: () => HTMLElement | null;
 }
 
 const FocusableSelector = 'a[href],button,input,select,textarea,[tabindex],[contenteditable="true"]';
@@ -125,7 +127,7 @@ onScopeDispose(() => {
   props.onUnmountAutoFocus?.(event);
   if (!event.defaultPrevented && ownedFocus && document) {
     const top = topFocusScope(document);
-    const target = previouslyFocused;
+    const target = props.returnFocus?.() ?? previouslyFocused;
     if (target?.isConnected && !target.closest('[inert]') && (!top || scopeContains(top, target))) {
       target.focus({ preventScroll: true });
     } else top?.recover();

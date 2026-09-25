@@ -50,7 +50,7 @@ export class ConfigError extends Error {
     const lines = issues.map((issue) => `  - ${issue.lookupKey}: ${issue.message}`).join('\n');
     super(`Invalid configuration (${issues.length} ${issues.length === 1 ? 'issue' : 'issues'}):\n${lines}`);
     this.name = 'ConfigError';
-    this.issues = issues;
+    this.issues = Object.freeze(issues.map((issue) => Object.freeze({ ...issue })));
     // Restore the prototype chain across the ES5 `Error` transpilation target so `instanceof` holds.
     Object.setPrototypeOf(this, ConfigError.prototype);
   }
@@ -67,7 +67,7 @@ export function defineConfig<const S extends ConfigSchema>(schema: S, options?: 
   const sources = options?.sources ?? defaultSources();
   const prefix = options?.prefix ?? '';
 
-  const resolved: Record<string, unknown> = {};
+  const resolved: Record<string, unknown> = Object.create(null);
   const issues: ConfigIssue[] = [];
 
   for (const [key, field] of Object.entries(schema) as [string, AnyConfigField][]) {
@@ -76,7 +76,13 @@ export function defineConfig<const S extends ConfigSchema>(schema: S, options?: 
 
     if (raw === undefined) {
       if (field.hasDefault) {
-        resolved[key] = field.defaultValue;
+        try {
+          const value = field.createDefault ? field.createDefault() : field.defaultValue;
+          if (value === undefined) throw new TypeError('Config defaults cannot be undefined.');
+          resolved[key] = value;
+        } catch {
+          issues.push({ key, lookupKey, reason: 'invalid', message: `invalid ${field.typeName} default` });
+        }
       } else if (!field.required) {
         resolved[key] = undefined;
       } else {

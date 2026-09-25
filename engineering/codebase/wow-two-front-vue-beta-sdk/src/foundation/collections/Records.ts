@@ -102,7 +102,7 @@ export function pickKeys<T extends object, TKey extends keyof T>(source: T, keys
  * @returns A new object without the named keys.
  */
 export function omitKeys<T extends object, TKey extends keyof T>(source: T, keys: ReadonlyArray<TKey>): Omit<T, TKey> {
-  const omitted = new Set<PropertyKey>(keys);
+  const omitted = new Set<PropertyKey>(keys.map((key) => (typeof key === 'number' ? String(key) : key)));
   const record = source as Record<string, unknown>;
   const result: Record<string, unknown> = {};
   for (const key of Object.keys(record)) {

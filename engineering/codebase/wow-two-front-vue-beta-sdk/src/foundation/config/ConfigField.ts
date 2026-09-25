@@ -1,3 +1,6 @@
+import { LosslessJson } from '../json';
+import { ResultExtensions, type Result } from '../results';
+
 // Typed-env field specs. A `ConfigField<T>` describes how one configuration key is parsed from its raw
 // string form, whether it is required, and its fallback — the atoms `defineConfig` reads a source through.
 // Each builder (`str`, `num`, `bool`, `oneOf`, `url`, `port`, `json`, `list`) returns a field whose `parse`
@@ -11,6 +14,9 @@ export interface ConfigFieldOptions<T> {
 
   /** The value used when the key is absent or empty. Supplying it makes the field optional. */
   readonly default?: T;
+
+  /** Creates an independent fallback for each resolution; use for mutable values. */
+  readonly defaultFactory?: () => T;
 
   /** Redacts the raw value from `ConfigError` messages — set for tokens, keys, and passwords. */
   readonly secret?: boolean;
@@ -34,6 +40,9 @@ export interface ConfigField<T, Optional extends boolean = false> {
   /** The configured fallback, meaningful only when `hasDefault` is `true`. */
   readonly defaultValue?: T;
 
+  /** Builds an independent fallback when configured. */
+  readonly createDefault?: () => T;
+
   /** Whether the raw value is redacted from error output. */
   readonly secret: boolean;
 
@@ -45,7 +54,11 @@ export interface ConfigField<T, Optional extends boolean = false> {
 }
 
 /** Computes a field's phantom optionality from its options — optional iff no `default` and `required: false`. */
-type Optionality<O> = O extends { default: unknown } ? false : O extends { required: false } ? true : false;
+type Optionality<O> = O extends { default: unknown } | { defaultFactory: unknown }
+  ? false
+  : O extends { required: false }
+    ? true
+    : false;
 
 /** The upper bound for a field of unknown scalar type — every concrete `ConfigField<T, …>` is assignable to it. */
 export type AnyConfigField = ConfigField<unknown, boolean>;
@@ -56,19 +69,33 @@ function createField<T>(
   parse: (raw: string) => T,
   options: ConfigFieldOptions<T> | undefined,
 ): ConfigField<T, boolean> {
-  const hasDefault = options !== undefined && 'default' in options;
-  return {
+  const hasValue = options !== undefined && Object.hasOwn(options, 'default');
+  const hasFactory = options !== undefined && Object.hasOwn(options, 'defaultFactory');
+  if (hasValue && hasFactory) throw new TypeError('Choose default or defaultFactory, not both.');
+  if (
+    hasValue &&
+    (options.default === undefined ||
+      (typeof options.default === 'object' && options.default !== null) ||
+      typeof options.default === 'function')
+  ) {
+    throw new TypeError('Use defaultFactory for mutable config defaults; undefined is not a default.');
+  }
+  if (hasFactory && typeof options.defaultFactory !== 'function')
+    throw new TypeError('defaultFactory must be a function.');
+  const hasDefault = hasValue || hasFactory;
+  return Object.freeze({
     typeName,
     parse,
     hasDefault,
-    defaultValue: hasDefault ? options.default : undefined,
+    defaultValue: hasValue ? options.default : undefined,
+    createDefault: hasFactory ? options.defaultFactory : undefined,
     // A field is required unless it carries a default or is explicitly opted out.
     required: hasDefault ? false : (options?.required ?? true),
     secret: options?.secret ?? false,
-  };
+  });
 }
 
-/** A string field — the raw value is trimmed and rejected when empty (empty already reads as "missing"). */
+/** A string field — preserves the raw value; empty strings are handled as missing by resolution. */
 export function str<const O extends ConfigFieldOptions<string> = ConfigFieldOptions<string>>(
   options?: O,
 ): ConfigField<string, Optionality<O>> {
@@ -159,21 +186,35 @@ export function port<const O extends ConfigFieldOptions<number> = ConfigFieldOpt
   ) as ConfigField<number, Optionality<O>>;
 }
 
-/** A JSON field — `JSON.parse`d into `T`; a malformed document is rejected. */
-export function json<T, const O extends ConfigFieldOptions<T> = ConfigFieldOptions<T>>(
+/** Validates a parsed JSON value; expected failures carry the decoder's own failure data. */
+export type ConfigJsonDecoder<T> = (value: unknown) => Result<T, unknown>;
+
+/** Reads JSON without claiming a decoded application shape. Numeric tokens remain ExactNumber values. */
+export function json<const O extends ConfigFieldOptions<unknown> = ConfigFieldOptions<unknown>>(
   options?: O,
-): ConfigField<T, Optionality<O>> {
+): ConfigField<unknown, Optionality<O>>;
+/** Decodes a lossless JSON value into a validated application shape; decoder failures reject the field. */
+export function json<T, const O extends ConfigFieldOptions<T> = ConfigFieldOptions<T>>(
+  decode: ConfigJsonDecoder<T>,
+  options?: O,
+): ConfigField<T, Optionality<O>>;
+export function json(
+  decodeOrOptions?: ConfigJsonDecoder<unknown> | ConfigFieldOptions<unknown>,
+  options?: ConfigFieldOptions<unknown>,
+): ConfigField<unknown, boolean> {
+  const decode =
+    typeof decodeOrOptions === 'function' ? decodeOrOptions : (value: unknown) => ResultExtensions.ok(value);
   return createField(
     'json',
     (raw) => {
-      try {
-        return JSON.parse(raw) as T;
-      } catch {
-        throw `expected valid JSON, got "${raw}"`;
-      }
+      const parsed = LosslessJson.parse(raw);
+      if (!parsed.ok) throw 'expected valid JSON';
+      const decoded = decode(parsed.value);
+      if (!decoded.ok) throw 'JSON value failed its decoder';
+      return decoded.value;
     },
-    options,
-  ) as ConfigField<T, Optionality<O>>;
+    typeof decodeOrOptions === 'function' ? options : decodeOrOptions,
+  );
 }
 
 /** Tunes how a `list` field splits its raw value. */

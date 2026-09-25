@@ -1,8 +1,8 @@
 // @wow-two-beta/ui-vue/auth — headless session client over the wow-two backend identity baseline.
 // `AuthProvider` owns the session state machine (unknown → resolving → authenticated | anonymous):
 // me-resolve on mount (deduped through a shared in-flight promise), signIn / signOut / refresh /
-// setUser actions, generic `TUser` typing. `createAuthBridge` is the module-scope hub for the
-// non-Vue seams — feed `bridge.onUnauthorized` to `createApiClient` so a 401 flips the session, and
+// setUser actions, generic `TUser` typing. `createAuthBridge` is the app-owned hub for the
+// non-Vue seams — feed `bridge.scope` and `bridge.onUnauthorized` to `createApiClient` so a 401 flips the session, and
 // `bridge.isAuthenticated` to the router's `requireAuth(...)` guard so protected routes await the
 // resolve before redirecting. Strategies cover the three evidenced product shapes: cookie
 // me-resolve (drydock, smart-qr incl. guest/`isAnonymous`), in-memory bearer (secrets-vault —
@@ -24,11 +24,18 @@ export { default as AuthProvider, type AuthProviderProps } from './providers/Aut
 export { useAuth, type AuthApi } from './providers/AuthContext';
 
 // Non-Vue seams — api-client 401s in, router-guard reads out
-export { createAuthBridge, type AuthBridge, type UnauthorizedListener, type SessionListener } from './AuthBridge';
+export {
+  createAuthBridge,
+  type AuthBridge,
+  type AuthBridgeOptions,
+  type AuthBridgeOwner,
+  type UnauthorizedListener,
+  type SessionListener,
+} from './AuthBridge';
 
-// Google sign-in is NOT here. The GIS client (`useGoogleIdentity`) is a provider-script wrapper
+// Google sign-in is NOT here. The GIS client (`provideGoogleIdentity`) is a provider-script wrapper
 // with no session concepts, so it ships as `foundation/oauth`; its button is
-// `presentation/actions`'s `GoogleSignInButton`. Feed the credential either one emits to this
+// `presentation/actions`'s `GoogleSignInButton`. Feed the credential the owner receives to this
 // module's `signIn` — that handoff is where the session starts.
 
 // Strategies

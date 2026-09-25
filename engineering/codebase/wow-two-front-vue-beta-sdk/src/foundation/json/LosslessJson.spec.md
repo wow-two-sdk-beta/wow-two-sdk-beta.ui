@@ -5,7 +5,7 @@ JSON transport without passing numeric tokens through JavaScript Number. Public 
 ## API
 
 - `LosslessJson.parse(text): Result<LosslessJsonValue, JsonFailure>`
-- `LosslessJson.stringify(value: unknown): Result<string, JsonFailure>`
+- `LosslessJson.stringify(value: unknown, options?: JsonStringifyOptions): Result<string, JsonFailure>`
 
 The codec has no reviver, replacer or implicit domain decoder. Date-looking and numeric-looking JSON strings remain strings. Field/schema conversion belongs to the caller. HTTP integration can opt into this codec through its declared JSON seam.
 
@@ -20,6 +20,10 @@ All duplicate decoded keys in the same object fail, even if values are equal. Th
 Numeric token spelling is retained through parse/stringify, including decimal scale, exponent spelling and negative zero. Structural whitespace, string escaping and property enumeration order are not a byte-for-byte JSON document preservation contract. Arithmetic on an ExactNumber yields canonical numeric spelling instead.
 
 ## Serialization
+
+`options.space` chooses indentation, clamped to 0–10 spaces; default output is compact.
+`options.sortKeys` sorts object keys at every level while preserving array order and exact numeric spelling.
+Formatting work counts toward the output resource budget.
 
 Accepted values are null, booleans, strings, ExactNumber, bigint, safe native integers, dense arrays and plain/null-prototype records containing accepted values. Bigint and safe native integers emit numeric tokens. ExactNumber emits its retained token, not a JSON string. A native decimal such as `0.1` must be supplied as `ExactNumber.parse('0.1')` so decimal intent is explicit; the codec cannot recover information already lost by prior native arithmetic.
 

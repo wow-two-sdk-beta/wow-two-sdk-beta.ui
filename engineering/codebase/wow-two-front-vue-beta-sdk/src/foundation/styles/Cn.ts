@@ -1,10 +1,11 @@
 import clsx, { type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { cn as mergeClasses } from 'tailwind-variants';
 
 /**
  * Conditional class composer with Tailwind conflict-resolution.
  * Use anywhere you'd otherwise concatenate class strings.
  */
 export function cn(...inputs: ReadonlyArray<ClassValue>): string {
-  return twMerge(clsx(inputs));
+  // Variants and caller overrides share one merge engine and its bounded cache.
+  return mergeClasses(clsx(inputs)) ?? '';
 }

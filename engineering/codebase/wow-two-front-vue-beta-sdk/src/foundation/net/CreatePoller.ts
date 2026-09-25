@@ -182,7 +182,15 @@ export function createPoller(fn: PollFn, options: PollerOptions = {}): Poller {
   const setState = (next: PollerState): void => {
     if (state === next) return;
     state = next;
-    onStateChange?.(next);
+    try {
+      onStateChange?.(next);
+    } catch (error) {
+      try {
+        onError?.(toError(error));
+      } catch {
+        /* Observer failures do not interrupt scheduling. */
+      }
+    }
   };
 
   /** Clears the pending tick, if any. Never touches the listeners — suspension keeps them. */

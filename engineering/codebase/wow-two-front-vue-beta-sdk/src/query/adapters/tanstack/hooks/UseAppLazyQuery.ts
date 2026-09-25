@@ -1,3 +1,4 @@
+import { queryScope } from '../QueryLifetime';
 import { resolveQueryResult } from '../QueryOutcome';
 import { ResultExtensions, type Result } from '../../../../foundation/results';
 import { onScopeDispose, shallowRef, toValue, type MaybeRefOrGetter, type Ref } from 'vue';
@@ -113,6 +114,10 @@ export function useAppLazyQuery<TRaw, TData = TRaw>({
     loading.value = false;
   };
 
-  onScopeDispose(reset);
+  const unsubscribe = queryScope(client).subscribe(reset);
+  onScopeDispose(() => {
+    unsubscribe();
+    reset();
+  });
   return { data, loading, error, fetch, reset };
 }

@@ -17,11 +17,15 @@ export function useResizeObserver<T extends HTMLElement = HTMLElement>(
   watchPostEffect((onCleanup) => {
     const element = toValue(target);
     if (!toValue(enabled) || !element || typeof ResizeObserver === 'undefined') return;
+    let disposed = false;
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      if (entry) callback(entry);
+      if (!disposed && entry) callback(entry);
     });
     observer.observe(element);
-    onCleanup(() => observer.disconnect());
+    onCleanup(() => {
+      disposed = true;
+      observer.disconnect();
+    });
   });
 }

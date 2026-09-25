@@ -1,5 +1,6 @@
 export * from './providers/LocaleContext';
 export * from './LocaleFormatters';
+export * from './ExactNumberFormatter';
 
 // `LocaleProvider` and `FormattedRelative` are SFCs, so they need a named re-export rather than a `export *`
 // (a `.vue` module's only meaningful export is its default). The provide/inject half of `LocaleProvider` lives
@@ -8,3 +9,4 @@ export { default as LocaleProvider, type LocaleProviderProps } from './providers
 export { FormattedRelative, type FormattedRelativeProps } from './formattedRelative';
 
 export { createCollator, compareStrings } from './Compare';
+export { useLocaleDefaults, type LocaleDefaultProps } from './UseLocaleDefaults';

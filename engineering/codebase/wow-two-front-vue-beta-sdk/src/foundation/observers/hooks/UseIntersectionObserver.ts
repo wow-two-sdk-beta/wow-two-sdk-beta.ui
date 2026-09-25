@@ -93,7 +93,9 @@ export function useIntersectionObserver(
     const current =
       observer ??
       new IntersectionObserver((entries, self) => {
-        for (const entry of entries) callback(entry, self);
+        for (const entry of entries) {
+          if (observer === self && observed.has(entry.target)) callback(entry, self);
+        }
       }, toIntersectionInit(opts));
     observer = current;
 

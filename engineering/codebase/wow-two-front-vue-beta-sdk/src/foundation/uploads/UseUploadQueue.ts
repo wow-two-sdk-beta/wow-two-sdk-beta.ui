@@ -116,9 +116,8 @@ export interface UseUploadQueueControls<TResult = unknown> {
  * panel or drop zone.
  *
  * The queue is created at setup and kept for the scope's lifetime, so `concurrency` / `accept` / `maxSize` /
- * `retry` are setup-time values (`transport` stays live — see the file header). Disposal does NOT cancel
- * in-flight uploads; call `cancelAll` from `onScopeDispose` if that is the behaviour you want, or hoist the
- * queue out of the component with `createUploadQueue` + {@link useUploadQueueSnapshot} so uploads survive it.
+ * `retry` are setup-time values (`transport` stays live — see the file header). Disposal clears the queue and cancels
+ * in-flight uploads. To retain uploads, hoist `createUploadQueue` and use {@link useUploadQueueSnapshot}.
  *
  * @param options Queue configuration. A ref or getter keeps `transport` live; the rest is read once.
  */

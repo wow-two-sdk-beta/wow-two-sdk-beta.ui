@@ -28,7 +28,13 @@
 import type { LogContext } from './LogRecord';
 
 /** Provides the context keys redacted by default — the credential names that show up in practically every payload. */
-export const DefaultRedactKeys: ReadonlyArray<string> = ['password', 'token', 'secret', 'authorization', 'apiKey'];
+export const DefaultRedactKeys: ReadonlyArray<string> = Object.freeze([
+  'password',
+  'token',
+  'secret',
+  'authorization',
+  'apiKey',
+]);
 
 /** Provides the placeholder written over a redacted value. */
 export const DefaultRedactionMask = '[redacted]';

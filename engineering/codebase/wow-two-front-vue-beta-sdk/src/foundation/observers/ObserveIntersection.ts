@@ -103,13 +103,15 @@ export function observeIntersection(
 ): Disposer {
   if (!supportsIntersectionObserver()) return NoopDisposer;
 
+  let disposed = false;
   const observer = new IntersectionObserver((entries, self) => {
-    for (const entry of entries) callback(entry, self);
+    for (const entry of entries) {
+      if (!disposed) callback(entry, self);
+    }
   }, toIntersectionInit(options));
 
   observer.observe(element);
 
-  let disposed = false;
   return () => {
     if (disposed) return;
     disposed = true;

@@ -1,5 +1,15 @@
 import { computed, type ComputedRef } from 'vue';
 
+import type { ExactNumber, NumberFailure } from '../numbers';
+import type { Result } from '../results';
+import {
+  formatExactNumber,
+  formatExactCurrency,
+  formatExactPercent,
+  type ExactNumberFormatOptions,
+  type ExactCurrencyFormatOptions,
+  type ExactPercentFormatOptions,
+} from './ExactNumberFormatter';
 import { useLocale } from './providers/LocaleContext';
 
 import { intlOptionsKey as optKey, memoIntl as memo } from './IntlCache';
@@ -9,6 +19,13 @@ export interface LocaleFormatters {
   /** The BCP-47 locale these formatters are bound to. */
   locale: string;
   number(value: number, options?: Intl.NumberFormatOptions): string;
+  exactNumber(value: ExactNumber, options?: ExactNumberFormatOptions): Result<string, NumberFailure>;
+  exactCurrency(
+    value: ExactNumber,
+    currency: string,
+    options?: ExactCurrencyFormatOptions,
+  ): Result<string, NumberFailure>;
+  exactPercent(value: ExactNumber, options?: ExactPercentFormatOptions): Result<string, NumberFailure>;
   currency(value: number, currency: string, options?: Intl.NumberFormatOptions): string;
   percent(value: number, options?: Intl.NumberFormatOptions): string;
   date(value: Date | number, options?: Intl.DateTimeFormatOptions): string;
@@ -27,6 +44,9 @@ export function createLocaleFormatters(locale: string): LocaleFormatters {
   return {
     locale,
     number: (value, options) => nf(options).format(value),
+    exactNumber: (value, options) => formatExactNumber(value, locale, options),
+    exactCurrency: (value, currency, options) => formatExactCurrency(value, locale, currency, options),
+    exactPercent: (value, options) => formatExactPercent(value, locale, options),
     currency: (value, currency, options) => nf({ ...options, style: 'currency', currency }).format(value),
     percent: (value, options) => nf({ ...options, style: 'percent' }).format(value),
     date: (value, options) => dtf(options ?? { dateStyle: 'medium' }).format(value),

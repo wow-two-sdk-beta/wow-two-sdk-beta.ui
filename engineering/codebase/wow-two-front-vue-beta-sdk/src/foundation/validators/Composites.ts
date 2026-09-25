@@ -127,14 +127,15 @@ export function object<TShape extends ObjectShape>(
     const issues: ValidationIssue[] = [];
 
     for (const [key, validator] of entries) {
-      const result = validator.parseAt(value[key], [...path, key]);
+      const present = Object.hasOwn(value, key);
+      const result = validator.parseAt(present ? value[key] : undefined, [...path, key]);
       if (!result.ok) {
         issues.push(...result.failure.issues);
         continue;
       }
       // An absent optional key stays absent. Writing `{ name: undefined }` would make `'name' in output`
       // true, which flips `??=` merges and deep-equality comparisons downstream.
-      if (result.value === undefined && !(key in value)) continue;
+      if (result.value === undefined && !present) continue;
       defineOwn(output, key, result.value);
     }
 

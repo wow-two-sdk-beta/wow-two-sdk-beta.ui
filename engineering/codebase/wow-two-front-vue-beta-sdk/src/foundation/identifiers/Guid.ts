@@ -24,6 +24,9 @@ function createV7(timestamp?: number | Temporal.Instant): Guid {
   const ms =
     timestamp === undefined ? Date.now() : typeof timestamp === 'number' ? timestamp : timestamp.epochMilliseconds;
 
+  if (!Number.isSafeInteger(ms) || ms < 0 || ms >= 2 ** 48) {
+    throw new RangeError('Guid.createV7: timestamp must fit the unsigned 48-bit millisecond wire field.');
+  }
   const b = new Uint8Array(16);
   crypto.getRandomValues(b);
 

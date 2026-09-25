@@ -55,11 +55,10 @@ export function toBytes(data: BinaryInput): Uint8Array {
 export async function digest(algorithm: DigestAlgorithm, data: BinaryInput): Promise<Uint8Array> {
   const subtle = requireSubtle();
 
-  // TS 5.7 made `Uint8Array` generic over its backing buffer and narrowed `BufferSource` to
-  // `ArrayBufferView<ArrayBuffer>`, which excludes the `SharedArrayBuffer`-backed views the default
-  // `Uint8Array<ArrayBufferLike>` still admits. `subtle.digest` reads any byte view at runtime, so this
-  // widens the static type without changing behaviour — and without narrowing what callers may pass in.
-  const hashed = await subtle.digest(algorithm, toBytes(data) as BufferSource);
+  const bytes = toBytes(data);
+  // SubtleCrypto forbids shared backing stores; snapshot those inputs before handing them off.
+  const input = bytes.buffer instanceof ArrayBuffer ? (bytes as Uint8Array<ArrayBuffer>) : new Uint8Array(bytes);
+  const hashed = await subtle.digest(algorithm, input);
 
   return new Uint8Array(hashed);
 }

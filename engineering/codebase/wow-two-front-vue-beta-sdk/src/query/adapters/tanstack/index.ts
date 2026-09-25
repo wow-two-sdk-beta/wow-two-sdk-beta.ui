@@ -25,6 +25,7 @@
 export {
   createQueryClient,
   type CreateQueryClientOptions,
+  type AppQueryClient,
   type AppQueryMeta,
   type QueryErrorContext,
 } from './CreateQueryClient';

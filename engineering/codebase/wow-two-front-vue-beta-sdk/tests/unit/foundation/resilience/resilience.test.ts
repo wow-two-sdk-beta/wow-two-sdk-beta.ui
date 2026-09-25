@@ -72,3 +72,15 @@ describe('shouldRetry', () => {
     expect(DefaultTransientStatuses).toContain(503);
   });
 });
+
+it('rejects invalid delay work and never exceeds a fractional cap after rounding', () => {
+  expect(() => computeRetryDelay(policy(), 0)).toThrow(RangeError);
+  expect(() => computeRetryDelay(policy({ baseDelayMs: NaN }), 1)).toThrow(RangeError);
+  expect(() => computeRetryDelay(policy(), 2000)).toThrow(RangeError);
+  expect(computeRetryDelay(policy({ maxDelayMs: 250.6 }), 2000)).toBe(250);
+  expect(computeRetryDelay(policy({ baseDelayMs: 0 }), 2000)).toBe(0);
+  expect(() => computeRetryDelay(policy({ jitter: JitterStrategy.Full }), 1, 0, () => 1)).toThrow(RangeError);
+  expect(shouldRetry(policy({ maxRetries: Infinity }), 0, 503)).toBe(true);
+  expect(shouldRetry(policy({ maxRetries: NaN }), 0, 503)).toBe(false);
+  expect(shouldRetry(policy(), -1, 503)).toBe(false);
+});

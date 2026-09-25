@@ -18,7 +18,7 @@ function focusMainContent(): void {
 </script>
 
 <script setup lang="ts">
-import { onMounted, shallowRef, watch } from 'vue';
+import { nextTick, onMounted, onScopeDispose, shallowRef, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { deepestHandleValue, resolveHandleValue } from '../RouteHandles';
@@ -41,23 +41,35 @@ const message = shallowRef('');
 // `router.replace`) never yank focus back to main mid-interaction. React needed a ref to absorb
 // StrictMode's double-invoked mount effect; a non-immediate watcher cannot double-fire.
 let lastPath: string | null = null;
+let generation = 0;
+let disposed = false;
+onScopeDispose(() => {
+  disposed = true;
+  generation += 1;
+});
 
 // `onMounted` never runs on the server, which is what this needs: it reads and focuses the DOM.
 onMounted(() => {
   lastPath = props.skipInitial ? route.path : null;
-  if (!props.skipInitial) announce(route.path);
+  if (!props.skipInitial) void announce(route.path);
 });
 
 watch(
   () => route.path,
   (path) => {
     if (lastPath === path) return;
-    announce(path);
+    void announce(path);
   },
+  { flush: 'post' },
 );
 
-function announce(path: string): void {
+async function announce(path: string): Promise<void> {
+  const current = ++generation;
   lastPath = path;
+  // Clear the live region so adjacent pages with the same title still announce once.
+  message.value = '';
+  await nextTick();
+  if (disposed || current !== generation || route.path !== path) return;
   focusMainContent();
   message.value = deepestHandleValue(route, (handle) => resolveHandleValue(handle.title, route)) ?? document.title;
 }

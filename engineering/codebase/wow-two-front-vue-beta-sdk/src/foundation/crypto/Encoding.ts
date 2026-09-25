@@ -110,6 +110,9 @@ export function base64ToBytes(base64: string): Uint8Array {
   }
 
   const binary = atob(base64);
+  if (btoa(binary).replace(/=+$/, '') !== base64.replace(/=+$/, '')) {
+    throw new TypeError('base64ToBytes: non-zero padding bits are not canonical.');
+  }
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < bytes.length; i++) bytes[i] = binary.charCodeAt(i);
 

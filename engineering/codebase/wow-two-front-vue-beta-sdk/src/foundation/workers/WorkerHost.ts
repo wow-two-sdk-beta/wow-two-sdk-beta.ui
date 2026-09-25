@@ -147,12 +147,13 @@ export function exposeWorkerApi<THandlers extends WorkerHandlerMap>(
 ): () => void {
   if (scope === null) return () => undefined;
   const target = scope;
+  let disposed = false;
 
   /** Runs one request to completion and posts exactly one reply. */
   async function dispatch(event: MessageEvent): Promise<void> {
     const request: unknown = event.data;
     // Not our envelope — the pipe is shared, so stay silent rather than answering a message we do not own.
-    if (!isWorkerRequestMessage(request)) return;
+    if (disposed || !isWorkerRequestMessage(request)) return;
 
     try {
       // OWN properties only. A bare `handlers[method]` walks the prototype chain, so a request for
@@ -169,6 +170,7 @@ export function exposeWorkerApi<THandlers extends WorkerHandlerMap>(
       const invoke = handler as (...args: ReadonlyArray<unknown>) => unknown;
       const outcome: unknown = await invoke(...request.args);
 
+      if (disposed) return;
       const value = isWorkerTransfer(outcome) ? outcome.value : outcome;
       const transfer = isWorkerTransfer(outcome) ? [...outcome.transfer] : undefined;
 
@@ -178,7 +180,12 @@ export function exposeWorkerApi<THandlers extends WorkerHandlerMap>(
       // it. Without this, such a call hangs until its deadline, or forever when it has none.
       target.postMessage(createSuccessMessage(request.id, value), transfer);
     } catch (error) {
-      target.postMessage(createFailureMessage(request.id, serializeError(error)));
+      if (disposed) return;
+      try {
+        target.postMessage(createFailureMessage(request.id, serializeError(error)));
+      } catch {
+        /* A terminated or unusable reply channel cannot receive a failure either. */
+      }
     }
   }
 
@@ -189,6 +196,7 @@ export function exposeWorkerApi<THandlers extends WorkerHandlerMap>(
 
   target.addEventListener('message', listener);
   return () => {
+    disposed = true;
     target.removeEventListener('message', listener);
   };
 }

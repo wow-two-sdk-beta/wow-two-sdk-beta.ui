@@ -181,10 +181,13 @@ export function useRovingFocusItem(options: UseRovingFocusItemOptions = {}): Use
     [() => toValue(options.isActive ?? false), () => context?.groupEl.value ?? null],
     ([isActive, groupNode], _previous, onCleanup) => {
       if (!isActive || !context || !groupNode || typeof document === 'undefined') return;
-      if (!groupNode.contains(document.activeElement)) context.setFocusedId(id);
+      const selectActive = (): void => {
+        if (node.value && !isNodeDisabled(node.value)) context.setFocusedId(id);
+      };
+      if (!groupNode.contains(groupNode.ownerDocument.activeElement)) selectActive();
       const onFocusOut = (event: FocusEvent) => {
         const next = event.relatedTarget as Node | null;
-        if (!next || !groupNode.contains(next)) context.setFocusedId(id);
+        if (!next || !groupNode.contains(next)) selectActive();
       };
       groupNode.addEventListener('focusout', onFocusOut);
       onCleanup(() => groupNode.removeEventListener('focusout', onFocusOut));

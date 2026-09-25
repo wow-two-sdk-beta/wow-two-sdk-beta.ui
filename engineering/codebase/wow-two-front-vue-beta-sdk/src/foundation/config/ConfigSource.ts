@@ -29,8 +29,9 @@ export function importMetaEnvSource(): ConfigSource {
  */
 export function windowConfigSource(globalKey: string = DefaultRuntimeConfigKey): ConfigSource {
   if (typeof window === 'undefined') return {};
+  if (!Object.hasOwn(window, globalKey)) return {};
   const raw = (window as unknown as Record<string, unknown>)[globalKey];
-  return raw !== null && typeof raw === 'object' ? (raw as ConfigSource) : {};
+  return raw !== null && typeof raw === 'object' && !Array.isArray(raw) ? (raw as ConfigSource) : {};
 }
 
 /** An explicit source over a plain record — the injection seam for tests and for values resolved elsewhere. */
@@ -50,6 +51,7 @@ export function defaultSources(): ReadonlyArray<ConfigSource> {
  */
 export function resolveRaw(sources: ReadonlyArray<ConfigSource>, key: string): string | undefined {
   for (const source of sources) {
+    if (!Object.hasOwn(source, key)) continue;
     const hit = (source as Record<string, unknown>)[key];
     if (hit === undefined || hit === null) continue;
     const asString = typeof hit === 'string' ? hit : String(hit);

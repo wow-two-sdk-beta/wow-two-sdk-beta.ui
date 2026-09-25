@@ -23,3 +23,27 @@ Supported writes are `field.value`/`field.setValue`, `form.setValue`, array oper
 File/Blob, Temporal and custom class instances are opaque immutable leaves retained by identity. Replace them through a setter; mutable class internals require a plain editing model instead. The form neither JSON-serializes these leaves nor strips their prototypes. Dirty comparison uses identity for opaque leaves.
 
 Synchronous and asynchronous schema exceptions settle the form's boolean verdict as false with a safe validation fallback. Both validating/submitting state and the in-flight latch release, so retry can run. Expected schema issues and Standard Schema output retain their existing protocol.
+
+## Discriminated array rows
+
+Call `useFieldArray` with the array's complete element union. Do not claim a narrower branch through its generic.
+Create a runtime-checked branch with `variant`; render its typed `Field` only while `matches` is true.
+
+```ts
+type Rule = { kind: 'fallback'; destination: string } | { kind: 'country'; country: string; destination: string };
+
+const rules = useFieldArray<Rule>(form, 'rules');
+const countryRules = rules.variant((rule): rule is Extract<Rule, { kind: 'country' }> => rule.kind === 'country');
+```
+
+```vue
+<countryRules.Field v-if="countryRules.matches(row.index)" :index="row.index" name="country">
+  <template #default="field"><TextInput v-model="field.value" /></template>
+</countryRules.Field>
+```
+
+## Array identity and stale validation
+
+`form.array(path).keys` owns row identity across all bindings and direct facade operations. Reorder remaps nested-array keys; scalar field edits preserve identity. Whole-row/array replacement and reset create fresh keys. `useFieldArray` renders that same canonical identity rather than a separate local registry. Invalid indices are ignored. Direct native `engine` mutations bypass this facade identity contract; use the shared array/setValue/reset APIs for rendered rows.
+
+Async validation resolves false and cannot publish old errors when the validated values changed while awaiting the schema. Both house and TanStack adapters share this behavior.

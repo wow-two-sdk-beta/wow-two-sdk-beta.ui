@@ -227,8 +227,10 @@ export interface AppFieldComponent<TValues extends object> {
   };
 }
 
-/** Array helpers at a path — `push` / `insert` / `remove` / `swap` / `move` (R8). Indices are assumed in range. */
+/** Array helpers at a path. Invalid indices are ignored; identity follows structural operations. */
 export interface AppArrayApi {
+  /** Canonical row keys; reset and whole-row/array replacement create fresh identities. */
+  readonly keys: ReadonlyArray<string>;
   readonly push: (value: unknown) => void;
   readonly insert: (index: number, value: unknown) => void;
   readonly remove: (index: number) => void;

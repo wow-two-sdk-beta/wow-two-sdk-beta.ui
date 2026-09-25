@@ -1,3 +1,4 @@
+import { createFormArrayIdentity } from '../../FormArrayIdentity';
 import { onMounted, onScopeDispose, shallowRef, toValue, type ShallowRef } from 'vue';
 
 import {
@@ -297,12 +298,14 @@ interface AdapterPrelude<TValues extends object, TOutput> {
   readonly parseValues: (values: TValues, fresh?: boolean) => Promise<FormParseResult<TOutput>>;
   /** The form's message resolver, memoized against the `messages` / `labels` option identities. */
   readonly messageResolver: () => ResolveValidationMessage;
+  readonly bindValues: (read: () => TValues) => void;
 }
 
 /** Builds the overlay + the stable TanStack options (all callbacks read the latest options through `getOptions`). */
 function createAdapterPrelude<TValues extends object, TOutput>(
   getOptions: () => AppFormOptions<TValues, TOutput>,
 ): AdapterPrelude<TValues, TOutput> {
+  let readCurrentValues: (() => TValues) | null = null;
   const initialOptions = getOptions();
   const initialValues = snapshotFormValues(initialOptions.defaultValues);
   const overlay = createTanstackFormOverlay<TValues>(snapshotFormValues(initialValues));
@@ -361,8 +364,9 @@ function createAdapterPrelude<TValues extends object, TOutput>(
 
   const validateWithSchema: FormValidateAsyncFn<TValues> = async ({ value, signal }) => {
     overlay.setScope(null);
-    const result = await untilFormAbort(parseValues(value), signal, null);
-    if (!result) return undefined;
+    const snapshot = snapshotFormValues(value);
+    const result = await untilFormAbort(parseValues(snapshot), signal, null);
+    if (!result || (readCurrentValues && !deepEqual(snapshot, readCurrentValues()))) return undefined;
     return toEngineValidationError(result.ok ? {} : result.failure.fieldErrors);
   };
   tanstackOptions.validators = { onDynamicAsync: validateWithSchema };
@@ -375,7 +379,16 @@ function createAdapterPrelude<TValues extends object, TOutput>(
       modeAfterSubmission: 'change',
     })(props);
 
-  return { getOptions, overlay, tanstackOptions, messageResolver, parseValues };
+  return {
+    getOptions,
+    overlay,
+    tanstackOptions,
+    messageResolver,
+    parseValues,
+    bindValues: (read) => {
+      readCurrentValues = read;
+    },
+  };
 }
 
 /** What `buildAppForm` returns — the contract surface plus the teardown the adapter's own timer needs. */
@@ -399,6 +412,7 @@ function buildAppForm<TValues extends object, TOutput>(
   let trailingSubmit = false;
   let submittingValues: TValues | null = null;
   const reader = createCombinedReader(bridgeStore(engine), overlay);
+  const identity = createFormArrayIdentity(() => engine.store.state.values);
 
   // ── Submit path shared by `handleSubmit` + auto-submit (validate → onSubmit → map failure) ─────
   /** Resolves a thrown submit failure onto the overlay (matched paths → fields, remainder → banner). */
@@ -530,7 +544,14 @@ function buildAppForm<TValues extends object, TOutput>(
       requestController.signal,
       null,
     );
-    return !disposed && lifecycle === lifecycleEpoch && epoch === validationEpoch && result !== null && result[1].ok;
+    return (
+      !disposed &&
+      lifecycle === lifecycleEpoch &&
+      epoch === validationEpoch &&
+      result !== null &&
+      result[1].ok &&
+      deepEqual(values, engine.store.state.values)
+    );
   }
 
   // ── Auto-submit (`submitOn`) — routes through the SAME `guardedSubmit` as manual submit ────────
@@ -563,6 +584,7 @@ function buildAppForm<TValues extends object, TOutput>(
       overlay.clearServerErrorsAt(path);
       // Triggers TanStack 'change'-cause validation, gated by `revalidateLogic`.
       engine.setFieldValue(path as DeepKeys<TValues>, snapshotFormValues(value) as never);
+      identity.replace(path);
       // `submitOn: 'change'` — a user-origin write schedules the debounced auto-submit.
       scheduleAutoSubmit();
     },
@@ -586,29 +608,31 @@ function buildAppForm<TValues extends object, TOutput>(
     // TanStack's array ops are constrained to its typed array paths (`DeepKeysOfType`); the
     // contract's paths are loose strings, so the vendor's path algebra is opted out of with
     // `never` rather than reimplemented here.
-    const field = path as never;
-    switch (operation.kind) {
-      case 'push':
-        engine.pushFieldValue(field, snapshotFormValues(operation.value) as never);
-        break;
-      case 'insert':
-        void engine.insertFieldValue(field, operation.index, snapshotFormValues(operation.value) as never);
-        break;
-      case 'remove':
-        void engine.removeFieldValue(field, operation.index);
-        break;
-      case 'swap':
-        engine.swapFieldValues(field, operation.indexA, operation.indexB);
-        break;
-      case 'move':
-        engine.moveFieldValues(field, operation.fromIndex, operation.toIndex);
-        break;
-    }
-    // Contract reindexing for the overlay: row-scoped server errors + touched marks
-    // follow their rows. TanStack shifts its OWN field meta by its rules; where they
-    // differ, the contract wins because errors/touched surface from the overlay and
-    // client errors are recomputed by the op's change-revalidation.
-    overlay.remapForArrayOperation(path, operation);
+    identity.operation(path, operation, () => {
+      const field = path as never;
+      switch (operation.kind) {
+        case 'push':
+          engine.pushFieldValue(field, snapshotFormValues(operation.value) as never);
+          break;
+        case 'insert':
+          void engine.insertFieldValue(field, operation.index, snapshotFormValues(operation.value) as never);
+          break;
+        case 'remove':
+          void engine.removeFieldValue(field, operation.index);
+          break;
+        case 'swap':
+          engine.swapFieldValues(field, operation.indexA, operation.indexB);
+          break;
+        case 'move':
+          engine.moveFieldValues(field, operation.fromIndex, operation.toIndex);
+          break;
+      }
+      // Contract reindexing for the overlay: row-scoped server errors + touched marks
+      // follow their rows. TanStack shifts its OWN field meta by its rules; where they
+      // differ, the contract wins because errors/touched surface from the overlay and
+      // client errors are recomputed by the op's change-revalidation.
+      overlay.remapForArrayOperation(path, operation);
+    });
     scheduleAutoSubmit();
   };
 
@@ -652,9 +676,13 @@ function buildAppForm<TValues extends object, TOutput>(
       // in-field `setValue`; TanStack's 'change'-cause validation runs under `revalidateLogic`.
       overlay.clearServerErrorsAt(path);
       engine.setFieldValue(path as DeepKeys<TValues>, snapshotFormValues(value) as never);
+      identity.replace(path);
       scheduleAutoSubmit();
     },
     array: (path: string) => ({
+      get keys() {
+        return identity.keys(path);
+      },
       push: (value: unknown) => arrayOperation(path, { kind: 'push', value }),
       insert: (index: number, value: unknown) => arrayOperation(path, { kind: 'insert', index, value }),
       remove: (index: number) => arrayOperation(path, { kind: 'remove', index }),
@@ -670,6 +698,7 @@ function buildAppForm<TValues extends object, TOutput>(
       tanstackOptions.defaultValues = values;
       overlay.reset(snapshotFormValues(values));
       engine.reset(values);
+      identity.reset();
       clearAutoSubmitTimer(); // a reset/prefill never auto-submits — drop any pending trailing submit
     },
     setFieldErrors: (errors: Record<string, ReadonlyArray<string>>) => overlay.replaceServerErrors(errors),
@@ -702,6 +731,7 @@ export function useAppForm<TValues extends object, TOutput = TValues>(
 ): AppForm<TValues, TanstackFormEngine<TValues>> {
   const prelude = createAdapterPrelude<TValues, TOutput>(() => toValue(options));
   const engine = useForm(prelude.tanstackOptions) as TanstackFormEngine<TValues>;
+  prelude.bindValues(() => engine.store.state.values);
   const built = buildAppForm<TValues, TOutput>(engine, prelude);
 
   // Validate once on mount when flagged — seeds `isValid` / field errors WITHOUT marking touched

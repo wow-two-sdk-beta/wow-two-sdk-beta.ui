@@ -6,6 +6,7 @@
 
 export {
   type ConfigField,
+  type ConfigJsonDecoder,
   type ConfigFieldOptions,
   type AnyConfigField,
   type ListFieldOptions,

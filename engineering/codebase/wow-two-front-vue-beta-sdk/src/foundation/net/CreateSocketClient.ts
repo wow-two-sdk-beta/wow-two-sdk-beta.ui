@@ -208,7 +208,11 @@ export function createSocketClient<TIn = unknown, TOut = unknown>(
   const setState = (next: ConnectionState): void => {
     if (state === next) return;
     state = next;
-    onStateChange?.(next);
+    try {
+      onStateChange?.(next);
+    } catch (error) {
+      report(error);
+    }
   };
 
   /** Reports an error, tolerating a throwing consumer handler — a bad listener must not break the transport. */
@@ -315,7 +319,11 @@ export function createSocketClient<TIn = unknown, TOut = unknown>(
       scheduler.reset();
       setState(ConnectionState.Open);
       if (closedByCaller || connection !== target) return;
-      onOpen?.();
+      try {
+        onOpen?.();
+      } catch (error) {
+        report(error);
+      }
       if (closedByCaller || connection !== target) return;
       // Flush AFTER `onOpen`, so a handler that sends a subscribe/auth frame on connect lands ahead of the
       // backlog rather than behind it — the ordering a protocol with a handshake requires.
@@ -342,7 +350,11 @@ export function createSocketClient<TIn = unknown, TOut = unknown>(
         report(error);
         return;
       }
-      onMessage(decoded, message);
+      try {
+        onMessage(decoded, message);
+      } catch (error) {
+        report(error);
+      }
     });
 
     on('error', () => {
@@ -353,7 +365,11 @@ export function createSocketClient<TIn = unknown, TOut = unknown>(
 
     on('close', (event) => {
       stopHeartbeat();
-      onClose?.(event as CloseEvent);
+      try {
+        onClose?.(event as CloseEvent);
+      } catch (error) {
+        report(error);
+      }
       if (closedByCaller) return;
 
       detach?.();

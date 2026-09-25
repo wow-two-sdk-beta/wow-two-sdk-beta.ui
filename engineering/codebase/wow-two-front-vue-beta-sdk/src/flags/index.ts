@@ -29,6 +29,9 @@ export {
   type JsonValue,
   type JsonObject,
   type FlagValue,
+  type FlagScalar,
+  type FlagScalarValue,
+  type FlagObjectDecoder,
   type ContextAttribute,
   type EvaluationContext,
   type FlagEvaluation,
@@ -59,4 +62,4 @@ export {
 
 // Vue seam — provider component + composables
 export { default as FlagsProvider, type FlagsProviderProps } from './providers/FlagsProvider.vue';
-export { useFlag, useFlags } from './providers/FlagsContext';
+export { useFlag, useFlags, useObjectFlag } from './providers/FlagsContext';

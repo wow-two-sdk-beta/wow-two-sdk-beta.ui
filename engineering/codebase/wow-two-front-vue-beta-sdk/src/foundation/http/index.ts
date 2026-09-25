@@ -8,3 +8,5 @@ export * from './Envelope';
 export * from './models/DateBrands';
 export * from './CreateApiClient';
 export * from './FieldErrors';
+
+export { createRequestScope, type RequestScope, type RequestSnapshot } from './RequestScope';

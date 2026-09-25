@@ -1,7 +1,9 @@
+import { useQueryRevision, queryScope, withinQueryScope } from '../QueryLifetime';
+import { combineRequestSignals } from '../../../../foundation/http/RequestScope';
 import { resolveQueryResult } from '../QueryOutcome';
 import type { Result } from '../../../../foundation/results';
 import { computed, toValue, type ComputedRef, type MaybeRefOrGetter, type Ref } from 'vue';
-import { keepPreviousData, useQuery, type QueryKey } from '@tanstack/vue-query';
+import { useQuery, useQueryClient, type QueryKey } from '@tanstack/vue-query';
 
 import type { ApiFailure } from '../../../../foundation/http';
 
@@ -68,12 +70,29 @@ export function useAppPaginatedQuery<TItem, TPage>({
   enabled,
   meta,
 }: UseAppPaginatedQueryOptions<TItem, TPage>): UseAppPaginatedQueryReturn<TItem, TPage> {
+  const client = useQueryClient();
+  const revision = useQueryRevision(client);
   const query = useQuery<TPage, Error, TPage, QueryKey>(() => {
+    void revision.value;
     const currentPage = toValue(page);
     return {
       queryKey: [...toValue(key), currentPage],
-      queryFn: ({ signal }) => resolveQueryResult(queryFn({ page: currentPage, signal })),
-      placeholderData: keepPreviousData,
+      queryFn: async ({ signal }) => {
+        const origin = queryScope(client).capture();
+        const combined = combineRequestSignals(signal, origin.signal);
+        try {
+          return await withinQueryScope(origin, () =>
+            resolveQueryResult(queryFn({ page: currentPage, signal: combined.signal })),
+          );
+        } finally {
+          combined.dispose();
+        }
+      },
+      placeholderData: (previous, previousQuery) =>
+        previousQuery &&
+        client.getQueryCache().find({ queryKey: previousQuery.queryKey, exact: true }) === previousQuery
+          ? previous
+          : undefined,
       enabled: toValue(enabled),
       meta,
     };

@@ -56,6 +56,7 @@ export type {
   FieldArrayGlueField,
   FieldArrayGlueFieldProps,
   FieldArrayRow,
+  FieldArrayVariant,
 } from './UseFieldArray';
 
 // Adapter-author seams — building blocks the in-repo adapters share

@@ -9,14 +9,8 @@
 // forms engine already speaks the spec, but the spec type lived above `foundation`, so nothing below it
 // could produce one. `toStandardSchema` exists only for callers who prefer a bare spec object.
 //
-// WHY THE SPEC `Input` IS `TOutput`, NOT `unknown`: the spec's `Props<Input, Output>` carries `Input`
-// only through the optional phantom `types`, and consumers spell the schema slot with the ONE-ARG form —
-// `AppFormOptions.schema?: StandardSchemaV1<TValues>`, which expands to `Props<TValues, TValues>`. A
-// validator declaring `Input = unknown` fails that assignment, because `types?: Types<unknown, T>` is not
-// assignable to `types?: Types<T, T>`. Declaring `Input = TOutput` is what makes "drops in unchanged"
-// literally true. The cost is that a `.transform()` chain reports its INPUT type as the transformed
-// output; this slice does not track input types, `types` is never populated at runtime, and `validate`
-// still accepts `unknown` — so the inaccuracy is confined to `InferInput`, which no consumer here reads.
+// Standard Schema carries input and output independently. Transforms preserve the original input;
+// optional/default chains add undefined only where accepted. Runtime validation still accepts unknown.
 //
 // WHY `derive` REBUILDS `this.constructor`: refinements must preserve the SUBCLASS, or the chain collapses
 // — `string().min(2)` returning a base `Validator<string>` would lose `.pattern()`. Every subclass keeps
@@ -29,6 +23,7 @@
 // Expected validation failures use Result. Caller checks, transforms and violated invariants
 // remain exceptional; explicitly adapt throwing external parsers at their boundary.
 
+import { ExactNumber } from '../numbers';
 import type { StandardSchemaV1 } from './StandardSchema';
 import { invalid, valid, type PathSegmentKey, type ValidatorParseResult } from './ValidationOutcome';
 
@@ -115,24 +110,41 @@ export class Validator<TOutput, TInput = TOutput> implements StandardSchemaV1<TI
   }
 
   /**
-   * Substitutes `fallback` when the value is `undefined`, narrowing the output back to a defined type.
+   * Substitutes a scalar or immutable ExactNumber when undefined. Mutable defaults use `defaultFactory`.
    *
    * `null` is NOT defaulted. An explicit `null` is a value the caller chose — in a JSON payload it means
    * "known to be empty", which is different from "absent" — so it keeps flowing into this validator and
    * is rejected unless the validator is also `.nullable()`. Matches zod's split.
    */
   default(fallback: Exclude<TOutput, undefined>): Validator<Exclude<TOutput, undefined>, TInput | undefined> {
+    if (
+      (typeof fallback === 'object' && fallback !== null && !ExactNumber.isExactNumber(fallback)) ||
+      typeof fallback === 'function'
+    )
+      throw new TypeError('Use defaultFactory for object or function defaults.');
+    return this.defaultFactory(() => fallback);
+  }
+
+  /** Produces a fresh parsed default per missing value; the factory owns mutable value isolation. */
+  defaultFactory(
+    create: () => Exclude<TOutput, undefined>,
+  ): Validator<Exclude<TOutput, undefined>, TInput | undefined> {
+    const fallback = (): Exclude<TOutput, undefined> => {
+      const value = create();
+      if (value === undefined) throw new TypeError('A default factory must return a defined value.');
+      return value;
+    };
     return new Validator<Exclude<TOutput, undefined>, TInput | undefined>(
       `${this.typeName} (default)`,
       (value, path) => {
-        if (value === undefined) return valid(fallback);
+        if (value === undefined) return valid(fallback());
 
         const result = this.parseAt(value, path);
         if (!result.ok) return result;
 
         // The inner validator can still yield `undefined` (a `.transform` that returns it), which the
         // fallback also covers — so the narrowing cast holds for every path that reaches here.
-        return valid((result.value === undefined ? fallback : result.value) as Exclude<TOutput, undefined>);
+        return valid((result.value === undefined ? fallback() : result.value) as Exclude<TOutput, undefined>);
       },
     );
   }

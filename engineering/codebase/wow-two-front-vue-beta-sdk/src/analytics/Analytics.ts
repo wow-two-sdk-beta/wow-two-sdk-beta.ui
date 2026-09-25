@@ -89,6 +89,9 @@ export interface Analytics {
 /** Creates an {@link Analytics} client — one per app. Without isolation, use the default {@link analytics}. */
 export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
   const { maxQueueSize = 100, onError, now = Date.now } = options;
+  if (!Number.isSafeInteger(maxQueueSize) || maxQueueSize < 0) {
+    throw new RangeError('Analytics maxQueueSize must be a non-negative safe integer.');
+  }
   const providers = new Set<AnalyticsProvider>(options.providers ?? []);
   const queue: AnalyticsCall[] = [];
   const pendingDeliveries = new Set<Promise<void>>();
@@ -178,7 +181,7 @@ export function createAnalytics(options: AnalyticsOptions = {}): Analytics {
 
     identify(userId: string, traits?: AnalyticsProperties): void {
       const timestamp = now();
-      const identity: AnalyticsIdentity = traits ? { userId, traits, timestamp } : { userId, timestamp };
+      const identity: AnalyticsIdentity = traits ? { userId, traits: { ...traits }, timestamp } : { userId, timestamp };
       dispatch({ kind: AnalyticsCallKind.Identify, identity });
     },
 

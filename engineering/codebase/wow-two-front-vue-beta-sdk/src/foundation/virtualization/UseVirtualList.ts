@@ -84,8 +84,7 @@ export interface UseVirtualListOptions {
   readonly count: MaybeRefOrGetter<number>;
 
   /**
-   * Estimated size of the item at an index, in pixels, used until a real measurement arrives. Read at build
-   * time — a CHANGED estimator only takes effect when `count` changes or an item is re-measured.
+   * Estimated size before measurement, in pixels. Reactive values read by this callback invalidate the geometry.
    */
   readonly estimateSize: (index: number) => number;
 
@@ -107,7 +106,7 @@ export interface UseVirtualListOptions {
    */
   readonly initialViewportSize?: number;
 
-  /** Stable key for an item, for reordering data. Defaults to the index. */
+  /** Stable item identity for rendering and retained measurements across reorders. Defaults to the index. */
   readonly getItemKey?: (index: number) => string | number;
 }
 
@@ -177,7 +176,7 @@ export function useVirtualList(options: UseVirtualListOptions): VirtualList {
   );
 
   /** Real sizes reported through `measureItem`, keyed by index; absent entries fall back to the estimate. */
-  const measuredSizes = new Map<number, number>();
+  const measuredSizes = new Map<string | number, number>();
 
   /** Scroll correction owed to items that grew/shrank above the fold, applied after the next patch. */
   let pendingScrollDelta = 0;
@@ -188,10 +187,20 @@ export function useVirtualList(options: UseVirtualListOptions): VirtualList {
     // rebuild every offset whenever an inline arrow was re-created.
     void measurementVersion.value;
     return buildMeasurements(count.value, (index) => {
-      const measured = measuredSizes.get(index);
+      const measured = measuredSizes.get(options.getItemKey?.(index) ?? index);
       return measured ?? options.estimateSize(index);
     });
   });
+
+  watch(
+    horizontal,
+    () => {
+      measuredSizes.clear();
+      pendingScrollDelta = 0;
+      measurementVersion.value += 1;
+    },
+    { flush: 'sync' },
+  );
 
   const totalSize = computed(() => measurementsTotalSize(measurements.value));
 
@@ -295,7 +304,7 @@ export function useVirtualList(options: UseVirtualListOptions): VirtualList {
     // The guard that stops a measure -> render -> measure loop dead. Everything below re-derives.
     if (previous === size) return;
 
-    measuredSizes.set(index, size);
+    measuredSizes.set(options.getItemKey?.(index) ?? index, size);
 
     // Compensate only for an item entirely above the viewport's top edge — see this file's header for why a
     // straddling item must NOT be compensated. Accumulate: a whole batch of items can re-measure in one flush.

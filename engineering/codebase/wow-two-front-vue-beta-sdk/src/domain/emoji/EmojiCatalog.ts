@@ -4,21 +4,27 @@ import { emojiCatalogData } from './EmojiCatalogData';
 /** Represents one catalog emoji — its glyph, display label, search tags, and display category. */
 export interface EmojiCatalogEntry {
   /** The emoji glyph (a base emoji, no skin-tone variant). */
-  glyph: string;
+  readonly glyph: string;
 
   /** The human-readable display name. */
-  label: string;
+  readonly label: string;
 
   /** The lowercase keywords the search matches against. */
-  tags: ReadonlyArray<string>;
+  readonly tags: ReadonlyArray<string>;
 
   /** The top-level category the entry is grouped under. */
-  category: EmojiCategory;
+  readonly category: EmojiCategory;
 }
 
 /** Returns every catalog emoji in `category`, preserving display order. */
+const entries: ReadonlyArray<EmojiCatalogEntry> = Object.freeze(emojiCatalogData);
+for (const entry of entries) {
+  Object.freeze(entry.tags);
+  Object.freeze(entry);
+}
+
 function byCategory(category: EmojiCategory): ReadonlyArray<EmojiCatalogEntry> {
-  return emojiCatalogData.filter((entry) => entry.category === category);
+  return entries.filter((entry) => entry.category === category);
 }
 
 /**
@@ -29,12 +35,12 @@ function byCategory(category: EmojiCategory): ReadonlyArray<EmojiCatalogEntry> {
  */
 function search(keyword: string): ReadonlyArray<EmojiCatalogEntry> {
   const needle = keyword.trim().toLowerCase();
-  if (!needle) return emojiCatalogData;
+  if (!needle) return entries;
 
   const ranked: { entry: EmojiCatalogEntry; rank: number; order: number }[] = [];
-  for (let order = 0; order < emojiCatalogData.length; order++) {
+  for (let order = 0; order < entries.length; order++) {
     // `noUncheckedIndexedAccess` widens the element; the loop is length-bound, so this never trips.
-    const entry = emojiCatalogData[order];
+    const entry = entries[order];
     if (entry === undefined) continue;
     const label = entry.label.toLowerCase();
 
@@ -54,7 +60,7 @@ function search(keyword: string): ReadonlyArray<EmojiCatalogEntry> {
 /** Provides the standard emoji set, base only, plus its category and search lookups. */
 export const EmojiCatalog = {
   /** Every catalog emoji, in display order. */
-  all: emojiCatalogData,
+  all: entries,
   byCategory,
   search,
 };

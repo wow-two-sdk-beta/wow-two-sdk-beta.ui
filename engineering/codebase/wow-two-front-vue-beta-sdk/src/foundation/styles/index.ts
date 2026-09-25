@@ -16,7 +16,14 @@ export type {
 export { ColorExtensions, ColorTone } from './extensions/ColorExtensions';
 export type { ColorOverride, ColorProp } from './extensions/ColorExtensions';
 export { surfaceVariants, SurfaceVariant } from './SurfaceStyles';
-export type { SurfaceVariants, SurfaceTone, SurfaceRadius, SurfacePadding, SurfaceElevation } from './SurfaceStyles';
+export type {
+  SurfaceVariants,
+  SurfaceTone,
+  SurfaceRadius,
+  SurfacePadding,
+  SurfaceElevation,
+  SurfaceAmbient,
+} from './SurfaceStyles';
 export { Layer, layerStyle, type LayerName } from './constants/Layers';
 export { Tone, Size, Radius, Padding } from './enums/StyleTokens';
 export type { Elevation } from './enums/StyleTokens';

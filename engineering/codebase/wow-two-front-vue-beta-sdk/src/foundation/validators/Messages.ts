@@ -22,6 +22,8 @@
 // a single catalogue serves both. The alias pass lives on the CLIENT deliberately: it lets a form adopt
 // the catalogue before the backend normalizes anything, and it keeps working unchanged afterwards.
 
+import { ExactNumber } from '../numbers';
+
 /** A field-level failure widened to carry its machine tag — the channel a catalogue can key on. */
 export interface FieldIssue {
   /** The authoring or server message. Always present; used verbatim when no catalogue entry matches. */
@@ -149,7 +151,8 @@ export type ResolveValidationMessage = (issue: FieldIssue, path: string) => stri
 
 /** Reads a numeric operand, tolerating the string form a JSON payload may carry. */
 function operand(params: Readonly<Record<string, unknown>>, key: string): string | null {
-  const value = params[key];
+  const value = Object.hasOwn(params, key) ? params[key] : undefined;
+  if (ExactNumber.isExactNumber(value)) return value.toString();
   if (typeof value === 'number' && Number.isFinite(value)) return String(value);
   if (typeof value === 'string' && value.length > 0) return value;
   return null;
@@ -183,7 +186,7 @@ export const defaultValidationMessages: ValidationMessageCatalogue = Object.free
   min: (context) => {
     const limit = operand(context.params, 'min');
     if (limit === null) return context.message;
-    switch (context.params.unit) {
+    switch (operand(context.params, 'unit')) {
       case 'characters':
         return `must be at least ${characters(limit)}`;
       case 'items':
@@ -197,7 +200,7 @@ export const defaultValidationMessages: ValidationMessageCatalogue = Object.free
   max: (context) => {
     const limit = operand(context.params, 'max');
     if (limit === null) return context.message;
-    switch (context.params.unit) {
+    switch (operand(context.params, 'unit')) {
       case 'characters':
         return `must be at most ${characters(limit)}`;
       case 'items':
@@ -211,7 +214,7 @@ export const defaultValidationMessages: ValidationMessageCatalogue = Object.free
   length: (context) => {
     const exact = operand(context.params, 'length');
     if (exact === null) return context.message;
-    if (context.params.unit === 'items') return `must have exactly ${items(exact)}`;
+    if (operand(context.params, 'unit') === 'items') return `must have exactly ${items(exact)}`;
     return `must be exactly ${characters(exact)}`;
   },
   integer: () => 'must be a whole number',
@@ -293,8 +296,16 @@ export function createMessageResolver(
 
   return (issue, path) => {
     const code = issue.code;
-    const entry = code === undefined ? undefined : table[code];
-    const label = labels === undefined ? undefined : (labels[path] ?? labels[toLabelKey(path)]);
+    const entry = code !== undefined && Object.hasOwn(table, code) ? table[code] : undefined;
+    const labelKey = toLabelKey(path);
+    const label =
+      labels === undefined
+        ? undefined
+        : Object.hasOwn(labels, path)
+          ? labels[path]
+          : Object.hasOwn(labels, labelKey)
+            ? labels[labelKey]
+            : undefined;
     if (entry === undefined) return issue.message;
 
     let rendered: string;
@@ -311,7 +322,7 @@ export function createMessageResolver(
       return issue.message;
     }
 
-    if (rendered.length === 0) return issue.message;
+    if (typeof rendered !== 'string' || rendered.length === 0) return issue.message;
     return label === undefined || rendered === issue.message ? rendered : `${label} ${rendered}`;
   };
 }

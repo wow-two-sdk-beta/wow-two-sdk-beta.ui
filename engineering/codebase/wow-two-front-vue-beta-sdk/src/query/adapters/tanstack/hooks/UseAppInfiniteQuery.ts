@@ -1,7 +1,9 @@
+import { useQueryRevision, queryScope, withinQueryScope } from '../QueryLifetime';
+import { combineRequestSignals } from '../../../../foundation/http/RequestScope';
 import { resolveQueryResult } from '../QueryOutcome';
 import type { Result } from '../../../../foundation/results';
 import { computed, toValue, type ComputedRef, type MaybeRefOrGetter, type Ref } from 'vue';
-import { useInfiniteQuery, type InfiniteData, type QueryKey } from '@tanstack/vue-query';
+import { useInfiniteQuery, useQueryClient, type InfiniteData, type QueryKey } from '@tanstack/vue-query';
 
 import type { ApiFailure } from '../../../../foundation/http';
 
@@ -77,9 +79,21 @@ export function useAppInfiniteQuery<TItem, TPage>({
   const extract = (page: TPage): ReadonlyArray<TItem> =>
     mapPage ? mapPage(page) : (page as unknown as ReadonlyArray<TItem>);
 
+  const client = useQueryClient();
+  const revision = useQueryRevision(client);
   const query = useInfiniteQuery<TPage, Error, InfiniteData<TPage, unknown>, QueryKey, unknown>(() => ({
-    queryKey: toValue(key),
-    queryFn: ({ pageParam, signal }) => resolveQueryResult(queryFn({ pageParam, signal })),
+    queryKey: (revision.value, toValue(key)),
+    queryFn: async ({ pageParam, signal }) => {
+      const origin = queryScope(client).capture();
+      const combined = combineRequestSignals(signal, origin.signal);
+      try {
+        return await withinQueryScope(origin, () =>
+          resolveQueryResult(queryFn({ pageParam, signal: combined.signal })),
+        );
+      } finally {
+        combined.dispose();
+      }
+    },
     getNextPageParam,
     initialPageParam,
     enabled: toValue(enabled),

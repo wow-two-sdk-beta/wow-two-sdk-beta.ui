@@ -1,18 +1,26 @@
 <script lang="ts">
-export interface SpinnerProps {
+import type { SVGAttributes } from 'vue';
+export interface SpinnerProps extends /* @vue-ignore */ SVGAttributes {
   /** The extra classes merged onto the underlying SVG. */
   readonly className?: string;
 }
 </script>
 
 <script setup lang="ts">
+import { computed, useAttrs } from 'vue';
+import type { ClassValue } from 'clsx';
 import { Loader2 } from 'lucide-vue-next';
 import { cn } from '../../styles';
 
 /** Renders a spinning loader icon — for inline action-loading feedback or standalone progress indication. */
-defineOptions({ name: 'Spinner' });
+defineOptions({ name: 'Spinner', inheritAttrs: false });
 
 const props = defineProps<SpinnerProps>();
+const attrs = useAttrs();
+const rest = computed(() => {
+  const { class: _class, ...others } = attrs;
+  return others;
+});
 </script>
 
 <template>
@@ -22,5 +30,9 @@ const props = defineProps<SpinnerProps>();
     wins over the icon's default `width`/`height` attributes, keeping the spinner scaled to the
     current font-size — and `cn` puts it first, so a caller's own sizing class still overrides it.
   -->
-  <Loader2 :class="cn('animate-spin size-[1em]', props.className)" aria-hidden="true" />
+  <Loader2
+    v-bind="rest"
+    :class="cn('animate-spin motion-reduce:animate-none size-[1em]', props.className, attrs.class as ClassValue)"
+    aria-hidden="true"
+  />
 </template>

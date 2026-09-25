@@ -240,7 +240,7 @@ function createLoggerFrom(core: LoggerCore, context: LogContext): Logger {
 export function createLogger(options: LoggerOptions = {}): Logger {
   const core: LoggerCore = {
     sinks: [...(options.sinks ?? [])],
-    redactKeys: options.redactKeys ?? DefaultRedactKeys,
+    redactKeys: [...(options.redactKeys ?? DefaultRedactKeys)],
     mask: options.redactionMask ?? DefaultRedactionMask,
     onError: options.onError,
     now: options.now ?? Date.now,

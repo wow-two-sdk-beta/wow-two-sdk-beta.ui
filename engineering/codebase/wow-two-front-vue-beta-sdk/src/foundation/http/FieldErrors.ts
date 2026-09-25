@@ -26,16 +26,17 @@ import type { ApiFailure } from './ApiFailure';
 /** Normalizes a source rule code onto the shared vocabulary, passing an unknown code through unchanged. */
 function normalizeCode(code: unknown): string | undefined {
   if (typeof code !== 'string' || code.length === 0) return undefined;
-  return FluentValidationCodes[code] ?? code;
+  return Object.hasOwn(FluentValidationCodes, code) ? FluentValidationCodes[code] : code;
 }
 
 /** Renames a payload's operand keys onto the vocabulary's (`MaxLength` → `max`), keeping unlisted ones. */
 function normalizeParams(params: unknown): Readonly<Record<string, unknown>> | undefined {
   if (params === null || typeof params !== 'object' || Array.isArray(params)) return undefined;
-  const normalized: Record<string, unknown> = {};
+  const normalized: Record<string, unknown> = Object.create(null);
   let count = 0;
   for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
-    normalized[FluentValidationParameters[key] ?? key] = value;
+    const name = Object.hasOwn(FluentValidationParameters, key) ? FluentValidationParameters[key]! : key;
+    normalized[name] = value;
     count += 1;
   }
   return count > 0 ? normalized : undefined;

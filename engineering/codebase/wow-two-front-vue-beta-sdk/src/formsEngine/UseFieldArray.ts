@@ -1,47 +1,9 @@
-import {
-  computed,
-  defineComponent,
-  h,
-  shallowRef,
-  watch,
-  type Component,
-  type PublicProps,
-  type Ref,
-  type VNode,
-} from 'vue';
+import { computed, defineComponent, h, type Component, type PublicProps, type Ref, type VNode } from 'vue';
 
 import type { AppArrayApi, AppFieldApi, AppFieldProps, AppFormState } from './AppForm';
 import { getPath } from './Paths';
 
-/*
- * useFieldArray — the typed row-render helper over `form.array(path)`
- * (docs/analysis/forms-deferred-items.md item 2b · forms-vector-next.md §F-2g).
- *
- * ENGINE-FREE, ONE IMPLEMENTATION. It composes only the shared `AppForm` contract —
- * `form.array` (ops), `form.useFormState` (a reactive row count), `form.Field` (the per-cell
- * binding) — so it serves BOTH adapters (`house` + `tanstack`) with no per-engine code and no
- * conformance drift; the shared suite pins it once against each.
- *
- * WHY IT EXISTS. A deep path like `rules[0].destination` resolves to `unknown` on
- * `AppFieldValue` — the deliberate typed-values / untyped-paths contract line (recursive
- * `PathValue` is rejected: it re-implements vendor `DeepKeys`, blows up on our discriminated
- * unions, and leaks engine types into the engine-free contract — item 2, option a). So every
- * array-row cell casts `f.value` (smart-qr `RuleControls`: 3 casts/row). This helper is typed
- * by the ROW ELEMENT instead: one generic `TItem` + one `keyof TItem`, NO recursion, NO vendor
- * deep-path types. A cell binds with `f.value` typed as `TItem[name]`, and the single
- * `unknown → element` cast lives HERE, in the SDK, once — not per-row in every consumer.
- *
- * It also retires the F-2g strain "a reorderable-array component must become form-aware": the
- * component takes `form` + `path` once through this composable, gets stable row keys (focus +
- * local state follow the logical row through insert/remove/swap/move, not the index), and drives
- * row-scoped errors through `form.array`'s existing reindexing — never reimplemented here.
- *
- * STABLE KEYS, PUBLISHED BY REPLACEMENT. The key list is a `shallowRef` an op REPLACES (never
- * mutates in place), so a reorder that keeps the length — swap / move — still publishes.
- * Reconciling an externally-changed length (`reset(data)`, a whole-array `setValue`) runs in a
- * sync-flush `watch` on the length: it lands in the same tick as the store commit, so no read
- * ever sees a stale key list, and nothing writes reactive state from inside a `computed`.
- */
+/** Typed, engine-free row rendering over the form's canonical array identity. */
 
 /** The slice of the `AppForm` contract the helper consumes — every engine's `AppForm` satisfies it. */
 export interface FieldArrayForm {
@@ -49,7 +11,7 @@ export interface FieldArrayForm {
   readonly Field: FieldArrayGlueField;
   /** Array ops at a path — the helper's ops delegate here (never reimplemented). */
   readonly array: (path: string) => AppArrayApi;
-  /** Selector-subscribed form state — the helper subscribes to the array's length only. */
+  /** Selector-subscribed form state — used for typed field values. */
   readonly useFormState: <TSlice>(
     selector: (state: AppFormState<unknown>) => TSlice,
     isEqual?: (a: TSlice, b: TSlice) => boolean,
@@ -105,6 +67,14 @@ export interface FieldArrayField<TItem extends object> {
   };
 }
 
+/** A runtime-checked view of one discriminated-union branch. */
+export interface FieldArrayVariant<TItem extends object> {
+  /** Tests the current row value with the supplied type guard. */
+  readonly matches: (index: number) => boolean;
+  /** The row-field accessor narrowed to the guarded branch. */
+  readonly Field: FieldArrayField<TItem>;
+}
+
 /** What `useFieldArray` returns — reactive rows + stable keys, a typed row-field accessor, and element-typed ops. */
 export interface FieldArray<TItem extends object> {
   /** The current rows — `{ key, index }`; render with `:key="row.key"` so a cell keeps identity through reorder. */
@@ -123,50 +93,15 @@ export interface FieldArray<TItem extends object> {
   readonly swap: (indexA: number, indexB: number) => void;
   /** Moves a row. Delegates to `form.array`. */
   readonly move: (fromIndex: number, toIndex: number) => void;
-}
-
-/** Monotonic per-instance row-key allocator — keys are never reused, so a removed row's key can't collide. */
-function makeKey(seq: { current: number }): string {
-  const id = seq.current;
-  seq.current = id + 1;
-  return `far-${id}`;
-}
-
-/** Builds `length` fresh keys (first read). */
-function buildKeys(length: number, seq: { current: number }): string[] {
-  const keys: string[] = [];
-  for (let index = 0; index < length; index += 1) keys.push(makeKey(seq));
-  return keys;
-}
-
-/** Reconciles a key list to a `length` the ops did not cause: keep the prefix, grow fresh, shrink by truncation. */
-function reconcileKeys(current: ReadonlyArray<string>, length: number, seq: { current: number }): string[] {
-  const keys = current.slice(0, length);
-  while (keys.length < length) keys.push(makeKey(seq));
-  return keys;
-}
-
-/** Swaps two key slots in place (indices assumed in range, mirroring `AppArrayApi`). */
-function swapKeys(keys: string[], indexA: number, indexB: number): void {
-  const valueA = keys[indexA];
-  const valueB = keys[indexB];
-  if (valueA === undefined || valueB === undefined) return;
-  keys[indexA] = valueB;
-  keys[indexB] = valueA;
-}
-
-/** Moves a key slot in place (indices assumed in range). */
-function moveKey(keys: string[], fromIndex: number, toIndex: number): void {
-  const [moved] = keys.splice(fromIndex, 1);
-  if (moved === undefined) return;
-  keys.splice(toIndex, 0, moved);
+  /** Creates a runtime-checked field view for one discriminated-union branch. */
+  readonly variant: <TVariant extends TItem>(guard: (item: TItem) => item is TVariant) => FieldArrayVariant<TVariant>;
 }
 
 /**
  * Row-render helper for the array at `path`. `TItem` is the row element type; row fields bind
  * one level deep (`keyof TItem`), typed, cast-free. Reuses `form.array(path)` for the ops
- * (row + error/touched reindexing stays in the adapter) and subscribes to the array LENGTH
- * only, so a row container re-renders on structural changes but not on per-row field edits —
+ * (row + error/touched reindexing stays in the adapter) and subscribes to its canonical row keys,
+ * so containers re-render on structural changes but not on per-row field edits —
  * each `array.Field` owns its own value subscription. Works identically on `house` + `tanstack`.
  *
  * `rows` / `length` are live getters, so `v-for="row in array.rows"` reads the current rows on
@@ -175,29 +110,7 @@ function moveKey(keys: string[], fromIndex: number, toIndex: number): void {
 export function useFieldArray<TItem extends object>(form: FieldArrayForm, path: string): FieldArray<TItem> {
   const ops = form.array(path);
 
-  // Reactive row count. A length-only selector (`Object.is` on the number) means field edits —
-  // which change the array reference but not its length — don't re-render the container.
-  const storeLength = form.useFormState((state) => {
-    const value = getPath(state.values, path);
-    return Array.isArray(value) ? value.length : 0;
-  });
-
-  // Stable row keys the helper OWNS, moved in lockstep with the ops.
-  const seq = { current: 0 };
-  const keysRef = shallowRef<string[]>(buildKeys(storeLength.value, seq));
-
-  // A length change no op of ours caused — `reset(data)`, a whole-array `setValue`. `flush: 'sync'`
-  // so the keys reconcile in the same tick as the store commit and no read can see a stale list;
-  // after one of our own ops the lengths already agree, so this is a no-op there.
-  watch(
-    storeLength,
-    (length) => {
-      if (keysRef.value.length !== length) keysRef.value = reconcileKeys(keysRef.value, length, seq);
-    },
-    { flush: 'sync' },
-  );
-
-  const rows = computed<ReadonlyArray<FieldArrayRow>>(() => keysRef.value.map((key, index) => ({ key, index })));
+  const rows = computed<ReadonlyArray<FieldArrayRow>>(() => ops.keys.map((key, index) => ({ key, index })));
 
   const Field = defineComponent({
     name: 'FieldArrayField',
@@ -231,14 +144,18 @@ export function useFieldArray<TItem extends object>(form: FieldArrayForm, path: 
     },
   }) as unknown as FieldArrayField<TItem>;
 
-  // Each op moves the keys the SAME way it moves the rows, publishes the new list, then delegates
-  // to `form.array` (the adapter reindexes row-scoped errors + touched). The list is REPLACED, not
-  // mutated, so swap/move — which keep the length — still publish.
-  const apply = (mutateKeys: (keys: string[]) => void, run: () => void): void => {
-    const next = [...keysRef.value];
-    mutateKeys(next);
-    keysRef.value = next;
-    run();
+  const variant = <TVariant extends TItem>(guard: (item: TItem) => item is TVariant): FieldArrayVariant<TVariant> => {
+    const items = form.useFormState((state) => {
+      const value = getPath(state.values, path);
+      return Array.isArray(value) ? value : [];
+    });
+    return {
+      matches: (index) => {
+        const item = items.value[index];
+        return typeof item === 'object' && item !== null && guard(item as TItem);
+      },
+      Field: Field as unknown as FieldArrayField<TVariant>,
+    };
   };
 
   return {
@@ -249,30 +166,11 @@ export function useFieldArray<TItem extends object>(form: FieldArrayForm, path: 
       return rows.value.length;
     },
     Field,
-    push: (value: TItem) =>
-      apply(
-        (next) => next.push(makeKey(seq)),
-        () => ops.push(value),
-      ),
-    insert: (index: number, value: TItem) =>
-      apply(
-        (next) => next.splice(index, 0, makeKey(seq)),
-        () => ops.insert(index, value),
-      ),
-    remove: (index: number) =>
-      apply(
-        (next) => next.splice(index, 1),
-        () => ops.remove(index),
-      ),
-    swap: (indexA: number, indexB: number) =>
-      apply(
-        (next) => swapKeys(next, indexA, indexB),
-        () => ops.swap(indexA, indexB),
-      ),
-    move: (fromIndex: number, toIndex: number) =>
-      apply(
-        (next) => moveKey(next, fromIndex, toIndex),
-        () => ops.move(fromIndex, toIndex),
-      ),
+    push: ops.push,
+    insert: ops.insert,
+    remove: ops.remove,
+    swap: ops.swap,
+    move: ops.move,
+    variant,
   };
 }

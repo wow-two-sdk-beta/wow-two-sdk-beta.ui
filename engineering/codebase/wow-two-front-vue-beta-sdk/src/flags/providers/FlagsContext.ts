@@ -12,7 +12,7 @@ import {
 } from 'vue';
 
 import { createFlagClient, type FlagClient } from '../FlagClient';
-import type { FlagValue, JsonObject, EvaluationContext } from '../FlagTypes';
+import type { FlagScalar, FlagScalarValue, FlagObjectDecoder, JsonObject, EvaluationContext } from '../FlagTypes';
 
 /*
  * The Vue seam over `FlagClient` — the provide/inject + composable pattern used by
@@ -106,19 +106,33 @@ export function useFlags(): FlagClient {
     getBoolean: (...args) => client.value.getBoolean(...args),
     getString: (...args) => client.value.getString(...args),
     getNumber: (...args) => client.value.getNumber(...args),
-    getObject<TValue extends JsonObject>(key: string, fallback: TValue, context?: EvaluationContext): TValue {
-      return client.value.getObject(key, fallback, context);
+    getObject<TValue extends JsonObject>(
+      key: string,
+      fallback: TValue,
+      decode: FlagObjectDecoder<TValue>,
+      context?: EvaluationContext,
+    ): TValue {
+      return client.value.getObject(key, fallback, decode, context);
     },
     evaluateBoolean: (...args) => client.value.evaluateBoolean(...args),
     evaluateString: (...args) => client.value.evaluateString(...args),
     evaluateNumber: (...args) => client.value.evaluateNumber(...args),
-    evaluateObject<TValue extends JsonObject>(key: string, fallback: TValue, context?: EvaluationContext) {
-      return client.value.evaluateObject(key, fallback, context);
+    evaluateObject<TValue extends JsonObject>(
+      key: string,
+      fallback: TValue,
+      decode: FlagObjectDecoder<TValue>,
+      context?: EvaluationContext,
+    ) {
+      return client.value.evaluateObject(key, fallback, decode, context);
     },
-    getValue<TValue extends FlagValue>(key: string, fallback: TValue, context?: EvaluationContext): TValue {
+    getValue<TValue extends FlagScalar>(
+      key: string,
+      fallback: TValue,
+      context?: EvaluationContext,
+    ): FlagScalarValue<TValue> {
       return client.value.getValue(key, fallback, context);
     },
-    evaluate<TValue extends FlagValue>(key: string, fallback: TValue, context?: EvaluationContext) {
+    evaluate<TValue extends FlagScalar>(key: string, fallback: TValue, context?: EvaluationContext) {
       return client.value.evaluate(key, fallback, context);
     },
     getContext: () => client.value.getContext(),
@@ -137,21 +151,34 @@ export function useFlags(): FlagClient {
 /**
  * Reads one flag's value, re-evaluating whenever the evaluation context changes. The typed path is
  * picked from `defaultValue`, which also types the result — `useFlag('newNav', false)` is
- * `ComputedRef<boolean>`, `useFlag('limits', { max: 10 })` is a computed of that object type.
+ * `ComputedRef<boolean>`. Object flags use useObjectFlag with an explicit decoder.
  *
  * Returns a `ComputedRef<TValue>` rather than a bare value, because a bare value could never
  * re-evaluate. `key` and `defaultValue` may each be a ref or getter — changing either re-evaluates
  * the flag.
  */
-export function useFlag<TValue extends FlagValue>(
+export function useFlag<TValue extends FlagScalar>(
   key: MaybeRefOrGetter<string>,
   defaultValue: MaybeRefOrGetter<TValue>,
-): ComputedRef<TValue> {
+): ComputedRef<FlagScalarValue<TValue>> {
   const { client, revision } = resolveFlags();
-  return computed<TValue>(() => {
+  return computed<FlagScalarValue<TValue>>(() => {
     // `revision` is the dependency that re-evaluates this flag when the evaluation context moves.
     // Read through `void` rather than discarded into a binding — the read IS the subscription.
     void revision.value;
     return client.value.getValue(toValue(key), toValue(defaultValue));
+  });
+}
+
+/** Reads a decoded object flag reactively, falling back when its wire shape is invalid. */
+export function useObjectFlag<TValue extends JsonObject>(
+  key: MaybeRefOrGetter<string>,
+  defaultValue: MaybeRefOrGetter<TValue>,
+  decode: FlagObjectDecoder<TValue>,
+): ComputedRef<TValue> {
+  const { client, revision } = resolveFlags();
+  return computed(() => {
+    void revision.value;
+    return client.value.getObject(toValue(key), toValue(defaultValue), decode);
   });
 }

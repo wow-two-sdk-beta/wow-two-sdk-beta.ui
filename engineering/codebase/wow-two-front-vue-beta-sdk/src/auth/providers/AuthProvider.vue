@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { AuthBridge } from '../AuthBridge';
+import type { AuthBridge, AuthBridgeOwner } from '../AuthBridge';
 import { AuthStatus, type AuthSession, type AuthStrategy } from '../AuthSession';
 
 const AnonymousSession = { status: AuthStatus.Anonymous, user: null } as const;
@@ -8,11 +8,11 @@ const AnonymousSession = { status: AuthStatus.Anonymous, user: null } as const;
 export interface AuthProviderProps<TUser = unknown, TSignInInput = unknown> {
   /**
    * The transport strategy (cookie / bearer / redirect factory, or bespoke delegates). Read live
-   * on every call, so a swap takes effect immediately — it does not re-resolve on its own.
+   * on every call. A swap cancels old work and re-resolves when resolveOnMount is enabled.
    */
   readonly strategy: AuthStrategy<TUser, TSignInInput>;
 
-  /** The module-scope bridge wiring the non-Vue seams — api-client 401s flip this session; router guards read it. */
+  /** The app-owned bridge wiring the non-Vue seams — api-client 401s flip this session; router guards read it. */
   readonly bridge?: AuthBridge<TUser>;
 
   /**
@@ -38,6 +38,7 @@ import { onMounted, onScopeDispose, provide, shallowRef, watch } from 'vue';
 // `AuthStatus` / `AuthSession` are already imported by the plain `<script>` block above — the two
 // blocks compile into ONE module, so importing them again here is a duplicate identifier.
 import { AuthKey, type AuthApi } from './AuthContext';
+import { awaitRequest } from '../../foundation/http/RequestScope';
 import { AppErrorFactory, ResultExtensions, type AppError, type Result } from '../../foundation/results';
 
 /**
@@ -86,10 +87,34 @@ function owns(current: number): boolean {
 }
 const cancelled = (): Result<never, AppError> => ResultExtensions.fail(AppErrorFactory.cancelled());
 
+let bridgeOwner: AuthBridgeOwner<TUser> | undefined;
 watch(
-  [session, () => props.bridge],
-  ([current, bridge]) => {
-    bridge?.publishSession(current);
+  () => props.bridge,
+  (bridge, _previous, onCleanup) => {
+    const owner = bridge?.attach();
+    bridgeOwner = owner;
+    owner?.publishSession(session.value);
+    const unsubscribe = owner?.subscribeUnauthorized((error) => {
+      invalidate();
+      try {
+        props.strategy.onUnauthorized?.();
+      } finally {
+        session.value = AnonymousSession;
+        props.onUnauthorized?.(error);
+      }
+    });
+    onCleanup(() => {
+      unsubscribe?.();
+      owner?.detach();
+      if (bridgeOwner === owner) bridgeOwner = undefined;
+    });
+  },
+  { immediate: true, flush: 'sync' },
+);
+watch(
+  session,
+  (current) => {
+    bridgeOwner?.publishSession(current);
     props.onSessionChange?.(current);
   },
   { immediate: true, flush: 'sync' },
@@ -102,7 +127,7 @@ function runResolve(): Promise<Result<TUser | null, AppError>> {
   session.value = { status: AuthStatus.Resolving, user: null };
   const promise = (async (): Promise<Result<TUser | null, AppError>> => {
     try {
-      const outcome = await strategy.resolveUser({ signal });
+      const outcome = await awaitRequest(() => strategy.resolveUser({ signal }), signal);
       if (!owns(current)) return cancelled();
       session.value =
         outcome.ok && outcome.value !== null
@@ -111,6 +136,7 @@ function runResolve(): Promise<Result<TUser | null, AppError>> {
       if (!outcome.ok && outcome.failure.type !== 'cancelled') props.onResolveError?.(outcome.failure);
       return outcome;
     } catch (error) {
+      if (signal.aborted) return cancelled();
       if (owns(current)) session.value = AnonymousSession;
       throw error;
     }
@@ -143,31 +169,19 @@ onScopeDispose(() => {
   disposed = true;
   invalidate();
 });
-watch(
-  () => props.bridge,
-  (bridge, _previous, onCleanup) => {
-    if (!bridge) return;
-    onCleanup(
-      bridge.subscribeUnauthorized((error) => {
-        invalidate();
-        try {
-          props.strategy.onUnauthorized?.();
-        } finally {
-          session.value = AnonymousSession;
-          props.onUnauthorized?.(error);
-        }
-      }),
-    );
-  },
-  { immediate: true },
-);
 
 async function signIn(input?: TSignInInput): Promise<Result<TUser | null, AppError>> {
   const strategy = props.strategy;
   if (!strategy.signIn) return ResultExtensions.fail(AppErrorFactory.unavailable());
   const { current, signal } = begin();
   if (session.value.status === AuthStatus.Resolving) session.value = AnonymousSession;
-  const outcome = await strategy.signIn(input as TSignInInput, { signal });
+  let outcome: Result<TUser | null | void, AppError>;
+  try {
+    outcome = await awaitRequest(() => strategy.signIn!(input as TSignInInput, { signal }), signal);
+  } catch (error) {
+    if (signal.aborted) return cancelled();
+    throw error;
+  }
   if (!owns(current)) return cancelled();
   if (!outcome.ok) return outcome;
   const user = outcome.value ?? null;
@@ -179,7 +193,10 @@ async function signOut(): Promise<Result<void, AppError>> {
   const { current, signal } = begin();
   session.value = AnonymousSession;
   try {
-    return (await strategy.signOut?.({ signal })) ?? ResultExtensions.ok(undefined);
+    return (await awaitRequest(() => strategy.signOut?.({ signal }), signal)) ?? ResultExtensions.ok(undefined);
+  } catch (error) {
+    if (signal.aborted) return cancelled();
+    throw error;
   } finally {
     if (owns(current)) session.value = AnonymousSession;
   }

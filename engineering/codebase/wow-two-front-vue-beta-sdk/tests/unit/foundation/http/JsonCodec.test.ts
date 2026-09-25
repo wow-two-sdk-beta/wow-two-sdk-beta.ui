@@ -65,15 +65,36 @@ describe('opt-in HTTP JSON codecs', () => {
     expect((fetch.mock.calls[0]?.[1] as RequestInit).body).toBe('{"count":3}');
   });
 
+  it('selects lossless JSON per request without changing native sibling endpoints', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(rawJson(`{"data":{"id":${IdToken}}}`))
+      .mockResolvedValueOnce(rawJson('{"data":{"ratio":0.125}}'));
+    const client = createApiClient({ fetch });
+    const exactResult = await client.get('/exact', {
+      json: LosslessJson,
+      decode: (value) => ResultExtensions.ok(value as { id: unknown }),
+    });
+    const nativeResult = await client.get('/native');
+    expect(exactResult.ok && ExactNumber.isExactNumber(exactResult.value.id)).toBe(true);
+    expect(nativeResult).toEqual(ResultExtensions.ok({ ratio: 0.125 }));
+  });
+
+  it('selects native JSON per request on a lossless client', async () => {
+    const fetch = vi.fn().mockResolvedValue(rawJson('{"data":{"ratio":0.125}}'));
+    const client = createApiClient({ json: LosslessJson, fetch });
+    expect(await client.get('/native', { json: null })).toEqual(ResultExtensions.ok({ ratio: 0.125 }));
+  });
+
   it.each([200, 422])(
-    'maps malformed %i response JSON to protocol failure without decoder or retry',
+    'keeps malformed %i JSON classification at the correct success/error boundary',
     async (status) => {
       const fetch = vi.fn().mockResolvedValue(rawJson('{"data":9223372036854775807,', status));
       const decode = vi.fn((value: unknown) => ResultExtensions.ok(value));
       const client = createApiClient({ json: LosslessJson, fetch, retry: { ...DefaultRetryPolicy, maxRetries: 2 } });
       expect(await client.get('/broken', { decode })).toMatchObject({
         ok: false,
-        failure: { code: 'protocol', status },
+        failure: { code: status === 200 ? 'protocol' : 'http', status },
       });
       expect(decode).not.toHaveBeenCalled();
       expect(fetch).toHaveBeenCalledOnce();

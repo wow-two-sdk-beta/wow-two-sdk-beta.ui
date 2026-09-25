@@ -1,8 +1,10 @@
+import { queryScope } from './QueryLifetime';
 import { dehydrate, hydrate, type DehydratedState, type QueryClient, type QueryKey } from '@tanstack/vue-query';
 
 const DefaultStorageKey = 'app:query-cache';
 const DefaultMaxAgeMs = 24 * 60 * 60_000; // 24h
 const WriteThrottleMs = 1_000;
+const owners = new WeakMap<Window, Map<string, symbol>>();
 
 /** The envelope written to storage — the dehydrated cache plus what restore has to validate before trusting it. */
 interface PersistedSnapshot {
@@ -29,6 +31,8 @@ export interface QueryPersistenceHandle {
   readonly unsubscribe: () => void;
   /** Resolves once the persisted cache has been restored into the client. */
   readonly restored: Promise<void>;
+  /** Stops writes and removes this owner's persisted private snapshot. */
+  readonly clear: () => void;
 }
 
 /**
@@ -60,33 +64,54 @@ export function setupQueryPersistence(
 
   const { storageKey = DefaultStorageKey, maxAgeMs = DefaultMaxAgeMs, buster = '', includes } = options;
 
-  restore(client, storageKey, maxAgeMs, buster, includes);
+  const registry = owners.get(window) ?? new Map<string, symbol>();
+  owners.set(window, registry);
+  const owner = Symbol(storageKey);
+  registry.set(storageKey, owner);
+  const owns = (): boolean => registry.get(storageKey) === owner;
+  const scope = queryScope(client);
+  const origin = scope.capture();
+  if (origin.isCurrent()) restore(client, storageKey, maxAgeMs, buster, includes);
 
   // Throttled: a burst of cache events (one query settling touches the cache several times) must not
   // serialize the whole cache once per event.
   let timer: ReturnType<typeof setTimeout> | null = null;
+  let stopped = false;
   const schedule = (): void => {
-    if (timer !== null) return;
+    if (!origin.isCurrent() || !owns() || stopped || timer !== null) return;
     timer = setTimeout(() => {
       timer = null;
-      write(client, storageKey, buster, includes);
+      if (origin.isCurrent() && owns() && !stopped) write(client, storageKey, buster, includes);
     }, WriteThrottleMs);
   };
 
   const unsubscribeQueries = client.getQueryCache().subscribe(schedule);
   const unsubscribeMutations = client.getMutationCache().subscribe(schedule);
 
-  return {
-    unsubscribe: () => {
-      unsubscribeQueries();
-      unsubscribeMutations();
-      if (timer !== null) {
-        clearTimeout(timer);
-        timer = null;
-      }
-    },
-    restored: Promise.resolve(),
+  // A disposed scope invokes subscribers immediately, before assignment completes.
+  let unsubscribeScope: () => void = () => {};
+  const unsubscribe = (): void => {
+    stopped = true;
+    if (owns()) registry.delete(storageKey);
+    unsubscribeQueries();
+    unsubscribeMutations();
+    unsubscribeScope();
+    if (timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+    }
   };
+  const clear = (): void => {
+    const currentOwner = owns();
+    unsubscribe();
+    try {
+      if (currentOwner) window.localStorage.removeItem(storageKey);
+    } catch {
+      /* Storage is best-effort. */
+    }
+  };
+  unsubscribeScope = scope.subscribe(clear);
+  return { unsubscribe, clear, restored: Promise.resolve() };
 }
 
 /** Hydrates the client from storage when the snapshot is present, current, and matches the buster. */

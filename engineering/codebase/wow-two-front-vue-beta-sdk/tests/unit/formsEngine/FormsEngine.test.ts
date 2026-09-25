@@ -10,6 +10,7 @@ import {
   resolveSubmitFailure,
   setPath,
   toSubmitError,
+  useFieldArray,
 } from '@src/formsEngine';
 import { houseFormEngine, useAppForm } from '@src/formsEngine/adapters/house';
 import { tanstackFormEngine } from '@src/formsEngine/adapters/tanstack';
@@ -162,5 +163,32 @@ describe('the engine contract', () => {
   it('both adapters expose the same facade entry point', () => {
     expect(houseFormEngine.useAppForm).toBeTypeOf('function');
     expect(tanstackFormEngine.useAppForm).toBeTypeOf('function');
+  });
+});
+
+describe('discriminated field arrays', () => {
+  type Rule = { kind: 'fallback'; destination: string } | { kind: 'country'; country: string; destination: string };
+  interface RuleValues {
+    readonly rules: readonly Rule[];
+  }
+
+  it('narrows a branch only while its runtime guard matches', () => {
+    const scope = effectScope();
+    try {
+      scope.run(() => {
+        const form = useAppForm<RuleValues>({
+          defaultValues: { rules: [{ kind: 'country', country: 'UZ', destination: '/uz' }] },
+          onSubmit: () => Promise.resolve(ResultExtensions.ok(undefined)),
+        });
+        const rules = useFieldArray<Rule>(form, 'rules');
+        const countries = rules.variant((rule): rule is Extract<Rule, { kind: 'country' }> => rule.kind === 'country');
+        expect(countries.matches(0)).toBe(true);
+        form.setValue('rules[0]', { kind: 'fallback', destination: '/' });
+        expect(countries.matches(0)).toBe(false);
+        expect(countries.matches(1)).toBe(false);
+      });
+    } finally {
+      scope.stop();
+    }
   });
 });

@@ -81,7 +81,7 @@ export function useHotkeys(
     const chordList = parsed.value;
 
     function onKey(event: KeyboardEvent): void {
-      if (toValue(options?.enabled ?? true) === false) return;
+      if (event.isComposing || toValue(options?.enabled ?? true) === false) return;
 
       const ignoreInputs = toValue(options?.ignoreInputs ?? true);
       const inEditable = ignoreInputs && isEditableTarget(event.target);
@@ -133,7 +133,7 @@ export function useHotkeyMap(
     const chordList = parsed.value;
 
     function onKey(event: KeyboardEvent): void {
-      if (toValue(options?.enabled ?? true) === false) return;
+      if (event.isComposing || toValue(options?.enabled ?? true) === false) return;
 
       const ignoreInputs = toValue(options?.ignoreInputs ?? true);
       const inEditable = ignoreInputs && isEditableTarget(event.target);

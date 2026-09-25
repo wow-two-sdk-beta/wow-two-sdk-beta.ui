@@ -30,7 +30,8 @@ export function readField<T, TField extends string>(
   field: TField,
   accessors?: FieldAccessors<T, TField>,
 ): unknown {
-  const accessor: FieldAccessor<T> | undefined = accessors?.[field];
+  const accessor: FieldAccessor<T> | undefined =
+    accessors && Object.hasOwn(accessors, field) ? accessors[field] : undefined;
   if (accessor) return accessor(item);
   if (typeof item === 'object' && item !== null) {
     return (item as Record<string, unknown>)[field];

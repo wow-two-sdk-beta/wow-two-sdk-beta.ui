@@ -243,9 +243,7 @@ body {
   color: var(--color-foreground);
 }
 
-/* Ambient surface treatments — opt-in via Card `ambient="sheen|glow"`. Layer a gradient over the
- * surface's bg-color. `sheen` lifts the top edge (visible on dark, ~invisible on light); `glow` adds a
- * primary-tinted corner wash for expressive / hero surfaces. */
+/* Ambient surface treatments — opt-in via Card `ambient`. */
 .surface-sheen {
   background-image: linear-gradient(180deg, rgb(255 255 255 / 0.05), transparent 55%);
 }
@@ -255,6 +253,12 @@ body {
     color-mix(in srgb, var(--color-primary) 14%, transparent),
     transparent 52%
   );
+}
+.surface-bevel {
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, var(--color-foreground) 8%, transparent),
+    0 8px 22px -10px color-mix(in srgb, var(--color-foreground) 18%, transparent),
+    0 2px 6px -3px color-mix(in srgb, var(--color-foreground) 14%, transparent);
 }
 
 /* Enter/exit primitives — paired with the `--animate-*` tokens above. Subtle (8px) slides for

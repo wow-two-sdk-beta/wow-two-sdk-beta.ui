@@ -27,9 +27,14 @@ function getTotalDurationMs(node: HTMLElement): number {
 
 /** A function ref may receive a component's public instance; the DOM node is what the timing logic needs. */
 function toElement(value: unknown): HTMLElement | null {
-  if (value instanceof HTMLElement) return value;
+  const isElement = (candidate: unknown): candidate is HTMLElement =>
+    typeof candidate === 'object' &&
+    candidate !== null &&
+    (candidate as HTMLElement).nodeType === 1 &&
+    'style' in candidate;
+  if (isElement(value)) return value;
   const el = (value as { $el?: unknown } | null)?.$el;
-  return el instanceof HTMLElement ? el : null;
+  return isElement(el) ? el : null;
 }
 
 /**
@@ -135,7 +140,7 @@ export const Presence = defineComponent({
            useful `setTimeout` on the server. Bail rather than throw: the server emits
            `data-state="closed"`, which is exactly what the client's first render produces, so
            hydration still matches and this same watcher runs the enter on the client. */
-        if (typeof requestAnimationFrame === 'undefined' && typeof setTimeout === 'undefined') {
+        if (typeof window === 'undefined') {
           return;
         }
         onCleanup(
@@ -160,11 +165,18 @@ export const Presence = defineComponent({
           return;
         }
         let started = false;
+        const startedAt = performance.now();
+        let duration = 0;
         const onStart = (event: Event) => {
           if (event.target === el) started = true;
         };
         const onEnd = (event: Event) => {
-          if (event.target === el) rendered.value = false;
+          if (event.target !== el) return;
+          // One element may animate several properties; the first completed property does not end presence.
+          if (el.getAnimations) {
+            if (el.getAnimations().some((animation) => animation.playState === 'running' || animation.pending)) return;
+          } else if (performance.now() - startedAt < duration) return;
+          rendered.value = false;
         };
         el.addEventListener('animationstart', onStart);
         el.addEventListener('transitionrun', onStart);
@@ -174,6 +186,7 @@ export const Presence = defineComponent({
         // deterministic; the next render settles on the same value.
         el.setAttribute('data-state', 'closed');
         dataState.value = 'closed';
+        duration = getTotalDurationMs(el);
 
         /* Armed here, NOT inside the frame callback.
            This is the unmount guarantee: `animationend` does not fire for an animation that
@@ -183,12 +196,9 @@ export const Presence = defineComponent({
            `pointer-events: auto` scrim the user cannot click past. `getComputedStyle` recalcs
            synchronously, so reading the duration right after the flip already reflects the
            closed state's timing. */
-        const safety = setTimeout(
-          () => {
-            rendered.value = false;
-          },
-          getTotalDurationMs(el) + 100,
-        );
+        const safety = setTimeout(() => {
+          rendered.value = false;
+        }, duration + 100);
 
         /* The fast path — nothing is animating, so drop it now rather than wait out the
            safety timer. */

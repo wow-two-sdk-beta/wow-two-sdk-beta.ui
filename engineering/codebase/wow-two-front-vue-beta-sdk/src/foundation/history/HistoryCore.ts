@@ -307,6 +307,8 @@ export function createHistoryCore<TPayload>(config: HistoryCoreConfig<TPayload>)
 
     clear(): void {
       entries.length = 0;
+      buffer = [];
+      bufferLabel = undefined;
       cursor = 0;
       dropAnchor();
       notify();

@@ -140,6 +140,7 @@ export function subscribeToPermissionChange(
       }
 
       emit(readPermissionState(status));
+      if (cancelled) return;
 
       const listener = (): void => {
         if (!cancelled) emit(readPermissionState(status));

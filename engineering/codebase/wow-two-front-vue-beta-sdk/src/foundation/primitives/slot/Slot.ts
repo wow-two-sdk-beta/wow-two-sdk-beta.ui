@@ -14,6 +14,37 @@ import {
 
 export type AnyProps = Record<string, unknown>;
 
+/** Blocks inactive activation before either slotted or component-owned handlers can run. */
+export function withInactiveGuard(props: AnyProps, owner: AnyProps = props): AnyProps {
+  const disabled = owner.disabled === true || owner.disabled === '';
+  const inactive = disabled || owner['aria-disabled'] === true || owner['aria-disabled'] === 'true';
+  if (!inactive) return props;
+  const guard =
+    (name: string) =>
+    (event: Event): void => {
+      if (event.type.startsWith('key')) {
+        const key = (event as KeyboardEvent).key;
+        if (key !== 'Enter' && key !== ' ') {
+          for (const handler of toHandlers(props[name])) (handler as (event: Event) => void)(event);
+          return;
+        }
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    };
+  return {
+    ...props,
+    'aria-disabled': true,
+    ...(disabled ? { disabled: true, tabindex: -1 } : {}),
+    onClickCapture: guard('onClickCapture'),
+    onAuxclickCapture: guard('onAuxclickCapture'),
+    onDblclickCapture: guard('onDblclickCapture'),
+    onPointerdownCapture: guard('onPointerdownCapture'),
+    onKeydownCapture: guard('onKeydownCapture'),
+    onKeyupCapture: guard('onKeyupCapture'),
+  };
+}
+
 /**
  * Vue keeps a vnode's listeners under the same `on[A-Z]` prop shape React uses
  * (`@click` compiles to `onClick`), but a single prop may hold *several*
@@ -58,7 +89,8 @@ export function mergeProps(slotProps: AnyProps, childProps: AnyProps): AnyProps 
       merged[key] = slotVal;
     }
   }
-  return merged;
+  // Inactive ownership cannot be overridden by a child's props or listener order.
+  return withInactiveGuard(merged, slotProps);
 }
 
 /** A whitespace-only text vnode — the compiler emits these between elements; they are not merge targets. */

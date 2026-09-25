@@ -1,4 +1,41 @@
 <script lang="ts">
+import type { InjectionKey } from 'vue';
+
+interface ColorModeOwner {
+  readonly parent: ColorModeOwner | null;
+  readonly mode: () => ColorMode;
+}
+interface RootColorModes {
+  readonly owners: ColorModeOwner[];
+  readonly dark: boolean;
+  readonly colorScheme: string;
+  readonly priority: string;
+}
+const ColorModeOwnerKey: InjectionKey<ColorModeOwner> = Symbol('wow-two.colorModeOwner');
+const RootOwners = new WeakMap<HTMLElement, RootColorModes>();
+
+function isDescendant(owner: ColorModeOwner, ancestor: ColorModeOwner): boolean {
+  for (let entry: ColorModeOwner | null = owner; entry; entry = entry.parent) {
+    if (entry === ancestor) return true;
+  }
+  return false;
+}
+
+function applyRootMode(root: HTMLElement): void {
+  const state = RootOwners.get(root);
+  if (!state) return;
+  const owner = state.owners.at(-1);
+  if (owner) {
+    const mode = owner.mode();
+    root.classList.toggle('dark', mode === 'dark');
+    root.style.setProperty('color-scheme', mode);
+  } else {
+    root.classList.toggle('dark', state.dark);
+    if (state.colorScheme) root.style.setProperty('color-scheme', state.colorScheme, state.priority);
+    else root.style.removeProperty('color-scheme');
+    RootOwners.delete(root);
+  }
+}
 // `ColorMode` is imported as a value by `<script setup>` below; both blocks
 // share one module scope, so re-importing the type here would duplicate it.
 export interface ColorModeProviderProps {
@@ -11,7 +48,7 @@ export interface ColorModeProviderProps {
 </script>
 
 <script setup lang="ts">
-import { onMounted, provide, shallowRef, watch, watchEffect } from 'vue';
+import { inject, onMounted, onScopeDispose, provide, shallowRef, watch } from 'vue';
 import { useMediaQuery } from '../../device';
 import { ColorMode, ColorModeKey, type ColorModeContextValue } from './ColorModeContext';
 
@@ -35,7 +72,9 @@ defineSlots<{
 
 /** Explicit defaults are shared by SSR and the first client render. */
 const mode = shallowRef<ColorMode>(props.defaultMode === 'system' ? ColorMode.Light : props.defaultMode);
-const mounted = shallowRef(false);
+let root: HTMLElement | undefined;
+const owner: ColorModeOwner = { parent: inject(ColorModeOwnerKey, null), mode: () => mode.value };
+provide(ColorModeOwnerKey, owner);
 const followsSystem = shallowRef(false);
 const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
 
@@ -55,18 +94,35 @@ onMounted(() => {
           ? ColorMode.Dark
           : ColorMode.Light
         : mode.value;
-  mounted.value = true;
+  root = document.documentElement;
+  const state: RootColorModes = RootOwners.get(root) ?? {
+    owners: [],
+    dark: root.classList.contains('dark'),
+    colorScheme: root.style.getPropertyValue('color-scheme'),
+    priority: root.style.getPropertyPriority('color-scheme'),
+  };
+  RootOwners.set(root, state);
+  const descendant = state.owners.findIndex((candidate) => isDescendant(candidate, owner));
+  if (descendant < 0) state.owners.push(owner);
+  else state.owners.splice(descendant, 0, owner);
+  applyRootMode(root);
+});
+
+onScopeDispose(() => {
+  if (!root) return;
+  const state = RootOwners.get(root);
+  const index = state?.owners.indexOf(owner) ?? -1;
+  if (state && index >= 0) state.owners.splice(index, 1);
+  applyRootMode(root);
+  root = undefined;
 });
 
 watch(prefersDark, (dark) => {
   if (followsSystem.value) mode.value = dark ? ColorMode.Dark : ColorMode.Light;
 });
 
-watchEffect(() => {
-  if (!mounted.value || typeof document === 'undefined') return;
-  const root = document.documentElement;
-  root.classList.toggle('dark', mode.value === ColorMode.Dark);
-  root.style.colorScheme = mode.value;
+watch(mode, () => {
+  if (root) applyRootMode(root);
 });
 
 function setMode(next: ColorMode): void {

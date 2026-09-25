@@ -31,7 +31,7 @@
 import { isAbortError, toError } from '../errors';
 import { DefaultRetryPolicy, computeRetryDelay, shouldRetry, type RetryPolicy } from '../resilience';
 
-import { abortErrorFor } from './Abort';
+import { abortErrorFor, abortable } from './Abort';
 
 /**
  * Reads the HTTP status a caught failure carries, for `shouldRetry`. Returns `0` — the "network / unknown"
@@ -123,7 +123,7 @@ export async function retryAsync<T>(
     if (signal !== undefined && isAborted(signal)) throw abortErrorFor(signal);
 
     try {
-      return await fn(failures + 1);
+      return await abortable(Promise.resolve(fn(failures + 1)), signal);
     } catch (caught) {
       // Cancellation outranks the policy, in both shapes: the call rejected with an abort, or the signal
       // fired and the call rejected with something else entirely.

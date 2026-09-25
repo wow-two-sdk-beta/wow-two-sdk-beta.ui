@@ -62,7 +62,14 @@ onMounted(() => {
   if (descendant < 0) stack.push(entry);
   else stack.splice(descendant, 0, entry);
   const onKeyDown = (event: KeyboardEvent): void => {
-    if (stack.at(-1) !== entry || event.key !== 'Escape' || event.defaultPrevented || HandledEvents.has(event)) return;
+    if (
+      stack.at(-1) !== entry ||
+      event.key !== 'Escape' ||
+      event.isComposing ||
+      event.defaultPrevented ||
+      HandledEvents.has(event)
+    )
+      return;
     HandledEvents.add(event);
     entry.onEscape(event);
   };

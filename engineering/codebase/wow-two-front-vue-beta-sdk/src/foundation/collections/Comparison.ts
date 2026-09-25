@@ -73,8 +73,8 @@ export function shallowEqual(first: unknown, second: unknown): boolean {
  *
  * Understands `Date` (by timestamp), `RegExp` (source + flags), `Array`, `Map`, `Set`, `ArrayBuffer` and
  * every typed array / `DataView` (byte-wise), and plain objects (own enumerable string keys). `NaN` equals
- * `NaN`. Anything else falls back to `Object.is`, so two distinct `class` instances with equal fields DO
- * compare equal — the walk is structural and does not check constructors outside the built-ins above.
+ * `NaN`. Anything else falls back to `Object.is`: opaque objects and distinct class instances compare unequal.
+ * Their internal state is not inspected.
  *
  * Terminates on circular structures: a pair already under comparison is treated as equal.
  *
@@ -100,10 +100,12 @@ function deepEqualWithin(first: unknown, second: unknown, seen: Map<object, Set<
   if (partners) partners.add(second);
   else seen.set(first, new Set<object>([second]));
 
-  const isEqual = compareObjects(first, second, seen);
-  // A failed probe must not linger as a remembered success — see the header note on `Map`/`Set` matching.
-  if (!isEqual) seen.get(first)?.delete(second);
-  return isEqual;
+  try {
+    return compareObjects(first, second, seen);
+  } finally {
+    // Track active assumptions only: a successful child may depend on a parent that later fails.
+    seen.get(first)?.delete(second);
+  }
 }
 
 /** Dispatches two non-null objects to the branch that matches their built-in type. */
@@ -150,6 +152,13 @@ function compareObjects(first: object, second: object, seen: Map<object, Set<obj
     return setsEqual(first, second, seen);
   }
 
+  const leftPrototype: unknown = Object.getPrototypeOf(first);
+  const rightPrototype: unknown = Object.getPrototypeOf(second);
+  if (
+    (leftPrototype !== null && leftPrototype !== Object.prototype) ||
+    (rightPrototype !== null && rightPrototype !== Object.prototype)
+  )
+    return false;
   const leftKeys = Object.keys(first);
   const rightKeys = Object.keys(second);
   if (leftKeys.length !== rightKeys.length) return false;

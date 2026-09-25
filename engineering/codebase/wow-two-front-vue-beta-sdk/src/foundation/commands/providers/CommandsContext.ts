@@ -22,6 +22,7 @@ import {
   computed,
   inject,
   provide,
+  shallowRef,
   toValue,
   watch,
   type ComputedRef,
@@ -35,6 +36,8 @@ import { useCommandRegistryVersion } from '../hooks/UseCommandRegistry';
 
 /** The injection key — React's `createContext(undefined)` becomes a key plus an explicit throw at the read site. */
 export const CommandsKey: InjectionKey<CommandRegistry> = Symbol('wow-two.commands');
+
+const activeRegistries = new WeakMap<CommandRegistry, ComputedRef<CommandRegistry>>();
 
 /**
  * The provider half — used by `CommandsProvider`, and by any component that owns a registry.
@@ -53,9 +56,40 @@ export function provideCommands(
   const owned = createCommandRegistry({
     onError: (error, command) => toValue(onError)?.(error, command),
   });
-  const resolved = toValue(registry) ?? owned;
-  provide(CommandsKey, resolved);
-  return resolved;
+  const active = computed(() => toValue(registry) ?? owned);
+  const revision = shallowRef(0);
+  const listeners = new Set<() => void>();
+  const notify = (): void => {
+    revision.value += 1;
+    for (const listener of [...listeners]) listener();
+  };
+  watch(
+    active,
+    (current, _previous, cleanup) => {
+      cleanup(current.subscribe(notify));
+      notify();
+    },
+    { immediate: true, flush: 'sync' },
+  );
+  const facade: CommandRegistry = {
+    register: (command) => active.value.register(command),
+    registerAll: (commands) => active.value.registerAll(commands),
+    unregister: (id) => active.value.unregister(id),
+    get: (id) => active.value.get(id),
+    list: () => active.value.list(),
+    available: () => active.value.available(),
+    run: (id, context) => active.value.run(id, context),
+    version: () => revision.value,
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+  activeRegistries.set(facade, active);
+  provide(CommandsKey, facade);
+  return facade;
 }
 
 /** Reads the ambient registry. Throws when no {@link CommandsKey} provider is mounted — see the file header. */
@@ -109,6 +143,9 @@ function bindToLatest(command: Command, latest: MaybeRefOrGetter<ReadonlyArray<C
   const resolve = (): Command | undefined => toValue(latest).find((candidate) => candidate.id === id);
   return {
     ...command,
+    get icon() {
+      return resolve()?.icon;
+    },
     when: () => {
       const current = resolve();
       // Gone from the caller's array but not yet unregistered (mid-cleanup) → treat as unavailable.
@@ -138,7 +175,7 @@ export function useRegisterCommands(
   const signature = computed(() => toValue(commands).map(metadataSignature).join(''));
 
   watch(
-    signature,
+    [signature, () => activeRegistries.get(target)?.value ?? target],
     (_next, _previous, onCleanup) => {
       const dispose = target.registerAll(toValue(commands).map((command) => bindToLatest(command, commands)));
       onCleanup(dispose);

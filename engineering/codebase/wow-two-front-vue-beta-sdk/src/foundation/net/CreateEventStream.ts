@@ -214,7 +214,11 @@ export function createEventStream<TEvents extends EventStreamPayloads = EventStr
   const setState = (next: ConnectionState): void => {
     if (state === next) return;
     state = next;
-    onStateChange?.(next);
+    try {
+      onStateChange?.(next);
+    } catch (error) {
+      report(error, ReconnectOwner.None, scheduler.attempts);
+    }
   };
 
   /** Reports a failure, tolerating a throwing consumer handler — a bad listener must not break the transport. */
@@ -241,7 +245,12 @@ export function createEventStream<TEvents extends EventStreamPayloads = EventStr
       // spends the rest of the session starting from the maximum delay.
       scheduler.reset();
       setState(ConnectionState.Open);
-      onOpen?.();
+      if (closed || source !== target) return;
+      try {
+        onOpen?.();
+      } catch (error) {
+        report(error, ReconnectOwner.None, scheduler.attempts);
+      }
     });
 
     // The `error` event itself carries nothing useful — the spec gives it no reason, no status, no body.
@@ -251,7 +260,11 @@ export function createEventStream<TEvents extends EventStreamPayloads = EventStr
     if (onMessage !== undefined) {
       on('message', (event) => {
         const { text, message } = frameTextOf(event);
-        onMessage(parse(text), message);
+        try {
+          onMessage(parse(text), message);
+        } catch (error) {
+          report(error, ReconnectOwner.None, scheduler.attempts);
+        }
       });
     }
 
@@ -262,7 +275,11 @@ export function createEventStream<TEvents extends EventStreamPayloads = EventStr
       if (handler === undefined) continue;
       on(name, (event) => {
         const { text, message } = frameTextOf(event);
-        handler(parse(text), message);
+        try {
+          handler(parse(text), message);
+        } catch (error) {
+          report(error, ReconnectOwner.None, scheduler.attempts);
+        }
       });
     }
 

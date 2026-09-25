@@ -11,8 +11,7 @@
 //     cyclic object, or `ArrayBuffer` does not survive — `BroadcastChannel` structured-clones all of those.
 //   - Same-origin only, like `localStorage` itself. (`BroadcastChannel` is also same-origin, so this one is a
 //     wash — stated because consumers ask.)
-//   - One key, last write wins. Two posts inside a single task collapse: the second overwrites the first before
-//     any peer's `storage` handler has run, and the first is simply lost. Bursty publishers should batch.
+//   - Each storage event carries its own newValue; reading the current key would lose earlier burst messages.
 //   - Delivery is best-effort and unordered across senders; there is no ack and no queue.
 //   - The last envelope is left in storage on purpose. Removing it would fire a second `storage` event in every
 //     peer for no payload, and nothing reads the key on join.
@@ -51,7 +50,10 @@ function isEnvelope(value: unknown): value is SyncEnvelope<unknown> {
   return (
     typeof candidate.sender === 'string' &&
     typeof candidate.seq === 'number' &&
+    Number.isSafeInteger(candidate.seq) &&
+    candidate.seq >= 0 &&
     typeof candidate.timestamp === 'number' &&
+    Number.isFinite(candidate.timestamp) &&
     'message' in candidate
   );
 }
@@ -122,7 +124,14 @@ function bindStorage(key: string, broker: StorageBroker, onEnvelope: (raw: unkno
   // and the first envelope is dropped, which the `seq` de-dupe turns into a loss rather than a duplicate.
   const onStorage = (event: Event): void => {
     if (readEventKey(event) !== key) return;
-    onEnvelope(broker.read<unknown>(key));
+    const raw = (event as StorageEvent).newValue;
+    if (typeof raw === 'string') {
+      try {
+        onEnvelope(JSON.parse(raw));
+      } catch {
+        /* Ignore malformed transport data. */
+      }
+    } else if (raw === undefined) onEnvelope(broker.read<unknown>(key));
   };
 
   view.addEventListener('storage', onStorage);

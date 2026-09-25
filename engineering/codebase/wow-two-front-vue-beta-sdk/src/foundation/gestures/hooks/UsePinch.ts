@@ -94,6 +94,7 @@ export function usePinch(
   options?: MaybeRefOrGetter<PinchOptions | undefined>,
 ): void {
   watchPostEffect((onCleanup) => {
+    if (toValue(options)?.disabled === true) return;
     const current = toValue(target);
     if (!current) return;
     // Re-bound with an explicit type: TypeScript does not carry a narrowing into a hoisted function DECLARATION,
@@ -192,6 +193,7 @@ export function usePinch(
     }
 
     function onPointerDown(event: PointerEvent): void {
+      if (event.button !== 0) return;
       const opts = toValue(options);
       if (opts?.disabled === true) return;
       if (!acceptsPointerType(event.pointerType, opts?.pointerTypes)) return;

@@ -1,47 +1,45 @@
 import { toValue, watchPostEffect, type MaybeRefOrGetter } from 'vue';
 
-let lockCount = 0;
-let originalOverflow: string | null = null;
-let originalPaddingRight: string | null = null;
-
-function getScrollbarWidth(): number {
-  return window.innerWidth - document.documentElement.clientWidth;
+interface ScrollLock {
+  count: number;
+  body: HTMLElement;
+  overflow: string;
+  paddingRight: string;
 }
+const Locks = new WeakMap<Document, ScrollLock>();
 
 /**
- * Prevent body scroll while at least one consumer has the lock active.
- * Internally counted — multiple overlays may lock; only the last unlock restores.
- * Compensates for scrollbar width to avoid layout shift.
- *
- * `enabled` may be a ref or a getter (`() => props.isEnabled`), so the lock
- * follows a prop without the consumer re-invoking anything. The counter is
- * module-level and shared, exactly as in the original.
+ * Prevent body scroll while a document has active owners, compensating for its scrollbar.
+ * The final owner restores the captured body styles. An optional document supports portals into frames.
  */
-export function useScrollLock(enabled: MaybeRefOrGetter<boolean> = true): void {
+export function useScrollLock(
+  enabled: MaybeRefOrGetter<boolean> = true,
+  target: MaybeRefOrGetter<Document | null | undefined> = () => (typeof document === 'undefined' ? null : document),
+): void {
   watchPostEffect((onCleanup) => {
-    if (!toValue(enabled) || typeof document === 'undefined') return;
-    if (lockCount === 0) {
-      const body = document.body;
-      const scrollbarWidth = getScrollbarWidth();
-      originalOverflow = body.style.overflow;
-      originalPaddingRight = body.style.paddingRight;
+    const owner = toValue(target);
+    if (!toValue(enabled) || !owner?.body || !owner.defaultView) return;
+    let lock = Locks.get(owner);
+    if (!lock) {
+      const body = owner.body;
+      const view = owner.defaultView;
+      lock = { count: 0, body, overflow: body.style.overflow, paddingRight: body.style.paddingRight };
+      Locks.set(owner, lock);
+      const scrollbarWidth = Math.max(0, view.innerWidth - owner.documentElement.clientWidth);
       body.style.overflow = 'hidden';
       if (scrollbarWidth > 0) {
-        const padding = Number.parseFloat(window.getComputedStyle(body).paddingRight) || 0;
+        const padding = Number.parseFloat(view.getComputedStyle(body).paddingRight) || 0;
         body.style.paddingRight = `${padding + scrollbarWidth}px`;
       }
     }
-    lockCount += 1;
-
+    lock.count += 1;
+    const lease = lock;
     onCleanup(() => {
-      lockCount -= 1;
-      if (lockCount === 0) {
-        const body = document.body;
-        body.style.overflow = originalOverflow ?? '';
-        body.style.paddingRight = originalPaddingRight ?? '';
-        originalOverflow = null;
-        originalPaddingRight = null;
-      }
+      lease.count -= 1;
+      if (lease.count !== 0) return;
+      lease.body.style.overflow = lease.overflow;
+      lease.body.style.paddingRight = lease.paddingRight;
+      Locks.delete(owner);
     });
   });
 }

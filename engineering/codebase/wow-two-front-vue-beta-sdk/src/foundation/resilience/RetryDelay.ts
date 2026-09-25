@@ -6,7 +6,7 @@ import { DefaultTransientStatuses, type RetryPolicy } from './RetryPolicy';
 function backoffDelay(policy: RetryPolicy, attempt: number): number {
   const { backoff, baseDelayMs } = policy;
   const raw =
-    backoff === BackoffStrategy.Constant
+    baseDelayMs === 0 || backoff === BackoffStrategy.Constant
       ? baseDelayMs
       : backoff === BackoffStrategy.Linear
         ? baseDelayMs * attempt
@@ -40,12 +40,37 @@ export function computeRetryDelay(
   previousDelayMs = 0,
   random: () => number = Math.random,
 ): number {
+  if (!Number.isSafeInteger(attempt) || attempt < 1)
+    throw new RangeError('Retry attempt must be a positive safe integer.');
+  if (
+    !Number.isFinite(policy.baseDelayMs) ||
+    policy.baseDelayMs < 0 ||
+    (policy.maxDelayMs !== undefined && (!Number.isFinite(policy.maxDelayMs) || policy.maxDelayMs < 0)) ||
+    !Number.isFinite(previousDelayMs) ||
+    previousDelayMs < 0
+  ) {
+    throw new RangeError('Retry delays must be finite and non-negative.');
+  }
+  const sample = (): number => {
+    const value = random();
+    if (!Number.isFinite(value) || value < 0 || value >= 1) throw new RangeError('Retry randomness must be in [0, 1).');
+    return value;
+  };
   const delay = backoffDelay(policy, attempt);
-  return Math.round(applyJitter(policy, delay, previousDelayMs || delay, random));
+  const jittered = applyJitter(policy, delay, previousDelayMs || delay, sample);
+  if (!Number.isFinite(jittered)) throw new RangeError('Retry delay overflowed; configure maxDelayMs.');
+  const rounded = Math.round(jittered);
+  return policy.maxDelayMs === undefined ? rounded : Math.min(rounded, Math.floor(policy.maxDelayMs));
 }
 
 /** Decides whether a failed attempt should retry — within `maxRetries` and the status is transient per the policy. */
 export function shouldRetry(policy: RetryPolicy, failureCount: number, status: number): boolean {
-  const transient = new Set(policy.retryableStatuses ?? DefaultTransientStatuses);
-  return failureCount < policy.maxRetries && transient.has(status);
+  if (
+    (!Number.isSafeInteger(policy.maxRetries) && policy.maxRetries !== Infinity) ||
+    policy.maxRetries < 0 ||
+    !Number.isSafeInteger(failureCount) ||
+    failureCount < 0
+  )
+    return false;
+  return failureCount < policy.maxRetries && (policy.retryableStatuses ?? DefaultTransientStatuses).includes(status);
 }

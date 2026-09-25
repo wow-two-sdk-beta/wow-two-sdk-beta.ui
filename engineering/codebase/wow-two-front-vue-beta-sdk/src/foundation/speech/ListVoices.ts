@@ -72,12 +72,19 @@ export function onVoicesChanged(listener: () => void): () => void {
 
     // Older WebKit: property-only wiring. Chain rather than clobber, so a consumer's own handler survives us.
     const previous = synth.onvoiceschanged;
-    synth.onvoiceschanged = function (this: SpeechSynthesis, event: Event): void {
-      if (typeof previous === 'function') previous.call(this, event);
-      listener();
+    let active = true;
+    const wrapped = function (this: SpeechSynthesis, event: Event): void {
+      try {
+        if (typeof previous === 'function') previous.call(this, event);
+      } catch {
+        /* Preserve other subscribers. */
+      }
+      if (active) listener();
     };
+    synth.onvoiceschanged = wrapped;
     return (): void => {
-      synth.onvoiceschanged = previous;
+      active = false;
+      if (synth.onvoiceschanged === wrapped) synth.onvoiceschanged = previous;
     };
   } catch {
     return noop;

@@ -12,7 +12,7 @@ export function useEscape(handler: (event: KeyboardEvent) => void, enabled: Mayb
   watchPostEffect((onCleanup) => {
     if (!toValue(enabled) || typeof document === 'undefined') return;
     const onKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') handler(e);
+      if (!e.isComposing && toValue(enabled) && e.key === 'Escape') handler(e);
     };
     document.addEventListener('keydown', onKeyDown);
     onCleanup(() => document.removeEventListener('keydown', onKeyDown));

@@ -6,6 +6,8 @@ import { ApiError, type ApiFailure } from '../../../foundation/http';
 import { computeRetryDelay, DefaultRetryPolicy, shouldRetry, type RetryPolicy } from '../../../foundation/resilience';
 
 import { toApiFailure } from './QueryOutcome';
+import { queryScope } from './QueryLifetime';
+import type { RequestScope } from '../../../foundation/http/RequestScope';
 
 const StaleTimeMs = 30_000;
 const GcTimeMs = 5 * 60_000;
@@ -34,6 +36,8 @@ export interface QueryErrorContext {
 
 /** Defines options for `createQueryClient`. */
 export interface CreateQueryClientOptions {
+  /** Optional auth/session lifetime. Invalidation clears private queries and invalidates late callbacks. */
+  readonly scope?: RequestScope;
   /**
    * Emits a coerced `ApiFailure` whenever any query or mutation fails. Cancellations and calls whose
    * `meta` sets `suppressGlobalError: true` are skipped; `context.meta` carries the call's `meta`.
@@ -52,7 +56,13 @@ export interface CreateQueryClientOptions {
  * Creates the app `QueryClient` — house defaults (30s stale · 5m gc · no focus-refetch · mutations
  * no-retry) + a configurable `RetryPolicy` + global error coercion to `ApiFailure`.
  */
-export function createQueryClient(options: CreateQueryClientOptions = {}): QueryClient {
+export interface AppQueryClient extends QueryClient {
+  /** Clears this client and cancels its current operation generation. */
+  readonly invalidateSession: () => void;
+  /** Permanently releases this client and its external session subscription. */
+  readonly dispose: () => void;
+}
+export function createQueryClient(options: CreateQueryClientOptions = {}): AppQueryClient {
   const handleError = (error: unknown, meta: AppQueryMeta | undefined): void => {
     if (isCancellation(error)) return;
     if (meta?.suppressGlobalError === true) return;
@@ -60,7 +70,7 @@ export function createQueryClient(options: CreateQueryClientOptions = {}): Query
   };
   const policy = options.retry ?? DefaultRetryPolicy;
 
-  return new QueryClient({
+  const client = new QueryClient({
     queryCache: new QueryCache({ onError: (error, query) => handleError(error, query.meta) }),
     mutationCache: new MutationCache({
       onError: (error, _variables, _context, mutation) => handleError(error, mutation.meta),
@@ -77,6 +87,18 @@ export function createQueryClient(options: CreateQueryClientOptions = {}): Query
         retryDelay: (attemptIndex) => computeRetryDelay(policy, attemptIndex + 1),
       },
       mutations: { retry: 0 },
+    },
+  });
+  const scope = queryScope(client);
+  const unsubscribe = options.scope?.subscribe(() => {
+    if (options.scope?.capture().isCurrent()) scope.invalidate();
+    else scope.dispose();
+  });
+  return Object.assign(client, {
+    invalidateSession: scope.invalidate,
+    dispose: () => {
+      unsubscribe?.();
+      scope.dispose();
     },
   });
 }

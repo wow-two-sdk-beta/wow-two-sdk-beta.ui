@@ -124,13 +124,13 @@ export function observeMutation(
 ): Disposer {
   if (!supportsMutationObserver()) return NoopDisposer;
 
+  let disposed = false;
   const observer = new MutationObserver((records, self) => {
-    callback(records, self);
+    if (!disposed) callback(records, self);
   });
 
   observer.observe(node, toMutationInit(options));
 
-  let disposed = false;
   return () => {
     if (disposed) return;
     disposed = true;

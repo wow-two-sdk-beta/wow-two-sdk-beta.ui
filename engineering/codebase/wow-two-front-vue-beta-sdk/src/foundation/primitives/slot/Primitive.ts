@@ -1,6 +1,6 @@
 import { defineComponent, h, type PropType } from 'vue';
 import type { ElementType } from '../../dom/Polymorphic';
-import { renderSlotClone, type AnyProps } from './Slot';
+import { renderSlotClone, withInactiveGuard, type AnyProps } from './Slot';
 
 export interface PrimitiveProps {
   /** The element or component to render. Default `'div'`. Ignored when `asChild`. */
@@ -57,11 +57,12 @@ export const Primitive = defineComponent({
   setup(props, { attrs, slots }) {
     return () => {
       if (props.asChild) return renderSlotClone(attrs as AnyProps, slots);
+      const guardedAttrs = withInactiveGuard(attrs as AnyProps);
       // A component target takes the slots object so named slots survive;
       // an intrinsic tag takes the flat vnode array.
       return typeof props.as === 'string'
-        ? h(props.as, attrs, slots.default?.())
-        : h(props.as as never, attrs, slots as never);
+        ? h(props.as, guardedAttrs, slots.default?.())
+        : h(props.as as never, guardedAttrs, slots as never);
     };
   },
 });

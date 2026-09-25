@@ -176,7 +176,13 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
   /** Bumps the version then fans out over a copy, so a listener may unsubscribe while being notified. */
   function notify(): void {
     revision += 1;
-    for (const listener of [...listeners]) listener();
+    for (const listener of [...listeners]) {
+      try {
+        listener();
+      } catch {
+        /* Observers cannot interrupt the queue lifecycle. */
+      }
+    }
   }
 
   /** Replaces an item with a changed copy and notifies. Silently drops writes for an id that is no longer queued. */
@@ -255,9 +261,17 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
         });
 
         try {
+          const attempt = baseAttempt + retries + 1;
           const result = await transport.upload(current.file, {
             signal: controller.signal,
-            onProgress: (loaded: number, total?: number) => recordProgress(id, loaded, total),
+            onProgress: (loaded: number, total?: number) => {
+              if (
+                !controller.signal.aborted &&
+                controllers.get(id) === controller &&
+                entries.get(id)?.attempt === attempt
+              )
+                recordProgress(id, loaded, total);
+            },
           });
           // A transport that ignores its signal can still resolve after a cancel; the user's intent wins.
           if (controller.signal.aborted) {
@@ -281,7 +295,12 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
           if (retryPolicy !== false && shouldRetry(retryPolicy, retries, status)) {
             const attemptNumber = retries + 1;
             const delayMs = computeRetryDelay(retryPolicy, attemptNumber, previousDelayMs);
-            retryPolicy.onRetry?.({ attempt: attemptNumber, error: caught, status, delayMs });
+            try {
+              retryPolicy.onRetry?.({ attempt: attemptNumber, error: caught, status, delayMs });
+            } catch (error) {
+              patch(id, { status: UploadStatus.Failed, error: toError(error) });
+              return;
+            }
             await sleep(delayMs, controller.signal);
             if (controller.signal.aborted) {
               patch(id, { status: UploadStatus.Cancelled });
@@ -296,6 +315,11 @@ export function createUploadQueue<TResult = unknown>(options: UploadQueueOptions
           return;
         }
       }
+    } catch (error) {
+      patch(id, {
+        status: controller.signal.aborted ? UploadStatus.Cancelled : UploadStatus.Failed,
+        error: toError(error),
+      });
     } finally {
       controllers.delete(id);
       pump();

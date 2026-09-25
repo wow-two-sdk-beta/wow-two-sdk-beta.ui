@@ -12,6 +12,7 @@
 // `number()` ALSO REJECTS `NaN` AND `Infinity`: both are `typeof 'number'` and both poison every
 // downstream comparison, so a "valid number" that fails `x > 0` and `x <= 0` alike is not one.
 
+import { ExactNumber } from '../numbers';
 import { describeType, invalid, valid, type ValidatorParseResult } from './ValidationOutcome';
 import { Validator } from './Validator';
 
@@ -122,6 +123,46 @@ export function number(message?: string): NumberValidator {
     typeof value === 'number' && Number.isFinite(value)
       ? valid(value)
       : invalid([{ path, message: message ?? `expected number, received ${describeType(value)}`, code: 'type' }]),
+  );
+}
+
+/** Exact numeric refinements retain decimal operands without native-number conversion. */
+export class ExactNumberValidator extends Validator<ExactNumber> {
+  min(limit: ExactNumber, message?: string): this {
+    return this.refine(
+      (value) => {
+        const compared = value.compare(limit);
+        return compared.ok && compared.value >= 0;
+      },
+      message ?? `must be at least ${String(limit)}`,
+      'min',
+      { min: limit },
+    );
+  }
+
+  max(limit: ExactNumber, message?: string): this {
+    return this.refine(
+      (value) => {
+        const compared = value.compare(limit);
+        return compared.ok && compared.value <= 0;
+      },
+      message ?? `must be at most ${String(limit)}`,
+      'max',
+      { max: limit },
+    );
+  }
+
+  integer(message?: string): this {
+    return this.refine((value) => value.isInteger(), message ?? 'must be a whole number', 'integer');
+  }
+}
+
+/** Accepts an SDK `ExactNumber`; numeric strings and native numbers require an explicit boundary conversion. */
+export function exactNumber(message?: string): ExactNumberValidator {
+  return new ExactNumberValidator('ExactNumber', (value, path) =>
+    ExactNumber.isExactNumber(value)
+      ? valid(value)
+      : invalid([{ path, message: message ?? `expected ExactNumber, received ${describeType(value)}`, code: 'type' }]),
   );
 }
 

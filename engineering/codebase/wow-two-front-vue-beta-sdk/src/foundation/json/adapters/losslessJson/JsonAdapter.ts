@@ -7,8 +7,8 @@ export function parseJson(text: string, number: (token: string) => ExactNumber):
 }
 
 /** Special number serialization runs before ExactNumber's deliberately throwing toJSON. */
-export function stringifyJson(value: unknown): string {
-  const text = stringify(value, undefined, undefined, [
+export function stringifyJson(value: unknown, space = 0): string {
+  const text = stringify(value, undefined, space, [
     {
       test: ExactNumber.isExactNumber,
       stringify: (number) => {

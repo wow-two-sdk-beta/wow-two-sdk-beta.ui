@@ -23,6 +23,7 @@
 // — reading a browser capability at setup time is exactly what produces a hydration mismatch, where the
 // server's `false` and the client's `true` disagree on the first pass.
 
+import { toError } from '../errors';
 import { onMounted, onScopeDispose, shallowRef, type ShallowRef } from 'vue';
 
 import { createWorkerClient, type WorkerApiOf, type WorkerClient, type WorkerClientOptions } from './WorkerClient';
@@ -64,8 +65,16 @@ export function useWorker<TApi extends WorkerApiOf<TApi>>(
       return;
     }
 
-    client.value = createWorkerClient<TApi>(factory(), options);
     supported.value = true;
+    try {
+      client.value = createWorkerClient<TApi>(factory(), options);
+    } catch (error) {
+      try {
+        options?.onError?.(toError(error));
+      } catch {
+        /* Error observers cannot break setup. */
+      }
+    }
   });
 
   onScopeDispose(() => {

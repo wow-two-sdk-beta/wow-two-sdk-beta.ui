@@ -1,3 +1,5 @@
+import type { Result } from '../foundation/results';
+
 /*
  * OpenFeature-SHAPED vocabulary, mirrored structurally — NO `@openfeature/*` dependency, exactly
  * like `forms-engine/StandardSchema.ts` vendors the Standard Schema spec types. An app that later
@@ -32,7 +34,12 @@ export interface JsonObject {
 }
 
 /** Defines every value a flag can evaluate to — the four supported flag types. */
-export type FlagValue = boolean | string | number | JsonObject;
+export type FlagScalar = boolean | string | number;
+export type FlagValue = FlagScalar | JsonObject;
+/** Widens fallback literals; a provider can return any value of the selected scalar kind. */
+export type FlagScalarValue<T extends FlagScalar> = T extends boolean ? boolean : T extends string ? string : number;
+/** Validates an object flag's application shape; return a failure to fall back and report a type mismatch. */
+export type FlagObjectDecoder<T extends JsonObject> = (value: unknown) => Result<T, unknown>;
 
 /** Defines an attribute value on an {@link EvaluationContext} — a scalar, or a list for roles and groups. */
 export type ContextAttribute = string | number | boolean | null | readonly (string | number | boolean)[];

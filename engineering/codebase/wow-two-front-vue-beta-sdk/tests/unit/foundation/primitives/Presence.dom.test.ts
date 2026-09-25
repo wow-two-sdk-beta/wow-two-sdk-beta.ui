@@ -105,6 +105,25 @@ describe('foundation/primitives — Presence without requestAnimationFrame', () 
 });
 
 describe('foundation/primitives — Presence with requestAnimationFrame', () => {
+  it('keeps the child while another exit property is still animating', async () => {
+    const { isPresent, wrapper } = harness();
+    const element = wrapper.get('#child').element;
+    let running = true;
+    Object.defineProperty(element, 'getAnimations', { value: () => (running ? [{ playState: 'running' }] : []) });
+    try {
+      isPresent.value = false;
+      await wrapper.vm.$nextTick();
+      element.dispatchEvent(new Event('transitionend'));
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('#child').exists()).toBe(true);
+      running = false;
+      element.dispatchEvent(new Event('transitionend'));
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('#child').exists()).toBe(false);
+    } finally {
+      wrapper.unmount();
+    }
+  });
   it('still enters and exits on the normal frame path', async () => {
     const { isPresent, wrapper } = harness();
     await wait(SETTLE_MS);

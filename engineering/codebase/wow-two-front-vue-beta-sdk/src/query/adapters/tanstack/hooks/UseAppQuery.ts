@@ -1,7 +1,9 @@
+import { useQueryRevision, queryScope, withinQueryScope } from '../QueryLifetime';
+import { combineRequestSignals } from '../../../../foundation/http/RequestScope';
 import { resolveQueryResult } from '../QueryOutcome';
 import type { Result } from '../../../../foundation/results';
 import { computed, toValue, type ComputedRef, type MaybeRefOrGetter, type Ref } from 'vue';
-import { useQuery, type QueryKey } from '@tanstack/vue-query';
+import { useQuery, useQueryClient, type QueryKey } from '@tanstack/vue-query';
 
 import type { ApiFailure } from '../../../../foundation/http';
 
@@ -60,9 +62,19 @@ export function useAppQuery<TRaw, TData = TRaw>({
 }: UseAppQueryOptions<TRaw, TData>): UseAppQueryReturn<TData> {
   // A getter for the WHOLE options object: `key` and `enabled` are `MaybeRefOrGetter`, and this is
   // the one form that re-evaluates every one of them together on each dependency change.
+  const client = useQueryClient();
+  const revision = useQueryRevision(client);
   const query = useQuery<TRaw, Error, TData, QueryKey>(() => ({
-    queryKey: toValue(key),
-    queryFn: ({ signal }) => resolveQueryResult(queryFn({ signal })),
+    queryKey: (revision.value, toValue(key)),
+    queryFn: async ({ signal }) => {
+      const origin = queryScope(client).capture();
+      const combined = combineRequestSignals(signal, origin.signal);
+      try {
+        return await withinQueryScope(origin, () => resolveQueryResult(queryFn({ signal: combined.signal })));
+      } finally {
+        combined.dispose();
+      }
+    },
     select: map ?? ((raw: TRaw) => raw as unknown as TData),
     enabled: toValue(enabled),
     meta,
