@@ -389,7 +389,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:unit": "vitest run --project unit",
-    "test:browser": "vitest run --project chromium --project chromium-forced-colors",
+    "test:browser": "vitest run --project chromium --project chromium-forced-colors --project firefox --project webkit",
     "coverage": "vitest run --coverage",
     "prepublishOnly": "pnpm typecheck && pnpm build && pnpm check:package",
     "check:package": "node scripts/check-package.mjs",

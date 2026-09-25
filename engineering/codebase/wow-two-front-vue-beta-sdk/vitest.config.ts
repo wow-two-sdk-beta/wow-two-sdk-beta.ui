@@ -74,6 +74,7 @@ export default defineConfig({
       {
         plugins: [vue(), tailwindcss()],
         resolve: { alias: srcAlias },
+        optimizeDeps: { include: ['lossless-json', 'bignumber.js'] },
         test: {
           name: 'browser',
           include: ['tests/unit/**/*.component.test.ts', 'tests/unit/**/*.browser.test.ts'],
@@ -83,6 +84,8 @@ export default defineConfig({
             provider: playwright(),
             instances: [
               { browser: 'chromium', name: 'chromium' },
+              { browser: 'firefox', name: 'firefox' },
+              { browser: 'webkit', name: 'webkit' },
               {
                 browser: 'chromium',
                 name: 'chromium-forced-colors',

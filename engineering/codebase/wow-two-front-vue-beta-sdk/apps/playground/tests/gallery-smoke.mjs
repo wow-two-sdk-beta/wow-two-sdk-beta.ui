@@ -108,7 +108,7 @@ try {
       };
     });
     assert.equal(state.styleCount, 1);
-    assert.deepEqual(state.selectors, [`.theme-${id}`, `.dark.theme-${id}`], 'Only selected palette CSS is installed');
+    assert.deepEqual(state.selectors, [`.theme-${id}`, `.dark.theme-${id}, .dark .theme-${id}`], 'Only selected palette CSS is installed');
     assert.ok(state.primary, 'The selected palette exposes primary tokens');
     assert.equal(state.scheme, dark ? 'dark' : 'light');
     assert.equal(state.storedTheme, id);

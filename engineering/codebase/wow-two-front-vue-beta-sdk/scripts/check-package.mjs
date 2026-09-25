@@ -13,6 +13,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { gzipSync } from 'node:zlib';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { build } from 'vite';
@@ -135,7 +136,46 @@ try {
     );
     run(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(cwd, 'tsconfig.json')], cwd);
   };
+
+  // Compile actual templates against packed declarations: TS-only import probes miss generic slot regressions.
+  const templateCheck = (cwd = scratch) => {
+    for (const fixture of ['consumer.vue', 'consumer-invalid.vue']) {
+      copyFileSync(join(root, 'scripts/fixtures', fixture), join(cwd, fixture));
+    }
+    const config = (file) =>
+      JSON.stringify({
+        compilerOptions: {
+          strict: true,
+          noEmit: true,
+          module: 'ESNext',
+          moduleResolution: 'Bundler',
+          target: 'ES2022',
+          lib: ['ES2022', 'DOM', 'DOM.Iterable'],
+          types: [],
+          skipLibCheck: false,
+        },
+        vueCompilerOptions: { strictTemplates: true },
+        files: [file],
+      });
+    const command = [join(root, 'node_modules/vue-tsc/bin/vue-tsc.js'), '-p', join(cwd, 'tsconfig-template.json')];
+    writeFileSync(join(cwd, 'tsconfig-template.json'), config('consumer.vue'));
+    run(process.execPath, command, cwd);
+    writeFileSync(join(cwd, 'tsconfig-template.json'), config('consumer-invalid.vue'));
+    let diagnostics = '';
+    try {
+      run(process.execPath, command, cwd);
+    } catch (error) {
+      diagnostics = String(error.stdout ?? '') + String(error.stderr ?? '');
+    }
+    if (
+      !diagnostics.includes('TS2322') ||
+      !diagnostics.includes("Property 'toFixed' does not exist on type 'string'")
+    ) {
+      throw new Error(`Packed Vue templates lost model or field-slot type safety:\n${diagnostics}`);
+    }
+  };
   typecheck(core);
+  templateCheck();
 
   for (const [key, peers] of Object.entries(adapters)) {
     for (const peer of peers) {
@@ -180,6 +220,36 @@ try {
     if (!css.includes(token)) throw new Error(`Packed consumer CSS omits SDK styling: ${token}`);
   }
   console.log('check-package: production consumer bundles packed JavaScript and generates SDK utility CSS.');
+  // JS-only production consumers; Vue is external, all other dependencies are included.
+  // UI ceilings retain headroom while rejecting the previous duplicate class-merge engine.
+  for (const [entry, symbol, maximumGzip] of [
+    ['presentation/actions', 'Button', 24_000],
+    ['presentation/display', 'Text', 18_000],
+    ['presentation/display', 'Card', 19_500],
+    ['foundation/http', 'createApiClient', 4_500],
+    ['foundation/numbers', 'ExactNumber', 12_500],
+  ]) {
+    const file = join(scratch, `budget-${symbol}.mjs`);
+    writeFileSync(file, `import { ${symbol} } from '${published.name}/${entry}'; globalThis.__sdkBudget = ${symbol};`);
+    const result = await build({
+      root: scratch,
+      configFile: false,
+      logLevel: 'silent',
+      build: {
+        write: false,
+        minify: 'esbuild',
+        rollupOptions: { input: file, external: ['vue'], output: { format: 'es' } },
+      },
+    });
+    const code = (Array.isArray(result) ? result : [result])
+      .flatMap((bundle) => bundle.output)
+      .filter((item) => item.type === 'chunk')
+      .map((item) => item.code)
+      .join('');
+    const size = gzipSync(code).length;
+    if (size > maximumGzip) throw new Error(`${symbol} consumer exceeds gzip budget: ${size} > ${maximumGzip}`);
+    console.log(`check-package: ${symbol} JS consumer ${size}/${maximumGzip} gzip bytes.`);
+  }
   if (process.argv.includes('--install')) {
     // Separate root prevents Node/TypeScript resolving through the linked fixture's ancestor node_modules.
     installed = mkdtempSync(join(tmpdir(), 'ui-vue-installed-'));
@@ -209,6 +279,7 @@ try {
       entries.map(([key]) => key),
       installed,
     );
+    templateCheck(installed);
     console.log('check-package: clean npm tarball install passes without workspace dependency links.');
   }
   console.log(
