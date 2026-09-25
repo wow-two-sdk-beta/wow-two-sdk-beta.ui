@@ -20,6 +20,8 @@ export interface KeyboardShortcutPickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevent edits while retaining the value. Falls back to the surrounding Field. */
+  readonly readonly?: boolean;
 }
 
 // SSR-safe: `navigator` is undefined in Node < 21.
@@ -44,8 +46,9 @@ function normalizeKey(key: string): string {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
-import { computed, ref, useAttrs, useTemplateRef } from 'vue';
+import { computed, ref, watch, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { AriaAttribute } from '../../../foundation/dom';
 import { cn } from '../../../foundation/styles';
@@ -64,13 +67,16 @@ import KbdText from '../../display/kbdText/KbdText.vue';
    the attrs land on the button rather than being dropped by the multi-root template. */
 defineOptions({ name: 'KeyboardShortcutPicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<KeyboardShortcutPickerProps>(), {
-  placeholder: 'Click to record',
-  recordLabel: 'Press keys…',
+const inputProps = withDefaults(defineProps<KeyboardShortcutPickerProps>(), {
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
   modelValue: undefined,
   disabled: undefined,
+  readonly: undefined,
+});
+const props = useLocaleDefaults(inputProps, 'KeyboardShortcutPicker', {
+  placeholder: 'Click to record',
+  recordLabel: 'Press keys…',
 });
 
 const emit = defineEmits<{
@@ -89,6 +95,8 @@ const attrs = useAttrs();
    standalone props win when provided, context fills the gaps (SelectPicker parity). */
 const field = useFormControl();
 const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? field?.isReadOnly);
+const inactive = computed(() => finalDisabled.value || isReadOnly.value);
 
 const controlled = useControlled<ReadonlyArray<string>>({
   controlled: () => props.modelValue,
@@ -101,6 +109,9 @@ const controlled = useControlled<ReadonlyArray<string>>({
 const keys = controlled.value;
 const recording = ref(false);
 const button = useTemplateRef<HTMLButtonElement>('button');
+watch(inactive, (value) => {
+  if (value) recording.value = false;
+});
 
 /* Never declared props — a declared `'aria-label'` would arrive as `props.ariaLabel` and stop
    reaching the DOM. Read off the attrs so the consumer's value can override the context's. */
@@ -112,14 +123,15 @@ const ariaDescribedBy = computed(() => attrs[AriaAttribute.DescribedBy] as strin
    otherwise, which is what detaches them. `useEventListener` is post-flush and guards
    `typeof document`, so nothing here reaches the DOM during SSR. */
 const listenerTarget = computed<Document | null>(() => {
-  if (!recording.value) return null;
-  return typeof document === 'undefined' ? null : document;
+  if (!recording.value || inactive.value) return null;
+  return button.value?.ownerDocument ?? null;
 });
 
 useEventListener(
   'keydown',
   (event) => {
     const e = event as KeyboardEvent;
+    if (e.defaultPrevented || e.isComposing || inactive.value) return;
     e.preventDefault();
     e.stopPropagation();
     if (e.key === 'Escape') {
@@ -155,7 +167,7 @@ useEventListener(
 );
 
 function startRecord(): void {
-  if (finalDisabled.value) return;
+  if (inactive.value) return;
   recording.value = true;
 }
 
@@ -211,17 +223,17 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     :aria-invalid="field?.isInvalid || undefined"
     :aria-labelledby="labelledBy"
     :aria-describedby="describedBy"
-    :disabled="finalDisabled"
+    :disabled="inactive"
     :class="buttonClass"
     v-bind="passthroughAttrs"
     @click="startRecord"
     @keydown="onKeydown"
   >
     <span v-if="recording" class="text-xs text-muted-foreground">
-      <slot name="recordLabel">{{ recordLabel }}</slot>
+      <slot name="recordLabel">{{ props.recordLabel }}</slot>
     </span>
     <span v-else-if="keys.length === 0" class="text-xs text-muted-foreground">
-      <slot name="placeholder">{{ placeholder }}</slot>
+      <slot name="placeholder">{{ props.placeholder }}</slot>
     </span>
     <span v-else class="inline-flex items-center gap-1 text-muted-foreground">
       <template v-for="(k, i) in keys" :key="k">
@@ -236,5 +248,12 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       aria-hidden="true"
     />
   </button>
-  <input v-if="name" type="hidden" :name="name" :value="hiddenValue" />
+  <input
+    v-if="name"
+    type="hidden"
+    :disabled="finalDisabled"
+    :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+    :name="name"
+    :value="hiddenValue"
+  />
 </template>

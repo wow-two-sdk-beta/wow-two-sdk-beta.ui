@@ -186,6 +186,7 @@ const DefaultRule: RecurrenceRule = {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -248,6 +249,7 @@ const uid = useId('recurrence');
 const preview = computed(() => buildPreview(rule.value, props.from, props.previewCount));
 
 function update(patch: Partial<RecurrenceRule>): void {
+  if (isDisabled.value || isReadOnly.value) return;
   const next = { ...rule.value, ...patch };
   // Reset incompatible fields when freq changes.
   if (patch.freq && patch.freq !== rule.value.freq) {
@@ -337,6 +339,8 @@ const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   controlled.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -352,7 +356,9 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     v-bind="passthroughAttrs"
   >
     <div class="flex flex-wrap items-center gap-2 text-sm">
-      <label :for="`${uid}-interval`" class="text-muted-foreground">Every</label>
+      <label :for="`${uid}-interval`" class="text-muted-foreground"
+        >{{ locale.t('RecurrenceEditor.every', undefined, 'Every') }}
+      </label>
       <input
         :id="`${uid}-interval`"
         type="number"
@@ -365,7 +371,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         @input="onIntervalInput"
       />
       <select
-        aria-label="Frequency"
+        :aria-label="locale.t('RecurrenceEditor.frequency', undefined, 'Frequency')"
         :value="rule.freq"
         :disabled="isDisabled"
         :class="freqClass"
@@ -379,8 +385,12 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     </div>
 
     <div v-if="rule.freq === 'WEEKLY'" class="flex items-center gap-2 text-sm">
-      <span class="text-muted-foreground">On</span>
-      <div role="group" aria-label="Days of week" class="flex flex-wrap gap-1">
+      <span class="text-muted-foreground">{{ locale.t('RecurrenceEditor.on', undefined, 'On') }} </span>
+      <div
+        role="group"
+        :aria-label="locale.t('RecurrenceEditor.daysOfWeek', undefined, 'Days of week')"
+        class="flex flex-wrap gap-1"
+      >
         <button
           v-for="wd in AllWeekdays"
           :key="wd"
@@ -397,7 +407,9 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     </div>
 
     <div v-if="rule.freq === 'MONTHLY'" class="flex items-center gap-2 text-sm">
-      <label :for="`${uid}-month-day`" class="text-muted-foreground">On day</label>
+      <label :for="`${uid}-month-day`" class="text-muted-foreground"
+        >{{ locale.t('RecurrenceEditor.onDay', undefined, 'On day') }}
+      </label>
       <input
         :id="`${uid}-month-day`"
         type="number"
@@ -409,14 +421,20 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         :class="monthDayClass"
         @input="onMonthDayInput"
       />
-      <span class="text-muted-foreground">of the month</span>
+      <span class="text-muted-foreground"
+        >{{ locale.t('RecurrenceEditor.ofTheMonth', undefined, 'of the month') }}
+      </span>
     </div>
 
     <!-- The design-system `RadioInput`, not a bare `<input type="radio">`: the native control
          renders platform chrome that matches nothing else in the package. Each one carries an
          explicit `id` — `RadioInput` otherwise adopts the surrounding `Field`'s id and all three
          would collide on it. -->
-    <div role="radiogroup" aria-label="End mode" class="flex flex-col gap-2 text-sm">
+    <div
+      role="radiogroup"
+      :aria-label="locale.t('RecurrenceEditor.endMode', undefined, 'End mode')"
+      class="flex flex-col gap-2 text-sm"
+    >
       <label :for="`${uid}-end-never`" class="flex items-center gap-2">
         <RadioInput
           :id="`${uid}-end-never`"
@@ -426,7 +444,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
           :disabled="isDisabled || isReadOnly"
           @update:modelValue="update({ count: undefined, until: null })"
         />
-        Never
+        {{ locale.t('RecurrenceEditor.never', undefined, 'Never') }}
       </label>
       <label :for="`${uid}-end-count`" class="flex items-center gap-2">
         <RadioInput
@@ -437,17 +455,17 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
           :disabled="isDisabled || isReadOnly"
           @update:modelValue="update({ count: rule.count ?? 10, until: null })"
         />
-        After
+        {{ locale.t('RecurrenceEditor.after', undefined, 'After') }}
         <input
           type="number"
-          aria-label="Occurrence count"
+          :aria-label="locale.t('RecurrenceEditor.occurrenceCount', undefined, 'Occurrence count')"
           :min="1"
           :value="rule.count ?? ''"
           :disabled="isDisabled || isReadOnly || endMode !== 'count'"
           :class="countClass"
           @input="onCountInput"
         />
-        occurrences
+        {{ locale.t('RecurrenceEditor.occurrences', undefined, 'occurrences') }}
       </label>
       <!-- The end date sits BESIDE the label, not inside it: `DatePicker` is a button, and a
            button inside a `<label>` forwards its click to the labelled radio. -->
@@ -461,14 +479,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
             :disabled="isDisabled || isReadOnly"
             @update:modelValue="update({ until: addMonths(from, 6), count: undefined })"
           />
-          On
+          {{ locale.t('RecurrenceEditor.on', undefined, 'On') }}
         </label>
         <DatePicker
           :id="`${uid}-end-date`"
           size="sm"
-          aria-label="End date"
+          :aria-label="locale.t('RecurrenceEditor.endDate', undefined, 'End date')"
           class="w-44"
-          placeholder="Pick a date"
+          :placeholder="locale.t('RecurrenceEditor.pickADate', undefined, 'Pick a date')"
           :model-value="rule.until ?? null"
           :disabled="isDisabled || isReadOnly || endMode !== 'until'"
           @update:modelValue="onUntilPick"
@@ -477,14 +495,23 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     </div>
 
     <div class="rounded-md bg-muted/40 p-3 text-xs">
-      <div class="mb-1 font-medium text-muted-foreground">Next occurrences</div>
+      <div class="mb-1 font-medium text-muted-foreground">
+        {{ locale.t('RecurrenceEditor.nextOccurrences', undefined, 'Next occurrences') }}
+      </div>
       <ul aria-live="polite" class="grid grid-cols-2 gap-x-4 gap-y-0.5 sm:grid-cols-3">
         <li v-for="d in preview" :key="d.toString()" class="text-foreground tabular-nums">
           {{ formatISODate(d) }}
         </li>
       </ul>
     </div>
-    <input v-if="name" type="hidden" :name="name" :value="serialized" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="isDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="serialized"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

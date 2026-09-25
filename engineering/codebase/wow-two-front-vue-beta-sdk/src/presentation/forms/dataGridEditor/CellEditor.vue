@@ -15,6 +15,7 @@ const BaseClass =
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, onMounted, useTemplateRef } from 'vue';
 
 /**
@@ -78,6 +79,8 @@ function onKeydown(event: KeyboardEvent): void {
     emit('cancel');
   }
 }
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -103,8 +106,8 @@ function onKeydown(event: KeyboardEvent): void {
     @blur="onBlur"
     @keydown="onKeydown"
   >
-    <option value="true">true</option>
-    <option value="false">false</option>
+    <option value="true">{{ locale.t('CellEditor.true', undefined, 'true') }}</option>
+    <option value="false">{{ locale.t('CellEditor.false', undefined, 'false') }}</option>
   </select>
   <input
     v-else

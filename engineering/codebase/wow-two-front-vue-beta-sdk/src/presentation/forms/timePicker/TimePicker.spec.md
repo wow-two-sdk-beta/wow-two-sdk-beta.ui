@@ -16,24 +16,24 @@ Public import: `import { TimePicker } from '@wow-two-beta/ui-vue/presentation/fo
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `Temporal.PlainTime \| null` | no | — | The selected time, controlled. The `v-model` binding target. |
-| `defaultValue` | `Temporal.PlainTime \| null` | no | — | The uncontrolled initial selection. |
-| `minuteStep` | `number` | no | `5` | The minute interval. Default 5. |
-| `placeholder` | `string` | no | `'Pick a time'` | The empty-state text on the trigger. |
-| `format` | `(time: Temporal.PlainTime) => string` | no | `(t: Temporal.PlainTime) => t.toString({ smallestUnit: 'minute' })` | The trigger's time formatter. Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do. |
-| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
-| `name` | `string` | no | — | The hidden input name; when set, a hidden input ships the value with form submission. |
-| `size` | `SelectPickerSize` | no | — | The trigger size. |
-| `state` | `InputState` | no | — | The validity surface. |
-| `id` | `string` | no | — | The trigger's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| Prop           | Type                                   | Required | Default               | Meaning                                                                                                          |
+| -------------- | -------------------------------------- | -------- | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `modelValue`   | `Temporal.PlainTime \| null`           | no       | —                     | The selected time, controlled. The `v-model` binding target.                                                     |
+| `defaultValue` | `Temporal.PlainTime \| null`           | no       | —                     | The uncontrolled initial selection.                                                                              |
+| `minuteStep`   | `number`                               | no       | `5`                   | The minute interval. Default 5.                                                                                  |
+| `placeholder`  | `string`                               | no       | `'Pick a time'`       | The empty-state text on the trigger.                                                                             |
+| `format`       | `(time: Temporal.PlainTime) => string` | no       | Active LocaleProvider | The trigger's time formatter. Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do. |
+| `isInvalid`    | `boolean`                              | no       | `undefined`           | The invalid surface override. Falls back to the surrounding form control's `isInvalid`.                          |
+| `name`         | `string`                               | no       | —                     | The hidden input name; when set, a hidden input ships the value with form submission.                            |
+| `size`         | `SelectPickerSize`                     | no       | —                     | The trigger size.                                                                                                |
+| `state`        | `InputState`                           | no       | —                     | The validity surface.                                                                                            |
+| `id`           | `string`                               | no       | —                     | The trigger's id. Auto-filled from `FormControl` context when omitted.                                           |
+| `disabled`     | `boolean`                              | no       | `undefined`           | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                   |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                                  | Meaning                                                                             |
+| ------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [time: Temporal.PlainTime \| null];` | Fires when the reader picks an hour or a minute in the popover. The `v-model` half. |
 
 ## Slots
@@ -49,3 +49,11 @@ None declared.
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Focused test references: [DateTimeControls.dom.test.ts](../../../../tests/unit/presentation/forms/DateTimeControls.dom.test.ts). Consult the named test assertions for the behavior actually covered.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+`readonly` inherits Field context and blocks typing, native changes and picker actions. Disabled native mirrors are omitted from submission; read-only values remain included. `form` reaches the named mirror. Calendar/display labels follow LocaleProvider unless explicitly overridden; canonical typed and wire formats remain stable.
+
+## Editing guarantees
+
+Minute steps must be integer values from 1 through 60; invalid steps use the default five-minute interval. Native time steps use the same interval in seconds. Boundary and current minutes remain selectable even when off-step. Time selection enforces `min`/`max`; date-time selection clamps a newly picked boundary day to its valid time window. Invalid typed values revert without an update.

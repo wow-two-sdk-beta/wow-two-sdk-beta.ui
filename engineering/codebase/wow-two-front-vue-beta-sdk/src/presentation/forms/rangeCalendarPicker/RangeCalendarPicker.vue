@@ -8,6 +8,11 @@ export interface DateRange {
 }
 
 export interface RangeCalendarPickerProps {
+  /** Disables all date changes, including keyboard activation. */
+  readonly disabled?: boolean;
+  /** Allows inspection without changing the selection. */
+  readonly readonly?: boolean;
+
   /** The selected range, controlled. The `v-model` binding target. */
   readonly modelValue?: DateRange | null;
 
@@ -33,6 +38,7 @@ export interface RangeCalendarPickerProps {
 </script>
 
 <script setup lang="ts">
+import { useFormControl } from '../../../foundation/primitives';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -49,7 +55,7 @@ import type { MonthGridDayProps } from '../MonthGrid.vue';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'RangeCalendarPicker', inheritAttrs: false });
 
-const props = defineProps<RangeCalendarPickerProps>();
+const props = withDefaults(defineProps<RangeCalendarPickerProps>(), { disabled: undefined, readonly: undefined });
 
 const emit = defineEmits<{
   /** Fires when the second click completes the range, or the first clears it. The `v-model` half. */
@@ -57,6 +63,10 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+const field = useFormControl();
+const inactive = computed(
+  () => (props.disabled ?? field?.isDisabled ?? false) || (props.readonly ?? field?.isReadOnly ?? false),
+);
 
 const controlled = useControlled<DateRange | null>({
   /* `??` is wrong here — `null` is a MEANINGFUL selection ("nothing selected"), and `??`
@@ -86,10 +96,11 @@ function setFocusedDate(next: Temporal.PlainDate): void {
 }
 
 function isDayDisabled(d: Temporal.PlainDate): boolean {
-  return isDateDisabled(d, { min: props.min, max: props.max, isDisabled: props.isDisabled });
+  return inactive.value || isDateDisabled(d, { min: props.min, max: props.max, isDisabled: props.isDisabled });
 }
 
 function onDayActivate(date: Temporal.PlainDate): void {
+  if (isDayDisabled(date)) return;
   if (!pendingStart.value) {
     /* First click opens a pending range; the public value clears until both ends are set
        (a `DateRange` always carries a real start and end). */
@@ -175,6 +186,8 @@ defineExpose({ el: root });
 const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   controlled.reset();
+  pendingStart.value = null;
+  hoveredDate.value = null;
 });
 </script>
 

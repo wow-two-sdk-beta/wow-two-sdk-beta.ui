@@ -6,6 +6,7 @@ export interface SortableGroupHandleProps {}
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { Key } from '../../../foundation/dom';
@@ -51,13 +52,15 @@ const rest = computed(() => {
 });
 
 defineExpose({ el });
+
+const locale = useLocale();
 </script>
 
 <template>
   <button
     ref="el"
     type="button"
-    aria-label="Drag to reorder"
+    :aria-label="locale.t('SortableGroupHandle.dragToReorder', undefined, 'Drag to reorder')"
     aria-roledescription="sortable item handle"
     v-bind="rest"
     :class="classes"

@@ -75,3 +75,4 @@ export * from './segmentedPicker';
 export * from './dataGridEditor';
 export * from './nodeEditor';
 export * from './sortableGroup';
+export { ExactNumberInput, type ExactNumberInputProps } from './exactNumberInput';

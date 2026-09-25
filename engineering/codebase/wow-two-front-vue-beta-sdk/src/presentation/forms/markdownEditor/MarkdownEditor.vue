@@ -164,6 +164,7 @@ const ViewOrder: ReadonlyArray<MarkdownEditorView> = [
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { UrlExtensions } from '../../../foundation/dom';
 import { computed, nextTick, useAttrs, useSlots, useTemplateRef } from 'vue';
@@ -329,12 +330,18 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   valueCtl.reset();
   viewCtl.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
   <div :key="formResetRevision" :data-state="state" :class="surfaceClass" :style="{ minHeight }">
     <div class="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1">
-      <div role="toolbar" aria-label="Markdown formatting" class="flex items-center gap-0.5">
+      <div
+        role="toolbar"
+        :aria-label="locale.t('MarkdownEditor.markdownFormatting', undefined, 'Markdown formatting')"
+        class="flex items-center gap-0.5"
+      >
         <button
           v-for="a in ToolbarActions"
           :key="a.key"
@@ -349,7 +356,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       </div>
       <div
         role="radiogroup"
-        aria-label="View mode"
+        :aria-label="locale.t('MarkdownEditor.viewMode', undefined, 'View mode')"
         class="ml-auto flex items-center gap-0.5 rounded-md bg-card p-0.5 ring-1 ring-border"
       >
         <button
@@ -391,7 +398,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         v-if="showPreview"
         role="group"
         aria-live="polite"
-        aria-label="Preview"
+        :aria-label="locale.t('MarkdownEditor.preview', undefined, 'Preview')"
         class="prose prose-sm flex-1 overflow-auto bg-background p-3 text-sm text-foreground"
       >
         <slot v-if="hasPreviewSlot" name="preview" :markdown="markdown" />

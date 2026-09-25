@@ -1,7 +1,8 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 import type { InputSize, InputState } from '../InputStyles';
 
-export interface PasswordInputProps {
+export interface PasswordInputProps extends /* @vue-ignore */ NativeInputAttributes {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */

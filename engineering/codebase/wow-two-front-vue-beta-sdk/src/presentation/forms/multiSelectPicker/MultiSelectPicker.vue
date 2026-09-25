@@ -10,6 +10,8 @@ export interface MultiSelectPickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly isDisabled?: boolean;
+  /** Prevents editing while preserving selected values in form submission. */
+  readonly isReadOnly?: boolean;
 
   /** The hidden-input name; one hidden input is rendered per selected value. */
   readonly name?: string;
@@ -62,6 +64,7 @@ const props = withDefaults(defineProps<MultiSelectPickerProps>(), {
   modelValue: undefined,
   open: undefined,
   isDisabled: undefined,
+  isReadOnly: undefined,
   isInvalid: undefined,
 });
 
@@ -76,6 +79,8 @@ const emit = defineEmits<{
 const field = useFormControl();
 
 const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled ?? false);
+const finalReadOnly = computed(() => props.isReadOnly ?? field?.isReadOnly ?? false);
+const inactive = computed(() => finalDisabled.value || finalReadOnly.value);
 const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid);
 
 const openCtl = useControlled<boolean>({
@@ -120,11 +125,15 @@ provide<MultiSelectPickerContextValue>(multiSelectContextKey, {
   get open() {
     return openCtl.value.value;
   },
-  setOpen: openCtl.setValue,
+  setOpen: (next) => {
+    if (!next || !inactive.value) openCtl.setValue(next);
+  },
   get values() {
     return valuesCtl.value.value;
   },
-  setValues: valuesCtl.setValue,
+  setValues: (next) => {
+    if (!inactive.value) valuesCtl.setValue([...new Set(next)]);
+  },
   get labels() {
     return labels.value;
   },
@@ -132,7 +141,7 @@ provide<MultiSelectPickerContextValue>(multiSelectContextKey, {
   unregisterLabel,
   getOptionLabel: getOptionLabelFn,
   get isDisabled() {
-    return finalDisabled.value;
+    return inactive.value;
   },
   get name() {
     return props.name;
@@ -172,7 +181,15 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <slot />
     <!-- Always-rendered — inside PopoverContent they would vanish from form submission when closed. -->
     <template v-if="name">
-      <input v-for="v in selected" :key="v" type="hidden" :name="name" :value="v" />
+      <input
+        v-for="v in selected"
+        :key="v"
+        type="hidden"
+        :disabled="finalDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="name"
+        :value="v"
+      />
     </template>
     <input
       ref="formResetAnchor"

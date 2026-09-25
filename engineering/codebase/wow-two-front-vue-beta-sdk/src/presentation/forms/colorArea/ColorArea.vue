@@ -20,6 +20,8 @@ export interface ColorAreaProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly isDisabled?: boolean;
+  /** Prevents editing without removing keyboard focus. */
+  readonly isReadOnly?: boolean;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
@@ -31,6 +33,7 @@ import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
 import { AriaAttribute } from '../../../foundation/dom';
+import { useLocale } from '../../../foundation/i18n';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
@@ -47,6 +50,7 @@ const props = withDefaults(defineProps<ColorAreaProps>(), {
   /* Explicit `undefined` default: the flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow the context. */
   isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -57,6 +61,7 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+const locale = useLocale();
 
 const saturationControlled = useControlled<number>({
   controlled: () => props.saturation,
@@ -75,6 +80,8 @@ const v = valueControlled.value;
 /* Inherits id/disabled/invalid/labelling from a surrounding <Field>; explicit props win. */
 const ctx = useFormControl();
 const disabled = computed(() => props.isDisabled ?? ctx?.isDisabled ?? false);
+const readOnly = computed(() => props.isReadOnly ?? ctx?.isReadOnly ?? false);
+const inactive = computed(() => disabled.value || readOnly.value);
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel` and
    stop reaching the DOM. It is read off the attrs so it can be relocated onto the track. */
@@ -86,6 +93,7 @@ const labelledBy = computed(() => (!ariaLabel.value ? ctx?.labelledBy : undefine
 const track = useTemplateRef<HTMLDivElement>('track');
 
 function commit(nextS: number, nextV: number): void {
+  if (inactive.value || !Number.isFinite(nextS) || !Number.isFinite(nextV)) return;
   const cs = clamp01(nextS);
   const cv = clamp01(nextV);
   saturationControlled.setValue(cs);
@@ -97,6 +105,7 @@ function updateFromClient(clientX: number, clientY: number): void {
   const node = track.value;
   if (!node) return;
   const rect = node.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return;
   const xRatio = clamp01((clientX - rect.left) / rect.width);
   const yRatio = clamp01((clientY - rect.top) / rect.height);
   commit(xRatio, 1 - yRatio);
@@ -104,57 +113,52 @@ function updateFromClient(clientX: number, clientY: number): void {
 
 function onPointerdown(event: PointerEvent): void {
   if (event.defaultPrevented) return;
-  if (disabled.value) return;
+  if (inactive.value) return;
+  if (event.button !== 0) return;
   event.preventDefault();
+  track.value?.querySelector<HTMLElement>('[role=slider]')?.focus();
   (event.target as Element).setPointerCapture?.(event.pointerId);
   updateFromClient(event.clientX, event.clientY);
 }
 
 function onPointermove(event: PointerEvent): void {
   if (event.defaultPrevented) return;
-  if (disabled.value || event.buttons !== 1) return;
+  if (inactive.value || event.buttons !== 1) return;
   updateFromClient(event.clientX, event.clientY);
 }
 
-function onKeydown(event: KeyboardEvent): void {
-  if (event.isComposing) return;
-  if (event.defaultPrevented) return;
-  if (disabled.value) return;
-  const big = props.step * 10;
-  let nextS = s.value;
-  let nextV = v.value;
+function onAxisKeydown(event: KeyboardEvent, axis: 'saturation' | 'value'): void {
+  if (event.isComposing || event.defaultPrevented || inactive.value) return;
+  const step = Number.isFinite(props.step) && props.step > 0 ? props.step : 0.01;
+  const current = axis === 'saturation' ? s.value : v.value;
+  let next = current;
   switch (event.key) {
     case 'ArrowRight':
-      nextS = s.value + props.step;
+    case 'ArrowUp':
+      next += step;
       break;
     case 'ArrowLeft':
-      nextS = s.value - props.step;
-      break;
-    case 'ArrowUp':
-      nextV = v.value + props.step;
-      break;
     case 'ArrowDown':
-      nextV = v.value - props.step;
+      next -= step;
       break;
     case 'PageUp':
-      nextV = v.value + big;
+      next += step * 10;
       break;
     case 'PageDown':
-      nextV = v.value - big;
+      next -= step * 10;
       break;
     case 'Home':
-      nextS = 0;
-      nextV = 1;
+      next = 0;
       break;
     case 'End':
-      nextS = 1;
-      nextV = 0;
+      next = 1;
       break;
     default:
       return;
   }
   event.preventDefault();
-  commit(nextS, nextV);
+  if (axis === 'saturation') commit(next, v.value);
+  else commit(s.value, next);
 }
 
 const trackStyle = computed<StyleValue>(() => [
@@ -173,7 +177,6 @@ const thumbStyle = computed<StyleValue>(() => ({
 
 const controlId = computed(() => props.id ?? ctx?.id);
 const finalAriaLabel = computed(() => ariaLabel.value ?? (labelledBy.value ? undefined : 'Saturation and value'));
-const valueText = computed(() => `saturation ${(s.value * 100).toFixed(0)}%, value ${(v.value * 100).toFixed(0)}%`);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
@@ -184,7 +187,7 @@ const passthroughAttrs = computed(() =>
 
 const rootClass = computed(() =>
   cn(
-    'relative aspect-square w-full select-none rounded-md border border-border focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'relative aspect-square w-full select-none rounded-md border border-border focus-within:outline-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
     disabled.value && 'pointer-events-none opacity-50',
     attrs.class as ClassValue,
   ),
@@ -204,27 +207,51 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   <div
     :key="formResetRevision"
     ref="track"
-    role="slider"
+    role="group"
     :id="controlId"
-    :tabindex="disabled ? -1 : 0"
     :aria-label="finalAriaLabel"
     :aria-labelledby="labelledBy"
-    :aria-valuetext="valueText"
     :aria-invalid="isInvalid"
     :aria-describedby="describedBy"
     :aria-disabled="disabled || undefined"
+    :aria-readonly="readOnly || undefined"
     :data-disabled="disabled ? '' : undefined"
     :style="trackStyle"
     :class="rootClass"
     v-bind="passthroughAttrs"
     @pointerdown="onPointerdown"
     @pointermove="onPointermove"
-    @keydown="onKeydown"
   >
     <div
       aria-hidden="true"
       :style="thumbStyle"
       class="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md ring-1 ring-black/20"
+    />
+    <span
+      role="slider"
+      class="sr-only"
+      :tabindex="disabled ? -1 : 0"
+      :aria-label="locale.t('ColorArea.saturation', undefined, 'Saturation')"
+      :aria-valuemin="0"
+      :aria-valuemax="100"
+      :aria-valuenow="Math.round(s * 100)"
+      :aria-valuetext="`${Math.round(s * 100)}%`"
+      :aria-disabled="disabled || undefined"
+      :aria-readonly="readOnly || undefined"
+      @keydown="onAxisKeydown($event, 'saturation')"
+    />
+    <span
+      role="slider"
+      class="sr-only"
+      :tabindex="disabled ? -1 : 0"
+      :aria-label="locale.t('ColorArea.value', undefined, 'Brightness')"
+      :aria-valuemin="0"
+      :aria-valuemax="100"
+      :aria-valuenow="Math.round(v * 100)"
+      :aria-valuetext="`${Math.round(v * 100)}%`"
+      :aria-disabled="disabled || undefined"
+      :aria-readonly="readOnly || undefined"
+      @keydown="onAxisKeydown($event, 'value')"
     />
     <input
       ref="formResetAnchor"

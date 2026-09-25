@@ -16,6 +16,8 @@ export interface SwitchInputProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevents editing while preserving native form submission. */
+  readonly readonly?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
   readonly required?: boolean;
@@ -60,6 +62,7 @@ const props = withDefaults(defineProps<SwitchInputProps>(), {
   modelValue: undefined,
   defaultValue: undefined,
   disabled: undefined,
+  readonly: undefined,
   required: undefined,
 });
 
@@ -84,11 +87,16 @@ const controlled = useControlled<boolean>({
 const isChecked = controlled.value;
 
 function onChange(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) {
+    (event.target as HTMLInputElement).checked = isChecked.value;
+    return;
+  }
   controlled.setValue((event.target as HTMLInputElement).checked);
 }
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 
@@ -139,6 +147,8 @@ defineExpose({ el: input });
       class="peer absolute inset-0 m-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
       v-bind="passthroughAttrs"
       @change="onChange"
+      @click="isReadOnly && $event.preventDefault()"
+      :aria-readonly="isReadOnly || undefined"
     />
     <span aria-hidden="true" :class="trackClass">
       <span :class="thumbClass" />

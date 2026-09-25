@@ -52,6 +52,8 @@ export interface ListboxPickerProps {
 
   /** Disables all items when true. */
   readonly isDisabled?: boolean;
+  /** Prevents selection changes while allowing inspection. */
+  readonly isReadOnly?: boolean;
 
   /** Compares item values for equality; defaults to `Object.is`. */
   readonly isEqual?: EqualityFn<unknown>;
@@ -67,9 +69,10 @@ export interface ListboxPickerProps {
 <script setup lang="ts">
 import { DomOrderExtensions } from '../../../foundation/dom';
 import { useNativeFormReset } from '../UseNativeFormReset';
-import { computed, onMounted, provide, ref, useAttrs, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn, surfaceVariants } from '../../../foundation/styles';
+import { useFormControl } from '../../../foundation/primitives';
 import { useControlled } from '../../../foundation/state';
 import { useTypeahead } from '../../../foundation/selection';
 import { listboxVariants } from './ListboxPicker.variants';
@@ -92,6 +95,7 @@ const props = withDefaults(defineProps<ListboxPickerProps>(), {
      default — but `isDisabled` must stay tri-state for the `aria-disabled` / tabindex branches. */
   isMultiple: false,
   isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -107,6 +111,10 @@ defineSlots<{
 }>();
 
 const attrs = useAttrs();
+const field = useFormControl();
+const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled ?? false);
+const finalReadOnly = computed(() => props.isReadOnly ?? field?.isReadOnly ?? false);
+const inactive = computed(() => finalDisabled.value || finalReadOnly.value);
 
 /* `EqualityFn` is already imported by the plain `<script>` block above — both blocks share one
    module scope, so re-importing it here would be a duplicate declaration. */
@@ -136,16 +144,34 @@ const values = computed<ReadonlyArray<unknown>>(() => {
    the reactive half, and it is what descendants actually re-render on. */
 const items: ItemEntry[] = [];
 const activeId = ref<string | null>(null);
+let mounted = false;
+function reconcileActive(): void {
+  if (items.some((item) => item.id === activeId.value && !item.isDisabled)) return;
+  const enabled = orderedItems().filter((item) => !item.isDisabled);
+  activeId.value =
+    (enabled.find((item) => values.value.some((value) => equals.value(value, item.value))) ?? enabled[0])?.id ?? null;
+}
+function scheduleReconcile(): void {
+  if (mounted) reconcileActive();
+  void nextTick(() => {
+    if (mounted) reconcileActive();
+  });
+}
+onBeforeUnmount(() => {
+  mounted = false;
+});
 
 function registerItem(entry: ItemEntry): void {
   const idx = items.findIndex((i) => i.id === entry.id);
   if (idx >= 0) items[idx] = entry;
   else items.push(entry);
+  scheduleReconcile();
 }
 
 function unregisterItem(id: string): void {
   const idx = items.findIndex((i) => i.id === id);
   if (idx >= 0) items.splice(idx, 1);
+  scheduleReconcile();
 }
 
 function setActiveId(id: string | null): void {
@@ -153,6 +179,7 @@ function setActiveId(id: string | null): void {
 }
 
 function onItemSelect(next: unknown): void {
+  if (inactive.value || !items.some((item) => !item.isDisabled && equals.value(item.value, next))) return;
   if (props.isMultiple) {
     const current = controlled.value.value;
     const list = (Array.isArray(current) ? current : []) as unknown[];
@@ -167,6 +194,7 @@ function onItemSelect(next: unknown): void {
    `onMounted` is the Vue equivalent of React's mount-only effect — children have registered
    by then, and it never runs on the server. */
 onMounted(() => {
+  mounted = true;
   if (activeId.value) return;
   const firstSelected = items.find((i) => !i.isDisabled && values.value.some((v) => equals.value(v, i.value)));
   const firstEnabled = items.find((i) => !i.isDisabled);
@@ -220,7 +248,7 @@ function handleKeyDown(event: KeyboardEvent): void {
      consumer's handler is pulled off `attrs` and invoked by hand (and excluded from the
      passthrough below so it cannot fire twice). */
   (attrs.onKeydown as ((e: KeyboardEvent) => void) | undefined)?.(event);
-  if (event.defaultPrevented || props.isDisabled) return;
+  if (event.defaultPrevented || event.isComposing || inactive.value) return;
   /* Type-to-select first: a printable char (incl. Space while a buffer is active) is consumed
      here and must not fall through to Enter/Space selection or anything else. */
   if (typeahead.onKeyDown(event)) {
@@ -281,7 +309,7 @@ const context: ListboxPickerContextValue = {
     return resolvedIndicator.value;
   },
   get isDisabled() {
-    return props.isDisabled ?? false;
+    return inactive.value;
   },
   onItemSelect,
   registerItem,
@@ -296,7 +324,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
-const listTabIndex = computed(() => (props.isDisabled ? -1 : (props.tabindex ?? 0)));
+const listTabIndex = computed(() => (finalDisabled.value ? -1 : (props.tabindex ?? 0)));
 
 const rootClass = computed(() =>
   cn(
@@ -330,7 +358,8 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     :tabindex="listTabIndex"
     :aria-multiselectable="isMultiple || undefined"
     :aria-activedescendant="activeId ?? undefined"
-    :aria-disabled="isDisabled || undefined"
+    :aria-disabled="finalDisabled || undefined"
+    :aria-readonly="finalReadOnly || undefined"
     :class="rootClass"
     v-bind="passthroughAttrs"
     @keydown="handleKeyDown"

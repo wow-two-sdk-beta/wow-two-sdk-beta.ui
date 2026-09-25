@@ -16,27 +16,27 @@ Public import: `import { KnobInput } from '@wow-two-beta/ui-vue/presentation/for
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `number` | no | `undefined` | The value, controlled. The `v-model` binding target. |
-| `defaultValue` | `number` | no | `undefined` | The initial value when uncontrolled. Defaults to `min`. |
-| `min` | `number` | no | `0` | The lower bound. Default `0`. |
-| `max` | `number` | no | `1` | The upper bound. Default `1`. |
-| `step` | `number` | no | `0.01` | The arrow-key / wheel step. Default `0.01`. |
-| `largeStep` | `number` | no | `0.1` | The Shift+arrow step. Default `0.1`. |
-| `size` | `number` | no | `64` | The knob's pixel diameter. Default `64`. |
-| `arcDegrees` | `number` | no | `270` | The sweep of the value arc in degrees. Default `270`. |
-| `tone` | `KnobInputTone` | no | `'brand'` | The accent palette. Default `brand`. |
-| `format` | `(value: number) => string \| number` | no | `(v: number) => v.toFixed(2)` | The readout formatter. Default `(v) => v.toFixed(2)`. Kept a PROP, not an emit: it RETURNS the rendered text, which an emit cannot do. |
-| `isValueShown` | `boolean` | no | `true` | Whether the formatted readout renders in the centre. Default `true`. |
-| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `name` | `string` | no | — | The hidden input name; the hidden input emits the numeric value. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| Prop           | Type                                  | Required | Default                       | Meaning                                                                                                                                |
+| -------------- | ------------------------------------- | -------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `modelValue`   | `number`                              | no       | `undefined`                   | The value, controlled. The `v-model` binding target.                                                                                   |
+| `defaultValue` | `number`                              | no       | `undefined`                   | The initial value when uncontrolled. Defaults to `min`.                                                                                |
+| `min`          | `number`                              | no       | `0`                           | The lower bound. Default `0`.                                                                                                          |
+| `max`          | `number`                              | no       | `1`                           | The upper bound. Default `1`.                                                                                                          |
+| `step`         | `number`                              | no       | `0.01`                        | The arrow-key / wheel step. Default `0.01`.                                                                                            |
+| `largeStep`    | `number`                              | no       | `0.1`                         | The Shift+arrow step. Default `0.1`.                                                                                                   |
+| `size`         | `number`                              | no       | `64`                          | The knob's pixel diameter. Default `64`.                                                                                               |
+| `arcDegrees`   | `number`                              | no       | `270`                         | The sweep of the value arc in degrees. Default `270`.                                                                                  |
+| `tone`         | `KnobInputTone`                       | no       | `'brand'`                     | The accent palette. Default `brand`.                                                                                                   |
+| `format`       | `(value: number) => string \| number` | no       | `(v: number) => v.toFixed(2)` | The readout formatter. Default `(v) => v.toFixed(2)`. Kept a PROP, not an emit: it RETURNS the rendered text, which an emit cannot do. |
+| `isValueShown` | `boolean`                             | no       | `true`                        | Whether the formatted readout renders in the centre. Default `true`.                                                                   |
+| `isDisabled`   | `boolean`                             | no       | `undefined`                   | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                                         |
+| `name`         | `string`                              | no       | —                             | The hidden input name; the hidden input emits the numeric value.                                                                       |
+| `id`           | `string`                              | no       | —                             | The control's id. Auto-filled from `FormControl` context when omitted.                                                                 |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                               | Meaning                                                                          |
+| ------------------- | --------------------------------------- | -------------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [value: number];` | Fires when the reader turns the dial by drag, wheel or key — the `v-model` half. |
 
 ## Slots
@@ -51,3 +51,7 @@ None declared.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Field disabled/read-only state is checked at mutation boundaries, including synthetic events. Read-only prevents edits without discarding the current value. Where a named hidden mirror is provided, it forwards `form`, omits disabled values and retains read-only values. Localizable default labels follow LocaleProvider while explicit caller text takes precedence.

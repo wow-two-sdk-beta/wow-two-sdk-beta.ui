@@ -72,6 +72,21 @@ describe('CodeEditor keyboard exit', () => {
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
   });
 
+  it.each(['Alt', 'Shift', 'Control', 'Meta'])('keeps Escape exit armed across the %s modifier', async (key) => {
+    const wrapper = mount(CodeEditor, { props: { defaultValue: 'value' } });
+    try {
+      const input = wrapper.get('textarea');
+      await input.trigger('keydown', { key: 'Escape' });
+      await input.trigger('keydown', { key });
+      const tab = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true, bubbles: true });
+      input.element.dispatchEvent(tab);
+      expect(tab.defaultPrevented).toBe(false);
+      expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it('leaves Tab native when indentation is disabled', async () => {
     const wrapper = mount(CodeEditor, { props: { canIndentOnTab: false } });
     mounted.push(wrapper);

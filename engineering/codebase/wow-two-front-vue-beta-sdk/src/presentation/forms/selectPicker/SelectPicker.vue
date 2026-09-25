@@ -17,6 +17,9 @@ export interface SelectPickerProps<K, V = K> {
   /** The disabled state, blocking interaction when true. */
   readonly isDisabled?: boolean;
 
+  /** Prevents selection changes while preserving the submitted value. */
+  readonly isReadOnly?: boolean;
+
   /** The loading state, showing a spinner in the trigger and blocking interaction. */
   readonly isLoading?: boolean;
 
@@ -62,6 +65,7 @@ export interface SelectPickerProps<K, V = K> {
 </script>
 
 <script setup lang="ts" generic="K, V = K">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { useTemplateRef } from 'vue';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, provide, ref, shallowRef, watch } from 'vue';
@@ -83,11 +87,11 @@ defineOptions({ name: 'SelectPicker', inheritAttrs: false });
 /** The SelectPicker tree — `SelectPickerTrigger` and `SelectPickerContent`. React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<SelectPickerProps<K, V>>(), {
+const inputProps = withDefaults(defineProps<SelectPickerProps<K, V>>(), {
   isLoading: false,
-  loadingLabel: 'Loading options…',
+
   isClearable: false,
-  clearLabel: 'Clear selection',
+
   defaultOpen: false,
   placement: 'bottom',
   /* Explicit `undefined` defaults are load-bearing: `useControlled` keys on `=== undefined`,
@@ -96,8 +100,22 @@ const props = withDefaults(defineProps<SelectPickerProps<K, V>>(), {
      dead — and `isDisabled`/`isInvalid` would shadow the surrounding `<Field>` context. */
   open: undefined,
   isDisabled: undefined,
+  isReadOnly: undefined,
   isInvalid: undefined,
 });
+const props = inputProps;
+const labels = useLocaleDefaults(
+  {
+    get loadingLabel() {
+      return inputProps.loadingLabel;
+    },
+    get clearLabel() {
+      return inputProps.clearLabel;
+    },
+  },
+  'SelectPicker',
+  { loadingLabel: 'Loading options…', clearLabel: 'Clear selection' },
+);
 
 const emit = defineEmits<{
   /** Fires when the reader picks an option or clears it — the `v-model` half, carrying the key. */
@@ -110,6 +128,8 @@ const emit = defineEmits<{
 const field = useFormControl();
 
 const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled ?? false);
+const finalReadOnly = computed(() => props.isReadOnly ?? field?.isReadOnly ?? false);
+const inactive = computed(() => finalDisabled.value || finalReadOnly.value || props.isLoading);
 const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid ?? false);
 
 const openCtl = useControlled<boolean>({
@@ -128,13 +148,18 @@ const keyCtl = useControlled<K | null>({
 
 /* Reactive, unlike ListboxPicker's plain array: `SelectPickerValue` resolves its label from this set and
    `SelectPickerContent` counts visible rows off it, both at render time. */
-const items = ref<ItemRegistryEntry[]>([]);
+const items = shallowRef<ItemRegistryEntry[]>([]);
 
-/* Persistent key→label cache (keyed by serialized key), never evicted on unmount: backstops
-   label resolution for a closed trigger after items unmount, separate from the live `items` set.
-   Deliberately a plain Map, matching React's ref — every read of it is reached through a chain
-   that already depends on `items`, which is what changes when an option unmounts. */
-const labelCache = new Map<string, string | number>();
+/* Labels survive panel unmount. Keys retain identity; serialization is only a wire concern. */
+const labelCache = new Map<unknown, string | number>();
+function cachedKey(key: unknown): unknown {
+  if (!props.keyEquals || labelCache.has(key)) return key;
+  for (const existing of labelCache.keys()) if (keyEqualsFn.value(existing, key)) return existing;
+  return key;
+}
+function cacheLabel(key: unknown, label: string | number): void {
+  labelCache.set(cachedKey(key), label);
+}
 
 const query = ref('');
 const activeDescendant = ref<string | null>(null);
@@ -160,7 +185,7 @@ function getOptionLabelFn(key: unknown): string | number | null {
 
 function registerItem(entry: ItemRegistryEntry): void {
   /* Persist the label so a closed trigger can still resolve it after this item unmounts. */
-  labelCache.set(serializeKeyFn.value(entry.itemKey), entry.label);
+  cacheLabel(entry.itemKey, entry.label);
   const list = items.value;
   const idx = list.findIndex((i) => Object.is(i.itemKey, entry.itemKey));
   if (idx >= 0) {
@@ -194,7 +219,7 @@ function unregisterItem(itemKey: unknown): void {
 }
 
 function getCachedLabel(key: unknown): string | number | undefined {
-  return labelCache.get(serializeKeyFn.value(key));
+  return labelCache.get(cachedKey(key));
 }
 
 /* Maps the eager `options` prop to registry entries, mirroring what a `SelectPickerItem` registers.
@@ -234,8 +259,7 @@ watch(
   (seeds) => {
     if (seeds.length === 0) return;
     for (const seed of seeds) {
-      const serialized = serializeKeyFn.value(seed.itemKey);
-      if (!labelCache.has(serialized)) labelCache.set(serialized, seed.label);
+      cacheLabel(seed.itemKey, seed.label);
     }
   },
   { immediate: true },
@@ -251,6 +275,7 @@ const selectedLabel = computed<string | number | null>(() => {
 });
 
 function onSelect(entry: ItemRegistryEntry): void {
+  if (inactive.value || entry.isDisabled) return;
   keyCtl.setValue(entry.itemKey as K | null);
   selectedEntry.value = { itemKey: entry.itemKey, label: entry.label };
   openCtl.setValue(false);
@@ -258,11 +283,13 @@ function onSelect(entry: ItemRegistryEntry): void {
 }
 
 function onClear(): void {
+  if (inactive.value) return;
   keyCtl.setValue(null);
   selectedEntry.value = null;
 }
 
 function onPopoverOpenChange(next: boolean): void {
+  if (next && inactive.value) return;
   openCtl.setValue(next);
   if (!next) {
     query.value = '';
@@ -274,7 +301,7 @@ const context: SelectPickerContextValue = {
   get open() {
     return openCtl.value.value;
   },
-  setOpen: (next) => openCtl.setValue(next),
+  setOpen: onPopoverOpenChange,
   get selectedKey() {
     return keyCtl.value.value;
   },
@@ -302,19 +329,19 @@ const context: SelectPickerContextValue = {
     query.value = next;
   },
   get isDisabled() {
-    return finalDisabled.value;
+    return finalDisabled.value || finalReadOnly.value;
   },
   get isLoading() {
     return props.isLoading;
   },
   get loadingLabel() {
-    return props.loadingLabel;
+    return labels.loadingLabel;
   },
   get isClearable() {
     return props.isClearable;
   },
   get clearLabel() {
-    return props.clearLabel;
+    return labels.clearLabel;
   },
   get serializeKey() {
     return serializeKeyFn.value;
@@ -372,7 +399,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   >
     <slot />
     <!-- Always-rendered — inside PopoverContent it would vanish from form submission when closed. -->
-    <input v-if="name && hasSelection" type="hidden" :name="name" :value="serializedKey" />
+    <input
+      v-if="name && hasSelection"
+      type="hidden"
+      :disabled="finalDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="serializedKey"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

@@ -15,21 +15,21 @@ Public import: `import { SliderInput } from '@wow-two-beta/ui-vue/presentation/f
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `size` | `Size` | no | `SizeValue.Md` | The control size. |
-| `modelValue` | `string \| number` | no | — | The value, controlled. The `v-model` binding target. |
-| `defaultValue` | `string \| number` | no | — | The initial value when uncontrolled. |
-| `min` | `string \| number` | no | `0` | The lower bound. Default 0. |
-| `max` | `string \| number` | no | `100` | The upper bound. Default 100. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
+| Prop           | Type               | Required | Default        | Meaning                                                                        |
+| -------------- | ------------------ | -------- | -------------- | ------------------------------------------------------------------------------ |
+| `size`         | `Size`             | no       | `SizeValue.Md` | The control size.                                                              |
+| `modelValue`   | `string \| number` | no       | —              | The value, controlled. The `v-model` binding target.                           |
+| `defaultValue` | `string \| number` | no       | —              | The initial value when uncontrolled.                                           |
+| `min`          | `string \| number` | no       | `0`            | The lower bound. Default 0.                                                    |
+| `max`          | `string \| number` | no       | `100`          | The upper bound. Default 100.                                                  |
+| `id`           | `string`           | no       | —              | The control's id. Auto-filled from `FormControl` context when omitted.         |
+| `disabled`     | `boolean`          | no       | `undefined`    | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `required`     | `boolean`          | no       | `undefined`    | The required state. Falls back to the surrounding form control's `isRequired`. |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                               | Meaning                                                                                  |
+| ------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [value: string];` | Fires when the reader drags the thumb or arrows it along the track — the `v-model` half. |
 
 ## Slots
@@ -44,3 +44,7 @@ None declared.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Field disabled/read-only state is checked at mutation boundaries, including synthetic events. Read-only prevents edits without discarding the current value. Where a named hidden mirror is provided, it forwards `form`, omits disabled values and retains read-only values. Localizable default labels follow LocaleProvider while explicit caller text takes precedence.

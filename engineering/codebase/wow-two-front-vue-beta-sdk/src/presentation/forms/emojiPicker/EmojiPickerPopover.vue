@@ -53,6 +53,7 @@ export interface EmojiPickerPopoverProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useTemplateRef } from 'vue';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed } from 'vue';
@@ -111,6 +112,7 @@ const fieldInvalid = computed(() => field?.isInvalid || undefined);
 const triggerGlyph = computed(() => currentValue.value?.glyph ?? '🙂');
 
 function onPick(entry: EmojiCatalogEntry | null): void {
+  if (field?.isDisabled || field?.isReadOnly) return;
   emit('update:modelValue', entry);
   if (entry !== null) openCtl.setValue(false);
 }
@@ -118,13 +120,15 @@ function onPick(entry: EmojiCatalogEntry | null): void {
 const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   openCtl.reset();
-  if (currentValue.value !== null) onPick(null);
+  if (currentValue.value !== null) emit('update:modelValue', null);
 });
+
+const locale = useLocale();
 </script>
 
 <template>
   <Popover :key="formResetRevision" :open="isOpenNow" :placement="placement" @update:open="openCtl.setValue($event)">
-    <PopoverTrigger as-child>
+    <PopoverTrigger as-child :disabled="field?.isDisabled || field?.isReadOnly">
       <slot name="trigger">
         <Button
           :variant="ButtonVariant.Ghost"
@@ -132,7 +136,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
           :size="SizePreset.Sm"
           :shape="ButtonShape.Square"
           :id="fieldId"
-          aria-label="Choose emoji"
+          :aria-label="locale.t('EmojiPickerPopover.chooseEmoji', undefined, 'Choose emoji')"
           :aria-labelledby="fieldLabelledBy"
           :aria-describedby="fieldDescribedBy"
           :aria-invalid="fieldInvalid"
@@ -147,7 +151,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         FormControlProvider keeps it from adopting the surrounding Field's id (which now names
         the trigger; adoption would duplicate it) or its chrome.
       -->
-      <FormControlProvider>
+      <FormControlProvider :is-disabled="field?.isDisabled" :is-read-only="field?.isReadOnly">
         <EmojiPicker
           :model-value="currentValue"
           :storage="storage"

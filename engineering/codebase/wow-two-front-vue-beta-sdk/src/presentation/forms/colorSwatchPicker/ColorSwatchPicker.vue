@@ -26,6 +26,8 @@ export interface ColorSwatchPickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly isDisabled?: boolean;
+  /** Prevents selecting a different swatch. */
+  readonly isReadOnly?: boolean;
 
   /** The group's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
@@ -53,6 +55,7 @@ const props = withDefaults(defineProps<ColorSwatchPickerProps>(), {
   /* Explicit `undefined` default: the flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow the context. */
   isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -85,6 +88,7 @@ const controlled = useControlled<string | null>({
 const selected = controlled.value;
 
 function onSelect(color: string): void {
+  if (finalDisabled.value || (props.isReadOnly ?? field?.isReadOnly)) return;
   controlled.setValue(color);
 }
 
@@ -132,7 +136,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       :key="c"
       :color="c"
       :is-selected="selected === c"
-      :is-disabled="finalDisabled"
+      :is-disabled="finalDisabled || (props.isReadOnly ?? field?.isReadOnly ?? false)"
       :size="swatchSize"
       :shape="swatchShape"
       @select="onSelect"

@@ -16,26 +16,26 @@ Public import: `import { DateRangePicker } from '@wow-two-beta/ui-vue/presentati
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `DateRange \| null` | no | — | The selected range, controlled. The `v-model` binding target. |
-| `defaultValue` | `DateRange \| null` | no | — | The uncontrolled initial selection. |
-| `placeholder` | `string` | no | `'Pick a range'` | The empty-state text on the trigger. |
-| `format` | `(date: Temporal.PlainDate) => string` | no | `(d: Temporal.PlainDate) => d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })` | The trigger's date formatter. Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do. |
-| `min` | `Temporal.PlainDate \| null` | no | — | The minimum selectable date. |
-| `max` | `Temporal.PlainDate \| null` | no | — | The maximum selectable date. |
-| `isDisabled` | `(date: Temporal.PlainDate) => boolean` | no | — | The custom per-day disable predicate. Also a returning prop. |
-| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
-| `name` | `string` | no | — | The hidden input name; when set, two hidden inputs (`{name}_start`, `{name}_end`) ship the ISO values. |
-| `size` | `SelectPickerSize` | no | — | The trigger size. |
-| `state` | `InputState` | no | — | The validity surface. |
-| `id` | `string` | no | — | The trigger's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| Prop           | Type                                    | Required | Default               | Meaning                                                                                                          |
+| -------------- | --------------------------------------- | -------- | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `modelValue`   | `DateRange \| null`                     | no       | —                     | The selected range, controlled. The `v-model` binding target.                                                    |
+| `defaultValue` | `DateRange \| null`                     | no       | —                     | The uncontrolled initial selection.                                                                              |
+| `placeholder`  | `string`                                | no       | `'Pick a range'`      | The empty-state text on the trigger.                                                                             |
+| `format`       | `(date: Temporal.PlainDate) => string`  | no       | Active LocaleProvider | The trigger's date formatter. Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do. |
+| `min`          | `Temporal.PlainDate \| null`            | no       | —                     | The minimum selectable date.                                                                                     |
+| `max`          | `Temporal.PlainDate \| null`            | no       | —                     | The maximum selectable date.                                                                                     |
+| `isDisabled`   | `(date: Temporal.PlainDate) => boolean` | no       | —                     | The custom per-day disable predicate. Also a returning prop.                                                     |
+| `isInvalid`    | `boolean`                               | no       | `undefined`           | The invalid surface override. Falls back to the surrounding form control's `isInvalid`.                          |
+| `name`         | `string`                                | no       | —                     | The hidden input name; when set, two hidden inputs (`{name}_start`, `{name}_end`) ship the ISO values.           |
+| `size`         | `SelectPickerSize`                      | no       | —                     | The trigger size.                                                                                                |
+| `state`        | `InputState`                            | no       | —                     | The validity surface.                                                                                            |
+| `id`           | `string`                                | no       | —                     | The trigger's id. Auto-filled from `FormControl` context when omitted.                                           |
+| `disabled`     | `boolean`                               | no       | `undefined`           | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                   |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                          | Meaning                                                                              |
+| ------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | `update:modelValue` | `'update:modelValue': [range: DateRange \| null];` | Fires when a click in the popover completes or clears the range. The `v-model` half. |
 
 ## Slots
@@ -50,3 +50,7 @@ None declared.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+`readonly` inherits Field context and blocks typing, native changes and picker actions. Disabled native mirrors are omitted from submission; read-only values remain included. `form` reaches the named mirror. Calendar/display labels follow LocaleProvider unless explicitly overridden; canonical typed and wire formats remain stable.

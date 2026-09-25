@@ -18,6 +18,10 @@ export interface DataGridEditorProps<T> {
   readonly rowKey: (row: T) => string;
   /** The dense row height. Default `false`. */
   readonly isDense?: boolean;
+  /** Prevent all interactions; inherits the surrounding Field. */
+  readonly isDisabled?: boolean;
+  /** Keep navigation available while preventing edits; inherits the surrounding Field. */
+  readonly isReadOnly?: boolean;
 }
 
 interface CellPos {
@@ -27,6 +31,7 @@ interface CellPos {
 
 function castValue(raw: string, type: DataGridEditorCellType): unknown {
   if (type === DataGridEditorCellType.Number) {
+    if (raw.trim() === '') return '';
     const parsed = Number(raw);
     return Number.isFinite(parsed) ? parsed : raw;
   }
@@ -37,6 +42,7 @@ function castValue(raw: string, type: DataGridEditorCellType): unknown {
 
 <script setup lang="ts" generic="T">
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
+import { useFormControl } from '../../../foundation/primitives';
 import { cn } from '../../../foundation/styles';
 import { useId } from '../../../foundation/identifiers';
 import CellEditor from './CellEditor.vue';
@@ -59,6 +65,8 @@ const props = withDefaults(defineProps<DataGridEditorProps<T>>(), {
   rowKey: (row: unknown) => String(row),
   // Explicit `undefined` so an absent Boolean prop is not cast to `false`.
   isDense: undefined,
+  isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -68,12 +76,12 @@ const emit = defineEmits<{
 
 defineSlots<{
   /** Overrides a column header. Falls back to the column's own `header`. */
-  header(props: { column: DataGridEditorColumn<T> }): unknown;
+  header?(props: { column: DataGridEditorColumn<T> }): unknown;
   /**
    * Overrides a body cell in read mode. Falls back to the column's `cell`
    * renderer, then to its `accessor`.
    */
-  cell(props: { row: T; column: DataGridEditorColumn<T>; rowIndex: number; colIndex: number }): unknown;
+  cell?(props: { row: T; column: DataGridEditorColumn<T>; rowIndex: number; colIndex: number }): unknown;
 }>();
 
 const attrs = useAttrs();
@@ -83,6 +91,11 @@ const tableEl = useTemplateRef<HTMLTableElement>('tableEl');
 const active = ref<CellPos>({ row: 0, col: 0 });
 const editing = ref(false);
 const draft = ref('');
+const field = useFormControl();
+const disabled = computed(() => props.isDisabled ?? field?.isDisabled);
+const readOnly = computed(() => props.isReadOnly ?? field?.isReadOnly);
+let editOwner: { rowKey: string; columnKey: string; value: unknown } | null = null;
+let restoreGridFocus = false;
 
 const gridId = useId();
 function cellId(row: number, col: number): string {
@@ -98,22 +111,28 @@ const rowCount = computed(() => props.rows.length);
 watch(
   editing,
   (isEditing, wasEditing) => {
-    if (!isEditing && wasEditing) tableEl.value?.focus();
+    if (!isEditing && wasEditing && restoreGridFocus) tableEl.value?.focus();
+    if (!isEditing) restoreGridFocus = false;
   },
   { flush: 'post' },
 );
 
 function beginEdit(): void {
+  if (disabled.value || readOnly.value) return;
   const column = props.columns[active.value.col];
   const row = props.rows[active.value.row];
   if (!column || row === undefined) return;
   if (column.isEditable === false) return;
   const raw = column.accessor(row);
+  editOwner = { rowKey: props.rowKey(row), columnKey: column.key, value: raw };
   draft.value = raw == null ? '' : String(raw);
   editing.value = true;
 }
 
 function commitEdit(move?: DataGridEditorMove, rawValue?: string): void {
+  if (!editing.value || disabled.value || readOnly.value || !editOwner) return;
+  if (!reconcileEdit()) return;
+  restoreGridFocus = move !== undefined;
   const column = props.columns[active.value.col];
   const row = props.rows[active.value.row];
   if (!column || row === undefined) {
@@ -124,8 +143,9 @@ function commitEdit(move?: DataGridEditorMove, rawValue?: string): void {
   // is still the previous text when a select's change and its commit fire in the
   // same event (select/boolean editors).
   const value = castValue(rawValue ?? draft.value, column.type ?? DataGridEditorCellType.Text);
-  emit('row-change', row, column.key, value);
   editing.value = false;
+  editOwner = null;
+  emit('row-change', row, column.key, value);
   if (move === DataGridEditorMove.Right) {
     active.value = {
       row: active.value.row,
@@ -141,16 +161,23 @@ function commitEdit(move?: DataGridEditorMove, rawValue?: string): void {
 }
 
 function cancelEdit(): void {
+  restoreGridFocus = true;
   editing.value = false;
+  editOwner = null;
 }
 
 function onKeydown(event: KeyboardEvent): void {
-  if (event.isComposing) return;
+  if (event.isComposing || event.defaultPrevented || disabled.value || rowCount.value === 0 || colCount.value === 0)
+    return;
   if (editing.value) {
     if (event.key === 'Enter') {
       event.preventDefault();
       commitEdit(DataGridEditorMove.Down);
     } else if (event.key === 'Tab') {
+      if (event.shiftKey || active.value.col === colCount.value - 1) {
+        commitEdit();
+        return;
+      }
       event.preventDefault();
       commitEdit(DataGridEditorMove.Right);
     } else if (event.key === 'Escape') {
@@ -199,6 +226,7 @@ function onKeydown(event: KeyboardEvent): void {
 }
 
 function onCellClick(rowIndex: number, colIndex: number): void {
+  if (disabled.value) return;
   const column = props.columns[colIndex];
   if (!column) return;
   const isEditingThisCell = editing.value && active.value.row === rowIndex && active.value.col === colIndex;
@@ -207,6 +235,41 @@ function onCellClick(rowIndex: number, colIndex: number): void {
   // no frame hop.
   if (column.isEditable !== false && !isEditingThisCell) beginEdit();
 }
+
+/** Keep a draft attached to the same logical cell across sorting and live updates. */
+function reconcileEdit(): boolean {
+  if (!editOwner) return false;
+  const row = props.rows.findIndex((row) => props.rowKey(row) === editOwner?.rowKey);
+  const col = props.columns.findIndex((column) => column.key === editOwner?.columnKey);
+  const column = props.columns[col];
+  const value = props.rows[row];
+  if (
+    row < 0 ||
+    !column ||
+    value === undefined ||
+    column.isEditable === false ||
+    !Object.is(column.accessor(value), editOwner.value) ||
+    disabled.value ||
+    readOnly.value
+  ) {
+    editing.value = false;
+    editOwner = null;
+    return false;
+  }
+  active.value = { row, col };
+  return true;
+}
+watch(
+  () => [props.rows, props.columns, disabled.value, readOnly.value],
+  () => {
+    if (editing.value && reconcileEdit()) return;
+    active.value = {
+      row: Math.max(0, Math.min(rowCount.value - 1, active.value.row)),
+      col: Math.max(0, Math.min(colCount.value - 1, active.value.col)),
+    };
+  },
+  { deep: true, flush: 'sync' },
+);
 
 function isActiveCell(rowIndex: number, colIndex: number): boolean {
   return active.value.row === rowIndex && active.value.col === colIndex;
@@ -265,8 +328,10 @@ defineExpose({ el });
       role="grid"
       :aria-rowcount="rowCount + 1"
       :aria-colcount="colCount"
-      :tabindex="0"
-      :aria-activedescendant="rowCount > 0 ? cellId(active.row, active.col) : undefined"
+      :tabindex="disabled ? -1 : 0"
+      :aria-disabled="disabled || undefined"
+      :aria-readonly="readOnly || undefined"
+      :aria-activedescendant="rowCount > 0 && colCount > 0 ? cellId(active.row, active.col) : undefined"
       class="w-full border-collapse focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       @keydown="onKeydown"
     >
@@ -299,9 +364,9 @@ defineExpose({ el });
             :key="column.key"
             role="gridcell"
             :aria-colindex="colIndex + 1"
-            :aria-readonly="column.isEditable === false || undefined"
+            :aria-readonly="readOnly || column.isEditable === false || undefined"
             :aria-selected="isActiveCell(rowIndex, colIndex) || undefined"
-            :tabindex="isActiveCell(rowIndex, colIndex) ? 0 : -1"
+            :tabindex="-1"
             :style="cellStyle(column)"
             :class="cellClasses(column, rowIndex, colIndex)"
             @click="onCellClick(rowIndex, colIndex)"

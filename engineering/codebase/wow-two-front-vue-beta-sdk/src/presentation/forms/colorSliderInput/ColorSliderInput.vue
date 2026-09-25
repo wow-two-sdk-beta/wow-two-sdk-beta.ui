@@ -34,6 +34,8 @@ export interface ColorSliderInputProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly isDisabled?: boolean;
+  /** Prevents editing without removing keyboard focus. */
+  readonly isReadOnly?: boolean;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
@@ -75,6 +77,7 @@ const props = withDefaults(defineProps<ColorSliderInputProps>(), {
   /* Explicit `undefined` default: the flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow the context. */
   isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -100,6 +103,8 @@ const val = controlled.value;
 /* Inherits id/disabled/invalid/labelling from a surrounding <Field>; explicit props win. */
 const ctx = useFormControl();
 const disabled = computed(() => props.isDisabled ?? ctx?.isDisabled ?? false);
+const readOnly = computed(() => props.isReadOnly ?? ctx?.isReadOnly ?? false);
+const inactive = computed(() => disabled.value || readOnly.value);
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel` and
    stop reaching the DOM. It is read off the attrs so it can be relocated onto the track. */
@@ -116,6 +121,7 @@ function updateFromClientX(clientX: number): void {
   const node = track.value;
   if (!node) return;
   const rect = node.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return;
   const ratio = clamp01((clientX - rect.left) / rect.width);
   const next = ratio * max.value;
   /* next is already within [0, max] — clampHue would wrap a full-right drag (360) back to 0. */
@@ -124,15 +130,17 @@ function updateFromClientX(clientX: number): void {
 
 function onPointerdown(event: PointerEvent): void {
   if (event.defaultPrevented) return;
-  if (disabled.value) return;
+  if (inactive.value) return;
+  if (event.button !== 0) return;
   event.preventDefault();
+  track.value?.focus();
   (event.target as Element).setPointerCapture?.(event.pointerId);
   updateFromClientX(event.clientX);
 }
 
 function onPointermove(event: PointerEvent): void {
   if (event.defaultPrevented) return;
-  if (disabled.value) return;
+  if (inactive.value) return;
   if (event.buttons !== 1) return;
   updateFromClientX(event.clientX);
 }
@@ -140,7 +148,7 @@ function onPointermove(event: PointerEvent): void {
 function onKeydown(event: KeyboardEvent): void {
   if (event.isComposing) return;
   if (event.defaultPrevented) return;
-  if (disabled.value) return;
+  if (inactive.value) return;
   let next = val.value;
   switch (event.key) {
     case 'ArrowRight':
@@ -252,6 +260,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
       :aria-disabled="disabled || undefined"
+      :aria-readonly="readOnly || undefined"
       aria-orientation="horizontal"
       :data-disabled="disabled ? '' : undefined"
       :style="trackStyle"

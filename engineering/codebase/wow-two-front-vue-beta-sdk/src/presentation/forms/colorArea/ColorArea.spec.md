@@ -17,23 +17,23 @@ Public import: `import { ColorArea } from '@wow-two-beta/ui-vue/presentation/for
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `hue` | `number` | no | `0` | The hue the square is tinted with (0–360). |
-| `saturation` | `number` | no | — | The saturation, controlled (0–1). The `v-model:saturation` binding target. |
-| `defaultSaturation` | `number` | no | — | The initial saturation when uncontrolled. |
-| `value` | `number` | no | — | The brightness/value, controlled (0–1). The `v-model:value` binding target. |
-| `defaultValue` | `number` | no | — | The initial value when uncontrolled. |
-| `step` | `number` | no | `0.01` | The arrow-key increment. `PageUp`/`PageDown` move ten steps. |
-| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| Prop                | Type      | Required | Default     | Meaning                                                                        |
+| ------------------- | --------- | -------- | ----------- | ------------------------------------------------------------------------------ |
+| `hue`               | `number`  | no       | `0`         | The hue the square is tinted with (0–360).                                     |
+| `saturation`        | `number`  | no       | —           | The saturation, controlled (0–1). The `v-model:saturation` binding target.     |
+| `defaultSaturation` | `number`  | no       | —           | The initial saturation when uncontrolled.                                      |
+| `value`             | `number`  | no       | —           | The brightness/value, controlled (0–1). The `v-model:value` binding target.    |
+| `defaultValue`      | `number`  | no       | —           | The initial value when uncontrolled.                                           |
+| `step`              | `number`  | no       | `0.01`      | The arrow-key increment. `PageUp`/`PageDown` move ten steps.                   |
+| `isDisabled`        | `boolean` | no       | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `id`                | `string`  | no       | —           | The control's id. Auto-filled from `FormControl` context when omitted.         |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                               | Meaning                                                                                             |
+| ------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `update:saturation` | `'update:saturation': [value: number];` | Fires when a drag or arrow key lands the thumb on a new saturation — the `v-model:saturation` half. |
-| `update:value` | `'update:value': [value: number];` | Fires when a drag or arrow key lands the thumb on a new brightness — the `v-model:value` half. |
+| `update:value`      | `'update:value': [value: number];`      | Fires when a drag or arrow key lands the thumb on a new brightness — the `v-model:value` half.      |
 
 ## Slots
 
@@ -47,3 +47,7 @@ None declared.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Saturation and brightness expose separate named sliders, each with its own scalar value and keyboard axis. Arrow keys move one percent; Page keys move ten; Home/End select the bounds. Zero-size pointer geometry cannot emit NaN. Inherited disabled/read-only blocks editing.

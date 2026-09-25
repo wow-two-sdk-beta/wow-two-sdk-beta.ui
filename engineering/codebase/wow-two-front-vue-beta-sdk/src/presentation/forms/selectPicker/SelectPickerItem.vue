@@ -72,7 +72,7 @@ const matchesQuery = computed(() => !ctx.query || itemText.value.toLowerCase().i
 
 <template>
   <!-- ListboxPickerItem compares via the wired keyEquals — same equality math as SelectPicker. -->
-  <ListboxPickerItem v-if="matchesQuery" :value="itemKey" :is-disabled="isDisabled">
+  <ListboxPickerItem v-if="matchesQuery" v-bind="$attrs" :value="itemKey" :is-disabled="isDisabled">
     <slot>{{ label }}</slot>
   </ListboxPickerItem>
 </template>

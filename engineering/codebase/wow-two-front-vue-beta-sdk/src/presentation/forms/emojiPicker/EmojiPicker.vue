@@ -39,6 +39,7 @@ export interface EmojiPickerProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults, useLocale } from '../../../foundation/i18n';
 import { useTemplateRef } from 'vue';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed } from 'vue';
@@ -67,13 +68,14 @@ import {
    `EmojiSizePicker` (passing `entry.glyph`) when a host needs a per-emoji scale. */
 defineOptions({ name: 'EmojiPicker' });
 
-const props = withDefaults(defineProps<EmojiPickerProps>(), {
+const inputProps = withDefaults(defineProps<EmojiPickerProps>(), {
   categoryNavVariant: CategoryNavVariantValue.Strip,
   tileShape: EmojiTileShapeValue.Rounded,
   rowsCount: 6,
-  label: 'Emoji',
+
   showFirstCategoryWhenRecentsEmpty: false,
 });
+const props = useLocaleDefaults(inputProps, 'EmojiPicker', { label: 'Emoji' });
 
 const emit = defineEmits<{
   /** Fires when the reader picks an emoji or clears the selection — the `v-model` half. */
@@ -112,12 +114,14 @@ const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   if (currentValue.value !== null) onChange(null);
 });
+
+const locale = useLocale();
 </script>
 
 <template>
   <StackLayout :key="formResetRevision" gap="3">
     <div class="flex items-center justify-between">
-      <span class="text-sm font-medium">{{ label }}</span>
+      <span class="text-sm font-medium">{{ props.label }}</span>
       <Button
         :variant="isNoneSelected ? undefined : ButtonVariant.Outline"
         :tone="isNoneSelected ? ColorTone.Primary : ColorTone.Neutral"
@@ -125,13 +129,13 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         :aria-pressed="isNoneSelected"
         @click="picker.clearSelection()"
       >
-        None
+        {{ locale.t('EmojiPicker.none', undefined, 'None') }}
       </Button>
     </div>
 
     <SearchInput
       :size="searchSize"
-      placeholder="Search emoji…"
+      :placeholder="locale.t('EmojiPicker.searchEmoji', undefined, 'Search emoji…')"
       :model-value="picker.searchKeyword.value"
       @update:model-value="picker.searchKeyword.value = $event"
       @clear="picker.searchKeyword.value = ''"

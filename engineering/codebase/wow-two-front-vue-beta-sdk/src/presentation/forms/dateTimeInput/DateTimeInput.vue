@@ -1,8 +1,9 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 import type { Temporal } from 'temporal-polyfill';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface DateTimeInputProps {
+export interface DateTimeInputProps extends /* @vue-ignore */ NativeInputAttributes<'min' | 'max'> {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */
@@ -48,12 +49,16 @@ export interface DateTimeInputProps {
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
 
+  /** Prevents typing and popup changes while preserving form submission. */
+  readonly readonly?: boolean;
+
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
   readonly required?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -63,7 +68,16 @@ import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
-import { formatISODateTime, parseISODate, parseISODateTime, today } from '../DateExtensions';
+import {
+  formatISODateTime,
+  isDateTimeInBounds,
+  clampDateTime,
+  clampDate,
+  normalizeMinuteStep,
+  parseISODate,
+  parseISODateTime,
+  today,
+} from '../DateExtensions';
 import CalendarPicker from '../calendarPicker/CalendarPicker.vue';
 import TimeColumns from '../TimeColumns.vue';
 
@@ -86,6 +100,7 @@ const props = withDefaults(defineProps<DateTimeInputProps>(), {
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required". */
   disabled: undefined,
+  readonly: undefined,
   required: undefined,
 });
 
@@ -136,13 +151,14 @@ function parseDateTimeText(text: string): Temporal.PlainDateTime | null {
 
 /** Commits the draft; an unparseable draft reverts to the committed value (ColorInput parity). */
 function commit(): void {
+  if (isDisabled.value || isReadOnly.value) return;
   if (!draft.value.trim()) {
     controlled.setValue(null);
     draft.value = '';
     return;
   }
   const next = parseDateTimeText(draft.value);
-  if (next) {
+  if (next && isDateTimeInBounds(next, props.min, props.max)) {
     controlled.setValue(next);
     draft.value = formatISODateTime(next).replace('T', ' ');
   } else {
@@ -151,6 +167,7 @@ function commit(): void {
 }
 
 function onDraftInput(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
   draft.value = (event.target as HTMLInputElement).value;
 }
 
@@ -170,26 +187,40 @@ function onKeydown(event: KeyboardEvent): void {
 
 /** The `native` path keeps the original ISO-string round trip. */
 function onNativeInput(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
+  const input = event.target as HTMLInputElement;
+  if (!input.validity.valid) {
+    input.value = isoValue.value;
+    return;
+  }
   controlled.setValue(parseISODateTime((event.target as HTMLInputElement).value));
 }
 
 /* A date pick keeps the time that was already set; a time pick keeps the date. Neither
    closes the popover — the other half still has to be chosen. */
 function onCalendarChange(date: Temporal.PlainDate | null): void {
+  if (isDisabled.value || isReadOnly.value) return;
   if (!date) {
     controlled.setValue(null);
     return;
   }
-  controlled.setValue(date.toPlainDateTime(committed.value?.toPlainTime()));
+  const next = clampDateTime(date.toPlainDateTime(committed.value?.toPlainTime()), props.min, props.max);
+  if (isDateTimeInBounds(next, props.min, props.max)) controlled.setValue(next);
 }
 
 function onColumnsChange(time: Temporal.PlainTime): void {
-  const date = committed.value?.toPlainDate() ?? today();
-  controlled.setValue(date.toPlainDateTime(time));
+  if (isDisabled.value || isReadOnly.value) return;
+  const date = clampDate(committed.value?.toPlainDate() ?? today(), props.min?.toPlainDate(), props.max?.toPlainDate());
+  const next = date.toPlainDateTime(time);
+  if (isDateTimeInBounds(next, props.min, props.max)) controlled.setValue(next);
 }
 
 const calendarValue = computed(() => committed.value?.toPlainDate() ?? null);
-const calendarMonth = computed(() => calendarValue.value ?? today());
+const calendarMonth = computed(() =>
+  clampDate(calendarValue.value ?? today(), props.min?.toPlainDate(), props.max?.toPlainDate()),
+);
+const minTime = computed(() => (props.min?.toPlainDate().equals(calendarMonth.value) ? props.min.toPlainTime() : null));
+const maxTime = computed(() => (props.max?.toPlainDate().equals(calendarMonth.value) ? props.max.toPlainTime() : null));
 const timeValue = computed(() => committed.value?.toPlainTime() ?? null);
 
 /* The day bounds the calendar can express — the hour half of `min`/`max` stays the typed
@@ -203,6 +234,10 @@ const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateVal
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
+watch([isDisabled, isReadOnly], ([disabled, readOnly]) => {
+  if (disabled || readOnly) open.value = false;
+});
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
@@ -236,6 +271,8 @@ useNativeFormReset(root, controlled.reset, () => {
 });
 
 defineExpose({ el: root });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -245,11 +282,13 @@ defineExpose({ el: root });
       v-if="native"
       ref="root"
       type="datetime-local"
+      :step="normalizeMinuteStep(minuteStep) * 60"
       :id="inputId"
       :value="isoValue"
       :min="minValue"
       :max="maxValue"
       :disabled="isDisabled"
+      :readonly="isReadOnly"
       :required="isRequired"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
@@ -268,6 +307,7 @@ defineExpose({ el: root });
         :value="draft"
         :placeholder="placeholder"
         :disabled="isDisabled"
+        :readonly="isReadOnly"
         :required="isRequired"
         :aria-invalid="isInvalid"
         :aria-describedby="describedBy"
@@ -278,8 +318,8 @@ defineExpose({ el: root });
         @keydown="onKeydown"
       />
       <PopoverTrigger
-        aria-label="Choose date and time"
-        :disabled="isDisabled"
+        :aria-label="locale.t('DateTimeInput.chooseDateAndTime', undefined, 'Choose date and time')"
+        :disabled="isDisabled || isReadOnly"
         class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <CalendarClock class="h-4 w-4" />
@@ -288,16 +328,31 @@ defineExpose({ el: root });
         <div class="flex items-start gap-2">
           <CalendarPicker
             :model-value="calendarValue"
+            :disabled="isDisabled || isReadOnly"
             :default-month="calendarMonth"
             :min="minDate"
             :max="maxDate"
             @update:modelValue="onCalendarChange"
           />
-          <TimeColumns :model-value="timeValue" :minute-step="minuteStep" @update:modelValue="onColumnsChange" />
+          <TimeColumns
+            :disabled="isDisabled || isReadOnly"
+            :min="minTime"
+            :max="maxTime"
+            :model-value="timeValue"
+            :minute-step="minuteStep"
+            @update:modelValue="onColumnsChange"
+          />
         </div>
       </PopoverContent>
     </Popover>
 
-    <input v-if="name" type="hidden" :name="name" :value="isoValue" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="isDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="isoValue"
+    />
   </div>
 </template>

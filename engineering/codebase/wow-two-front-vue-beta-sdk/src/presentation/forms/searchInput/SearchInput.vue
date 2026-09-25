@@ -1,7 +1,8 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface SearchInputProps {
+export interface SearchInputProps extends /* @vue-ignore */ NativeInputAttributes {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */
@@ -38,6 +39,7 @@ export interface SearchInputProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -150,6 +152,8 @@ useNativeFormReset(root, controlled.reset, () => {
 });
 
 defineExpose({ el: root });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -174,7 +178,7 @@ defineExpose({ el: root });
       v-if="showClear"
       type="button"
       :disabled="isDisabled"
-      aria-label="Clear search"
+      :aria-label="locale.t('SearchInput.clearSearch', undefined, 'Clear search')"
       class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-subtle-foreground hover:bg-muted hover:text-muted-foreground"
       @click="handleClear"
     >

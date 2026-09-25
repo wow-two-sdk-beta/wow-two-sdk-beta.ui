@@ -36,11 +36,13 @@ export interface EditableInputProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { useTemplateRef } from 'vue';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, provide, ref, shallowRef, useAttrs, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
+import { useFormControl } from '../../../foundation/primitives';
 import { useControlled } from '../../../foundation/state';
 import { EditableInputKey, type EditableInputContextValue } from './EditableInputContext';
 
@@ -58,14 +60,14 @@ defineOptions({ name: 'EditableInput', inheritAttrs: false });
 /** The EditableInput tree — preview, input and the submit/cancel buttons. React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<EditableInputProps>(), {
+const inputProps = withDefaults(defineProps<EditableInputProps>(), {
   defaultEditing: false,
-  placeholder: 'Click to edit',
+
   canSubmitOnBlur: true,
   canSubmitOnEnter: true,
   canCancelOnEscape: true,
-  isDisabled: false,
-  isReadOnly: false,
+  isDisabled: undefined,
+  isReadOnly: undefined,
   /* Explicit `undefined` defaults are load-bearing: `useControlled` keys on `=== undefined`,
      and Vue casts an absent `boolean` prop to `false` — without these, `editing`/`editing`
      would read as "controlled, and closed", pinning the control out of edit mode and making
@@ -73,6 +75,7 @@ const props = withDefaults(defineProps<EditableInputProps>(), {
   modelValue: undefined,
   editing: undefined,
 });
+const props = useLocaleDefaults(inputProps, 'EditableInput', { placeholder: 'Click to edit' });
 
 const emit = defineEmits<{
   /** Fires when the reader commits the draft — the `v-model` half. */
@@ -82,6 +85,10 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+const field = useFormControl();
+const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled ?? false);
+const finalReadOnly = computed(() => props.isReadOnly ?? field?.isReadOnly ?? false);
+const inactive = computed(() => finalDisabled.value || finalReadOnly.value);
 
 const valueCtl = useControlled<string>({
   controlled: () => props.modelValue,
@@ -115,6 +122,7 @@ watch([editMode, committed], ([isEditing, next]) => {
 });
 
 function submit(): void {
+  if (inactive.value) return;
   valueCtl.setValue(draft.value);
   editingCtl.setValue(false);
 }
@@ -133,22 +141,24 @@ provide<EditableInputContextValue>(EditableInputKey, {
     return draft.value;
   },
   setDraft: (next) => {
-    draft.value = next;
+    if (!inactive.value) draft.value = next;
   },
   get isEditing() {
     return editMode.value;
   },
-  setEditing: editingCtl.setValue,
+  setEditing: (next) => {
+    if (!next || !inactive.value) editingCtl.setValue(next);
+  },
   submit,
   cancel,
   get placeholder() {
     return props.placeholder;
   },
   get isDisabled() {
-    return props.isDisabled;
+    return finalDisabled.value;
   },
   get isReadOnly() {
-    return props.isReadOnly;
+    return finalReadOnly.value;
   },
   get canSubmitOnBlur() {
     return props.canSubmitOnBlur;
@@ -181,7 +191,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
 <template>
   <div :key="formResetRevision" :class="rootClass" v-bind="passthroughAttrs">
     <slot />
-    <input v-if="name" type="hidden" :name="name" :value="committed" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="finalDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="committed"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

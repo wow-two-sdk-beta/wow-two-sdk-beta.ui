@@ -17,6 +17,8 @@ export interface ColorWheelInputProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly isDisabled?: boolean;
+  /** Prevents editing without removing keyboard focus. */
+  readonly isReadOnly?: boolean;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
@@ -54,6 +56,7 @@ const props = withDefaults(defineProps<ColorWheelInputProps>(), {
   /* Explicit `undefined` default: the flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow it. */
   isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -76,6 +79,8 @@ const hue = controlled.value;
 /* Inherits id/disabled/invalid/labelling from a surrounding <Field>; explicit props win. */
 const ctx = useFormControl();
 const disabled = computed(() => props.isDisabled ?? ctx?.isDisabled ?? false);
+const readOnly = computed(() => props.isReadOnly ?? ctx?.isReadOnly ?? false);
+const inactive = computed(() => disabled.value || readOnly.value);
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel` and
    stop reaching the DOM. It is read off the attrs so it can be relocated onto the wheel. */
@@ -90,27 +95,31 @@ const track = useTemplateRef<HTMLDivElement>('track');
 function updateFromClient(clientX: number, clientY: number): void {
   const node = track.value;
   if (!node) return;
-  controlled.setValue(clampHue(angleFromCenter(clientX, clientY, node.getBoundingClientRect())));
+  const rect = node.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return;
+  controlled.setValue(clampHue(angleFromCenter(clientX, clientY, rect)));
 }
 
 function onPointerdown(event: PointerEvent): void {
   if (event.defaultPrevented) return;
-  if (disabled.value) return;
+  if (inactive.value) return;
+  if (event.button !== 0) return;
   event.preventDefault();
+  track.value?.focus();
   (event.target as Element).setPointerCapture?.(event.pointerId);
   updateFromClient(event.clientX, event.clientY);
 }
 
 function onPointermove(event: PointerEvent): void {
   if (event.defaultPrevented) return;
-  if (disabled.value || event.buttons !== 1) return;
+  if (inactive.value || event.buttons !== 1) return;
   updateFromClient(event.clientX, event.clientY);
 }
 
 function onKeydown(event: KeyboardEvent): void {
   if (event.isComposing) return;
   if (event.defaultPrevented) return;
-  if (disabled.value) return;
+  if (inactive.value) return;
   let next = hue.value;
   switch (event.key) {
     case 'ArrowRight':
@@ -210,6 +219,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     :aria-invalid="isInvalid"
     :aria-describedby="describedBy"
     :aria-disabled="disabled || undefined"
+    :aria-readonly="readOnly || undefined"
     :data-disabled="disabled ? '' : undefined"
     :style="wheelStyle"
     :class="rootClass"

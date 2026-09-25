@@ -66,10 +66,10 @@ function hover(index: number): void {
   overIndex.value = index;
 }
 
-function end(): void {
+function end(commit = false): void {
   const from = dragged;
   const to = over;
-  if (from !== null && to !== null && from !== to) emit('reorder', from, to);
+  if (commit && from !== null && to !== null) move(from, to);
   dragged = null;
   over = null;
   dragIndex.value = null;
@@ -77,7 +77,16 @@ function end(): void {
 }
 
 function move(from: number, to: number): void {
-  if (from !== to && to >= 0 && to < itemCount.value) emit('reorder', from, to);
+  if (
+    Number.isInteger(from) &&
+    Number.isInteger(to) &&
+    from >= 0 &&
+    from < itemCount.value &&
+    from !== to &&
+    to >= 0 &&
+    to < itemCount.value
+  )
+    emit('reorder', from, to);
 }
 
 /* Live getters on the two indices — every mounted item reads them each render. */

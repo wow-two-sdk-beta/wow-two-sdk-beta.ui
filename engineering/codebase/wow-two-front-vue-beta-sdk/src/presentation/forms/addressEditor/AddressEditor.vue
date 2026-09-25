@@ -135,6 +135,7 @@ export const AddressCountries = CountryConfigs;
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -240,6 +241,8 @@ const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   controlled.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -256,7 +259,9 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   >
     <!-- Country -->
     <div class="flex flex-col gap-1">
-      <label :for="ids.country" class="text-xs font-medium text-foreground">Country</label>
+      <label :for="ids.country" class="text-xs font-medium text-foreground"
+        >{{ locale.t('AddressEditor.country', undefined, 'Country') }}
+      </label>
       <select
         :id="ids.country"
         :value="address.country"
@@ -265,12 +270,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         @change="onCountryChange"
       >
         <option v-for="c in AddressCountries" :key="c.iso" :value="c.iso">{{ c.name }}</option>
-        <option value="XX">Other</option>
+        <option value="XX">{{ locale.t('AddressEditor.other', undefined, 'Other') }}</option>
       </select>
     </div>
     <!-- Line 1 -->
     <div class="flex flex-col gap-1">
-      <label :for="ids.line1" class="text-xs font-medium text-foreground">Address line 1</label>
+      <label :for="ids.line1" class="text-xs font-medium text-foreground"
+        >{{ locale.t('AddressEditor.addressLine1', undefined, 'Address line 1') }}
+      </label>
       <input
         :id="ids.line1"
         type="text"
@@ -285,7 +292,8 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <!-- Line 2 -->
     <div class="flex flex-col gap-1">
       <label :for="ids.line2" class="text-xs font-medium text-muted-foreground">
-        Address line 2 <span class="text-[10px]">(optional)</span>
+        {{ locale.t('AddressEditor.addressLine2', undefined, 'Address line 2') }}
+        <span class="text-[10px]">{{ locale.t('AddressEditor.optional', undefined, '(optional)') }} </span>
       </label>
       <input
         :id="ids.line2"
@@ -301,7 +309,9 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <!-- City + Region + Postal -->
     <div :class="gridClass">
       <div class="flex flex-col gap-1">
-        <label :for="ids.city" class="text-xs font-medium text-foreground">City</label>
+        <label :for="ids.city" class="text-xs font-medium text-foreground"
+          >{{ locale.t('AddressEditor.city', undefined, 'City') }}
+        </label>
         <input
           :id="ids.city"
           type="text"
@@ -359,12 +369,48 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       </div>
     </div>
     <template v-if="name">
-      <input type="hidden" :name="`${name}.country`" :value="address.country" />
-      <input type="hidden" :name="`${name}.line1`" :value="address.line1" />
-      <input type="hidden" :name="`${name}.line2`" :value="address.line2 ?? ''" />
-      <input type="hidden" :name="`${name}.city`" :value="address.city" />
-      <input type="hidden" :name="`${name}.region`" :value="address.region" />
-      <input type="hidden" :name="`${name}.postalCode`" :value="address.postalCode" />
+      <input
+        type="hidden"
+        :disabled="isDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="`${name}.country`"
+        :value="address.country"
+      />
+      <input
+        type="hidden"
+        :disabled="isDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="`${name}.line1`"
+        :value="address.line1"
+      />
+      <input
+        type="hidden"
+        :disabled="isDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="`${name}.line2`"
+        :value="address.line2 ?? ''"
+      />
+      <input
+        type="hidden"
+        :disabled="isDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="`${name}.city`"
+        :value="address.city"
+      />
+      <input
+        type="hidden"
+        :disabled="isDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="`${name}.region`"
+        :value="address.region"
+      />
+      <input
+        type="hidden"
+        :disabled="isDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="`${name}.postalCode`"
+        :value="address.postalCode"
+      />
     </template>
     <input
       ref="formResetAnchor"

@@ -2,6 +2,11 @@
 import type { Temporal } from 'temporal-polyfill';
 
 export interface CalendarPickerProps {
+  /** Disables all date changes, including keyboard activation. */
+  readonly disabled?: boolean;
+  /** Allows inspection without changing the selection. */
+  readonly readonly?: boolean;
+
   /** The selected date, controlled. The `v-model` binding target. */
   readonly modelValue?: Temporal.PlainDate | null;
 
@@ -28,6 +33,7 @@ export interface CalendarPickerProps {
 </script>
 
 <script setup lang="ts">
+import { useFormControl } from '../../../foundation/primitives';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -43,7 +49,7 @@ import type { MonthGridDayProps } from '../MonthGrid.vue';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'CalendarPicker', inheritAttrs: false });
 
-const props = defineProps<CalendarPickerProps>();
+const props = withDefaults(defineProps<CalendarPickerProps>(), { disabled: undefined, readonly: undefined });
 
 const emit = defineEmits<{
   /** Fires when the reader picks a day in the grid. The `v-model` half. */
@@ -51,6 +57,10 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+const field = useFormControl();
+const inactive = computed(
+  () => (props.disabled ?? field?.isDisabled ?? false) || (props.readonly ?? field?.isReadOnly ?? false),
+);
 
 const controlled = useControlled<Temporal.PlainDate | null>({
   /* `??` is wrong here — `null` is a MEANINGFUL selection ("nothing selected"), and `??`
@@ -78,10 +88,11 @@ function setFocusedDate(next: Temporal.PlainDate): void {
 }
 
 function isDayDisabled(d: Temporal.PlainDate): boolean {
-  return isDateDisabled(d, { min: props.min, max: props.max, isDisabled: props.isDisabled });
+  return inactive.value || isDateDisabled(d, { min: props.min, max: props.max, isDisabled: props.isDisabled });
 }
 
 function onDayActivate(d: Temporal.PlainDate): void {
+  if (isDayDisabled(d)) return;
   controlled.setValue(d);
 }
 

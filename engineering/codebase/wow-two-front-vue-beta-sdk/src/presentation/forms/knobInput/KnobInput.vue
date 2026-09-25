@@ -63,6 +63,8 @@ export interface KnobInputProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly isDisabled?: boolean;
+  /** Prevents edits without excluding the value from form submission. */
+  readonly isReadOnly?: boolean;
 
   /** The hidden input name; the hidden input emits the numeric value. */
   readonly name?: string;
@@ -106,6 +108,7 @@ const props = withDefaults(defineProps<KnobInputProps>(), {
   modelValue: undefined,
   defaultValue: undefined,
   isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -128,6 +131,8 @@ const current = controlled.value;
 /* Inherits id/disabled/invalid/labelling from a surrounding <Field>; explicit props win. */
 const ctx = useFormControl();
 const disabled = computed(() => props.isDisabled ?? ctx?.isDisabled ?? false);
+const readOnly = computed(() => props.isReadOnly ?? ctx?.isReadOnly ?? false);
+const inactive = computed(() => disabled.value || readOnly.value);
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel`, so
    `props['aria-label']` is always undefined and no accessible name renders. */
@@ -149,14 +154,14 @@ function setClamped(v: number): void {
 }
 
 function onPointerDown(event: PointerEvent): void {
-  if (disabled.value || event.button !== 0) return;
+  if (inactive.value || event.button !== 0) return;
   dragState.value = { startY: event.clientY, startValue: current.value };
   (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
 }
 
 function onPointerMove(event: PointerEvent): void {
   const drag = dragState.value;
-  if (disabled.value || !drag) return;
+  if (inactive.value || !drag) return;
   const dy = drag.startY - event.clientY; // up = increase
   const range = props.max - props.min;
   const sensitivity = range / 200; // 200px drag = full range
@@ -176,7 +181,7 @@ function onPointerUp(event: PointerEvent): void {
 useEventListener(
   'wheel',
   (event) => {
-    if (disabled.value) return;
+    if (inactive.value) return;
     event.preventDefault();
     const delta = (event as WheelEvent).deltaY < 0 ? props.step : -props.step;
     setClamped(current.value + delta);
@@ -187,7 +192,7 @@ useEventListener(
 
 function onKeydown(event: KeyboardEvent): void {
   if (event.isComposing) return;
-  if (disabled.value) return;
+  if (inactive.value) return;
   const s = event.shiftKey ? props.largeStep : props.step;
   switch (event.key) {
     case 'ArrowUp':
@@ -287,6 +292,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     :aria-invalid="ctx?.isInvalid || undefined"
     :aria-describedby="ctx?.describedBy"
     :aria-disabled="disabled || undefined"
+    :aria-readonly="readOnly || undefined"
     :tabindex="disabled ? -1 : 0"
     :style="rootStyle"
     :class="rootClass"
@@ -324,7 +330,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     >
       {{ readout }}
     </span>
-    <input v-if="name" type="hidden" :name="name" :value="current" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="disabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="current"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

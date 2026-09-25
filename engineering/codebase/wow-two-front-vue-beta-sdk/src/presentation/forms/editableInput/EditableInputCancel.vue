@@ -5,6 +5,7 @@
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { X } from 'lucide-vue-next';
@@ -52,6 +53,8 @@ const CloseIcon = X;
 
 /** The rendered `<button>` — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -59,7 +62,7 @@ defineExpose({ el });
     v-if="ctx.isEditing"
     ref="el"
     type="button"
-    aria-label="Cancel"
+    :aria-label="locale.t('EditableInputCancel.cancel', undefined, 'Cancel')"
     :class="buttonClass"
     v-bind="passthroughAttrs"
     @mousedown="onMousedown"

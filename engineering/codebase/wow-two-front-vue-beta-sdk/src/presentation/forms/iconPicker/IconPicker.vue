@@ -147,6 +147,7 @@ export interface IconPickerProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults, useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -161,17 +162,18 @@ import { inputBaseVariants, InputSize } from '../InputStyles';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'IconPicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<IconPickerProps>(), {
+const inputProps = withDefaults(defineProps<IconPickerProps>(), {
   icons: () => BuiltInIcons,
   columns: 8,
   size: 20,
   iconButtonSize: 36,
-  placeholder: 'Search icons…',
+
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
   modelValue: undefined,
   isDisabled: undefined,
 });
+const props = useLocaleDefaults(inputProps, 'IconPicker', { placeholder: 'Search icons…' });
 
 const emit = defineEmits<{
   /** Fires when the reader picks an icon from the grid — the `v-model` half. */
@@ -254,6 +256,8 @@ const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   controlled.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -261,7 +265,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <input
       type="search"
       :value="query"
-      :placeholder="placeholder"
+      :placeholder="props.placeholder"
       :disabled="finalDisabled"
       :class="searchClass"
       @input="onQueryInput"
@@ -293,10 +297,17 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         </button>
       </div>
       <div v-if="filtered.length === 0" class="col-span-full px-2 py-6 text-center text-xs text-muted-foreground">
-        No icons match.
+        {{ locale.t('IconPicker.noIconsMatch', undefined, 'No icons match.') }}
       </div>
     </div>
-    <input v-if="name" type="hidden" :name="name" :value="selected" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="finalDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="selected"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

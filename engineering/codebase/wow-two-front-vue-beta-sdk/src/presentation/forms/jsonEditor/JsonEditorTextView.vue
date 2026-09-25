@@ -10,6 +10,7 @@ export interface JsonEditorTextViewProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, ref, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useFormControl } from '../../../foundation/primitives';
@@ -74,13 +75,15 @@ const textareaClass = computed(() =>
     error.value && 'text-foreground',
   ),
 );
+
+const locale = useLocale();
 </script>
 
 <template>
   <div class="flex h-full flex-col">
     <textarea
       :id="ctx?.id"
-      aria-label="JSON source"
+      :aria-label="locale.t('JsonEditorTextView.jsonSource', undefined, 'JSON source')"
       :aria-labelledby="ctx?.labelledBy"
       :aria-invalid="editor.isInvalid || undefined"
       :aria-describedby="ctx?.describedBy"

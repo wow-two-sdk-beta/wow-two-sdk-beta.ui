@@ -16,19 +16,19 @@ Public import: `import { CalendarPicker } from '@wow-two-beta/ui-vue/presentatio
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `Temporal.PlainDate \| null` | no | — | The selected date, controlled. The `v-model` binding target. |
-| `defaultValue` | `Temporal.PlainDate \| null` | no | — | The uncontrolled initial selection. |
-| `defaultMonth` | `Temporal.PlainDate` | no | — | The initial visible month (uncontrolled). |
-| `min` | `Temporal.PlainDate \| null` | no | — | The minimum selectable date. |
-| `max` | `Temporal.PlainDate \| null` | no | — | The maximum selectable date. |
-| `isDisabled` | `(date: Temporal.PlainDate) => boolean` | no | — | The custom disable predicate. Kept a PROP, not an emit: it RETURNS a value the grid reads on every cell, which is not what an emit models. |
+| Prop           | Type                                    | Required | Default | Meaning                                                                                                                                    |
+| -------------- | --------------------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `modelValue`   | `Temporal.PlainDate \| null`            | no       | —       | The selected date, controlled. The `v-model` binding target.                                                                               |
+| `defaultValue` | `Temporal.PlainDate \| null`            | no       | —       | The uncontrolled initial selection.                                                                                                        |
+| `defaultMonth` | `Temporal.PlainDate`                    | no       | —       | The initial visible month (uncontrolled).                                                                                                  |
+| `min`          | `Temporal.PlainDate \| null`            | no       | —       | The minimum selectable date.                                                                                                               |
+| `max`          | `Temporal.PlainDate \| null`            | no       | —       | The maximum selectable date.                                                                                                               |
+| `isDisabled`   | `(date: Temporal.PlainDate) => boolean` | no       | —       | The custom disable predicate. Kept a PROP, not an emit: it RETURNS a value the grid reads on every cell, which is not what an emit models. |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                                  | Meaning                                                            |
+| ------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------ |
 | `update:modelValue` | `'update:modelValue': [date: Temporal.PlainDate \| null];` | Fires when the reader picks a day in the grid. The `v-model` half. |
 
 ## Slots
@@ -44,3 +44,7 @@ None declared.
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Focused test references: [DateTimeControls.dom.test.ts](../../../../tests/unit/presentation/forms/DateTimeControls.dom.test.ts). Consult the named test assertions for the behavior actually covered.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Whole-control `disabled` and `readonly` inherit Field state and are separate from `isDisabled(date)`. Inactive date buttons and callbacks cannot change selection. Month/day labels use the active LocaleProvider. Reset clears pending range gestures as well as the value.

@@ -49,6 +49,8 @@ export interface ToggleInputProps
 
   /** The render element. `div` (role=button) lets interactive children nest. Default `button`. */
   readonly as?: ToggleInputElement;
+  /** Prevents changing the pressed state while remaining focusable. */
+  readonly isReadOnly?: boolean;
 }
 </script>
 
@@ -59,6 +61,7 @@ import { computed, inject, useAttrs } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn, ColorTone as ColorToneValue } from '../../../foundation/styles';
 import { Key } from '../../../foundation/dom';
+import { useFormControl } from '../../../foundation/primitives';
 import { useControlled } from '../../../foundation/state';
 import Button from '../../actions/button/Button.vue';
 import { ButtonVariant } from '../../actions/button';
@@ -87,6 +90,7 @@ const props = withDefaults(defineProps<ToggleInputProps>(), {
      into `false` rather than `undefined` — which reads as "supplied" at every `!== undefined`
      check. An explicit `undefined` default suppresses the cast. */
   tooltip: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -100,6 +104,19 @@ defineSlots<{
 }>();
 
 const attrs = useAttrs();
+const field = useFormControl();
+const attrFlag = (key: string): boolean => attrs[key] === true || attrs[key] === '' || attrs[key] === 'true';
+const inactive = computed(
+  () =>
+    attrFlag('disabled') ||
+    attrFlag('isDisabled') ||
+    attrFlag('is-disabled') ||
+    attrFlag('isLoading') ||
+    attrFlag('is-loading') ||
+    attrFlag('readonly') ||
+    Boolean(props.isReadOnly ?? field?.isReadOnly) ||
+    Boolean(field?.isDisabled),
+);
 
 /* Present only inside a `ToggleGroup`; standalone toggles own their state. */
 const group = inject(ToggleGroupKey, null);
@@ -146,6 +163,7 @@ const itemRole = computed(() => (group?.itemRole === ToggleItemRole.Tab ? ('tab'
 const ariaSelected = computed(() => (itemRole.value === 'tab' ? pressed.value : undefined));
 
 function toggle(): void {
+  if (inactive.value) return;
   setPressed(!pressed.value);
   group?.toggle(props.value);
 }
@@ -158,6 +176,8 @@ function handleClick(event: MouseEvent): void {
 }
 
 function handleDivKeyDown(event: KeyboardEvent): void {
+  if (event.defaultPrevented || event.isComposing || inactive.value) return;
+  if (event.target !== event.currentTarget) return;
   if (event.key === Key.Space || event.key === Key.Enter) {
     event.preventDefault();
     toggle();
@@ -183,6 +203,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     :as-child="isDiv"
     :value="value"
     :aria-pressed="pressed"
+    :aria-disabled="inactive || undefined"
     :aria-label="resolvedAriaLabel"
     :data-pressed="pressed ? 'true' : 'false'"
     :title="resolvedTitle"
@@ -194,15 +215,15 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   >
     <!-- `as="div"` → render through the asChild merge onto a real <div> so consumers may nest
          interactive children (button-in-button is invalid markup). Keyboard parity added here. -->
-    <div v-if="isDiv" role="button" :tabindex="0" @keydown="handleDivKeyDown">
+    <div v-if="isDiv" role="button" :tabindex="inactive ? -1 : 0" @keydown="handleDivKeyDown">
       <slot :pressed="pressed" />
     </div>
     <slot v-else :pressed="pressed" />
-    <input
-      ref="formResetAnchor"
-      type="hidden"
-      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
-      aria-hidden="true"
-    />
   </Button>
+  <input
+    ref="formResetAnchor"
+    type="hidden"
+    :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+    aria-hidden="true"
+  />
 </template>

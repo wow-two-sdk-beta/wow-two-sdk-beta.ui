@@ -12,6 +12,9 @@ export interface TimePickerProps {
 
   /** The minute interval. Default 5. */
   readonly minuteStep?: number;
+  /** Inclusive same-day time bounds. */
+  readonly min?: Temporal.PlainTime | null;
+  readonly max?: Temporal.PlainTime | null;
 
   /** The empty-state text on the trigger. */
   readonly placeholder?: string;
@@ -40,10 +43,13 @@ export interface TimePickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevents selection changes while preserving form submission. */
+  readonly readonly?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useLocale, useLocaleDefaults } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -55,6 +61,7 @@ import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { selectTriggerVariants } from '../selectPicker/SelectPicker.variants';
 import { InputState as InputStateValue } from '../InputStyles';
+import { isTimeInBounds } from '../DateExtensions';
 import TimeColumns from '../TimeColumns.vue';
 
 /** Renders a trigger button that opens popover hour and minute columns and shows the picked time. */
@@ -62,15 +69,17 @@ import TimeColumns from '../TimeColumns.vue';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'TimePicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<TimePickerProps>(), {
+const inputProps = withDefaults(defineProps<TimePickerProps>(), {
   minuteStep: 5,
-  placeholder: 'Pick a time',
-  format: (t: Temporal.PlainTime) => t.toString({ smallestUnit: 'minute' }),
+
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
   disabled: undefined,
+  readonly: undefined,
 });
+const locale = useLocale();
+const props = useLocaleDefaults(inputProps, 'TimePicker', { placeholder: 'Pick a time' });
 
 const emit = defineEmits<{
   /** Fires when the reader picks an hour or a minute in the popover. The `v-model` half. */
@@ -84,6 +93,7 @@ const attrs = useAttrs();
 const field = useFormControl();
 
 const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
+const finalReadOnly = computed(() => props.readonly ?? field?.isReadOnly ?? false);
 const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid);
 
 const controlled = useControlled<Temporal.PlainTime | null>({
@@ -107,10 +117,16 @@ const triggerState = computed(
 /* The columns live in the shared `TimeColumns` — the same panel `TimeInput` and
    `DateTimeInput` open, so the three cannot drift. */
 function onColumnsChange(next: Temporal.PlainTime): void {
-  controlled.setValue(next);
+  if (finalDisabled.value || finalReadOnly.value) return;
+  if (isTimeInBounds(next, props.min, props.max)) controlled.setValue(next);
 }
 
-const displayText = computed(() => (time.value ? props.format(time.value) : props.placeholder));
+const displayText = computed(() =>
+  time.value
+    ? (props.format?.(time.value) ??
+      time.value.toLocaleString(locale.locale.value, { hour: '2-digit', minute: '2-digit' }))
+    : props.placeholder,
+);
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel`. */
 const ariaLabel = computed(() => attrs[AriaAttribute.Label] as string | undefined);
@@ -150,7 +166,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <PopoverTrigger
       ref="trigger"
       :id="triggerId"
-      :disabled="finalDisabled"
+      :disabled="finalDisabled || finalReadOnly"
       :aria-invalid="ariaInvalid"
       :aria-label="ariaLabel"
       :aria-labelledby="labelledBy"
@@ -164,9 +180,23 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       <Clock class="h-4 w-4 shrink-0 text-muted-foreground" />
     </PopoverTrigger>
     <PopoverContent is-bare>
-      <TimeColumns :model-value="time" :minute-step="minuteStep" @update:modelValue="onColumnsChange" />
+      <TimeColumns
+        :disabled="finalDisabled || finalReadOnly"
+        :min="min"
+        :max="max"
+        :model-value="time"
+        :minute-step="minuteStep"
+        @update:modelValue="onColumnsChange"
+      />
     </PopoverContent>
-    <input v-if="name && time" type="hidden" :name="name" :value="hiddenValue" />
+    <input
+      v-if="name && time"
+      type="hidden"
+      :disabled="finalDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="hiddenValue"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

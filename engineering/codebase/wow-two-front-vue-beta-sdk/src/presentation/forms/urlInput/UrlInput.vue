@@ -1,7 +1,8 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface UrlInputProps {
+export interface UrlInputProps extends /* @vue-ignore */ NativeInputAttributes {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */

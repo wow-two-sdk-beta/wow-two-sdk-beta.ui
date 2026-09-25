@@ -32,6 +32,7 @@ export interface JsonEditorProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, provide, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -152,6 +153,8 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   valueCtl.reset();
   modeCtl.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -166,7 +169,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <div class="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1">
       <div
         role="radiogroup"
-        aria-label="JSON mode"
+        :aria-label="locale.t('JsonEditor.jsonMode', undefined, 'JSON mode')"
         class="flex items-center gap-0.5 rounded-md bg-card p-0.5 ring-1 ring-border"
       >
         <button

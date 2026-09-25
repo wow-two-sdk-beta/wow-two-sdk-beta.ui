@@ -56,6 +56,7 @@ export interface ChatComposerInputProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults, useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, nextTick, onMounted, useAttrs, useSlots, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -72,8 +73,7 @@ import { useControlled } from '../../../foundation/state';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'ChatComposerInput', inheritAttrs: false });
 
-const props = withDefaults(defineProps<ChatComposerInputProps>(), {
-  placeholder: 'Write a message…',
+const inputProps = withDefaults(defineProps<ChatComposerInputProps>(), {
   submitOn: 'enter',
   maxHeight: 200,
   isSendButtonHidden: false,
@@ -82,6 +82,7 @@ const props = withDefaults(defineProps<ChatComposerInputProps>(), {
   modelValue: undefined,
   isDisabled: undefined,
 });
+const props = useLocaleDefaults(inputProps, 'ChatComposerInput', { placeholder: 'Write a message…' });
 
 const emit = defineEmits<{
   /** Fires when the writer edits the draft message — the `v-model` half. */
@@ -209,6 +210,8 @@ useNativeFormReset(textarea, controlled.reset, () => {
 });
 
 defineExpose({ el: textarea });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -221,7 +224,7 @@ defineExpose({ el: textarea });
       v-bind="textareaPassthrough"
       :value="text"
       :rows="1"
-      :placeholder="placeholder"
+      :placeholder="props.placeholder"
       :disabled="isDisabled"
       :class="textareaClass"
       @input="onInput"
@@ -233,7 +236,13 @@ defineExpose({ el: textarea });
     </div>
     <template v-if="!isSendButtonHidden">
       <slot v-if="hasSendButton" name="sendButton">{{ sendButton }}</slot>
-      <button v-else type="submit" :disabled="isDisabled || isEmpty" aria-label="Send message" :class="sendButtonClass">
+      <button
+        v-else
+        type="submit"
+        :disabled="isDisabled || isEmpty"
+        :aria-label="locale.t('ChatComposerInput.sendMessage', undefined, 'Send message')"
+        :class="sendButtonClass"
+      >
         <SendIcon class="h-4 w-4" />
       </button>
     </template>

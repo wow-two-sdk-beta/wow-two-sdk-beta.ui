@@ -50,21 +50,12 @@ const MaxDisabledSkip = 400;
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../foundation/i18n';
 import { computed, onBeforeUnmount, onMounted, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { cn } from '../../foundation/styles';
-import {
-  MonthLabelsLong,
-  WeekdayLabelsShort,
-  addDays,
-  addMonths,
-  buildMonthGrid,
-  isSameDay,
-  isToday,
-  startOfMonth,
-  sundayIndex,
-} from './DateExtensions';
+import { addDays, addMonths, buildMonthGrid, isSameDay, isToday, startOfMonth, sundayIndex } from './DateExtensions';
 
 /** Renders the shared 42-cell month grid — month nav, weekday row, keyboard-navigable day cells. */
 /* `inheritAttrs: false` so `class` folds into the component's own `cn()` call — plain fallthrough
@@ -260,7 +251,9 @@ function cellClass(date: Temporal.PlainDate, outOfMonth: boolean): string {
    stop reaching the DOM. It is read off the attrs so it can be relocated onto the grid. */
 const ariaLabel = computed(() => (attrs[AriaAttribute.Label] as string | undefined) ?? 'Calendar');
 
-const monthLabel = computed(() => `${MonthLabelsLong[props.viewMonth.month - 1]} ${props.viewMonth.year}`);
+const monthLabel = computed(() =>
+  props.viewMonth.toLocaleString(locale.locale.value, { month: 'long', year: 'numeric' }),
+);
 
 const rootClass = computed(() =>
   cn(
@@ -269,11 +262,20 @@ const rootClass = computed(() =>
   ),
 );
 
-const WeekdayLabels = WeekdayLabelsShort;
+const WeekdayLabels = computed(() =>
+  Array.from({ length: 7 }, (_, index) =>
+    addDays(props.viewMonth.subtract({ days: sundayIndex(props.viewMonth) }), index).toLocaleString(
+      locale.locale.value,
+      { weekday: 'short' },
+    ),
+  ),
+);
 const ChevronLeftIcon = ChevronLeft;
 const ChevronRightIcon = ChevronRight;
 
 defineExpose({ el: root });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -282,7 +284,7 @@ defineExpose({ el: root });
     <div class="flex items-center justify-between gap-2 px-1">
       <button
         type="button"
-        aria-label="Previous month"
+        :aria-label="locale.t('MonthGrid.previousMonth', undefined, 'Previous month')"
         class="grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         @click="emit('update:viewMonth', addMonths(viewMonth, -1))"
       >
@@ -291,7 +293,7 @@ defineExpose({ el: root });
       <div class="text-sm font-medium" aria-live="polite">{{ monthLabel }}</div>
       <button
         type="button"
-        aria-label="Next month"
+        :aria-label="locale.t('MonthGrid.nextMonth', undefined, 'Next month')"
         class="grid h-7 w-7 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         @click="emit('update:viewMonth', addMonths(viewMonth, 1))"
       >

@@ -74,7 +74,14 @@ function onValueChange(next: unknown): void {
     :elevation="elevation"
     :class="panelClass"
   >
-    <ListboxPicker is-multiple :model-value="selected" variant="flat" radius="none" @update:modelValue="onValueChange">
+    <ListboxPicker
+      :is-disabled="ctx.isDisabled"
+      is-multiple
+      :model-value="selected"
+      variant="flat"
+      radius="none"
+      @update:modelValue="onValueChange"
+    >
       <slot />
     </ListboxPicker>
   </PopoverContent>

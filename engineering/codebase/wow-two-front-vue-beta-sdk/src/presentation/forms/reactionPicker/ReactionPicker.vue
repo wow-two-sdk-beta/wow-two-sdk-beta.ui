@@ -34,6 +34,7 @@ const SizeClass: Partial<Record<Size, string>> = {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Plus } from 'lucide-vue-next';
@@ -98,10 +99,18 @@ const root = useTemplateRef<HTMLDivElement>('root');
 
 /** The rendered element — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: root });
+
+const locale = useLocale();
 </script>
 
 <template>
-  <div ref="root" role="toolbar" aria-label="Reaction picker" :class="rootClass" v-bind="passthroughAttrs">
+  <div
+    ref="root"
+    role="toolbar"
+    :aria-label="locale.t('ReactionPicker.reactionPicker', undefined, 'Reaction picker')"
+    :class="rootClass"
+    v-bind="passthroughAttrs"
+  >
     <button
       v-for="emoji in emojis"
       :key="emoji"
@@ -114,7 +123,13 @@ defineExpose({ el: root });
     >
       <span aria-hidden="true">{{ emoji }}</span>
     </button>
-    <button v-if="isMoreShown" type="button" aria-label="More reactions" :class="moreClass" @click="props.onMore?.()">
+    <button
+      v-if="isMoreShown"
+      type="button"
+      :aria-label="locale.t('ReactionPicker.moreReactions', undefined, 'More reactions')"
+      :class="moreClass"
+      @click="props.onMore?.()"
+    >
       <Plus class="h-4 w-4" />
     </button>
   </div>

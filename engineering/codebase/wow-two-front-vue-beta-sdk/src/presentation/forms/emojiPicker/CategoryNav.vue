@@ -18,6 +18,7 @@ export interface CategoryNavProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, type CSSProperties } from 'vue';
 import { ToggleInput, ToggleGroup, ToggleGroupVariant, ToggleInputVariant, ToggleMode } from '..';
 import {
@@ -54,6 +55,8 @@ const categories = computed(() =>
 function selectCategory(key: CategoryKey | null | ReadonlyArray<string>): void {
   if (typeof key === 'string') emit('select', key as CategoryKey);
 }
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -62,7 +65,7 @@ function selectCategory(key: CategoryKey | null | ReadonlyArray<string>): void {
     :type="ToggleMode.Single"
     :is-attached="false"
     :model-value="active"
-    aria-label="Emoji categories"
+    :aria-label="locale.t('CategoryNav.emojiCategories', undefined, 'Emoji categories')"
     class="flex-wrap"
     @update:modelValue="selectCategory"
   >
@@ -82,7 +85,7 @@ function selectCategory(key: CategoryKey | null | ReadonlyArray<string>): void {
     :type="ToggleMode.Single"
     :variant="ToggleGroupVariant.Segmented"
     :model-value="active"
-    aria-label="Emoji categories"
+    :aria-label="locale.t('CategoryNav.emojiCategories', undefined, 'Emoji categories')"
     class="w-full"
     @update:modelValue="selectCategory"
   >

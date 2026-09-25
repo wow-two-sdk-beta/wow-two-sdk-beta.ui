@@ -15,27 +15,27 @@ Public import: `import { SearchInput } from '@wow-two-beta/ui-vue/presentation/f
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `size` | `InputSize` | no | — | The control size. |
-| `state` | `InputState` | no | — | The validity surface. |
-| `border` | `InputBorder` | no | — | The border weight. |
-| `ring` | `InputRing` | no | — | The focus-ring weight. |
-| `isClearable` | `boolean` | no | `true` | The clearable state, showing a clear (×) button when the input has a value. Default true. |
-| `modelValue` | `string \| number` | no | — | The value, controlled. The `v-model` binding target. |
-| `defaultValue` | `string \| number` | no | — | The initial value when uncontrolled. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
-| `readOnly` | `boolean` | no | `undefined` | The read-only state — the legacy alias. Falls back to the form control's `isReadOnly`. |
-| `readonly` | `boolean` | no | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
+| Prop           | Type               | Required | Default     | Meaning                                                                                       |
+| -------------- | ------------------ | -------- | ----------- | --------------------------------------------------------------------------------------------- |
+| `size`         | `InputSize`        | no       | —           | The control size.                                                                             |
+| `state`        | `InputState`       | no       | —           | The validity surface.                                                                         |
+| `border`       | `InputBorder`      | no       | —           | The border weight.                                                                            |
+| `ring`         | `InputRing`        | no       | —           | The focus-ring weight.                                                                        |
+| `isClearable`  | `boolean`          | no       | `true`      | The clearable state, showing a clear (×) button when the input has a value. Default true.     |
+| `modelValue`   | `string \| number` | no       | —           | The value, controlled. The `v-model` binding target.                                          |
+| `defaultValue` | `string \| number` | no       | —           | The initial value when uncontrolled.                                                          |
+| `id`           | `string`           | no       | —           | The control's id. Auto-filled from `FormControl` context when omitted.                        |
+| `disabled`     | `boolean`          | no       | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`.                |
+| `required`     | `boolean`          | no       | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`.                |
+| `readOnly`     | `boolean`          | no       | `undefined` | The read-only state — the legacy alias. Falls back to the form control's `isReadOnly`.        |
+| `readonly`     | `boolean`          | no       | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
-| `update:modelValue` | `'update:modelValue': [value: string];` | Fires when the reader edits the query — the `v-model` half. |
-| `clear` | `clear: [];` | Fires when the reader empties the field with the clear button, after the value is reset. |
+| Event               | Signature                               | Meaning                                                                                  |
+| ------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `update:modelValue` | `'update:modelValue': [value: string];` | Fires when the reader edits the query — the `v-model` half.                              |
+| `clear`             | `clear: [];`                            | Fires when the reader empties the field with the clear button, after the value is reset. |
 
 ## Slots
 
@@ -50,3 +50,5 @@ None declared.
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Focused test references: [Forms.contract.dom.test.ts](../../../../tests/unit/presentation/forms/Forms.contract.dom.test.ts). Consult the named test assertions for the behavior actually covered.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+Native input attributes and event listeners (including `name`, `form`, `autocomplete`, `onBlur`, `onInput` and keyboard/composition/clipboard events) are represented in the public props type. They remain fallthrough attrs at runtime. Canonical model value, visual size, fixed native type and declared Temporal bounds retain component ownership. Autocomplete accepts its native extensible token string.

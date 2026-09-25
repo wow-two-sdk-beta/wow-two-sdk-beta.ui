@@ -324,6 +324,13 @@ defineExpose({ el: input });
       @compositionend="onInput"
     />
     <div v-if="hasPreview" aria-live="polite" :class="previewClass">{{ preview }}</div>
-    <input v-if="name" type="hidden" :name="name" :value="cron" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="isDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="cron"
+    />
   </div>
 </template>

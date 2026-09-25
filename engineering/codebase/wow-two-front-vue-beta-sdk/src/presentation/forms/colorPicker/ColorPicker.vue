@@ -40,6 +40,8 @@ export interface ColorPickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly isDisabled?: boolean;
+  /** Prevents editing while preserving the submitted color. */
+  readonly isReadOnly?: boolean;
 
   /** The hidden input's name — renders a form-submittable mirror of the hex. */
   readonly name?: string;
@@ -53,6 +55,7 @@ const FallbackHsv: HSV = { h: 217, s: 0.91, v: 0.96, a: 1 };
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, shallowRef, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -82,6 +85,7 @@ const props = withDefaults(defineProps<ColorPickerProps>(), {
   /* Explicit `undefined` default: the flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow the context. */
   isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -104,6 +108,7 @@ const attrs = useAttrs();
 const field = useFormControl();
 
 const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled ?? false);
+const finalReadOnly = computed(() => props.isReadOnly ?? field?.isReadOnly ?? false);
 const triggerId = computed(() => props.id ?? field?.id);
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel` and
@@ -143,11 +148,12 @@ watch([hex, () => props.hasAlpha], () => {
      produces — avoids hue collapsing when SV passes through 0. */
   const currentHex = hsvToHex(hsv.value, { withAlpha: props.hasAlpha });
   if (currentHex.toLowerCase() !== hex.value.toLowerCase()) {
-    hsv.value = { ...parsed, a: hsv.value.a };
+    hsv.value = parsed;
   }
 });
 
 function updateHsv(next: HSV): void {
+  if (finalDisabled.value || finalReadOnly.value) return;
   hsv.value = next;
   controlled.setValue(hsvToHex(next, { withAlpha: props.hasAlpha }));
 }
@@ -161,10 +167,12 @@ function onAlphaChange(a: number): void {
 }
 
 function onHexChange(next: string | null): void {
+  if (finalDisabled.value || finalReadOnly.value) return;
   controlled.setValue(next);
 }
 
 function onPresetChange(next: string | null): void {
+  if (finalDisabled.value || finalReadOnly.value) return;
   controlled.setValue(next);
 }
 
@@ -207,12 +215,14 @@ const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   controlled.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
   <Popover :key="formResetRevision">
     <!-- Custom trigger: no id/aria wiring, per the React original's contract. -->
-    <PopoverTrigger v-if="hasCustomTrigger" ref="trigger" as-child>
+    <PopoverTrigger v-if="hasCustomTrigger" ref="trigger" as-child :disabled="finalDisabled || finalReadOnly">
       <slot name="trigger" />
     </PopoverTrigger>
 
@@ -232,7 +242,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       <ColorSwatchPreview
         :color="swatchColor"
         :size="triggerSize"
-        :is-disabled="finalDisabled"
+        :is-disabled="finalDisabled || finalReadOnly"
         :class="swatchTriggerClass"
         @click="noop"
       />
@@ -246,7 +256,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       :aria-labelledby="labelledBy"
       :aria-describedby="describedBy"
       :aria-invalid="isInvalid"
-      :disabled="finalDisabled"
+      :disabled="finalDisabled || finalReadOnly"
       :class="framedTriggerClass"
       v-bind="passthroughAttrs"
     >
@@ -254,13 +264,16 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       <span class="font-mono uppercase">{{ hexText }}</span>
     </PopoverTrigger>
 
-    <PopoverContent aria-label="Color picker" class="flex w-64 flex-col gap-3">
+    <PopoverContent
+      :aria-label="locale.t('ColorPicker.colorPicker', undefined, 'Color picker')"
+      class="flex w-64 flex-col gap-3"
+    >
       <!-- The panel widgets are sub-controls of the picker, not the field's control — each
            gets its OWN bare FormControlProvider so none of them adopts the surrounding
            Field's id (which now names the trigger; adoption would duplicate it) or its
            label/describedby/invalid chrome. One provider per widget: they all read
            `id ?? ctx.id`, so a single shared provider would duplicate ids among them. -->
-      <FormControlProvider>
+      <FormControlProvider :is-disabled="finalDisabled || finalReadOnly" :is-read-only="finalReadOnly">
         <ColorArea
           :hue="hsv.h"
           :saturation="hsv.s"
@@ -269,27 +282,36 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
           @update:value="(v) => updateHsv({ ...hsv, v })"
         />
       </FormControlProvider>
-      <FormControlProvider>
+      <FormControlProvider :is-disabled="finalDisabled || finalReadOnly" :is-read-only="finalReadOnly">
         <ColorSliderInput
           :channel="ColorChannel.Hue"
           :model-value="hsv.h"
-          aria-label="Hue"
+          :aria-label="locale.t('ColorPicker.hue', undefined, 'Hue')"
           @update:modelValue="onHueChange"
         />
       </FormControlProvider>
-      <FormControlProvider v-if="hasAlpha">
+      <FormControlProvider v-if="hasAlpha" :is-disabled="finalDisabled || finalReadOnly" :is-read-only="finalReadOnly">
         <ColorSliderInput
           :channel="ColorChannel.Alpha"
           :model-value="alphaValue"
           :color="hsv"
-          aria-label="Alpha"
+          :aria-label="locale.t('ColorPicker.alpha', undefined, 'Alpha')"
           @update:modelValue="onAlphaChange"
         />
       </FormControlProvider>
-      <FormControlProvider>
-        <ColorInput aria-label="Hex color" :model-value="hex" :has-alpha="hasAlpha" @update:modelValue="onHexChange" />
+      <FormControlProvider :is-disabled="finalDisabled || finalReadOnly" :is-read-only="finalReadOnly">
+        <ColorInput
+          :aria-label="locale.t('ColorPicker.hexColor', undefined, 'Hex color')"
+          :model-value="hex"
+          :has-alpha="hasAlpha"
+          @update:modelValue="onHexChange"
+        />
       </FormControlProvider>
-      <FormControlProvider v-if="hasPresets">
+      <FormControlProvider
+        v-if="hasPresets"
+        :is-disabled="finalDisabled || finalReadOnly"
+        :is-read-only="finalReadOnly"
+      >
         <ColorSwatchPicker
           :colors="presets ?? []"
           :model-value="hex"
@@ -299,7 +321,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       </FormControlProvider>
     </PopoverContent>
 
-    <input v-if="name" type="hidden" :name="name" :value="hiddenValue" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="finalDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="hiddenValue"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

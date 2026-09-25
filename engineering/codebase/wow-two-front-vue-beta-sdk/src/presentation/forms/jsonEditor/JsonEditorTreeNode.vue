@@ -18,6 +18,7 @@ export interface JsonEditorTreeNodeProps {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, ref } from 'vue';
 import { ChevronRight, Copy } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
@@ -119,6 +120,8 @@ const leafClass = computed(() =>
 
 const ChevronIcon = ChevronRight;
 const CopyIcon = Copy;
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -141,7 +144,7 @@ const CopyIcon = Copy;
       <input
         v-else-if="editing"
         autofocus
-        aria-label="Edit value"
+        :aria-label="locale.t('JsonEditorTreeNode.editValue', undefined, 'Edit value')"
         :aria-invalid="editor.isInvalid || undefined"
         :aria-describedby="ctx?.describedBy"
         :value="draft"

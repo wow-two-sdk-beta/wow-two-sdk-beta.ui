@@ -16,20 +16,20 @@ Public import: `import { ColorSliderInput } from '@wow-two-beta/ui-vue/presentat
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `channel` | `ColorChannel` | no | `ColorChannel.Hue` | The channel the track drives. |
-| `modelValue` | `number` | no | — | The channel value, controlled. The `v-model` binding target. |
-| `defaultValue` | `number` | no | — | The initial value when uncontrolled. |
-| `color` | `HSV` | no | — | The surrounding color the non-hue gradients are built from. |
-| `step` | `number` | no | — | The arrow-key increment. Defaults to `1` for hue, `0.01` otherwise. |
-| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| Prop           | Type           | Required | Default            | Meaning                                                                        |
+| -------------- | -------------- | -------- | ------------------ | ------------------------------------------------------------------------------ |
+| `channel`      | `ColorChannel` | no       | `ColorChannel.Hue` | The channel the track drives.                                                  |
+| `modelValue`   | `number`       | no       | —                  | The channel value, controlled. The `v-model` binding target.                   |
+| `defaultValue` | `number`       | no       | —                  | The initial value when uncontrolled.                                           |
+| `color`        | `HSV`          | no       | —                  | The surrounding color the non-hue gradients are built from.                    |
+| `step`         | `number`       | no       | —                  | The arrow-key increment. Defaults to `1` for hue, `0.01` otherwise.            |
+| `isDisabled`   | `boolean`      | no       | `undefined`        | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `id`           | `string`       | no       | —                  | The control's id. Auto-filled from `FormControl` context when omitted.         |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                               | Meaning                                                                                     |
+| ------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [value: number];` | Fires when a drag or arrow key lands the thumb on a new channel value — the `v-model` half. |
 
 ## Slots
@@ -44,3 +44,7 @@ None declared.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Field disabled/read-only state is checked at mutation boundaries, including synthetic events. Read-only prevents edits without discarding the current value. Where a named hidden mirror is provided, it forwards `form`, omits disabled values and retains read-only values. Localizable default labels follow LocaleProvider while explicit caller text takes precedence.

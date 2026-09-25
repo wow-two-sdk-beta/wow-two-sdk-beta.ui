@@ -1,8 +1,9 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 import type { SwatchShape } from '../../display/colorSwatchPreview';
 
-export interface ColorInputProps {
+export interface ColorInputProps extends /* @vue-ignore */ NativeInputAttributes {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */
@@ -29,6 +30,8 @@ export interface ColorInputProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevents editing while preserving native form submission. */
+  readonly readonly?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
   readonly required?: boolean;
@@ -59,6 +62,7 @@ const props = withDefaults(defineProps<ColorInputProps>(), {
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow the
      context with a hard "not disabled / not required". */
   disabled: undefined,
+  readonly: undefined,
   required: undefined,
 });
 
@@ -100,6 +104,7 @@ function commitHex(text: string, hasAlpha: boolean): string | null {
 }
 
 function commit(): void {
+  if (isDisabled.value || isReadOnly.value) return;
   if (!draft.value) {
     controlled.setValue(null);
     return;
@@ -115,6 +120,10 @@ function commit(): void {
 }
 
 function onInput(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) {
+    (event.target as HTMLInputElement).value = String(committed.value ?? '');
+    return;
+  }
   if ((event as InputEvent).isComposing) return;
   draft.value = (event.target as HTMLInputElement).value;
 }
@@ -138,6 +147,7 @@ const swatchColor = computed(() => committed.value ?? '#00000000');
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
@@ -181,6 +191,7 @@ defineExpose({ el: root });
       :id="inputId"
       :disabled="isDisabled"
       :required="isRequired"
+      :readonly="isReadOnly"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
       :spellcheck="false"

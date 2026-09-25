@@ -248,6 +248,51 @@ export function isZonedDayInRange(
 }
 
 /** Format a ZonedDateTime's time-of-day as "HH:MM" (locale-aware). */
-export function formatZonedTime(z: Temporal.ZonedDateTime): string {
-  return z.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit' });
+export function formatZonedTime(z: Temporal.ZonedDateTime, locale?: string): string {
+  return z.toLocaleString(locale, { hour: '2-digit', minute: '2-digit' });
+}
+
+/** Validates an offered minute interval without unbounded loops or fractional Temporal values. */
+export function normalizeMinuteStep(step: number | undefined): number {
+  return step !== undefined && Number.isInteger(step) && step >= 1 && step <= 60 ? step : 5;
+}
+
+/** Inclusive same-day bounds. A reversed interval has no valid values. */
+export function isTimeInBounds(
+  value: Temporal.PlainTime,
+  min?: Temporal.PlainTime | null,
+  max?: Temporal.PlainTime | null,
+): boolean {
+  return (!min || Temporal.PlainTime.compare(value, min) >= 0) && (!max || Temporal.PlainTime.compare(value, max) <= 0);
+}
+
+export function clampTime(
+  value: Temporal.PlainTime,
+  min?: Temporal.PlainTime | null,
+  max?: Temporal.PlainTime | null,
+): Temporal.PlainTime {
+  if (min && Temporal.PlainTime.compare(value, min) < 0) return min;
+  if (max && Temporal.PlainTime.compare(value, max) > 0) return max;
+  return value;
+}
+
+export function isDateTimeInBounds(
+  value: Temporal.PlainDateTime,
+  min?: Temporal.PlainDateTime | null,
+  max?: Temporal.PlainDateTime | null,
+): boolean {
+  return (
+    (!min || Temporal.PlainDateTime.compare(value, min) >= 0) &&
+    (!max || Temporal.PlainDateTime.compare(value, max) <= 0)
+  );
+}
+
+export function clampDateTime(
+  value: Temporal.PlainDateTime,
+  min?: Temporal.PlainDateTime | null,
+  max?: Temporal.PlainDateTime | null,
+): Temporal.PlainDateTime {
+  if (min && Temporal.PlainDateTime.compare(value, min) < 0) return min;
+  if (max && Temporal.PlainDateTime.compare(value, max) > 0) return max;
+  return value;
 }

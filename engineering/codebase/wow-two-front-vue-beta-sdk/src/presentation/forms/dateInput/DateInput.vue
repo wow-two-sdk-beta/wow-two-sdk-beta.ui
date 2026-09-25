@@ -1,8 +1,9 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 import type { Temporal } from 'temporal-polyfill';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface DateInputProps {
+export interface DateInputProps extends /* @vue-ignore */ NativeInputAttributes<'min' | 'max'> {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */
@@ -42,12 +43,16 @@ export interface DateInputProps {
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
 
+  /** Prevents typing and popup changes while preserving form submission. */
+  readonly readonly?: boolean;
+
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
   readonly required?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -57,7 +62,7 @@ import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
-import { formatISODate, parseISODate, today } from '../DateExtensions';
+import { formatISODate, isDateDisabled, parseISODate, today } from '../DateExtensions';
 import CalendarPicker from '../calendarPicker/CalendarPicker.vue';
 
 /**
@@ -79,6 +84,7 @@ const props = withDefaults(defineProps<DateInputProps>(), {
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required". */
   disabled: undefined,
+  readonly: undefined,
   required: undefined,
 });
 
@@ -117,13 +123,14 @@ watch(displayValue, (next) => {
 
 /** Commits the draft; an unparseable draft reverts to the committed value (ColorInput parity). */
 function commit(): void {
+  if (isDisabled.value || isReadOnly.value) return;
   if (!draft.value.trim()) {
     controlled.setValue(null);
     draft.value = '';
     return;
   }
   const next = parseISODate(draft.value.trim());
-  if (next) {
+  if (next && !isDateDisabled(next, { min: props.min, max: props.max })) {
     controlled.setValue(next);
     draft.value = formatISODate(next);
   } else {
@@ -132,6 +139,7 @@ function commit(): void {
 }
 
 function onDraftInput(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
   draft.value = (event.target as HTMLInputElement).value;
 }
 
@@ -151,12 +159,20 @@ function onKeydown(event: KeyboardEvent): void {
 
 /** The `native` path keeps the original ISO-string round trip. */
 function onNativeInput(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
+  const input = event.target as HTMLInputElement;
+  if (!input.validity.valid) {
+    input.value = displayValue.value;
+    return;
+  }
   controlled.setValue(parseISODate((event.target as HTMLInputElement).value));
 }
 
 /* A day is the whole value here, so the pick closes the panel — `DatePicker` parity, and
    unlike `DateTimeInput`, where the time half still has to be chosen. */
 function onCalendarChange(next: Temporal.PlainDate | null): void {
+  if (isDisabled.value || isReadOnly.value || (next && isDateDisabled(next, { min: props.min, max: props.max })))
+    return;
   controlled.setValue(next);
   open.value = false;
 }
@@ -169,6 +185,10 @@ const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateVal
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
+watch([isDisabled, isReadOnly], ([disabled, readOnly]) => {
+  if (disabled || readOnly) open.value = false;
+});
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
@@ -202,6 +222,8 @@ useNativeFormReset(root, controlled.reset, () => {
 });
 
 defineExpose({ el: root });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -216,6 +238,7 @@ defineExpose({ el: root });
       :min="minValue"
       :max="maxValue"
       :disabled="isDisabled"
+      :readonly="isReadOnly"
       :required="isRequired"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
@@ -234,6 +257,7 @@ defineExpose({ el: root });
         :value="draft"
         :placeholder="placeholder"
         :disabled="isDisabled"
+        :readonly="isReadOnly"
         :required="isRequired"
         :aria-invalid="isInvalid"
         :aria-describedby="describedBy"
@@ -244,8 +268,8 @@ defineExpose({ el: root });
         @keydown="onKeydown"
       />
       <PopoverTrigger
-        aria-label="Choose date"
-        :disabled="isDisabled"
+        :aria-label="locale.t('DateInput.chooseDate', undefined, 'Choose date')"
+        :disabled="isDisabled || isReadOnly"
         class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <CalendarIcon class="h-4 w-4" />
@@ -253,6 +277,7 @@ defineExpose({ el: root });
       <PopoverContent is-bare>
         <CalendarPicker
           :model-value="committed"
+          :disabled="isDisabled || isReadOnly"
           :default-month="calendarMonth"
           :min="min"
           :max="max"

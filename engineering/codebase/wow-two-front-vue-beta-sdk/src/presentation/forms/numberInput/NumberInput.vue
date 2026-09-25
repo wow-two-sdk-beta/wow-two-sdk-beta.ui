@@ -1,7 +1,8 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface NumberInputProps {
+export interface NumberInputProps extends /* @vue-ignore */ NativeInputAttributes {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */
@@ -46,6 +47,7 @@ export interface NumberInputProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -65,10 +67,9 @@ const PlusIcon = Plus;
    onto the inner `<input>` by hand, matching React's `{...props}` placement. */
 defineOptions({ name: 'NumberInput', inheritAttrs: false });
 
-const props = withDefaults(defineProps<NumberInputProps>(), {
+const inputProps = withDefaults(defineProps<NumberInputProps>(), {
   step: 1,
-  incrementLabel: 'Increment',
-  decrementLabel: 'Decrement',
+
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required / not read-only". */
@@ -76,6 +77,10 @@ const props = withDefaults(defineProps<NumberInputProps>(), {
   required: undefined,
   readOnly: undefined,
   readonly: undefined,
+});
+const props = useLocaleDefaults(inputProps, 'NumberInput', {
+  incrementLabel: 'Increment',
+  decrementLabel: 'Decrement',
 });
 
 const emit = defineEmits<{
@@ -181,7 +186,7 @@ defineExpose({ el: root });
       <button
         type="button"
         :disabled="isDisabled || isReadOnly"
-        :aria-label="decrementLabel"
+        :aria-label="props.decrementLabel"
         class="grid h-7 w-6 place-items-center rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
         @click="adjust(-1)"
       >
@@ -190,7 +195,7 @@ defineExpose({ el: root });
       <button
         type="button"
         :disabled="isDisabled || isReadOnly"
-        :aria-label="incrementLabel"
+        :aria-label="props.incrementLabel"
         class="grid h-7 w-6 place-items-center rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
         @click="adjust(1)"
       >

@@ -7,7 +7,7 @@ export interface SortableGroupContextValue {
   overIndex: number | null;
   begin: (index: number) => void;
   hover: (index: number) => void;
-  end: () => void;
+  end: (commit?: boolean) => void;
   move: (from: number, to: number) => void;
 }
 

@@ -6,6 +6,7 @@ export interface WizardFormStepsProps {}
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
@@ -50,10 +51,18 @@ const passthroughAttrs = computed(() =>
 const stripClass = computed(() => cn('flex items-center gap-2 overflow-x-auto', attrs.class as ClassValue));
 
 defineExpose({ el });
+
+const locale = useLocale();
 </script>
 
 <template>
-  <div ref="el" role="tablist" aria-label="WizardForm steps" :class="stripClass" v-bind="passthroughAttrs">
+  <div
+    ref="el"
+    role="tablist"
+    :aria-label="locale.t('WizardFormSteps.wizardformSteps', undefined, 'WizardForm steps')"
+    :class="stripClass"
+    v-bind="passthroughAttrs"
+  >
     <button
       v-for="(step, i) in ctx.steps"
       :key="step.id"
@@ -68,7 +77,9 @@ defineExpose({ el });
         {{ i + 1 }}
       </span>
       {{ step.label ?? step.id }}
-      <span v-if="step.isOptional" class="ml-1 text-[10px] opacity-70">(optional)</span>
+      <span v-if="step.isOptional" class="ml-1 text-[10px] opacity-70"
+        >{{ locale.t('WizardFormSteps.optional', undefined, '(optional)') }}
+      </span>
     </button>
   </div>
 </template>

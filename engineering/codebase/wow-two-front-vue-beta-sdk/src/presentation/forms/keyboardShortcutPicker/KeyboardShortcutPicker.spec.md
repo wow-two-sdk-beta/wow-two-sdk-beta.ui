@@ -16,26 +16,26 @@ Public import: `import { KeyboardShortcutPicker } from '@wow-two-beta/ui-vue/pre
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `ReadonlyArray<string>` | no | `undefined` | The captured chord, controlled. The `v-model` binding target. |
-| `defaultValue` | `ReadonlyArray<string>` | no | — | The initial chord when uncontrolled. |
-| `placeholder` | `string \| number` | no | `'Click to record'` | The idle label. Fill the `placeholder` slot for richer content. |
-| `recordLabel` | `string \| number` | no | `'Press keys…'` | The listening label. Fill the `recordLabel` slot for richer content. |
-| `name` | `string` | no | — | The hidden input name; the hidden input emits the `+`-joined chord. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| Prop           | Type                    | Required | Default             | Meaning                                                                        |
+| -------------- | ----------------------- | -------- | ------------------- | ------------------------------------------------------------------------------ |
+| `modelValue`   | `ReadonlyArray<string>` | no       | `undefined`         | The captured chord, controlled. The `v-model` binding target.                  |
+| `defaultValue` | `ReadonlyArray<string>` | no       | —                   | The initial chord when uncontrolled.                                           |
+| `placeholder`  | `string \| number`      | no       | `'Click to record'` | The idle label. Fill the `placeholder` slot for richer content.                |
+| `recordLabel`  | `string \| number`      | no       | `'Press keys…'`     | The listening label. Fill the `recordLabel` slot for richer content.           |
+| `name`         | `string`                | no       | —                   | The hidden input name; the hidden input emits the `+`-joined chord.            |
+| `id`           | `string`                | no       | —                   | The control's id. Auto-filled from `FormControl` context when omitted.         |
+| `disabled`     | `boolean`               | no       | `undefined`         | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                             | Meaning                                                               |
+| ------------------- | ----------------------------------------------------- | --------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [keys: ReadonlyArray<string>];` | Fires when the reader records or clears a chord — the `v-model` half. |
 
 ## Slots
 
-| Slot | Signature | Meaning |
-|---|---|---|
+| Slot          | Signature                  | Meaning                     |
+| ------------- | -------------------------- | --------------------------- |
 | `placeholder` | `placeholder?(): unknown;` | See the declared signature. |
 | `recordLabel` | `recordLabel?(): unknown;` | See the declared signature. |
 
@@ -47,3 +47,11 @@ Public import: `import { KeyboardShortcutPicker } from '@wow-two-beta/ui-vue/pre
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Field disabled/read-only state is checked at mutation boundaries, including synthetic events. Read-only prevents edits without discarding the current value. Where a named hidden mirror is provided, it forwards `form`, omits disabled values and retains read-only values. Localizable default labels follow LocaleProvider while explicit caller text takes precedence.
+
+## Editing guarantees
+
+Becoming disabled/read-only cancels an active recording session and releases its document listener. Composition events are ignored. The listener belongs to the control owner document.

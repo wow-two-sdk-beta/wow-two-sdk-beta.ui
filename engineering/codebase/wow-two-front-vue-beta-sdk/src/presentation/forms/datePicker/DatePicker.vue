@@ -46,10 +46,13 @@ export interface DatePickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevents selection changes while preserving form submission. */
+  readonly readonly?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useLocale, useLocaleDefaults } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -69,14 +72,15 @@ import CalendarPicker from '../calendarPicker/CalendarPicker.vue';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'DatePicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<DatePickerProps>(), {
-  placeholder: 'Pick a date',
-  format: (d: Temporal.PlainDate) => d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
+const inputProps = withDefaults(defineProps<DatePickerProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
   disabled: undefined,
+  readonly: undefined,
 });
+const locale = useLocale();
+const props = useLocaleDefaults(inputProps, 'DatePicker', { placeholder: 'Pick a date' });
 
 const emit = defineEmits<{
   /** Fires when the reader picks a day in the popover. The `v-model` half. */
@@ -90,6 +94,7 @@ const attrs = useAttrs();
 const field = useFormControl();
 
 const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
+const finalReadOnly = computed(() => props.readonly ?? field?.isReadOnly ?? false);
 const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid);
 
 const controlled = useControlled<Temporal.PlainDate | null>({
@@ -107,6 +112,7 @@ const date = controlled.value;
 const open = ref(false);
 
 function onCalendarChange(next: Temporal.PlainDate | null): void {
+  if (finalDisabled.value || finalReadOnly.value) return;
   controlled.setValue(next);
   open.value = false;
 }
@@ -115,7 +121,9 @@ const triggerState = computed(
   () => props.state ?? (finalInvalid.value ? InputStateValue.Invalid : InputStateValue.Default),
 );
 
-const displayText = computed(() => (date.value ? props.format(date.value) : props.placeholder));
+const formatDate = (date: Temporal.PlainDate): string =>
+  props.format?.(date) ?? date.toLocaleString(locale.locale.value, { year: 'numeric', month: 'short', day: 'numeric' });
+const displayText = computed(() => (date.value ? formatDate(date.value) : props.placeholder));
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel`. */
 const ariaLabel = computed(() => attrs[AriaAttribute.Label] as string | undefined);
@@ -156,7 +164,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <PopoverTrigger
       ref="trigger"
       :id="triggerId"
-      :disabled="finalDisabled"
+      :disabled="finalDisabled || finalReadOnly"
       :aria-invalid="ariaInvalid"
       :aria-label="ariaLabel"
       :aria-labelledby="labelledBy"
@@ -176,10 +184,18 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         :min="min"
         :max="max"
         :is-disabled="isDisabled"
+        :disabled="finalDisabled || finalReadOnly"
         @update:modelValue="onCalendarChange"
       />
     </PopoverContent>
-    <input v-if="name" type="hidden" :name="name" :value="hiddenValue" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="finalDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="hiddenValue"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

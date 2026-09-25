@@ -41,6 +41,7 @@ const ScrollbarClass =
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { computed, ref, useTemplateRef, watch, type CSSProperties } from 'vue';
 import { Key } from '../../../foundation/dom';
 import { EmojiEmptyLabels, EmojiPickerSizes } from './EmojiPicker.variants';
@@ -135,6 +136,8 @@ const viewportStyle = computed<CSSProperties>(() => ({
      through a CSS var. */
   '--emoji-scroll-thumb': thumbColor.value,
 }));
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -148,7 +151,13 @@ const viewportStyle = computed<CSSProperties>(() => ({
     item in the picker's `StackLayout`.
   -->
   <div v-else-if="viewportRows !== undefined" :class="ScrollbarClass" :style="viewportStyle">
-    <div ref="grid" role="listbox" aria-label="Emoji" :style="gridStyle" @keydown="moveFocus">
+    <div
+      ref="grid"
+      role="listbox"
+      :aria-label="locale.t('EmojiGrid.emoji', undefined, 'Emoji')"
+      :style="gridStyle"
+      @keydown="moveFocus"
+    >
       <EmojiTile
         v-for="(entry, index) in emojis"
         :key="entry.glyph"
@@ -162,7 +171,14 @@ const viewportStyle = computed<CSSProperties>(() => ({
     </div>
   </div>
 
-  <div v-else ref="grid" role="listbox" aria-label="Emoji" :style="gridStyle" @keydown="moveFocus">
+  <div
+    v-else
+    ref="grid"
+    role="listbox"
+    :aria-label="locale.t('EmojiGrid.emoji', undefined, 'Emoji')"
+    :style="gridStyle"
+    @keydown="moveFocus"
+  >
     <EmojiTile
       v-for="(entry, index) in emojis"
       :key="entry.glyph"

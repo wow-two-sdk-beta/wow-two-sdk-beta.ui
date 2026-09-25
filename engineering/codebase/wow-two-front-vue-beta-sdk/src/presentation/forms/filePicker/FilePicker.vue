@@ -16,6 +16,8 @@ export interface FilePickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevent edits while retaining the value. Falls back to the surrounding Field. */
+  readonly readonly?: boolean;
 }
 
 /* Sizes not listed fall back to the `md` row at the call site. */
@@ -27,6 +29,7 @@ const SizeClass: Partial<Record<Size, string>> = {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Upload } from 'lucide-vue-next';
@@ -39,13 +42,14 @@ import { useFormControl } from '../../../foundation/primitives';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'FilePicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<FilePickerProps>(), {
-  label: 'Choose file',
+const inputProps = withDefaults(defineProps<FilePickerProps>(), {
   size: SizeValue.Md,
   /* Explicit `undefined` default: the flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow it. */
   disabled: undefined,
+  readonly: undefined,
 });
+const props = useLocaleDefaults(inputProps, 'FilePicker', { label: 'Choose file' });
 
 const emit = defineEmits<{
   /** Fires when the reader picks files in the system dialog, carrying the chosen `FileList`. */
@@ -66,6 +70,8 @@ const slots = useSlots();
 const ctx = useFormControl();
 
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly);
+const inactive = computed(() => isDisabled.value || isReadOnly.value);
 const inputId = computed(() => props.id ?? ctx?.id);
 const describedBy = computed(() => ctx?.describedBy);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
@@ -78,11 +84,16 @@ const hasPreview = computed(() => Boolean(props.preview) || Boolean(slots.previe
 const input = useTemplateRef<HTMLInputElement>('input');
 
 function openPicker(): void {
+  if (inactive.value) return;
   input.value?.click();
 }
 
 function onChange(event: Event): void {
   const target = event.target as HTMLInputElement;
+  if (inactive.value) {
+    target.value = '';
+    return;
+  }
   emit('files-change', target.files);
   // Reset so re-picking the same file fires change again.
   target.value = '';
@@ -110,21 +121,15 @@ defineExpose({ el: input });
 
 <template>
   <div :class="wrapperClass">
-    <button
-      type="button"
-      :disabled="isDisabled"
-      :aria-describedby="describedBy"
-      :class="buttonClass"
-      @click="openPicker"
-    >
+    <button type="button" :disabled="inactive" :aria-describedby="describedBy" :class="buttonClass" @click="openPicker">
       <Icon :icon="UploadIcon" :size="16" />
-      <slot name="label">{{ label }}</slot>
+      <slot name="label">{{ props.label }}</slot>
     </button>
     <input
       ref="input"
       type="file"
       :id="inputId"
-      :disabled="isDisabled"
+      :disabled="inactive"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
       :aria-required="isRequired"

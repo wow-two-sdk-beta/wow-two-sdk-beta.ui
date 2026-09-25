@@ -15,23 +15,23 @@ Public import: `import { CheckboxInput } from '@wow-two-beta/ui-vue/presentation
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `size` | `SizeUnion<CheckboxInputSizePreset>` | no | `'md'` | The size — preset (`xs\|sm\|md\|lg\|xl`) → box + icon scale · number/string → square inline · object → explicit dims. |
-| `variant` | `CheckboxInputVariant` | no | `CheckboxInputVariantValue.Solid` | The visual surface style. |
-| `tone` | `ColorTone` | no | `ColorToneValue.Primary` | The semantic tone palette. |
-| `isIndeterminate` | `boolean` | no | `undefined` | The tristate visual state — input stays unchecked but renders as a dash with the same checked-state styling. |
-| `color` | `ColorProp` | no | — | The color override (string seed or slot object) — replaces the active `tone`'s theme tokens locally. |
-| `modelValue` | `boolean` | no | `undefined` | The checked state, controlled. The `v-model` binding target. |
-| `defaultValue` | `boolean` | no | `undefined` | The initial checked state when uncontrolled. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
+| Prop              | Type                                 | Required | Default                           | Meaning                                                                                                               |
+| ----------------- | ------------------------------------ | -------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `size`            | `SizeUnion<CheckboxInputSizePreset>` | no       | `'md'`                            | The size — preset (`xs\|sm\|md\|lg\|xl`) → box + icon scale · number/string → square inline · object → explicit dims. |
+| `variant`         | `CheckboxInputVariant`               | no       | `CheckboxInputVariantValue.Solid` | The visual surface style.                                                                                             |
+| `tone`            | `ColorTone`                          | no       | `ColorToneValue.Primary`          | The semantic tone palette.                                                                                            |
+| `isIndeterminate` | `boolean`                            | no       | `undefined`                       | The tristate visual state — input stays unchecked but renders as a dash with the same checked-state styling.          |
+| `color`           | `ColorProp`                          | no       | —                                 | The color override (string seed or slot object) — replaces the active `tone`'s theme tokens locally.                  |
+| `modelValue`      | `boolean`                            | no       | `undefined`                       | The checked state, controlled. The `v-model` binding target.                                                          |
+| `defaultValue`    | `boolean`                            | no       | `undefined`                       | The initial checked state when uncontrolled.                                                                          |
+| `id`              | `string`                             | no       | —                                 | The control's id. Auto-filled from `FormControl` context when omitted.                                                |
+| `disabled`        | `boolean`                            | no       | `undefined`                       | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                        |
+| `required`        | `boolean`                            | no       | `undefined`                       | The required state. Falls back to the surrounding form control's `isRequired`.                                        |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                  | Meaning                                                            |
+| ------------------- | ------------------------------------------ | ------------------------------------------------------------------ |
 | `update:modelValue` | `'update:modelValue': [checked: boolean];` | Fires when the user ticks or unticks the box — the `v-model` half. |
 
 ## Slots
@@ -47,3 +47,7 @@ None declared.
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Focused test references: [Forms.contract.dom.test.ts](../../../../tests/unit/presentation/forms/Forms.contract.dom.test.ts). Consult the named test assertions for the behavior actually covered.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Field disabled/read-only state is checked at mutation boundaries, including synthetic events. Read-only prevents edits without discarding the current value. Where a named hidden mirror is provided, it forwards `form`, omits disabled values and retains read-only values. Localizable default labels follow LocaleProvider while explicit caller text takes precedence.

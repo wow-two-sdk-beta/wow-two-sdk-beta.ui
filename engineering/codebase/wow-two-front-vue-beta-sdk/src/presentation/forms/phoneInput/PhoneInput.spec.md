@@ -16,21 +16,21 @@ Public import: `import { PhoneInput } from '@wow-two-beta/ui-vue/presentation/fo
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `string` | no | `undefined` | The E.164 value, controlled. The `v-model` binding target. |
-| `defaultValue` | `string` | no | — | The initial E.164 value when uncontrolled. |
-| `defaultCountry` | `string` | no | `'US'` | The ISO code selected before the value carries a recognisable dial prefix. Default `US`. |
-| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `isReadOnly` | `boolean` | no | `undefined` | The read-only state. Falls back to the surrounding form control's `isReadOnly`. |
-| `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
-| `placeholder` | `string` | no | `'(555) 555-5555'` | The national-number placeholder. |
-| `name` | `string` | no | — | The hidden input name; the hidden input emits the full E.164 value. |
+| Prop             | Type      | Required | Default            | Meaning                                                                                  |
+| ---------------- | --------- | -------- | ------------------ | ---------------------------------------------------------------------------------------- |
+| `modelValue`     | `string`  | no       | `undefined`        | The E.164 value, controlled. The `v-model` binding target.                               |
+| `defaultValue`   | `string`  | no       | —                  | The initial E.164 value when uncontrolled.                                               |
+| `defaultCountry` | `string`  | no       | `'US'`             | The ISO code selected before the value carries a recognisable dial prefix. Default `US`. |
+| `isDisabled`     | `boolean` | no       | `undefined`        | The disabled state. Falls back to the surrounding form control's `isDisabled`.           |
+| `isReadOnly`     | `boolean` | no       | `undefined`        | The read-only state. Falls back to the surrounding form control's `isReadOnly`.          |
+| `isInvalid`      | `boolean` | no       | `undefined`        | The invalid surface override. Falls back to the surrounding form control's `isInvalid`.  |
+| `placeholder`    | `string`  | no       | `'(555) 555-5555'` | The national-number placeholder.                                                         |
+| `name`           | `string`  | no       | —                  | The hidden input name; the hidden input emits the full E.164 value.                      |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                              | Meaning                                                                          |
+| ------------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [e164: string];` | Fires when the reader edits the number or switches country — the `v-model` half. |
 
 ## Slots
@@ -45,3 +45,5 @@ No explicit exposed handle.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+Native input attributes and event listeners (including `name`, `form`, `autocomplete`, `onBlur`, `onInput` and keyboard/composition/clipboard events) are represented in the public props type. They remain fallthrough attrs at runtime. Canonical model value, visual size, fixed native type and declared Temporal bounds retain component ownership. Autocomplete accepts its native extensible token string.

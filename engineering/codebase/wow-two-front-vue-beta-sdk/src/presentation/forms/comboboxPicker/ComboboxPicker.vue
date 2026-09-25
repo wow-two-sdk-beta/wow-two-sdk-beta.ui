@@ -14,6 +14,8 @@ export interface ComboboxPickerProps {
 
   /** The disabled state. Default `false`. */
   readonly isDisabled?: boolean;
+  /** Prevents editing while preserving the submitted value. */
+  readonly isReadOnly?: boolean;
 
   /** The invalid surface flag handed to `ComboboxPickerInput`. */
   readonly isInvalid?: boolean;
@@ -36,6 +38,7 @@ export interface ComboboxPickerProps {
 import { useTemplateRef } from 'vue';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, provide, ref, shallowRef } from 'vue';
+import { useFormControl } from '../../../foundation/primitives';
 import { useControlled } from '../../../foundation/state';
 import { useId } from '../../../foundation/identifiers';
 import {
@@ -51,7 +54,8 @@ defineOptions({ name: 'ComboboxPicker', inheritAttrs: false });
 defineSlots<{ default(): unknown }>();
 
 const props = withDefaults(defineProps<ComboboxPickerProps>(), {
-  isDisabled: false,
+  isDisabled: undefined,
+  isReadOnly: undefined,
   defaultOpen: false,
   fillInputOnSelect: true,
   /* Explicit `undefined` defaults are load-bearing: `useControlled` keys on `=== undefined`,
@@ -71,6 +75,11 @@ const emit = defineEmits<{
   /** Fires when the reader opens or dismisses the option panel — the `v-model:open` half. */
   'update:open': [open: boolean];
 }>();
+
+const field = useFormControl();
+const finalDisabled = computed(() => props.isDisabled ?? field?.isDisabled ?? false);
+const finalReadOnly = computed(() => props.isReadOnly ?? field?.isReadOnly ?? false);
+const inactive = computed(() => finalDisabled.value || finalReadOnly.value);
 
 const openCtl = useControlled<boolean>({
   controlled: () => props.open,
@@ -133,6 +142,7 @@ function unregisterItem(id: string): void {
 }
 
 function selectItem(entry: ComboboxPickerItemEntry, options?: { close?: boolean }): void {
+  if (inactive.value || entry.isDisabled) return;
   valueCtl.setValue(entry.value);
   if (props.fillInputOnSelect) {
     const text = typeof entry.label === 'string' ? entry.label : entry.value;
@@ -145,15 +155,21 @@ provide<ComboboxPickerContextValue>(comboboxContextKey, {
   get open() {
     return openCtl.value.value;
   },
-  setOpen: openCtl.setValue,
+  setOpen: (next) => {
+    if (!next || !inactive.value) openCtl.setValue(next);
+  },
   get value() {
     return valueCtl.value.value;
   },
-  setValue: valueCtl.setValue,
+  setValue: (next) => {
+    if (!inactive.value) valueCtl.setValue(next);
+  },
   get inputValue() {
     return inputCtl.value.value;
   },
-  setInputValue: inputCtl.setValue,
+  setInputValue: (next) => {
+    if (!inactive.value) inputCtl.setValue(next);
+  },
   get activeId() {
     return activeId.value;
   },
@@ -171,10 +187,10 @@ provide<ComboboxPickerContextValue>(comboboxContextKey, {
     return listboxId;
   },
   get isDisabled() {
-    return props.isDisabled;
+    return inactive.value;
   },
   get isInvalid() {
-    return props.isInvalid;
+    return props.isInvalid ?? field?.isInvalid;
   },
   selectItem,
 });
@@ -191,7 +207,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
 
 <template>
   <slot :key="formResetRevision" />
-  <input v-if="name" type="hidden" :name="name" :value="selected" />
+  <input
+    v-if="name"
+    type="hidden"
+    :disabled="finalDisabled"
+    :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+    :name="name"
+    :value="selected"
+  />
   <input
     ref="formResetAnchor"
     type="hidden"

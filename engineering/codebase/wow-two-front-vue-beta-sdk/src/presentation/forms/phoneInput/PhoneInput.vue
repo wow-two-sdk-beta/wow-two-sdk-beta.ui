@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 /** Represents one selectable dialling country. */
 export interface PhoneCountry {
   iso: string;
@@ -61,7 +62,7 @@ export const PhoneCountries: ReadonlyArray<PhoneCountry> = [
   { iso: 'MX', name: 'Mexico', dial: '+52', flag: '🇲🇽' },
 ];
 
-export interface PhoneInputProps {
+export interface PhoneInputProps extends /* @vue-ignore */ NativeInputAttributes {
   /** The E.164 value, controlled. The `v-model` binding target. */
   readonly modelValue?: string;
 
@@ -101,6 +102,7 @@ function splitE164(value: string, defaultIso: string): { iso: string; national: 
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useTemplateRef } from 'vue';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs } from 'vue';
@@ -210,12 +212,14 @@ const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   controlled.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
   <div :key="formResetRevision" :class="rootClass" v-bind="passthroughAttrs">
     <select
-      aria-label="Country"
+      :aria-label="locale.t('PhoneInput.country', undefined, 'Country')"
       :value="iso"
       :disabled="disabled || readOnly"
       :class="selectClass"
@@ -239,7 +243,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       :class="inputClass"
       @input="setNational"
     />
-    <input v-if="name" type="hidden" :name="name" :value="e164" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="disabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="e164"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

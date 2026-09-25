@@ -16,18 +16,18 @@ Public import: `import { GradientPicker } from '@wow-two-beta/ui-vue/presentatio
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `Gradient` | no | `undefined` | The gradient, controlled. The `v-model` binding target. |
-| `defaultValue` | `Gradient` | no | `undefined` | The initial gradient when uncontrolled. |
-| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `name` | `string` | no | — | The hidden input name; the hidden input emits the CSS string. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| Prop           | Type       | Required | Default     | Meaning                                                                        |
+| -------------- | ---------- | -------- | ----------- | ------------------------------------------------------------------------------ |
+| `modelValue`   | `Gradient` | no       | `undefined` | The gradient, controlled. The `v-model` binding target.                        |
+| `defaultValue` | `Gradient` | no       | `undefined` | The initial gradient when uncontrolled.                                        |
+| `isDisabled`   | `boolean`  | no       | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `name`         | `string`   | no       | —           | The hidden input name; the hidden input emits the CSS string.                  |
+| `id`           | `string`   | no       | —           | The control's id. Auto-filled from `FormControl` context when omitted.         |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                 | Meaning                                                                       |
+| ------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [value: Gradient];` | Fires when the reader edits the kind, angle or any stop — the `v-model` half. |
 
 ## Slots
@@ -42,3 +42,7 @@ None declared.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Field disabled/read-only state is checked at mutation boundaries, including synthetic events. Read-only prevents edits without discarding the current value. Where a named hidden mirror is provided, it forwards `form`, omits disabled values and retains read-only values. Localizable default labels follow LocaleProvider while explicit caller text takes precedence.

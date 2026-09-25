@@ -45,6 +45,7 @@ export interface CodeEditorProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, nextTick, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -59,11 +60,11 @@ import { useFormControl } from '../../../foundation/primitives';
    of the attrs land on the inner `<textarea>` rather than the surface. */
 defineOptions({ name: 'CodeEditor', inheritAttrs: false });
 
-const props = withDefaults(defineProps<CodeEditorProps>(), {
+const inputProps = withDefaults(defineProps<CodeEditorProps>(), {
   tabSize: 2,
   isTabIndented: false,
   canIndentOnTab: true,
-  keyboardExitLabel: 'Press Escape, then Tab to leave the editor.',
+
   minHeight: '12rem',
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
@@ -73,6 +74,9 @@ const props = withDefaults(defineProps<CodeEditorProps>(), {
   readOnly: undefined,
   readonly: undefined,
   required: undefined,
+});
+const props = useLocaleDefaults(inputProps, 'CodeEditor', {
+  keyboardExitLabel: 'Press Escape, then Tab to leave the editor.',
 });
 
 const emit = defineEmits<{
@@ -144,6 +148,7 @@ function onKeydown(event: KeyboardEvent): void {
     event.stopPropagation();
     return;
   }
+  if (['Alt', 'Shift', 'Control', 'Meta'].includes(event.key)) return;
   if (event.key !== 'Tab') {
     keyboardExitArmed.value = false;
     return;

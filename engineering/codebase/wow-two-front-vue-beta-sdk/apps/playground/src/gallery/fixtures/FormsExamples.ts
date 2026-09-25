@@ -71,6 +71,7 @@ import {
   MultiSelectPickerTags,
   MultiSelectPickerTrigger,
   NumberInput,
+  ExactNumberInput,
   PasswordInput,
   PercentInput,
   PhoneInput,
@@ -102,6 +103,8 @@ import {
   WizardFormStep,
   WizardFormSteps,
 } from '../../../../../src/presentation/forms';
+import { ExactNumber } from '../../../../../src/foundation/numbers';
+const exactNumberExample = ExactNumber.parse('9223372036854775807.125');
 import { h, type VNode } from 'vue';
 import { memoryStorageBroker } from '../../../../../src/foundation/storage';
 import { smokeCase, type SmokeCase } from './Example';
@@ -172,6 +175,9 @@ export const formsExamples: readonly SmokeCase[] = [
   smokeCase('UrlInput', UrlInput, {}),
 
   smokeCase('NumberInput', NumberInput, {}),
+  smokeCase('ExactNumberInput', ExactNumberInput, {
+    defaultValue: exactNumberExample.ok ? exactNumberExample.value : null,
+  }),
 
   smokeCase('PasswordInput', PasswordInput, {}),
 

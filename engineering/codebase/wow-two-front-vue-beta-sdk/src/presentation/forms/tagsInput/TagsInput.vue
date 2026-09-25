@@ -67,6 +67,7 @@ export interface TagsInputProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -82,8 +83,7 @@ import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'TagsInput', inheritAttrs: false });
 
-const props = withDefaults(defineProps<TagsInputProps>(), {
-  placeholder: 'Add tag…',
+const inputProps = withDefaults(defineProps<TagsInputProps>(), {
   delimiters: () => [','],
   validate: (t: string) => t.trim().length > 0,
   allowsDuplicates: false,
@@ -95,6 +95,7 @@ const props = withDefaults(defineProps<TagsInputProps>(), {
   readOnly: undefined,
   readonly: undefined,
 });
+const props = useLocaleDefaults(inputProps, 'TagsInput', { placeholder: 'Add tag…' });
 
 const emit = defineEmits<{
   /** Fires when the reader commits or removes a tag — the `v-model` half. */
@@ -287,7 +288,14 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       @keydown="onKeydown"
       @blur="onBlur"
     />
-    <input v-if="name" type="hidden" :name="name" :value="hiddenValue" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="isDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="hiddenValue"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

@@ -47,10 +47,13 @@ export interface DateRangePickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevents selection changes while preserving form submission. */
+  readonly readonly?: boolean;
 }
 </script>
 
 <script setup lang="ts">
+import { useLocale, useLocaleDefaults } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -70,14 +73,15 @@ import RangeCalendarPicker from '../rangeCalendarPicker/RangeCalendarPicker.vue'
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'DateRangePicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<DateRangePickerProps>(), {
-  placeholder: 'Pick a range',
-  format: (d: Temporal.PlainDate) => d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
+const inputProps = withDefaults(defineProps<DateRangePickerProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
   disabled: undefined,
+  readonly: undefined,
 });
+const locale = useLocale();
+const props = useLocaleDefaults(inputProps, 'DateRangePicker', { placeholder: 'Pick a range' });
 
 const emit = defineEmits<{
   /** Fires when a click in the popover completes or clears the range. The `v-model` half. */
@@ -91,6 +95,7 @@ const attrs = useAttrs();
 const field = useFormControl();
 
 const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
+const finalReadOnly = computed(() => props.readonly ?? field?.isReadOnly ?? false);
 const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid);
 
 const controlled = useControlled<DateRange | null>({
@@ -119,6 +124,7 @@ watch([range, open], ([nextRange, isOpen]) => {
 });
 
 function onCalendarChange(next: DateRange | null): void {
+  if (finalDisabled.value || finalReadOnly.value) return;
   controlled.setValue(next);
 }
 
@@ -129,11 +135,11 @@ const triggerState = computed(
 const display = computed(() => {
   const current = range.value;
   if (!current?.start) return null;
-  return current.end
-    ? `${props.format(current.start)} → ${props.format(current.end)}`
-    : `${props.format(current.start)} → …`;
+  return current.end ? `${formatDate(current.start)} → ${formatDate(current.end)}` : `${formatDate(current.start)} → …`;
 });
 
+const formatDate = (date: Temporal.PlainDate): string =>
+  props.format?.(date) ?? date.toLocaleString(locale.locale.value, { year: 'numeric', month: 'short', day: 'numeric' });
 const displayText = computed(() => display.value ?? props.placeholder);
 
 /* Never a declared prop — a declared `'aria-label'` would arrive as `props.ariaLabel`. */
@@ -176,7 +182,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <PopoverTrigger
       ref="trigger"
       :id="triggerId"
-      :disabled="finalDisabled"
+      :disabled="finalDisabled || finalReadOnly"
       :aria-invalid="ariaInvalid"
       :aria-label="ariaLabel"
       :aria-labelledby="labelledBy"
@@ -196,12 +202,25 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         :min="min"
         :max="max"
         :is-disabled="isDisabled"
+        :disabled="finalDisabled || finalReadOnly"
         @update:modelValue="onCalendarChange"
       />
     </PopoverContent>
     <template v-if="name">
-      <input type="hidden" :name="`${name}_start`" :value="hiddenStart" />
-      <input type="hidden" :name="`${name}_end`" :value="hiddenEnd" />
+      <input
+        type="hidden"
+        :disabled="finalDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="`${name}_start`"
+        :value="hiddenStart"
+      />
+      <input
+        type="hidden"
+        :disabled="finalDisabled"
+        :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+        :name="`${name}_end`"
+        :value="hiddenEnd"
+      />
     </template>
     <input
       ref="formResetAnchor"

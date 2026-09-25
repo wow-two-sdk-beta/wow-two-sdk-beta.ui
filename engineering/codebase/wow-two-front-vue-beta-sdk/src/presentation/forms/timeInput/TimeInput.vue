@@ -1,8 +1,9 @@
 <script lang="ts">
+import type { NativeInputAttributes } from '../NativeControlAttributes';
 import type { Temporal } from 'temporal-polyfill';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface TimeInputProps {
+export interface TimeInputProps extends /* @vue-ignore */ NativeInputAttributes<'min' | 'max'> {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */
@@ -29,6 +30,9 @@ export interface TimeInputProps {
 
   /** The minute interval offered in the popover. Default 5. Ignored when `native`. */
   readonly minuteStep?: number;
+  /** Inclusive same-day time bounds. */
+  readonly min?: Temporal.PlainTime | null;
+  readonly max?: Temporal.PlainTime | null;
 
   /** The empty-state text. Ignored when `native` — that control renders its own mask. */
   readonly placeholder?: string;
@@ -39,6 +43,9 @@ export interface TimeInputProps {
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
 
+  /** Prevents typing and popup changes while preserving form submission. */
+  readonly readonly?: boolean;
+
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
   readonly required?: boolean;
 }
@@ -48,6 +55,7 @@ const TimeText = /^(\d{1,2})(?::?(\d{2}))?$/;
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -58,7 +66,7 @@ import { useControlled } from '../../../foundation/state';
 import { useFormControl } from '../../../foundation/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
 import { inputBaseVariants, InputState as InputStateValue } from '../InputStyles';
-import { formatISOTime } from '../DateExtensions';
+import { formatISOTime, isTimeInBounds, normalizeMinuteStep } from '../DateExtensions';
 import TimeColumns from '../TimeColumns.vue';
 
 /**
@@ -80,6 +88,7 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required". */
   disabled: undefined,
+  readonly: undefined,
   required: undefined,
 });
 
@@ -124,13 +133,14 @@ function parseTimeText(text: string): Temporal.PlainTime | null {
 
 /** Commits the draft; an unparseable draft reverts to the committed value (ColorInput parity). */
 function commit(): void {
+  if (isDisabled.value || isReadOnly.value) return;
   if (!draft.value.trim()) {
     controlled.setValue(null);
     draft.value = '';
     return;
   }
   const next = parseTimeText(draft.value);
-  if (next) {
+  if (next && isTimeInBounds(next, props.min, props.max)) {
     controlled.setValue(next);
     draft.value = formatISOTime(next);
   } else {
@@ -139,6 +149,7 @@ function commit(): void {
 }
 
 function onDraftInput(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
   draft.value = (event.target as HTMLInputElement).value;
 }
 
@@ -158,11 +169,18 @@ function onKeydown(event: KeyboardEvent): void {
 
 /** The `native` path keeps the original `HH:MM`-string round trip. */
 function onNativeInput(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
+  const input = event.target as HTMLInputElement;
+  if (!input.validity.valid) {
+    input.value = displayValue.value;
+    return;
+  }
   const raw = (event.target as HTMLInputElement).value;
   controlled.setValue(raw ? parseTimeText(raw) : null);
 }
 
 function onColumnsChange(next: Temporal.PlainTime): void {
+  if (isDisabled.value || isReadOnly.value || !isTimeInBounds(next, props.min, props.max)) return;
   controlled.setValue(next);
 }
 
@@ -172,6 +190,10 @@ const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateVal
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
+watch([isDisabled, isReadOnly], ([disabled, readOnly]) => {
+  if (disabled || readOnly) open.value = false;
+});
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
@@ -205,6 +227,8 @@ useNativeFormReset(root, controlled.reset, () => {
 });
 
 defineExpose({ el: root });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -214,9 +238,13 @@ defineExpose({ el: root });
       v-if="native"
       ref="root"
       type="time"
+      :min="formatISOTime(min)"
+      :max="formatISOTime(max)"
+      :step="normalizeMinuteStep(minuteStep) * 60"
       :id="inputId"
       :value="displayValue"
       :disabled="isDisabled"
+      :readonly="isReadOnly"
       :required="isRequired"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
@@ -236,6 +264,7 @@ defineExpose({ el: root });
         :value="draft"
         :placeholder="placeholder"
         :disabled="isDisabled"
+        :readonly="isReadOnly"
         :required="isRequired"
         :aria-invalid="isInvalid"
         :aria-describedby="describedBy"
@@ -246,14 +275,21 @@ defineExpose({ el: root });
         @keydown="onKeydown"
       />
       <PopoverTrigger
-        aria-label="Choose time"
-        :disabled="isDisabled"
+        :aria-label="locale.t('TimeInput.chooseTime', undefined, 'Choose time')"
+        :disabled="isDisabled || isReadOnly"
         class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <Clock class="h-4 w-4" />
       </PopoverTrigger>
       <PopoverContent is-bare>
-        <TimeColumns :model-value="committed" :minute-step="minuteStep" @update:modelValue="onColumnsChange" />
+        <TimeColumns
+          :disabled="isDisabled || isReadOnly"
+          :min="min"
+          :max="max"
+          :model-value="committed"
+          :minute-step="minuteStep"
+          @update:modelValue="onColumnsChange"
+        />
       </PopoverContent>
     </Popover>
   </div>

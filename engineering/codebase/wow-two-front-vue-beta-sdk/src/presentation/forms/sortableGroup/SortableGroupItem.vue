@@ -42,6 +42,9 @@ provide<SortableGroupItemContextValue>(SortableGroupItemKey, {
 });
 
 function onDragStart(event: DragEvent): void {
+  if (!armed.value || event.defaultPrevented || (event.target as Element).closest('[data-sortable-item]') !== el.value)
+    return;
+  event.stopPropagation();
   if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
   root.begin(props.index);
 }
@@ -51,12 +54,16 @@ function onDragOver(event: DragEvent): void {
 }
 
 function onDrop(event: DragEvent): void {
+  if (root.dragIndex === null) return;
   event.preventDefault();
-  root.end();
+  event.stopPropagation();
+  root.hover(props.index);
+  root.end(true);
   armed.value = false;
 }
 
-function onDragEnd(): void {
+function onDragEnd(event: DragEvent): void {
+  event.stopPropagation();
   root.end();
   armed.value = false;
 }
@@ -84,7 +91,7 @@ defineExpose({ el });
     v-bind="rest"
     :class="classes"
     @dragstart="onDragStart"
-    @dragenter="root.hover(props.index)"
+    @dragenter.stop="root.dragIndex !== null && root.hover(props.index)"
     @dragover="onDragOver"
     @drop="onDrop"
     @dragend="onDragEnd"

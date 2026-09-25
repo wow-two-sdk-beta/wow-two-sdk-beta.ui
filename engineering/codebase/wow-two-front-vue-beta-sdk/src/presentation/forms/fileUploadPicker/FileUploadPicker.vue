@@ -43,6 +43,8 @@ export interface FileUploadPickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevent edits while retaining the value. Falls back to the surrounding Field. */
+  readonly readonly?: boolean;
 
   /** The native input name. */
   readonly name?: string;
@@ -53,7 +55,8 @@ export interface FileUploadPickerProps {
 </script>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots, useTemplateRef } from 'vue';
+import { useLocaleDefaults } from '../../../foundation/i18n';
+import { computed, ref, watch, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { UploadCloud } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
@@ -71,14 +74,16 @@ import { useFormControl } from '../../../foundation/primitives';
    of the attrs land on the hidden native `<input>` rather than the wrapper. */
 defineOptions({ name: 'FileUploadPicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<FileUploadPickerProps>(), {
+const inputProps = withDefaults(defineProps<FileUploadPickerProps>(), {
   multiple: false,
-  label: 'Drop files here, or click to browse',
+
   /* Explicit `undefined` defaults: each flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
   disabled: undefined,
+  readonly: undefined,
 });
+const props = useLocaleDefaults(inputProps, 'FileUploadPicker', { label: 'Drop files here, or click to browse' });
 
 const emit = defineEmits<{
   /** Fires when the reader drops or picks files, carrying them split into accepted and rejected. */
@@ -104,6 +109,14 @@ const dragState = ref<DragState>('idle');
    (label click opens the picker). The dropzone mirrors describedby for keyboard users. */
 const ctx = useFormControl();
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly);
+const inactive = computed(() => isDisabled.value || isReadOnly.value);
+watch(inactive, (value) => {
+  if (value) {
+    dragCounter.value = 0;
+    dragState.value = 'idle';
+  }
+});
 const invalid = computed(() => props.isInvalid ?? ctx?.isInvalid);
 
 function partition(files: FileList | ReadonlyArray<File>): [ReadonlyArray<File>, ReadonlyArray<FileRejection>] {
@@ -129,11 +142,11 @@ function partition(files: FileList | ReadonlyArray<File>): [ReadonlyArray<File>,
 }
 
 function openPicker(): void {
-  if (!isDisabled.value) input.value?.click();
+  if (!inactive.value) input.value?.click();
 }
 
 function onDragEnter(event: DragEvent): void {
-  if (isDisabled.value) return;
+  if (inactive.value) return;
   event.preventDefault();
   dragCounter.value += 1;
   const items = event.dataTransfer?.items;
@@ -155,13 +168,13 @@ function onDragEnter(event: DragEvent): void {
 }
 
 function onDragOver(event: DragEvent): void {
-  if (isDisabled.value) return;
+  if (inactive.value) return;
   event.preventDefault();
   if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
 }
 
 function onDragLeave(event: DragEvent): void {
-  if (isDisabled.value) return;
+  if (inactive.value) return;
   event.preventDefault();
   dragCounter.value -= 1;
   if (dragCounter.value <= 0) {
@@ -171,7 +184,7 @@ function onDragLeave(event: DragEvent): void {
 }
 
 function onDrop(event: DragEvent): void {
-  if (isDisabled.value) return;
+  if (inactive.value) return;
   event.preventDefault();
   dragCounter.value = 0;
   dragState.value = 'idle';
@@ -183,7 +196,7 @@ function onDrop(event: DragEvent): void {
 
 function onKeydown(event: KeyboardEvent): void {
   if (event.isComposing) return;
-  if (isDisabled.value) return;
+  if (inactive.value) return;
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
     openPicker();
@@ -192,6 +205,10 @@ function onKeydown(event: KeyboardEvent): void {
 
 function onChange(event: Event): void {
   const target = event.target as HTMLInputElement;
+  if (inactive.value) {
+    target.value = '';
+    return;
+  }
   const files = target.files;
   if (!files || files.length === 0) return;
   const [accepted, rejected] = partition(files);
@@ -238,8 +255,8 @@ defineExpose({ el: input });
   <div :class="wrapperClass">
     <div
       role="button"
-      :tabindex="isDisabled ? -1 : 0"
-      :aria-disabled="isDisabled || undefined"
+      :tabindex="inactive ? -1 : 0"
+      :aria-disabled="inactive || undefined"
       :aria-describedby="ctx?.describedBy"
       :data-drag-state="dragState"
       :data-invalid="showError || undefined"
@@ -253,7 +270,7 @@ defineExpose({ el: input });
     >
       <Icon :icon="UploadIcon" :size="28" :class="iconClass" />
       <div class="font-medium text-foreground">
-        <slot name="label">{{ label }}</slot>
+        <slot name="label">{{ props.label }}</slot>
       </div>
       <div v-if="hasHint" class="text-xs">
         <slot name="hint">{{ hint }}</slot>
@@ -264,7 +281,7 @@ defineExpose({ el: input });
         :id="inputId"
         :accept="accept"
         :multiple="multiple"
-        :disabled="isDisabled"
+        :disabled="inactive"
         :aria-invalid="invalid || undefined"
         :aria-describedby="ctx?.describedBy"
         :aria-required="ctx?.isRequired || undefined"

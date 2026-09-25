@@ -90,7 +90,7 @@ const rootClass = computed(() => cn(optionTileVariants(), attrs.class as ClassVa
     :title="label"
     :class="rootClass"
     v-bind="passthroughAttrs"
-    @update:modelValue="emit('select')"
+    @update:modelValue="(next) => next && emit('select')"
   >
     <slot />
   </ToggleInput>

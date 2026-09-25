@@ -16,20 +16,20 @@ Public import: `import { ColorWheelInput } from '@wow-two-beta/ui-vue/presentati
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `modelValue` | `number` | no | — | The hue, controlled. The `v-model` binding target. |
-| `defaultValue` | `number` | no | — | The initial hue when uncontrolled. |
-| `size` | `number` | no | `200` | The outer diameter in pixels. Default 200. |
-| `thickness` | `number` | no | `30` | The ring thickness in pixels. Default 30. |
-| `step` | `number` | no | `1` | The arrow-key increment. |
-| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
+| Prop           | Type      | Required | Default     | Meaning                                                                        |
+| -------------- | --------- | -------- | ----------- | ------------------------------------------------------------------------------ |
+| `modelValue`   | `number`  | no       | —           | The hue, controlled. The `v-model` binding target.                             |
+| `defaultValue` | `number`  | no       | —           | The initial hue when uncontrolled.                                             |
+| `size`         | `number`  | no       | `200`       | The outer diameter in pixels. Default 200.                                     |
+| `thickness`    | `number`  | no       | `30`        | The ring thickness in pixels. Default 30.                                      |
+| `step`         | `number`  | no       | `1`         | The arrow-key increment.                                                       |
+| `isDisabled`   | `boolean` | no       | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `id`           | `string`  | no       | —           | The control's id. Auto-filled from `FormControl` context when omitted.         |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                             | Meaning                                                                           |
+| ------------------- | ------------------------------------- | --------------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [hue: number];` | Fires when a drag or arrow key lands the thumb on a new hue — the `v-model` half. |
 
 ## Slots
@@ -44,3 +44,7 @@ None declared.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Field disabled/read-only state is checked at mutation boundaries, including synthetic events. Read-only prevents edits without discarding the current value. Where a named hidden mirror is provided, it forwards `form`, omits disabled values and retains read-only values. Localizable default labels follow LocaleProvider while explicit caller text takes precedence.

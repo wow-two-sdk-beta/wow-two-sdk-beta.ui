@@ -43,6 +43,7 @@ const SizeClass: Partial<Record<Size, string>> = {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -74,6 +75,7 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+const locale = useLocale();
 
 /* Per-cell array state — a joined string compacts empties, remapping cell i to char 0. */
 function toCells(s: string): ReadonlyArray<string> {
@@ -114,6 +116,7 @@ function isAllowed(ch: string): boolean {
 }
 
 function update(next: ReadonlyArray<string>): void {
+  if (isDisabled.value || isReadOnly.value) return;
   controlled.setValue(next);
   if (next.every(Boolean)) emit('complete', next.join(''));
 }
@@ -141,6 +144,7 @@ function onCellKeydown(index: number, event: KeyboardEvent): void {
 }
 
 function onPaste(event: ClipboardEvent): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
   const pasted = event.clipboardData?.getData('text').replace(/\s+/g, '') ?? '';
   const filtered = pasted.split('').filter(isAllowed).join('');
   if (filtered) {
@@ -157,8 +161,9 @@ const inputMode = computed(() => (props.type === PinInputType.Numeric ? 'numeric
 /* Cells are internal — consumers can't label them individually, so each carries a built-in
    name (the aria-label wins over a `Field` label's htmlFor, keeping per-digit announcements). */
 function cellLabel(index: number): string {
-  const noun = props.type === PinInputType.Numeric ? 'Digit' : 'Character';
-  return `${noun} ${index + 1} of ${props.length}`;
+  return props.type === PinInputType.Numeric
+    ? locale.t('PinInput.digit', { index: index + 1, length: props.length }, 'Digit {index} of {length}')
+    : locale.t('PinInput.character', { index: index + 1, length: props.length }, 'Character {index} of {length}');
 }
 
 const firstCellId = computed(() => ctx?.id);

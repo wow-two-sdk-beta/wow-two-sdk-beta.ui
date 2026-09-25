@@ -15,28 +15,28 @@ Public import: `import { DateTimeInput } from '@wow-two-beta/ui-vue/presentation
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `size` | `InputSize` | no | — | The control size. |
-| `state` | `InputState` | no | — | The validity surface. |
-| `border` | `InputBorder` | no | — | The border weight. |
-| `ring` | `InputRing` | no | — | The focus-ring weight. |
-| `modelValue` | `Temporal.PlainDateTime \| null` | no | — | The value, controlled. The `v-model` binding target. `null` is the cleared state. |
-| `defaultValue` | `Temporal.PlainDateTime \| null` | no | — | The initial value when uncontrolled. |
-| `min` | `Temporal.PlainDateTime \| null` | no | — | The earliest selectable wall-clock instant. |
-| `max` | `Temporal.PlainDateTime \| null` | no | — | The latest selectable wall-clock instant. |
-| `native` | `boolean` | no | `false` | Renders a bare `<input type="datetime-local">` and drops the popover. Opt-in only. The browser owns that control's picker panel — it cannot be themed, so it lands a system-chrome popup in the middle of a design-system form. Reach for it when the platform picker is the point (a mobile-first form wanting the OS wheels, for instance). |
-| `minuteStep` | `number` | no | `5` | The minute interval offered in the popover. Default 5. Ignored when `native`. |
-| `placeholder` | `string` | no | `'YYYY-MM-DD HH:MM'` | The empty-state text. Ignored when `native` — that control renders its own mask. |
-| `name` | `string` | no | — | The hidden input name; when set, a hidden input ships the ISO value with form submission. |
-| `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
+| Prop           | Type                             | Required | Default              | Meaning                                                                                                                                                                                                                                                                                                                                       |
+| -------------- | -------------------------------- | -------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `size`         | `InputSize`                      | no       | —                    | The control size.                                                                                                                                                                                                                                                                                                                             |
+| `state`        | `InputState`                     | no       | —                    | The validity surface.                                                                                                                                                                                                                                                                                                                         |
+| `border`       | `InputBorder`                    | no       | —                    | The border weight.                                                                                                                                                                                                                                                                                                                            |
+| `ring`         | `InputRing`                      | no       | —                    | The focus-ring weight.                                                                                                                                                                                                                                                                                                                        |
+| `modelValue`   | `Temporal.PlainDateTime \| null` | no       | —                    | The value, controlled. The `v-model` binding target. `null` is the cleared state.                                                                                                                                                                                                                                                             |
+| `defaultValue` | `Temporal.PlainDateTime \| null` | no       | —                    | The initial value when uncontrolled.                                                                                                                                                                                                                                                                                                          |
+| `min`          | `Temporal.PlainDateTime \| null` | no       | —                    | The earliest selectable wall-clock instant.                                                                                                                                                                                                                                                                                                   |
+| `max`          | `Temporal.PlainDateTime \| null` | no       | —                    | The latest selectable wall-clock instant.                                                                                                                                                                                                                                                                                                     |
+| `native`       | `boolean`                        | no       | `false`              | Renders a bare `<input type="datetime-local">` and drops the popover. Opt-in only. The browser owns that control's picker panel — it cannot be themed, so it lands a system-chrome popup in the middle of a design-system form. Reach for it when the platform picker is the point (a mobile-first form wanting the OS wheels, for instance). |
+| `minuteStep`   | `number`                         | no       | `5`                  | The minute interval offered in the popover. Default 5; also sets the native step in seconds.                                                                                                                                                                                                                                                  |
+| `placeholder`  | `string`                         | no       | `'YYYY-MM-DD HH:MM'` | The empty-state text. Ignored when `native` — that control renders its own mask.                                                                                                                                                                                                                                                              |
+| `name`         | `string`                         | no       | —                    | The hidden input name; when set, a hidden input ships the ISO value with form submission.                                                                                                                                                                                                                                                     |
+| `id`           | `string`                         | no       | —                    | The control's id. Auto-filled from `FormControl` context when omitted.                                                                                                                                                                                                                                                                        |
+| `disabled`     | `boolean`                        | no       | `undefined`          | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                                                                                                                                                                                                                                                |
+| `required`     | `boolean`                        | no       | `undefined`          | The required state. Falls back to the surrounding form control's `isRequired`.                                                                                                                                                                                                                                                                |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                                       | Meaning                                                                    |
+| ------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [value: Temporal.PlainDateTime \| null];` | Fires when the reader types or picks a date and time — the `v-model` half. |
 
 ## Slots
@@ -52,3 +52,13 @@ None declared.
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Focused test references: [DateTimeControls.dom.test.ts](../../../../tests/unit/presentation/forms/DateTimeControls.dom.test.ts). Consult the named test assertions for the behavior actually covered.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+`readonly` inherits Field context and blocks typing, native changes and picker actions. Disabled native mirrors are omitted from submission; read-only values remain included. `form` reaches the named mirror. Calendar/display labels follow LocaleProvider unless explicitly overridden; canonical typed and wire formats remain stable.
+
+## Editing guarantees
+
+Minute steps must be integer values from 1 through 60; invalid steps use the default five-minute interval. Native time steps use the same interval in seconds. Boundary and current minutes remain selectable even when off-step. Time selection enforces `min`/`max`; date-time selection clamps a newly picked boundary day to its valid time window. Invalid typed values revert without an update.
+
+Native input attributes and event listeners (including `name`, `form`, `autocomplete`, `onBlur`, `onInput` and keyboard/composition/clipboard events) are represented in the public props type. They remain fallthrough attrs at runtime. Canonical model value, visual size, fixed native type and declared Temporal bounds retain component ownership. Autocomplete accepts its native extensible token string.

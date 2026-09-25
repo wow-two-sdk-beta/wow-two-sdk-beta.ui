@@ -22,6 +22,8 @@ export interface SliderInputProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly disabled?: boolean;
+  /** Prevents editing while preserving native form submission. */
+  readonly readonly?: boolean;
 
   /** The required state. Falls back to the surrounding form control's `isRequired`. */
   readonly required?: boolean;
@@ -56,6 +58,7 @@ const props = withDefaults(defineProps<SliderInputProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   disabled: undefined,
+  readonly: undefined,
   required: undefined,
 });
 
@@ -80,12 +83,17 @@ const controlled = useControlled<string | number>({
 const currentValue = controlled.value;
 
 function onInput(event: Event): void {
+  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) {
+    (event.target as HTMLInputElement).value = String(currentValue.value);
+    return;
+  }
   if ((event as InputEvent).isComposing) return;
   controlled.setValue((event.target as HTMLInputElement).value);
 }
 
 const inputId = computed(() => props.id ?? ctx?.id);
 const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
 const isRequired = computed(() => props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
@@ -135,6 +143,9 @@ defineExpose({ el: root });
     :class="rootClass"
     v-bind="passthroughAttrs"
     @input="onInput"
+    :aria-readonly="isReadOnly || undefined"
+    @pointerdown="isReadOnly && $event.preventDefault()"
+    @keydown="isReadOnly && $event.preventDefault()"
     @compositionend="onInput"
   />
 </template>

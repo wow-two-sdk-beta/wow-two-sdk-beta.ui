@@ -16,20 +16,20 @@ Public import: `import { ColorSwatchPicker } from '@wow-two-beta/ui-vue/presenta
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `colors` | `ReadonlyArray<string>` | yes | — | The palette rendered as swatches. |
-| `modelValue` | `string \| null` | no | — | The selected hex, controlled. The `v-model` binding target. |
-| `defaultValue` | `string \| null` | no | — | The initial selection when uncontrolled. |
-| `swatchSize` | `ColorSwatchPreviewSize` | no | `'md'` | The size step every swatch renders at. |
-| `swatchShape` | `SwatchShape` | no | `'square'` | The outline shape every swatch renders with. |
-| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `id` | `string` | no | — | The group's id. Auto-filled from `FormControl` context when omitted. |
+| Prop           | Type                     | Required | Default     | Meaning                                                                        |
+| -------------- | ------------------------ | -------- | ----------- | ------------------------------------------------------------------------------ |
+| `colors`       | `ReadonlyArray<string>`  | yes      | —           | The palette rendered as swatches.                                              |
+| `modelValue`   | `string \| null`         | no       | —           | The selected hex, controlled. The `v-model` binding target.                    |
+| `defaultValue` | `string \| null`         | no       | —           | The initial selection when uncontrolled.                                       |
+| `swatchSize`   | `ColorSwatchPreviewSize` | no       | `'md'`      | The size step every swatch renders at.                                         |
+| `swatchShape`  | `SwatchShape`            | no       | `'square'`  | The outline shape every swatch renders with.                                   |
+| `isDisabled`   | `boolean`                | no       | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `id`           | `string`                 | no       | —           | The group's id. Auto-filled from `FormControl` context when omitted.           |
 
 ## Emits
 
-| Event | Signature | Meaning |
-|---|---|---|
+| Event               | Signature                                       | Meaning                                                                     |
+| ------------------- | ----------------------------------------------- | --------------------------------------------------------------------------- |
 | `update:modelValue` | `'update:modelValue': [value: string \| null];` | Fires when the reader picks a swatch from the palette — the `v-model` half. |
 
 ## Slots
@@ -44,3 +44,7 @@ None declared.
 
 - Public render fixture: [FormsExamples.ts](../../../../apps/playground/src/gallery/fixtures/FormsExamples.ts). This covers render/SSR compatibility, not all interaction behavior.
 - Required follow-through for changes: verify the affected state, keyboard, focus, composition and cleanup paths; the existence of this specification is not a passing-test claim.
+
+## Editing guarantees
+
+Field disabled/read-only state is checked at mutation boundaries, including synthetic events. Read-only prevents edits without discarding the current value. Where a named hidden mirror is provided, it forwards `form`, omits disabled values and retains read-only values. Localizable default labels follow LocaleProvider while explicit caller text takes precedence.

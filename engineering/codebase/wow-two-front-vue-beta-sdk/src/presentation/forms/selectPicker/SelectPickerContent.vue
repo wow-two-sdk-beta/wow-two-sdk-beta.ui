@@ -49,6 +49,7 @@ const ForwardedNavKeys = new Set(['ArrowDown', 'ArrowUp', 'Home', 'End', 'PageDo
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useTemplateRef, watch, type ComponentPublicInstance } from 'vue';
 import { Loader2 } from 'lucide-vue-next';
 import { cn } from '../../../foundation/styles';
@@ -66,23 +67,24 @@ defineOptions({ name: 'SelectPickerContent', inheritAttrs: false });
 /** The item list — `SelectPickerItem`, `ListboxPickerGroup`, `ListboxPickerSeparator`. React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<SelectPickerContentProps>(), {
+const inputProps = withDefaults(defineProps<SelectPickerContentProps>(), {
   isSearchable: false,
+
+  matchWidth: false,
+});
+const props = useLocaleDefaults(inputProps, 'SelectPickerContent', {
   searchPlaceholder: 'Search…',
   noResultsLabel: 'No results',
-  matchWidth: false,
 });
 
 /* `ctx` is a live-getter object — read fields off it, never destructure. */
 const ctx = useSelectContext();
 
-const hasItems = computed(() => ctx.items.length > 0);
-
 const visibleCount = computed(() =>
   ctx.query ? ctx.items.filter((i) => i.text.toLowerCase().includes(ctx.query.toLowerCase())).length : ctx.items.length,
 );
 
-const showEmpty = computed(() => hasItems.value && visibleCount.value === 0);
+const showEmpty = computed(() => visibleCount.value === 0);
 
 const listbox = useTemplateRef<ComponentPublicInstance & { el?: HTMLElement | null }>('listbox');
 
@@ -140,7 +142,8 @@ const selectedForListbox = computed(() => ctx.selectedKey ?? undefined);
     :radius="radius"
     :padding="padding ?? 'none'"
     :elevation="elevation"
-    :class="contentClass"
+    v-bind="$attrs"
+    :class="[contentClass, $attrs.class]"
   >
     <div v-if="isSearchable" class="border-b border-border p-1">
       <SearchInput
@@ -152,7 +155,7 @@ const selectedForListbox = computed(() => ctx.selectedKey ?? undefined);
         :aria-activedescendant="ctx.activeDescendant ?? undefined"
         aria-autocomplete="list"
         :model-value="ctx.query"
-        :placeholder="searchPlaceholder"
+        :placeholder="props.searchPlaceholder"
         is-clearable
         class="rounded-sm"
         @update:model-value="ctx.setQuery($event)"
@@ -165,6 +168,7 @@ const selectedForListbox = computed(() => ctx.selectedKey ?? undefined);
       :id="ctx.listboxId"
       :model-value="selectedForListbox"
       :is-equal="ctx.keyEquals"
+      :is-disabled="ctx.isDisabled || ctx.isLoading"
       variant="flat"
       radius="none"
       :tabindex="isSearchable ? -1 : 0"
@@ -181,7 +185,7 @@ const selectedForListbox = computed(() => ctx.selectedKey ?? undefined);
         <span>{{ ctx.loadingLabel }}</span>
       </div>
       <slot />
-      <ListboxPickerEmpty v-if="!ctx.isLoading && showEmpty">{{ noResultsLabel }}</ListboxPickerEmpty>
+      <ListboxPickerEmpty v-if="!ctx.isLoading && showEmpty">{{ props.noResultsLabel }}</ListboxPickerEmpty>
     </ListboxPicker>
   </PopoverContent>
 </template>

@@ -50,6 +50,7 @@ export interface FontPickerProps {
 </script>
 
 <script setup lang="ts">
+import { useLocaleDefaults, useLocale } from '../../../foundation/i18n';
 import { useTemplateRef } from 'vue';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, ref, useAttrs } from 'vue';
@@ -66,14 +67,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../overlays';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'FontPicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<FontPickerProps>(), {
+const inputProps = withDefaults(defineProps<FontPickerProps>(), {
   fonts: () => BuiltInFonts,
-  placeholder: 'SelectPicker font…',
-  previewText: 'The quick brown fox',
+
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
   modelValue: undefined,
   isDisabled: undefined,
+});
+const props = useLocaleDefaults(inputProps, 'FontPicker', {
+  placeholder: 'SelectPicker font…',
+  previewText: 'The quick brown fox',
 });
 
 const emit = defineEmits<{
@@ -146,6 +150,8 @@ const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   controlled.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -179,11 +185,15 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
           type="search"
           autofocus
           :value="query"
-          placeholder="Search fonts…"
+          :placeholder="locale.t('FontPicker.searchFonts', undefined, 'Search fonts…')"
           class="mb-2 h-8 w-full rounded-md border border-input bg-background px-2 text-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           @input="onQueryInput"
         />
-        <div role="listbox" aria-label="Fonts" class="max-h-72 overflow-y-auto">
+        <div
+          role="listbox"
+          :aria-label="locale.t('FontPicker.fonts', undefined, 'Fonts')"
+          class="max-h-72 overflow-y-auto"
+        >
           <button
             v-for="f in filtered"
             :key="f.name"
@@ -199,12 +209,19 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
             </span>
           </button>
           <div v-if="filtered.length === 0" class="px-2 py-6 text-center text-xs text-muted-foreground">
-            No fonts match.
+            {{ locale.t('FontPicker.noFontsMatch', undefined, 'No fonts match.') }}
           </div>
         </div>
       </PopoverContent>
     </Popover>
-    <input v-if="name" type="hidden" :name="name" :value="family" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="finalDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="family"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

@@ -31,6 +31,8 @@ export interface GradientPickerProps {
 
   /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
   readonly isDisabled?: boolean;
+  /** Prevent gradient edits; inherits the surrounding Field. */
+  readonly isReadOnly?: boolean;
 
   /** The hidden input name; the hidden input emits the CSS string. */
   readonly name?: string;
@@ -58,6 +60,7 @@ export function gradientToCss(g: Gradient): string {
 </script>
 
 <script setup lang="ts">
+import { useLocale } from '../../../foundation/i18n';
 import { useNativeFormReset } from '../UseNativeFormReset';
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
@@ -87,6 +90,7 @@ const props = withDefaults(defineProps<GradientPickerProps>(), {
   modelValue: undefined,
   defaultValue: undefined,
   isDisabled: undefined,
+  isReadOnly: undefined,
 });
 
 const emit = defineEmits<{
@@ -99,6 +103,8 @@ const el = useTemplateRef<HTMLDivElement>('el');
 
 const ctx = useFormControl();
 const isDisabled = computed(() => props.isDisabled ?? ctx?.isDisabled);
+const isReadOnly = computed(() => props.isReadOnly ?? ctx?.isReadOnly);
+const inactive = computed(() => isDisabled.value || isReadOnly.value);
 
 const controlled = useControlled<Gradient>({
   controlled: () => props.modelValue,
@@ -117,10 +123,12 @@ const css = computed(() => gradientToCss(gradient.value));
 const kinds = Object.values(GradientKind);
 
 function update(patch: Partial<Gradient>): void {
+  if (inactive.value) return;
   controlled.setValue({ ...gradient.value, ...patch });
 }
 
 function updateStop(index: number, patch: Partial<GradientStop>): void {
+  if (inactive.value) return;
   controlled.setValue({
     ...gradient.value,
     stops: gradient.value.stops.map((s, i) => (i === index ? { ...s, ...patch } : s)),
@@ -128,6 +136,7 @@ function updateStop(index: number, patch: Partial<GradientStop>): void {
 }
 
 function addStop(): void {
+  if (inactive.value) return;
   const last = gradient.value.stops[gradient.value.stops.length - 1];
   const newPos = last ? Math.min(100, last.position + 25) : 50;
   controlled.setValue({
@@ -137,6 +146,7 @@ function addStop(): void {
 }
 
 function removeStop(index: number): void {
+  if (inactive.value) return;
   if (gradient.value.stops.length <= 2) return;
   controlled.setValue({
     ...gradient.value,
@@ -194,6 +204,8 @@ const formResetAnchor = useTemplateRef<HTMLInputElement>('formResetAnchor');
 const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   controlled.reset();
 });
+
+const locale = useLocale();
 </script>
 
 <template>
@@ -212,7 +224,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <div class="flex items-center gap-2 text-sm">
       <div
         role="radiogroup"
-        aria-label="Gradient kind"
+        :aria-label="locale.t('GradientPicker.gradientKind', undefined, 'Gradient kind')"
         class="flex items-center gap-0.5 rounded-md bg-muted/40 p-0.5 ring-1 ring-border"
       >
         <button
@@ -221,7 +233,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
           type="button"
           role="radio"
           :aria-checked="gradient.kind === k"
-          :disabled="isDisabled"
+          :disabled="inactive"
           :class="kindClass(k)"
           @click="update({ kind: k })"
         >
@@ -229,13 +241,13 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         </button>
       </div>
       <label v-if="gradient.kind !== 'radial'" class="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-        Angle
+        {{ locale.t('GradientPicker.angle', undefined, 'Angle') }}
         <input
           type="number"
           :min="0"
           :max="360"
           :value="gradient.angle"
-          :disabled="isDisabled"
+          :disabled="inactive"
           :class="angleInputClass"
           @input="onAngleInput"
         />
@@ -252,35 +264,35 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       <li v-for="(stop, i) in gradient.stops" :key="i" class="flex items-center gap-2">
         <input
           type="color"
-          aria-label="Stop color"
+          :aria-label="locale.t('GradientPicker.stopColor', undefined, 'Stop color')"
           :value="stop.color"
-          :disabled="isDisabled"
+          :disabled="inactive"
           class="h-7 w-10 cursor-pointer rounded-sm border border-input bg-background"
           @input="onStopColorInput(i, $event)"
         />
         <input
           type="text"
-          aria-label="Stop color hex"
+          :aria-label="locale.t('GradientPicker.stopColorHex', undefined, 'Stop color hex')"
           :value="stop.color"
-          :disabled="isDisabled"
+          :disabled="inactive"
           :class="hexInputClass"
           @input="onStopColorInput(i, $event)"
         />
         <input
           type="number"
-          aria-label="Stop position"
+          :aria-label="locale.t('GradientPicker.stopPosition', undefined, 'Stop position')"
           :min="0"
           :max="100"
           :value="stop.position"
-          :disabled="isDisabled"
+          :disabled="inactive"
           :class="positionInputClass"
           @input="onStopPositionInput(i, $event)"
         />
         <span class="text-xs text-muted-foreground">%</span>
         <button
           type="button"
-          aria-label="Remove stop"
-          :disabled="isDisabled || gradient.stops.length <= 2"
+          :aria-label="locale.t('GradientPicker.removeStop', undefined, 'Remove stop')"
+          :disabled="inactive || gradient.stops.length <= 2"
           class="inline-flex h-7 w-7 items-center justify-center rounded text-destructive hover:bg-destructive-soft disabled:pointer-events-none disabled:opacity-40"
           @click="removeStop(i)"
         >
@@ -291,18 +303,25 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
 
     <button
       type="button"
-      :disabled="isDisabled"
+      :disabled="inactive"
       class="inline-flex h-8 w-full items-center justify-center gap-1 rounded-md border border-dashed border-border text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
       @click="addStop"
     >
-      <Icon :icon="PlusIcon" :size="12" /> Add stop
+      <Icon :icon="PlusIcon" :size="12" /> {{ locale.t('GradientPicker.addStop', undefined, 'Add stop') }}
     </button>
 
     <!-- CSS output -->
     <code class="block break-all rounded-md bg-muted/40 px-2 py-1.5 text-[10px] text-muted-foreground">
       {{ css }}
     </code>
-    <input v-if="name" type="hidden" :name="name" :value="css" />
+    <input
+      v-if="name"
+      type="hidden"
+      :disabled="isDisabled"
+      :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
+      :name="name"
+      :value="css"
+    />
     <input
       ref="formResetAnchor"
       type="hidden"

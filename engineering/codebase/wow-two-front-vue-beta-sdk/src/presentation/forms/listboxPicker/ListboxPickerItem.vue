@@ -60,7 +60,7 @@ const isSelected = computed(() => ctx.values.some((v) => ctx.isEqual(v, props.va
 const isActive = computed(() => ctx.activeId === id);
 
 const state = computed<ListboxPickerItemState>(() => {
-  if (props.isDisabled) return ListboxPickerItemState.Disabled;
+  if (props.isDisabled || ctx.isDisabled) return ListboxPickerItemState.Disabled;
   if (isSelected.value) return ListboxPickerItemState.Selected;
   if (isActive.value) return ListboxPickerItemState.Active;
   return ListboxPickerItemState.Default;
@@ -74,7 +74,7 @@ function onClick(event: MouseEvent): void {
 }
 
 function onPointerEnter(): void {
-  if (!props.isDisabled) ctx.setActiveId(id);
+  if (!props.isDisabled && !ctx.isDisabled) ctx.setActiveId(id);
 }
 
 const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
@@ -96,7 +96,7 @@ defineExpose({ el: root });
     :id="id"
     role="option"
     :aria-selected="isSelected"
-    :aria-disabled="isDisabled || undefined"
+    :aria-disabled="isDisabled || ctx.isDisabled || undefined"
     :data-active="isActive ? '' : undefined"
     :data-selected="isSelected ? '' : undefined"
     :data-disabled="isDisabled ? '' : undefined"

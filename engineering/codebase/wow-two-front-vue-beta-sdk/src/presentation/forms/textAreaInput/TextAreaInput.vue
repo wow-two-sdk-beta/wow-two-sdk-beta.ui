@@ -1,7 +1,8 @@
 <script lang="ts">
+import type { NativeTextareaAttributes } from '../NativeControlAttributes';
 import type { InputSize, InputState, InputBorder, InputRing } from '../InputStyles';
 
-export interface TextAreaInputProps {
+export interface TextAreaInputProps extends /* @vue-ignore */ NativeTextareaAttributes {
   /** The control size. */
   readonly size?: InputSize;
   /** The validity surface. */
