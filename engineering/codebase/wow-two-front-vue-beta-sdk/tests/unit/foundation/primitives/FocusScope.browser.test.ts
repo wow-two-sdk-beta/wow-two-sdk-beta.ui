@@ -189,13 +189,20 @@ describe('FocusScope browser contract', () => {
 
   it('isolates and restores focus in the owning iframe document', async () => {
     const frame = document.createElement('iframe');
-    host().append(frame);
+    // Wait for the final document before focusing; a new iframe starts with a transient document.
+    await new Promise<void>((resolve) => {
+      frame.addEventListener('load', () => resolve(), { once: true });
+      frame.srcdoc = '<!doctype html><html><body></body></html>';
+      host().append(frame);
+    });
     const ownedDocument = frame.contentDocument;
     if (!ownedDocument) throw new Error('Missing iframe document');
     const opener = ownedDocument.createElement('button');
     opener.textContent = 'iframe opener';
     ownedDocument.body.append(opener);
+    frame.contentWindow?.focus();
     opener.focus();
+    expect(ownedDocument.activeElement).toBe(opener);
     const target = ownedDocument.createElement('div');
     ownedDocument.body.append(target);
     const wrapper = mount(
