@@ -1,0 +1,72 @@
+{
+  "date": "2026-09-25",
+  "baseline": "f4fe5c6477bc83a344e8c10cc4d6467dabf176b8 plus 31 staged readiness files",
+  "environment": {
+    "node": "20.10.0",
+    "tailwindVariants": "3.3.1",
+    "tailwindMerge": "3.6.0"
+  },
+  "method": "Vite production application build, esbuild minification, Vue external, other dependencies bundled, JS only. Lite alias is an unverified behavior experiment.",
+  "results": [
+    {
+      "mode": "current",
+      "name": "button",
+      "bytes": 89297,
+      "gzip": 27340
+    },
+    {
+      "mode": "current",
+      "name": "text",
+      "bytes": 73056,
+      "gzip": 22746
+    },
+    {
+      "mode": "current",
+      "name": "card",
+      "bytes": 78741,
+      "gzip": 23622
+    },
+    {
+      "mode": "current",
+      "name": "http",
+      "bytes": 7186,
+      "gzip": 2907
+    },
+    {
+      "mode": "current",
+      "name": "numbers",
+      "bytes": 26240,
+      "gzip": 10992
+    },
+    {
+      "mode": "lite-experiment",
+      "name": "button",
+      "bytes": 59690,
+      "gzip": 18272
+    },
+    {
+      "mode": "lite-experiment",
+      "name": "text",
+      "bytes": 43462,
+      "gzip": 13759
+    },
+    {
+      "mode": "lite-experiment",
+      "name": "card",
+      "bytes": 49141,
+      "gzip": 14662
+    },
+    {
+      "mode": "lite-experiment",
+      "name": "http",
+      "bytes": 7186,
+      "gzip": 2907
+    },
+    {
+      "mode": "lite-experiment",
+      "name": "numbers",
+      "bytes": 26240,
+      "gzip": 10992
+    }
+  ]
+}

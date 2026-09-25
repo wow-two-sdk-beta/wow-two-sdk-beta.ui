@@ -1,36 +1,39 @@
 # Vue port — track
 
-*Last updated: 2026-08-10*
+*Last updated: 2026-09-26*
 
 > Track doc for `@wow-two-beta/ui-vue` — the Vue 3 port of `@wow-two-beta/ui`, living beside it at
 > `engineering/codebase/wow-two-front-vue-beta-sdk`. **This file is the queue.**
 >
 > Why: the developer works faster in Vue, and the SDK's own measurements say the React ecosystem is no longer
 > the reason to stay. Analysis: [`ideas/frontend-sdk-vue-port-analysis.md`](../../../../../ideas/frontend-sdk-vue-port-analysis.md)
-> in `wow-two-ws`. Proof-of-value gate is a `smart-qr` frontend rebuilt on this package.
+> in `wow-two-ws`. The first product gate is ForeverPin rebuilt on this package.
 
 ---
 
-## Status — port complete, unpublished
+## Status
 
-Verified from a clean `dist` at `2ea9c55`:
+`@wow-two-beta/ui-vue@0.0.6` is published. GitHub Actions run `34998940096`, attempt 2, passed and created
+matching tag and release `ui-vue-v0.0.6` on 2026-09-19.
 
 | Gate | Result |
 |---|---|
-| `pnpm typecheck` | exit 0 — **404 SFCs compile** |
-| `pnpm lint` | exit 0 |
-| `pnpm test` | **1,260 assertions**, 50 files, 3.8s |
-| `pnpm build` | exit 0 from clean, byte-reproducible |
-| Export targets | **128 resolved, 0 unresolved** across 66 subpaths |
-| Declaration emit | 0 files with erased slot types |
-| `npm pack` | 1,507 files · 2.1 MB packed · 9.6 MB unpacked |
+| SFC compilation | 407 SFCs pass |
+| Node/DOM/SSR | 1,774 tests pass |
+| Chromium | 30 ordinary/forced-colors checks pass |
+| Themes | 183 shipped themes pass declared contrast pairs |
+| Packed consumer | Fresh install, runtime, types and styles pass |
+| Registry | `@wow-two-beta/ui-vue@0.0.6` verified |
 
-Surface: **41 foundation modules · 18 primitives · 17 composables · 237 components in 7 groups ·
-`domain` · `feedback` · `analytics` · `flags` · `auth` · `forms-engine` (+2 adapters) · `router` · `query`.**
-Nothing from the React package is unported.
+The published port and earlier conventions sweep are complete. The full Vue SDK implementation sweep
+is verified locally: 2,025 unit/DOM/SSR tests, 57 Chromium/WebKit browser checks, 408 SFCs, library and
+playground builds, seven-family gallery smoke and a clean packed npm consumer pass. Results and limits:
+[full-sweep-implementation.md](../architecture/analysis/vue-sdk-optimization/full-sweep-implementation.md).
+Firefox launch is blocked by the local macOS runtime; the expanded Linux CI matrix remains unverified.
+Source and release-check batches are committed locally; the candidate remains unpublished.
+The [component inventory](../architecture/analysis/forever-pin-vue-readiness.md) remains the API map.
 
-Not done: publish (the developer pushes; CI releases on `main`), and the `smart-qr` Vue rebuild that
-is the actual proof gate.
+Playground, sandbox and theme-app optimization follow the ForeverPin migration.
 
 ---
 
@@ -43,9 +46,9 @@ is the actual proof gate.
 | D3 | Vite library mode + `@vitejs/plugin-vue` + `vite-plugin-dts` | `tsup` cannot compile SFCs |
 | D4 | **Self-contained** — copies the agnostic layer, no shared `core` package | pilot speed; drift only bites in a both-live-forever world, which this port exists to avoid |
 | D5 | Subpath export map mirrors the React package 1:1 | a consumer swaps the specifier, nothing else |
-| D6 | Tests = **smoke layer only** (mount + a11y per component) | full parity costs more than the components; write real tests once smart-qr proves out |
+| D6 | Every public component needs a spec and playground fixture; risky behavior gets focused tests | smoke-only coverage proved insufficient during the conventions sweep |
 | D7 | `release-vue.yml` with a `paths:` filter, separate from `release.yml` | a React push must never publish the Vue package |
-| D8 | `forms-engine` ships in v0.1; `router` / `query` / `auth` / `flags` / `analytics` defer to v0.2 | smart-qr imports `forms-engine` + `forms-engine/tanstack`; it imports neither `router` nor `query` |
+| D8 | `forms-engine`, `router`, `query`, `auth`, `flags` and `analytics` ship together | the owner requested the full React capability surface in Vue |
 
 ---
 
@@ -154,13 +157,15 @@ with its own `computed` so a sibling field's edit leaves an unrelated control as
 
 `/* @vue-ignore */` on `VariantProps`-derived heritage keeps the SFC compiler off `typeof someVariants`
 entirely — a simpler alternative to rule 2's spelled-out union + `AssertExact`.
-| W3 | `forms-engine` + `house` + `tanstack`(vue-form) | 2,529 LOC | 🔄 |
-| W3b | `analytics` + `flags` + `auth` — headless top-level modules | ~1,835 LOC | 🔄 |
-| W4 | Smoke tests (D6) + publish `0.0.1` + pipeline verify | — | ⬜ |
-| W5 | `smart-qr` Vue frontend — the gate | 6,880 LOC | ⬜ |
+| W3 | `forms-engine` + `house` + `tanstack`(vue-form) | 2,529 LOC | ✅ |
+| W3b | `analytics` + `flags` + `auth` — headless top-level modules | ~1,835 LOC | ✅ |
+| W4 | Full verification + publish `0.0.6` + pipeline verify | — | ✅ `34998940096` |
+| W5 | Full Vue SDK review, corrections, optimization and missing reusable capabilities | — | 🔄 |
+| W6 | ForeverPin Vue migration and product validation | — | ⬜ |
+| W7 | Playground, sandbox and theme-app optimization | — | ⬜ |
 
 | W3c | `router` + `query` onto `vue-router` / `@tanstack/vue-query` | 46 files | ✅ `1026bd7` |
-| W4b | Root barrel + `MIGRATION.md` + README | — | 🔄 |
+| W4b | Root barrel + `MIGRATION.md` + README | — | ✅ |
 
 **D8 revised:** `router` and `query` were ported after all. The user's scope was "move everything we have
 with React", and deferring two modules to v0.2 served a v0.1 boundary he never asked for.
@@ -183,7 +188,7 @@ with React", and deferring two modules to v0.2 served a v0.1 boundary he never a
 - `Tour.isOpen` was pinned controlled-and-closed by rule 4 and could never open. Fixing it unmasked two
   of the SSR crashes above, which that bug had been suppressing.
 
-W2a is sequenced first inside W2 because it is `smart-qr`'s critical path.
+W2a was sequenced first inside W2 because it was ForeverPin's critical path.
 
 ---
 
@@ -197,14 +202,57 @@ Parallel agents edit one working tree on one branch. Disjoint file sets only —
 | agnostic-core | `src/domain/**` + its 19 `src/foundation/*` modules | `primitives`, `hooks`, `presentation`, root config |
 | primitives | `src/foundation/primitives/**` | everything else |
 
-Agents stage nothing and commit nothing — `guard-git.py` blocks `push`; the developer commits and pushes,
-CI publishes `0.0.y`.
+Agents stage scoped batches and commit with effective repository permission.
+The developer publishes; CI bumps `0.0.y`.
 
 ---
 
-## Open
+## Full SDK sweep queue
 
-- **API naming** — keep the React package's exact export names in Vue, or redesign props idiomatically at
-  the seam? D5 locks the *subpath* map; this is about component prop names. Unanswered.
-- `@tanstack/vue-form`'s API differs from `react-form`; whether `AppForm` survives as-is or the facade is
-  redesigned resolves once W3 starts.
+The complete inventory and evidence live in
+[`forever-pin-vue-readiness.md`](../architecture/analysis/forever-pin-vue-readiness.md).
+The 2026-09-25 [deeper audit](../architecture/analysis/vue-sdk-optimization/deeper-audit.md) supplies
+reproductions and acceptance criteria. Earlier capability delivery does not close these deeper behavior gaps.
+Manual component-by-component review is no longer the prerequisite; mechanical corrections can proceed.
+
+| It | Scope | Status |
+|---|---|---|
+| FP-1 | Response modes, retry classification, token cancellation and success metadata delivered (A09, A10, A20) | ✅ Implemented; combined local gates pass |
+| FP-2 | Exact decoding, diagnostic operands, cached Intl and exact currency/percent delivered (A08, A22, A24) | ✅ Implemented; combined local gates pass |
+| FP-3 | Session-owned unauthorized handling and Google Identity ownership (A01, A03) | ✅ Implemented; combined local gates pass |
+| FP-4 | Session query/bridge disposal and route DOM timing (A02, A18) | ✅ Implemented; combined local gates pass |
+| FP-5 | Union views, current-snapshot validation and shared row identities delivered (A04, A05) | ✅ Implemented; combined local gates pass |
+| FP-6 | Inactive actions, controlled alpha, datetime bounds/liveness, cancelled sorts, native forms, select lifecycle, time/color accessibility (A11–A17, A19) | ✅ Implemented; combined local gates pass |
+| FP-7 | Modal, alert-modal and popover APIs | ✅ Implemented; combined local gates pass |
+| FP-8 | Navbar/card fixes delivered; final style/interaction regression evidence joins combined verification | ✅ Implemented; combined local gates pass |
+| FP-9 | Display, marketing, table and glyph APIs | ✅ Implemented; combined local gates pass |
+| FP-12 | Validator own-property safety and independent mutable defaults (A06, A07) | ✅ Implemented; combined local gates pass |
+| FP-13 | Single class-merge owner and minimal-consumer bundle budgets (A21) | ✅ Implemented; combined local gates pass |
+| FP-14 | LocaleProvider adoption for component defaults, reactive locale and RTL verification (A23) | ✅ Implemented; combined local gates pass |
+| FP-15 | Packed Vue templates, cross-vector scenarios, browser matrix (A25) | ✅ Packed/cross-vector/Chromium/WebKit pass; Firefox Linux CI result pending |
+| FP-11 | Combined verification and human-published Vue candidate | ⬜ |
+| FP-10 | `smart-qr` visual validation during the subsequent ForeverPin migration | ⬜ |
+
+Implementation grouping: session ownership → forms/validators → Google Identity → HTTP → interaction safety
+→ navigation/accessibility → measured efficiency → locale/exact display → combined release verification.
+Independent groups may run in parallel; shared session contracts settle before dependent implementation.
+
+
+### Full-source coverage
+
+The owner expanded this pass from the ForeverPin subset to the entire Vue SDK.
+All public modules, presentation families, shared primitives, exports and release gates are in scope.
+React remains parked. Broad demo-app optimization follows the ForeverPin migration; API-compilation fixtures
+and new-capability examples are part of this SDK pass.
+
+| Lane | Scope | Current evidence |
+|---|---|---|
+| Pure foundations | Exact numbers, JSON, validators, i18n, config, collections, flags, utilities, domain and analytics | Implemented; detailed coverage and combined results in full-sweep report |
+| Runtime foundations | Auth, HTTP, query, router, OAuth, browser capabilities and resource lifetimes | Implemented; detailed coverage and combined results in full-sweep report |
+| Forms and interaction | All form controls, engines, native forms, date/time, menus and overlays | Implemented; detailed coverage and combined results in full-sweep report |
+| Presentation and delivery | Actions, display, feedback, layout, primitives, styles, package consumers and browser matrix | Implemented; detailed coverage and combined results in full-sweep report |
+
+New reusable surfaces include exact-number editing, request/session scopes, detailed HTTP responses,
+provider-owned Google identity and reactive component locale defaults. Their source specs define the contracts.
+A source inventory or smoke render does not establish every interaction; final coverage records name
+reviewed groups, focused behavior tests, combined gates and remaining limits separately.

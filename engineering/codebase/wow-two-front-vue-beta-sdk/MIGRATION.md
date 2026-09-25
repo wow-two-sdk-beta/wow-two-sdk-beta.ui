@@ -1,9 +1,66 @@
 # Vue convention-sweep migration
 
-*Last updated: 2026-09-10*
+*Last updated: 2026-09-25*
 
-This is the breaking migration for the current Vue sweep. The release version is not yet assigned.
+This records the published `0.0.6` migration and the unreleased full-sweep changes below.
 React is parked and has a different public API; importing the Vue package is not a symbol-for-symbol package swap.
+
+## Unreleased full SDK sweep
+
+This candidate is not published. Consumer changes are intentional: the Vue SDK is owned internally,
+and no production consumer requires compatibility shims. React is outside this pass.
+
+| Capability | Consumer change |
+|---|---|
+| Google Identity | Call `provideGoogleIdentity(options)` once in an ancestor; descendants call argument-free `useGoogleIdentity()` or render `GoogleSignInButton`. The button no longer owns credentials/client configuration. |
+| Auth + requests | Share an explicitly owned `RequestScope` through the auth bridge, API client and query adapters. Session invalidation cancels old work and rejects stale side effects. |
+| HTTP metadata | Use `client.detailed.get/post/...` for `{ value, status, headers }`; existing body-only methods retain their shape. |
+| Exact editing | `ExactNumberInput` models `ExactNumber | null`; draft text commits on Enter/blur, Escape restores, invalid drafts preserve the last committed model. |
+| Exact formatting | `formatExactNumber` supports currency/percent with exact arithmetic. Rounding is explicit; currency names are unsupported. |
+| Config JSON | Replace unchecked `json<T>()` with `json(decoder)` returning a typed Result; bare `json()` returns unknown and parses losslessly. |
+| Defaults | Mutable validator/config defaults use `defaultFactory`, never one shared mutable value. |
+| Object flags | `getObject/evaluateObject(key, fallback, decoder, context?)` require a Result decoder. Use `useObjectFlag` for object values; `useFlag` accepts scalars. |
+| Hashing/downloads | `stableStringify`, `hashObject` and `downloadJson` use strict lossless JSON. Encode custom instances explicitly; represent fractions/unsafe integers as ExactNumber. |
+| Tables | Column `compare(left,right)` supports domain ordering without coercion; the built-in path preserves ExactNumber/bigint ordering. |
+| Native forms | Composite controls carry name/disabled/external form ownership into hidden native fields; read-only controls suppress mutations. |
+| Field arrays | Shared canonical row keys preserve field/touched/error identity across multiple views and nested moves; stale validation cannot overwrite new edits. |
+
+`LosslessJson.stringify(value, { space, sortKeys })` adds optional pretty/canonical serialization.
+Hashing preserves numeric spelling, including scale and exponent; normalize ExactNumber first if a
+cache should treat alternate equal spellings identically. Native fractional values fail rather than
+silently inheriting a rounded number.
+
+### Locale and direction
+
+Component-authored defaults read the nearest `LocaleProvider`; explicit text props/slots win.
+Keys follow `ComponentName.messageName`, and omitted values retain English fallback text. Changing
+locale/messages updates mounted controls. Complete messages use named variables, allowing word reordering:
+
+```vue
+<LocaleProvider locale="fr-FR" :messages="{
+  'DataTable.emptyContent': 'Aucun résultat.',
+  'PdfViewer.pageNumber': 'Page {page}',
+}">
+  <App />
+</LocaleProvider>
+```
+
+Direction remains explicit through `DirectionProvider`; locale does not infer document direction.
+Use identical locale/direction inputs on server and initial client render. Source specs and the
+[message catalogue](../../architecture/analysis/vue-sdk-optimization/component-messages.md) list defaults.
+
+### Behavioral changes
+
+Inactive slotted actions stop native activation in capture phase. Focus restoration belongs to the
+shared scope, with an explicit context-menu return target. Code editor Escape releases the following
+Tab including modifier-key sequences. Calendars project into the displayed zone, use exclusive ends,
+show overlapping events separately and preserve multi-day continuation. DiffViewer uses linear working
+memory while retaining quadratic worst-case time; large rendered diffs still need paging.
+
+Browser capabilities now isolate observer exceptions and stale completions from resource cleanup.
+Retries validate delay math but continue supporting explicit infinite reconnect budgets. Upload attempts
+own their progress callbacks. Virtualized sizes follow stable item keys. Theme CSS applies dark tokens
+when `.dark` is the theme host or an ancestor.
 
 ## Entry points
 
@@ -60,7 +117,7 @@ original decimal text or bigint. Native arithmetic/JSON operators do not impleme
 
 Both form adapters preserve immutable ExactNumber values in snapshots and use numeric equality for dirty
 tracking. Existing number-valued controls and schemas are not automatically converted to exact-number
-controls. Use text-based editing and an explicit parser at that boundary.
+controls. Use `ExactNumberInput` for canonical decimal editing, or an explicit parser for custom editors.
 
 `ApiFailure.problem` and `ApiError.problem` are raw readonly records: validate their members before use.
 The HTTP transport's `failure.status` stays a native number; a numeric diagnostic body member retains the
@@ -114,6 +171,8 @@ Native validators use the shared Result. Third-party Standard Schema still uses 
 
 HTTP returns `Result<unknown, ApiFailure>` for raw JSON. Typed data requires an explicit decoder.
 Empty responses require `response: 'empty'`; callers cannot claim arbitrary successful data after a 204.
+Use `response: 'text'`, `response: 'blob'` or `response: 'arrayBuffer'` for non-JSON bodies.
+Set request `json` to a codec to override the client default, or to `null` to use native JSON for that request.
 The global temporal reviver and unchecked `parseJson<T>` are removed: field schemas own dates,
 durations, numeric precision, enum values and omission/null behavior.
 
@@ -150,6 +209,16 @@ write. `flush()` readies pending work and does not await durability; cancellatio
 
 `LocaleProvider` defaults to `en-US` on both server and client. Pass the same request locale to both;
 apply browser preferences explicitly after hydration.
+
+Use `formatExactNumber` or `createLocaleFormatters(locale).exactNumber` for exact decimal display.
+Use the strict `exactNumber()` validator after a lossless JSON boundary; it rejects native numbers,
+strings and bigints rather than guessing whether their original wire token was precise.
+
+`useFieldArray<TUnion>().variant(guard)` returns a guarded branch view. Check `matches(row.index)`
+before rendering its narrowed `Field`; the guard is re-evaluated against the current row value.
+
+`Navbar` accepts `containerAttrs` and `containerClass` for its inner `ContainerLayout`. `Card` accepts
+`ambient="sheen"`, `ambient="glow"` or `ambient="bevel"`; the package stylesheet owns those treatments.
 
 ## Renamed public types
 

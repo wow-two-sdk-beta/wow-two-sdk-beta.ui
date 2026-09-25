@@ -1,6 +1,6 @@
 # Planning — iterations & tasks
 
-*Last updated: 2026-07-11*
+*Last updated: 2026-09-26*
 
 > The single iteration/task registry for this repo — every vector's status lives HERE; the `../architecture/analysis/*.md` files are deep-analysis reference,
 > `../architecture/testing.md` keeps its own detailed iteration table (linked). One row per iteration: compact, current, no history prose (git has history).
@@ -17,7 +17,7 @@
 | Forms / fields / validation | [`analysis/forms-engine.md`](../architecture/analysis/forms-engine.md) | **COMPLETE** — engine + 2 adapters + 114-case conformance + all fields wired + 3 product proofs + [completeness map](../architecture/analysis/forms-completeness.md) (34 shipped · 0 ship-now) |
 | Lib adoption | [`analysis/lib-adoption.md`](../architecture/analysis/lib-adoption.md) | verdicts set; consumed per-wave |
 | Theming | `THEMES.md` | engine + 183 themes; smart-qr AA exception pinned |
-| **Vue port** | [`vue-port-track.md`](vue-port-track.md) (own wave table = the queue) | W0/W1a/W1b in flight — `@wow-two-beta/ui-vue` beside the React pkg; gate = smart-qr rebuilt on it |
+| **Vue SDK** | [`vue-port-track.md`](vue-port-track.md) (own wave table = the queue) | `0.0.6` published; full Vue sweep implemented and locally verified; publication and Firefox CI pending before ForeverPin migration |
 
 ---
 

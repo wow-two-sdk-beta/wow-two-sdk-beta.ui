@@ -1,6 +1,6 @@
 # UI SDK — conventions sweep
 
-*Last updated: 2026-09-13*
+*Last updated: 2026-09-19*
 
 > The running list of code that does not yet meet the frontend conventions, with counts measured against the tree.
 > Purpose — the conventions landed as 108 docs in one pass; the code has not caught up, and that gap needs one home.
@@ -18,8 +18,8 @@ rules as settled. The separate [SDK baseline](../../../../../system/sessions/fro
 remeasures selected rows and records release gaps; it is not a full source audit.
 
 The owner permits radical breaking changes and confirms no production consumers. Active scope, confirmed
-2026-09-10: Vue `@wow-two-beta/ui-vue`; React implementation/release is parked. Row 11 belongs to the smart-qr app;
-it does not silently authorize app edits in this SDK lane. Retain completed rows and their history.
+2026-09-10: Vue `@wow-two-beta/ui-vue`; React implementation/release is parked. Product migration work belongs
+to the ForeverPin repository and is not authorized by this SDK lane. Retain completed rows and their history.
 
 Rows 31–42 came from the convention analysis; row 43 records the final whole-layout audit's additional work.
 Row 44 records the owner-selected lossless JSON/exact-number prototype.
@@ -54,7 +54,7 @@ pass. React/app rows and broad exact-number adoption remain outside this sweep.
 | 8, 18, 27 | 379 adjacent specs; 349 public SFC demo fixtures; stale Vue contracts corrected |
 | 35 | 95 canonical model surfaces; 54 native-reset roots; IME/draft/reset regression coverage passes |
 | 17, 33, 41 | Qualified DOM root handles, provider/lifecycle/modal corrections and export/runtime matrix complete; browser checks pass |
-| 9, 11 | React and smart-qr work parked outside the Vue sweep |
+| 9, 11 | React and ForeverPin product work parked outside the Vue sweep |
 | 44 | ExactNumber/LosslessJson prototype, HTTP codec and form-value preservation pass unit/integration/package gates; broad client/control adoption remains outside the prototype |
 
 Resolution evidence is in workspace `system/sessions/frontend-conventions-sweep/`:
@@ -254,3 +254,7 @@ while every other gate passes.
 
 - [conventions](../../../../../conventions/development/frontend/frontend-conventions.md) — the rules this sweep enforces
 - [vue port track](vue-port-track.md) — the port that produced most of the debt
+
+The subsequent full Vue implementation pass is recorded in
+[full-sweep-implementation.md](../architecture/analysis/vue-sdk-optimization/full-sweep-implementation.md).
+It expands the original exact-value prototype into controls/config/flags and completes the deeper integration review.

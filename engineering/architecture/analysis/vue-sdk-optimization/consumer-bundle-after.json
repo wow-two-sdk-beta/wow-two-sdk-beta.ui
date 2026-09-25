@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "current",
+    "name": "button",
+    "bytes": 64290,
+    "gzip": 19920
+  },
+  {
+    "mode": "current",
+    "name": "text",
+    "bytes": 47110,
+    "gzip": 15089
+  },
+  {
+    "mode": "current",
+    "name": "card",
+    "bytes": 52791,
+    "gzip": 15975
+  },
+  {
+    "mode": "current",
+    "name": "http",
+    "bytes": 9269,
+    "gzip": 3589
+  },
+  {
+    "mode": "current",
+    "name": "numbers",
+    "bytes": 26240,
+    "gzip": 10992
+  }
+]
