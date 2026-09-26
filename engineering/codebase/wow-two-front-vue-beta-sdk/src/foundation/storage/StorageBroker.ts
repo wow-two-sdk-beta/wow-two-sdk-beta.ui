@@ -8,11 +8,11 @@ export interface StorageBroker {
   /** Reads and parses the value stored under `key`, or null when absent or unreadable. */
   read<T>(key: string): T | null;
 
-  /** Serializes `value` to JSON and writes it under `key`; a quota or serialization failure is swallowed. */
-  write<T>(key: string, value: T): void;
+  /** Serializes and writes `value`; reports false when storage or serialization is unavailable. */
+  write<T>(key: string, value: T): boolean;
 
-  /** Removes any value stored under `key`. */
-  remove(key: string): void;
+  /** Removes any value stored under `key`; reports false when storage is unavailable. */
+  remove(key: string): boolean;
 }
 
 /** Resolves the ambient `localStorage`, or null when unavailable — SSR, private mode, security exception. */
@@ -46,25 +46,29 @@ export const localStorageStorageBroker: StorageBroker = {
     }
   },
 
-  write<T>(key: string, value: T): void {
+  write<T>(key: string, value: T): boolean {
     const store = resolveLocalStorage();
-    if (store === null) return;
+    if (store === null) return false;
 
     try {
-      store.setItem(key, JSON.stringify(value));
+      const serialized = JSON.stringify(value);
+      if (serialized === undefined) return false;
+      store.setItem(key, serialized);
+      return true;
     } catch {
-      // Quota exceeded or value not serializable — drop the write silently.
+      return false;
     }
   },
 
-  remove(key: string): void {
+  remove(key: string): boolean {
     const store = resolveLocalStorage();
-    if (store === null) return;
+    if (store === null) return false;
 
     try {
       store.removeItem(key);
+      return true;
     } catch {
-      // Removal blocked — nothing to recover.
+      return false;
     }
   },
 };
@@ -85,16 +89,20 @@ export function memoryStorageBroker(): StorageBroker {
       }
     },
 
-    write<T>(key: string, value: T): void {
+    write<T>(key: string, value: T): boolean {
       try {
-        store.set(key, JSON.stringify(value));
+        const serialized = JSON.stringify(value);
+        if (serialized === undefined) return false;
+        store.set(key, serialized);
+        return true;
       } catch {
-        // Mirror the localStorage broker: an unserializable value is dropped, not thrown.
+        return false;
       }
     },
 
-    remove(key: string): void {
+    remove(key: string): boolean {
       store.delete(key);
+      return true;
     },
   };
 }

@@ -1,0 +1,27 @@
+.ui-backdrop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-overlay, 60);
+  background: rgb(0 0 0 / 50%);
+}
+
+.ui-backdrop-overlay-blurred {
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.ui-modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-modal, 70);
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.ui-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 512px;
+}

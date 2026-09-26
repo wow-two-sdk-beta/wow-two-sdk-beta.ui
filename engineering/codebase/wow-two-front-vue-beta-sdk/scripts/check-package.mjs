@@ -220,6 +220,37 @@ try {
     if (!css.includes(token)) throw new Error(`Packed consumer CSS omits SDK styling: ${token}`);
   }
   console.log('check-package: production consumer bundles packed JavaScript and generates SDK utility CSS.');
+
+  // A component-only consumer can scan PointControl without pulling the package-wide utility surface.
+  writeFileSync(
+    join(scratch, 'point-control.css'),
+    `@import 'tailwindcss' source(none);\n` +
+      `@import '${published.name}/presentation/forms/point-control/styles.css';\n` +
+      `@theme { --color-border: #ccc; --color-ring: #000; --color-primary: #000; }\n`,
+  );
+  writeFileSync(join(scratch, 'point-control.ts'), `import './point-control.css';\n`);
+  const pointBundles = await build({
+    root: scratch,
+    configFile: false,
+    logLevel: 'silent',
+    plugins: [tailwindcss()],
+    build: {
+      write: false,
+      minify: false,
+      cssMinify: false,
+      lib: { entry: join(scratch, 'point-control.ts'), formats: ['es'], cssFileName: 'point-control' },
+    },
+  });
+  const pointCss = (Array.isArray(pointBundles) ? pointBundles : [pointBundles])
+    .flatMap((bundle) => bundle.output)
+    .filter((item) => item.type === 'asset' && item.fileName.endsWith('.css'))
+    .map((item) => String(item.source))
+    .join('\n');
+  for (const token of ['.aspect-square', '.touch-none', '.bg-primary']) {
+    if (!pointCss.includes(token)) throw new Error(`PointControl CSS omits component styling: ${token}`);
+  }
+  if (pointCss.includes('.h-9')) throw new Error('PointControl CSS scanned unrelated SDK controls.');
+  console.log('check-package: PointControl public stylesheet scans only its compiled component chunk.');
   // JS-only production consumers; Vue is external, all other dependencies are included.
   // UI ceilings retain headroom while rejecting the previous duplicate class-merge engine.
   for (const [entry, symbol, maximumGzip] of [

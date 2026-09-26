@@ -120,6 +120,45 @@ describe('overlays — a11y', () => {
 
     wrapper.unmount();
   });
+
+  it('marks the modal layer and blurred backdrop for component-only styling', async () => {
+    const wrapper = mount({
+      render: () =>
+        h(Modal, { defaultOpen: true }, () =>
+          h(ModalContent, { isBlurred: true }, () => h('p', { [BODY_MARKER]: '' })),
+        ),
+    });
+    await nextTick();
+
+    expect(document.body.querySelector('.ui-modal-layer')).not.toBeNull();
+    expect(document.body.querySelector('.ui-modal-content')).not.toBeNull();
+    expect(document.body.querySelector('.ui-backdrop-overlay-blurred')).not.toBeNull();
+
+    wrapper.unmount();
+  });
+});
+
+describe('AlertModal actions', () => {
+  it('renders footer actions without close-glyph positioning', async () => {
+    const wrapper = mount({
+      render: () =>
+        h(AlertModal, { defaultOpen: true }, () =>
+          h(AlertModalContent, null, () => [
+            h(AlertModalCancel, null, () => 'Keep editing'),
+            h(AlertModalAction, null, () => 'Discard'),
+          ]),
+        ),
+    });
+    await nextTick();
+
+    for (const button of document.body.querySelectorAll('button')) {
+      expect(button.classList).not.toContain('absolute');
+      expect(button.classList).not.toContain('right-4');
+      expect(button.classList).not.toContain('top-4');
+    }
+
+    wrapper.unmount();
+  });
 });
 
 describe('overlays — focus scope nesting', () => {

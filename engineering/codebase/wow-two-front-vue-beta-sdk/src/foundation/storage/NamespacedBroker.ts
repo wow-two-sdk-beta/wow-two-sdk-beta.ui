@@ -21,12 +21,12 @@ export function namespacedBroker(inner: StorageBroker, namespace: string): Stora
       return inner.read<T>(scope(key));
     },
 
-    write<T>(key: string, value: T): void {
-      inner.write(scope(key), value);
+    write<T>(key: string, value: T): boolean {
+      return inner.write(scope(key), value);
     },
 
-    remove(key: string): void {
-      inner.remove(scope(key));
+    remove(key: string): boolean {
+      return inner.remove(scope(key));
     },
   };
 }

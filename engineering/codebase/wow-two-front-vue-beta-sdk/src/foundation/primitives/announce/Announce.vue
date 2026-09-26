@@ -38,6 +38,18 @@ defineSlots<{
 }>();
 
 const attrs = useAttrs();
+const visuallyHiddenStyle = {
+  position: 'absolute',
+  width: '1px',
+  height: '1px',
+  padding: '0',
+  margin: '-1px',
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  clipPath: 'inset(50%)',
+  whiteSpace: 'nowrap',
+  border: '0',
+} as const;
 
 const classes = computed(() =>
   cn(
@@ -48,7 +60,7 @@ const classes = computed(() =>
 );
 
 const rest = computed(() => {
-  const { class: _class, ...others } = attrs;
+  const { class: _class, style: _style, ...others } = attrs;
   return others;
 });
 </script>
@@ -60,6 +72,7 @@ const rest = computed(() => {
     :aria-live="props.politeness"
     aria-atomic="true"
     :class="classes"
+    :style="[attrs.style, visuallyHiddenStyle]"
   >
     <slot />
   </div>

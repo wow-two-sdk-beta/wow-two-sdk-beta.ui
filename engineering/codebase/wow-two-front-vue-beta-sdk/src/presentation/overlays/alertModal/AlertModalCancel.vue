@@ -45,5 +45,7 @@ defineExpose({ el });
 </script>
 
 <template>
-  <OverlayCloseButton ref="inner" v-bind="rest" :class="classes"><slot /></OverlayCloseButton>
+  <OverlayCloseButton ref="inner" as-child>
+    <button v-bind="rest" type="button" :class="classes"><slot /></button>
+  </OverlayCloseButton>
 </template>

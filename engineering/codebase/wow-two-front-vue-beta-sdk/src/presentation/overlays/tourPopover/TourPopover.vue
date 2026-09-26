@@ -21,6 +21,10 @@ export interface TourPopoverStep {
   readonly title?: string;
   readonly body?: string;
   readonly placement?: Placement;
+  /** Requires a real click inside the spotlighted target before Next is enabled. */
+  readonly completeOn?: 'target-click';
+  /** Short instruction shown while a required task is incomplete. */
+  readonly taskHint?: string;
 }
 
 export interface TourPopoverProps {
@@ -35,7 +39,7 @@ export interface TourPopoverProps {
 
 <script setup lang="ts">
 import { useLocale } from '../../../foundation/i18n';
-import { computed, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, ref, shallowRef, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { Key } from '../../../foundation/dom';
 import { useControlled } from '../../../foundation/state';
@@ -59,21 +63,12 @@ function rectFromTarget(target: TourPopoverStep['target']): Rect | null {
   return { top: r.top, left: r.left, width: r.width, height: r.height };
 }
 
-function placementCoords(rect: Rect, placement: NonNullable<TourPopoverStep['placement']>, gap = 12) {
-  switch (placement) {
-    case Placement.Top:
-      return { top: rect.top - gap, left: rect.left + rect.width / 2, transform: 'translate(-50%, -100%)' };
-    case Placement.Right:
-      return { top: rect.top + rect.height / 2, left: rect.left + rect.width + gap, transform: 'translate(0, -50%)' };
-    case Placement.Bottom:
-      return { top: rect.top + rect.height + gap, left: rect.left + rect.width / 2, transform: 'translate(-50%, 0)' };
-    case Placement.Left:
-      return { top: rect.top + rect.height / 2, left: rect.left - gap, transform: 'translate(-100%, -50%)' };
-  }
+function targetElement(target: TourPopoverStep['target']): HTMLElement | null {
+  return typeof target === 'string' ? document.querySelector<HTMLElement>(target) : target.value;
 }
 
 /**
- * Renders a multi-step tour — an SVG mask cut out around each step's target, plus a step tooltip.
+ * Renders a multi-step tour — a click-through spotlight around each step's target, plus a step tooltip.
  * The tooltip carries Next / Prev / Skip / Done.
  *
  * `TourPopoverStep.title` / `.body` are plain `string`: steps are data passed as a
@@ -110,6 +105,9 @@ const emit = defineEmits<{
 
   /** Fires when the reader abandons the tour — the Skip button, or Escape. */
   skip: [];
+
+  /** Fires after the current step's required interaction happens on its live target. */
+  'task-complete': [index: number];
 }>();
 
 const openCtl = useControlled<boolean>({
@@ -127,12 +125,35 @@ const resolvedOpen = computed(() => openCtl.value.value);
 const stepIndex = computed(() => stepCtl.value.value);
 
 const rect = shallowRef<Rect | null>(null);
+const tooltipPanel = shallowRef<HTMLElement | null>(null);
+const nextButton = shallowRef<HTMLButtonElement | null>(null);
+const tooltipSize = shallowRef({ width: 288, height: 180 });
+const restoreFocus = shallowRef<HTMLElement | null>(null);
+const completedTasks = ref<ReadonlySet<number>>(new Set());
 const titleId = useId('tour-title');
 const descId = useId('tour-desc');
-const maskId = useId('tour-mask');
 const reducedMotion = useReducedMotion();
 
 const step = computed(() => props.steps[stepIndex.value]);
+
+// Body copy and responsive width can change the tooltip after the target was measured.
+// Observe its final border box so viewport clamping always uses the rendered size.
+watch(
+  tooltipPanel,
+  (panel, _previous, onCleanup) => {
+    if (!panel || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (!entry) return;
+      const box = entry.borderBoxSize[0];
+      const width = box?.inlineSize ?? panel.offsetWidth;
+      const height = box?.blockSize ?? panel.offsetHeight;
+      if (width > 0 && height > 0) tooltipSize.value = { width, height };
+    });
+    observer.observe(panel);
+    onCleanup(() => observer.disconnect());
+  },
+  { flush: 'post' },
+);
 
 /* Keep the Portal (scrim + tooltip) mounted while the pop-out plays — the
    component hard-unmounts on `!open`, which would kill the exit. Opening
@@ -147,11 +168,29 @@ watch(
       mounted.value = true;
       return;
     }
-    if (!isReduced) return;
-    const raf = requestAnimationFrame(() => {
+    if (typeof window === 'undefined') {
       mounted.value = false;
-    });
-    onCleanup(() => cancelAnimationFrame(raf));
+      return;
+    }
+    const delay = isReduced ? 0 : 240;
+    const timer = window.setTimeout(() => {
+      mounted.value = false;
+    }, delay);
+    onCleanup(() => clearTimeout(timer));
+  },
+  { immediate: true, flush: 'post' },
+);
+
+// Preserve the caller's focus across the non-modal tour.
+watch(
+  resolvedOpen,
+  (isOpen, wasOpen) => {
+    if (typeof document === 'undefined') return;
+    if (isOpen && !wasOpen) {
+      restoreFocus.value = document.activeElement as HTMLElement | null;
+      completedTasks.value = new Set();
+    }
+    if (!isOpen && wasOpen) restoreFocus.value?.focus({ preventScroll: true });
   },
   { immediate: true, flush: 'post' },
 );
@@ -166,11 +205,37 @@ watch(
        bail, and let the same watcher measure on the client. */
     if (typeof requestAnimationFrame === 'undefined' || typeof window === 'undefined') return;
 
+    let handle = 0;
+    let attempts = 0;
     const update = () => {
-      rect.value = rectFromTarget(currentStepValue.target);
+      const nextRect = rectFromTarget(currentStepValue.target);
+      if (!nextRect && attempts++ < 12) {
+        handle = requestAnimationFrame(update);
+        return;
+      }
+      rect.value = nextRect;
+      const target = targetElement(currentStepValue.target);
+      target?.scrollIntoView({
+        block: 'nearest',
+        inline: 'nearest',
+        behavior: reducedMotion.value ? 'auto' : 'smooth',
+      });
+      void nextTick(() => {
+        const panelRect = tooltipPanel.value?.getBoundingClientRect();
+        if (panelRect && panelRect.width > 0 && panelRect.height > 0)
+          tooltipSize.value = { width: panelRect.width, height: panelRect.height };
+        if (
+          currentStepValue.completeOn === 'target-click' &&
+          target?.matches('button,a,input,select,textarea,[tabindex]')
+        ) {
+          target.focus({ preventScroll: true });
+        } else {
+          tooltipPanel.value?.focus({ preventScroll: true });
+        }
+      });
     };
     // Defer to next frame so the target can mount / scroll into view.
-    const handle = requestAnimationFrame(update);
+    handle = requestAnimationFrame(update);
 
     window.addEventListener('resize', update, { passive: true });
     window.addEventListener('scroll', update, { passive: true, capture: true });
@@ -179,6 +244,25 @@ watch(
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, true);
     });
+  },
+  { immediate: true, flush: 'post' },
+);
+
+// A task step observes the real highlighted control; the open cutout remains interactive.
+watch(
+  [resolvedOpen, step, stepIndex],
+  ([isOpen, currentStepValue, currentIndex], _previous, onCleanup) => {
+    if (!isOpen || currentStepValue?.completeOn !== 'target-click') return;
+    const onClick = (event: MouseEvent) => {
+      const target = targetElement(currentStepValue.target);
+      if (!target) return;
+      if (!target.contains(event.target as Node)) return;
+      completedTasks.value = new Set(completedTasks.value).add(currentIndex);
+      emit('task-complete', currentIndex);
+      void nextTick(() => nextButton.value?.focus({ preventScroll: true }));
+    };
+    document.addEventListener('click', onClick, true);
+    onCleanup(() => document.removeEventListener('click', onClick, true));
   },
   { immediate: true, flush: 'post' },
 );
@@ -194,6 +278,7 @@ watch(
       if (event.key === Key.Escape) {
         event.preventDefault();
         openCtl.setValue(false);
+        restoreFocus.value?.focus({ preventScroll: true });
         emit('skip');
       }
     };
@@ -204,8 +289,10 @@ watch(
 );
 
 const goNext = () => {
+  if (step.value?.completeOn && !completedTasks.value.has(stepIndex.value)) return;
   if (stepIndex.value >= props.steps.length - 1) {
     openCtl.setValue(false);
+    void nextTick(() => restoreFocus.value?.focus({ preventScroll: true }));
     emit('complete');
   } else {
     stepCtl.setValue(stepIndex.value + 1);
@@ -218,12 +305,40 @@ const goPrev = () => {
 
 const skip = () => {
   openCtl.setValue(false);
+  void nextTick(() => restoreFocus.value?.focus({ preventScroll: true }));
   emit('skip');
 };
 
 const placement = computed(() => step.value?.placement ?? Placement.Bottom);
 
-const tooltipCoords = computed(() => (rect.value ? placementCoords(rect.value, placement.value) : null));
+const tooltipCoords = computed(() => {
+  if (!rect.value || typeof window === 'undefined') return null;
+  const gap = 12;
+  const margin = 12;
+  const { width, height } = tooltipSize.value;
+  const centerX = rect.value.left + rect.value.width / 2;
+  const centerY = rect.value.top + rect.value.height / 2;
+  let left = centerX - width / 2;
+  let top = rect.value.top + rect.value.height + gap;
+  if (placement.value === Placement.Top) top = rect.value.top - height - gap;
+  if (placement.value === Placement.Left) {
+    left = rect.value.left - width - gap;
+    top = centerY - height / 2;
+  }
+  if (placement.value === Placement.Right) {
+    left = rect.value.left + rect.value.width + gap;
+    top = centerY - height / 2;
+  }
+  // Flip vertically before clamping when the requested side does not fit.
+  if (top + height > window.innerHeight - margin && rect.value.top - height - gap >= margin)
+    top = rect.value.top - height - gap;
+  if (top < margin && rect.value.top + rect.value.height + gap + height <= window.innerHeight - margin)
+    top = rect.value.top + rect.value.height + gap;
+  return {
+    top: Math.max(margin, Math.min(top, window.innerHeight - height - margin)),
+    left: Math.max(margin, Math.min(left, window.innerWidth - width - margin)),
+  };
+});
 
 /** Vue does not auto-suffix numeric style values with `px`. */
 const tooltipStyle = computed(() => {
@@ -233,7 +348,6 @@ const tooltipStyle = computed(() => {
     position: 'fixed' as const,
     top: `${coords.top}px`,
     left: `${coords.left}px`,
-    transform: coords.transform,
   };
 });
 
@@ -242,6 +356,22 @@ const announcement = computed(() =>
 );
 
 const bodyClasses = computed(() => cn('text-sm text-muted-foreground', step.value?.title && 'mt-1.5'));
+const taskComplete = computed(() => !step.value?.completeOn || completedTasks.value.has(stepIndex.value));
+
+const scrimStyles = computed(() => {
+  if (!rect.value) return [];
+  const pad = props.padding;
+  const top = Math.max(0, rect.value.top - pad);
+  const left = Math.max(0, rect.value.left - pad);
+  const right = Math.min(window.innerWidth, rect.value.left + rect.value.width + pad);
+  const bottom = Math.min(window.innerHeight, rect.value.top + rect.value.height + pad);
+  return [
+    { inset: `0 0 auto 0`, height: `${top}px` },
+    { inset: `${bottom}px 0 0 0` },
+    { top: `${top}px`, left: '0', width: `${left}px`, height: `${Math.max(0, bottom - top)}px` },
+    { top: `${top}px`, left: `${right}px`, right: '0', height: `${Math.max(0, bottom - top)}px` },
+  ];
+});
 
 /**
  * `Presence` clones `data-state` onto this node, so the pop (fade + slight
@@ -263,31 +393,29 @@ const onTooltipAnimationEnd = () => {
 
 <template>
   <Portal v-if="mounted && step">
-    <!-- SVG mask backdrop with cutout around target. Skipped while the
+    <!-- Four backdrop panels leave the highlighted target interactive. Skipped while the
          target is unresolvable so a bare scrim never blocks the page.
          Gated on `open` (not `mounted`) so the scrim clears immediately on
          close while the tooltip plays its pop-out before unmount. -->
-    <svg
-      v-if="resolvedOpen && rect"
-      aria-hidden="true"
-      class="pointer-events-auto fixed inset-0 z-modal h-full w-full"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <mask :id="maskId">
-          <rect width="100%" height="100%" fill="white" />
-          <rect
-            :x="rect.left - props.padding"
-            :y="rect.top - props.padding"
-            :width="rect.width + props.padding * 2"
-            :height="rect.height + props.padding * 2"
-            :rx="6"
-            fill="black"
-          />
-        </mask>
-      </defs>
-      <rect width="100%" height="100%" fill="rgba(0,0,0,0.55)" :mask="`url(#${maskId})`" />
-    </svg>
+    <template v-if="resolvedOpen && rect">
+      <div
+        v-for="(scrimStyle, index) in scrimStyles"
+        :key="index"
+        aria-hidden="true"
+        class="tour-popover-scrim"
+        :style="scrimStyle"
+      />
+      <div
+        aria-hidden="true"
+        class="tour-popover-highlight"
+        :style="{
+          top: `${rect.top - props.padding}px`,
+          left: `${rect.left - props.padding}px`,
+          width: `${rect.width + props.padding * 2}px`,
+          height: `${rect.height + props.padding * 2}px`,
+        }"
+      />
+    </template>
 
     <!-- Tooltip — wrapped in `Presence` so its pop-out plays before the
          component unmounts. `Presence` clones `data-state` ("open" | "closed")
@@ -295,6 +423,10 @@ const onTooltipAnimationEnd = () => {
          `@animationend` drops `mounted`. -->
     <Presence v-if="tooltipCoords" :is-present="resolvedOpen">
       <div
+        ref="tooltipPanel"
+        data-tour-popover=""
+        :data-task-required="step.completeOn ? 'true' : 'false'"
+        tabindex="-1"
         role="dialog"
         aria-modal="false"
         :aria-labelledby="titleId"
@@ -303,25 +435,30 @@ const onTooltipAnimationEnd = () => {
         :class="tooltipClasses"
         @animationend="onTooltipAnimationEnd"
       >
-        <div v-if="step.title" :id="titleId" class="text-sm font-semibold">{{ step.title }}</div>
-        <div v-if="step.body" :id="descId" :class="bodyClasses">{{ step.body }}</div>
-        <div class="mt-3 flex items-center justify-between gap-3">
-          <span class="text-xs text-muted-foreground"> {{ stepIndex + 1 }} / {{ props.steps.length }} </span>
-          <div class="flex items-center gap-2">
-            <button type="button" class="text-xs text-muted-foreground hover:text-foreground" @click="skip">
+        <div v-if="step.title" :id="titleId" class="tour-popover-title">{{ step.title }}</div>
+        <div v-if="step.body" :id="descId" :class="[bodyClasses, 'tour-popover-body']">{{ step.body }}</div>
+        <p v-if="step.taskHint && !taskComplete" class="tour-popover-task">
+          {{ step.taskHint }}
+        </p>
+        <div class="tour-popover-footer">
+          <span class="tour-popover-count"> {{ stepIndex + 1 }} / {{ props.steps.length }} </span>
+          <div class="tour-popover-actions">
+            <button type="button" class="tour-popover-skip" @click="skip">
               {{ locale.t('TourPopover.skip', undefined, 'Skip') }}
             </button>
             <button
               v-if="stepIndex > 0"
               type="button"
-              class="inline-flex h-7 items-center rounded-md border border-border bg-background px-2.5 text-xs font-medium hover:bg-muted"
+              class="tour-popover-button tour-popover-button-secondary"
               @click="goPrev"
             >
               {{ locale.t('TourPopover.back', undefined, 'Back') }}
             </button>
             <button
+              ref="nextButton"
               type="button"
-              class="inline-flex h-7 items-center rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+              class="tour-popover-button tour-popover-button-primary"
+              :disabled="!taskComplete"
               @click="goNext"
             >
               {{ stepIndex >= props.steps.length - 1 ? 'Done' : 'Next' }}

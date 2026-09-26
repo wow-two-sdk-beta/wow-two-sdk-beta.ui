@@ -53,6 +53,16 @@
       "import": "./dist/foundation/state/index.js",
       "default": "./dist/foundation/state/index.js"
     },
+    "./foundation/hooks": {
+      "types": "./dist/foundation/hooks/index.d.ts",
+      "import": "./dist/foundation/hooks/index.js",
+      "default": "./dist/foundation/hooks/index.js"
+    },
+    "./foundation/sync": {
+      "types": "./dist/foundation/sync/index.d.ts",
+      "import": "./dist/foundation/sync/index.js",
+      "default": "./dist/foundation/sync/index.js"
+    },
     "./foundation/icons": {
       "types": "./dist/foundation/icons/index.d.ts",
       "import": "./dist/foundation/icons/index.js",
@@ -303,6 +313,19 @@
       "import": "./dist/presentation/forms/index.js",
       "default": "./dist/presentation/forms/index.js"
     },
+    "./presentation/forms/point-control": {
+      "types": "./dist/presentation/forms/pointControl/index.d.ts",
+      "import": "./dist/presentation/forms/pointControl/index.js",
+      "default": "./dist/presentation/forms/pointControl/index.js"
+    },
+    "./presentation/forms/point-control/styles.css": "./dist/presentation/forms/pointControl/styles.css",
+    "./presentation/overlays/tour-popover": {
+      "types": "./dist/presentation/overlays/tourPopover/index.d.ts",
+      "import": "./dist/presentation/overlays/tourPopover/index.js",
+      "default": "./dist/presentation/overlays/tourPopover/index.js"
+    },
+    "./presentation/overlays/tour-popover/styles.css": "./dist/presentation/overlays/tourPopover/styles.css",
+    "./presentation/overlays/modal/styles.css": "./dist/presentation/overlays/modal/styles.css",
     "./presentation/layout": {
       "types": "./dist/presentation/layout/index.d.ts",
       "import": "./dist/presentation/layout/index.js",
@@ -379,7 +402,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && cp src/index.css dist/index.css && node scripts/build-themes-css.mjs",
+    "build": "vite build && cp src/index.css dist/index.css && mkdir -p dist/presentation/forms/pointControl dist/presentation/overlays/tourPopover dist/presentation/overlays/modal && cp src/presentation/forms/pointControl/styles.css dist/presentation/forms/pointControl/styles.css && cp src/presentation/overlays/tourPopover/styles.css dist/presentation/overlays/tourPopover/styles.css && cp src/presentation/overlays/modal/styles.css dist/presentation/overlays/modal/styles.css && node scripts/build-themes-css.mjs",
     "dev": "vite build --watch",
     "typecheck": "vue-tsc --noEmit -p tsconfig.typecheck.json && pnpm check:capabilities && node scripts/check-sfc.mjs",
     "lint": "eslint .",

@@ -77,7 +77,7 @@ provide(overlayChromeContextKey, {
 
 const classes = computed(() =>
   cn(
-    'relative w-full max-w-lg',
+    'ui-modal-content relative w-full max-w-lg',
     'motion-safe:group-data-[state=open]:animate-(--animate-pop-in)',
     'motion-safe:group-data-[state=closed]:animate-(--animate-pop-out)',
     surfaceVariants({
@@ -129,7 +129,7 @@ defineExpose({ el });
         <div
           :class="
             cn(
-              'group fixed inset-0 z-modal grid place-items-center overflow-y-auto p-4',
+              'ui-modal-layer group fixed inset-0 z-modal grid place-items-center overflow-y-auto p-4',
               'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
               'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
             )

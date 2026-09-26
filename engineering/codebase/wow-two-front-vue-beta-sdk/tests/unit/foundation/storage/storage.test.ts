@@ -19,7 +19,7 @@ import {
 describe('memoryStorageBroker', () => {
   it('round-trips a value and answers null for a key it never held', () => {
     const broker = memoryStorageBroker();
-    broker.write('user', { id: 7, name: 'ada' });
+    expect(broker.write('user', { id: 7, name: 'ada' })).toBe(true);
 
     expect(broker.read<{ id: number; name: string }>('user')).toEqual({ id: 7, name: 'ada' });
     expect(broker.read('absent')).toBeNull();
@@ -28,7 +28,7 @@ describe('memoryStorageBroker', () => {
   it('forgets a removed key', () => {
     const broker = memoryStorageBroker();
     broker.write('k', 1);
-    broker.remove('k');
+    expect(broker.remove('k')).toBe(true);
     expect(broker.read('k')).toBeNull();
   });
 
@@ -38,14 +38,22 @@ describe('memoryStorageBroker', () => {
     first.write('k', 1);
     expect(second.read('k')).toBeNull();
   });
+
+  it('reports serialization failure without throwing', () => {
+    const broker = memoryStorageBroker();
+    const circular: { self?: unknown } = {};
+    circular.self = circular;
+    expect(broker.write('circular', circular)).toBe(false);
+    expect(broker.read('circular')).toBeNull();
+  });
 });
 
 describe('localStorageStorageBroker', () => {
   /* The SSR guard. Without it every read here throws, and so does every server render. */
   it('degrades to a no-op when no ambient Storage exists', () => {
-    expect(() => localStorageStorageBroker.write('k', 1)).not.toThrow();
+    expect(localStorageStorageBroker.write('k', 1)).toBe(false);
     expect(localStorageStorageBroker.read('k')).toBeNull();
-    expect(() => localStorageStorageBroker.remove('k')).not.toThrow();
+    expect(localStorageStorageBroker.remove('k')).toBe(false);
   });
 });
 
@@ -55,13 +63,15 @@ describe('namespacedBroker', () => {
     const alpha = namespacedBroker(inner, 'alpha');
     const beta = namespacedBroker(inner, 'beta');
 
-    alpha.write('token', 'a');
-    beta.write('token', 'b');
+    expect(alpha.write('token', 'a')).toBe(true);
+    expect(beta.write('token', 'b')).toBe(true);
 
     expect(alpha.read('token')).toBe('a');
     expect(beta.read('token')).toBe('b');
     // The raw key is untouched — proof the prefix reached the inner broker.
     expect(inner.read('token')).toBeNull();
+    expect(alpha.remove('token')).toBe(true);
+    expect(alpha.read('token')).toBeNull();
   });
 });
 

@@ -130,4 +130,15 @@ describe('primitive document and focus ownership', () => {
     expect(wrapper.classes()).not.toContain('first');
     expect(wrapper.attributes('data-message')).toBe('second');
   });
+
+  it('keeps live regions visually hidden without consumer utility CSS', () => {
+    const wrapper = mount(Announce, { slots: { default: 'Saved' } });
+    wrappers.push(wrapper);
+    const style = (wrapper.element as HTMLElement).style;
+    expect(style.position).toBe('absolute');
+    expect(style.width).toBe('1px');
+    expect(style.height).toBe('1px');
+    expect(style.overflow).toBe('hidden');
+    expect(style.clipPath).toBe('inset(50%)');
+  });
 });

@@ -64,10 +64,10 @@ const attrs = useAttrs();
 // enter plays on mount and exit plays before Presence defers the unmount.
 const classes = computed(() =>
   cn(
-    'fixed inset-0 z-overlay bg-black/50',
+    'ui-backdrop-overlay fixed inset-0 z-overlay bg-black/50',
     'motion-safe:data-[state=isOpen]:animate-(--animate-fade-in)',
     'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
-    props.isBlurred && 'backdrop-blur-sm',
+    props.isBlurred && 'ui-backdrop-overlay-blurred backdrop-blur-sm',
     attrs.class as string | undefined,
   ),
 );
