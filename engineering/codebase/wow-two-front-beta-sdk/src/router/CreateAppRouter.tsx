@@ -1,5 +1,11 @@
 import { createElement, type ReactNode } from 'react';
-import { createBrowserRouter, createHashRouter, redirect, type LoaderFunctionArgs, type RouteObject } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  createHashRouter,
+  redirect,
+  type LoaderFunctionArgs,
+  type RouteObject,
+} from 'react-router-dom';
 
 import { AppErrorBoundary } from './AppErrorBoundary';
 import { AppRoot } from './AppRoot';
@@ -24,6 +30,9 @@ export interface CreateAppRouterOptions {
 
   /** Overrides the built-in root error boundary. */
   readonly errorElement?: ReactNode;
+
+  /** Content shown while the initial lazy route hydrates. Defaults to an accessible loading status. */
+  readonly loadingElement?: ReactNode;
 
   /** Overrides the built-in `*` catch-all page. */
   readonly notFound?: ReactNode;
@@ -70,7 +79,19 @@ function toLoader(guards: readonly RouteGuard[], redirectTo: string | undefined)
 
 /** Maps one `AppRoute` (our model) to a react-router `RouteObject`. */
 function toRouteObject(route: AppRoute): RouteObject {
-  const { path, index, element, lazy, layout, redirect: to, guard, handle, errorElement, children, id } = route;
+  const {
+    path,
+    index,
+    element,
+    lazy,
+    layout,
+    redirect: to,
+    guard,
+    handle,
+    errorElement,
+    children,
+    id,
+  } = route;
 
   const base: Record<string, unknown> = { id, handle, errorElement };
   const loader = toLoader(toGuards(guard), to);
@@ -105,6 +126,9 @@ export function createAppRouter(config: RouteConfig, options: CreateAppRouterOpt
       onPageView: options.onPageView,
     }),
     errorElement: options.errorElement ?? createElement(AppErrorBoundary),
+    hydrateFallbackElement:
+      options.loadingElement ??
+      createElement('div', { role: 'status', 'aria-live': 'polite' }, 'Loading…'),
     children,
   };
 

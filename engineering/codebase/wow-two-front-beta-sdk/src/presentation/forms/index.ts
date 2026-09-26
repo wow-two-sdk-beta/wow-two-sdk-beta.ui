@@ -72,6 +72,7 @@ export * from './emojiPicker';
 export * from './emojiSizeControl';
 export * from './reactionPicker';
 export * from './chatComposer';
+export * from './pointControl';
 
 // Shared form-control axis enums (public prop API; the tv config in InputStyles stays internal).
 export { InputSize, InputState, InputBorder, InputRing } from './InputStyles';

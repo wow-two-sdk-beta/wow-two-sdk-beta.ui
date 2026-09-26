@@ -288,6 +288,11 @@
       "import": "./dist/presentation/forms/index.js",
       "default": "./dist/presentation/forms/index.js"
     },
+    "./presentation/forms/point-control": {
+      "types": "./dist/presentation/forms/pointControl/index.d.ts",
+      "import": "./dist/presentation/forms/point-control/index.js",
+      "default": "./dist/presentation/forms/point-control/index.js"
+    },
     "./presentation/layout": {
       "types": "./dist/presentation/layout/index.d.ts",
       "import": "./dist/presentation/layout/index.js",

@@ -92,6 +92,7 @@ export default defineConfig({
     // `foundation/storage`), so it needs an explicit entry rather than the `subpathLayer` one-level generation.
     // No zustand peer: it only mirrors zustand's `PersistStorage` shape structurally (see ZustandPersist.ts).
     'foundation/storage/zustand/index': 'src/foundation/storage/zustand/index.ts',
+    'presentation/forms/point-control/index': 'src/presentation/forms/pointControl/index.ts',
     // Entry KEY = dist path (`dist/<layer>/<group>/index.js`) — mirrors the
     // layered source folder so the emitted subpath matches the public export.
     ...Object.fromEntries(

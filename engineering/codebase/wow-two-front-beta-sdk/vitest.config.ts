@@ -7,6 +7,11 @@ import { fileURLToPath } from 'node:url';
 // source via the `@src/*` alias (mirrors the `tsconfig.json` path). Applied per
 // project so every project (unit · browser · storybook) resolves it.
 const srcAlias = { '@src': fileURLToPath(new URL('./src', import.meta.url)) };
+const browserExecutable = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+const browserProvider = () =>
+  playwright({
+    launchOptions: browserExecutable ? { executablePath: browserExecutable } : undefined,
+  });
 
 /*
  * Three projects (engineering/architecture/testing.md):
@@ -45,7 +50,7 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            provider: playwright(),
+            provider: browserProvider(),
             instances: [{ browser: 'chromium' }],
           },
         },
@@ -58,7 +63,7 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            provider: playwright(),
+            provider: browserProvider(),
             instances: [{ browser: 'chromium' }],
           },
           setupFiles: ['./.storybook/vitest.setup.ts'],

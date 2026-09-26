@@ -17,11 +17,7 @@ export {
   type UseAutosaveOptions,
   type AutosaveControls,
 } from './useAutosave';
-export {
-  useTypeahead,
-  type UseTypeaheadOptions,
-  type UseTypeaheadReturn,
-} from './useTypeahead';
+export { useTypeahead, type UseTypeaheadOptions, type UseTypeaheadReturn } from './useTypeahead';
 export {
   usePersistentState,
   type PersistentStateOptions,
@@ -33,3 +29,9 @@ export {
   type RecentItemsOptions,
   type RecentItems,
 } from './useRecentItems';
+export {
+  useVisitInvitation,
+  isVisitInvitationDue,
+  type VisitInvitationPolicy,
+  type VisitInvitationRecord,
+} from './useVisitInvitation';

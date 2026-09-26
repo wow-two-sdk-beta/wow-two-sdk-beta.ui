@@ -9,10 +9,10 @@ export interface StorageBroker {
   read<T>(key: string): T | null;
 
   /** Serializes `value` to JSON and writes it under `key`; a quota or serialization failure is swallowed. */
-  write<T>(key: string, value: T): void;
+  write<T>(key: string, value: T): boolean;
 
   /** Removes any value stored under `key`. */
-  remove(key: string): void;
+  remove(key: string): boolean;
 }
 
 /** Resolves the ambient `Storage` (browser `localStorage`), or null when unavailable — SSR, private-mode, or a security exception. */
@@ -46,25 +46,27 @@ export const localStorageStorageBroker: StorageBroker = {
     }
   },
 
-  write<T>(key: string, value: T): void {
+  write<T>(key: string, value: T): boolean {
     const store = resolveLocalStorage();
-    if (store === null) return;
+    if (store === null) return false;
 
     try {
       store.setItem(key, JSON.stringify(value));
+      return true;
     } catch {
-      // Quota exceeded or value not serializable — drop the write silently.
+      return false;
     }
   },
 
-  remove(key: string): void {
+  remove(key: string): boolean {
     const store = resolveLocalStorage();
-    if (store === null) return;
+    if (store === null) return false;
 
     try {
       store.removeItem(key);
+      return true;
     } catch {
-      // Removal blocked — nothing to recover.
+      return false;
     }
   },
 };
@@ -85,16 +87,18 @@ export function memoryStorageBroker(): StorageBroker {
       }
     },
 
-    write<T>(key: string, value: T): void {
+    write<T>(key: string, value: T): boolean {
       try {
         store.set(key, JSON.stringify(value));
+        return true;
       } catch {
-        // Mirror the localStorage broker: an unserializable value is dropped, not thrown.
+        return false;
       }
     },
 
-    remove(key: string): void {
+    remove(key: string): boolean {
       store.delete(key);
+      return true;
     },
   };
 }

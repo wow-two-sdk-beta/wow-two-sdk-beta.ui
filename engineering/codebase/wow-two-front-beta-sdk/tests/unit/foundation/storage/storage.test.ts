@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { localStorageStorageBroker, memoryStorageBroker } from '@src/foundation/storage/StorageBroker';
+import {
+  localStorageStorageBroker,
+  memoryStorageBroker,
+} from '@src/foundation/storage/StorageBroker';
 import { prependRecent } from '@src/foundation/hooks/useRecentItems';
 
 // These tests run in vitest's default `node` environment — there is no DOM, so `window` is genuinely
@@ -92,7 +95,7 @@ describe('localStorageStorageBroker — browser path', () => {
   it('swallows a quota error on write', () => {
     const restore = withWindow(fakeStorage({ throwOnSet: true }));
     try {
-      expect(() => localStorageStorageBroker.write('k', 'big')).not.toThrow();
+      expect(localStorageStorageBroker.write('k', 'big')).toBe(false);
     } finally {
       restore();
     }

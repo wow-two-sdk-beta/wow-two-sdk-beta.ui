@@ -66,3 +66,9 @@ export { useSyncChannel } from './UseSyncChannel';
 export { useLeaderElection, type LeaderElectionState } from './UseLeaderElection';
 
 export { useBroadcastState, type SetBroadcastState } from './UseBroadcastState';
+export {
+  LatestRevisionQueue,
+  type LatestRevisionQueueOptions,
+  type RevisionedSnapshot,
+  type RevisionQueueStatus,
+} from './LatestRevisionQueue';

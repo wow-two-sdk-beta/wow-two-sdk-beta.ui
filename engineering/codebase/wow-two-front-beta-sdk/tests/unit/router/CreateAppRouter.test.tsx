@@ -33,7 +33,11 @@ function childrenOf(router: AppRouter): RouteObject[] {
 function callLoader(route: RouteObject, url = 'https://x/secret') {
   const loader = route.loader as (args: LoaderFunctionArgs) => Promise<unknown>;
   expect(typeof loader).toBe('function');
-  return loader({ request: new Request(url), params: {}, context: undefined } as LoaderFunctionArgs);
+  return loader({
+    request: new Request(url),
+    params: {},
+    context: undefined,
+  } as LoaderFunctionArgs);
 }
 
 /** Expects a loader rejection to be a react-router redirect Response and returns its target. */
@@ -51,7 +55,10 @@ const Page: ComponentType = () => <p>page</p>;
 
 describe('createAppRouter — structure', () => {
   it('wraps the config in a root route and appends the * catch-all last', () => {
-    const router = make([{ path: 'a', element: <Page /> }, { path: 'b', element: <Page /> }]);
+    const router = make([
+      { path: 'a', element: <Page /> },
+      { path: 'b', element: <Page /> },
+    ]);
 
     const children = childrenOf(router);
     expect(children).toHaveLength(3);
@@ -67,6 +74,21 @@ describe('createAppRouter — structure', () => {
     expect(children).toHaveLength(1);
     expect(children[0]?.path).toBe('*');
     expect(children[0]?.element).toBe(custom);
+  });
+
+  it('adds an accessible root hydration fallback by default', () => {
+    const router = make([]);
+    const fallback = router.routes[0]?.hydrateFallbackElement;
+    expect(fallback).toMatchObject({
+      type: 'div',
+      props: { role: 'status', 'aria-live': 'polite', children: 'Loading…' },
+    });
+  });
+
+  it('honors a custom root hydration fallback', () => {
+    const custom = <p>Preparing studio…</p>;
+    const router = make([], { loadingElement: custom });
+    expect(router.routes[0]?.hydrateFallbackElement).toBe(custom);
   });
 
   it('passes basename through to the router', () => {
@@ -152,9 +174,7 @@ describe('createAppRouter — guards + redirect compilation', () => {
   });
 
   it('runs guards before an unconditional redirect', async () => {
-    const router = make([
-      { path: 'old', redirect: '/new', guard: () => ({ redirect: '/login' }) },
-    ]);
+    const router = make([{ path: 'old', redirect: '/new', guard: () => ({ redirect: '/login' }) }]);
 
     await expect(redirectTarget(callLoader(childrenOf(router)[0]!))).resolves.toBe('/login');
   });
