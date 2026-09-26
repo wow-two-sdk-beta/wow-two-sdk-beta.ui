@@ -35,6 +35,8 @@ export interface ToastOptions {
    * refreshing its timer instead of stacking a duplicate.
    */
   key?: string;
+  /** Shows or hides this toast's countdown bar; defaults to the ToastHost's `showProgress`. */
+  progress?: boolean;
 }
 
 /** Content for a `toastHost.promise` phase — a title string, or a full partial options object. */
@@ -192,11 +194,25 @@ export interface ToastHostProps {
   readonly defaultDuration?: number;
   readonly canPauseOnHover?: boolean;
   readonly gap?: number;
+  /**
+   * Shows a countdown bar along the bottom of each auto-dismissing toast. It pauses with the
+   * expiry timer, restarts when the toast updates, and is omitted for sticky toasts and reduced motion.
+   */
+  readonly showProgress?: boolean;
 }
 
 interface VisibleToast extends ToastEntry {
   resolvedDuration: number;
 }
+
+/** Countdown-bar fill per severity; the neutral bar uses the brand primary. */
+const ProgressClasses: Record<ToastSeverity, string> = {
+  neutral: 'bg-primary',
+  info: 'bg-info',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  danger: 'bg-destructive',
+};
 </script>
 
 <script setup lang="ts">
@@ -204,6 +220,7 @@ import { useLocale } from '../../../foundation/i18n';
 import {
   computed,
   defineComponent,
+  h,
   onMounted,
   onUnmounted,
   ref,
@@ -226,6 +243,56 @@ const ToastNodeView = defineComponent({
 });
 
 /**
+ * The countdown bar. It animates a scale transform with the Web Animations API so the bar pauses
+ * and resumes in step with the host's expiry timer; environments without `animate` show it static.
+ */
+const ToastProgress = defineComponent({
+  name: 'ToastProgress',
+  props: {
+    duration: { type: Number, required: true },
+    paused: { type: Boolean, default: false },
+    severity: { type: String as PropType<ToastSeverity>, default: 'neutral' },
+  },
+  setup(progressProps) {
+    const fill = ref<HTMLElement | null>(null);
+    let animation: Animation | undefined;
+    onMounted(() => {
+      const element = fill.value;
+      if (!element || typeof element.animate !== 'function') return;
+      animation = element.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], {
+        duration: progressProps.duration,
+        easing: 'linear',
+        fill: 'forwards',
+      });
+      if (progressProps.paused) animation.pause();
+    });
+    watch(
+      () => progressProps.paused,
+      (isPaused) => {
+        if (isPaused) animation?.pause();
+        else animation?.play();
+      },
+    );
+    onUnmounted(() => animation?.cancel());
+    return () =>
+      h(
+        'div',
+        {
+          'aria-hidden': 'true',
+          'data-toast-progress': '',
+          class: 'absolute inset-x-0 bottom-0 h-1 motion-reduce:hidden',
+        },
+        [
+          h('div', {
+            ref: fill,
+            class: cn('h-full w-full origin-left opacity-80', ProgressClasses[progressProps.severity]),
+          }),
+        ],
+      );
+  },
+});
+
+/**
  * Renders the toast viewport — subscribes to the global `toastHost` store and stacks `Toast` cards.
  * Mount once, per app.
  *
@@ -239,6 +306,7 @@ const props = withDefaults(defineProps<ToastHostProps>(), {
   defaultDuration: 5000,
   canPauseOnHover: true,
   gap: 8,
+  showProgress: false,
 });
 
 const attrs = useAttrs();
@@ -399,7 +467,13 @@ const stackClasses = computed(() =>
   ),
 );
 
-const itemClasses = computed(() => cn('pointer-events-auto w-80', MotionClasses[props.position]));
+const itemClasses = computed(() =>
+  cn('pointer-events-auto relative w-80 overflow-hidden rounded-md', MotionClasses[props.position]),
+);
+
+/** A present, auto-dismissing toast shows the bar when its own flag or the host default asks for it. */
+const hasProgress = (t: VisibleToast & { present: boolean }): boolean =>
+  t.present && Number.isFinite(t.resolvedDuration) && (t.progress ?? props.showProgress);
 
 /** Vue does not auto-suffix numeric style values with `px`. */
 const stackStyle = computed(() => ({ gap: `${props.gap}px` }));
@@ -434,6 +508,13 @@ const stackStyle = computed(() => ({ gap: `${props.gap}px` }));
             </template>
             <template v-if="t.action" #actions><ToastNodeView :node="t.action" /></template>
           </Toast>
+          <ToastProgress
+            v-if="hasProgress(t)"
+            :key="`${t.id}:${t.nonce}`"
+            :duration="t.resolvedDuration"
+            :paused="paused"
+            :severity="t.severity ?? 'neutral'"
+          />
         </div>
       </Presence>
     </div>
