@@ -36,21 +36,25 @@ export interface AlertModalActionProps
 
 export const AlertModalAction = forwardRef<HTMLButtonElement, AlertModalActionProps>(
   function AlertModalAction({ onAction, onClick, className, children, ...rest }, ref) {
+    // asChild: the close behavior wraps a real footer button instead of the corner close icon's styles.
     return (
-      <ModalClose
-        ref={ref}
-        onClick={(e) => {
-          onClick?.(e);
-          if (e.defaultPrevented) return;
-          onAction?.();
-        }}
-        className={cn(
-          'inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          className,
-        )}
-        {...rest}
-      >
-        {children}
+      <ModalClose asChild>
+        <button
+          ref={ref}
+          type="button"
+          onClick={(e) => {
+            onClick?.(e);
+            if (e.defaultPrevented) return;
+            onAction?.();
+          }}
+          className={cn(
+            'inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            className,
+          )}
+          {...rest}
+        >
+          {children}
+        </button>
       </ModalClose>
     );
   },
@@ -64,15 +68,18 @@ export interface AlertModalCancelProps
 export const AlertModalCancel = forwardRef<HTMLButtonElement, AlertModalCancelProps>(
   function AlertModalCancel({ className, children, ...rest }, ref) {
     return (
-      <ModalClose
-        ref={ref}
-        className={cn(
-          'inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          className,
-        )}
-        {...rest}
-      >
-        {children}
+      <ModalClose asChild>
+        <button
+          ref={ref}
+          type="button"
+          className={cn(
+            'inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            className,
+          )}
+          {...rest}
+        >
+          {children}
+        </button>
       </ModalClose>
     );
   },

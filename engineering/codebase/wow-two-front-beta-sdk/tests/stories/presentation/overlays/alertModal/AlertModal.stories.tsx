@@ -94,6 +94,27 @@ export const OpensWithAlertSemantics: Story = {
   },
 };
 
+export const FooterButtonsSitInTheFooter: Story = {
+  render: interactionRender,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getByRole('button', { name: 'Delete item' }));
+    const dialog = await body.findByRole('alertdialog');
+    await waitFor(() => expect(dialog).toBeVisible());
+
+    // Regression: both buttons once inherited the corner close icon's absolute position and overlapped.
+    const cancel = within(dialog).getByRole('button', { name: 'Cancel' });
+    const action = within(dialog).getByRole('button', { name: 'Delete' });
+    await expect(getComputedStyle(cancel).position).not.toBe('absolute');
+    await expect(getComputedStyle(action).position).not.toBe('absolute');
+    const a = cancel.getBoundingClientRect();
+    const b = action.getBoundingClientRect();
+    const overlap = a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+    await expect(overlap).toBe(false);
+  },
+};
+
 export const ActionFiresCallbackAndCloses: Story = {
   render: interactionRender,
   play: async ({ canvasElement }) => {
