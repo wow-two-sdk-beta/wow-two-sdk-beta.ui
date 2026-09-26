@@ -131,7 +131,7 @@ describe('supported text and translucent-surface contrast', () => {
       ),
     ]);
     expect(createHash('sha256').update(JSON.stringify(palette)).digest('hex')).toBe(
-      'e93cfcacf2f378d85da2a2627c5f917ed72f1528b0917e17d4a68638a736190f',
+      'e01402f172c10bd2f366af614480c1d79b430b84badcbf9a0fcebb2fa13d4c48',
     );
   });
 

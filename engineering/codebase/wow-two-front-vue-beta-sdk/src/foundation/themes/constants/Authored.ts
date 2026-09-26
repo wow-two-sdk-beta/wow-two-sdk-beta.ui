@@ -1,9 +1,11 @@
-/* Authored Smart QR palette. Brand fills and neutral backgrounds preserve the original app colors.
- * Foreground tokens were corrected for the SDK's declared text/placeholder/glass contrast pairs.
- * These changes await visual review in the app, so the theme is a candidate. */
+/* Authored palettes.
+ * Smart QR: brand fills and neutral backgrounds preserve the original app colors; foreground tokens were corrected
+ * for the SDK's declared text/placeholder/glass contrast pairs and await visual review in the app.
+ * Ocharo: the Ocharo Studio palette (paper, linen, green-slate ink, pomegranate) with harmonised status tones.
+ * Both are candidates until a shipping app validates them through the registry. */
 
 import type { Theme } from '../Theme';
-import { ThemeStatus } from '../Theme';
+import { ThemeRadius, ThemeStatus } from '../Theme';
 import type { TokenSet } from '../Tokens';
 import { validateTheme } from '../Validate';
 
@@ -166,5 +168,105 @@ const smartQr: Theme = {
   meta: validateTheme({ light: smartQrLight, dark: smartQrDark }),
 };
 
+// Ocharo Studio light: warm paper and linen surfaces, green-slate ink, pomegranate brand.
+const ocharoLight: TokenSet = {
+  background: '#f1f0eb',
+  foreground: '#303b37',
+  card: '#fffefa',
+  'card-foreground': '#303b37',
+  popover: '#fffefa',
+  'popover-foreground': '#303b37',
+  muted: '#f5f5ef',
+  'muted-foreground': '#596259',
+  'subtle-foreground': '#5f675f',
+  inverse: '#303b37',
+  'inverse-foreground': '#fffefa',
+  border: '#e7e7df',
+  'border-strong': '#7f877f',
+  input: '#7f877f',
+  ring: '#7a3944',
+  primary: '#7a3944',
+  'primary-foreground': '#fffefa',
+  'primary-soft': '#f6e9e9',
+  'primary-soft-foreground': '#6c3039',
+  accent: '#4a6356',
+  'accent-foreground': '#fffefa',
+  'accent-soft': '#e7eee9',
+  'accent-soft-foreground': '#3a5045',
+  destructive: '#a8322d',
+  'destructive-foreground': '#fffefa',
+  'destructive-soft': '#f8e6e3',
+  'destructive-soft-foreground': '#8e2a26',
+  info: '#2f5f86',
+  'info-foreground': '#fffefa',
+  'info-soft': '#e5eef5',
+  'info-soft-foreground': '#264f6f',
+  success: '#2f6a47',
+  'success-foreground': '#fffefa',
+  'success-soft': '#e4f0e8',
+  'success-soft-foreground': '#255638',
+  warning: '#8a5a0a',
+  'warning-foreground': '#fffefa',
+  'warning-soft': '#f7ecd8',
+  'warning-soft-foreground': '#6c4506',
+};
+
+// Ocharo Studio dark: deep green-slate surfaces, pale linen ink, rose brand.
+const ocharoDark: TokenSet = {
+  background: '#242b29',
+  foreground: '#eceee5',
+  card: '#303835',
+  'card-foreground': '#eceee5',
+  popover: '#303835',
+  'popover-foreground': '#eceee5',
+  muted: '#39423d',
+  'muted-foreground': '#b8c1b5',
+  'subtle-foreground': '#aeb7ab',
+  inverse: '#eceee5',
+  'inverse-foreground': '#242b29',
+  border: '#46504a',
+  'border-strong': '#86918a',
+  input: '#86918a',
+  ring: '#daa0aa',
+  primary: '#daa0aa',
+  'primary-foreground': '#2a1c1f',
+  'primary-soft': '#4d3c40',
+  'primary-soft-foreground': '#f6dde1',
+  accent: '#a9c4b4',
+  'accent-foreground': '#1c2621',
+  'accent-soft': '#344640',
+  'accent-soft-foreground': '#dcebe1',
+  destructive: '#f0968d',
+  'destructive-foreground': '#3a0f0c',
+  'destructive-soft': '#4f2f2d',
+  'destructive-soft-foreground': '#fbdad6',
+  info: '#93bddf',
+  'info-foreground': '#0f2233',
+  'info-soft': '#2c3f4d',
+  'info-soft-foreground': '#cfe3f2',
+  success: '#93cda9',
+  'success-foreground': '#0f2a1a',
+  'success-soft': '#2c4236',
+  'success-soft-foreground': '#d6f0df',
+  warning: '#e3b660',
+  'warning-foreground': '#2e1f00',
+  'warning-soft': '#4a3d25',
+  'warning-soft-foreground': '#f8e6c1',
+};
+
+/** Ocharo Studio's palette as a theme; its island layout and typography stay in the product. */
+const ocharo: Theme = {
+  id: 'ocharo',
+  name: 'Ocharo',
+  description:
+    'Pomegranate brand and sage accent on warm paper and linen (light) / deep green-slate (dark) — authored from Ocharo Studio.',
+  tags: ['brand', 'pomegranate', 'sage', 'warm', 'paper', 'candidate', 'aa', 'product'],
+  light: ocharoLight,
+  dark: ocharoDark,
+  radius: ThemeRadius.Lg,
+  status: ThemeStatus.Candidate,
+  meta: validateTheme({ light: ocharoLight, dark: ocharoDark }),
+};
+
 /** Authored palettes, merged before generated candidates in the registry. */
-export const AuthoredThemes: ReadonlyArray<Theme> = [smartQr];
+export const AuthoredThemes: ReadonlyArray<Theme> = [smartQr, ocharo];
