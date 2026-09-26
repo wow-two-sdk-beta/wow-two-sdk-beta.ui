@@ -1,0 +1,73 @@
+/* Scan the compiled host-and-card chunk; consumers provide Tailwind and semantic theme tokens. */
+@source '../../../chunks/ToastHost.vue*.js';
+/* The card atom's variants live in the shared feedback chunk, so they are listed rather than scanned. */
+@source inline('pointer-events-auto rounded-md border bg-popover text-popover-foreground shadow-lg px-4 py-3 text-sm border-info-soft border-success-soft border-warning-soft border-destructive-soft border-border');
+
+/* Stacking layer for consumers that do not import the package-wide theme; their own values win. */
+@theme default {
+  --z-index-toast: 90;
+}
+
+/*
+ * Slide motion the host references by variable. `:where(:root)` has no specificity, so a consumer's
+ * own motion tokens (or the package-wide theme) override these fallbacks.
+ */
+:where(:root) {
+  --animate-slide-in-right: ui-toast-slide-in-x 200ms cubic-bezier(0, 0, 0.2, 1);
+  --animate-slide-out-right: ui-toast-slide-out-x 150ms cubic-bezier(0.4, 0, 1, 1);
+  --animate-slide-in-left: ui-toast-slide-in-x-reverse 200ms cubic-bezier(0, 0, 0.2, 1);
+  --animate-slide-out-left: ui-toast-slide-out-x-reverse 150ms cubic-bezier(0.4, 0, 1, 1);
+  --animate-slide-in-top: ui-toast-slide-in-y-reverse 200ms cubic-bezier(0, 0, 0.2, 1);
+  --animate-slide-out-top: ui-toast-slide-out-y-reverse 150ms cubic-bezier(0.4, 0, 1, 1);
+  --animate-slide-in-bottom: ui-toast-slide-in-y 200ms cubic-bezier(0, 0, 0.2, 1);
+  --animate-slide-out-bottom: ui-toast-slide-out-y 150ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+@keyframes ui-toast-slide-in-x {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}
+@keyframes ui-toast-slide-out-x {
+  to {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}
+@keyframes ui-toast-slide-in-x-reverse {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+@keyframes ui-toast-slide-out-x-reverse {
+  to {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+}
+@keyframes ui-toast-slide-in-y {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes ui-toast-slide-out-y {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes ui-toast-slide-in-y-reverse {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes ui-toast-slide-out-y-reverse {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}

@@ -6,6 +6,8 @@ Source: [ToastHost.vue](ToastHost.vue).
 
 Public import: `import { ToastHost } from '@wow-two-beta/ui-vue/presentation/feedback';`.
 
+Component-only import: `@wow-two-beta/ui-vue/presentation/feedback/toast-host` with `@wow-two-beta/ui-vue/presentation/feedback/toast-host/styles.css`, which scans only the toast chunks and supplies overridable stacking and slide-motion fallbacks. The consumer provides Tailwind and the semantic colour tokens.
+
 ## Contract
 
 - Hover and descendant keyboard focus independently pause expiration; expiration resumes only when both have left.

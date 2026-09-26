@@ -326,6 +326,12 @@
     },
     "./presentation/overlays/tour-popover/styles.css": "./dist/presentation/overlays/tourPopover/styles.css",
     "./presentation/overlays/modal/styles.css": "./dist/presentation/overlays/modal/styles.css",
+    "./presentation/feedback/toast-host": {
+      "types": "./dist/presentation/feedback/toastHost/index.d.ts",
+      "import": "./dist/presentation/feedback/toastHost/index.js",
+      "default": "./dist/presentation/feedback/toastHost/index.js"
+    },
+    "./presentation/feedback/toast-host/styles.css": "./dist/presentation/feedback/toastHost/styles.css",
     "./presentation/layout": {
       "types": "./dist/presentation/layout/index.d.ts",
       "import": "./dist/presentation/layout/index.js",
@@ -402,7 +408,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && cp src/index.css dist/index.css && mkdir -p dist/presentation/forms/pointControl dist/presentation/overlays/tourPopover dist/presentation/overlays/modal && cp src/presentation/forms/pointControl/styles.css dist/presentation/forms/pointControl/styles.css && cp src/presentation/overlays/tourPopover/styles.css dist/presentation/overlays/tourPopover/styles.css && cp src/presentation/overlays/modal/styles.css dist/presentation/overlays/modal/styles.css && node scripts/build-themes-css.mjs",
+    "build": "vite build && cp src/index.css dist/index.css && mkdir -p dist/presentation/forms/pointControl dist/presentation/overlays/tourPopover dist/presentation/overlays/modal dist/presentation/feedback/toastHost && cp src/presentation/forms/pointControl/styles.css dist/presentation/forms/pointControl/styles.css && cp src/presentation/overlays/tourPopover/styles.css dist/presentation/overlays/tourPopover/styles.css && cp src/presentation/overlays/modal/styles.css dist/presentation/overlays/modal/styles.css && cp src/presentation/feedback/toastHost/styles.css dist/presentation/feedback/toastHost/styles.css && node scripts/build-themes-css.mjs",
     "dev": "vite build --watch",
     "typecheck": "vue-tsc --noEmit -p tsconfig.typecheck.json && pnpm check:capabilities && node scripts/check-sfc.mjs",
     "lint": "eslint .",

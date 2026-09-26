@@ -251,6 +251,37 @@ try {
   }
   if (pointCss.includes('.h-9')) throw new Error('PointControl CSS scanned unrelated SDK controls.');
   console.log('check-package: PointControl public stylesheet scans only its compiled component chunk.');
+
+  // A component-only toast consumer gets the host, card and countdown styling without the package-wide surface.
+  writeFileSync(
+    join(scratch, 'toast-host.css'),
+    `@import 'tailwindcss' source(none);\n` +
+      `@import '${published.name}/presentation/feedback/toast-host/styles.css';\n` +
+      `@theme { --color-popover: #fff; --color-popover-foreground: #111; --color-border: #ccc; --color-primary: #000; }\n`,
+  );
+  writeFileSync(join(scratch, 'toast-host.ts'), `import './toast-host.css';\n`);
+  const toastBundles = await build({
+    root: scratch,
+    configFile: false,
+    logLevel: 'silent',
+    plugins: [tailwindcss()],
+    build: {
+      write: false,
+      minify: false,
+      cssMinify: false,
+      lib: { entry: join(scratch, 'toast-host.ts'), formats: ['es'], cssFileName: 'toast-host' },
+    },
+  });
+  const toastCss = (Array.isArray(toastBundles) ? toastBundles : [toastBundles])
+    .flatMap((bundle) => bundle.output)
+    .filter((item) => item.type === 'asset' && item.fileName.endsWith('.css'))
+    .map((item) => String(item.source))
+    .join('\n');
+  for (const token of ['.w-80', '.bg-popover', '.z-toast', '.origin-left', '--animate-slide-in-right']) {
+    if (!toastCss.includes(token)) throw new Error(`ToastHost CSS omits component styling: ${token}`);
+  }
+  if (toastCss.includes('.h-9')) throw new Error('ToastHost CSS scanned unrelated SDK controls.');
+  console.log('check-package: ToastHost public stylesheet scans only its compiled toast chunks.');
   // JS-only production consumers; Vue is external, all other dependencies are included.
   // UI ceilings retain headroom while rejecting the previous duplicate class-merge engine.
   for (const [entry, symbol, maximumGzip] of [
