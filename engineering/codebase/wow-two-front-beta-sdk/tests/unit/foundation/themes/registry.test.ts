@@ -27,6 +27,9 @@ const KNOWN_AA_EXCEPTIONS: string[] = ['smart-qr'];
 
 const SORTED_TOKENS = [...SEMANTIC_TOKENS].sort();
 
+/** The hand-authored candidates from `authored.ts`, in registry order. */
+const AUTHORED_IDS = ['glass-harbor', 'frost', 'bento-deck', 'harbor-frost'];
+
 describe('theme catalog golden master', () => {
   it('every theme passes AA validation, modulo the known exceptions', () => {
     const failing = THEMES.filter((t) => !validateTheme(t).contrastAA).map((t) => t.id);
@@ -39,9 +42,10 @@ describe('theme catalog golden master', () => {
     }
   });
 
-  it('catalog shape: 183 themes (1 validated + 24 curated + 68 named + 90 spectrum), validated first, unique ids', () => {
-    expect(THEMES).toHaveLength(183);
+  it('catalog shape: 187 themes (1 validated + 4 authored + 24 curated + 68 named + 90 spectrum), validated first, unique ids', () => {
+    expect(THEMES).toHaveLength(187);
     expect(THEMES[0]?.id).toBe('smart-qr');
+    expect(THEME_IDS.slice(1, 5)).toEqual(AUTHORED_IDS);
     expect(new Set(THEME_IDS).size).toBe(THEMES.length);
     expect(THEME_IDS).toEqual(THEMES.map((t) => t.id));
   });
@@ -67,5 +71,29 @@ describe('registry lookups', () => {
     expect(validated.map((t) => t.id)).toEqual(['smart-qr']);
     expect(candidates.every((t) => t.status === ThemeStatus.Candidate)).toBe(true);
     expect(validated.length + candidates.length).toBe(THEMES.length);
+  });
+});
+
+describe('authored themes', () => {
+  it('are candidates on the large radius knob', () => {
+    for (const id of AUTHORED_IDS) {
+      expect(getTheme(id)?.status, id).toBe(ThemeStatus.Candidate);
+      expect(getTheme(id)?.radius, id).toBe('lg');
+    }
+  });
+
+  it('carry an ambient backdrop only for the glass directions', () => {
+    const withBackdrop = AUTHORED_IDS.filter((id) => getTheme(id)?.ambient);
+    expect(withBackdrop).toEqual(['glass-harbor', 'frost', 'harbor-frost']);
+  });
+
+  it('pair Frost by day with Glass Harbor by night in harbor-frost', () => {
+    const merged = getTheme('harbor-frost');
+    expect(merged?.light).toBe(getTheme('frost')?.light);
+    expect(merged?.dark).toBe(getTheme('glass-harbor')?.dark);
+    expect(merged?.ambient).toEqual({
+      light: getTheme('frost')?.ambient?.light,
+      dark: getTheme('glass-harbor')?.ambient?.dark,
+    });
   });
 });

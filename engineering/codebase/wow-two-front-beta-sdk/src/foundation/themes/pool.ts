@@ -15,7 +15,8 @@
  *      app picks already has a near neighbour in the pool.
  *
  * `registry.ts` imports `POOL_SEEDS` and appends it after the curated seeds, so
- * the final order is: smart-qr (validated) → 24 curated candidates → this pool.
+ * the final order is: smart-qr (validated) → authored candidates → 24 curated
+ * candidates → this pool.
  *
  * Foundation layer — no upward imports (ESLint enforces).
  * ------------------------------------------------------------------------- */

@@ -4,7 +4,7 @@ How to **use a theme**, what a theme actually is, its **lifecycle** (validated v
 
 A theme is a complete set of semantic **color** tokens for **both** light and dark mode, scoped to a `.theme-{id}` class. Switching themes = swapping that class. No rebuild, no JS, no flash.
 
-> A theme is **colors only** — the 39 semantic tokens, nothing else. App-specific extras (fonts like Geist, surface treatments, custom radii beyond the `radius` knob) are **layered separately** in the app, not baked into the theme. A theme makes any app *consistent*; it doesn't make every app *identical*.
+> A theme is **colors only** — the 39 semantic tokens, plus two optional knobs: `radius` and a glass theme's `ambient` backdrop ([Glass themes](#glass-themes--the-ambient-backdrop)). App-specific extras (fonts like Geist, surface treatments, custom radii beyond the `radius` knob) are **layered separately** in the app, not baked into the theme. A theme makes any app *consistent*; it doesn't make every app *identical*.
 
 ---
 
@@ -83,6 +83,8 @@ Every theme carries a `status`: **`validated`** or **`candidate`**. This is the 
 
 > **Validated** starts with **one** theme: `smart-qr`. The other ~24 curated presets are **candidates** — AA-proven, ready to adopt, awaiting their first real-app validation.
 
+> **Authored candidates** sit between the two: hand-authored palettes from a drawn design direction ([`src/foundation/themes/authored.ts`](./engineering/codebase/wow-two-front-beta-sdk/src/foundation/themes/authored.ts)). Their colors are locked like a validated theme's and clear AA, but no shipping app has proven them yet, so they stay `candidate` until one does.
+
 ### The validation flow — candidate → validated
 
 How a candidate earns `validated` status (i.e. how the pool drains into the trusted set):
@@ -110,11 +112,18 @@ The point: the *app* is the proving ground. A candidate becomes validated only a
 
 ## Curated themes
 
-25 ship today, in two lifecycle groups. `THEMES` lists **validated first**, then candidates (this is also the emitted-stylesheet / manifest order).
+`THEMES` lists **validated first**, then the authored candidates, then the generated candidates (this is also the emitted-stylesheet / manifest order).
 
 **Validated (1)** — app-proven, safe for production:
 
 - `smart-qr` — Smart QR product theme: violet brand + teal accent on cool lavender-grey (light) / charcoal (dark).
+
+**Authored candidates (4)** — hand-authored from Wheelhouse's design directions, AA-proven, radius `lg`:
+
+- `glass-harbor` — cyan brand and amber harbor lights on deep navy under dark glass; light mode is pale sea glass. Has a backdrop.
+- `frost` — deep teal brand on a blue, lavender and peach wash under frosted glass; dark mode is cool slate. Has a backdrop.
+- `bento-deck` — teal brand and pastel tone tiles on warm paper with ink surfaces; flat, no backdrop.
+- `harbor-frost` — the merge: `frost` light by day, `glass-harbor` dark by night, with each one's backdrop.
 
 **Candidate (24)** — AA-proven, not yet app-validated:
 
@@ -128,7 +137,7 @@ import {
   validatedThemes, candidateThemes,
 } from '@wow-two-beta/ui/themes';
 
-THEME_IDS;                 // ['smart-qr','wow','midnight',…] — validated first
+THEME_IDS;                 // ['smart-qr','glass-harbor',…,'wow',…] — validated first
 getTheme('smart-qr')?.name;// 'Smart QR'
 validatedThemes();         // [smart-qr] — app-proven, prefer for production
 candidateThemes();         // the 24 curated presets — AA-proven, not app-validated
@@ -153,6 +162,22 @@ function applyTheme(id: string, dark: boolean) {
 ```
 
 Dark mode is the library's existing `.dark` variant (`@custom-variant dark (&:where(.dark, .dark *))`) — `.dark` and `.theme-{id}` compose: `.dark.theme-{id}` selects the theme's dark token set.
+
+---
+
+## Glass themes — the ambient backdrop
+
+Glass needs something behind it to blur. A theme may carry an `ambient` backdrop per mode: CSS `background-image` layers (soft radial glows over a base wash) that the emitter writes as `--theme-ambient` into the theme's light and dark blocks.
+
+```html
+<html class="theme-harbor-frost dark">
+  <body class="surface-ambient">  <!-- paints var(--theme-ambient), fixed to the viewport -->
+```
+
+- `surface-ambient` (from `styles.css`) paints the backdrop; under a theme without one it paints nothing.
+- Put panels on the `glass` / `glass-outline` surface variant: translucent `popover` fill plus `backdrop-blur`.
+- The tokens stay opaque, so every contrast check still holds; the translucency comes from the surface variant.
+- Authoring one: `Theme.ambient = { light, dark }`, each a comma-separated layer list.
 
 ---
 

@@ -50,6 +50,18 @@ export interface ThemeMeta {
   failures?: ReadonlyArray<string>;
 }
 
+/**
+ * A page backdrop per mode — CSS `background-image` layers (gradients) that glass surfaces blur.
+ * Emitted as `--theme-ambient`; an app paints it with the `surface-ambient` class.
+ */
+export interface ThemeAmbient {
+  /** Light-mode backdrop layers. */
+  light: string;
+
+  /** Dark-mode backdrop layers. */
+  dark: string;
+}
+
 /** A named, validated theme — the unit the registry stores and the emitter renders. */
 export interface Theme {
   /** Stable kebab-case id; drives the `.theme-{id}` class. */
@@ -72,6 +84,9 @@ export interface Theme {
 
   /** Border-radius scale knob (maps to the lib's `--radius-*`). Optional. */
   radius?: ThemeRadius;
+
+  /** Page backdrop for glass themes (maps to `--theme-ambient`). Optional. */
+  ambient?: ThemeAmbient;
 
   /** Lifecycle status — `validated` (real-app proven, locked) or `candidate` (engine-proven). */
   status: ThemeStatus;

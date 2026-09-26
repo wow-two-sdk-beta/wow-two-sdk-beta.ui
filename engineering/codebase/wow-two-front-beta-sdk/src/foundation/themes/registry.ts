@@ -14,6 +14,7 @@ import type { Theme, ThemeSeed } from './Theme';
 import { ThemeStatus } from './Theme';
 import { generateTheme } from './generate';
 import { VALIDATED_THEMES } from './validated';
+import { AUTHORED_THEMES } from './authored';
 import { POOL_SEEDS } from './pool';
 
 /** The authoring seeds. Order here = order in `THEMES` and the emitted stylesheet. */
@@ -275,10 +276,15 @@ const CANDIDATE_SEEDS: ReadonlyArray<ThemeSeed> = [...THEME_SEEDS, ...POOL_SEEDS
 const CANDIDATE_THEMES: ReadonlyArray<Theme> = CANDIDATE_SEEDS.map(generateTheme);
 
 /**
- * The full registry: validated (real-app-proven) themes FIRST, then the curated
- * candidate presets. Order here = order in the emitted stylesheet / manifest.
+ * The full registry: validated (real-app-proven) themes FIRST, then the
+ * hand-authored candidates, then the generated candidate presets. Order here =
+ * order in the emitted stylesheet / manifest.
  */
-export const THEMES: ReadonlyArray<Theme> = [...VALIDATED_THEMES, ...CANDIDATE_THEMES];
+export const THEMES: ReadonlyArray<Theme> = [
+  ...VALIDATED_THEMES,
+  ...AUTHORED_THEMES,
+  ...CANDIDATE_THEMES,
+];
 
 /** Look up a theme by id. Returns `undefined` when absent. */
 export function getTheme(id: string): Theme | undefined {

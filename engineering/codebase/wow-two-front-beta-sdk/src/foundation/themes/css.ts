@@ -2,8 +2,8 @@
  * CSS emitter — turn a Theme into scoped class blocks.
  *
  * An app applies a theme by adding `theme-{id}` to a root element. The emitted
- * CSS overrides the lib's semantic `--color-*` vars (and optional `--radius-*`)
- * under that class, so every Tailwind utility (`bg-primary`, `text-foreground`,
+ * CSS overrides the lib's semantic `--color-*` vars (and optional `--radius-*`
+ * and `--theme-ambient`) under that class, so every Tailwind utility (`bg-primary`, `text-foreground`,
  * …) re-resolves to the theme's values. Dark mode reuses the lib's variant:
  * `.dark.theme-{id}` (i.e. `.dark` + the theme class on the same element, or an
  * ancestor `.dark`).
@@ -38,14 +38,19 @@ function radiusDeclarations(theme: Theme, indent = '  '): string {
   );
 }
 
+/** Render the optional ambient backdrop as a declaration line (empty string when unset). */
+function ambientDeclaration(layers: string | undefined, indent = '  '): string {
+  return layers ? `\n${indent}--theme-ambient: ${layers};` : '';
+}
+
 /**
  * Emit the CSS for a single theme: a light `.theme-{id}` block + a
  * `.dark.theme-{id}` block. Returns a string (no trailing newline).
  */
 export function themeToCss(theme: Theme): string {
   const radius = radiusDeclarations(theme);
-  const light = `.theme-${theme.id} {\n${declarations(theme.light)}${radius}\n}`;
-  const dark = `.dark.theme-${theme.id} {\n${declarations(theme.dark)}\n}`;
+  const light = `.theme-${theme.id} {\n${declarations(theme.light)}${radius}${ambientDeclaration(theme.ambient?.light)}\n}`;
+  const dark = `.dark.theme-${theme.id} {\n${declarations(theme.dark)}${ambientDeclaration(theme.ambient?.dark)}\n}`;
   return `${light}\n\n${dark}`;
 }
 

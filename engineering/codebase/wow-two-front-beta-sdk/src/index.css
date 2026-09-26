@@ -253,6 +253,13 @@ html, body {
   background-image: radial-gradient(135% 135% at 100% 112%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 52%);
 }
 
+/* Theme backdrop — the page canvas of a glass theme, from its `--theme-ambient` layers. Put it on the app
+ * shell so `glass` surfaces have colored light to blur; themes without a backdrop leave the page flat. */
+.surface-ambient {
+  background-image: var(--theme-ambient, none);
+  background-attachment: fixed;
+}
+
 /* Presence enter: a child mounts in the closed state for a frame or two so enter transitions start from it.
    Invisible and unanimated meanwhile, so an exit animation keyed on the closed state never plays on the way in. */
 [data-presence='entering'] {
