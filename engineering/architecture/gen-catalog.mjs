@@ -19,6 +19,7 @@ const GROUPS = ['actions', 'display', 'feedback', 'forms', 'layout', 'nav', 'ove
 // Hand-authored purposes for components that lack a spec `## Purpose` (verified
 // against each component's source). Used only when nothing is extracted.
 const OVERRIDES = {
+  PointControl: 'Accessible pointer, touch, and keyboard control for selecting a normalized two-dimensional point.',
   Button: 'The core button — `variant` × `tone` styling, icon slots, and a loading state; renders `<button>` or `asChild`.',
   CopyButton: 'Button that copies text to the clipboard and flips to a copied state.',
   Divider: 'A rule between content — plain, or with a centered label; orientation is required.',

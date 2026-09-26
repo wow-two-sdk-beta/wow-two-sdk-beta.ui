@@ -4,7 +4,7 @@
 
 Every shipped component in `@wow-two-beta/ui`, grouped by presentation group + foundation primitives. Import from the group **subpath** (tree-shakes to just that slice); each name links to its source folder (spec + stories live there).
 
-**248 entries** — 231 presentation components across 7 groups + 17 foundation primitives (L2 headless).
+**249 entries** — 232 presentation components across 7 groups + 17 foundation primitives (L2 headless).
 
 ## Convention
 
@@ -158,7 +158,7 @@ Every shipped component in `@wow-two-beta/ui`, grouped by presentation group + f
 
 ### presentation/forms
 
-`import { … } from '@wow-two-beta/ui/presentation/forms'` · 74 components
+`import { … } from '@wow-two-beta/ui/presentation/forms'` · 75 components
 
 | Component | Purpose |
 |---|---|
@@ -216,6 +216,7 @@ Every shipped component in `@wow-two-beta/ui`, grouped by presentation group + f
 | [`PercentInput`](../codebase/wow-two-front-beta-sdk/src/presentation/forms/percentInput/) | `NumberInput` with a trailing `%` decoration. |
 | [`PhoneInput`](../codebase/wow-two-front-beta-sdk/src/presentation/forms/phoneInput/) | International phone input. |
 | [`PinInput`](../codebase/wow-two-front-beta-sdk/src/presentation/forms/pinInput/) | One-time-code / PIN entry — N single-character cells. |
+| [`PointControl`](../codebase/wow-two-front-beta-sdk/src/presentation/forms/pointControl/) | Accessible pointer, touch, and keyboard control for selecting a normalized two-dimensional point. |
 | [`Radio`](../codebase/wow-two-front-beta-sdk/src/presentation/forms/radio/) | Single radio button. |
 | [`RadioField`](../codebase/wow-two-front-beta-sdk/src/presentation/forms/radioField/) | Radio + right-side label + optional description, wrapped in a `<label>`. |
 | [`RadioGroup`](../codebase/wow-two-front-beta-sdk/src/presentation/forms/radioGroup/) | Mutex group of `RadioField` children. |
