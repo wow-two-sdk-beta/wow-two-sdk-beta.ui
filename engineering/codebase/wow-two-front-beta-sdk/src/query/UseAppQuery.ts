@@ -43,7 +43,10 @@ export function useAppQuery<TRaw, TData = TRaw>({
 
   return {
     data: query.data,
+    /** The first load: no data yet and a request in flight. */
     loading: query.isPending && query.isFetching,
+    /** Any request in flight, background refetches included — for freshness hints, not skeletons. */
+    fetching: query.isFetching,
     error,
     refetch: query.refetch,
   };

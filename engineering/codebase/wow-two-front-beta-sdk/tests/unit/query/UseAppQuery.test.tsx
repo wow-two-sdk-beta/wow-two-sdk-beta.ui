@@ -151,4 +151,29 @@ describe('useAppQuery', () => {
     await waitFor(() => expect(result.current.error).toBeInstanceOf(ApiError));
     expect(result.current.error?.status).toBe(0);
   });
+
+  it('reports a background refetch as fetching, not loading', async () => {
+    let calls = 0;
+    const second = deferred<number>();
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => useAppQuery({ key: ['q', 'fetching'], queryFn: () => (++calls === 1 ? Promise.resolve(1) : second.promise) }),
+      { wrapper },
+    );
+    await waitFor(() => expect(result.current.data).toBe(1));
+    expect(result.current.fetching).toBe(false);
+
+    act(() => {
+      void result.current.refetch();
+    });
+    await waitFor(() => expect(result.current.fetching).toBe(true));
+    expect(result.current.loading).toBe(false); // the first load is over; content stays
+
+    await act(async () => {
+      second.resolve(2);
+      await second.promise;
+    });
+    await waitFor(() => expect(result.current.fetching).toBe(false));
+    expect(result.current.data).toBe(2);
+  });
 });

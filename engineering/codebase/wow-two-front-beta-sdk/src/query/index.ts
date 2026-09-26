@@ -39,6 +39,7 @@ export { useAppPaginatedQuery, type UseAppPaginatedQueryOptions } from './UseApp
 export { byPageToken, pageItems } from './PageHelpers';
 export { useAppLazyQuery, type UseAppLazyQueryOptions } from './UseAppLazyQuery';
 export { useQueryCache, type QueryCacheApi, type QueryCachePrefetch } from './UseQueryCache';
+export { useRefresh, type UseRefreshOptions, type UseRefreshResult } from './UseRefresh';
 
 // Prefetch + suspense
 export { usePrefetchQuery, prefetchProps, type PrefetchTarget, type PrefetchProps } from './UsePrefetchQuery';
