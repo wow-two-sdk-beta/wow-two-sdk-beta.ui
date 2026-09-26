@@ -16,6 +16,7 @@ provided the behavioral baseline for these reusable units; the product no longer
 | `StorageBroker` result contract | Extended existing API | `write` and `remove` now report blocked, quota, and serialization failures while remaining safe for callers that ignore the result |
 | `Modal` / `BottomSheet` | Existing, with component-only modal styles | The studio uses the SDK modal shell for settings, exports, onboarding, and confirmations while retaining product content and responsive composition |
 | `useConfirmation` | Added to `foundation/hooks` | Provides generic promise-based confirmation state; Ocharo supplies deletion and discard wording through its modal host |
+| `ToastHost` / `useToastHost` | Extended with a countdown bar and a component-only entry | Top-right studio notifications with a pausing progress bar, one deduplicated slot and a warning tone for failures |
 
 The studio header, garment library, inspector composition, save/sync wording, onboarding content, and camera controls remain in the product. Their behavior depends on garment, renderer, or persistence contracts and does not form a stable generic SDK API yet. `IconButton` and `RangeControl` are small product wrappers around native controls because their icon/value composition and gesture-boundary callbacks are studio-specific; the underlying accessible point input and visit scheduling are shared. Studio history remains in its pure reducer because look identity, import fingerprints, and placement-gesture coalescing are domain transitions; the SDK's mutable snapshot history has a different contract.
 
@@ -71,6 +72,20 @@ therefore keep normal flow layout instead of inheriting the absolute close-glyph
 
 Ocharo adopts this contract through `wow-two-beta-ui-vue-0.0.7-ocharo-modal.tgz`, SHA-256
 `79abd50c3bbaa30cd10aba3719cc185b73ddefad9ea8371c345575b5da260052`. The package remains local and unpublished.
+
+## Toast contract
+
+`ToastHost` takes `show-progress` to draw a countdown bar per toast; the bar pauses with the toast on hover or focus
+and takes the toast's severity colour. `presentation/feedback/toast-host` loads the host, the store and
+`useToastHost` without the feedback barrel, and its `styles.css` scans only the compiled host chunk. The card atom's
+surface classes live in a shared chunk, so the stylesheet lists them inline; a DOM test renders every severity and
+fails if a rendered class is missing from that list. The packed-consumer check covers the entry and its stylesheet.
+
+Ocharo maps `info`, `success`, `warning`, `destructive`, `popover` and `muted` to its own tokens, keys every message to
+one slot and clears the matching store notice on dismissal. It adopts this contract, the modal and the tour through
+`wow-two-beta-ui-vue-0.0.7-ocharo-7a5ed4d.tgz` (SDK commit `7a5ed4d`), SHA-256
+`88001091e680650f6547eee32b77710db2d3243dc14e7d1d08bf6df7f29cc35a`. Local tarballs are named by SDK commit, because npm
+reuses a cached tarball whose file name and version are unchanged. The package remains local and unpublished.
 
 ## Theme
 
