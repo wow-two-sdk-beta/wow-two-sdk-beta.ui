@@ -91,7 +91,8 @@ export const OpensWithActionsListed: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Open action sheet' }));
 
     const dialog = await body.findByRole('dialog');
-    await expect(dialog).toBeVisible();
+    // Presence holds a new panel invisible for its first frames, then it enters.
+    await waitFor(() => expect(dialog).toBeVisible());
     await expect(dialog).toHaveAccessibleName('Choose an action');
     await expect(dialog).toHaveAccessibleDescription('What would you like to do?');
     // Bottom-edge Drawer under the hood.

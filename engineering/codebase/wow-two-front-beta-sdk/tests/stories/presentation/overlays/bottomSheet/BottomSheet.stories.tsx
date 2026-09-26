@@ -88,7 +88,8 @@ export const OpensViaControlledState: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Open sheet' }));
 
     const dialog = await body.findByRole('dialog');
-    await expect(dialog).toBeVisible();
+    // Presence holds a new panel invisible for its first frames, then it enters.
+    await waitFor(() => expect(dialog).toBeVisible());
     await expect(dialog).toHaveAttribute('aria-modal', 'true');
     await expect(dialog).toHaveAccessibleName('Sheet title');
     await expect(dialog).toHaveAccessibleDescription('Sheet description.');

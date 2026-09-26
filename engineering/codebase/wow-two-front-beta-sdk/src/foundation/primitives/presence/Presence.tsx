@@ -13,9 +13,14 @@ export interface PresenceProps {
   /** The presence flag — toggle false to trigger exit. */
   isPresent: boolean;
 
-  /** The single React element child — receives `ref` and `data-state` ("open" | "closed"). */
+  /** The single React element child — receives `ref`, `data-state` ("open" | "closed") and, while it enters, `data-presence="entering"`. */
   children: ReactElement;
 }
+
+// While a child enters it sits in the closed state so enter transitions start from it. The stylesheet keeps
+// `[data-presence="entering"]` invisible and unanimated, so an exit animation keyed on that closed state never
+// plays on the way in. An attribute rather than a style prop: surfaces that spread props after their own inline
+// style would lose it.
 
 function parseTimes(value: string): ReadonlyArray<number> {
   return value.split(',').map((part) => {
@@ -45,12 +50,15 @@ function getTotalDurationMs(node: HTMLElement): number {
  * `data-state="closed"` until its own `animationend`/`transitionend` fires
  * (or a computed-duration timeout as a fallback). If no exit animation
  * actually starts, the child unmounts immediately. On enter, the child
- * mounts with `data-state="closed"` and flips to `"open"` on the next
- * frame so enter transitions play.
+ * mounts with `data-state="closed"` — hidden and unanimated, marked
+ * `data-presence="entering"` — and flips to `"open"` on the next frame, so
+ * enter transitions start from the closed styles and an exit animation never
+ * plays on the way in.
  */
 export function Presence({ isPresent, children }: PresenceProps): ReactElement | null {
   const [rendered, setRendered] = useState(isPresent);
   const [dataState, setDataState] = useState<'open' | 'closed'>('closed');
+  const [entering, setEntering] = useState(isPresent);
   const ref = useRef<HTMLElement | null>(null);
 
   const child = isValidElement(children)
@@ -64,12 +72,16 @@ export function Presence({ isPresent, children }: PresenceProps): ReactElement |
     if (!isPresent) return;
     if (!rendered) {
       setRendered(true);
+      setEntering(true);
       return;
     }
     if (dataState === 'open') return;
     let raf2 = 0;
     const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => setDataState('open'));
+      raf2 = requestAnimationFrame(() => {
+        setDataState('open');
+        setEntering(false);
+      });
     });
     return () => {
       cancelAnimationFrame(raf1);
@@ -102,8 +114,11 @@ export function Presence({ isPresent, children }: PresenceProps): ReactElement |
     node.addEventListener('transitionend', onEnd);
     // Flip the DOM synchronously so the start-detection window below is
     // deterministic; React re-renders to the same value via setDataState.
+    // A child closed while still entering drops its hidden entering style, so
+    // its exit animation can run and whoever waits on it hears it end.
     node.setAttribute('data-state', 'closed');
     setDataState('closed');
+    setEntering(false);
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
         const animating = started || (node.getAnimations?.().length ?? 0) > 0;
@@ -129,5 +144,6 @@ export function Presence({ isPresent, children }: PresenceProps): ReactElement |
   return cloneElement(child, {
     ref: composedRef,
     'data-state': dataState,
+    ...(entering ? { 'data-presence': 'entering' } : {}),
   } as Partial<typeof child.props>);
 }

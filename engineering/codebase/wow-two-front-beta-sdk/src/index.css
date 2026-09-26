@@ -250,6 +250,13 @@ html, body {
   background-image: radial-gradient(135% 135% at 100% 112%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 52%);
 }
 
+/* Presence enter: a child mounts in the closed state for a frame or two so enter transitions start from it.
+   Invisible and unanimated meanwhile, so an exit animation keyed on the closed state never plays on the way in. */
+[data-presence='entering'] {
+  opacity: 0 !important;
+  animation: none !important;
+}
+
 /* Enter/exit primitives — paired with the `--animate-*` tokens above. Subtle (8px) slides for
  * popovers/menus/toasts; full-edge drawer/sheet slides use component-level translate utilities. */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }

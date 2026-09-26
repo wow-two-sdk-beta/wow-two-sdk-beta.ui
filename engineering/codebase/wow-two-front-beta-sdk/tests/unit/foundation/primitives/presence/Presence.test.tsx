@@ -9,8 +9,9 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 /*
  * Timing semantics under test (see Presence.tsx):
- * - Enter: child mounts with data-state="closed", flips to "open" after a
- *   double requestAnimationFrame.
+ * - Enter: child mounts with data-state="closed", hidden and unanimated
+ *   (data-presence="entering"), and flips to "open" after a double
+ *   requestAnimationFrame.
  * - Exit: data-state flips to "closed" synchronously; Presence then waits two
  *   animation frames to detect whether an exit animation/transition started.
  *   No animation → unmount at the end of that window (deferred, NOT
@@ -165,5 +166,36 @@ describe('Presence', () => {
     await waitFor(() => expect(screen.queryByTestId('infinite')).not.toBeInTheDocument(), {
       timeout: 2000,
     });
+  });
+  it('enters hidden and unanimated, so a closed-state exit animation never plays on the way in', async () => {
+    render(
+      <>
+        {/* The rule the SDK stylesheet ships (src/index.css). */}
+        <style>{"[data-presence='entering'] { opacity: 0 !important; animation: none !important; }"}</style>
+        <Animated isPresent />
+      </>,
+    );
+    const node = screen.getByTestId('animated');
+    expect(node).toHaveAttribute('data-state', 'closed');
+    expect(node).toHaveAttribute('data-presence', 'entering');
+    expect(getComputedStyle(node).opacity).toBe('0');
+    expect(getComputedStyle(node).animationName).toBe('none');
+    await waitFor(() => expect(node).toHaveAttribute('data-state', 'open'));
+    expect(node).not.toHaveAttribute('data-presence');
+  });
+
+  it('passes no style, so a child that spreads props after its own inline style keeps it', async () => {
+    function Surface(props: { style?: object }) {
+      return <div data-testid="surface" style={{ height: '400px' }} {...props} />;
+    }
+    render(
+      <Presence isPresent>
+        <Surface />
+      </Presence>,
+    );
+    const node = screen.getByTestId('surface');
+    expect(node.style.height).toBe('400px');
+    await waitFor(() => expect(node).toHaveAttribute('data-state', 'open'));
+    expect(node.style.height).toBe('400px');
   });
 });

@@ -117,7 +117,8 @@ export const OpensOnTriggerClick: Story = {
     await userEvent.click(trigger);
 
     const dialog = await body.findByRole('dialog');
-    await expect(dialog).toBeVisible();
+    // Presence holds a new panel invisible for its first frames, then it enters.
+    await waitFor(() => expect(dialog).toBeVisible());
     await expect(dialog).toHaveAttribute('aria-modal', 'true');
     await expect(dialog).toHaveAttribute('data-side', 'right');
     await expect(dialog).toHaveAccessibleName('Interaction test');
