@@ -7,6 +7,9 @@
 - Removing an owner reveals the remaining active owner without overwriting its mode.
 - Removing the final owner restores the original dark class and color-scheme value and priority.
 - Explicit defaults produce the same mode during SSR and the initial client render.
+- `followSystem()` hands the mode back to the OS preference and persists `system`; a stored `system` follows the OS on
+  the next load even when `defaultMode` names a fixed mode. `followsSystem` reports which of the two is active.
+- A pre-paint script reading the same key treats `system` like an absent choice.
 
 Regression coverage: [DOM ownership](../../../../tests/unit/foundation/primitives/Ownership.dom.test.ts) and
 [SSR](../../../../tests/unit/foundation/primitives/ColorMode.ssr.test.ts).

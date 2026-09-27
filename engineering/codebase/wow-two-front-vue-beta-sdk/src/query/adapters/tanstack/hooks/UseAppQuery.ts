@@ -27,6 +27,12 @@ export interface UseAppQueryOptions<TRaw, TData = TRaw> {
   /** Gates the query — skips fetching while `false`. A ref or getter toggles it reactively. */
   readonly enabled?: MaybeRefOrGetter<boolean>;
 
+  /**
+   * Polls every this many milliseconds while set, pausing in a background tab; `false` or `undefined` stops it. A
+   * getter polls only while work is in flight — `() => (job.value?.isRunning ? 2_000 : false)`.
+   */
+  readonly refetchInterval?: MaybeRefOrGetter<number | false | undefined>;
+
   /** Metadata for the global `onError` seam — `suppressGlobalError: true` keeps this query's failures out. */
   readonly meta?: AppQueryMeta;
 }
@@ -58,6 +64,7 @@ export function useAppQuery<TRaw, TData = TRaw>({
   queryFn,
   map,
   enabled,
+  refetchInterval,
   meta,
 }: UseAppQueryOptions<TRaw, TData>): UseAppQueryReturn<TData> {
   // A getter for the WHOLE options object: `key` and `enabled` are `MaybeRefOrGetter`, and this is
@@ -77,6 +84,7 @@ export function useAppQuery<TRaw, TData = TRaw>({
     },
     select: map ?? ((raw: TRaw) => raw as unknown as TData),
     enabled: toValue(enabled),
+    refetchInterval: toValue(refetchInterval) ?? false,
     meta,
   }));
 

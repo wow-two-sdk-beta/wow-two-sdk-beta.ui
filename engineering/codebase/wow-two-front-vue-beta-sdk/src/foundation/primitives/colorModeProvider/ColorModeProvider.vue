@@ -50,7 +50,7 @@ export interface ColorModeProviderProps {
 <script setup lang="ts">
 import { inject, onMounted, onScopeDispose, provide, shallowRef, watch } from 'vue';
 import { useMediaQuery } from '../../device';
-import { ColorMode, ColorModeKey, type ColorModeContextValue } from './ColorModeContext';
+import { ColorMode, ColorModeKey, ColorModeSystemValue, type ColorModeContextValue } from './ColorModeContext';
 
 /**
  * Renders no element of its own — the slot passes straight through — while owning the app's light/dark mode:
@@ -85,7 +85,10 @@ onMounted(() => {
   } catch {
     // Storage denial must not disable the in-memory theme control.
   }
-  followsSystem.value = stored !== ColorMode.Light && stored !== ColorMode.Dark && props.defaultMode === 'system';
+  // A stored `system` choice follows the OS even when the default names a fixed mode.
+  followsSystem.value =
+    stored === ColorModeSystemValue ||
+    (stored !== ColorMode.Light && stored !== ColorMode.Dark && props.defaultMode === 'system');
   mode.value =
     stored === ColorMode.Light || stored === ColorMode.Dark
       ? stored
@@ -136,13 +139,28 @@ function setMode(next: ColorMode): void {
   }
 }
 
+function followSystem(): void {
+  followsSystem.value = true;
+  mode.value = prefersDark.value ? ColorMode.Dark : ColorMode.Light;
+  if (!props.storageKey || typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(props.storageKey, ColorModeSystemValue);
+  } catch {
+    // Storage may be disabled or full; following the OS stays active for this session.
+  }
+}
+
 // A getter, so consumers read `ctx.mode` as a plain value exactly like the
 // React context object — and tracking still happens on access.
 const context: ColorModeContextValue = {
   get mode() {
     return mode.value;
   },
+  get followsSystem() {
+    return followsSystem.value;
+  },
   setMode,
+  followSystem,
   toggle: () => setMode(mode.value === ColorMode.Dark ? ColorMode.Light : ColorMode.Dark),
 };
 

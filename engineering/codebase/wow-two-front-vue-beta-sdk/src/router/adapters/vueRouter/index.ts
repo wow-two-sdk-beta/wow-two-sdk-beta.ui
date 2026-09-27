@@ -68,6 +68,7 @@ export { useTypedSearchParams, type TypedSearchParams } from './hooks/UseTypedSe
 export { requireAuth, buildReturnTo, resolveReturnTo, useReturnTo, type ReturnToSource } from './Guards';
 
 // Nav helpers
+export { default as AppLink, type AppLinkProps } from './appLink/AppLink.vue';
 export { default as AppNavLink, type AppNavLinkProps } from './appNavLink/AppNavLink.vue';
 export { useBreadcrumbs, type Breadcrumb } from './hooks/UseBreadcrumbs';
 export { usePrefetch, prefetch, prefetchProps, type PrefetchProps } from './hooks/UsePrefetch';
