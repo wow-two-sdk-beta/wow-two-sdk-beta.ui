@@ -18,8 +18,9 @@ type ButtonSizePreset = Extract<SizePreset, 'xs' | 'sm' | 'md' | 'lg' | 'xl'>;
    Raw/object forms set inline dims only — pair with `padding` if text-bearing. */
 export type ButtonSize = SizeUnion<ButtonSizePreset>;
 
-/** @internal The type-only surface `ButtonProps` inherits — native attributes plus the variant keys. */
-type ButtonAttributes = Omit<ButtonHTMLAttributes, 'type' | 'disabled' | 'color' | 'onClick'> &
+/** @internal The type-only surface `ButtonProps` inherits — native attributes plus the variant keys. `onClick` stays
+    typed so `@click` compiles under strict templates; the button still gates it at runtime (see `handleClick`). */
+type ButtonAttributes = Omit<ButtonHTMLAttributes, 'type' | 'disabled' | 'color'> &
   Omit<ButtonVariants, 'size' | 'variant' | 'tone' | 'shape'>;
 
 /** Defines props for the button. */

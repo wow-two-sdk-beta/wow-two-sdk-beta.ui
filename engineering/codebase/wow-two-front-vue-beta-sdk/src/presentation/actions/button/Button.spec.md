@@ -46,6 +46,12 @@ Inherited contracts: `extends /* @vue-ignore */ ButtonAttributes`. These members
 | `longPressDelay` | `number` | no | `PressExtensions.longPressDelay.default` | The long-press duration (ms). Default 500. Out-of-range values trigger a dev warning. |
 | `debounceMs` | `number` | no | — | The click-throttle window (ms) — first wins; subsequent swallowed via `preventDefault()`. |
 
+## Listeners
+
+| Listener | Type | Meaning |
+|---|---|---|
+| `onClick` (`@click`) | `(event: MouseEvent) => void` | The native click, typed on the props. It runs after the loading, skeleton, long-press and `debounceMs` gates, so a swallowed click never reaches it. |
+
 ## Emits
 
 | Event | Signature | Meaning |
