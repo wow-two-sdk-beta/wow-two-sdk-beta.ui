@@ -33,7 +33,8 @@ const CopiedIcon = Check;
 const CopyIcon = Copy;
 
 /**
- * Renders code text with a copy button, inline for one-liners or block for multi-line snippets.
+ * Renders code text with a copy button, inline for one-liners or block for multi-line snippets — a block keeps its
+ * line breaks and indentation, scrolling sideways instead of wrapping.
  *
  * Copy runs through the L1 `useClipboard` hook directly — `SnippetText` stays in display and cannot import the actions
  * `CopyButton`.
@@ -54,6 +55,10 @@ const classes = computed(() =>
     attrs.class as string | undefined,
   ),
 );
+
+/* A block snippet keeps its line breaks and indentation, scrolling sideways instead of wrapping — the multi-line
+   contract a caller cannot reach through `CodeText`'s slot here. */
+const codeClasses = computed(() => cn('flex-1 pr-10', props.variant === SnippetTextVariant.Block && 'whitespace-pre'));
 
 const buttonClasses = computed(() =>
   cn(
@@ -77,7 +82,7 @@ defineExpose({ el });
 
 <template>
   <div ref="el" v-bind="rest" :class="classes">
-    <CodeText :variant="props.variant" class="flex-1 pr-10">{{ props.text }}</CodeText>
+    <CodeText :variant="props.variant" :class="codeClasses">{{ props.text }}</CodeText>
     <button
       type="button"
       :aria-label="locale.t(copied ? 'SnippetText.copied' : 'SnippetText.copy', undefined, copied ? 'Copied' : 'Copy')"
