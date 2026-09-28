@@ -13,7 +13,7 @@ import { ref } from 'vue';
 import * as nav from '@wow-two-beta/ui-vue/presentation/nav';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
 import { CountBadge } from '@wow-two-beta/ui-vue/presentation/display';
-import { Home, Inbox, Settings } from 'lucide-vue-next';
+import { FolderKanban, Home, Inbox, Settings } from 'lucide-vue-next';
 import Demo from '../gallery/Demo.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
 import { navExamples } from '../gallery/fixtures/NavExamples';
@@ -53,7 +53,14 @@ const {
   TableOfContents,
   BottomNavMenu,
   BottomNavMenuItem,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuGroup,
+  SidebarMenuSection,
 } = nav;
+
+/** Whether the sidebar demo shows as an icon rail. */
+const isRail = ref(false);
 
 const covered = [
   'Breadcrumb',
@@ -70,6 +77,10 @@ const covered = [
   'MenuSub',
   'BottomNavMenu',
   'BottomNavMenuItem',
+  'SidebarMenu',
+  'SidebarMenuItem',
+  'SidebarMenuGroup',
+  'SidebarMenuSection',
   'MenuSubTrigger',
   'MenuSubContent',
   'DropdownMenu',
@@ -282,6 +293,40 @@ const menuAnchor = ref<HTMLElement | null>(null);
             </div>
           </template>
         </ScrollSpy>
+      </Demo>
+
+      <Demo name="SidebarMenu" note="section + collapsible group · toggle the icon rail below">
+        <div class="flex flex-col items-start gap-2">
+          <div :class="isRail ? 'w-14' : 'w-56'" class="rounded-md border border-border p-2 transition-[width]">
+            <SidebarMenu :is-collapsed="isRail">
+              <SidebarMenuSection label="Workspace">
+                <SidebarMenuItem href="#home" is-active>
+                  <template #icon><Home class="size-4" /></template>
+                  Home
+                </SidebarMenuItem>
+                <SidebarMenuItem href="#inbox">
+                  <template #icon><Inbox class="size-4" /></template>
+                  <template #trailing><CountBadge :value="12" /></template>
+                  Inbox
+                </SidebarMenuItem>
+                <SidebarMenuGroup label="Projects" default-open>
+                  <template #icon><FolderKanban class="size-4" /></template>
+                  <SidebarMenuItem href="#atlas">Atlas</SidebarMenuItem>
+                  <SidebarMenuItem href="#beacon">Beacon</SidebarMenuItem>
+                </SidebarMenuGroup>
+              </SidebarMenuSection>
+              <SidebarMenuSection label="Account">
+                <SidebarMenuItem href="#settings">
+                  <template #icon><Settings class="size-4" /></template>
+                  Settings
+                </SidebarMenuItem>
+              </SidebarMenuSection>
+            </SidebarMenu>
+          </div>
+          <Button size="sm" variant="soft" @click="isRail = !isRail">{{
+            isRail ? 'Expand' : 'Collapse to rail'
+          }}</Button>
+        </div>
       </Demo>
 
       <Demo name="BottomNavMenu" note="in flow here (is-fixed=false) · Inbox carries a badge">

@@ -288,7 +288,7 @@ Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-
 | G7 | `DataTable` depth — selection, expandable rows, sticky header, loading state on `foundation/selection`; declined controlled toggles revert | ✅ 12 DOM tests |
 | G8 | Hierarchical pickers — `TreeSelectPicker`, `CascaderPicker`, `TransferPicker` | ⬜ |
 | G9 | Period pickers — `MonthPicker`, `YearPicker` on a shared index-space `PeriodGrid` | ✅ 6 DOM tests |
-| G10 | App navigation — `SidebarMenu`, `BottomNavMenu` | 🟡 `BottomNavMenu` ✅ 3 DOM tests · `SidebarMenu` ⬜ |
+| G10 | App navigation — `SidebarMenu` (+ `Item`/`Group`/`Section`, icon rail), `BottomNavMenu` | ✅ 8 DOM tests |
 | G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignaturePad` | ⬜ |
 | G12 | `MentionInput` | ⬜ |
 | G13 | Small gaps — `KanbanBoard`, `MasonryLayout`, `OverflowGroup`, `TimezonePicker`, `DurationInput` (`Tag` already closes via `@close`) | 🟡 masonry · overflow · time zone ✅ 9 DOM tests · `KanbanBoard`, `DurationInput` ⬜ |

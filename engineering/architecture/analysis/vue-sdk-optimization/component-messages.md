@@ -191,6 +191,7 @@ in their capability specifications and are not inferred by this catalogue.
 | `SelectPicker.loadingLabel` | Loading options… | [SelectPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/selectPicker/SelectPicker.vue) |
 | `SelectPickerContent.noResultsLabel` | No results | [SelectPickerContent.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/selectPicker/SelectPickerContent.vue) |
 | `SelectPickerContent.searchPlaceholder` | Search… | [SelectPickerContent.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/selectPicker/SelectPickerContent.vue) |
+| `SidebarMenu.label` | Sidebar | [SidebarMenu.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/nav/sidebarMenu/SidebarMenu.vue) |
 | `SortableGroupHandle.dragToReorder` | Drag to reorder | [SortableGroupHandle.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/sortableGroup/SortableGroupHandle.vue) |
 | `Sparkline.ariaLabel` | Trend | [Sparkline.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/sparkline/Sparkline.vue) |
 | `SpeedDialGroupTrigger.label` | Toggle actions | [SpeedDialGroupTrigger.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/actions/speedDialGroup/SpeedDialGroupTrigger.vue) |

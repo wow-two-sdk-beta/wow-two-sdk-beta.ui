@@ -34,6 +34,10 @@ import {
   TableOfContents,
   BottomNavMenu,
   BottomNavMenuItem,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuGroup,
+  SidebarMenuSection,
 } from '../../../../../src/presentation/nav';
 import { h, type VNode } from 'vue';
 import { smokeCase, type SmokeCase } from './Example';
@@ -46,6 +50,7 @@ const inMenu = (node: VNode): VNode => h(Menu, { anchor: null, open: true }, () 
 const inMenuRadioGroup = (node: VNode): VNode => inMenu(h(MenuRadioGroup, { defaultValue: 'a' }, () => node));
 const inMenuSub = (node: VNode): VNode => inMenu(h(MenuSub, { defaultOpen: true }, () => node));
 const inBottomNav = (node: VNode): VNode => h(BottomNavMenu, { isFixed: false }, () => node);
+const inSidebar = (node: VNode): VNode => h(SidebarMenu, null, () => node);
 
 const inDropdownMenu = (node: VNode): VNode => h(DropdownMenu, { defaultOpen: true }, () => node);
 
@@ -100,6 +105,19 @@ export const navExamples: readonly SmokeCase[] = [
   smokeCase('BottomNavMenu', BottomNavMenu, { isFixed: false }, { slot: true }),
 
   smokeCase('BottomNavMenuItem', BottomNavMenuItem, { isActive: true }, { slot: true, wrap: inBottomNav }),
+
+  smokeCase('SidebarMenu', SidebarMenu, {}, { slot: true }),
+
+  smokeCase('SidebarMenuItem', SidebarMenuItem, { isActive: true }, { slot: true, wrap: inSidebar }),
+
+  smokeCase(
+    'SidebarMenuGroup',
+    SidebarMenuGroup,
+    { label: 'Projects', defaultOpen: true },
+    { slot: true, wrap: inSidebar },
+  ),
+
+  smokeCase('SidebarMenuSection', SidebarMenuSection, { label: 'Workspace' }, { slot: true, wrap: inSidebar }),
 
   smokeCase('DropdownMenu', DropdownMenu, {}, { slot: true }),
 

@@ -12,7 +12,7 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 | Area | Added |
 |---|---|
 | Menus (`presentation/nav`) | `MenuCheckboxItem`, `MenuRadioGroup` + `MenuRadioItem`, `MenuSub` + `MenuSubTrigger` + `MenuSubContent` — usable in `DropdownMenuContent`, `ContextMenuContent` and `MenubarContent` |
-| App navigation | `BottomNavMenu` + `BottomNavMenuItem` (mobile bottom bar, `asChild` router links, badges) |
+| App navigation | `BottomNavMenu` + `BottomNavMenuItem` (mobile bottom bar, `asChild` router links, badges); `SidebarMenu` + `SidebarMenuItem` / `SidebarMenuGroup` / `SidebarMenuSection` (icon rail via `isCollapsed`) |
 | Forms | `RatingPicker` (whole/half steps, clearable), `RangeSliderInput` (two thumbs, `commit` event), `TimezonePicker` (IANA ids, offset-labelled), `MonthPicker` (`Temporal.PlainYearMonth`), `YearPicker` |
 | Overlays | `ConfirmPopover` — inline confirm that awaits a promise from `@confirm` |
 | Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary`, `OverflowGroup` (first N items + counted marker) |

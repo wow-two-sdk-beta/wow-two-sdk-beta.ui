@@ -10,3 +10,4 @@ export * from './scrollSpy';
 export * from './tableOfContents';
 export * from './linkItem';
 export * from './bottomNavMenu';
+export * from './sidebarMenu';
