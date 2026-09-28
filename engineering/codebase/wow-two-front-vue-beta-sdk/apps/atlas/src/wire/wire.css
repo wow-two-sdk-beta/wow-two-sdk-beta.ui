@@ -1,0 +1,545 @@
+/* Wireframe kit. Every size is a multiple of `--u` — one "14 real pixels" step of the drawn device — so a wireframe
+   scales with its frame at any size (container query units), and `--d` scales spacing by density. Colours are mixed
+   from the active theme's tokens, so every wireframe reads in the chosen theme, light or dark. */
+
+.wf {
+  --w-canvas: color-mix(in oklab, var(--color-muted) 70%, var(--color-background));
+  --w-surface: var(--color-card, var(--color-background));
+  --w-chrome: var(--color-background);
+  --w-line: color-mix(in oklab, var(--color-foreground) 12%, transparent);
+  --w-ink: color-mix(in oklab, var(--color-foreground) 17%, transparent);
+  --w-ink-strong: color-mix(in oklab, var(--color-foreground) 34%, transparent);
+  --w-ink-soft: color-mix(in oklab, var(--color-foreground) 8%, transparent);
+  --w-accent: color-mix(in oklab, var(--color-primary) 72%, transparent);
+  --w-accent-soft: color-mix(in oklab, var(--color-primary) 18%, transparent);
+
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  background: var(--w-canvas);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  container-type: inline-size;
+  isolation: isolate;
+}
+
+.wf-desktop {
+  aspect-ratio: 16 / 10;
+}
+.wf-tablet {
+  aspect-ratio: 3 / 4;
+}
+.wf-phone {
+  aspect-ratio: 9 / 19;
+}
+
+/* The stage carries the device scale: the frame is the query container, the stage resolves its units. */
+.wf-stage {
+  --u: 1cqw;
+  --d: 1;
+  --g: 0px;
+  --r: calc(var(--u) * 0.45);
+  --w-shadow: 0 calc(var(--u) * 0.3) calc(var(--u) * 1.4) color-mix(in oklab, var(--color-foreground) 14%, transparent);
+
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+.wf-tablet .wf-stage {
+  --u: 1.85cqw;
+}
+.wf-phone .wf-stage {
+  --u: 3.6cqw;
+}
+.wf-compact .wf-stage {
+  --d: 0.78;
+}
+.wf-spacious .wf-stage {
+  --d: 1.3;
+}
+.wf-cards .wf-stage {
+  --g: calc(var(--u) * 0.8 * var(--d));
+  --r: calc(var(--u) * 0.7);
+}
+.wf-islands .wf-stage {
+  --g: calc(var(--u) * 1.1 * var(--d));
+  --r: calc(var(--u) * 1.2);
+}
+.wf-glass .wf-stage {
+  --g: calc(var(--u) * 0.9 * var(--d));
+  --r: calc(var(--u) * 0.9);
+}
+
+.wf-glass {
+  background:
+    radial-gradient(60% 55% at 12% 8%, color-mix(in oklab, var(--color-primary) 32%, transparent), transparent 70%),
+    radial-gradient(
+      50% 50% at 92% 88%,
+      color-mix(in oklab, var(--color-accent, var(--color-primary)) 26%, transparent),
+      transparent 70%
+    ),
+    var(--w-canvas);
+}
+
+/* ---- primitives ---- */
+.wl {
+  display: block;
+  height: calc(var(--u) * 0.5);
+  border-radius: 999px;
+  background: var(--w-ink);
+  flex-shrink: 0;
+}
+.wl-strong {
+  height: calc(var(--u) * 0.85);
+  background: var(--w-ink-strong);
+}
+.wl-soft {
+  background: var(--w-ink-soft);
+}
+.wl-accent {
+  background: var(--w-accent);
+}
+.wdot {
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--u) * 1.15);
+  height: calc(var(--u) * 1.15);
+  border-radius: calc(var(--u) * 0.3);
+  background: var(--w-ink);
+}
+.wdot-round {
+  border-radius: 999px;
+}
+.wdot-accent {
+  background: var(--w-accent);
+}
+.wdot-lg {
+  width: calc(var(--u) * 2);
+  height: calc(var(--u) * 2);
+}
+.wbtn {
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--u) * 5);
+  height: calc(var(--u) * 1.9 * var(--d));
+  border-radius: calc(var(--r) * 0.8 + 1px);
+  background: var(--w-ink-soft);
+  border: 1px solid var(--w-line);
+}
+.wbtn-primary {
+  background: var(--w-accent);
+  border-color: transparent;
+}
+.wchip {
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--u) * 3.4);
+  height: calc(var(--u) * 1.3 * var(--d));
+  border-radius: 999px;
+  background: var(--w-ink-soft);
+  border: 1px solid var(--w-line);
+}
+.wchip-on {
+  background: var(--w-accent-soft);
+  border-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+}
+.winput {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 0.5);
+  height: calc(var(--u) * 2 * var(--d));
+  padding: 0 calc(var(--u) * 0.6);
+  border-radius: calc(var(--r) * 0.8 + 1px);
+  border: 1px solid var(--w-line);
+  background: var(--w-chrome);
+}
+.wimg {
+  display: block;
+  border-radius: calc(var(--r) * 0.8 + 1px);
+  background:
+    linear-gradient(160deg, transparent 55%, var(--w-ink-soft) 55%),
+    linear-gradient(135deg, var(--w-ink-soft), var(--w-ink));
+}
+
+/* ---- regions ---- */
+.wtop {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.1);
+  flex-shrink: 0;
+  height: calc(var(--u) * 3.4 * var(--d));
+  padding: 0 calc(var(--u) * 1.3);
+  background: var(--w-chrome);
+  border-bottom: 1px solid var(--w-line);
+}
+.wf-islands .wtop {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+.wf-glass .wtop {
+  margin: var(--g) var(--g) 0;
+  border: 1px solid color-mix(in oklab, var(--color-foreground) 10%, transparent);
+  border-radius: var(--r);
+  background: color-mix(in oklab, var(--w-chrome) 55%, transparent);
+  backdrop-filter: blur(8px);
+}
+.wlocal {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 0.7);
+  flex-shrink: 0;
+  height: calc(var(--u) * 2.8 * var(--d));
+  padding: 0 calc(var(--u) * 1.3);
+  border-bottom: 1px solid var(--w-line);
+  background: var(--w-surface);
+}
+.wbody {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: var(--g);
+  padding: var(--g);
+}
+.wregion {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--w-surface);
+}
+.wf-flat .wregion + .wregion {
+  border-left: 1px solid var(--w-line);
+}
+.wf-cards .wregion,
+.wf-glass .wregion {
+  border: 1px solid var(--w-line);
+  border-radius: var(--r);
+}
+.wf-islands .wregion {
+  border-radius: var(--r);
+  box-shadow: var(--w-shadow);
+}
+.wf-glass .wside,
+.wf-glass .wrail {
+  background: color-mix(in oklab, var(--w-surface) 55%, transparent);
+  backdrop-filter: blur(8px);
+}
+.wside {
+  width: calc(var(--u) * 14.5);
+  flex-shrink: 0;
+  gap: calc(var(--u) * 0.55 * var(--d));
+  padding: calc(var(--u) * 1 * var(--d)) calc(var(--u) * 0.9);
+  background: var(--w-chrome);
+}
+.wrail {
+  width: calc(var(--u) * 3.8);
+  flex-shrink: 0;
+  align-items: center;
+  gap: calc(var(--u) * 1.1 * var(--d));
+  padding-top: calc(var(--u) * 1.1);
+  background: var(--w-chrome);
+}
+.wpanel {
+  width: calc(var(--u) * 19);
+  flex-shrink: 0;
+  gap: calc(var(--u) * 0.8 * var(--d));
+  padding: calc(var(--u) * 1 * var(--d));
+}
+.wpanel-narrow {
+  width: calc(var(--u) * 13);
+}
+.wmain {
+  flex: 1;
+  min-width: 0;
+}
+.wmain-canvas {
+  background: transparent;
+}
+.wf-flat .wmain-canvas,
+.wf-cards .wmain-canvas {
+  background: var(--w-canvas);
+}
+
+.wisland {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.8 * var(--d));
+  width: calc(var(--u) * 17);
+  padding: calc(var(--u) * 1 * var(--d));
+  border-radius: calc(var(--u) * 1.2);
+  background: var(--w-surface);
+  box-shadow: var(--w-shadow);
+  border: 1px solid var(--w-line);
+}
+.wisland-leading {
+  top: calc(var(--u) * 1.2);
+  bottom: calc(var(--u) * 1.2);
+  left: calc(var(--u) * 1.2);
+}
+.wisland-trailing {
+  top: calc(var(--u) * 1.2);
+  right: calc(var(--u) * 1.2);
+  max-height: 72%;
+}
+.wisland-dock {
+  left: 50%;
+  bottom: calc(var(--u) * 1.2);
+  width: auto;
+  transform: translateX(-50%);
+  flex-direction: row;
+  align-items: center;
+  padding: calc(var(--u) * 0.7) calc(var(--u) * 1);
+  border-radius: 999px;
+}
+.wcorner {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.4);
+  padding: calc(var(--u) * 0.5);
+  border-radius: calc(var(--r) + 2px);
+  background: var(--w-surface);
+  border: 1px solid var(--w-line);
+}
+
+.wdrawer {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 38%;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.8 * var(--d));
+  padding: calc(var(--u) * 1.2 * var(--d));
+  background: var(--w-surface);
+  border-left: 1px solid var(--w-line);
+  box-shadow: var(--w-shadow);
+}
+.wscrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: color-mix(in oklab, var(--color-foreground) 12%, transparent);
+}
+
+.wsheet {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--u) * 0.6);
+  right: calc(var(--u) * 0.6);
+  bottom: calc(var(--u) * 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.7);
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 1.1) calc(var(--u) * 1.2);
+  border-radius: calc(var(--u) * 1.4);
+  background: var(--w-surface);
+  box-shadow: var(--w-shadow);
+  border: 1px solid var(--w-line);
+}
+.wsheet-handle {
+  align-self: center;
+  width: calc(var(--u) * 3);
+  height: calc(var(--u) * 0.4);
+  border-radius: 999px;
+  background: var(--w-ink-strong);
+}
+
+.wtabs {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-shrink: 0;
+  height: calc(var(--u) * 4.2);
+  border-top: 1px solid var(--w-line);
+  background: var(--w-chrome);
+}
+.wtab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--u) * 0.35);
+}
+
+/* ---- content helpers ---- */
+.wpad {
+  padding: calc(var(--u) * 1.2 * var(--d));
+}
+.wcol {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.7 * var(--d));
+}
+.wrow {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 0.8);
+}
+.wgrow {
+  flex: 1;
+  min-width: 0;
+}
+.wfill {
+  flex: 1;
+  min-height: 0;
+}
+.wcard {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.6 * var(--d));
+  padding: calc(var(--u) * 0.8 * var(--d));
+  border-radius: calc(var(--r) * 0.9 + 2px);
+  border: 1px solid var(--w-line);
+  background: var(--w-surface);
+}
+.wsel {
+  background: var(--w-accent-soft);
+  border-radius: calc(var(--r) * 0.8 + 1px);
+}
+.witem {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 0.7);
+  padding: calc(var(--u) * 0.45 * var(--d)) calc(var(--u) * 0.5);
+}
+.wtable-row {
+  display: grid;
+  grid-template-columns: calc(var(--u) * 1.1) 2.2fr 1.2fr 1fr 1fr 0.8fr;
+  align-items: center;
+  gap: calc(var(--u) * 1);
+  padding: calc(var(--u) * 0.7 * var(--d)) 0;
+  border-bottom: 1px solid var(--w-line);
+}
+.wkanban {
+  display: flex;
+  gap: calc(var(--u) * 0.9);
+  flex: 1;
+  min-height: 0;
+}
+.wkanban-col {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.6 * var(--d));
+  flex: 1;
+  min-width: 0;
+  padding: calc(var(--u) * 0.7);
+  border-radius: calc(var(--r) * 0.9 + 2px);
+  background: var(--w-ink-soft);
+}
+.wgrid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
+  gap: calc(var(--u) * 0.9 * var(--d));
+}
+.wbars {
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--u) * 0.35);
+  height: calc(var(--u) * 6);
+}
+.wbars > span {
+  flex: 1;
+  border-radius: calc(var(--u) * 0.2) calc(var(--u) * 0.2) 0 0;
+  background: var(--w-ink);
+}
+.wbars > span:nth-child(3n) {
+  background: var(--w-accent);
+}
+.wmap {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(28deg, transparent 47%, var(--w-ink) 47.4%, var(--w-ink) 48.2%, transparent 48.6%),
+    linear-gradient(-62deg, transparent 58%, var(--w-ink) 58.3%, var(--w-ink) 59%, transparent 59.4%),
+    linear-gradient(90deg, transparent 30%, var(--w-ink-soft) 30.2%, var(--w-ink-soft) 30.8%, transparent 31%),
+    linear-gradient(0deg, transparent 64%, var(--w-ink-soft) 64.2%, var(--w-ink-soft) 64.9%, transparent 65.1%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(var(--u) * 5),
+      var(--w-ink-soft) calc(var(--u) * 5) calc(var(--u) * 5.12)
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 calc(var(--u) * 5),
+      var(--w-ink-soft) calc(var(--u) * 5) calc(var(--u) * 5.12)
+    ),
+    color-mix(in oklab, var(--w-canvas) 80%, var(--color-foreground) 4%);
+}
+.wmap-route {
+  position: absolute;
+  left: 18%;
+  top: 38%;
+  width: 52%;
+  height: calc(var(--u) * 0.55);
+  border-radius: 999px;
+  background: var(--w-accent);
+  transform: rotate(-9deg);
+  transform-origin: left center;
+}
+.wscene {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    45% 55% at 50% 52%,
+    color-mix(in oklab, var(--w-surface) 85%, transparent),
+    transparent 75%
+  );
+}
+.wscene-object {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: calc(var(--u) * 9);
+  height: calc(var(--u) * 16);
+  transform: translate(-50%, -52%);
+  border-radius: 45% 45% 18% 18% / 30% 30% 12% 12%;
+  background: linear-gradient(180deg, var(--w-ink-strong), var(--w-ink));
+}
+.wscene-floor {
+  position: absolute;
+  left: 50%;
+  top: 72%;
+  width: calc(var(--u) * 12);
+  height: calc(var(--u) * 1.6);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--w-ink-soft);
+}
+.wbubble {
+  max-width: 62%;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.4);
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 1);
+  border-radius: calc(var(--u) * 1);
+  background: var(--w-ink-soft);
+}
+.wbubble-own {
+  align-self: flex-end;
+  background: var(--w-accent-soft);
+}
+.wcal {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 1px;
+  flex: 1;
+  min-height: 0;
+  background: var(--w-line);
+  border: 1px solid var(--w-line);
+}
+.wcal > div {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 0.3);
+  padding: calc(var(--u) * 0.35);
+  background: var(--w-surface);
+}
