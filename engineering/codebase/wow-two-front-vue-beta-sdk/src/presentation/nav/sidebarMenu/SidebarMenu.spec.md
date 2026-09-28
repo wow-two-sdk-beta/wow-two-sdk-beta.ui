@@ -23,6 +23,7 @@ Public import: `import { SidebarMenu, SidebarMenuItem, SidebarMenuGroup, Sidebar
 
 - A disclosure: the toggle row carries `aria-expanded` and `aria-controls`, and the nested list is named by `label`. Closed lists stay in the DOM, hidden.
 - `open` / `update:open` and `defaultOpen` follow the shared controlled-state helper. Open the group that holds the active route through `defaultOpen`.
+- In the rail a group shows only its toggle: the nested list stays hidden (`aria-expanded="false"`), and its open state applies once the menu expands.
 
 ### SidebarMenuSection
 
@@ -30,48 +31,48 @@ Public import: `import { SidebarMenu, SidebarMenuItem, SidebarMenuGroup, Sidebar
 
 ## Props
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `isCollapsed` | `boolean` | no | `false` | Shows the menu as an icon rail. |
+| Prop          | Type      | Required | Default | Meaning                         |
+| ------------- | --------- | -------- | ------- | ------------------------------- |
+| `isCollapsed` | `boolean` | no       | `false` | Shows the menu as an icon rail. |
 
 ### SidebarMenuItem
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `isActive` | `boolean` | no | `undefined` | Marks the current place. |
-| `asChild` | `boolean` | no | `false` | Renders the slotted router link instead of an `<a>`. |
+| Prop       | Type      | Required | Default     | Meaning                                              |
+| ---------- | --------- | -------- | ----------- | ---------------------------------------------------- |
+| `isActive` | `boolean` | no       | `undefined` | Marks the current place.                             |
+| `asChild`  | `boolean` | no       | `false`     | Renders the slotted router link instead of an `<a>`. |
 
 ### SidebarMenuGroup
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `label` | `string` | yes | — | The toggle text and the nested list's name. |
-| `open` | `boolean` | no | `undefined` | The open state, controlled — the `v-model:open` target. |
-| `defaultOpen` | `boolean` | no | `false` | The initial open state when uncontrolled. |
+| Prop          | Type      | Required | Default     | Meaning                                                 |
+| ------------- | --------- | -------- | ----------- | ------------------------------------------------------- |
+| `label`       | `string`  | yes      | —           | The toggle text and the nested list's name.             |
+| `open`        | `boolean` | no       | `undefined` | The open state, controlled — the `v-model:open` target. |
+| `defaultOpen` | `boolean` | no       | `false`     | The initial open state when uncontrolled.               |
 
 ### SidebarMenuSection
 
-| Prop | Type | Required | Default | Meaning |
-|---|---|---|---|---|
-| `label` | `string` | yes | — | The section heading and the list's name. |
+| Prop    | Type     | Required | Default | Meaning                                  |
+| ------- | -------- | -------- | ------- | ---------------------------------------- |
+| `label` | `string` | yes      | —       | The section heading and the list's name. |
 
 ## Emits
 
-| Part | Event | Signature | Meaning |
-|---|---|---|---|
+| Part               | Event         | Signature                         | Meaning                                          |
+| ------------------ | ------------- | --------------------------------- | ------------------------------------------------ |
 | `SidebarMenuGroup` | `update:open` | `'update:open': [open: boolean];` | Fires when the reader opens or closes the group. |
 
 ## Slots
 
-| Part | Slot | Signature | Meaning |
-|---|---|---|---|
-| `SidebarMenu` | `default` | `default(): unknown` | The items, groups and sections. |
-| `SidebarMenuItem` | `default` | `default(): unknown` | The label, or the router link under `asChild`. |
-| `SidebarMenuItem` | `icon` | `icon(): unknown` | The leading icon. |
-| `SidebarMenuItem` | `trailing` | `trailing(): unknown` | The count or status dot; hidden in the rail. |
-| `SidebarMenuGroup` | `default` | `default(): unknown` | The nested items. |
-| `SidebarMenuGroup` | `icon` | `icon(): unknown` | The toggle row's icon. |
-| `SidebarMenuSection` | `default` | `default(): unknown` | The section's items and groups. |
+| Part                 | Slot       | Signature             | Meaning                                        |
+| -------------------- | ---------- | --------------------- | ---------------------------------------------- |
+| `SidebarMenu`        | `default`  | `default(): unknown`  | The items, groups and sections.                |
+| `SidebarMenuItem`    | `default`  | `default(): unknown`  | The label, or the router link under `asChild`. |
+| `SidebarMenuItem`    | `icon`     | `icon(): unknown`     | The leading icon.                              |
+| `SidebarMenuItem`    | `trailing` | `trailing(): unknown` | The count or status dot; hidden in the rail.   |
+| `SidebarMenuGroup`   | `default`  | `default(): unknown`  | The nested items.                              |
+| `SidebarMenuGroup`   | `icon`     | `icon(): unknown`     | The toggle row's icon.                         |
+| `SidebarMenuSection` | `default`  | `default(): unknown`  | The section's items and groups.                |
 
 ## Exposed handle
 

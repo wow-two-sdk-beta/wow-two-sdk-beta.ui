@@ -80,6 +80,7 @@ import type { ClassValue } from 'clsx';
 import { AriaAttribute } from '../../../foundation/dom';
 import { useLocale } from '../../../foundation/i18n';
 import { useId } from '../../../foundation/identifiers';
+import { useResizeObserver } from '../../../foundation/observers';
 import { useFormControl } from '../../../foundation/primitives';
 import { useControlled } from '../../../foundation/state';
 import { cn } from '../../../foundation/styles';
@@ -153,9 +154,37 @@ const crop = computed<CropRect>(() => draft.value ?? value.value ?? defaultCrop.
 
 const isLoaded = computed(() => natural.value.width > 0 && natural.value.height > 0);
 
+/* Sized from the natural width, capped by the container and by `maxHeight` through the ratio — never by
+   `max-height`, which would squash a width-sized image. The px width also gives shrink-wrapping ancestors a
+   preferred size, which an SVG with only a viewBox lacks. */
+const imageStyle = computed(() => {
+  const { width, height } = natural.value;
+  if (!isLoaded.value) return { maxWidth: '100%', maxHeight: props.maxHeight };
+  return { width: `${width}px`, height: 'auto', maxWidth: `min(100%, calc(${props.maxHeight} * ${width / height}))` };
+});
+
+/* The frame tracks the image's rendered box, so the crop never depends on a wrapper shrinking to fit an image
+   that has no intrinsic width (an SVG with only a viewBox collapses a fit-content wrapper to zero). */
+const frameStyle = shallowRef<Record<string, string>>({});
+
+function measureFrame(): void {
+  const element = image.value;
+  if (!element) return;
+  frameStyle.value = {
+    left: `${element.offsetLeft}px`,
+    top: `${element.offsetTop}px`,
+    width: `${element.offsetWidth}px`,
+    height: `${element.offsetHeight}px`,
+  };
+}
+
+useResizeObserver(image, measureFrame);
+
 function onLoad(): void {
   const element = image.value;
-  if (element) natural.value = { width: element.naturalWidth, height: element.naturalHeight };
+  if (!element) return;
+  natural.value = { width: element.naturalWidth, height: element.naturalHeight };
+  measureFrame();
 }
 
 /** The crop box's placement as percentages of the rendered image. */
@@ -331,12 +360,12 @@ const rest = computed(() => {
 });
 
 const rootClass = computed(() =>
-  cn('relative inline-block max-w-full select-none', disabled.value && 'opacity-60', attrs.class as ClassValue),
+  cn('relative block w-full select-none', disabled.value && 'opacity-60', attrs.class as ClassValue),
 );
 
 const boxClass = computed(() =>
   cn(
-    'absolute outline-2 outline-white shadow-[0_0_0_9999px_rgb(0_0_0/0.5)]',
+    'absolute outline-2 outline-white',
     'focus-visible:outline-primary',
     locked.value ? 'cursor-default' : 'cursor-move touch-none',
   ),
@@ -345,16 +374,21 @@ const boxClass = computed(() =>
 
 <template>
   <div v-bind="rest" :class="rootClass" :data-dragging="draft ? '' : undefined">
-    <div class="relative overflow-hidden rounded-md">
-      <img
-        ref="image"
-        :src="props.src"
-        :alt="props.alt"
-        draggable="false"
-        class="block h-auto max-w-full"
-        :style="{ maxHeight: props.maxHeight }"
-        @load="onLoad"
-      />
+    <img
+      ref="image"
+      :src="props.src"
+      :alt="props.alt"
+      draggable="false"
+      class="block rounded-md"
+      :style="imageStyle"
+      @load="onLoad"
+    />
+    <!-- The dimmed surround is clipped to the image; the interactive box sits in an unclipped layer so its
+         handles stay whole at the image edge. -->
+    <div class="pointer-events-none absolute overflow-hidden rounded-md" :style="frameStyle" aria-hidden="true">
+      <div class="absolute shadow-[0_0_0_9999px_rgb(0_0_0/0.5)]" :style="boxStyle" />
+    </div>
+    <div class="absolute" :style="frameStyle">
       <div
         role="group"
         :aria-label="areaName"

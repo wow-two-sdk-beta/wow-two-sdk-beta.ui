@@ -55,6 +55,10 @@ const controlled = useControlled<boolean>({
 });
 const isOpen = controlled.value;
 
+/* The rail has no room for nested rows (they often lack icons), so a group shows only its toggle there; its
+   open state still applies once the menu expands. */
+const isShown = computed(() => isOpen.value && !context.isCollapsed);
+
 function toggle(): void {
   controlled.setValue(!isOpen.value);
 }
@@ -81,7 +85,7 @@ const listClasses = computed(() =>
 
 <template>
   <li v-bind="rest" :class="rootClasses" :data-state="isOpen ? 'open' : 'closed'">
-    <button type="button" :aria-expanded="isOpen" :aria-controls="listId" :class="toggleClasses" @click="toggle">
+    <button type="button" :aria-expanded="isShown" :aria-controls="listId" :class="toggleClasses" @click="toggle">
       <span v-if="$slots.icon" class="inline-flex shrink-0 text-muted-foreground" aria-hidden="true">
         <slot name="icon" />
       </span>
@@ -92,7 +96,7 @@ const listClasses = computed(() =>
         aria-hidden="true"
       />
     </button>
-    <ul v-show="isOpen" :id="listId" role="list" :aria-label="props.label" :class="listClasses">
+    <ul v-show="isShown" :id="listId" role="list" :aria-label="props.label" :class="listClasses">
       <slot />
     </ul>
   </li>

@@ -67,7 +67,7 @@ describe('SidebarMenu', () => {
     expect(toggle.attributes('aria-expanded')).toBe('true');
   });
 
-  it('turns labels into assistive-only text in the rail and drops trailing counts', () => {
+  it('turns labels into assistive-only text in the rail and drops trailing counts', async () => {
     const wrapper = mountSidebar({ isCollapsed: true });
     expect(wrapper.get('nav').attributes('data-collapsed')).toBe('');
     const inbox = wrapper.get('a[href="/inbox"]');
@@ -75,6 +75,12 @@ describe('SidebarMenu', () => {
     expect(inbox.text()).toBe('Inbox');
     expect(wrapper.get('button[aria-expanded] span.sr-only').text()).toBe('Projects');
     expect(wrapper.get('button[aria-expanded]').find('svg').exists()).toBe(false);
+    const railToggle = wrapper.get('button[aria-expanded]');
+    await railToggle.trigger('click');
+    expect(railToggle.attributes('aria-expanded')).toBe('false');
+    expect((wrapper.get(`#${railToggle.attributes('aria-controls')}`).element as HTMLElement).style.display).toBe(
+      'none',
+    );
     const sectionLabelId = wrapper.get('ul[aria-labelledby]').attributes('aria-labelledby');
     expect(wrapper.get(`#${sectionLabelId}`).classes()).toContain('sr-only');
   });

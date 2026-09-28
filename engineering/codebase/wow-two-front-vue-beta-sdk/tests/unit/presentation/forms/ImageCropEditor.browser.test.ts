@@ -67,3 +67,24 @@ it('drags a square crop onto the blue half and renders exactly those pixels', as
   probe.drawImage(cropped, 0, 0);
   expect([...probe.getImageData(50, 50, 1, 1).data]).toEqual([0, 0, 255, 255]);
 });
+
+it('keeps its size inside a shrink-wrapping parent and lays the crop over the rendered image', async () => {
+  const host = document.createElement('div');
+  host.style.cssText = 'display: flex; flex-direction: column; align-items: flex-start; width: 480px';
+  document.body.append(host);
+  const svg = encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640"><rect width="960" height="640"/></svg>',
+  );
+  wrapper = mount(ImageCropEditor, {
+    props: { src: `data:image/svg+xml;charset=utf-8,${svg}`, maxHeight: '200px' },
+    attachTo: host,
+  });
+  const image = wrapper.get('img').element as HTMLImageElement;
+  await expect.poll(() => image.getBoundingClientRect().width).toBeGreaterThan(100);
+  const imageBox = image.getBoundingClientRect();
+  const crop = wrapper.get('[data-crop-box]').element.getBoundingClientRect();
+  // The default free crop is the middle 80% of the rendered image.
+  expect(crop.width).toBeCloseTo(imageBox.width * 0.8, 0);
+  expect(crop.left).toBeCloseTo(imageBox.left + imageBox.width * 0.1, 0);
+  expect(crop.top).toBeCloseTo(imageBox.top + imageBox.height * 0.1, 0);
+});

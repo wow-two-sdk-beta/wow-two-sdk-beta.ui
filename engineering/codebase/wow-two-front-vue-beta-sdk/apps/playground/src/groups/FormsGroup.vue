@@ -327,7 +327,8 @@ const REGIONS = [
 const region = ref<string[] | null>(null);
 /** An inline SVG "photo", so the crop demo needs no network. */
 const CROP_PHOTO = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640"><defs><linearGradient id="s" x2="0" y2="1">' +
+  '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640">' +
+    '<defs><linearGradient id="s" x2="0" y2="1">' +
     '<stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#fde68a"/></linearGradient></defs>' +
     '<rect width="960" height="640" fill="url(#s)"/><circle cx="700" cy="200" r="90" fill="#f97316"/>' +
     '<path d="M0 520 L240 300 L420 480 L600 260 L960 560 V640 H0Z" fill="#166534"/></svg>',
