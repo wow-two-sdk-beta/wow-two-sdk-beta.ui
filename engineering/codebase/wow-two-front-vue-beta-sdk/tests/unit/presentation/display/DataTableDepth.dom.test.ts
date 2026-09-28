@@ -207,3 +207,19 @@ describe('DataTable ordering', () => {
     expect(names('desc')).toEqual(['High', 'Mid', 'Low', 'None']);
   });
 });
+
+describe('DataTable column renderers', () => {
+  it('mounts a VNode a column renderer returns and prints every other value as text', () => {
+    const richColumns: ReadonlyArray<DataTableColumn<Person>> = [
+      { key: 'name', header: 'Name', cell: (row) => h('strong', { 'data-name': row.id }, row.name) },
+      { key: 'tags', header: 'Tags', cell: (row) => [h('em', row.name[0]), h('em', String(row.age))] },
+      { key: 'meta', header: 'Meta', accessor: (row) => ({ age: row.age }) },
+      { key: 'none', header: 'None', accessor: () => null },
+    ];
+    const [first] = bodyRows(mountTable({ columns: richColumns }));
+    expect(first!.cells[0]!.querySelector('strong[data-name=p1]')?.textContent).toBe('Cleo');
+    expect([...first!.cells[1]!.querySelectorAll('em')].map((node) => node.textContent)).toEqual(['C', '41']);
+    expect(first!.cells[2]!.textContent?.replace(/\s/g, '')).toBe('{"age":41}');
+    expect(first!.cells[3]!.textContent).toBe('');
+  });
+});

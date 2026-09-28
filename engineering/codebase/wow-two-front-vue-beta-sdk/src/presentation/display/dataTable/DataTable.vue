@@ -39,8 +39,9 @@ export interface DataTableColumn<T> {
   readonly header: string | number;
   readonly accessor?: (row: T) => unknown;
   /**
-   * The per-cell renderer. Returns a value rendered as text; for rich markup
-   * use the `cell` scoped slot, which receives `{ row, column, index }`.
+   * The per-cell renderer — this column's rich override. Returns text, a number, a VNode (`h(Badge, …)`) or an
+   * array of VNodes; any other value renders as its display string. The `cell` scoped slot overrides every
+   * column at once.
    */
   readonly cell?: (row: T, index: number) => unknown;
   readonly isSortable?: boolean;
@@ -117,7 +118,7 @@ function sameKeys(a: ReadonlyArray<SelectionKey>, b: ReadonlyArray<SelectionKey>
 </script>
 
 <script setup lang="ts" generic="T">
-import { computed } from 'vue';
+import { computed, isVNode, toDisplayString, type FunctionalComponent, type VNodeChild } from 'vue';
 import { useLocale } from '../../../foundation/i18n';
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronRight } from 'lucide-vue-next';
 import { useId } from '../../../foundation/identifiers';
@@ -379,6 +380,17 @@ function renderCell(column: DataTableColumn<T>, row: T, index: number): unknown 
   return null;
 }
 
+/*
+ * Renders a cell value: VNodes (and arrays of them) mount as markup, everything else as its display string.
+ * Interpolating a VNode instead would JSON-stringify it — which throws on the VNode's circular component link.
+ */
+const CellContent: FunctionalComponent<{ value: unknown }> = ({ value }): VNodeChild => {
+  if (isVNode(value)) return value;
+  if (Array.isArray(value) && value.length > 0 && value.every((item) => isVNode(item))) return value as VNodeChild;
+  return toDisplayString(value);
+};
+CellContent.props = ['value'];
+
 /** The current selection as a model state, carrying the range anchor. */
 function selectionState(): SelectionState<SelectionKey> {
   return createSelection(props.selectionMode, selectedKeys.value, selectionAnchor);
@@ -524,9 +536,9 @@ const ExpandButtonClass =
               />
             </TableCell>
             <TableCell v-for="column in columns" :key="column.key" :class="alignClass(column.align)">
-              <slot name="cell" :row="row.row" :column="column" :index="row.index">{{
-                renderCell(column, row.row, row.index)
-              }}</slot>
+              <slot name="cell" :row="row.row" :column="column" :index="row.index"
+                ><CellContent :value="renderCell(column, row.row, row.index)"
+              /></slot>
             </TableCell>
           </TableRow>
           <TableRow v-if="row.isExpandable && row.isExpanded" :id="row.detailId" data-detail-row>

@@ -48,6 +48,13 @@ Rows with `onRowClick` are keyboard focusable and activate through Enter/Space. 
 their own keyboard behavior. Supply a stable `rowKey` for rows that reorder.
 Regression: `tests/unit/presentation/display/CalendarAndTable.dom.test.ts`.
 
+## Column renderers
+
+`DataTableColumn<T>.cell?: (row: T, index: number) => unknown` is one column's rich override: a VNode
+(`h(Badge, …)`) or an array of VNodes mounts as markup, and any other value renders as its display string,
+like an accessor's. The `cell` scoped slot replaces every column at once.
+Regression: `tests/unit/presentation/display/DataTableDepth.dom.test.ts`.
+
 ## Selection, expansion and loading
 
 - Row keys come from `rowKey(row, dataIndex)`, or the data index without one; sorting never changes a key.
