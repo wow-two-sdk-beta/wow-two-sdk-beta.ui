@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue';
+import { computed, defineAsyncComponent, shallowRef, watch } from 'vue';
+import { Density } from '@wow-two-beta/ui-vue/foundation/styles';
 import { ArrowRight } from 'lucide-vue-next';
 import { findArchetype } from '../content/layouts';
 import { Screens, findScreen } from '../content/screens';
-import { href, route } from '../router';
+import { OptionLabels } from '../content/model';
+import { href, replaceQuery, route } from '../router';
+import ChoiceChips from '../shell/ChoiceChips.vue';
 import LayoutWire from '../wire/LayoutWire.vue';
 
 /* The wireframes' real counterparts: each screen is an archetype built only from SDK components, so a layout
@@ -23,6 +26,15 @@ const Views = {
 const screen = computed(() => findScreen(route.value.id) ?? Screens[0]!);
 const archetype = computed(() => findArchetype(screen.value.archetype));
 const view = computed(() => Views[screen.value.id as keyof typeof Views]);
+
+/* The SDK's `data-density` on the frame rescales every component inside it; the choice rides in the link. */
+function readDensity(value: string | null): Density {
+  return value === Density.Compact || value === Density.Spacious ? value : Density.Comfortable;
+}
+const density = shallowRef<Density>(readDensity(route.value.query.get('density')));
+watch(density, (value) => {
+  replaceQuery(value === Density.Comfortable ? {} : { density: value });
+});
 </script>
 
 <template>
@@ -77,7 +89,17 @@ const view = computed(() => Views[screen.value.id as keyof typeof Views]);
       </div>
     </section>
 
-    <div class="h-[680px] overflow-hidden rounded-lg border border-border bg-background shadow-sm">
+    <ChoiceChips
+      label="Density"
+      :options="OptionLabels.density"
+      :model-value="density"
+      @update:model-value="(value) => (density = readDensity(value))"
+    />
+
+    <div
+      class="h-[680px] overflow-hidden rounded-lg border border-border bg-background shadow-sm"
+      :data-density="density"
+    >
       <component :is="view" :key="screen.id" />
     </div>
   </div>

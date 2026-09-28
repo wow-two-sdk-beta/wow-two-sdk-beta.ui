@@ -268,6 +268,28 @@ body {
   background-attachment: fixed;
 }
 
+/* ---------------------------------------------------------------------------
+ * Density — `data-density` on any element rescales every spacing utility inside it (heights, padding, gaps),
+ * because Tailwind derives them all from `--spacing`; `--ui-density-scale` carries the same factor to sizes
+ * written as `calc(<rem> * var(--ui-density-scale, 1))` (the `Button` scale). Type sizes are untouched. Values:
+ * `Density` in `foundation/styles`. Compact is 87.5%, spacious 112.5%; comfortable restores the default inside a
+ * denser parent.
+ * ------------------------------------------------------------------------- */
+[data-density='compact'] {
+  --spacing: 0.21875rem;
+  --ui-density-scale: 0.875;
+}
+
+[data-density='comfortable'] {
+  --spacing: 0.25rem;
+  --ui-density-scale: 1;
+}
+
+[data-density='spacious'] {
+  --spacing: 0.28125rem;
+  --ui-density-scale: 1.125;
+}
+
 /* Enter/exit primitives — paired with the `--animate-*` tokens above. Subtle (8px) slides for
  * popovers/menus/toasts; full-edge drawer/sheet slides use component-level translate utilities. */
 @keyframes fade-in {

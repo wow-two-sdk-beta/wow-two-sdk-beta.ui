@@ -299,4 +299,19 @@ describe('atlas screens', () => {
     await wrapper.get('[aria-label="Zoom in"]').trigger('click');
     expect(wrapper.find('[aria-label="125%, reset zoom"]').exists()).toBe(true);
   });
+
+  it('opens a screen at the linked density and keeps a new choice in the link', async () => {
+    await go('#/screens/board?density=compact');
+    const wrapper = render(ScreensPage);
+    await settle();
+    const frame = (): string | undefined => wrapper.find('[data-density]').attributes('data-density');
+    expect(frame()).toBe('compact');
+    const spacious = [...(wrapper.element as HTMLElement).querySelectorAll<HTMLButtonElement>('[role=radio]')].find(
+      (node) => node.textContent?.trim() === 'Spacious',
+    )!;
+    spacious.click();
+    await settle();
+    expect(frame()).toBe('spacious');
+    expect(route.value.query.get('density')).toBe('spacious');
+  });
 });

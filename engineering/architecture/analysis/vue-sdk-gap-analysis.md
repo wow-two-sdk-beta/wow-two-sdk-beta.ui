@@ -85,9 +85,9 @@ the menu vector, `RatingPicker`, `RangeSliderInput`, `ConfirmPopover`, `Truncate
 
 | Item | Where | Fix |
 |---|---|---|
-| Accessible name falls back to the component name `'KnobInput'` | `forms/knobInput/KnobInput.vue` | localized `KnobInput.label` |
-| Unlocalized `'Icons'` listbox name | `forms/iconPicker/IconPicker.vue` | localized `IconPicker.icons` |
-| Unlocalized `'Collapse'` / `'Expand'` toggles | `forms/jsonEditor/JsonEditorTreeNode.vue` | localized `JsonEditorTreeNode.*` |
+| Accessible name falls back to the component name `'KnobInput'` | `forms/knobInput/KnobInput.vue` | ✅ localized `KnobInput.label` (verified 2026-09-28) |
+| Unlocalized `'Icons'` listbox name | `forms/iconPicker/IconPicker.vue` | ✅ localized `IconPicker.icons` (verified 2026-09-28) |
+| Unlocalized `'Collapse'` / `'Expand'` toggles | `forms/jsonEditor/JsonEditorTreeNode.vue` | ✅ localized `JsonEditorTreeNode.*` (verified 2026-09-28) |
 | `DataTable` keeps its own sort model | `display/dataTable` | ✅ 2026-09-28: selection and the value ordering now come from `foundation/selection`; absent values sort last in both directions |
 | Unprefixed booleans predate the props rule | `Pagination.hideFirstLast` · `CommandPaletteModalItem.closeOnSelect` | rename on the next breaking pass |
 | Carried from the sweep | Firefox CI result · `smart-qr` visual acceptance · NodeEditor read-only · calendar week start · large-diff paging | owned by their existing rows |

@@ -141,7 +141,7 @@ light and dark: 184 themes (24 curated seeds, the authored `smart-qr` and `ochar
 |---|---|---|
 | Surface | flat (borders) · cards · islands (gap + shadow + radius) · glass (translucent chrome) | page code |
 | Gutter | one region gap (TNIS 6px, Ocharo ~16px) | page code |
-| Density | compact · comfortable · spacious — control heights, type floor, padding | page code |
+| Density | compact · comfortable · spacious — control heights, type floor, padding | ✅ SDK `data-density` (spacing + `Button` scale; type untouched) |
 | Canvas vs chrome | a canvas colour distinct from panel surfaces | page code (TNIS `--canvas`, Ocharo ivory) |
 | Ambient | a coloured glow behind glass | React SDK only (`--theme-ambient`) |
 
@@ -167,8 +167,9 @@ The playground remains the smoke and regression gallery; the atlas is the curate
 
 ## Roadmap
 
-- Shell presets in the SDK (surface · gutter · density · canvas) driven from the lab.
-- Port the Wheelhouse glass themes and the ambient token to the Vue SDK.
+- Shell presets in the SDK (surface · gutter · density · canvas) driven from the lab — density shipped as
+  `data-density` (2026-09-28); surface, gutter and canvas remain.
+- ✅ Port the Wheelhouse glass themes and the ambient token to the Vue SDK.
 - Component wireframes per family (the lab currently draws layouts; components render live).
 - Real-component renderings of each archetype (AppShell, SidebarMenu, KanbanBoard, DataTable) beside the wireframe.
 - Product snapshots: TNIS, Ocharo, Haven and Wheelhouse archetypes annotated with their tokens.

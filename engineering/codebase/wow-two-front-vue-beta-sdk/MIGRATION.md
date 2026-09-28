@@ -17,7 +17,8 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 | Overlays | `ConfirmPopover` — inline confirm that awaits a promise from `@confirm`; `LightboxModal` — full-screen image viewer (buttons, arrows, swipe) |
 | Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary`, `OverflowGroup` (first N items + counted marker), `KanbanBoard` + `KanbanColumn` / `KanbanCard` (drag or Alt+arrows; caller applies `move`) |
 | Layout | `StickyLayout` (pinned state), `VirtualScrollArea` (windowed list, `end-reached`), `MasonryLayout` |
-| Themes | `glass-harbor`, `frost`, `bento-deck`, `harbor-frost` (the Wheelhouse directions); `Theme.ambient` → `--theme-ambient`, painted by the `surface-ambient` class |
+| Themes | `glass-harbor`, `frost`, `bento-deck`, `harbor-frost` (the Wheelhouse directions); `Theme.ambient` → `--theme-ambient`, painted by the `surface-ambient` class; `readableForeground(color)` picks text for a consumer-colored surface |
+| Density | `data-density="compact \| comfortable \| spacious"` on any element rescales every spacing utility and the `Button` scale inside it (87.5% / 100% / 112.5%); values in `Density` (`foundation/styles`) |
 | `DataTable` | `selectionMode` + `v-model:selection`, `expanded` slot + `v-model:expanded`, `hasStickyHeader`, `isLoading` |
 
 Behavioral changes to existing parts:

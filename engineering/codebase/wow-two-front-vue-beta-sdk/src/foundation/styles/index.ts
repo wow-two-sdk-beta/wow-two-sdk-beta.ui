@@ -29,6 +29,7 @@ export { Tone, Size, Radius, Padding } from './enums/StyleTokens';
 export type { Elevation } from './enums/StyleTokens';
 export { Tones, ToneFamily } from './constants/Tones';
 export { Severity } from './enums/Severity';
+export { Density } from './enums/Density';
 export { Orientation } from './enums/Orientation';
 export { Align } from './enums/Align';
 export { Side } from './enums/Side';
