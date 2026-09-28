@@ -20,7 +20,9 @@ function scorePassword(pw: string): 0 | 1 | 2 | 3 | 4 {
   if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
   if (/\d/.test(pw)) score++;
   if (/[^A-Za-z0-9]/.test(pw)) score++;
-  return Math.min(4, score) as 0 | 1 | 2 | 3 | 4;
+  /* Length dominates guessability: a short password stays "Weak" however many character classes it mixes. */
+  const ceiling = pw.length < 8 ? 1 : 4;
+  return Math.min(ceiling, score) as 0 | 1 | 2 | 3 | 4;
 }
 </script>
 
@@ -59,7 +61,9 @@ function barClass(index: number): string {
   return cn('h-1 flex-1 rounded-full bg-muted transition-colors', index < resolvedScore.value && tone.value);
 }
 
-const isLabelShown = computed(() => !props.isLabelHidden && Boolean(props.value));
+/* The verdict is always spoken once there is a password; `isLabelHidden` only hides it visually. */
+const hasVerdict = computed(() => Boolean(props.value) || props.score !== undefined);
+const labelClass = computed(() => (props.isLabelHidden ? 'sr-only' : 'text-xs text-muted-foreground'));
 
 const OwnedAttributes: ReadonlySet<string> = new Set(['class']);
 const passthroughAttrs = computed(() =>
@@ -79,6 +83,12 @@ defineExpose({ el: root });
     <div class="flex gap-1" aria-hidden="true">
       <div v-for="i in 4" :key="i" :class="barClass(i - 1)" />
     </div>
-    <div v-if="isLabelShown" class="text-xs text-muted-foreground">{{ label }}</div>
+    <div v-if="hasVerdict" aria-live="polite" :class="labelClass">
+      <!-- The separating space lives inside the string: template whitespace beside a tag is condensed away. -->
+      <span class="sr-only">{{
+        `${locale.t('PasswordStrengthCallout.prefix', undefined, 'Password strength:')} `
+      }}</span
+      >{{ label }}
+    </div>
   </div>
 </template>

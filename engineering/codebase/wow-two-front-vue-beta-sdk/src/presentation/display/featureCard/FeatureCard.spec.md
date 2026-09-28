@@ -26,7 +26,7 @@ None declared.
 
 | Slot | Signature | Meaning |
 |---|---|---|
-| `icon` | `icon(): unknown;` | The icon node rendered inside a tinted badge (`bg-primary-soft text-primary`). Size it yourself. |
+| `icon` | `icon(): unknown;` | The icon node rendered inside a tinted badge (`bg-primary-soft text-primary-soft-foreground`). Size it yourself. |
 | `title` | `title(): unknown;` | The feature title — overrides the `title` prop's rendering. |
 | `description` | `description(): unknown;` | The supporting copy — overrides the `description` prop's rendering. |
 | `default` | `default(): unknown;` | The body content — used when neither `description` nor its slot is provided. |

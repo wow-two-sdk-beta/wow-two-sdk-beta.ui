@@ -19,6 +19,7 @@ export interface MeterBarProps {
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn, Size as SizeToken } from '../../../foundation/styles';
+import { useLocale } from '../../../foundation/i18n';
 
 /* Only the sm/md/lg steps carry a thickness; other `Size` members fall through
    to the `md` default at the lookup below. */
@@ -39,12 +40,33 @@ const props = withDefaults(defineProps<MeterBarProps>(), { max: 100, size: SizeT
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const tone = computed(() => {
-  const [good, warn] = props.thresholds ?? [props.max * 0.7, props.max * 0.9];
-  return props.value <= good ? 'bg-success' : props.value <= warn ? 'bg-warning' : 'bg-destructive';
-});
+const locale = useLocale();
 
-const pct = computed(() => Math.min(100, Math.max(0, (props.value / props.max) * 100)));
+const ZoneTone = { good: 'bg-success', warn: 'bg-warning', critical: 'bg-destructive' } as const;
+
+/** The threshold zone the value sits in — green up to the first threshold, amber to the second, red past it. */
+const zone = computed<keyof typeof ZoneTone>(() => {
+  const [good, warn] = props.thresholds ?? [props.max * 0.7, props.max * 0.9];
+  return props.value <= good ? 'good' : props.value <= warn ? 'warn' : 'critical';
+});
+const tone = computed(() => ZoneTone[zone.value]);
+
+/* A zero or negative `max` has no scale: draw an empty track rather than a `NaN%` width. */
+const pct = computed(() => (props.max > 0 ? Math.min(100, Math.max(0, (props.value / props.max) * 100)) : 0));
+
+/* The zone is otherwise carried by color alone (WCAG 1.4.1), so the spoken value names it. */
+const ZoneLabel = {
+  good: () => locale.t('MeterBar.zoneGood', undefined, 'normal'),
+  warn: () => locale.t('MeterBar.zoneWarn', undefined, 'high'),
+  critical: () => locale.t('MeterBar.zoneCritical', undefined, 'critical'),
+} as const;
+const valueText = computed(() =>
+  locale.t(
+    'MeterBar.valueText',
+    { percent: Math.round(pct.value), zone: ZoneLabel[zone.value]() },
+    '{percent}%, {zone}',
+  ),
+);
 
 const classes = computed(() =>
   cn(
@@ -71,6 +93,8 @@ defineExpose({ el });
     :aria-valuemin="0"
     :aria-valuemax="props.max"
     :aria-valuenow="props.value"
+    :aria-valuetext="valueText"
+    :data-zone="zone"
     v-bind="rest"
     :class="classes"
   >

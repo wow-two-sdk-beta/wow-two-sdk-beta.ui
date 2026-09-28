@@ -111,9 +111,9 @@ const leafClass = computed(() =>
   cn(
     'cursor-text rounded-sm px-1 text-left transition-colors',
     !editor.isDisabled && !editor.isReadOnly && 'hover:bg-muted',
-    type.value === 'string' && 'text-info',
-    type.value === 'number' && 'text-warning',
-    type.value === 'boolean' && 'text-success',
+    type.value === 'string' && 'text-info-soft-foreground',
+    type.value === 'number' && 'text-warning-soft-foreground',
+    type.value === 'boolean' && 'text-success-soft-foreground',
     type.value === 'null' && 'text-muted-foreground italic',
   ),
 );

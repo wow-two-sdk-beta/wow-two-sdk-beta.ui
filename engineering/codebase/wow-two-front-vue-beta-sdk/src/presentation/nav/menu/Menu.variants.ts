@@ -9,7 +9,7 @@ export const menuItemVariants = tv({
   variants: {
     state: {
       default: 'text-popover-foreground',
-      destructive: 'text-destructive focus:bg-destructive-soft hover:bg-destructive-soft',
+      destructive: 'text-destructive-soft-foreground focus:bg-destructive-soft hover:bg-destructive-soft',
       disabled: 'pointer-events-none opacity-50',
     },
   },

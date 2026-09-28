@@ -293,7 +293,7 @@ const locale = useLocale();
           type="button"
           :aria-label="locale.t('GradientPicker.removeStop', undefined, 'Remove stop')"
           :disabled="inactive || gradient.stops.length <= 2"
-          class="inline-flex h-7 w-7 items-center justify-center rounded text-destructive hover:bg-destructive-soft disabled:pointer-events-none disabled:opacity-40"
+          class="inline-flex h-7 w-7 items-center justify-center rounded text-destructive-soft-foreground hover:bg-destructive-soft disabled:pointer-events-none disabled:opacity-40"
           @click="removeStop(i)"
         >
           <Icon :icon="TrashIcon" :size="12" />

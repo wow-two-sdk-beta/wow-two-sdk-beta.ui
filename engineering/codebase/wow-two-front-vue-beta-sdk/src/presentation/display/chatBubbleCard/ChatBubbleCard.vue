@@ -135,8 +135,8 @@ const StatusIconClass: Record<ChatStatus, string> = {
   sending: 'h-3 w-3',
   sent: 'h-3 w-3',
   delivered: 'h-3 w-3',
-  read: 'h-3 w-3 text-info',
-  failed: 'h-3 w-3 text-destructive',
+  read: 'h-3 w-3 text-info-soft-foreground',
+  failed: 'h-3 w-3 text-destructive-soft-foreground',
 };
 
 const isEnd = computed(() => props.side === ChatSide.End);

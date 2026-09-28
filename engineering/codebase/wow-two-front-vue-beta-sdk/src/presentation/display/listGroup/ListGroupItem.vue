@@ -52,7 +52,7 @@ defineExpose({ el });
 
 <template>
   <li ref="el" v-bind="rest" :class="classes">
-    <span v-if="showCheck" aria-hidden="true" class="mt-0.5 shrink-0 text-primary">
+    <span v-if="showCheck" aria-hidden="true" class="mt-0.5 shrink-0 text-primary-soft-foreground">
       <Check class="h-4 w-4" />
     </span>
     <span v-if="$slots.leading" aria-hidden="true" class="mt-0.5 shrink-0 text-muted-foreground">

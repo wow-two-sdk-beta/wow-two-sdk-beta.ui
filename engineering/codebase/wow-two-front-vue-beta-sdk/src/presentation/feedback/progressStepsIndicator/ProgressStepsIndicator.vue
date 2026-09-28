@@ -52,7 +52,7 @@ const markerClasses = (i: number) => {
   return cn(
     'grid h-7 w-7 place-items-center rounded-full text-xs font-medium',
     status === 'complete' && 'bg-primary text-primary-foreground',
-    status === 'current' && 'border-2 border-primary text-primary',
+    status === 'current' && 'border-2 border-primary text-primary-soft-foreground',
     status === 'upcoming' && 'border border-border text-muted-foreground',
   );
 };

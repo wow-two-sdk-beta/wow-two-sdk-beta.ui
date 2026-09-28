@@ -66,7 +66,10 @@ const groups = computed<Array<AgendaGroup>>(() => {
 });
 
 function groupHeadingClass(day: Temporal.PlainDate): string {
-  return cn('mb-2 text-xs font-semibold uppercase text-muted-foreground', isToday(day) && 'text-primary');
+  return cn(
+    'mb-2 text-xs font-semibold uppercase text-muted-foreground',
+    isToday(day) && 'text-primary-soft-foreground',
+  );
 }
 
 function groupLabel(day: Temporal.PlainDate): string {

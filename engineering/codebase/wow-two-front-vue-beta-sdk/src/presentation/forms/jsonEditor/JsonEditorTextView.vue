@@ -100,7 +100,7 @@ const locale = useLocale();
     <div
       v-if="error"
       role="alert"
-      class="border-t border-destructive bg-destructive-soft px-3 py-2 text-xs text-destructive"
+      class="border-t border-destructive bg-destructive-soft px-3 py-2 text-xs text-destructive-soft-foreground"
     >
       {{ error }}
     </div>

@@ -58,7 +58,7 @@ const passthroughAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => !OwnedAttributes.has(key))),
 );
 
-const rootClass = computed(() => cn('text-sm text-destructive', attrs.class as ClassValue));
+const rootClass = computed(() => cn('text-sm text-destructive-soft-foreground', attrs.class as ClassValue));
 
 const root = useTemplateRef<HTMLParagraphElement>('root');
 

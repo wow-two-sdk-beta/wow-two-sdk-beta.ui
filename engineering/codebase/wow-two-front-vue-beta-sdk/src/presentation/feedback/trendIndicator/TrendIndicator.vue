@@ -70,7 +70,13 @@ const positive = computed(() =>
 );
 
 const tone = computed(() =>
-  direction.value === 'flat' ? 'text-muted-foreground' : positive.value ? 'text-success' : 'text-destructive',
+  /* `-soft-foreground`: the tones' text tokens — the solid `success` / `destructive` fills fall under AA as text in
+     many themes. */
+  direction.value === 'flat'
+    ? 'text-muted-foreground'
+    : positive.value
+      ? 'text-success-soft-foreground'
+      : 'text-destructive-soft-foreground',
 );
 
 const arrow = computed(() => DirectionIcon[direction.value]);

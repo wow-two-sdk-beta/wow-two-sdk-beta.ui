@@ -48,7 +48,7 @@ const classes = computed(() =>
     'group flex min-h-14 w-full flex-col items-center justify-center gap-0.5 px-2 py-1.5 text-xs font-medium',
     'text-muted-foreground transition-colors hover:text-foreground',
     'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
-    'data-[active]:text-primary',
+    'data-[active]:text-primary-soft-foreground',
     attrs.class as ClassValue,
   ),
 );

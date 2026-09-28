@@ -76,7 +76,10 @@ const valueSize = computed(() => ValueSize[props.size]);
 const classes = computed(() => cn('flex flex-col gap-1', attrs.class as string | undefined));
 
 const trendClasses = computed(() =>
-  cn('inline-flex items-center gap-0.5 text-xs font-medium', trendUp.value ? 'text-success' : 'text-destructive'),
+  cn(
+    'inline-flex items-center gap-0.5 text-xs font-medium',
+    trendUp.value ? 'text-success-soft-foreground' : 'text-destructive-soft-foreground',
+  ),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

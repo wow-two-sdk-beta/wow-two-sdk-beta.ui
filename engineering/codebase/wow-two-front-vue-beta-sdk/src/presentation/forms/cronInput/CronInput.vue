@@ -311,7 +311,9 @@ const wrapperClass = computed(() => cn('flex flex-col gap-1', attrs.class as Cla
 
 const inputClass = computed(() => cn(inputBaseVariants({ size: props.size, state: inputState.value }), 'font-mono'));
 
-const previewClass = computed(() => cn('px-1 text-xs', isError.value ? 'text-destructive' : 'text-muted-foreground'));
+const previewClass = computed(() =>
+  cn('px-1 text-xs', isError.value ? 'text-destructive-soft-foreground' : 'text-muted-foreground'),
+);
 
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
 useNativeFormReset(input, controlled.reset, () => {

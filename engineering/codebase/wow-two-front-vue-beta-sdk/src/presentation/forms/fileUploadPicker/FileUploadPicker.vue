@@ -244,13 +244,17 @@ const zoneClass = computed(() =>
     'hover:border-border-strong hover:bg-muted/40',
     'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     dragState.value === 'over' && 'border-primary bg-primary-soft/30 text-foreground',
-    showError.value && 'border-destructive bg-destructive-soft/30 text-destructive',
+    showError.value && 'border-destructive bg-destructive-soft/30 text-destructive-soft-foreground',
     finalDisabled.value && 'cursor-not-allowed opacity-60 hover:border-input hover:bg-background',
   ),
 );
 
 const iconClass = computed(() =>
-  cn('text-muted-foreground', dragState.value === 'over' && 'text-primary', showError.value && 'text-destructive'),
+  cn(
+    'text-muted-foreground',
+    dragState.value === 'over' && 'text-primary-soft-foreground',
+    showError.value && 'text-destructive-soft-foreground',
+  ),
 );
 
 const UploadIcon = UploadCloud;

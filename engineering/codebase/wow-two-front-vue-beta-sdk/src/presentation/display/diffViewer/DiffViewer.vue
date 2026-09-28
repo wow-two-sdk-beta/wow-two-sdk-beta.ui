@@ -200,8 +200,8 @@ defineExpose({ el });
         <slot name="rightLabel">{{ props.rightLabel }}</slot>
       </div>
       <div class="flex items-center gap-3">
-        <span class="text-success font-medium">+{{ stats.added }}</span>
-        <span class="text-destructive font-medium">−{{ stats.removed }}</span>
+        <span class="font-medium text-success-soft-foreground">+{{ stats.added }}</span>
+        <span class="font-medium text-destructive-soft-foreground">−{{ stats.removed }}</span>
       </div>
     </div>
 

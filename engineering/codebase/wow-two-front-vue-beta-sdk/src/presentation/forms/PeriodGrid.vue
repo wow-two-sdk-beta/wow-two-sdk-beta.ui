@@ -239,7 +239,7 @@ function cellClass(cell: PeriodCell): string {
     'hover:bg-primary/10 hover:text-foreground',
     'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     cell.isOutside && 'text-muted-foreground/60',
-    cell.index === currentIndex && 'font-semibold text-primary',
+    cell.index === currentIndex && 'font-semibold text-primary-soft-foreground',
     isSelected && 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
     isDisabled(cell.index) && 'pointer-events-none opacity-40',
   );

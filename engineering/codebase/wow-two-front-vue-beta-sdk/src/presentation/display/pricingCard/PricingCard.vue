@@ -130,7 +130,7 @@ defineExpose({ el: rootElement });
     </Text>
     <ul class="mt-5 flex flex-1 flex-col gap-2.5">
       <li v-for="(feature, index) in props.features" :key="feature" class="flex items-start gap-2 text-sm">
-        <Icon :icon="Check" :size="16" class="mt-0.5 text-primary" />
+        <Icon :icon="Check" :size="16" class="mt-0.5 text-primary-soft-foreground" />
         <span
           ><slot name="feature" :feature="feature" :index="index">{{ feature }}</slot></span
         >

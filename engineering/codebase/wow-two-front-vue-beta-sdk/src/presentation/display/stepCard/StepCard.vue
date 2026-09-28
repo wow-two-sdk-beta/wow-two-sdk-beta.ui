@@ -36,7 +36,7 @@ defineOptions({ name: 'StepCard', inheritAttrs: false });
  * the body fallback React spelled `description ?? children`.
  */
 defineSlots<{
-  /** The icon node rendered inside a tinted badge (`bg-primary-soft text-primary`). Size it yourself. */
+  /** The icon node, rendered in a tinted badge (`bg-primary-soft text-primary-soft-foreground`). Size it yourself. */
   icon(): unknown;
   /** The step title — overrides the `title` prop's rendering. */
   title(): unknown;
@@ -77,7 +77,10 @@ defineExpose({ el: rootElement });
 <template>
   <Card ref="el" variant="outline" radius="xl" :elevation="0" v-bind="rest" :class="classes">
     <span class="absolute right-4 top-3 text-5xl font-bold text-foreground/5">{{ props.step }}</span>
-    <span v-if="$slots.icon" class="grid size-11 place-items-center rounded-lg bg-primary-soft text-primary">
+    <span
+      v-if="$slots.icon"
+      class="grid size-11 place-items-center rounded-lg bg-primary-soft text-primary-soft-foreground"
+    >
       <slot name="icon" />
     </span>
     <Heading :level="3" size="md" :class="headingClasses">
