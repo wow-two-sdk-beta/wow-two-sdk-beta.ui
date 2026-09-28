@@ -1,4 +1,4 @@
-import { computed, ref, toValue, type ComputedRef, type MaybeRefOrGetter, type Ref } from 'vue';
+import { computed, onMounted, ref, toValue, type ComputedRef, type MaybeRefOrGetter, type Ref } from 'vue';
 
 import { EmojiCatalog, EmojiCategory, type EmojiCatalogEntry } from '../../../domain/emoji';
 import { useRecentItems } from '../../../foundation/storage';
@@ -76,14 +76,19 @@ export function useEmojiPicker({
   });
 
   const searchKeyword = ref('');
-  /* Default to the recents bucket; when asked and there are no recents yet, open on the first
-     real category instead. Read once, at setup — the React original seeded `useState` the same
-     way, so a later arrival of recents must not yank the user's category out from under them. */
-  const activeCategory = ref<CategoryKey>(
-    toValue(showFirstCategoryWhenRecentsEmpty) && recents.value.length === 0
-      ? EmojiCategory.SmileysPeople
-      : RecentCategory,
-  );
+  /* Default to the recents bucket; when asked and there are no recents yet, open on the first real category
+     instead. Recents hydrate from the broker on mount (SSR-safe), so setup never sees them: the first category is
+     the provisional pick, settled once on mount — the persistent state's hydrate hook was registered first and
+     has already run. Decided once, so a later arrival of recents never yanks the reader's category away. */
+  const wantsFirstCategory = toValue(showFirstCategoryWhenRecentsEmpty);
+  const activeCategory = ref<CategoryKey>(wantsFirstCategory ? EmojiCategory.SmileysPeople : RecentCategory);
+  if (wantsFirstCategory) {
+    onMounted(() => {
+      if (recents.value.length > 0 && activeCategory.value === EmojiCategory.SmileysPeople) {
+        activeCategory.value = RecentCategory;
+      }
+    });
+  }
 
   const trimmedKeyword = computed(() => searchKeyword.value.trim());
   const showSearch = computed(() => trimmedKeyword.value.length > 0);

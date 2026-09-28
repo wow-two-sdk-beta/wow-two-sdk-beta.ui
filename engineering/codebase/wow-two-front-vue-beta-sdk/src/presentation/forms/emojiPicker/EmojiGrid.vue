@@ -114,6 +114,14 @@ function moveFocus(event: KeyboardEvent): void {
   node.querySelectorAll<HTMLElement>('[role="option"]')[next]?.focus();
 }
 
+/* Pointer focus (a click, a tap) and programmatic focus move the roving stop too, so the next arrow key starts
+   from the tile the reader is on — not from the last tile the keyboard reached. */
+function syncStop(event: FocusEvent): void {
+  const options = grid.value?.querySelectorAll<HTMLElement>('[role="option"]');
+  const index = options ? [...options].indexOf(event.target as HTMLElement) : -1;
+  if (index >= 0) activeIndex.value = index;
+}
+
 const gridStyle = computed<CSSProperties>(() => ({
   display: 'grid',
   gridTemplateColumns: `repeat(auto-fill, minmax(${tokens.value.tile}px, 1fr))`,
@@ -157,6 +165,7 @@ const locale = useLocale();
       :aria-label="locale.t('EmojiGrid.emoji', undefined, 'Emoji')"
       :style="gridStyle"
       @keydown="moveFocus"
+      @focusin="syncStop"
     >
       <EmojiTile
         v-for="(entry, index) in emojis"
@@ -178,6 +187,7 @@ const locale = useLocale();
     :aria-label="locale.t('EmojiGrid.emoji', undefined, 'Emoji')"
     :style="gridStyle"
     @keydown="moveFocus"
+    @focusin="syncStop"
   >
     <EmojiTile
       v-for="(entry, index) in emojis"
