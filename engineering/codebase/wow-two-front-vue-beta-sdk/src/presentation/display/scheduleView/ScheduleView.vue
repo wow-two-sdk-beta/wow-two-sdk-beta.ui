@@ -47,6 +47,7 @@ import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
+import { readableForeground } from '../../../foundation/themes';
 import { formatZonedTime, minutesBetween, nowZoned, zonedAtHour } from '../../forms/DateExtensions';
 
 const locale = useLocale();
@@ -154,6 +155,7 @@ function bookingStyle(resource: ScheduleResource, booking: ScheduleBooking): Sty
     top: '4px',
     bottom: '4px',
     background: booking.color ?? resource.color,
+    color: readableForeground(booking.color ?? resource.color) ?? undefined,
   };
 }
 

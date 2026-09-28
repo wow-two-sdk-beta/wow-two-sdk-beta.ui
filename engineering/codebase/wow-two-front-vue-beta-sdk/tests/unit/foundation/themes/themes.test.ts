@@ -8,6 +8,7 @@ import {
   Oklch,
   oklchToHex,
   parseColor,
+  readableForeground,
   SemanticTokens,
   THEMES,
   themeToCss,
@@ -118,4 +119,20 @@ it('ships the Wheelhouse directions with their glass backdrops, AA in both modes
   expect(dark).toContain('--theme-ambient: radial-gradient(');
   expect(light).not.toEqual(dark);
   expect(themeToCss(getTheme('bento-deck')!)).not.toContain('--theme-ambient');
+});
+
+describe('readableForeground', () => {
+  it('picks the text pole with more contrast, and reads AA on saturated fills', () => {
+    for (const fill of ['#1e3a8a', '#b91c1c', '#15803d', '#7c3aed', '#fde68a', '#e0f2fe', '#f97316']) {
+      const text = readableForeground(fill)!;
+      const ratio = contrastRatio(parseColor(text)!, parseColor(fill)!);
+      expect(ratio, fill).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('returns null for colors the engine cannot parse', () => {
+    expect(readableForeground('var(--brand)')).toBeNull();
+    expect(readableForeground('rebeccapurple')).toBeNull();
+    expect(readableForeground(undefined)).toBeNull();
+  });
 });

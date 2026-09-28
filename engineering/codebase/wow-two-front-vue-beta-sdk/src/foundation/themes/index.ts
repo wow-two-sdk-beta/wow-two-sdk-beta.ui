@@ -38,6 +38,7 @@ export { ThemeStatus, ThemeRadius, NeutralTemp, AccentMode, SurfaceStyle } from 
 
 // Generator
 export { generateTheme } from './Generate';
+export { readableForeground } from './ReadableForeground';
 
 // Validator
 export { validateTheme, contrastPairs, contrastPairRatio, AaText, AaUi, type ContrastPair } from './Validate';

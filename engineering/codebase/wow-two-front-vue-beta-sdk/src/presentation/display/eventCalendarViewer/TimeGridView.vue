@@ -17,6 +17,7 @@ const HourPx = 48;
 <script setup lang="ts">
 import { computed, type StyleValue } from 'vue';
 import { cn } from '../../../foundation/styles';
+import { readableForeground } from '../../../foundation/themes';
 import { useLocale } from '../../../foundation/i18n';
 import { formatZonedTime, isToday, maxZoned, nowZoned } from '../../forms/DateExtensions';
 import {
@@ -104,7 +105,13 @@ function eventStyle(item: CalendarEventLayout): StyleValue {
     left: `calc(${(item.column / item.columns) * 100}% + 2px)`,
     width: `calc(${100 / item.columns}% - 4px)`,
     background: item.event.color,
+    color: readableForeground(item.event.color) ?? undefined,
   };
+}
+
+/* A consumer-colored all-day chip gets the text pole that reads on its color. */
+function chipStyle(e: EventCalendarViewerEvent): StyleValue {
+  return { background: e.color, color: readableForeground(e.color) ?? undefined };
 }
 
 function eventClass(e: EventCalendarViewerEvent): string {
@@ -168,7 +175,7 @@ function onEvent(ev: MouseEvent, e: EventCalendarViewerEvent): void {
               v-for="e in allDayEvents.get(d.toString())"
               :key="e.id"
               type="button"
-              :style="{ background: e.color }"
+              :style="chipStyle(e)"
               :class="allDayClass(e)"
               @click="onEvent($event, e)"
             >

@@ -146,3 +146,38 @@ describe('table sorting and interaction', () => {
     expect(activate).toHaveBeenCalledWith('Ada', 0);
   });
 });
+
+describe('consumer-colored calendar blocks', () => {
+  function textOf(view: 'month' | 'day', color: string): string {
+    const wrapper = mount(EventCalendarViewer, {
+      props: {
+        date: at('2026-09-25T12:00Z'),
+        view,
+        events: [{ ...event('Standup', '2026-09-25T09:00Z', '2026-09-25T09:30Z'), color }],
+      },
+    });
+    wrappers.push(wrapper);
+    const block = wrapper.findAll('button').find((button) => button.text().includes('Standup'));
+    return (block?.element as HTMLElement | undefined)?.style.color ?? '';
+  }
+
+  /** Mean channel of a `#rrggbb` or `rgb()` color — engines differ in how they echo an inline hex back. */
+  function lightness(color: string): number {
+    const channels = color.startsWith('#')
+      ? [1, 3, 5].map((start) => Number.parseInt(color.slice(start, start + 2), 16))
+      : (color.match(/\d+/gu) ?? []).map(Number);
+    const [r = 0, g = 0, b = 0] = channels;
+    return (r + g + b) / 3;
+  }
+
+  it('puts light text on a dark event color and dark text on a light one', () => {
+    for (const view of ['month', 'day'] as const) {
+      expect(lightness(textOf(view, '#1e3a8a')), view).toBeGreaterThan(200);
+      expect(lightness(textOf(view, '#fde68a')), view).toBeLessThan(60);
+    }
+  });
+
+  it('leaves the inherited text alone for a color it cannot read', () => {
+    expect(textOf('month', 'var(--brand)')).toBe('');
+  });
+});

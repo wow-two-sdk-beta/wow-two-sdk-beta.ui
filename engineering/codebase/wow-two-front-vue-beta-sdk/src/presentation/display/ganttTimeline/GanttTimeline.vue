@@ -65,6 +65,7 @@ import { useLocale } from '../../../foundation/i18n';
 import { computed, useAttrs, useTemplateRef, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
+import { readableForeground } from '../../../foundation/themes';
 import { daysBetween, isWeekend, today } from '../../forms/DateExtensions';
 
 const locale = useLocale();
@@ -166,6 +167,7 @@ function barStyle(task: GanttTimelineTask): StyleValue {
     top: '6px',
     bottom: '6px',
     background: task.color,
+    color: readableForeground(task.color) ?? undefined,
   };
 }
 

@@ -19,6 +19,7 @@ interface MonthCell {
 import { useLocale } from '../../../foundation/i18n';
 import { computed, type StyleValue } from 'vue';
 import { cn } from '../../../foundation/styles';
+import { readableForeground } from '../../../foundation/themes';
 import { formatZonedTime, isToday } from '../../forms/DateExtensions';
 import { startOfWeek } from './EventCalendarViewerTypes';
 import { intersectsCalendarDay } from './EventCalendarViewerLayout';
@@ -95,8 +96,9 @@ function eventClass(e: EventCalendarViewerEvent): string {
   );
 }
 
+/* A consumer-colored chip gets the text pole that reads on its color; a theme-colored one keeps the soft tokens. */
 function eventStyle(e: EventCalendarViewerEvent): StyleValue {
-  return { background: e.color };
+  return { background: e.color, color: readableForeground(e.color) ?? undefined };
 }
 
 function eventLabel(e: EventCalendarViewerEvent): string {
