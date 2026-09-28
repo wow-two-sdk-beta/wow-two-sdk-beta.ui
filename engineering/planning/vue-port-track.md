@@ -275,6 +275,10 @@ G1–G6 local gates (2026-09-26): typecheck + 423 SFCs · lint · format · 168 
 (79 exports, budgets held), playground build and seven-group gallery smoke. The last three-line
 `DropdownMenuContent` fix and demo tweaks postdate that build; a concurrent lane was editing packaging, so the
 rebuild waits for the next release run. Firefox still cannot launch on the macOS host; CI owns it.
+G7–G13 local gates (2026-09-28): typecheck + 449 SFCs · lint · format · 194 files / 2,296 unit/DOM/SSR tests ·
+Chromium, forced-colors and WebKit 36 files / 99 tests · build and packed consumer (81 exports, budgets held) ·
+playground build and gallery smoke. A playground pass caught two layout bugs the tests then pinned: the crop
+editor collapsed inside shrink-wrapping parents, and rail-mode groups showed icon-less rows.
 Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-beta-sdk/MIGRATION.md).
 
 | It | Scope | Status |
@@ -289,6 +293,6 @@ Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-
 | G8 | Hierarchical pickers — `TreeSelectPicker`, `CascaderPicker`, `TransferPicker` | ✅ 11 DOM tests |
 | G9 | Period pickers — `MonthPicker`, `YearPicker` on a shared index-space `PeriodGrid` | ✅ 6 DOM tests |
 | G10 | App navigation — `SidebarMenu` (+ `Item`/`Group`/`Section`, icon rail), `BottomNavMenu` | ✅ 8 DOM tests |
-| G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignatureInput` (was `SignaturePad`; `*Input` holds a form value) | ✅ 11 DOM + 3 browser tests |
+| G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignatureInput` (was `SignaturePad`; `*Input` holds a form value) | ✅ 11 DOM + 4 browser tests |
 | G12 | `MentionInput` | ✅ 4 DOM + 1 browser test |
 | G13 | Small gaps — `KanbanBoard`, `MasonryLayout`, `OverflowGroup`, `TimezonePicker`, `DurationInput` (`Tag` already closes via `@close`) | ✅ 17 DOM + 1 browser test (`KanbanBoard` + `KanbanColumn` / `KanbanCard`) |

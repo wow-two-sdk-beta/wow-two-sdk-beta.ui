@@ -5,6 +5,8 @@
 > What `@wow-two-beta/ui-vue` lacks after the published `0.0.7` sweep — missing components, shallow families and
 > small defects — ranked for the gap-close queue in [`vue-port-track.md`](../../planning/vue-port-track.md).
 > React is out of scope; the React package is parked.
+>
+> Status 2026-09-28: every queued gap (G1–G13) is built and locally verified, unpublished — see the track.
 
 ## Method
 
