@@ -130,7 +130,11 @@ const locale = useLocale();
       <button
         v-if="isObject"
         type="button"
-        :aria-label="open ? 'Collapse' : 'Expand'"
+        :aria-label="
+          open
+            ? locale.t('JsonEditorTreeNode.collapse', undefined, 'Collapse')
+            : locale.t('JsonEditorTreeNode.expand', undefined, 'Expand')
+        "
         class="inline-flex h-5 w-5 items-center justify-center text-muted-foreground hover:text-foreground"
         @click="open = !open"
       >

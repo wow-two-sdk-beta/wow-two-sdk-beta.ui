@@ -87,6 +87,7 @@ import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
 import { useEventListener } from '../../../foundation/dom';
 import { useFormControl } from '../../../foundation/primitives';
+import { useLocale } from '../../../foundation/i18n';
 
 /** Renders a rotational dial whose arc, pointer and readout track one value, turned by drag, wheel or arrow keys. */
 /* `inheritAttrs: false` so `class` folds into the root's own `cn()` call — plain fallthrough
@@ -117,6 +118,7 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+const locale = useLocale();
 
 const controlled = useControlled<number>({
   controlled: () => props.modelValue,
@@ -283,7 +285,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     ref="container"
     role="slider"
     :id="knobId"
-    :aria-label="ariaLabel ?? (labelledBy ? undefined : 'KnobInput')"
+    :aria-label="ariaLabel ?? (labelledBy ? undefined : locale.t('KnobInput.label', undefined, 'Knob'))"
     :aria-labelledby="labelledBy"
     :aria-valuenow="current"
     :aria-valuemin="min"

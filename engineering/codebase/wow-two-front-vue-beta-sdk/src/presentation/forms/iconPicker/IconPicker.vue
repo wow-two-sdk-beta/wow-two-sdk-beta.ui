@@ -277,7 +277,7 @@ const locale = useLocale();
     <div
       role="group"
       :id="gridId"
-      :aria-label="labelledBy ? undefined : 'Icons'"
+      :aria-label="labelledBy ? undefined : locale.t('IconPicker.icons', undefined, 'Icons')"
       :aria-labelledby="labelledBy"
       :aria-describedby="field?.describedBy"
       class="grid gap-1 overflow-y-auto"
