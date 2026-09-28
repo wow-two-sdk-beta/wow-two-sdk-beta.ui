@@ -12,6 +12,7 @@ Public import: `import { Button } from '@wow-two-beta/ui-vue/presentation/action
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 - Disabled, loading and skeleton states block activation before child or caller handlers, including slotted links.
 - Becoming inactive cancels a pending long press. Disabled targets leave the tab order; loading targets retain focus.
+- Loading swaps only the leading icon for the spinner and keeps the label; without a leading icon the spinner centers over the transparent label, so the width and the accessible name hold.
 
 ## Props
 
@@ -28,8 +29,8 @@ Inherited contracts: `extends /* @vue-ignore */ ButtonAttributes`. These members
 | `trailingSlot` | `VNodeChild` | no | `undefined` | The slot after children. Prefer the `trailing` named slot. |
 | `hoverSlot` | `VNodeChild` | no | `undefined` | The content shown in place of children on hover / focus-visible (CSS-only swap — no JS hover state). Idle → children visible; hover/focus-visible → `hoverSlot` visible. Pairs with `variant="reveal"` for a reveal-on-hover icon swap. When undefined (and no `hover` slot), children render normally. |
 | `loadingSlot` | `VNodeChild` | no | `undefined` | The indicator replacing the built-in `<Spinner/>` while loading. Prefer the `loading` slot. |
-| `isLoading` | `boolean` | no | `undefined` | The action-loading state — replaces leading w/ spinner, sets aria-busy, blocks clicks. |
-| `loadingText` | `string` | no | — | The text that replaces children when loading. No default — consumer supplies (i18n). |
+| `isLoading` | `boolean` | no | `undefined` | The action-loading state — the spinner takes the leading icon's place, the label stays, the button dims, sets aria-busy and blocks clicks. |
+| `loadingText` | `string` | no | — | The text that replaces the label while loading. Omit it to keep the label. No default — consumer supplies (i18n). |
 | `isSkeleton` | `boolean` | no | `undefined` | The content-loading state — hides content, keeps dimensions, shimmers. Excludes `isLoading`. |
 | `isDisabled` | `boolean` | no | `undefined` | The disabled state — drops focus order and clicks. Inherited from an enclosing `Field`. |
 | `isFullWidth` | `boolean` | no | `undefined` | The full-width state — stretches to fill container width. |

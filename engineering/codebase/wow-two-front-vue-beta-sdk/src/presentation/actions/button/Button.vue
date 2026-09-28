@@ -54,10 +54,10 @@ export interface ButtonProps extends /* @vue-ignore */ ButtonAttributes {
   /** The indicator replacing the built-in `<Spinner/>` while loading. Prefer the `loading` slot. */
   readonly loadingSlot?: VNodeChild;
 
-  /** The action-loading state — replaces leading w/ spinner, sets aria-busy, blocks clicks. */
+  /** The action-loading state — a spinner replaces the leading icon, the label stays, it dims and blocks clicks. */
   readonly isLoading?: boolean;
 
-  /** The text that replaces children when loading. No default — consumer supplies (i18n). */
+  /** The text that replaces the label while loading; omit it to keep the label. Consumer-supplied (i18n). */
   readonly loadingText?: string;
 
   /** The content-loading state — hides content, keeps dimensions, shimmers. Excludes `isLoading`. */
@@ -228,6 +228,12 @@ const resolvedDisabled = computed(() => props.isDisabled ?? formControl?.isDisab
 const skeletonActive = computed(() => !!props.isSkeleton);
 const loadingActive = computed(() => !skeletonActive.value && !!props.isLoading);
 const isInactive = computed(() => loadingActive.value || skeletonActive.value || resolvedDisabled.value);
+
+/* The spinner swaps with a leading icon when there is one; without one it centers over the label, whose
+   box keeps the button's width. */
+function hasLeading(): boolean {
+  return slots.leading !== undefined || props.leadingSlot !== undefined;
+}
 
 const dataState = computed<ButtonDataState | undefined>(() =>
   skeletonActive.value
@@ -504,14 +510,32 @@ defineExpose({ el });
     <!-- asChild → the merge target owns its children; leading/trailing/loading chrome is not rendered. -->
     <slot v-if="asChild" />
 
-    <template v-else-if="loadingActive">
+    <template v-else-if="loadingActive && (hasLeading() || loadingText !== undefined)">
+      <!-- The spinner stands where the leading icon was; the label (or loadingText) stays readable. -->
       <slot name="loading">
         <LoadingSlotProp v-if="loadingSlot !== undefined" />
         <Spinner v-else />
       </slot>
       <span v-if="loadingText !== undefined">{{ loadingText }}</span>
-      <!-- No loadingText: keep children in sr-only so the accessible name survives (Spinner is aria-hidden). -->
-      <span v-else class="sr-only"><slot /></span>
+      <slot v-else />
+      <slot name="trailing"><TrailingSlotProp v-if="trailingSlot !== undefined" /></slot>
+    </template>
+
+    <template v-else-if="loadingActive">
+      <!-- No icon to swap: the label turns transparent, keeping the width and the accessible name, and the
+           spinner centers over it. -->
+      <span class="relative inline-flex items-center justify-center">
+        <span class="inline-flex items-center gap-2 opacity-0">
+          <slot />
+          <slot name="trailing"><TrailingSlotProp v-if="trailingSlot !== undefined" /></slot>
+        </span>
+        <span class="absolute inset-0 inline-flex items-center justify-center">
+          <slot name="loading">
+            <LoadingSlotProp v-if="loadingSlot !== undefined" />
+            <Spinner v-else />
+          </slot>
+        </span>
+      </span>
     </template>
 
     <template v-else-if="hoverSlot !== undefined || $slots.hover">

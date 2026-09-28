@@ -54,6 +54,8 @@ export const buttonVariants = tv({
     // disabled (native attr handles click-blocking; pointer-events-none would
     // suppress the cursor visual, so we don't add it here)
     'disabled:opacity-50 disabled:cursor-not-allowed',
+    // loading — dimmed and busy, but still focusable (clicks are swallowed in the handler)
+    'data-[state=loading]:opacity-70 data-[state=loading]:cursor-progress',
     // skeleton state — wins over everything
     'data-[state=skeleton]:bg-muted! data-[state=skeleton]:text-transparent! data-[state=skeleton]:border-transparent! data-[state=skeleton]:cursor-default! data-[state=skeleton]:!pointer-events-none data-[state=skeleton]:animate-pulse',
     'data-[state=skeleton]:[&>*]:!invisible',
