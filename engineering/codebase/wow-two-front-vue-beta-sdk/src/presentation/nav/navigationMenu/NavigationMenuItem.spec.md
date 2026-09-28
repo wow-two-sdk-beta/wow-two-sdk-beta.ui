@@ -1,6 +1,6 @@
 # NavigationMenuItem
 
-Renders one `<li>` of the strip, pairing a Trigger / LinkItem with its Content panel.
+Renders one `<li>` of the strip, pairing a trigger or link with its content panel.
 
 Source: [NavigationMenuItem.vue](NavigationMenuItem.vue).
 

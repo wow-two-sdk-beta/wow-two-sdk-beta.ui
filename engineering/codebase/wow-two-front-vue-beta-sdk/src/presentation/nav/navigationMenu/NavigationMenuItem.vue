@@ -11,7 +11,7 @@ import { cn } from '../../../foundation/styles';
 import { useId } from '../../../foundation/identifiers';
 import { navigationMenuItemContextKey, useNavigationMenuContext } from './NavigationMenuContext';
 
-/** Renders one `<li>` of the strip, pairing a Trigger / LinkItem with its Content panel. */
+/** Renders one `<li>` of the strip, pairing a trigger or link with its content panel. */
 defineOptions({ name: 'NavigationMenuItem', inheritAttrs: false });
 
 /** The trigger / link and optional content — React's `children`. */

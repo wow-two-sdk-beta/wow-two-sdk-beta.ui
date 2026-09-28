@@ -21,7 +21,7 @@ Public import: `import { FontPicker } from '@wow-two-beta/ui-vue/presentation/fo
 | `modelValue` | `string` | no | `undefined` | The selected font family, controlled. The `v-model` binding target. |
 | `defaultValue` | `string` | no | — | The initial font family when uncontrolled. Defaults to the first entry in `fonts`. |
 | `fonts` | `ReadonlyArray<FontOption>` | no | `() => BuiltInFonts` | The selectable font set. Defaults to {@link BuiltInFonts}. |
-| `placeholder` | `string` | no | `'SelectPicker font…'` | The trigger text shown when the value matches no known font. |
+| `placeholder` | `string` | no | `'Select font…'` | The trigger text shown when the value matches no known font. |
 | `previewText` | `string` | no | `'The quick brown fox'` | The sample string rendered in each row's own face, unless the option carries its own `sample`. |
 | `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
 | `name` | `string` | no | — | The hidden form input name; the hidden input emits the selected family. |
