@@ -20,6 +20,7 @@ Public import: `import { TableOfContents } from '@wow-two-beta/ui-vue/presentati
 | `headingSelector` | `string` | no | `'h2, h3'` | The CSS selector used with `source`. Default `h2, h3`. |
 | `activeId` | `string \| null` | no | `undefined` | The override for the auto-derived active id. `undefined` keeps the derived value. |
 | `isSticky` | `boolean` | no | — | The sticky toggle — applies `sticky top-4 self-start` helper classes. |
+| `canUpdateHash` | `boolean` | no | `true` | Whether following an entry writes `#id` into the URL. `false` scrolls the heading into view and focuses it (adding `tabindex="-1"` when needed) without touching the URL — for hash-routed apps; modified clicks stay plain links. Regression: `tests/unit/presentation/nav/TableOfContents.dom.test.ts`. |
 
 ## Emits
 

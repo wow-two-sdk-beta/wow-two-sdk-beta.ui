@@ -27,6 +27,13 @@ export interface TableOfContentsProps {
 
   /** The sticky toggle — applies `sticky top-4 self-start` helper classes. */
   readonly isSticky?: boolean;
+
+  /**
+   * Whether following an entry writes its `#id` into the URL, as a plain link does. `false` scrolls the heading into
+   * view and moves focus to it without touching the URL — for hash-routed apps, where `#id` is a route. Default
+   * `true`.
+   */
+  readonly canUpdateHash?: boolean;
 }
 
 function depthFromTagName(tag: string): number {
@@ -40,6 +47,7 @@ import { useLocale } from '../../../foundation/i18n';
 import { computed, shallowRef, useAttrs, useTemplateRef, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useScrollSpy } from '../scrollSpy/UseScrollSpy';
+import { useReducedMotion } from '../../../foundation/device';
 
 const locale = useLocale();
 
@@ -58,6 +66,7 @@ defineSlots<{
 const props = withDefaults(defineProps<TableOfContentsProps>(), {
   headingSelector: 'h2, h3',
   activeId: undefined,
+  canUpdateHash: true,
 });
 
 const attrs = useAttrs();
@@ -86,6 +95,24 @@ const ids = computed(() => items.value.map((i) => i.id));
 const spyId = useScrollSpy(() => ids.value);
 const activeId = computed(() => (props.activeId !== undefined ? props.activeId : spyId.value));
 
+const reducedMotion = useReducedMotion();
+
+/**
+ * With `canUpdateHash` off, an entry is followed in place: the heading scrolls into view and takes focus (made
+ * programmatically focusable when it is not), so the next Tab continues from the section just reached. Modified
+ * clicks — a new tab, a new window — keep the plain link behavior.
+ */
+function onFollow(event: MouseEvent, id: string): void {
+  if (props.canUpdateHash || event.defaultPrevented || event.button !== 0) return;
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const heading = el.value?.ownerDocument.getElementById(id);
+  if (!heading) return;
+  event.preventDefault();
+  heading.scrollIntoView({ block: 'start', behavior: reducedMotion.value ? 'auto' : 'smooth' });
+  if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+  heading.focus({ preventScroll: true });
+}
+
 const classes = computed(() => cn(props.isSticky && 'sticky top-4 self-start', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
@@ -111,6 +138,7 @@ defineExpose({ el });
         <a
           :href="`#${item.id}`"
           :aria-current="item.id === activeId ? 'location' : undefined"
+          @click="onFollow($event, item.id)"
           :class="
             cn(
               'block rounded-sm px-2 py-1 transition-colors',
