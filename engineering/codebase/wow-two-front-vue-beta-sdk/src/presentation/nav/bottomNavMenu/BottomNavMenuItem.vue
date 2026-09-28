@@ -12,7 +12,7 @@ export interface BottomNavMenuItemProps {
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import type { ClassValue } from 'clsx';
-import { dataAttr } from '../../../foundation/dom';
+import { dataAttr, resolveElement } from '../../../foundation/dom';
 import { Primitive, Slottable } from '../../../foundation/primitives';
 import { cn } from '../../../foundation/styles';
 
@@ -54,7 +54,7 @@ const classes = computed(() =>
 );
 
 /** `Primitive` renders the real element, so its `$el` is this component's root. */
-const el = computed(() => (inner.value?.$el ?? null) as HTMLElement | null);
+const el = computed(() => resolveElement(inner.value));
 
 defineExpose({ el });
 </script>

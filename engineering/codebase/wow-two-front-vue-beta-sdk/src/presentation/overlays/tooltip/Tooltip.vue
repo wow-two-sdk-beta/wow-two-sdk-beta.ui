@@ -27,7 +27,7 @@ export interface TooltipProps {
 
 <script setup lang="ts">
 import { cloneVNode, computed, onBeforeUnmount, ref, shallowRef, useSlots, watch } from 'vue';
-import { AriaAttribute } from '../../../foundation/dom';
+import { AriaAttribute, resolveElement } from '../../../foundation/dom';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
 import { useEscape } from '../../../foundation/shortcuts';
@@ -155,8 +155,7 @@ function onAnimationEnd(): void {
 
 /** A function ref may receive a component's public instance; the positioner needs the DOM node. */
 function setAnchor(value: unknown): void {
-  const node = (value as { $el?: unknown } | null)?.$el ?? value;
-  anchor.value = node instanceof HTMLElement ? node : null;
+  anchor.value = resolveElement(value);
 }
 
 /**

@@ -12,6 +12,7 @@ export interface DropdownMenuTriggerProps {
 </script>
 
 <script setup lang="ts">
+import { resolveElement } from '../../../foundation/dom';
 import { computed, useAttrs, useTemplateRef, watch, type ComponentPublicInstance } from 'vue';
 import { Primitive } from '../../../foundation/primitives';
 import { NavExtensions } from '../NavExtensions';
@@ -59,7 +60,7 @@ function handleKeydown(event: KeyboardEvent): void {
 }
 
 /** `Primitive` renders the real element, so its `$el` is this component's root. */
-const el = computed(() => (inner.value?.$el ?? null) as HTMLElement | null);
+const el = computed(() => resolveElement(inner.value));
 
 defineExpose({ el });
 </script>

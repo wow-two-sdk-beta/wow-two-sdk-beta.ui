@@ -10,6 +10,7 @@ export type AlertModalActionProps = Record<string, never>;
 </script>
 
 <script setup lang="ts">
+import { resolveElement } from '../../../foundation/dom';
 import { computed, useAttrs, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import { cn } from '../../../foundation/styles';
 import OverlayCloseButton from '../OverlayCloseButton.vue';
@@ -54,7 +55,7 @@ function handleClick(event: MouseEvent): void {
   emit('action');
 }
 
-const el = computed(() => (inner.value?.$el ?? null) as HTMLElement | null);
+const el = computed(() => resolveElement(inner.value));
 
 defineExpose({ el });
 </script>

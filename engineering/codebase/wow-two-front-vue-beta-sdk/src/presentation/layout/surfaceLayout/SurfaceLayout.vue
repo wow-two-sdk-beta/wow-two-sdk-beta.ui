@@ -34,6 +34,7 @@ export interface SurfaceLayoutProps {
 </script>
 
 <script setup lang="ts">
+import { resolveElement } from '../../../foundation/dom';
 import { computed, useAttrs, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import { Primitive } from '../../../foundation/primitives';
 import { cn, surfaceVariants } from '../../../foundation/styles';
@@ -77,7 +78,7 @@ const rest = computed(() => {
 });
 
 /** `Primitive` renders the real element, so its `$el` is this component's root. */
-const el = computed(() => (inner.value?.$el ?? null) as HTMLElement | null);
+const el = computed(() => resolveElement(inner.value));
 
 defineExpose({ el });
 </script>

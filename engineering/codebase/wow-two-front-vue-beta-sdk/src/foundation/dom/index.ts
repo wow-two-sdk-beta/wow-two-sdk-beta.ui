@@ -18,3 +18,4 @@ export * from './hooks/UseFocusTrap';
 export * from './hooks/UseScrollLock';
 
 export { DomOrderExtensions } from './DomOrderExtensions';
+export { resolveElement } from './ResolveElement';

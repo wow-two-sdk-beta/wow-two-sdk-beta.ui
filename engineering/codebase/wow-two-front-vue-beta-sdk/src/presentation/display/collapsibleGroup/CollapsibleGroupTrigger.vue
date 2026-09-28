@@ -7,7 +7,7 @@ export interface CollapsibleGroupTriggerProps {
 
 <script setup lang="ts">
 import { shallowRef } from 'vue';
-import { ButtonType, dataAttr, HtmlElement } from '../../../foundation/dom';
+import { ButtonType, dataAttr, HtmlElement, resolveElement } from '../../../foundation/dom';
 import { Primitive } from '../../../foundation/primitives';
 import { useCollapsibleContext } from './CollapsibleGroupContext';
 
@@ -26,8 +26,7 @@ const context = useCollapsibleContext();
 /** The rendered element — the Vue stand-in for the React original's forwarded ref. */
 const el = shallowRef<HTMLElement | null>(null);
 const setEl = (value: unknown): void => {
-  const node = (value as { $el?: unknown } | null)?.$el ?? value;
-  el.value = node instanceof HTMLElement ? node : null;
+  el.value = resolveElement(value);
 };
 
 /* Chained after the consumer's own click (attribute fallthrough puts theirs first) and skipped

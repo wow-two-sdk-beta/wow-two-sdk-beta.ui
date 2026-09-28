@@ -12,6 +12,7 @@ import {
   type ShallowRef,
 } from 'vue';
 import { AriaAttribute } from '../../dom/enums/AriaAttribute';
+import { resolveElement } from '../../dom/ResolveElement';
 
 /**
  * Defines the arrow-key navigation axis of a roving-focus group.
@@ -119,9 +120,7 @@ export interface UseRovingFocusItemReturn {
 
 /** A function ref may receive a component's public instance; the group needs the DOM node. */
 function toElement(value: unknown): HTMLElement | null {
-  if (value instanceof HTMLElement) return value;
-  const el = (value as { $el?: unknown } | null)?.$el;
-  return el instanceof HTMLElement ? el : null;
+  return resolveElement(value);
 }
 
 /**

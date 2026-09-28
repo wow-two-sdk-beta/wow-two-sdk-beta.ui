@@ -1,6 +1,8 @@
 // Domain-internal helpers for `overlays/`. Not exported from the group barrel —
 // the "internal" signal is absence from `index.ts`, not the file name.
 
+import { resolveElement } from '../../foundation/dom';
+
 /** Extends `overlays/` with the DOM-node reads its triggers and panels share. */
 export const OverlayExtensions = {
   /**
@@ -15,6 +17,8 @@ export const OverlayExtensions = {
    */
   toHtmlElement(value: unknown): HTMLElement | null {
     if (typeof HTMLElement === 'undefined') return null;
-    return value instanceof HTMLElement ? value : null;
+    /* `resolveElement` also steps past a fragment's start anchor: an `as-child` trigger wrapping a component whose
+       template opens with a comment has that anchor as its `$el` in a development build. */
+    return resolveElement(value);
   },
 } as const;

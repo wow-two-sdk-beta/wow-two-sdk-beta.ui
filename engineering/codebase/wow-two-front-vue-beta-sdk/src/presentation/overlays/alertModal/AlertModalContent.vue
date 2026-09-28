@@ -6,6 +6,7 @@ export type AlertModalContentProps = ModalContentProps;
 </script>
 
 <script setup lang="ts">
+import { resolveElement } from '../../../foundation/dom';
 import { computed, useAttrs, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import ModalContent from '../modal/ModalContent.vue';
 
@@ -23,7 +24,7 @@ const inner = useTemplateRef<ComponentPublicInstance & { el?: unknown }>('inner'
 /** Declared props first, attrs (including `class`) after, so a caller's attribute wins — React's spread order. */
 const forwarded = computed(() => ({ ...props, ...attrs }));
 
-const el = computed(() => (inner.value?.$el ?? null) as HTMLElement | null);
+const el = computed(() => resolveElement(inner.value));
 
 defineExpose({ el });
 </script>

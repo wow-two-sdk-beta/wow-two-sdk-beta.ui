@@ -1,5 +1,6 @@
 import { cloneVNode, defineComponent, shallowRef, watch, type VNode } from 'vue';
 import { renderableChildren } from '../slot/Slot';
+import { resolveElement } from '../../dom/ResolveElement';
 
 export interface PresenceProps {
   /** The presence flag — toggle false to trigger exit. */
@@ -27,14 +28,7 @@ function getTotalDurationMs(node: HTMLElement): number {
 
 /** A function ref may receive a component's public instance; the DOM node is what the timing logic needs. */
 function toElement(value: unknown): HTMLElement | null {
-  const isElement = (candidate: unknown): candidate is HTMLElement =>
-    typeof candidate === 'object' &&
-    candidate !== null &&
-    (candidate as HTMLElement).nodeType === 1 &&
-    'style' in candidate;
-  if (isElement(value)) return value;
-  const el = (value as { $el?: unknown } | null)?.$el;
-  return isElement(el) ? el : null;
+  return resolveElement(value);
 }
 
 /**

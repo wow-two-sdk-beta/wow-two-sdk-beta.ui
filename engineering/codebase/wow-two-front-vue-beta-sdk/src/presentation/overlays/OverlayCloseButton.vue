@@ -12,6 +12,7 @@ export interface OverlayCloseButtonProps {
 </script>
 
 <script setup lang="ts">
+import { resolveElement } from '../../foundation/dom';
 import { useLocale } from '../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef, type ComponentPublicInstance } from 'vue';
 import { X } from 'lucide-vue-next';
@@ -61,7 +62,7 @@ function handleClick(event: MouseEvent): void {
 }
 
 /** `Primitive` renders the real element, so its `$el` is this component's root. */
-const el = computed(() => (inner.value?.$el ?? null) as HTMLElement | null);
+const el = computed(() => resolveElement(inner.value));
 
 defineExpose({ el });
 </script>
