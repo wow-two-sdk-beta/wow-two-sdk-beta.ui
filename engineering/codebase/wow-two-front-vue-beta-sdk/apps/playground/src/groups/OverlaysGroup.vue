@@ -324,6 +324,6 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
     </div>
 
     <h3 class="border-t border-border pt-4 font-mono text-xs uppercase text-subtle-foreground">auto-mounted tail</h3>
-    <AutoGroup :examples="overlaysExamples" :namespace="overlays" :covered="covered" />
+    <AutoGroup :examples="overlaysExamples" :namespace="overlays" :covered="covered" is-on-demand />
   </div>
 </template>

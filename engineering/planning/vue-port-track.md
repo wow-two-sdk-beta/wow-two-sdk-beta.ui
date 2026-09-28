@@ -296,3 +296,23 @@ Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-
 | G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignatureInput` (was `SignaturePad`; `*Input` holds a form value) | ✅ 11 DOM + 4 browser tests |
 | G12 | `MentionInput` | ✅ 4 DOM + 1 browser test |
 | G13 | Small gaps — `KanbanBoard`, `MasonryLayout`, `OverflowGroup`, `TimezonePicker`, `DurationInput` (`Tag` already closes via `@close`) | ✅ 17 DOM + 1 browser test (`KanbanBoard` + `KanbanColumn` / `KanbanCard`) |
+
+---
+
+## Component sweep S1–S8 (2026-09-28)
+
+Scan of 420 SFCs (`scratchpad` script, reproducible from the rules below): 223 have no focused test beyond the
+render/SSR smoke registry; 33 own `disabled`, 31 `readonly`, 14 `readOnly` and 21 `required` flags that the props
+convention names `isDisabled` / `isReadOnly` / `isRequired` ("must still take `is*` on a state flag the component
+owns and publishes"); 59 hand-written Field fallbacks; 22 files carry `eslint-disable`.
+
+| It | Scope | Status |
+|---|---|---|
+| S1 | Form state: `isDisabled` / `isReadOnly` / `isRequired` on every owning input through one `useFieldState`; legacy names stay one release as deprecated aliases | ⬜ |
+| S2 | Focused tests for interactive parts without one (toolbar, tree, carousel, editable, combobox, date range, disclosure, tag, toast, progress) | ⬜ |
+| S3 | `eslint-disable` audit — remove or justify each | ⬜ |
+| S4 | Playground: overlays render on request; link to the atlas | ✅ 0 dialogs open on load (was 7); `?smoke=1` still mounts all |
+| S5 | Themes: port the Wheelhouse glass themes and the ambient token from React | ⬜ |
+| S6 | Atlas: theme generator + CSS export (was the React theme studio) | ⬜ |
+| S7 | Atlas: real-component screens beside the wireframes (was the React showcase) and atlas tests | ⬜ |
+| S8 | Unprefixed idioms (`closeOnSelect`, `dismissOnEscape`, `hideBackdrop`, `hideFirstLast`, …) — names need a decision | ⬜ decision |

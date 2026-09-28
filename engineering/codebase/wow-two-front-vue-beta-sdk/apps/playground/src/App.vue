@@ -52,6 +52,13 @@ const warnCount = computed(() => diagnostics.filter((d) => d.kind === 'warn').le
       </nav>
 
       <div class="ml-auto flex items-center gap-2">
+        <a
+          href="http://localhost:5178/"
+          class="rounded-md border border-border px-2 py-1 text-xs text-subtle-foreground hover:bg-muted"
+          title="Layouts, patterns and themes — the atlas app (pnpm --filter atlas dev)"
+        >
+          atlas ↗
+        </a>
         <button
           type="button"
           class="rounded-md border border-border px-2 py-1 text-xs"
