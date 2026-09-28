@@ -2,6 +2,7 @@ import {
   Tooltip,
   TourPopover,
   CommandPaletteModal,
+  ConfirmPopover,
   CommandPaletteModalContent,
   CommandPaletteModalInput,
   CommandPaletteModalList,
@@ -187,6 +188,8 @@ export const overlaysExamples: readonly SmokeCase[] = [
       wrap: (node) => inPopover(h(PopoverContent, null, () => node)),
     },
   ),
+
+  smokeCase('ConfirmPopover', ConfirmPopover, { title: 'Delete this code?', defaultOpen: true }, { slot: true }),
 
   smokeCase('HoverCard', HoverCard, {}, { slot: true }),
 

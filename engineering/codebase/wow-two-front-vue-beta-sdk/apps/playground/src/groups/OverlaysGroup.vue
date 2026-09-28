@@ -28,6 +28,7 @@ const {
   ActionSheet,
   ActionSheetAction,
   ActionSheetCancel,
+  ConfirmPopover,
   BottomSheet,
   BackdropOverlay,
   ModalHeader,
@@ -63,6 +64,7 @@ const covered = [
   'ActionSheet',
   'ActionSheetAction',
   'ActionSheetCancel',
+  'ConfirmPopover',
   'BottomSheet',
   'BackdropOverlay',
   'ModalHeader',
@@ -96,6 +98,15 @@ const alertOpen = ref(false);
 const sheetOpen = ref(false);
 const bottomOpen = ref(false);
 const backdropOn = ref(false);
+const confirmLog = ref('idle');
+
+/** Simulates a slow delete, so the busy confirm state is visible. */
+function slowDelete(): Promise<void> {
+  confirmLog.value = 'deleting…';
+  return new Promise((resolve) => setTimeout(resolve, 1200)).then(() => {
+    confirmLog.value = 'deleted';
+  });
+}
 
 function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
   drawerSide.value = side;
@@ -184,6 +195,22 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
               <div class="p-2 text-xs">Popover placed {{ p }}</div>
             </PopoverContent>
           </Popover>
+        </div>
+      </Demo>
+
+      <Demo name="ConfirmPopover" note="async confirm keeps the panel busy until it settles">
+        <div class="flex flex-wrap items-center gap-2">
+          <ConfirmPopover
+            title="Delete this code?"
+            description="Printed copies stop resolving."
+            confirm-label="Delete"
+            tone="danger"
+            @confirm="slowDelete"
+            @cancel="confirmLog = 'cancelled'"
+          >
+            <Button variant="soft" tone="danger" size="sm">Delete…</Button>
+          </ConfirmPopover>
+          <span class="text-xs text-subtle-foreground">{{ confirmLog }}</span>
         </div>
       </Demo>
 
