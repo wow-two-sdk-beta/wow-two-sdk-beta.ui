@@ -12,6 +12,7 @@ import {
   LiveCursorIndicator,
   LoadingOverlay,
   LoadingState,
+  ErrorBoundary,
   MeterBar,
   PresenceIndicator,
   ProgressBar,
@@ -60,6 +61,8 @@ export const feedbackExamples: readonly SmokeCase[] = [
   smokeCase('InlineSpinner', InlineSpinner, {}, { slot: true }),
 
   smokeCase('LoadingState', LoadingState, {}),
+
+  smokeCase('ErrorBoundary', ErrorBoundary, {}, { slot: true }),
 
   smokeCase('ProgressStepsIndicator', ProgressStepsIndicator, { steps: ['Plan', 'Build'], current: 0 }),
 

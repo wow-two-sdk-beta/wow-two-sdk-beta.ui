@@ -105,6 +105,8 @@ import {
   TabsGroupTab,
   Tag,
   Text,
+  TruncatedText,
+  CountdownText,
   ThreadView,
   Timeline,
   TimelineDescription,
@@ -171,6 +173,10 @@ export const displayExamples: readonly SmokeCase[] = [
   smokeCase('Heading', Heading, {}, { slot: true }),
 
   smokeCase('Text', Text, {}, { slot: true }),
+
+  smokeCase('TruncatedText', TruncatedText, { lines: 2 }, { slot: true }),
+
+  smokeCase('CountdownText', CountdownText, { to: 1_790_000_000_000, isPaused: true }),
 
   smokeCase('CodeText', CodeText, {}, { slot: true }),
 

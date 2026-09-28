@@ -5,7 +5,7 @@ import {
   OnboardingChecklistCard,
   OnboardingChecklistCardTask,
 } from '@wow-two-beta/ui-vue/presentation/display';
-import { ref } from 'vue';
+import { defineComponent, h, ref } from 'vue';
 import * as feedback from '@wow-two-beta/ui-vue/presentation/feedback';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
 import { Info } from 'lucide-vue-next';
@@ -37,9 +37,11 @@ const {
   LoadingState,
   UndoBar,
   LiveCursorIndicator,
+  ErrorBoundary,
 } = feedback;
 
 const covered = [
+  'ErrorBoundary',
   'Alert',
   'AlertSimple',
   'Banner',
@@ -74,6 +76,22 @@ const PROGRESS_TONES = ['brand', 'success', 'warning', 'danger', 'neutral'] as c
 
 const undoOpen = ref(false);
 const overlayOn = ref(false);
+const widgetBroken = ref(false);
+
+/** A widget that throws while rendering once broken, to exercise the boundary. */
+const FragileWidget = defineComponent({
+  name: 'FragileWidget',
+  setup: () => () => {
+    if (widgetBroken.value) throw new Error('Widget crashed while rendering');
+    return h('p', { class: 'text-xs' }, 'The widget renders fine.');
+  },
+});
+
+/** Repairs the widget, then clears the boundary so it remounts. */
+function repair(reset: () => void): void {
+  widgetBroken.value = false;
+  reset();
+}
 </script>
 
 <template>
@@ -235,6 +253,24 @@ const overlayOn = ref(false);
       <Demo name="TypingIndicator" note="tone axis — dots should animate">
         <div class="flex items-center gap-4">
           <TypingIndicator v-for="t in ['muted', 'primary', 'foreground']" :key="t" :tone="t as never" />
+        </div>
+      </Demo>
+
+      <Demo name="ErrorBoundary" note="break the widget — the page around it keeps working">
+        <div class="space-y-2">
+          <ErrorBoundary>
+            <FragileWidget />
+            <template #fallback="{ error, reset }">
+              <div
+                role="alert"
+                class="space-y-1 rounded-md border border-destructive/40 bg-destructive-soft p-2 text-xs"
+              >
+                <p>{{ (error as Error).message }}</p>
+                <Button variant="ghost" size="sm" @click="repair(reset)">Repair and retry</Button>
+              </div>
+            </template>
+          </ErrorBoundary>
+          <Button variant="outline" size="sm" @click="widgetBroken = true">Break the widget</Button>
         </div>
       </Demo>
 

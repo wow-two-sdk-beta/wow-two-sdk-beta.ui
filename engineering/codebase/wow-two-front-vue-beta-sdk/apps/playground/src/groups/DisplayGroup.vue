@@ -16,6 +16,8 @@ const {
   Avatar,
   AvatarGroup,
   Text,
+  TruncatedText,
+  CountdownText,
   Heading,
   EyebrowText,
   Card,
@@ -93,6 +95,8 @@ const covered = [
   'Avatar',
   'AvatarGroup',
   'Text',
+  'TruncatedText',
+  'CountdownText',
   'Heading',
   'EyebrowText',
   'Card',
@@ -171,6 +175,11 @@ const AVATAR_SIZES = ['xs', 'sm', 'md', 'lg', 'xl', '2xl'] as const;
 const AVATAR_TONES = ['none', 'neutral', 'primary', 'danger', 'success', 'warning'] as const;
 
 const SPARK = [4, 9, 3, 12, 8, 15, 6, 18, 11, 20];
+const COUNTDOWN_TARGET = Date.now() + 3 * 60_000 + 7_000;
+const LONG_COPY =
+  'Dynamic QR codes keep their printed pattern while the destination changes behind them. Scans are counted per ' +
+  'device and country, destinations can be scheduled, and a code can be paused without reprinting anything. ' +
+  'Every change is versioned, so a wrong edit is one click away from being undone.';
 
 const ROWS = [
   { name: 'Ada Lovelace', role: 'Engineer', commits: 128 },
@@ -208,6 +217,21 @@ const ROWS = [
     </Demo>
 
     <div class="grid grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-3">
+      <Demo name="TruncatedText" note="clamped to 2 lines — the toggle only appears when the copy overflows">
+        <TruncatedText :lines="2" class="text-sm text-muted-foreground">{{ LONG_COPY }}</TruncatedText>
+      </Demo>
+
+      <Demo name="CountdownText" note="ticks on second boundaries; custom format below">
+        <div class="flex flex-col gap-1 text-sm">
+          <CountdownText :to="COUNTDOWN_TARGET" class="font-mono text-lg" />
+          <CountdownText
+            :to="COUNTDOWN_TARGET"
+            :format="({ minutes, seconds }) => `Offer ends in ${minutes}m ${seconds}s`"
+            class="text-xs text-subtle-foreground"
+          />
+        </div>
+      </Demo>
+
       <Demo name="Tag" note="variant axis + closable">
         <div class="flex flex-wrap gap-2">
           <Tag v-for="v in ['neutral', 'brand', 'success', 'warning', 'danger', 'info']" :key="v" :variant="v as never">

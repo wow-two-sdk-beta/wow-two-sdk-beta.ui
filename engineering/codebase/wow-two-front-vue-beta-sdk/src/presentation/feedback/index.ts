@@ -25,3 +25,4 @@ export * from './liveCursorIndicator';
 export * from './fieldErrorCallout';
 export * from './passwordStrengthCallout';
 export * from './characterCountCallout';
+export * from './errorBoundary';
