@@ -49,11 +49,16 @@ function pickAutoColor(name: string): string {
   return AutoColorPalette[hashName(name) % AutoColorPalette.length]!;
 }
 
+/** The first character of a word by code point — `[0]` would split an astral character into a lone surrogate. */
+function firstCharacter(word: string | undefined): string {
+  return word ? (Array.from(word)[0] ?? '') : '';
+}
+
 function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
+  const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return '';
-  const first = parts[0]?.[0] ?? '';
-  const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : '';
+  const first = firstCharacter(parts[0]);
+  const last = parts.length > 1 ? firstCharacter(parts[parts.length - 1]) : '';
   return (first + last).toUpperCase();
 }
 
@@ -171,6 +176,13 @@ const effectiveTone = computed(() => (autoColorClass.value ? AvatarTone.None : p
 
 const initials = computed(() => getInitials(props.name));
 
+/*
+ * Without an image the initials are not a name — "AK" reads as two letters. The fallback therefore speaks as one
+ * image named like the `<img>` would be: `alt`, else `name`. An empty `alt` marks the avatar decorative.
+ */
+const fallbackName = computed(() => (props.alt === '' ? undefined : (props.alt ?? (props.name || undefined))));
+const isDecorative = computed(() => props.alt === '');
+
 const classes = computed(() =>
   cn(
     avatarVariants({
@@ -205,6 +217,9 @@ defineExpose({ el });
     ref="el"
     :data-loading="props.isLoading ? 'true' : undefined"
     :aria-busy="props.isLoading ? true : undefined"
+    :role="!showImage && fallbackName ? 'img' : undefined"
+    :aria-label="!showImage ? fallbackName : undefined"
+    :aria-hidden="isDecorative ? 'true' : undefined"
     v-bind="rest"
     :class="classes"
     :style="styles"
@@ -216,6 +231,8 @@ defineExpose({ el });
       class="h-full w-full object-cover"
       @error="errored = true"
     />
-    <slot v-else name="fallback">{{ props.fallback ?? initials }}</slot>
+    <span v-else :aria-hidden="fallbackName ? 'true' : undefined" class="contents">
+      <slot name="fallback">{{ props.fallback ?? initials }}</slot>
+    </span>
   </span>
 </template>

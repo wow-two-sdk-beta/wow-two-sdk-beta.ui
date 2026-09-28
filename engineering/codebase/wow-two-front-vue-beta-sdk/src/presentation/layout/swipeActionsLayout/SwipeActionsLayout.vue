@@ -132,6 +132,29 @@ function close(): void {
   openSide.value = null;
 }
 
+/*
+ * The keyboard path to the actions. They stay in the tab order — hiding them from assistive tech while they remain
+ * focusable would strand focus on invisible buttons — and focusing one slides its side open, so the focused button
+ * is always on screen. Leaving the row, or Escape, closes it again.
+ */
+function reveal(side: 'left' | 'right'): void {
+  if (props.isDisabled) return;
+  offset.value = side === 'left' ? leftMax.value : -rightMax.value;
+  openSide.value = side;
+}
+
+function onFocusOut(event: FocusEvent): void {
+  const next = event.relatedTarget as Node | null;
+  if (openSide.value && !(next && el.value?.contains(next))) close();
+}
+
+function onKeydown(event: KeyboardEvent): void {
+  if (event.key === 'Escape' && openSide.value) {
+    event.stopPropagation();
+    close();
+  }
+}
+
 function onClick(): void {
   // Mouse drags always emit a click after pointerup — swallow it so a
   // drag-to-open doesn't instantly close. Plain taps still close.
@@ -166,27 +189,13 @@ defineExpose({ el });
 </script>
 
 <template>
-  <div ref="el" v-bind="rest" :class="classes">
+  <!--
+    Content comes first in the DOM so Tab reaches the row before its actions; `z-10` keeps it painted over the
+    absolutely positioned action panels behind it.
+  -->
+  <div ref="el" v-bind="rest" :class="classes" @focusout="onFocusOut" @keydown="onKeydown">
     <div
-      v-if="$slots.left"
-      class="absolute inset-y-0 left-0 flex"
-      :style="leftStyle"
-      :aria-hidden="openSide !== 'left'"
-    >
-      <slot name="left" />
-    </div>
-
-    <div
-      v-if="$slots.right"
-      class="absolute inset-y-0 right-0 flex"
-      :style="rightStyle"
-      :aria-hidden="openSide !== 'right'"
-    >
-      <slot name="right" />
-    </div>
-
-    <div
-      class="relative bg-card"
+      class="relative z-10 bg-card"
       :style="contentStyle"
       @pointerdown="onPointerDown"
       @pointermove="onPointerMove"
@@ -195,6 +204,12 @@ defineExpose({ el });
       @click="onClick"
     >
       <slot />
+    </div>
+    <div v-if="$slots.left" class="absolute inset-y-0 left-0 flex" :style="leftStyle" @focusin="reveal('left')">
+      <slot name="left" />
+    </div>
+    <div v-if="$slots.right" class="absolute inset-y-0 right-0 flex" :style="rightStyle" @focusin="reveal('right')">
+      <slot name="right" />
     </div>
   </div>
 </template>

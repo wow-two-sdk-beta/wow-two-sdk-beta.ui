@@ -59,16 +59,24 @@ const segments = computed<Array<HighlightTextSegment>>(() => {
   const list = queries.value;
   if (list.length === 0) return [{ text: props.text, isMatch: false }];
 
-  const pattern = list.map(escapeRegExp).join('|');
-  const regex = new RegExp(props.isWholeWord ? `\\b(${pattern})\\b` : `(${pattern})`, 'gi');
+  /* Longest first: regex alternation takes the first branch that matches, so `java|javascript` would split
+     "javascript" into a highlighted "java" and a plain "script". */
+  const pattern = [...list]
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp)
+    .join('|');
+  /* `\b` only knows ASCII word characters — "кофе" or "café" never sit between two of them — so whole words are
+     fenced with Unicode letter / number lookarounds instead. */
+  const regex = new RegExp(
+    props.isWholeWord ? `(?<![\\p{L}\\p{N}_])(${pattern})(?![\\p{L}\\p{N}_])` : `(${pattern})`,
+    'giu',
+  );
 
+  /* With one capture group, `split` puts every match at an odd index — read that, not a re-comparison. */
   return props.text
     .split(regex)
-    .filter((part) => part !== '')
-    .map((part) => ({
-      text: part,
-      isMatch: list.some((q) => part.toLowerCase() === q.toLowerCase()),
-    }));
+    .map((part, index) => ({ text: part, isMatch: index % 2 === 1 }))
+    .filter((segment) => segment.text !== '');
 });
 
 const classes = computed(() => cn(attrs.class as string | undefined));

@@ -11,6 +11,14 @@ Public import: `import { Avatar } from '@wow-two-beta/ui-vue/presentation/displa
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- Initials take the first character (by code point) of the first and last words of `name`.
+- Without an image the avatar is one `img` named `alt`, else `name`; the initials themselves are hidden from
+  assistive tech. An empty `alt` marks the avatar decorative (`aria-hidden`).
+- A failed image is retried when `src` changes.
+- Regression: `tests/unit/presentation/display/TextAvatarsSlides.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |

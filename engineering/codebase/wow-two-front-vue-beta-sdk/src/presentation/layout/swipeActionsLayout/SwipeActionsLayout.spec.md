@@ -11,6 +11,13 @@ Public import: `import { SwipeActionsLayout } from '@wow-two-beta/ui-vue/present
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- Dragging past `threshold` snaps a side open; a tap on the content closes it.
+- The actions stay in the tab order after the content. Focusing one slides its side open so the focused button is
+  on screen; Escape or focus leaving the row closes it.
+- Regression: `tests/unit/presentation/display/TextAvatarsSlides.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |

@@ -18,6 +18,7 @@ import { cloneVNode, computed, useAttrs, useSlots, useTemplateRef, type VNode } 
 import { cn, SizePreset } from '../../../foundation/styles';
 import { renderableChildren } from '../../../foundation/primitives';
 import Avatar from '../avatar/Avatar.vue';
+import { useLocale } from '../../../foundation/i18n';
 
 /** Renders a stack of overlapping `Avatar` children, with a "+N more" chip once they exceed `max`. */
 defineOptions({ name: 'AvatarGroup', inheritAttrs: false });
@@ -50,6 +51,8 @@ function sizedChildren(): Array<VNode> {
   return visible.map((child) => cloneVNode(child, { size: props.size }));
 }
 
+const locale = useLocale();
+
 const overflow = computed(() => {
   const count = renderableChildren(slots.default?.()).length;
   return props.max ? Math.max(0, count - props.max) : 0;
@@ -76,6 +79,13 @@ defineExpose({ el });
       <!-- Force consistent size -->
       <component :is="child" />
     </div>
-    <Avatar v-if="overflow > 0" :size="props.size" :fallback="`+${overflow}`" :class="overflowClasses" />
+    <!-- "+3" is the chip's look; its name says what it counts. -->
+    <Avatar
+      v-if="overflow > 0"
+      :size="props.size"
+      :fallback="`+${overflow}`"
+      :alt="locale.t('AvatarGroup.more', { count: overflow }, '{count} more')"
+      :class="overflowClasses"
+    />
   </div>
 </template>

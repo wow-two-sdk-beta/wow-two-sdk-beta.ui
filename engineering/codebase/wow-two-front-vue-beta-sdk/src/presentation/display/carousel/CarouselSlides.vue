@@ -77,6 +77,7 @@ defineExpose({ el });
           locale.t('CarouselSlides.position', { index: slideIndex + 1, total: children.length }, '{index} of {total}')
         "
         :aria-hidden="slideIndex !== carousel.index || undefined"
+        :inert="slideIndex !== carousel.index || undefined"
         class="w-full shrink-0"
       >
         <component :is="child" />
