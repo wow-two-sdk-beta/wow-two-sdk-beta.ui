@@ -84,6 +84,8 @@ const {
   RecurrenceEditor,
   ColorSwatchPicker,
   KnobInput,
+  RatingPicker,
+  RangeSliderInput,
   WizardForm,
   WizardFormSteps,
   WizardFormStep,
@@ -159,6 +161,8 @@ const covered = [
   'ColorSwatchPreview',
   'ColorSwatchPicker',
   'KnobInput',
+  'RatingPicker',
+  'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
   'StepperGroupStep',
@@ -249,6 +253,9 @@ const radioValue = ref('two');
 const checkboxes = ref<string[]>(['a']);
 const color = ref('#7c3aed');
 const knob = ref(35);
+const rating = ref<number | null>(3.5);
+const priceRange = ref<readonly [number, number]>([20, 80]);
+const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
 const listboxValue = ref<unknown>('b');
 
@@ -364,6 +371,28 @@ const stamp = ref<Temporal.PlainDateTime | null>(
           <KnobInput :model-value="80" tone="success" />
           <KnobInput :model-value="15" tone="danger" />
           <span class="text-xs text-subtle-foreground">{{ knob }}</span>
+        </div>
+      </Demo>
+
+      <Demo name="RatingPicker" note="half steps · press the picked mark again to clear · read-only below">
+        <div class="flex flex-col items-start gap-2">
+          <RatingPicker v-model="rating" :step="0.5" aria-label="Quality" />
+          <RatingPicker :model-value="rating" is-read-only size="sm" tone="primary" />
+          <p class="text-xs text-subtle-foreground">rating = {{ rating ?? 'null' }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="RangeSliderInput" note="drag either thumb · min gap 10 · commit fires on release">
+        <div class="space-y-3">
+          <RangeSliderInput
+            v-model="priceRange"
+            :min-distance="10"
+            :format-value="(v: number) => `$${v}`"
+            @commit="(range) => (committedRange = range)"
+          />
+          <p class="text-xs text-subtle-foreground">
+            value = {{ priceRange.join(' – ') }} · committed = {{ committedRange.join(' – ') }}
+          </p>
         </div>
       </Demo>
 

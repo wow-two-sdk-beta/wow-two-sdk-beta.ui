@@ -80,6 +80,8 @@ import {
   RadioField,
   RadioGroup,
   RangeCalendarPicker,
+  RangeSliderInput,
+  RatingPicker,
   ReactionPicker,
   RecurrenceEditor,
   SearchInput,
@@ -192,6 +194,10 @@ export const formsExamples: readonly SmokeCase[] = [
   smokeCase('SwitchInput', SwitchInput, {}),
 
   smokeCase('SliderInput', SliderInput, {}),
+
+  smokeCase('RangeSliderInput', RangeSliderInput, { defaultValue: [20, 80] }),
+
+  smokeCase('RatingPicker', RatingPicker, { defaultValue: 3, step: 0.5 }),
 
   smokeCase('Field', Field, {}, { slot: true }),
 

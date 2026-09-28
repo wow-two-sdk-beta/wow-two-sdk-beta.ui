@@ -77,3 +77,5 @@ export * from './nodeEditor';
 export * from './sortableGroup';
 export { ExactNumberInput, type ExactNumberInputProps } from './exactNumberInput';
 export * from './pointControl';
+export * from './ratingPicker';
+export * from './rangeSliderInput';
