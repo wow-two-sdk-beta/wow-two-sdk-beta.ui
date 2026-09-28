@@ -25,6 +25,8 @@ Behavioral changes to existing parts:
 - Form state flags follow the props convention (`isDisabled`, `isReadOnly`, `isRequired`) on the 30 inputs that
   owned `disabled` / `readonly` / `readOnly` / `required`. The old names still work this release and are removed in
   the next; the `is*` name wins when both are set, and both fall back to the surrounding `Field`.
+- `DateRangePicker` opened over a saved complete range no longer closes the moment it opens; it closes when a
+  pick completes a new range.
 - The date family (`DatePicker`, `DateRangePicker`, `CalendarPicker`, `RangeCalendarPicker`) moves its per-day
   predicate to `isDateDisabled`; `isDisabled` is now the boolean. A function passed as `isDisabled` still works as
   the predicate this release.

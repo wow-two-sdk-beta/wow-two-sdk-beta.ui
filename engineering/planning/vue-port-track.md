@@ -309,8 +309,8 @@ owns and publishes"); 59 hand-written Field fallbacks; 22 files carry `eslint-di
 | It | Scope | Status |
 |---|---|---|
 | S1 | Form state: `isDisabled` / `isReadOnly` / `isRequired` on every owning input; legacy names stay one release as deprecated aliases | ✅ 30 inputs + date predicate → `isDateDisabled`; 8 DOM tests; internal usages and demos migrated |
-| S2 | Focused tests for interactive parts without one (toolbar, tree, carousel, editable, combobox, date range, disclosure, tag, toast, progress) | ⬜ |
-| S3 | `eslint-disable` audit — remove or justify each | ⬜ |
+| S2 | Focused tests for interactive parts without one | ✅ 17 tests: toolbar, disclosure, tree, collapsible, tag, editable, composer, swatches, progress, date range — which caught a real `DateRangePicker` bug (a saved range closed on open) |
+| S3 | `eslint-disable` audit — remove or justify each | ✅ all 25 justified (empty exported contracts, control-char regex, schema namespace, escaped v-html) |
 | S4 | Playground: overlays render on request; link to the atlas | ✅ 0 dialogs open on load (was 7); `?smoke=1` still mounts all |
 | S5 | Themes: port the Wheelhouse glass themes and the ambient token from React | ✅ 188 themes; glass foregrounds corrected to this SDK's stricter AA pairs; existing palettes byte-identical |
 | S6 | Atlas: theme generator + CSS export (was the React theme studio) | ⬜ |

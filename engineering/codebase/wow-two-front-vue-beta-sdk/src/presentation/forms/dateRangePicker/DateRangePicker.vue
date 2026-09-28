@@ -133,14 +133,14 @@ const range = controlled.value;
 const open = ref(false);
 
 /*
- * Auto-close when both ends are picked. NOT `immediate` — an immediate watcher runs during
- * setup, on the server too, and the React original's effect only mattered after a change.
+ * Auto-close when a pick completes the range. Watches the range only: opening over an already complete range (a
+ * saved stay, a preset) must not close the panel the moment it opens. NOT `immediate` — an immediate watcher runs
+ * during setup, on the server too.
  */
-let wasComplete = false;
-watch([range, open], ([nextRange, isOpen]) => {
+watch(range, (nextRange, previousRange) => {
   const complete = Boolean(nextRange?.start && nextRange?.end);
-  if (complete && !wasComplete && isOpen) open.value = false;
-  wasComplete = complete;
+  const wasComplete = Boolean(previousRange?.start && previousRange?.end);
+  if (complete && !wasComplete && open.value) open.value = false;
 });
 
 function onCalendarChange(next: DateRange | null): void {
