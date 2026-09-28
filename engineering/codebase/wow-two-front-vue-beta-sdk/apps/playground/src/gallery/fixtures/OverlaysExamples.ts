@@ -3,6 +3,7 @@ import {
   TourPopover,
   CommandPaletteModal,
   ConfirmPopover,
+  LightboxModal,
   CommandPaletteModalContent,
   CommandPaletteModalInput,
   CommandPaletteModalList,
@@ -190,6 +191,13 @@ export const overlaysExamples: readonly SmokeCase[] = [
   ),
 
   smokeCase('ConfirmPopover', ConfirmPopover, { title: 'Delete this code?', defaultOpen: true }, { slot: true }),
+
+  smokeCase(
+    'LightboxModal',
+    LightboxModal,
+    { images: [{ src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', alt: 'Pixel' }] },
+    { slot: true },
+  ),
 
   smokeCase('HoverCard', HoverCard, {}, { slot: true }),
 

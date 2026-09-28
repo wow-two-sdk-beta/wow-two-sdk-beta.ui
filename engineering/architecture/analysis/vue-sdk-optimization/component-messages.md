@@ -119,6 +119,10 @@ in their capability specifications and are not inferred by this catalogue.
 | `KeyboardShortcutPicker.placeholder` | Click to record | [KeyboardShortcutPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/keyboardShortcutPicker/KeyboardShortcutPicker.vue) |
 | `KeyboardShortcutPicker.recordLabel` | Press keys… | [KeyboardShortcutPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/keyboardShortcutPicker/KeyboardShortcutPicker.vue) |
 | `KnobInput.label` | Knob | [KnobInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/knobInput/KnobInput.vue) |
+| `LightboxModal.counter` | {current} of {total} | [LightboxModal.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/lightboxModal/LightboxModal.vue) |
+| `LightboxModal.label` | Image viewer | [LightboxModal.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/lightboxModal/LightboxModal.vue) |
+| `LightboxModal.next` | Next image | [LightboxModal.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/lightboxModal/LightboxModal.vue) |
+| `LightboxModal.previous` | Previous image | [LightboxModal.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/lightboxModal/LightboxModal.vue) |
 | `LoadingOverlay.label` | Loading… | [LoadingOverlay.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/loadingOverlay/LoadingOverlay.vue) |
 | `LoadingOverlay.loading` | Loading | [LoadingOverlay.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/loadingOverlay/LoadingOverlay.vue) |
 | `LoadingState.title` | Loading… | [LoadingState.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/loadingState/LoadingState.vue) |

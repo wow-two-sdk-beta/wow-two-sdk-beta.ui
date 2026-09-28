@@ -40,7 +40,26 @@ const {
   DrawerHeader,
   DrawerTitle,
   DrawerBody,
+  LightboxModal,
 } = overlays;
+
+/** Draws an inline SVG "photo", so the lightbox demo needs no network. */
+function scene(hue: number, label: string): string {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="g" x2="1" y2="1">` +
+    `<stop offset="0" stop-color="hsl(${hue} 70% 55%)"/><stop offset="1" stop-color="hsl(${hue + 40} 70% 22%)"/>` +
+    `</linearGradient></defs><rect width="1200" height="800" fill="url(#g)"/><text x="600" y="420" ` +
+    `font-family="sans-serif" font-size="72" fill="white" text-anchor="middle">${label}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+/** The lightbox demo's images. */
+const GALLERY = [
+  { src: scene(200, 'Harbour'), alt: 'Harbour at dawn', caption: 'Dawn over the harbour' },
+  { src: scene(20, 'Market'), alt: 'Market street at noon' },
+  { src: scene(140, 'Bridge'), alt: 'Old stone bridge', caption: 'Built 1612' },
+  { src: scene(280, 'Dusk'), alt: 'Skyline at dusk' },
+];
 
 const covered = [
   'Modal',
@@ -65,6 +84,7 @@ const covered = [
   'ActionSheetAction',
   'ActionSheetCancel',
   'ConfirmPopover',
+  'LightboxModal',
   'BottomSheet',
   'BackdropOverlay',
   'ModalHeader',
@@ -196,6 +216,22 @@ function openDrawer(side: 'left' | 'right' | 'top' | 'bottom') {
             </PopoverContent>
           </Popover>
         </div>
+      </Demo>
+
+      <Demo name="LightboxModal" note="click a thumbnail · arrows, Home/End and touch swipes step · Escape closes">
+        <LightboxModal v-slot="{ openAt }" :images="GALLERY">
+          <div class="grid grid-cols-4 gap-1.5">
+            <button
+              v-for="(photo, index) in GALLERY"
+              :key="photo.alt"
+              type="button"
+              class="overflow-hidden rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+              @click="openAt(index)"
+            >
+              <img :src="photo.src" :alt="photo.alt" class="aspect-[3/2] w-full object-cover" />
+            </button>
+          </div>
+        </LightboxModal>
       </Demo>
 
       <Demo name="ConfirmPopover" note="async confirm keeps the panel busy until it settles">
