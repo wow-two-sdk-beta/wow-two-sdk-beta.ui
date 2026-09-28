@@ -105,6 +105,7 @@ const {
   TreeSelectPicker,
   CascaderPicker,
   ImageCropEditor,
+  MentionInput,
 } = forms;
 
 const covered = [
@@ -181,6 +182,7 @@ const covered = [
   'TreeSelectPicker',
   'CascaderPicker',
   'ImageCropEditor',
+  'MentionInput',
   'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
@@ -333,6 +335,15 @@ const CROP_PHOTO = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
 const cropArea = ref<{ x: number; y: number; width: number; height: number } | null>(null);
 const cropEditor = ref<{ toDataURL: () => string | null } | null>(null);
 const croppedPreview = ref<string | null>(null);
+/** The people the mention demo suggests. */
+const TEAM = [
+  { value: 'ada', label: 'Ada Lovelace', description: 'Design' },
+  { value: 'alan', label: 'Alan Turing', description: 'Backend' },
+  { value: 'grace', label: 'Grace Hopper', description: 'Compilers' },
+  { value: 'linus', label: 'Linus Torvalds', description: 'Kernel' },
+];
+const comment = ref('');
+const mentioned = ref<string[]>([]);
 const priceRange = ref<readonly [number, number]>([20, 80]);
 const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
@@ -543,6 +554,19 @@ const stamp = ref<Temporal.PlainDateTime | null>(
               cropArea ? `${cropArea.width}×${cropArea.height} @ ${cropArea.x},${cropArea.y}` : 'default crop'
             }}</span>
           </div>
+        </div>
+      </Demo>
+
+      <Demo name="MentionInput" note="type @ then a name · arrows pick, Enter or Tab inserts, Escape dismisses">
+        <div class="flex w-full flex-col gap-2">
+          <MentionInput
+            v-model="comment"
+            :options="TEAM"
+            placeholder="Leave a comment…"
+            aria-label="Comment"
+            @mention="(person) => mentioned.push(person.label)"
+          />
+          <p class="text-xs text-subtle-foreground">mentioned = {{ mentioned.join(', ') || '—' }}</p>
         </div>
       </Demo>
 

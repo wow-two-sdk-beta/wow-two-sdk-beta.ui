@@ -137,6 +137,8 @@ in their capability specifications and are not inferred by this catalogue.
 | `MarkdownEditor.viewMode` | View mode | [MarkdownEditor.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/markdownEditor/MarkdownEditor.vue) |
 | `MarqueeGroup.pauseLabel` | Pause animation | [MarqueeGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/marqueeGroup/MarqueeGroup.vue) |
 | `MarqueeGroup.resumeLabel` | Resume animation | [MarqueeGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/marqueeGroup/MarqueeGroup.vue) |
+| `MentionInput.label` | Suggestions | [MentionInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/mentionInput/MentionInput.vue) |
+| `MentionInput.suggestions` | {count} suggestions | [MentionInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/mentionInput/MentionInput.vue) |
 | `MessageGroup.jumpToLatest` | Jump to latest | [MessageGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/messageGroup/MessageGroup.vue) |
 | `MonthGrid.nextMonth` | Next month | [MonthGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/MonthGrid.vue) |
 | `MonthGrid.previousMonth` | Previous month | [MonthGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/MonthGrid.vue) |

@@ -290,5 +290,5 @@ Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-
 | G9 | Period pickers — `MonthPicker`, `YearPicker` on a shared index-space `PeriodGrid` | ✅ 6 DOM tests |
 | G10 | App navigation — `SidebarMenu` (+ `Item`/`Group`/`Section`, icon rail), `BottomNavMenu` | ✅ 8 DOM tests |
 | G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignatureInput` (was `SignaturePad`; `*Input` holds a form value) | ✅ 11 DOM + 3 browser tests |
-| G12 | `MentionInput` | ⬜ |
+| G12 | `MentionInput` | ✅ 4 DOM + 1 browser test |
 | G13 | Small gaps — `KanbanBoard`, `MasonryLayout`, `OverflowGroup`, `TimezonePicker`, `DurationInput` (`Tag` already closes via `@close`) | ✅ 17 DOM + 1 browser test (`KanbanBoard` + `KanbanColumn` / `KanbanCard`) |

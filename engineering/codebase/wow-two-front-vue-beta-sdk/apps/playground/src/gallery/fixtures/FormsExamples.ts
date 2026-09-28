@@ -114,6 +114,7 @@ import {
   TreeSelectPicker,
   CascaderPicker,
   ImageCropEditor,
+  MentionInput,
 } from '../../../../../src/presentation/forms';
 import { ExactNumber } from '../../../../../src/foundation/numbers';
 const exactNumberExample = ExactNumber.parse('9223372036854775807.125');
@@ -238,6 +239,11 @@ export const formsExamples: readonly SmokeCase[] = [
   smokeCase('ImageCropEditor', ImageCropEditor, {
     src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
     aspectRatio: 1,
+  }),
+
+  smokeCase('MentionInput', MentionInput, {
+    options: [{ value: 'ada', label: 'Ada Lovelace' }],
+    defaultValue: 'Thanks @Ada Lovelace',
   }),
 
   smokeCase('TimezonePicker', TimezonePicker, { defaultValue: 'Asia/Tashkent', timeZones: ['UTC', 'Asia/Tashkent'] }),
