@@ -222,6 +222,16 @@ in their capability specifications and are not inferred by this catalogue.
 | `ToastHost.notifications` | Notifications | [ToastHost.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/toastHost/ToastHost.vue) |
 | `TourPopover.back` | Back | [TourPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/tourPopover/TourPopover.vue) |
 | `TourPopover.skip` | Skip | [TourPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/tourPopover/TourPopover.vue) |
+| `TransferPicker.addAll` | Add all | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.addChecked` | Add checked | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.count` | {checked}/{total} | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.empty` | Nothing here | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.noMatches` | No matches | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.removeAll` | Remove all | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.removeChecked` | Remove checked | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.search` | Filter | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.sourceLabel` | Available | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TransferPicker.targetLabel` | Selected | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
 | `TruncatedText.lessLabel` | Show less | [TruncatedText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/truncatedText/TruncatedText.vue) |
 | `TruncatedText.moreLabel` | Show more | [TruncatedText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/truncatedText/TruncatedText.vue) |
 | `TypewriterText.pauseLabel` | Pause animation | [TypewriterText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/typewriterText/TypewriterText.vue) |

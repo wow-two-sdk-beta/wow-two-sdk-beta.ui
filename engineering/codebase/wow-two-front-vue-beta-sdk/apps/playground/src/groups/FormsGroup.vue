@@ -100,6 +100,7 @@ const {
   YearPicker,
   DurationInput,
   SignatureInput,
+  TransferPicker,
 } = forms;
 
 const covered = [
@@ -172,6 +173,7 @@ const covered = [
   'YearPicker',
   'DurationInput',
   'SignatureInput',
+  'TransferPicker',
   'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
@@ -269,6 +271,16 @@ const billingMonth = ref<Temporal.PlainYearMonth | null>(Temporal.PlainYearMonth
 const fiscalYear = ref<number | null>(null);
 const meetingLength = ref<Temporal.Duration | null>(Temporal.Duration.from({ minutes: 45 }));
 const signature = ref<string | null>(null);
+/** The permissions the transfer demo moves between its lists. */
+const PERMISSIONS = [
+  { key: 'codes.read', label: 'Read codes', description: 'List and open QR codes' },
+  { key: 'codes.write', label: 'Edit codes' },
+  { key: 'codes.delete', label: 'Delete codes' },
+  { key: 'stats.read', label: 'View statistics' },
+  { key: 'billing.manage', label: 'Manage billing', isDisabled: true },
+  { key: 'team.invite', label: 'Invite members' },
+];
+const granted = ref<string[]>(['codes.read']);
 const priceRange = ref<readonly [number, number]>([20, 80]);
 const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
@@ -434,6 +446,19 @@ const stamp = ref<Temporal.PlainDateTime | null>(
             alt="Signature preview"
             class="h-12 self-start rounded border border-border"
           />
+        </div>
+      </Demo>
+
+      <Demo name="TransferPicker" note="check options, then move · double-click moves one · billing is locked">
+        <div class="flex w-full flex-col gap-2">
+          <TransferPicker
+            v-model="granted"
+            :options="PERMISSIONS"
+            source-label="Available"
+            target-label="Granted"
+            is-searchable
+          />
+          <p class="text-xs text-subtle-foreground">granted = {{ granted.join(', ') || '—' }}</p>
         </div>
       </Demo>
 

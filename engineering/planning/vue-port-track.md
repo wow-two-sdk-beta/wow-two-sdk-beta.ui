@@ -286,7 +286,7 @@ Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-
 | G5 | Layout — `StickyLayout`, `VirtualScrollArea` | ✅ 7 DOM + 2 browser tests |
 | G6 | Localized accessible names — `KnobInput`, `IconPicker`, `JsonEditorTreeNode` | ✅ 3 DOM tests |
 | G7 | `DataTable` depth — selection, expandable rows, sticky header, loading state on `foundation/selection`; declined controlled toggles revert | ✅ 12 DOM tests |
-| G8 | Hierarchical pickers — `TreeSelectPicker`, `CascaderPicker`, `TransferPicker` | ⬜ |
+| G8 | Hierarchical pickers — `TreeSelectPicker`, `CascaderPicker`, `TransferPicker` | 🟡 `TransferPicker` ✅ 4 DOM tests · tree, cascader ⬜ |
 | G9 | Period pickers — `MonthPicker`, `YearPicker` on a shared index-space `PeriodGrid` | ✅ 6 DOM tests |
 | G10 | App navigation — `SidebarMenu` (+ `Item`/`Group`/`Section`, icon rail), `BottomNavMenu` | ✅ 8 DOM tests |
 | G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignatureInput` (was `SignaturePad`; `*Input` holds a form value) | 🟡 `SignatureInput` ✅ 3 DOM + 1 browser test · `LightboxModal` ✅ 4 DOM + 1 browser test · `ImageCropEditor` ⬜ |
