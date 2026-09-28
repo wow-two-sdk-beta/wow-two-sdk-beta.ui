@@ -7,8 +7,10 @@ export const Sections = [
   { key: 'patterns', label: 'Patterns' },
   { key: 'guides', label: 'Guides' },
   { key: 'lab', label: 'Lab' },
+  { key: 'screens', label: 'Screens' },
   { key: 'components', label: 'Components' },
   { key: 'themes', label: 'Themes' },
+  { key: 'studio', label: 'Studio' },
 ] as const;
 
 export type SectionKey = (typeof Sections)[number]['key'];

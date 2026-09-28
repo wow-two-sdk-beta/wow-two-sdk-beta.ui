@@ -49,6 +49,8 @@ export default defineConfig({
             'tests/unit/foundation/**/*.test.ts',
             'tests/unit/domain/**/*.test.ts',
             'tests/unit/{router,query,auth,feedback,formsEngine,analytics,flags}/**/*.test.ts',
+            // The atlas app's content graph and link codecs — pure data, no DOM.
+            'tests/unit/atlas/**/*.test.ts',
           ],
           exclude: ['**/*.browser.test.ts', '**/*.component.test.ts', ...smokeSuffixes],
         },

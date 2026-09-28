@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { ArrowLeft, FlaskConical } from 'lucide-vue-next';
+import { ArrowLeft, FlaskConical, MonitorSmartphone } from 'lucide-vue-next';
 import { Archetypes, findArchetype } from '../content/layouts';
 import { OptionLabels, type Device } from '../content/model';
+import { screenFor } from '../content/screens';
 import { specToQuery } from '../content/specQuery';
 import { href, route } from '../router';
 import ChoiceChips from '../shell/ChoiceChips.vue';
@@ -34,6 +35,9 @@ const related = computed(() =>
     return entry ? [entry] : [];
   }),
 );
+
+/** The real-component screen built on this archetype, when one exists. */
+const screen = computed(() => (archetype.value ? screenFor(archetype.value.id) : undefined));
 
 const labLink = computed(() =>
   archetype.value
@@ -70,12 +74,21 @@ const axes = computed(() => {
         <h1 class="text-2xl font-semibold tracking-tight">{{ archetype.name }}</h1>
         <p class="mt-1 max-w-2xl text-muted-foreground">{{ archetype.summary }}</p>
       </div>
-      <a
-        :href="labLink"
-        class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-      >
-        <FlaskConical class="size-4" aria-hidden="true" /> Open in the lab
-      </a>
+      <div class="flex flex-wrap gap-2">
+        <a
+          v-if="screen"
+          :href="href('screens', screen.id)"
+          class="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+        >
+          <MonitorSmartphone class="size-4" aria-hidden="true" /> See it built
+        </a>
+        <a
+          :href="labLink"
+          class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          <FlaskConical class="size-4" aria-hidden="true" /> Open in the lab
+        </a>
+      </div>
     </header>
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">

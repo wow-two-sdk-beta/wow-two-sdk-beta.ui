@@ -1,5 +1,13 @@
-import { ref, watch } from 'vue';
-import { ThemeCatalog, getTheme, themeToCss } from '@wow-two-beta/ui-vue/foundation/themes';
+import { onBeforeUnmount, shallowRef, watch, type Ref } from 'vue';
+import {
+  ThemeCatalog,
+  generateTheme,
+  getTheme,
+  themeToCss,
+  type Theme,
+  type ThemeSeed,
+} from '@wow-two-beta/ui-vue/foundation/themes';
+import { GeneratedThemeId, seedFromQuery, seedToQuery } from './content/seedQuery';
 
 /** The atlas opens on the house theme; any catalog theme can be applied from the top bar or the themes page. */
 export const DEFAULT_THEME = 'wow';
@@ -23,9 +31,35 @@ function savePreference(key: string, value: string): void {
   }
 }
 
+/* The studio's applied seed persists as its own query string, so reading it back runs the same validation a
+   shared studio link does. */
+const storedSeed = readPreference('atlas:seed');
+
+/** The studio seed applied atlas-wide, or `null` until the studio applies one. */
+export const generatedSeed = shallowRef<ThemeSeed | null>(
+  storedSeed === null ? null : seedFromQuery(new URLSearchParams(storedSeed)),
+);
+
+function isKnown(id: string): boolean {
+  return ids.has(id) || (id === GeneratedThemeId && generatedSeed.value !== null);
+}
+
 const storedTheme = readPreference('atlas:theme');
-export const themeId = ref(storedTheme !== null && ids.has(storedTheme) ? storedTheme : DEFAULT_THEME);
-export const isDark = ref(readPreference('atlas:dark') === 'true');
+export const themeId = shallowRef(storedTheme !== null && isKnown(storedTheme) ? storedTheme : DEFAULT_THEME);
+export const isDark = shallowRef(readPreference('atlas:dark') === 'true');
+
+/** Applies a studio seed to the whole atlas and remembers it across reloads. */
+export function applyGeneratedSeed(seed: ThemeSeed): void {
+  generatedSeed.value = { ...seed, id: GeneratedThemeId };
+  savePreference('atlas:seed', new URLSearchParams(seedToQuery(seed)).toString());
+  themeId.value = GeneratedThemeId;
+}
+
+/** The theme a catalog id or the generated id resolves to. */
+export function resolveTheme(id: string): Theme | undefined {
+  if (id === GeneratedThemeId) return generatedSeed.value ? generateTheme(generatedSeed.value) : undefined;
+  return ids.has(id) ? getTheme(id) : undefined;
+}
 
 /** Emits only the selected theme's CSS and keeps the root classes in step; returns a disposer. */
 export function installTheme(): () => void {
@@ -33,9 +67,9 @@ export function installTheme(): () => void {
   style.id = STYLE_ID;
   if (!style.isConnected) document.head.append(style);
   const stopTheme = watch(
-    themeId,
-    (id) => {
-      const theme = ids.has(id) ? getTheme(id) : undefined;
+    [themeId, generatedSeed],
+    ([id]) => {
+      const theme = resolveTheme(id);
       if (!theme) {
         themeId.value = DEFAULT_THEME;
         return;
@@ -64,4 +98,39 @@ export function installTheme(): () => void {
     stopDark();
     style.remove();
   };
+}
+
+/** The preview class a scoped token set resolves under, per mode. */
+export function previewClass(id: string, dark: boolean): string {
+  return `theme-${id}-preview-${dark ? 'dark' : 'light'}`;
+}
+
+/**
+ * Keeps a `<style>` with a theme's two PREVIEW blocks mounted for the calling component's lifetime.
+ *
+ * A plain `.theme-{id}` block cannot preview light mode inside a dark atlas: the emitter's `.dark .theme-{id}`
+ * selector matches any `.dark` ancestor. Each preview class therefore carries one mode's tokens in both blocks.
+ */
+export function useThemePreviewCss(theme: Readonly<Ref<Theme | undefined>>): void {
+  if (typeof document === 'undefined') return;
+  const style = document.createElement('style');
+  style.dataset.atlasPreview = '';
+  document.head.append(style);
+  const stop = watch(
+    theme,
+    (value) => {
+      if (!value) {
+        style.textContent = '';
+        return;
+      }
+      const light = { ...value, id: `${value.id}-preview-light`, dark: value.light };
+      const dark = { ...value, id: `${value.id}-preview-dark`, light: value.dark };
+      style.textContent = `${themeToCss(light)}\n\n${themeToCss(dark)}`;
+    },
+    { immediate: true },
+  );
+  onBeforeUnmount(() => {
+    stop();
+    style.remove();
+  });
 }

@@ -2,6 +2,7 @@
 import { Archetypes } from '../content/layouts';
 import { PatternGroups } from '../content/patterns';
 import { Guides } from '../content/guides';
+import { Screens } from '../content/screens';
 import { href } from '../router';
 import WireCard from '../shell/WireCard.vue';
 
@@ -22,8 +23,18 @@ const Entrances = [
     text: `${Guides.length} decision guides: answer a few questions, get a layout.`,
   },
   { section: 'lab', title: 'Lab', text: 'Compose navigation × panels × content × surface × density on any device.' },
+  {
+    section: 'screens',
+    title: 'Screens',
+    text: `${Screens.length} archetypes built from real SDK components — the wireframes, checked against what ships.`,
+  },
   { section: 'components', title: 'Components', text: 'Every exported SDK component, rendered live by family.' },
   { section: 'themes', title: 'Themes', text: 'The theme catalogue as swatches; apply any theme to the whole atlas.' },
+  {
+    section: 'studio',
+    title: 'Studio',
+    text: 'Generate an AA-checked theme from an OKLCH seed; share, apply or export it.',
+  },
 ] as const;
 </script>
 

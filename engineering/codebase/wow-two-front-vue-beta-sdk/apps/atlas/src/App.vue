@@ -2,7 +2,8 @@
 import { computed, defineAsyncComponent } from 'vue';
 import { Moon, Sun } from 'lucide-vue-next';
 import { Sections, href, route } from './router';
-import { isDark, themeId, themes } from './theme';
+import { GeneratedThemeId } from './content/seedQuery';
+import { generatedSeed, isDark, themeId, themes } from './theme';
 
 /* Pages load on demand; the components page pulls every fixture, so it only loads when opened. */
 const Pages = {
@@ -11,8 +12,10 @@ const Pages = {
   patterns: defineAsyncComponent(() => import('./pages/PatternsPage.vue')),
   guides: defineAsyncComponent(() => import('./pages/GuidesPage.vue')),
   lab: defineAsyncComponent(() => import('./pages/LabPage.vue')),
+  screens: defineAsyncComponent(() => import('./pages/ScreensPage.vue')),
   components: defineAsyncComponent(() => import('./pages/ComponentsPage.vue')),
   themes: defineAsyncComponent(() => import('./pages/ThemesPage.vue')),
+  studio: defineAsyncComponent(() => import('./pages/StudioPage.vue')),
 } as const;
 
 const page = computed(() => Pages[route.value.section]);
@@ -20,7 +23,7 @@ const pageKey = computed(() => `${route.value.section}/${route.value.id ?? ''}`)
 </script>
 
 <template>
-  <div class="min-h-svh bg-background text-foreground">
+  <div class="surface-ambient min-h-svh bg-background text-foreground">
     <header
       class="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70"
     >
@@ -52,6 +55,7 @@ const pageKey = computed(() => `${route.value.section}/${route.value.id ?? ''}`)
           aria-label="Theme"
           class="hidden max-w-44 rounded-md border border-border bg-background px-2 py-1.5 text-xs md:block"
         >
+          <option v-if="generatedSeed" :value="GeneratedThemeId">Studio · {{ generatedSeed.name }}</option>
           <option v-for="theme in themes" :key="theme.id" :value="theme.id">{{ theme.name }}</option>
         </select>
         <button

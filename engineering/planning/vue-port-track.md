@@ -313,6 +313,8 @@ owns and publishes"); 59 hand-written Field fallbacks; 22 files carry `eslint-di
 | S3 | `eslint-disable` audit — remove or justify each | ✅ all 25 justified (empty exported contracts, control-char regex, schema namespace, escaped v-html) |
 | S4 | Playground: overlays render on request; link to the atlas | ✅ 0 dialogs open on load (was 7); `?smoke=1` still mounts all |
 | S5 | Themes: port the Wheelhouse glass themes and the ambient token from React | ✅ 188 themes; glass foregrounds corrected to this SDK's stricter AA pairs; existing palettes byte-identical |
-| S6 | Atlas: theme generator + CSS export (was the React theme studio) | ⬜ |
-| S7 | Atlas: real-component screens beside the wireframes (was the React showcase) and atlas tests | ⬜ |
+| S6 | Atlas: theme generator + CSS export (was the React theme studio) | ✅ `#/studio`: OKLCH seed → live light/dark preview of real components, both-mode contrast report, apply to the atlas, export as runtime module / CSS / token JSON; the seed is the link. SDK: `contrastPairRatio` + `ContrastPair` exported |
+| S7 | Atlas: real-component screens beside the wireframes (was the React showcase) and atlas tests | ✅ `#/screens`: dashboard, board, settings, inbox, each linked to its archetype; 32 atlas tests (content graph, codecs, pages, screens). Building them caught a `DataTable` bug: a column `cell` returning a VNode crashed the table |
 | S8 | Unprefixed idioms (`closeOnSelect`, `dismissOnEscape`, `hideBackdrop`, `hideFirstLast`, …) — names need a decision | ⬜ decision |
+| S9 | Focused tests, second batch: interactive parts still covered only by the render smoke | ⬜ |
+| S10 | Final gates: browser matrix (chromium, forced colours, webkit), build, packed consumer, playground and atlas builds | ⬜ |
