@@ -22,7 +22,8 @@ defineSlots<{ default?(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const classes = computed(() => cn('flex-1 overflow-y-auto p-6', attrs.class as string | undefined));
+/* The main region (or the document) owns scrolling, so content never nests a second scroll container. */
+const classes = computed(() => cn('flex-1 p-6', attrs.class as string | undefined));
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

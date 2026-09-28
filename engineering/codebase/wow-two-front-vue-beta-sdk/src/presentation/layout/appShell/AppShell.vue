@@ -17,6 +17,26 @@ export const Breakpoint = {
 
 export type Breakpoint = (typeof Breakpoint)[keyof typeof Breakpoint];
 
+/** Defines what scrolls inside an `AppShell`. */
+export const AppShellScroll = {
+  /** The main region scrolls; the header, sidebar and footer span the full window and hold still. */
+  Region: 'region',
+  /** The whole document scrolls, as a page does; the header sticks to the top. */
+  Document: 'document',
+} as const;
+
+export type AppShellScroll = (typeof AppShellScroll)[keyof typeof AppShellScroll];
+
+/** Defines where an `AppShell` places its navigation. */
+export const AppShellNavigation = {
+  /** A sidebar rail beside the main region. */
+  Vertical: 'vertical',
+  /** A top bar only; the main region takes the full width. */
+  Horizontal: 'horizontal',
+} as const;
+
+export type AppShellNavigation = (typeof AppShellNavigation)[keyof typeof AppShellNavigation];
+
 const BreakpointPx: Record<Breakpoint, number> = {
   sm: 640,
   md: 768,
@@ -43,6 +63,8 @@ export interface AppShellContextValue {
   isSidebarCollapsed: ComputedRef<boolean>;
   /** True below `asideBreakpoint` — the aside renders nothing. */
   isAsideHidden: ComputedRef<boolean>;
+  /** What scrolls — the regions size and pin themselves by it. */
+  scroll: ComputedRef<AppShellScroll>;
 }
 
 export const appShellContextKey: InjectionKey<AppShellContextValue> = Symbol('wow-two.appShell');
@@ -77,12 +99,24 @@ export interface AppShellProps {
 
   /** The initial mobile-sidebar state when uncontrolled. Default `false`. */
   readonly defaultSidebarOpen?: boolean;
+
+  /**
+   * What scrolls. Default `region`: the main region scrolls, so the header spans the full window even where the
+   * platform draws a classic scrollbar. `document` scrolls the page, for long public pages with a closing footer.
+   */
+  readonly scroll?: AppShellScroll;
+
+  /**
+   * Where the navigation sits. Omit it and the shell reads its children: an `AppShellSidebar` makes it
+   * `vertical`, none makes it `horizontal`, so a top-bar app never reserves an empty sidebar column.
+   */
+  readonly navigation?: AppShellNavigation;
 }
 </script>
 
 <script setup lang="ts">
 import { useLocale } from '../../../foundation/i18n';
-import { computed, normalizeStyle, provide, useAttrs, useTemplateRef } from 'vue';
+import { computed, Fragment, normalizeStyle, provide, useAttrs, useSlots, useTemplateRef, type VNode } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
 import { useMediaQuery } from '../../../foundation/device';
@@ -112,6 +146,8 @@ const props = withDefaults(defineProps<AppShellProps>(), {
   asideBreakpoint: 'xl',
   sidebarOpen: undefined,
   defaultSidebarOpen: false,
+  scroll: AppShellScroll.Region,
+  navigation: undefined,
 });
 
 const emit = defineEmits<{
@@ -144,16 +180,43 @@ provide(appShellContextKey, {
   setSidebarOpen: controlled.setValue,
   isSidebarCollapsed,
   isAsideHidden,
+  scroll: computed(() => props.scroll),
 });
+
+const slots = useSlots();
+
+/** Whether the rendered children include an `AppShellSidebar`, looking through fragments and `v-for` lists. */
+function hasSidebar(nodes: ReadonlyArray<unknown>): boolean {
+  return nodes.some((node) => {
+    const vnode = node as VNode;
+    if ((vnode?.type as { name?: string } | undefined)?.name === 'AppShellSidebar') return true;
+    return vnode?.type === Fragment && Array.isArray(vnode.children) && hasSidebar(vnode.children);
+  });
+}
+
+/* Read while rendering (the grid style is a render dependency), so the slot call is tracked and warning-free,
+   and the server renders the same grid the client hydrates. */
+const navigation = computed<AppShellNavigation>(
+  () =>
+    props.navigation ??
+    (hasSidebar(slots.default?.() ?? []) ? AppShellNavigation.Vertical : AppShellNavigation.Horizontal),
+);
 
 /** Collapsed drops the sidebar track entirely; header and footer always span the full width. */
 const gridTemplate = computed(() =>
-  isSidebarCollapsed.value
-    ? `'header header' auto 'main main' 1fr 'footer footer' auto / 1fr`
+  isSidebarCollapsed.value || navigation.value === AppShellNavigation.Horizontal
+    ? `'header' auto 'main' 1fr 'footer' auto / 1fr`
     : `'header header' auto 'sidebar main' 1fr 'sidebar footer' auto / ${props.sidebarWidth} 1fr`,
 );
 
-const classes = computed(() => cn('grid min-h-svh bg-background text-foreground', attrs.class as string | undefined));
+/* A region shell owns the viewport: its rows fill the window exactly and only the main region scrolls. */
+const classes = computed(() =>
+  cn(
+    'grid bg-background text-foreground',
+    props.scroll === AppShellScroll.Region ? 'h-dvh overflow-hidden' : 'min-h-svh',
+    attrs.class as string | undefined,
+  ),
+);
 
 /** `gridTemplate` is normalized first so a caller's `style` still wins per-property. */
 const rootStyle = computed(() => normalizeStyle([{ gridTemplate: gridTemplate.value }, attrs.style]));

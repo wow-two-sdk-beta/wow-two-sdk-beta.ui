@@ -25,7 +25,7 @@ import { computed, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
 import Drawer from '../../overlays/drawer/Drawer.vue';
 import DrawerContent from '../../overlays/drawer/DrawerContent.vue';
-import { useAppShellContext } from './AppShell.vue';
+import { AppShellScroll, useAppShellContext } from './AppShell.vue';
 
 /**
  * Renders the side navigation rail — the `sidebar` grid area above
@@ -48,7 +48,8 @@ const isSidebarOpen = context.isSidebarOpen;
 
 const asideClasses = computed(() =>
   cn(
-    'sticky top-14 h-[calc(100svh-3.5rem)] overflow-y-auto border-r border-border bg-card [grid-area:sidebar]',
+    'overflow-y-auto border-r border-border bg-card [grid-area:sidebar]',
+    context.scroll.value === AppShellScroll.Region ? 'min-h-0' : 'sticky top-14 h-[calc(100svh-3.5rem)]',
     SidebarStaticClasses[context.sidebarBreakpoint.value],
     attrs.class as string | undefined,
   ),

@@ -2,7 +2,7 @@
 import type { HTMLAttributes } from 'vue';
 import type { SurfaceTone } from '../../../foundation/styles';
 import type { ContainerLayoutProps } from '../containerLayout';
-import type { NavbarHeight } from './Navbar.variants';
+import type { NavbarHeight, NavbarOrientation, NavbarVariant } from './Navbar.variants';
 
 export interface NavbarProps {
   /** Native attributes forwarded to the inner `ContainerLayout`; its `class` is merged last. */
@@ -22,14 +22,19 @@ export interface NavbarProps {
   readonly tone?: SurfaceTone;
   /** The bottom border under the bar. Default `true`. */
   readonly bordered?: boolean;
+  /** Which way the bar runs: a full-width top bar or a full-height side rail. Default `horizontal`. */
+  readonly orientation?: NavbarOrientation;
+  /** The surface: `solid`, `glass` or `transparent`. A `tone` overrides it. Default `solid`. */
+  readonly variant?: NavbarVariant;
 }
 </script>
 
 <script setup lang="ts">
-import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
+import { computed, provide, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { cn, surfaceVariants } from '../../../foundation/styles';
 import ContainerLayout from '../containerLayout/ContainerLayout.vue';
-import { navbarVariants } from './Navbar.variants';
+import { NavbarOrientation as Orientation, NavbarSurfaceClass, navbarVariants } from './Navbar.variants';
+import { navbarContextKey } from './NavbarContext';
 
 /**
  * Renders a lightweight header band (`<header>`) with `start` / `center` / `end` slots
@@ -54,7 +59,16 @@ defineSlots<{
   default?(): unknown;
 }>();
 
-const props = withDefaults(defineProps<NavbarProps>(), { sticky: false, bordered: true });
+const props = withDefaults(defineProps<NavbarProps>(), {
+  sticky: false,
+  bordered: true,
+  orientation: Orientation.Horizontal,
+  variant: 'solid',
+});
+
+const isVertical = computed(() => props.orientation === Orientation.Vertical);
+
+provide(navbarContextKey, { orientation: computed(() => props.orientation) });
 
 const attrs = useAttrs();
 const slots = useSlots();
@@ -62,9 +76,11 @@ const el = useTemplateRef<HTMLElement>('el');
 
 const classes = computed(() =>
   cn(
-    navbarVariants({ sticky: props.sticky, height: props.height }),
-    props.bordered && 'border-b border-border',
-    props.tone ? surfaceVariants({ variant: 'subtle', tone: props.tone, radius: 'none' }) : 'bg-card',
+    navbarVariants({ orientation: props.orientation, sticky: props.sticky, height: props.height }),
+    props.bordered && (isVertical.value ? 'border-e border-border' : 'border-b border-border'),
+    props.tone
+      ? surfaceVariants({ variant: 'subtle', tone: props.tone, radius: 'none' })
+      : NavbarSurfaceClass[props.variant],
     attrs.class as string | undefined,
   ),
 );
@@ -75,6 +91,15 @@ const endClasses = computed(() => cn('flex min-w-0 items-center gap-3', !slots.c
 /** Inner-container classes with consumer spacing taking precedence. */
 const containerClasses = computed(() =>
   cn('flex h-full items-center gap-3', props.containerAttrs?.class as string | undefined, props.containerClass),
+);
+
+/** Rail classes: a column from the brand at the top to the account at the foot, consumer spacing last. */
+const railClasses = computed(() =>
+  cn(
+    'flex h-full min-h-0 flex-col items-stretch gap-3 p-3',
+    props.containerAttrs?.class as string | undefined,
+    props.containerClass,
+  ),
 );
 
 /** Inner-container attributes except `class`, which is merged through `cn`. */
@@ -93,7 +118,23 @@ defineExpose({ el });
 </script>
 
 <template>
-  <header ref="el" v-bind="rest" :class="classes">
+  <header v-if="isVertical" ref="el" v-bind="rest" :class="classes">
+    <div v-bind="containerRest" :class="railClasses">
+      <slot v-if="$slots.default" />
+      <template v-else>
+        <div v-if="$slots.start" class="flex min-w-0 shrink-0 items-center gap-3">
+          <slot name="start" />
+        </div>
+        <div v-if="$slots.center" class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+          <slot name="center" />
+        </div>
+        <div v-if="$slots.end" class="mt-auto flex min-w-0 shrink-0 items-center gap-3">
+          <slot name="end" />
+        </div>
+      </template>
+    </div>
+  </header>
+  <header v-else ref="el" v-bind="rest" :class="classes">
     <ContainerLayout v-bind="containerRest" :size="props.containerSize" :class="containerClasses">
       <slot v-if="$slots.default" />
       <template v-else>

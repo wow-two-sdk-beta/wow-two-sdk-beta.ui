@@ -26,6 +26,7 @@ import { computed, useAttrs, useTemplateRef, type ComponentPublicInstance } from
 import { cn, Size as SizeToken } from '../../../foundation/styles';
 import { dataAttr, resolveElement } from '../../../foundation/dom';
 import { Primitive, Slottable } from '../../../foundation/primitives';
+import { useNavbar } from '../../layout/navbar/NavbarContext';
 
 /**
  * Renders a sidebar / nav row — icon, label, trailing slot, and an active state.
@@ -54,9 +55,14 @@ const props = withDefaults(defineProps<NavItemProps>(), {
 const attrs = useAttrs();
 const inner = useTemplateRef<ComponentPublicInstance>('inner');
 
+/* A top bar lays items in a row, each as wide as its label; a rail or sidebar gives each the full row. */
+const navbar = useNavbar();
+const isInRow = computed(() => navbar?.orientation.value === 'horizontal');
+
 const classes = computed(() =>
   cn(
-    'group inline-flex w-full items-center rounded-md font-medium text-foreground transition-colors',
+    'group inline-flex items-center rounded-md font-medium text-foreground transition-colors',
+    isInRow.value ? 'w-auto shrink-0 whitespace-nowrap' : 'w-full',
     'hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     'data-[active]:bg-primary-soft data-[active]:text-primary-soft-foreground',
     SizeClass[props.size],

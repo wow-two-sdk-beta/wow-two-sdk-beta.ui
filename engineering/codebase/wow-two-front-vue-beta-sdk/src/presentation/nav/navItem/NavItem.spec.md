@@ -9,6 +9,7 @@ Public import: `import { NavItem } from '@wow-two-beta/ui-vue/presentation/nav';
 ## Contract
 
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Inside a horizontal `Navbar` the item sizes to its label and never wraps; elsewhere (a rail, a sidebar, a drawer) it fills the row.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props

@@ -10,8 +10,9 @@ export type AppShellMainProps = Record<string, never>;
 </script>
 
 <script setup lang="ts">
-import { computed, useAttrs, useTemplateRef } from 'vue';
+import { computed, inject, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
+import { appShellContextKey, AppShellScroll } from './AppShell.vue';
 
 /**
  * Renders the primary column into the `main` grid area — also the skip-link's target.
@@ -27,8 +28,17 @@ defineSlots<{ default?(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLElement>('el');
 
+/* Optional: a main region rendered outside a shell keeps the document's scrolling. */
+const context = inject(appShellContextKey, null);
+
+/* In a region shell this is the one scroll container; its gutter is reserved so opening a panel never shifts
+   the layout sideways. */
 const classes = computed(() =>
-  cn('flex flex-col [grid-area:main] focus:outline-hidden', attrs.class as string | undefined),
+  cn(
+    'flex flex-col [grid-area:main] focus:outline-hidden',
+    context?.scroll.value === AppShellScroll.Region && 'min-h-0 overflow-y-auto [scrollbar-gutter:stable]',
+    attrs.class as string | undefined,
+  ),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

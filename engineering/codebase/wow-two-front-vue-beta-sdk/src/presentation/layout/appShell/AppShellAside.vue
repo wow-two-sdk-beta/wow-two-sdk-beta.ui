@@ -12,7 +12,7 @@ export type AppShellAsideProps = Record<string, never>;
 <script setup lang="ts">
 import { computed, normalizeStyle, useAttrs, useTemplateRef } from 'vue';
 import { cn } from '../../../foundation/styles';
-import { useAppShellContext } from './AppShell.vue';
+import { AppShellScroll, useAppShellContext } from './AppShell.vue';
 
 /** Renders the right-hand rail inside `AppShellMain`, and nothing at all below `asideBreakpoint`. */
 defineOptions({ name: 'AppShellAside', inheritAttrs: false });
@@ -29,7 +29,9 @@ const isHidden = context.isAsideHidden;
 
 const classes = computed(() =>
   cn(
-    'sticky top-14 h-[calc(100svh-3.5rem)] shrink-0 overflow-y-auto border-l border-border bg-card p-4',
+    'sticky shrink-0 overflow-y-auto border-l border-border bg-card p-4',
+    /* In a region shell the main region scrolls under no header, so the rail pins to its top edge. */
+    context.scroll.value === AppShellScroll.Region ? 'top-0 max-h-full' : 'top-14 h-[calc(100svh-3.5rem)]',
     attrs.class as string | undefined,
   ),
 );

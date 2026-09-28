@@ -9,6 +9,7 @@ Public import: `import { Navbar } from '@wow-two-beta/ui-vue/presentation/layout
 ## Contract
 
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- Shares its orientation with the `NavItem`s inside: in a top bar each sizes to its label, in a rail each fills the row.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
@@ -21,7 +22,9 @@ Public import: `import { Navbar } from '@wow-two-beta/ui-vue/presentation/layout
 | `height` | `NavbarHeight` | no | — | The band height. Default `md`. |
 | `sticky` | `boolean` | no | `false` | The sticky pinning of the bar to the top of the scroll container. Default `false` (non-sticky). |
 | `tone` | `SurfaceTone` | no | — | The tinted background tone for the band — applies the shadow-less `subtle` surface treatment. Omit for a transparent bar (relies on `bordered` / page bg). |
-| `bordered` | `boolean` | no | `true` | The bottom border under the bar. Default `true`. |
+| `bordered` | `boolean` | no | `true` | The bottom border under the bar (the end border for a rail). Default `true`. |
+| `orientation` | `NavbarOrientation` | no | `horizontal` | A full-width top bar (`start` / `center` / `end` in a row) or a full-height rail (`start` at the top, `center` scrolling, `end` at the foot). |
+| `variant` | `NavbarVariant` | no | `solid` | The surface: `solid`, `glass` (blurred, opaque where blur or transparency is unavailable or unwanted) or `transparent`. A `tone` overrides it. |
 
 ## Emits
 

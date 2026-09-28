@@ -1,5 +1,7 @@
 export {
   default as AppShell,
+  AppShellNavigation,
+  AppShellScroll,
   Breakpoint,
   useAppShell,
   type AppShellProps,

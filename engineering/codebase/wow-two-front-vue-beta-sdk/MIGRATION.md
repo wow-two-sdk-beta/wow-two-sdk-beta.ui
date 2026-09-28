@@ -20,8 +20,19 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 | Themes | `glass-harbor`, `frost`, `bento-deck`, `harbor-frost` (the Wheelhouse directions); `Theme.ambient` → `--theme-ambient`, painted by the `surface-ambient` class; `readableForeground(color)` picks text for a consumer-colored surface |
 | Density | `data-density="compact \| comfortable \| spacious"` on any element rescales every spacing utility and the `Button` scale inside it (87.5% / 100% / 112.5%); values in `Density` (`foundation/styles`) |
 | `DataTable` | `selectionMode` + `v-model:selection`, `expanded` slot + `v-model:expanded`, `hasStickyHeader`, `isLoading` |
+| Loading | `SkeletonStateSlot`, `SkeletonStateGroup`, `SkeletonStateText`, the `animation` prop (`pulse` · `shimmer` · `none`) and `useRefresh` (`query`) — values turn into placeholders while labels and layout stay |
+| Navigation | `Navbar` `orientation` (`horizontal` top bar · `vertical` rail) and `variant` (`solid` · `glass` · `transparent`); `AppShell` `scroll` and `navigation` |
+| Canvas | `CanvasArea` (`presentation/layout`) — the shared pan-and-zoom plane |
 
 Behavioral changes to existing parts:
+
+- `AppShell` fills the viewport and scrolls only `AppShellMain` (`scroll: 'region'`, the new default), so the header
+  and sidebar span the full window beside a classic scrollbar. Pass `scroll="document"` for the old page scrolling.
+  `AppShellContent` no longer nests its own scroll container.
+- `AppShell` reserves a sidebar column only when an `AppShellSidebar` child is present, or `navigation="vertical"`.
+- `Button` `isLoading` keeps the label: the spinner replaces the leading icon, or centers over a transparent label
+  when there is none, and the button dims. `loadingText` still replaces the label.
+- `NavItem` inside a horizontal `Navbar` sizes to its label instead of filling the row.
 
 - Form state flags follow the props convention (`isDisabled`, `isReadOnly`, `isRequired`) on the 30 inputs that
   owned `disabled` / `readonly` / `readOnly` / `required`. The old names still work this release and are removed in
