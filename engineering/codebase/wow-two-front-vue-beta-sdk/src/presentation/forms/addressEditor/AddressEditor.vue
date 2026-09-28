@@ -87,7 +87,7 @@ const CountryConfigs: ReadonlyArray<CountryConfig> = [
   },
   { iso: 'GB', name: 'United Kingdom', regionLabel: 'County', postalLabel: 'Postcode' },
   { iso: 'DE', name: 'Germany', regionLabel: 'Bundesland', postalLabel: 'PLZ' },
-  { iso: 'FR', name: 'France', regionLabel: 'Région', postalLabel: 'CodeText postal' },
+  { iso: 'FR', name: 'France', regionLabel: 'Région', postalLabel: 'Code postal' },
   { iso: 'AU', name: 'Australia', regionLabel: 'State', postalLabel: 'Postcode' },
   { iso: 'JP', name: 'Japan', regionLabel: 'Prefecture', postalLabel: '〒' },
 ];

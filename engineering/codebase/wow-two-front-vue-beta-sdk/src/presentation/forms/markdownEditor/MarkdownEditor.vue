@@ -2,13 +2,13 @@
 import { Marked } from 'marked';
 import {
   Bold,
-  Code as CodeText,
+  Code as CodeIcon,
   Heading1,
   Heading2,
   Italic,
   Link2,
-  List as ListGroup,
-  Quote as QuoteText,
+  List as ListIcon,
+  Quote as QuoteIcon,
 } from 'lucide-vue-next';
 import type { IconAdapter } from '../../../foundation/icons';
 
@@ -157,10 +157,10 @@ const ToolbarActions: ReadonlyArray<ToolbarAction> = [
   { key: 'h2', label: 'Heading 2', icon: Heading2, apply: linePrefix('## ') },
   { key: 'bold', label: 'Bold', icon: Bold, apply: wrap('**', '**') },
   { key: 'italic', label: 'Italic', icon: Italic, apply: wrap('*', '*') },
-  { key: 'code', label: 'InlineLayout code', icon: CodeText, apply: wrap('`', '`') },
-  { key: 'link', label: 'LinkItem', icon: Link2, apply: wrap('[', '](https://)') },
-  { key: 'list', label: 'ListGroup', icon: ListGroup, apply: linePrefix('- ') },
-  { key: 'quote', label: 'Blockquote', icon: QuoteText, apply: linePrefix('> ') },
+  { key: 'code', label: 'Inline code', icon: CodeIcon, apply: wrap('`', '`') },
+  { key: 'link', label: 'Link', icon: Link2, apply: wrap('[', '](https://)') },
+  { key: 'list', label: 'List', icon: ListIcon, apply: linePrefix('- ') },
+  { key: 'quote', label: 'Blockquote', icon: QuoteIcon, apply: linePrefix('> ') },
 ];
 
 /* Hoisted out of the template — the runtime template compiler resolves plain identifiers,
@@ -358,7 +358,7 @@ const locale = useLocale();
           v-for="a in ToolbarActions"
           :key="a.key"
           type="button"
-          :aria-label="a.label"
+          :aria-label="locale.t(`MarkdownEditor.${a.key}`, undefined, a.label)"
           :disabled="finalDisabled || finalReadOnly"
           class="inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           @click="applyAction(a)"

@@ -76,7 +76,7 @@ const inputProps = withDefaults(defineProps<FontPickerProps>(), {
   isDisabled: undefined,
 });
 const props = useLocaleDefaults(inputProps, 'FontPicker', {
-  placeholder: 'SelectPicker font…',
+  placeholder: 'Select font…',
   previewText: 'The quick brown fox',
 });
 
@@ -127,6 +127,40 @@ function select(option: FontOption): void {
   controlled.setValue(option.family);
   open.value = false;
 }
+
+const list = useTemplateRef<HTMLDivElement>('list');
+
+function options(): HTMLElement[] {
+  return [...(list.value?.querySelectorAll<HTMLElement>('[role=option]') ?? [])];
+}
+
+/* A listbox moves by arrows, not by Tab: ArrowDown from the search enters the list at the picked font (or the
+   first), arrows walk it, Home/End jump, and ArrowUp from the first option returns to the search. */
+function onSearchKeydown(event: KeyboardEvent): void {
+  if (event.key !== 'ArrowDown') return;
+  const all = options();
+  const target = all.find((option) => option.getAttribute('aria-selected') === 'true') ?? all[0];
+  if (!target) return;
+  event.preventDefault();
+  target.focus();
+}
+
+function onListKeydown(event: KeyboardEvent): void {
+  const all = options();
+  const index = all.indexOf(event.target as HTMLElement);
+  if (index < 0) return;
+  let next: number;
+  if (event.key === 'ArrowDown') next = Math.min(index + 1, all.length - 1);
+  else if (event.key === 'ArrowUp') next = index - 1;
+  else if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = all.length - 1;
+  else return;
+  event.preventDefault();
+  if (next < 0) search.value?.focus();
+  else all[next]?.focus();
+}
+
+const search = useTemplateRef<HTMLInputElement>('search');
 
 function optionClass(option: FontOption): string {
   return cn(
@@ -182,23 +216,29 @@ const locale = useLocale();
            being used for. -->
       <PopoverContent class="w-[20rem] p-2">
         <input
+          ref="search"
           type="search"
           autofocus
+          :aria-label="locale.t('FontPicker.searchLabel', undefined, 'Search fonts')"
           :value="query"
           :placeholder="locale.t('FontPicker.searchFonts', undefined, 'Search fonts…')"
           class="mb-2 h-8 w-full rounded-md border border-input bg-background px-2 text-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           @input="onQueryInput"
+          @keydown="onSearchKeydown"
         />
         <div
+          ref="list"
           role="listbox"
           :aria-label="locale.t('FontPicker.fonts', undefined, 'Fonts')"
           class="max-h-72 overflow-y-auto"
+          @keydown="onListKeydown"
         >
           <button
             v-for="f in filtered"
             :key="f.name"
             type="button"
             role="option"
+            tabindex="-1"
             :aria-selected="f.family === family"
             :class="optionClass(f)"
             @click="select(f)"

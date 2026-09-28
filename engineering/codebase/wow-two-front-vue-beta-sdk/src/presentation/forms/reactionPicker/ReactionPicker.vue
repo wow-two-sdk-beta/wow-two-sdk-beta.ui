@@ -35,7 +35,7 @@ const SizeClass: Partial<Record<Size, string>> = {
 
 <script setup lang="ts">
 import { useLocale } from '../../../foundation/i18n';
-import { computed, useAttrs, useTemplateRef } from 'vue';
+import { computed, shallowRef, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Plus } from 'lucide-vue-next';
 import { cn, Size as SizeValue } from '../../../foundation/styles';
@@ -101,6 +101,38 @@ const root = useTemplateRef<HTMLDivElement>('root');
 defineExpose({ el: root });
 
 const locale = useLocale();
+
+/* APG toolbar: one tab stop that the arrow keys move (mirrored in RTL), Home and End jump to the ends. Focus
+   arriving by pointer moves the stop too, so the next arrow starts where the reader is. */
+const stop = shallowRef(0);
+/* Clamped, so a shorter emoji list never leaves the toolbar without a tab stop. */
+const tabStop = computed(() => Math.min(stop.value, props.emojis.length - (isMoreShown.value ? 0 : 1)));
+
+function buttons(): HTMLButtonElement[] {
+  return [...(root.value?.querySelectorAll<HTMLButtonElement>('button') ?? [])];
+}
+
+function onFocusIn(event: FocusEvent): void {
+  const index = buttons().indexOf(event.target as HTMLButtonElement);
+  if (index >= 0) stop.value = index;
+}
+
+function onKeydown(event: KeyboardEvent): void {
+  const all = buttons();
+  const index = all.indexOf(event.target as HTMLButtonElement);
+  if (index < 0) return;
+  const isRtl = root.value ? getComputedStyle(root.value).direction === 'rtl' : false;
+  const forward = isRtl ? 'ArrowLeft' : 'ArrowRight';
+  const backward = isRtl ? 'ArrowRight' : 'ArrowLeft';
+  let next: number;
+  if (event.key === forward) next = (index + 1) % all.length;
+  else if (event.key === backward) next = (index - 1 + all.length) % all.length;
+  else if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = all.length - 1;
+  else return;
+  event.preventDefault();
+  all[next]?.focus();
+}
 </script>
 
 <template>
@@ -110,14 +142,17 @@ const locale = useLocale();
     :aria-label="locale.t('ReactionPicker.reactionPicker', undefined, 'Reaction picker')"
     :class="rootClass"
     v-bind="passthroughAttrs"
+    @keydown="onKeydown"
+    @focusin="onFocusIn"
   >
     <button
-      v-for="emoji in emojis"
+      v-for="(emoji, index) in emojis"
       :key="emoji"
       type="button"
+      :tabindex="index === tabStop ? 0 : -1"
       :data-active="isActive(emoji) ? '' : undefined"
       :aria-pressed="isActive(emoji)"
-      :aria-label="`React with ${emoji}`"
+      :aria-label="locale.t('ReactionPicker.reactWith', { emoji }, 'React with {emoji}')"
       :class="emojiClass(emoji)"
       @click="emit('select', emoji)"
     >
@@ -126,6 +161,7 @@ const locale = useLocale();
     <button
       v-if="isMoreShown"
       type="button"
+      :tabindex="emojis.length === tabStop ? 0 : -1"
       :aria-label="locale.t('ReactionPicker.moreReactions', undefined, 'More reactions')"
       :class="moreClass"
       @click="props.onMore?.()"
