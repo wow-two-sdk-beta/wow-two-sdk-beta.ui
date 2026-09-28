@@ -16,7 +16,7 @@ export const AaText = 4.5;
 export const AaUi = 3.0;
 
 /** One foreground↔background pair to verify, with its required ratio. */
-interface ContrastPair {
+export interface ContrastPair {
   /** Foreground token (text/icon/affordance color). */
   fg: SemanticToken;
 

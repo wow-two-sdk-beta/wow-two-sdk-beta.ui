@@ -40,7 +40,7 @@ export { ThemeStatus, ThemeRadius, NeutralTemp, AccentMode, SurfaceStyle } from 
 export { generateTheme } from './Generate';
 
 // Validator
-export { validateTheme, contrastPairs, AaText, AaUi } from './Validate';
+export { validateTheme, contrastPairs, contrastPairRatio, AaText, AaUi, type ContrastPair } from './Validate';
 
 // CSS / manifest emitters
 export { themeToCss, emitAllThemesCss, emitThemesManifest, type ThemeManifestEntry } from './Css';

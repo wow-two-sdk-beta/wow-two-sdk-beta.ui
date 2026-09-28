@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  contrastPairRatio,
+  contrastPairs,
   contrastRatio,
   generateTheme,
   getTheme,
@@ -42,6 +44,18 @@ describe('generateTheme', () => {
 
   it('carries a contrast verdict, and the validator agrees with it', () => {
     expect(validateTheme({ light: theme.light, dark: theme.dark }).contrastAA).toBe(theme.meta.contrastAA);
+  });
+
+  it('scores each public pair with the ratio the validator gates on', () => {
+    const failing = (['light', 'dark'] as const).flatMap((mode) =>
+      contrastPairs().filter((pair) => !(contrastPairRatio(theme[mode], pair) >= pair.min)),
+    );
+    expect(failing.length === 0).toBe(theme.meta.contrastAA);
+    const translucent = contrastPairs().find((pair) => pair.bg === 'primary' && pair.opacity !== undefined)!;
+    // A translucent fill composites over its host surface, so it never scores like the opaque token.
+    expect(contrastPairRatio(theme.light, translucent)).not.toBe(
+      contrastRatio(parseColor(theme.light[translucent.fg])!, parseColor(theme.light[translucent.bg])!),
+    );
   });
 });
 
