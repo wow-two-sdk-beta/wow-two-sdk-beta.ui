@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, shallowRef, watch } from 'vue';
+import { computed, shallowRef, watch } from 'vue';
 import { Density } from '@wow-two-beta/ui-vue/foundation/styles';
 import { ArrowRight } from 'lucide-vue-next';
 import { findArchetype } from '../content/layouts';
@@ -8,32 +8,42 @@ import { OptionLabels } from '../content/model';
 import { href, replaceQuery, route } from '../router';
 import ChoiceChips from '../shell/ChoiceChips.vue';
 import LayoutWire from '../wire/LayoutWire.vue';
+import { ScreenViews } from '../screens/views';
 
 /* The wireframes' real counterparts: each screen is an archetype built only from SDK components, so a layout
    decision can be checked against the parts that will actually ship. */
 
-const Views = {
-  dashboard: defineAsyncComponent(() => import('../screens/DashboardScreen.vue')),
-  board: defineAsyncComponent(() => import('../screens/BoardScreen.vue')),
-  settings: defineAsyncComponent(() => import('../screens/SettingsScreen.vue')),
-  inbox: defineAsyncComponent(() => import('../screens/InboxScreen.vue')),
-  wizard: defineAsyncComponent(() => import('../screens/WizardScreen.vue')),
-  'data-console': defineAsyncComponent(() => import('../screens/DataConsoleScreen.vue')),
-  docs: defineAsyncComponent(() => import('../screens/DocsScreen.vue')),
-  canvas: defineAsyncComponent(() => import('../screens/CanvasScreen.vue')),
-} as const;
-
 const screen = computed(() => findScreen(route.value.id) ?? Screens[0]!);
 const archetype = computed(() => findArchetype(screen.value.archetype));
-const view = computed(() => Views[screen.value.id as keyof typeof Views]);
+const view = computed(() => ScreenViews[screen.value.id]);
 
 /* The SDK's `data-density` on the frame rescales every component inside it; the choice rides in the link. */
 function readDensity(value: string | null): Density {
   return value === Density.Compact || value === Density.Spacious ? value : Density.Comfortable;
 }
 const density = shallowRef<Density>(readDensity(route.value.query.get('density')));
-watch(density, (value) => {
-  replaceQuery(value === Density.Comfortable ? {} : { density: value });
+
+/*
+ * Phone and tablet load the screen in an iframe at the device's width, so the screen meets a real viewport: its
+ * media queries — and the SDK's, like AppShell's sidebar collapse — see 390 or 820 pixels, not the atlas window.
+ */
+const DeviceWidth = { tablet: 820, phone: 390 } as const;
+/* The `border-8` bezel sits inside the box (border-box), so the frame grows by it to keep the viewport exact. */
+const FrameBezel = 8;
+type ScreenDevice = 'desktop' | keyof typeof DeviceWidth;
+function readDevice(value: string | null): ScreenDevice {
+  return value === 'tablet' || value === 'phone' ? value : 'desktop';
+}
+const device = shallowRef<ScreenDevice>(readDevice(route.value.query.get('device')));
+const frameSource = computed(() =>
+  href('frame', screen.value.id, density.value === Density.Comfortable ? undefined : { density: density.value }),
+);
+
+watch([density, device], ([nextDensity, nextDevice]) => {
+  replaceQuery({
+    ...(nextDensity === Density.Comfortable ? {} : { density: nextDensity }),
+    ...(nextDevice === 'desktop' ? {} : { device: nextDevice }),
+  });
 });
 </script>
 
@@ -89,18 +99,36 @@ watch(density, (value) => {
       </div>
     </section>
 
-    <ChoiceChips
-      label="Density"
-      :options="OptionLabels.density"
-      :model-value="density"
-      @update:model-value="(value) => (density = readDensity(value))"
-    />
+    <div class="flex flex-wrap gap-6">
+      <ChoiceChips
+        label="Device"
+        :options="OptionLabels.device"
+        :model-value="device"
+        @update:model-value="(value) => (device = readDevice(value))"
+      />
+      <ChoiceChips
+        label="Density"
+        :options="OptionLabels.density"
+        :model-value="density"
+        @update:model-value="(value) => (density = readDensity(value))"
+      />
+    </div>
 
     <div
+      v-if="device === 'desktop'"
       class="h-[680px] overflow-hidden rounded-lg border border-border bg-background shadow-sm"
       :data-density="density"
     >
       <component :is="view" :key="screen.id" />
+    </div>
+    <div v-else class="flex justify-center overflow-x-auto rounded-lg bg-muted/40 p-4">
+      <iframe
+        :key="`${screen.id}-${device}`"
+        :src="frameSource"
+        :title="`${screen.name} at ${DeviceWidth[device]} pixels`"
+        :style="{ width: `${DeviceWidth[device] + FrameBezel * 2}px`, height: `${720 + FrameBezel * 2}px` }"
+        class="shrink-0 rounded-[1.75rem] border-8 border-foreground/80 bg-background shadow-lg"
+      />
     </div>
   </div>
 </template>

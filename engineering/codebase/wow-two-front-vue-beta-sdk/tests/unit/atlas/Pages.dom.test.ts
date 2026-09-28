@@ -9,6 +9,7 @@ import PatternsPage from '../../../apps/atlas/src/pages/PatternsPage.vue';
 import ThemesPage from '../../../apps/atlas/src/pages/ThemesPage.vue';
 import StudioPage from '../../../apps/atlas/src/pages/StudioPage.vue';
 import ScreensPage from '../../../apps/atlas/src/pages/ScreensPage.vue';
+import FramePage from '../../../apps/atlas/src/pages/FramePage.vue';
 import DashboardScreen from '../../../apps/atlas/src/screens/DashboardScreen.vue';
 import BoardScreen from '../../../apps/atlas/src/screens/BoardScreen.vue';
 import SettingsScreen from '../../../apps/atlas/src/screens/SettingsScreen.vue';
@@ -20,7 +21,7 @@ import CanvasScreen from '../../../apps/atlas/src/screens/CanvasScreen.vue';
 import { Archetypes } from '../../../apps/atlas/src/content/layouts';
 import { GeneratedThemeId } from '../../../apps/atlas/src/content/seedQuery';
 import { Sections, route } from '../../../apps/atlas/src/router';
-import { generatedSeed, themeId } from '../../../apps/atlas/src/theme';
+import { generatedSeed, installTheme, isDark, themeId } from '../../../apps/atlas/src/theme';
 
 /* Mount-level coverage for the atlas: every page renders from a route, the lab and studio keep their state in the
    link, and each real-component screen does the one job its archetype promises. */
@@ -328,5 +329,51 @@ describe('atlas screens', () => {
     await settle();
     expect(frame()).toBe('spacious');
     expect(route.value.query.get('density')).toBe('spacious');
+  });
+
+  it('previews a screen on a phone through a bare frame at the true width', async () => {
+    await go('#/screens/inbox?device=phone&density=compact');
+    const wrapper = render(ScreensPage);
+    await settle();
+    const frame = wrapper.get('iframe');
+    expect(frame.attributes('src')).toBe('#/frame/inbox?density=compact');
+    expect((frame.element as HTMLElement).style.width).toBe('406px');
+    const desktop = [...(wrapper.element as HTMLElement).querySelectorAll<HTMLButtonElement>('[role=radio]')].find(
+      (node) => node.textContent?.trim() === 'Desktop',
+    )!;
+    desktop.click();
+    await settle();
+    expect(wrapper.find('iframe').exists()).toBe(false);
+    expect(route.value.query.get('device')).toBeNull();
+  });
+
+  it('renders the frame route as the screen alone, at the linked density', async () => {
+    await go('#/frame/board?density=spacious');
+    const wrapper = render(FramePage);
+    await vi.waitFor(async () => {
+      await settle();
+      expect(wrapper.text()).toContain('Release 2.4');
+    });
+    expect(wrapper.get('[data-density]').attributes('data-density')).toBe('spacious');
+  });
+});
+
+describe('atlas theme across documents', () => {
+  it('follows a theme another document stores, so a device frame tracks the atlas', async () => {
+    const dispose = installTheme();
+    try {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'atlas:theme', newValue: 'midnight' }));
+      window.dispatchEvent(new StorageEvent('storage', { key: 'atlas:dark', newValue: 'true' }));
+      await nextTick();
+      expect(themeId.value).toBe('midnight');
+      expect(isDark.value).toBe(true);
+      expect(document.documentElement.classList.contains('theme-midnight')).toBe(true);
+      window.dispatchEvent(new StorageEvent('storage', { key: 'atlas:theme', newValue: 'no-such-theme' }));
+      await nextTick();
+      expect(themeId.value).toBe('midnight');
+    } finally {
+      dispose();
+      isDark.value = false;
+    }
   });
 });

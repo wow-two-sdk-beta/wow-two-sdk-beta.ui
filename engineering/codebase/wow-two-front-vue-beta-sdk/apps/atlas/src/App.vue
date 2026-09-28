@@ -16,6 +16,7 @@ const Pages = {
   components: defineAsyncComponent(() => import('./pages/ComponentsPage.vue')),
   themes: defineAsyncComponent(() => import('./pages/ThemesPage.vue')),
   studio: defineAsyncComponent(() => import('./pages/StudioPage.vue')),
+  frame: defineAsyncComponent(() => import('./pages/FramePage.vue')),
 } as const;
 
 const page = computed(() => Pages[route.value.section]);
@@ -23,7 +24,9 @@ const pageKey = computed(() => `${route.value.section}/${route.value.id ?? ''}`)
 </script>
 
 <template>
-  <div class="surface-ambient min-h-svh bg-background text-foreground">
+  <!-- A device frame's document: the screen alone, no atlas chrome. -->
+  <component :is="page" v-if="route.section === 'frame'" :key="pageKey" />
+  <div v-else class="surface-ambient min-h-svh bg-background text-foreground">
     <header
       class="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70"
     >

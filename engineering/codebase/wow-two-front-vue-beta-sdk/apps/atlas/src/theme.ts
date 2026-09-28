@@ -93,7 +93,20 @@ export function installTheme(): () => void {
     },
     { immediate: true, flush: 'sync' },
   );
+  /* A device-preview iframe shares this origin's storage: another document changing the theme lands here as a
+     `storage` event, so the frame follows the atlas without a message channel. */
+  function onStorage(event: StorageEvent): void {
+    if (event.key === 'atlas:seed') {
+      generatedSeed.value = event.newValue === null ? null : seedFromQuery(new URLSearchParams(event.newValue));
+    } else if (event.key === 'atlas:theme' && event.newValue !== null && isKnown(event.newValue)) {
+      themeId.value = event.newValue;
+    } else if (event.key === 'atlas:dark') {
+      isDark.value = event.newValue === 'true';
+    }
+  }
+  window.addEventListener('storage', onStorage);
   return () => {
+    window.removeEventListener('storage', onStorage);
     stopTheme();
     stopDark();
     style.remove();

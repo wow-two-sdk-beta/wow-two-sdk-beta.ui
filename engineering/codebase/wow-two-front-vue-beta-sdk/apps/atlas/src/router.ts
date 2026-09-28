@@ -13,7 +13,10 @@ export const Sections = [
   { key: 'studio', label: 'Studio' },
 ] as const;
 
-export type SectionKey = (typeof Sections)[number]['key'];
+/* `frame` renders one screen bare, for the device preview's iframe; it has no place in the top bar. */
+const HiddenSections = ['frame'] as const;
+
+export type SectionKey = (typeof Sections)[number]['key'] | (typeof HiddenSections)[number];
 
 const hash = ref(typeof location === 'undefined' ? '' : location.hash);
 if (typeof window !== 'undefined') {
@@ -27,7 +30,8 @@ if (typeof window !== 'undefined') {
 export const route = computed(() => {
   const [path = '', query = ''] = hash.value.replace(/^#\/?/, '').split('?');
   const [section = 'home', id = null] = path.split('/');
-  const known = Sections.some((entry) => entry.key === section);
+  const known =
+    Sections.some((entry) => entry.key === section) || (HiddenSections as ReadonlyArray<string>).includes(section);
   return {
     section: (known ? section : 'home') as SectionKey,
     id: id || null,
