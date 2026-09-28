@@ -21,8 +21,10 @@ Public import: `import { SwitchInput } from '@wow-two-beta/ui-vue/presentation/f
 | `modelValue`   | `boolean` | no       | `undefined`    | The checked state, controlled. The `v-model` binding target.                   |
 | `defaultValue` | `boolean` | no       | `undefined`    | The initial checked state when uncontrolled.                                   |
 | `id`           | `string`  | no       | —              | The control's id. Auto-filled from `FormControl` context when omitted.         |
-| `disabled`     | `boolean` | no       | `undefined`    | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `required`     | `boolean` | no       | `undefined`    | The required state. Falls back to the surrounding form control's `isRequired`. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
+| `isRequired` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding field's `isRequired`. |
+| `required` | `boolean` | no | `undefined` | Deprecated alias of `isRequired`; removed next release. |
 
 ## Emits
 

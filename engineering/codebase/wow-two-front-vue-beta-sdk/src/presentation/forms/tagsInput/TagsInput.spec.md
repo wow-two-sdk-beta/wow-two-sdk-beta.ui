@@ -34,9 +34,11 @@ Public import: `import { TagsInput } from '@wow-two-beta/ui-vue/presentation/for
 | `name` | `string` | no | — | The hidden input name; the hidden input emits the comma-joined value. |
 | `tagVariant` | `TagVariant` | no | `'neutral'` | The chip variant. The NAMED type, not `TagVariants['variant']` — the SFC prop resolver cannot follow an indexed access into an imported interface, and the build fails on it while `vue-tsc` stays green. |
 | `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `readOnly` | `boolean` | no | `undefined` | The read-only state. Falls back to the form control's `isReadOnly`. |
-| `readonly` | `boolean` | no | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
+| `isReadOnly` | `boolean` | no | `undefined` | Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. |
+| `readOnly` | `boolean` | no | `undefined` | Deprecated alias of `isReadOnly`; removed next release. |
+| `readonly` | `boolean` | no | `undefined` | Deprecated alias of `isReadOnly`; removed next release. |
 
 ## Emits
 

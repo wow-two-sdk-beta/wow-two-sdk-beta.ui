@@ -32,16 +32,25 @@ export interface NumberInputProps extends /* @vue-ignore */ NativeInputAttribute
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 
-  /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readOnly?: boolean;
 
-  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 }
 </script>
@@ -73,9 +82,12 @@ const inputProps = withDefaults(defineProps<NumberInputProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required / not read-only". */
+  isDisabled: undefined,
   disabled: undefined,
+  isRequired: undefined,
   required: undefined,
   readOnly: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 const props = useLocaleDefaults(inputProps, 'NumberInput', {
@@ -115,7 +127,7 @@ function onInput(event: Event): void {
 }
 
 function adjust(direction: 1 | -1): void {
-  if (isDisabled.value || isReadOnly.value) return;
+  if (finalDisabled.value || finalReadOnly.value) return;
   const el = root.value;
   if (!el || typeof el.stepUp !== 'function') return;
   /* No argument — stepUp(n) steps n × the `step` attribute (already set on the input), not by n. */
@@ -130,9 +142,9 @@ function adjust(direction: 1 | -1): void {
 const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 const inputId = computed(() => props.id ?? ctx?.id);
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled ?? false);
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
-const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled ?? false);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
@@ -172,9 +184,9 @@ defineExpose({ el: root });
       :step="step"
       :id="inputId"
       :value="currentValue"
-      :disabled="isDisabled"
-      :required="isRequired"
-      :readonly="isReadOnly"
+      :disabled="finalDisabled"
+      :required="finalRequired"
+      :readonly="finalReadOnly"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
       :class="inputClass"
@@ -185,7 +197,7 @@ defineExpose({ el: root });
     <div class="absolute right-1 top-1/2 flex -translate-y-1/2 items-center">
       <button
         type="button"
-        :disabled="isDisabled || isReadOnly"
+        :disabled="finalDisabled || finalReadOnly"
         :aria-label="props.decrementLabel"
         class="grid h-7 w-6 place-items-center rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
         @click="adjust(-1)"
@@ -194,7 +206,7 @@ defineExpose({ el: root });
       </button>
       <button
         type="button"
-        :disabled="isDisabled || isReadOnly"
+        :disabled="finalDisabled || finalReadOnly"
         :aria-label="props.incrementLabel"
         class="grid h-7 w-6 place-items-center rounded text-muted-foreground hover:bg-muted disabled:opacity-50"
         @click="adjust(1)"

@@ -23,7 +23,8 @@ Public import: `import { RangeCalendarPicker } from '@wow-two-beta/ui-vue/presen
 | `defaultMonth` | `Temporal.PlainDate`                    | no       | —       | The initial visible month (uncontrolled).                                                                |
 | `min`          | `Temporal.PlainDate \| null`            | no       | —       | The minimum selectable date.                                                                             |
 | `max`          | `Temporal.PlainDate \| null`            | no       | —       | The maximum selectable date.                                                                             |
-| `isDisabled`   | `(date: Temporal.PlainDate) => boolean` | no       | —       | The custom disable predicate. Kept a PROP, not an emit: it RETURNS a value the grid reads on every cell. |
+| `isDateDisabled` | `(date: Temporal.PlainDate) => boolean` | no | — | The custom per-day disable predicate. |
+| `isDisabled` | `boolean \| ((date: Temporal.PlainDate) => boolean)` | no | `undefined` | The disabled state; falls back to the surrounding field. A function is the deprecated spelling of `isDateDisabled`. |
 
 ## Emits
 

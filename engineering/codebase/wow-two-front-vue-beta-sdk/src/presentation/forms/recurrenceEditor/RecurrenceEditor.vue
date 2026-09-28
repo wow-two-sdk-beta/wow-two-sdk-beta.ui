@@ -441,7 +441,7 @@ const locale = useLocale();
           size="sm"
           :name="endRadioName"
           :model-value="endMode === 'never'"
-          :disabled="isDisabled || isReadOnly"
+          :is-disabled="isDisabled || isReadOnly"
           @update:modelValue="update({ count: undefined, until: null })"
         />
         {{ locale.t('RecurrenceEditor.never', undefined, 'Never') }}
@@ -452,7 +452,7 @@ const locale = useLocale();
           size="sm"
           :name="endRadioName"
           :model-value="endMode === 'count'"
-          :disabled="isDisabled || isReadOnly"
+          :is-disabled="isDisabled || isReadOnly"
           @update:modelValue="update({ count: rule.count ?? 10, until: null })"
         />
         {{ locale.t('RecurrenceEditor.after', undefined, 'After') }}
@@ -476,7 +476,7 @@ const locale = useLocale();
             size="sm"
             :name="endRadioName"
             :model-value="endMode === 'until'"
-            :disabled="isDisabled || isReadOnly"
+            :is-disabled="isDisabled || isReadOnly"
             @update:modelValue="update({ until: addMonths(from, 6), count: undefined })"
           />
           {{ locale.t('RecurrenceEditor.on', undefined, 'On') }}
@@ -488,7 +488,7 @@ const locale = useLocale();
           class="w-44"
           :placeholder="locale.t('RecurrenceEditor.pickADate', undefined, 'Pick a date')"
           :model-value="rule.until ?? null"
-          :disabled="isDisabled || isReadOnly || endMode !== 'until'"
+          :is-disabled="isDisabled || isReadOnly || endMode !== 'until'"
           @update:modelValue="onUntilPick"
         />
       </div>

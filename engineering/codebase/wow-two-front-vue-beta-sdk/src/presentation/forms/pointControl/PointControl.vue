@@ -8,6 +8,9 @@ export interface PointControlProps {
   readonly modelValue?: PointControlValue;
   readonly defaultValue?: PointControlValue;
   readonly step?: number;
+  /** The disabled state — blocks dragging and keys. */
+  readonly isDisabled?: boolean;
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
   readonly backgroundImage?: string;
   readonly ariaLabel: string;
@@ -24,7 +27,11 @@ defineOptions({ name: 'PointControl', inheritAttrs: false });
 const props = withDefaults(defineProps<PointControlProps>(), {
   defaultValue: () => ({ x: 0.5, y: 0.5 }),
   step: 0.01,
+  isDisabled: undefined,
+  disabled: undefined,
 });
+
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? false);
 const emit = defineEmits<{
   'update:modelValue': [value: PointControlValue];
   'interaction-start': [];
@@ -41,7 +48,7 @@ const currentPoint = computed(() => point.value.value);
 const rootClass = computed(() =>
   cn(
     'relative aspect-square w-full touch-none select-none overflow-hidden rounded-md border border-border bg-cover bg-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-    props.disabled && 'pointer-events-none opacity-50',
+    finalDisabled.value && 'pointer-events-none opacity-50',
     attrs.class as ClassValue,
   ),
 );
@@ -66,7 +73,7 @@ function updateFromPointer(clientX: number, clientY: number): void {
 }
 
 function onPointerDown(event: PointerEvent): void {
-  if (props.disabled) return;
+  if (finalDisabled.value) return;
   event.preventDefault();
   root.value?.setPointerCapture(event.pointerId);
   emit('interaction-start');
@@ -91,7 +98,7 @@ function onPointerCancel(event: PointerEvent): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
-  if (props.disabled) return;
+  if (finalDisabled.value) return;
   const amount = event.shiftKey ? props.step * 10 : props.step;
   let next = point.value.value;
   if (event.key === 'ArrowLeft') next = { ...next, x: next.x - amount };
@@ -114,11 +121,11 @@ defineExpose({ el: root });
     ref="root"
     v-bind="passthroughAttrs"
     role="slider"
-    :tabindex="disabled ? -1 : 0"
+    :tabindex="finalDisabled ? -1 : 0"
     :aria-label="ariaLabel"
     :aria-valuetext="`x ${(currentPoint.x * 100).toFixed(0)}%, y ${(currentPoint.y * 100).toFixed(0)}%`"
-    :aria-disabled="disabled || undefined"
-    :data-disabled="disabled ? '' : undefined"
+    :aria-disabled="finalDisabled || undefined"
+    :data-disabled="finalDisabled ? '' : undefined"
     :class="rootClass"
     :style="backgroundStyle"
     @pointerdown="onPointerDown"

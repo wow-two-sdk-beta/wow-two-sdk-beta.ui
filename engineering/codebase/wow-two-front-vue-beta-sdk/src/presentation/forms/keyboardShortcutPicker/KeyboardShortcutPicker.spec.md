@@ -24,7 +24,8 @@ Public import: `import { KeyboardShortcutPicker } from '@wow-two-beta/ui-vue/pre
 | `recordLabel`  | `string \| number`      | no       | `'Press keys…'`     | The listening label. Fill the `recordLabel` slot for richer content.           |
 | `name`         | `string`                | no       | —                   | The hidden input name; the hidden input emits the `+`-joined chord.            |
 | `id`           | `string`                | no       | —                   | The control's id. Auto-filled from `FormControl` context when omitted.         |
-| `disabled`     | `boolean`               | no       | `undefined`         | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
 
 ## Emits
 

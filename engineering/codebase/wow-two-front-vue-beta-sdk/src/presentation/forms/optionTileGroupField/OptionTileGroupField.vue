@@ -7,6 +7,9 @@ export interface OptionTileGroupFieldProps {
   readonly label: string;
 
   /** The disabled state — greys + blocks every tile via a native `<fieldset disabled>`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
   /** The wrap state — tiles flow onto multiple rows. Default `false` (single row). */
@@ -34,9 +37,12 @@ defineOptions({ name: 'OptionTileGroupField', inheritAttrs: false });
 /* Explicit `undefined` defaults keep Vue's boolean casting from turning an absent prop into
    `false` — `wrap` must stay undefined so the variants config's own default decides. */
 const props = withDefaults(defineProps<OptionTileGroupFieldProps>(), {
+  isDisabled: undefined,
   disabled: undefined,
   wrap: undefined,
 });
+
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled);
 
 defineSlots<{
   /** The `OptionTilePicker` children the fieldset groups and disables together. */
@@ -68,7 +74,7 @@ defineExpose({ el: computed(() => root.value?.el ?? null) });
     `disabled` greys + blocks the whole group) laid out as a tile row, with the
     group's accessible name on `aria-label`.
   -->
-  <FieldsetLayout ref="root" :disabled="disabled" :aria-label="label" :class="rootClass" v-bind="passthroughAttrs">
+  <FieldsetLayout ref="root" :disabled="finalDisabled" :aria-label="label" :class="rootClass" v-bind="passthroughAttrs">
     <slot />
   </FieldsetLayout>
 </template>

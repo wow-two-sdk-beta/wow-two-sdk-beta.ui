@@ -41,9 +41,15 @@ export interface TimePickerProps {
   /** The trigger's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Prevents selection changes while preserving form submission. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 }
 </script>
@@ -75,7 +81,9 @@ const inputProps = withDefaults(defineProps<TimePickerProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 const locale = useLocale();
@@ -92,8 +100,8 @@ const attrs = useAttrs();
    standalone props win when provided, context fills the gaps (SelectPicker parity). */
 const field = useFormControl();
 
-const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
-const finalReadOnly = computed(() => props.readonly ?? field?.isReadOnly ?? false);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? field?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? field?.isReadOnly ?? false);
 const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid);
 
 const controlled = useControlled<Temporal.PlainTime | null>({

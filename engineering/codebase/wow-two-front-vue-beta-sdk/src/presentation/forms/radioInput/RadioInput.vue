@@ -14,12 +14,21 @@ export interface RadioInputProps {
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Prevents editing while preserving native form submission. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 }
 
@@ -50,8 +59,11 @@ const props = withDefaults(defineProps<RadioInputProps>(), {
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   modelValue: undefined,
   defaultValue: undefined,
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
+  isRequired: undefined,
   required: undefined,
 });
 
@@ -76,7 +88,7 @@ const controlled = useControlled<boolean>({
 const isChecked = controlled.value;
 
 function onChange(event: Event): void {
-  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) {
+  if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) {
     (event.target as HTMLInputElement).checked = isChecked.value;
     return;
   }
@@ -90,9 +102,9 @@ function onChange(event: Event): void {
 }
 
 const inputId = computed(() => props.id ?? ctx?.id);
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? ctx?.isReadOnly ?? false);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 
 const OwnedAttributes: ReadonlySet<string> = new Set(['class', 'checked']);
@@ -129,15 +141,15 @@ defineExpose({ el: input });
       ref="input"
       type="radio"
       :id="inputId"
-      :disabled="isDisabled"
-      :required="isRequired"
+      :disabled="finalDisabled"
+      :required="finalRequired"
       :checked="isChecked"
       :aria-invalid="isInvalid"
       class="peer absolute inset-0 m-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
       v-bind="passthroughAttrs"
       @change="onChange"
-      @click="isReadOnly && $event.preventDefault()"
-      :aria-readonly="isReadOnly || undefined"
+      @click="finalReadOnly && $event.preventDefault()"
+      :aria-readonly="finalReadOnly || undefined"
     />
     <span aria-hidden="true" :class="visualClass">
       <span class="h-2 w-2 rounded-full bg-primary-soft-foreground" />

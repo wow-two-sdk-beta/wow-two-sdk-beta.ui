@@ -18,9 +18,15 @@ export interface KeyboardShortcutPickerProps {
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Prevent edits while retaining the value. Falls back to the surrounding Field. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 }
 
@@ -71,7 +77,9 @@ const inputProps = withDefaults(defineProps<KeyboardShortcutPickerProps>(), {
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
   modelValue: undefined,
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 const props = useLocaleDefaults(inputProps, 'KeyboardShortcutPicker', {
@@ -94,9 +102,9 @@ const attrs = useAttrs();
 /* Inherits id/disabled/invalid/labelledby/describedby from a surrounding <Field>;
    standalone props win when provided, context fills the gaps (SelectPicker parity). */
 const field = useFormControl();
-const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? field?.isReadOnly);
-const inactive = computed(() => finalDisabled.value || isReadOnly.value);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? field?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? field?.isReadOnly);
+const inactive = computed(() => finalDisabled.value || finalReadOnly.value);
 
 const controlled = useControlled<ReadonlyArray<string>>({
   controlled: () => props.modelValue,

@@ -30,16 +30,25 @@ export interface CodeEditorProps {
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
-  /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readOnly?: boolean;
 
-  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 }
 </script>
@@ -70,9 +79,12 @@ const inputProps = withDefaults(defineProps<CodeEditorProps>(), {
      absent `boolean` prop to `false` — which would shadow the form control context. */
   modelValue: undefined,
   isInvalid: undefined,
+  isDisabled: undefined,
   disabled: undefined,
   readOnly: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
+  isRequired: undefined,
   required: undefined,
 });
 const props = useLocaleDefaults(inputProps, 'CodeEditor', {
@@ -98,8 +110,8 @@ const source = controlled.value;
 
 /* Inherits id/flags/describedby from a surrounding <Field>; explicit props win. */
 const ctx = useFormControl();
-const finalDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const finalReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
 const finalInvalid = computed(() => props.isInvalid ?? ctx?.isInvalid);
 
 const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
@@ -236,7 +248,7 @@ const state = computed(() => (finalInvalid.value ? 'invalid' : 'default'));
 const ariaDescribedBy = computed(() => attrs[AriaAttribute.DescribedBy] as string | undefined);
 
 const textareaId = computed(() => props.id ?? ctx?.id);
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
 const describedBy = computed(
   () =>
     [ariaDescribedBy.value ?? ctx?.describedBy, props.canIndentOnTab ? keyboardHintId : undefined]
@@ -291,7 +303,7 @@ defineExpose({ el: textarea });
       :id="textareaId"
       :disabled="finalDisabled"
       :readonly="finalReadOnly"
-      :required="isRequired"
+      :required="finalRequired"
       :spellcheck="false"
       :aria-invalid="finalInvalid || undefined"
       :aria-describedby="describedBy"

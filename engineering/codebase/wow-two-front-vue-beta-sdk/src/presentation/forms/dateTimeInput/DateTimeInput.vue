@@ -46,13 +46,22 @@ export interface DateTimeInputProps extends /* @vue-ignore */ NativeInputAttribu
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
-  /** Prevents typing and popup changes while preserving form submission. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 }
 </script>
@@ -99,8 +108,11 @@ const props = withDefaults(defineProps<DateTimeInputProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required". */
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
+  isRequired: undefined,
   required: undefined,
 });
 
@@ -151,7 +163,7 @@ function parseDateTimeText(text: string): Temporal.PlainDateTime | null {
 
 /** Commits the draft; an unparseable draft reverts to the committed value (ColorInput parity). */
 function commit(): void {
-  if (isDisabled.value || isReadOnly.value) return;
+  if (finalDisabled.value || finalReadOnly.value) return;
   if (!draft.value.trim()) {
     controlled.setValue(null);
     draft.value = '';
@@ -167,7 +179,7 @@ function commit(): void {
 }
 
 function onDraftInput(event: Event): void {
-  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
+  if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) return;
   draft.value = (event.target as HTMLInputElement).value;
 }
 
@@ -187,7 +199,7 @@ function onKeydown(event: KeyboardEvent): void {
 
 /** The `native` path keeps the original ISO-string round trip. */
 function onNativeInput(event: Event): void {
-  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
+  if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) return;
   const input = event.target as HTMLInputElement;
   if (!input.validity.valid) {
     input.value = isoValue.value;
@@ -199,7 +211,7 @@ function onNativeInput(event: Event): void {
 /* A date pick keeps the time that was already set; a time pick keeps the date. Neither
    closes the popover — the other half still has to be chosen. */
 function onCalendarChange(date: Temporal.PlainDate | null): void {
-  if (isDisabled.value || isReadOnly.value) return;
+  if (finalDisabled.value || finalReadOnly.value) return;
   if (!date) {
     controlled.setValue(null);
     return;
@@ -209,7 +221,7 @@ function onCalendarChange(date: Temporal.PlainDate | null): void {
 }
 
 function onColumnsChange(time: Temporal.PlainTime): void {
-  if (isDisabled.value || isReadOnly.value) return;
+  if (finalDisabled.value || finalReadOnly.value) return;
   const date = clampDate(committed.value?.toPlainDate() ?? today(), props.min?.toPlainDate(), props.max?.toPlainDate());
   const next = date.toPlainDateTime(time);
   if (isDateTimeInBounds(next, props.min, props.max)) controlled.setValue(next);
@@ -233,12 +245,12 @@ const maxValue = computed(() => formatISODateTime(props.max));
 const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 const inputId = computed(() => props.id ?? ctx?.id);
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
-watch([isDisabled, isReadOnly], ([disabled, readOnly]) => {
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? ctx?.isReadOnly ?? false);
+watch([finalDisabled, finalReadOnly], ([disabled, readOnly]) => {
   if (disabled || readOnly) open.value = false;
 });
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
@@ -287,9 +299,9 @@ const locale = useLocale();
       :value="isoValue"
       :min="minValue"
       :max="maxValue"
-      :disabled="isDisabled"
-      :readonly="isReadOnly"
-      :required="isRequired"
+      :disabled="finalDisabled"
+      :readonly="finalReadOnly"
+      :required="finalRequired"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
       :class="inputClass"
@@ -306,9 +318,9 @@ const locale = useLocale();
         :id="inputId"
         :value="draft"
         :placeholder="placeholder"
-        :disabled="isDisabled"
-        :readonly="isReadOnly"
-        :required="isRequired"
+        :disabled="finalDisabled"
+        :readonly="finalReadOnly"
+        :required="finalRequired"
         :aria-invalid="isInvalid"
         :aria-describedby="describedBy"
         :class="inputClass"
@@ -319,7 +331,7 @@ const locale = useLocale();
       />
       <PopoverTrigger
         :aria-label="locale.t('DateTimeInput.chooseDateAndTime', undefined, 'Choose date and time')"
-        :disabled="isDisabled || isReadOnly"
+        :disabled="finalDisabled || finalReadOnly"
         class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
       >
         <CalendarClock class="h-4 w-4" />
@@ -328,14 +340,14 @@ const locale = useLocale();
         <div class="flex items-start gap-2">
           <CalendarPicker
             :model-value="calendarValue"
-            :disabled="isDisabled || isReadOnly"
+            :is-disabled="Boolean(finalDisabled || finalReadOnly)"
             :default-month="calendarMonth"
             :min="minDate"
             :max="maxDate"
             @update:modelValue="onCalendarChange"
           />
           <TimeColumns
-            :disabled="isDisabled || isReadOnly"
+            :disabled="finalDisabled || finalReadOnly"
             :min="minTime"
             :max="maxTime"
             :model-value="timeValue"
@@ -349,7 +361,7 @@ const locale = useLocale();
     <input
       v-if="name"
       type="hidden"
-      :disabled="isDisabled"
+      :disabled="finalDisabled"
       :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
       :name="name"
       :value="isoValue"

@@ -24,13 +24,14 @@ Public import: `import { DatePicker } from '@wow-two-beta/ui-vue/presentation/fo
 | `format`       | `(date: Temporal.PlainDate) => string`  | no       | Active LocaleProvider | The trigger's date formatter. Kept a PROP, not an emit: it RETURNS the rendered string, which an emit cannot do. |
 | `min`          | `Temporal.PlainDate \| null`            | no       | —                     | The minimum selectable date.                                                                                     |
 | `max`          | `Temporal.PlainDate \| null`            | no       | —                     | The maximum selectable date.                                                                                     |
-| `isDisabled`   | `(date: Temporal.PlainDate) => boolean` | no       | —                     | The custom per-day disable predicate. Also a returning prop.                                                     |
+| `isDateDisabled` | `(date: Temporal.PlainDate) => boolean` | no | — | The custom per-day disable predicate. |
+| `isDisabled` | `boolean \| ((date: Temporal.PlainDate) => boolean)` | no | `undefined` | The disabled state; falls back to the surrounding field. A function is the deprecated spelling of `isDateDisabled`. |
 | `isInvalid`    | `boolean`                               | no       | `undefined`           | The invalid surface override. Falls back to the surrounding form control's `isInvalid`.                          |
 | `name`         | `string`                                | no       | —                     | The hidden input name; when set, a hidden input ships the ISO value with form submission.                        |
 | `size`         | `SelectPickerSize`                      | no       | —                     | The trigger size.                                                                                                |
 | `state`        | `InputState`                            | no       | —                     | The validity surface.                                                                                            |
 | `id`           | `string`                                | no       | —                     | The trigger's id. Auto-filled from `FormControl` context when omitted.                                           |
-| `disabled`     | `boolean`                               | no       | `undefined`           | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                   |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
 
 ## Emits
 

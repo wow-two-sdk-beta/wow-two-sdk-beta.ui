@@ -27,8 +27,17 @@ export interface DateRangePickerProps {
   /** The maximum selectable date. */
   readonly max?: Temporal.PlainDate | null;
 
-  /** The custom per-day disable predicate. Also a returning prop. */
-  readonly isDisabled?: (date: Temporal.PlainDate) => boolean;
+  /** The custom per-day disable predicate. Kept a prop: it returns a value. */
+  readonly isDateDisabled?: (date: Temporal.PlainDate) => boolean;
+
+  /**
+   * The disabled state. Falls back to the surrounding field's `isDisabled`. A function here is the deprecated
+   * spelling of `isDateDisabled`, still honoured this release.
+   */
+  readonly isDisabled?: boolean | ((date: Temporal.PlainDate) => boolean);
+
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
 
   /** The invalid surface override. Falls back to the surrounding form control's `isInvalid`. */
   readonly isInvalid?: boolean;
@@ -45,9 +54,9 @@ export interface DateRangePickerProps {
   /** The trigger's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Prevents selection changes while preserving form submission. */
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 }
 </script>
@@ -77,11 +86,22 @@ const inputProps = withDefaults(defineProps<DateRangePickerProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
+  isDateDisabled: undefined,
+  isDisabled: undefined,
+  isReadOnly: undefined,
   disabled: undefined,
   readonly: undefined,
 });
 const locale = useLocale();
 const props = useLocaleDefaults(inputProps, 'DateRangePicker', { placeholder: 'Pick a range' });
+
+/** The per-day predicate: `isDateDisabled`, or the deprecated function form of `isDisabled`. */
+const dayPredicate = computed(
+  () => props.isDateDisabled ?? (typeof props.isDisabled === 'function' ? props.isDisabled : undefined),
+);
+
+/** The boolean `isDisabled`, ignoring its deprecated predicate form. */
+const disabledFlag = computed(() => (typeof props.isDisabled === 'boolean' ? props.isDisabled : undefined));
 
 const emit = defineEmits<{
   /** Fires when a click in the popover completes or clears the range. The `v-model` half. */
@@ -94,8 +114,8 @@ const attrs = useAttrs();
    standalone props win when provided, context fills the gaps (SelectPicker parity). */
 const field = useFormControl();
 
-const finalDisabled = computed(() => props.disabled ?? field?.isDisabled);
-const finalReadOnly = computed(() => props.readonly ?? field?.isReadOnly ?? false);
+const finalDisabled = computed(() => disabledFlag.value ?? props.disabled ?? field?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? field?.isReadOnly ?? false);
 const finalInvalid = computed(() => props.isInvalid ?? field?.isInvalid);
 
 const controlled = useControlled<DateRange | null>({
@@ -201,8 +221,8 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
         :default-month="defaultMonth"
         :min="min"
         :max="max"
-        :is-disabled="isDisabled"
-        :disabled="finalDisabled || finalReadOnly"
+        :is-date-disabled="dayPredicate"
+        :is-disabled="Boolean(finalDisabled || finalReadOnly)"
         @update:modelValue="onCalendarChange"
       />
     </PopoverContent>

@@ -452,7 +452,7 @@ const ExpandButtonClass =
             size="sm"
             :model-value="headerStatus === SelectionStatus.All"
             :is-indeterminate="headerStatus === SelectionStatus.Some"
-            :disabled="selectableKeys.length === 0"
+            :is-disabled="selectableKeys.length === 0"
             :aria-label="locale.t('DataTable.selectAll', undefined, 'Select all rows')"
             @update:model-value="toggleAllRows"
           />
@@ -518,7 +518,7 @@ const ExpandButtonClass =
               <CheckboxInput
                 size="sm"
                 :model-value="row.isSelected"
-                :disabled="!row.isSelectable"
+                :is-disabled="!row.isSelectable"
                 :aria-label="locale.t('DataTable.selectRow', undefined, 'Select row')"
                 @update:model-value="toggleRow(row.key)"
               />

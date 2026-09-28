@@ -2,9 +2,9 @@
 import type { Temporal } from 'temporal-polyfill';
 
 export interface CalendarPickerProps {
-  /** Disables all date changes, including keyboard activation. */
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Allows inspection without changing the selection. */
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 
   /** The selected date, controlled. The `v-model` binding target. */
@@ -22,13 +22,17 @@ export interface CalendarPickerProps {
   /** The maximum selectable date. */
   readonly max?: Temporal.PlainDate | null;
 
+  /** The custom per-day disable predicate. Kept a prop: it returns a value. */
+  readonly isDateDisabled?: (date: Temporal.PlainDate) => boolean;
+
   /**
-   * The custom disable predicate.
-   *
-   * Kept a PROP, not an emit: it RETURNS a value the grid reads on every cell, which is
-   * not what an emit models.
+   * The disabled state. Falls back to the surrounding field's `isDisabled`. A function here is the deprecated
+   * spelling of `isDateDisabled`, still honoured this release.
    */
-  readonly isDisabled?: (date: Temporal.PlainDate) => boolean;
+  readonly isDisabled?: boolean | ((date: Temporal.PlainDate) => boolean);
+
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
 }
 </script>
 
@@ -40,7 +44,7 @@ import type { ClassValue } from 'clsx';
 import { AriaAttribute } from '../../../foundation/dom';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
-import { isDateDisabled, isSameDay, isToday, startOfMonth, today } from '../DateExtensions';
+import { isDateDisabled as isOutOfBounds, isSameDay, isToday, startOfMonth, today } from '../DateExtensions';
 import MonthGrid from '../MonthGrid.vue';
 import type { MonthGridDayProps } from '../MonthGrid.vue';
 
@@ -49,7 +53,20 @@ import type { MonthGridDayProps } from '../MonthGrid.vue';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'CalendarPicker', inheritAttrs: false });
 
-const props = withDefaults(defineProps<CalendarPickerProps>(), { disabled: undefined, readonly: undefined });
+const props = withDefaults(defineProps<CalendarPickerProps>(), {
+  isDateDisabled: undefined,
+  isDisabled: undefined,
+  isReadOnly: undefined,
+  disabled: undefined,
+  readonly: undefined,
+});
+/** The per-day predicate: `isDateDisabled`, or the deprecated function form of `isDisabled`. */
+const dayPredicate = computed(
+  () => props.isDateDisabled ?? (typeof props.isDisabled === 'function' ? props.isDisabled : undefined),
+);
+
+/** The boolean `isDisabled`, ignoring its deprecated predicate form. */
+const disabledFlag = computed(() => (typeof props.isDisabled === 'boolean' ? props.isDisabled : undefined));
 
 const emit = defineEmits<{
   /** Fires when the reader picks a day in the grid. The `v-model` half. */
@@ -59,7 +76,9 @@ const emit = defineEmits<{
 const attrs = useAttrs();
 const field = useFormControl();
 const inactive = computed(
-  () => (props.disabled ?? field?.isDisabled ?? false) || (props.readonly ?? field?.isReadOnly ?? false),
+  () =>
+    (disabledFlag.value ?? props.disabled ?? field?.isDisabled ?? false) ||
+    (props.isReadOnly ?? props.readonly ?? field?.isReadOnly ?? false),
 );
 
 const controlled = useControlled<Temporal.PlainDate | null>({
@@ -88,7 +107,7 @@ function setFocusedDate(next: Temporal.PlainDate): void {
 }
 
 function isDayDisabled(d: Temporal.PlainDate): boolean {
-  return inactive.value || isDateDisabled(d, { min: props.min, max: props.max, isDisabled: props.isDisabled });
+  return inactive.value || isOutOfBounds(d, { min: props.min, max: props.max, isDisabled: dayPredicate.value });
 }
 
 function onDayActivate(d: Temporal.PlainDate): void {

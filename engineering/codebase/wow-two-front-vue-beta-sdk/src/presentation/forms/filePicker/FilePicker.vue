@@ -14,9 +14,15 @@ export interface FilePickerProps {
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Prevent edits while retaining the value. Falls back to the surrounding Field. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 }
 
@@ -46,7 +52,9 @@ const inputProps = withDefaults(defineProps<FilePickerProps>(), {
   size: SizeValue.Md,
   /* Explicit `undefined` default: the flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow it. */
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 const props = useLocaleDefaults(inputProps, 'FilePicker', { label: 'Choose file' });
@@ -69,15 +77,15 @@ const slots = useSlots();
    The trigger button mirrors describedby for keyboard users. */
 const ctx = useFormControl();
 
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly);
-const inactive = computed(() => isDisabled.value || isReadOnly.value);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? ctx?.isReadOnly);
+const inactive = computed(() => finalDisabled.value || finalReadOnly.value);
 const inputId = computed(() => props.id ?? ctx?.id);
 const describedBy = computed(() => ctx?.describedBy);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 /* aria- (not native) required — the change handler resets `value` after handing the files
    out, so a native `required` would block every submit. */
-const isRequired = computed(() => ctx?.isRequired || undefined);
+const finalRequired = computed(() => ctx?.isRequired || undefined);
 
 const hasPreview = computed(() => Boolean(props.preview) || Boolean(slots.preview));
 
@@ -132,7 +140,7 @@ defineExpose({ el: input });
       :disabled="inactive"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
-      :aria-required="isRequired"
+      :aria-required="finalRequired"
       class="sr-only"
       v-bind="passthroughAttrs"
       @change="onChange"

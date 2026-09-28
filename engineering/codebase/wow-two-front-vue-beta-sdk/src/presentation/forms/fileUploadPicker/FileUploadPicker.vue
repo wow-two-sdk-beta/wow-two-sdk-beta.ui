@@ -41,9 +41,15 @@ export interface FileUploadPickerProps {
   /** The zone's sub-line. Fill the `hint` slot for richer content. */
   readonly hint?: string | number;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Prevent edits while retaining the value. Falls back to the surrounding Field. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 
   /** The native input name. */
@@ -80,7 +86,9 @@ const inputProps = withDefaults(defineProps<FileUploadPickerProps>(), {
   /* Explicit `undefined` defaults: each flag falls back to the form control context, and Vue
      casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 const props = useLocaleDefaults(inputProps, 'FileUploadPicker', { label: 'Drop files here, or click to browse' });
@@ -108,9 +116,9 @@ const dragState = ref<DragState>('idle');
    input carries the context id, so `Field`-rendered labels/describedby reference it
    (label click opens the picker). The dropzone mirrors describedby for keyboard users. */
 const ctx = useFormControl();
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly);
-const inactive = computed(() => isDisabled.value || isReadOnly.value);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? ctx?.isReadOnly);
+const inactive = computed(() => finalDisabled.value || finalReadOnly.value);
 watch(inactive, (value) => {
   if (value) {
     dragCounter.value = 0;
@@ -237,7 +245,7 @@ const zoneClass = computed(() =>
     'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
     dragState.value === 'over' && 'border-primary bg-primary-soft/30 text-foreground',
     showError.value && 'border-destructive bg-destructive-soft/30 text-destructive',
-    isDisabled.value && 'cursor-not-allowed opacity-60 hover:border-input hover:bg-background',
+    finalDisabled.value && 'cursor-not-allowed opacity-60 hover:border-input hover:bg-background',
   ),
 );
 

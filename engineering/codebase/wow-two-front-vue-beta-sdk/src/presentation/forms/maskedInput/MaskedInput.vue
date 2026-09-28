@@ -19,16 +19,25 @@ export interface MaskedInputProps extends /* @vue-ignore */ NativeInputAttribute
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 
-  /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readOnly?: boolean;
 
-  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 }
 
@@ -101,9 +110,12 @@ defineOptions({ name: 'MaskedInput', inheritAttrs: false });
 const props = withDefaults(defineProps<MaskedInputProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
+  isDisabled: undefined,
   disabled: undefined,
+  isRequired: undefined,
   required: undefined,
   readOnly: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 
@@ -133,9 +145,9 @@ function onInput(event: Event): void {
 }
 
 const inputId = computed(() => props.id ?? ctx?.id);
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
-const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
@@ -170,9 +182,9 @@ defineExpose({ el: root });
     type="text"
     :value="currentValue"
     :id="inputId"
-    :disabled="isDisabled"
-    :required="isRequired"
-    :readonly="isReadOnly"
+    :disabled="finalDisabled"
+    :required="finalRequired"
+    :readonly="finalReadOnly"
     :aria-invalid="isInvalid"
     :aria-describedby="describedBy"
     :class="rootClass"

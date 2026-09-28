@@ -28,8 +28,10 @@ Public import: `import { DateInput } from '@wow-two-beta/ui-vue/presentation/for
 | `native`       | `boolean`                    | no       | `false`        | Renders a bare `<input type="date">` and drops the popover. Opt-in only. The browser owns that control's picker panel — it cannot be themed, so it lands a system-chrome popup in the middle of a design-system form. Reach for it when the platform picker is the point (a mobile-first form wanting the OS wheels, for instance). |
 | `placeholder`  | `string`                     | no       | `'YYYY-MM-DD'` | The empty-state text. Ignored when `native` — that control renders its own mask.                                                                                                                                                                                                                                                    |
 | `id`           | `string`                     | no       | —              | The control's id. Auto-filled from `FormControl` context when omitted.                                                                                                                                                                                                                                                              |
-| `disabled`     | `boolean`                    | no       | `undefined`    | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                                                                                                                                                                                                                                      |
-| `required`     | `boolean`                    | no       | `undefined`    | The required state. Falls back to the surrounding form control's `isRequired`.                                                                                                                                                                                                                                                      |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
+| `isRequired` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding field's `isRequired`. |
+| `required` | `boolean` | no | `undefined` | Deprecated alias of `isRequired`; removed next release. |
 
 ## Emits
 

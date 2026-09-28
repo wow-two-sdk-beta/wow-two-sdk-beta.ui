@@ -28,7 +28,8 @@ Public import: `import { TimePicker } from '@wow-two-beta/ui-vue/presentation/fo
 | `size`         | `SelectPickerSize`                     | no       | —                     | The trigger size.                                                                                                |
 | `state`        | `InputState`                           | no       | —                     | The validity surface.                                                                                            |
 | `id`           | `string`                               | no       | —                     | The trigger's id. Auto-filled from `FormControl` context when omitted.                                           |
-| `disabled`     | `boolean`                              | no       | `undefined`           | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                   |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
 
 ## Emits
 

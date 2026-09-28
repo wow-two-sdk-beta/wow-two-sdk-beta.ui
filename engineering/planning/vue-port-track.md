@@ -308,7 +308,7 @@ owns and publishes"); 59 hand-written Field fallbacks; 22 files carry `eslint-di
 
 | It | Scope | Status |
 |---|---|---|
-| S1 | Form state: `isDisabled` / `isReadOnly` / `isRequired` on every owning input through one `useFieldState`; legacy names stay one release as deprecated aliases | ⬜ |
+| S1 | Form state: `isDisabled` / `isReadOnly` / `isRequired` on every owning input; legacy names stay one release as deprecated aliases | ✅ 30 inputs + date predicate → `isDateDisabled`; 8 DOM tests; internal usages and demos migrated |
 | S2 | Focused tests for interactive parts without one (toolbar, tree, carousel, editable, combobox, date range, disclosure, tag, toast, progress) | ⬜ |
 | S3 | `eslint-disable` audit — remove or justify each | ⬜ |
 | S4 | Playground: overlays render on request; link to the atlas | ✅ 0 dialogs open on load (was 7); `?smoke=1` still mounts all |

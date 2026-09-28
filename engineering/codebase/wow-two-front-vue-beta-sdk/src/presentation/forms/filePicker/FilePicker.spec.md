@@ -19,7 +19,8 @@ Public import: `import { FilePicker } from '@wow-two-beta/ui-vue/presentation/fo
 | `preview`  | `string \| number` | no       | —               | The filename(s) preview rendered next to the button. Fill the `preview` slot for richer content. |
 | `size`     | `Size`             | no       | `SizeValue.Md`  | The visual size of the button. Default `md`.                                                     |
 | `id`       | `string`           | no       | —               | The control's id. Auto-filled from `FormControl` context when omitted.                           |
-| `disabled` | `boolean`          | no       | `undefined`     | The disabled state. Falls back to the surrounding form control's `isDisabled`.                   |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
 
 ## Emits
 

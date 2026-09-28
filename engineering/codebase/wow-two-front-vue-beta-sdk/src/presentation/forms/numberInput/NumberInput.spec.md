@@ -29,10 +29,13 @@ Public import: `import { NumberInput } from '@wow-two-beta/ui-vue/presentation/f
 | `modelValue`     | `number \| null` | no       | —             | The value, controlled. The `v-model` binding target. Emits a finite number, or null when cleared. Invalid drafts do not commit. |
 | `defaultValue`   | `number \| null` | no       | —             | The initial value when uncontrolled.                                                                                            |
 | `id`             | `string`         | no       | —             | The control's id. Auto-filled from `FormControl` context when omitted.                                                          |
-| `disabled`       | `boolean`        | no       | `undefined`   | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                                  |
-| `required`       | `boolean`        | no       | `undefined`   | The required state. Falls back to the surrounding form control's `isRequired`.                                                  |
-| `readOnly`       | `boolean`        | no       | `undefined`   | The read-only state — the legacy alias. Falls back to the form control's `isReadOnly`.                                          |
-| `readonly`       | `boolean`        | no       | `undefined`   | Controlled axes use their canonical Vue model names; each update event requests caller state.                                   |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
+| `isRequired` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding field's `isRequired`. |
+| `required` | `boolean` | no | `undefined` | Deprecated alias of `isRequired`; removed next release. |
+| `isReadOnly` | `boolean` | no | `undefined` | Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. |
+| `readOnly` | `boolean` | no | `undefined` | Deprecated alias of `isReadOnly`; removed next release. |
+| `readonly` | `boolean` | no | `undefined` | Deprecated alias of `isReadOnly`; removed next release. |
 
 ## Emits
 

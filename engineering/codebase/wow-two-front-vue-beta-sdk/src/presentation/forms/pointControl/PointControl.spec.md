@@ -17,4 +17,4 @@ Consumers that do not import the global SDK stylesheet import
 - pointer drag maps the surface bounds to normalized coordinates and uses pointer capture.
 - arrow keys move by `step`; Shift moves by ten steps; Home and End select opposite corners.
 - `interaction-start` and `interaction-end` delimit pointer or keyboard gesture history.
-- the slider exposes both axis percentages through `aria-valuetext`; disabled state leaves the tab order.
+- the slider exposes both axis percentages through `aria-valuetext`; `isDisabled` (deprecated alias `disabled`, removed next release) leaves the tab order and ignores pointer and keys.

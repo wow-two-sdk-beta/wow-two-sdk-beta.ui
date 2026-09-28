@@ -11,9 +11,22 @@ export interface ExactNumberInputProps extends /* @vue-ignore */ NativeInputAttr
   readonly border?: InputBorder;
   readonly ring?: InputRing;
   readonly id?: string;
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readOnly?: boolean;
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
   /** Browser validity text for an incomplete or invalid decimal draft. */
   readonly invalidMessage?: string;
@@ -34,9 +47,12 @@ import { useNativeFormReset } from '../UseNativeFormReset';
 
 defineOptions({ name: 'ExactNumberInput', inheritAttrs: false });
 const rawProps = withDefaults(defineProps<ExactNumberInputProps>(), {
+  isDisabled: undefined,
   disabled: undefined,
+  isRequired: undefined,
   required: undefined,
   readOnly: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 const props = useLocaleDefaults(rawProps, 'ExactNumberInput', {
@@ -59,10 +75,12 @@ const draft = ref(controlled.value.value?.toString() ?? '');
 const dirty = ref(false);
 const composing = ref(false);
 const failure = shallowRef<NumberFailure | null>(null);
-const isDisabled = computed(() => props.disabled ?? context?.isDisabled ?? false);
-const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? context?.isReadOnly ?? false);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? context?.isDisabled ?? false);
+const finalReadOnly = computed(
+  () => props.isReadOnly ?? props.readonly ?? props.readOnly ?? context?.isReadOnly ?? false,
+);
 const inputId = computed(() => props.id ?? context?.id);
-const isRequired = computed(() => props.required ?? context?.isRequired);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? context?.isRequired);
 const isInvalid = computed(() => Boolean(failure.value || context?.isInvalid || props.state === InputStates.Invalid));
 const describedBy = computed(
   () => [context?.describedBy, attrs['aria-describedby']].filter(Boolean).join(' ') || undefined,
@@ -90,7 +108,7 @@ function restore(): void {
 }
 
 function onInput(event: Event): void {
-  if (isDisabled.value || isReadOnly.value) {
+  if (finalDisabled.value || finalReadOnly.value) {
     restore();
     return;
   }
@@ -103,7 +121,7 @@ function onInput(event: Event): void {
 
 /** Commits one complete JSON decimal token, or null; malformed drafts remain editable. */
 function commit(): Result<ExactNumber | null, NumberFailure> {
-  if (isDisabled.value || isReadOnly.value || composing.value || !dirty.value)
+  if (finalDisabled.value || finalReadOnly.value || composing.value || !dirty.value)
     return ResultExtensions.ok(controlled.value.value);
   const parsed = draft.value === '' ? ResultExtensions.ok(null) : Numbers.parse(draft.value);
   if (!parsed.ok) {
@@ -127,7 +145,7 @@ function commit(): Result<ExactNumber | null, NumberFailure> {
 function onKeydown(event: KeyboardEvent): void {
   if (event.isComposing || composing.value) return;
   if (event.key === 'Enter' && !commit().ok) event.preventDefault();
-  if (event.key === 'Escape' && !isDisabled.value && !isReadOnly.value) {
+  if (event.key === 'Escape' && !finalDisabled.value && !finalReadOnly.value) {
     event.preventDefault();
     restore();
   }
@@ -152,9 +170,9 @@ defineExpose({ el: root, commit, restore });
     inputmode="decimal"
     :id="inputId"
     :value="draft"
-    :disabled="isDisabled"
-    :required="isRequired"
-    :readonly="isReadOnly"
+    :disabled="finalDisabled"
+    :required="finalRequired"
+    :readonly="finalReadOnly"
     :aria-invalid="isInvalid || undefined"
     :aria-describedby="describedBy"
     :class="rootClass"

@@ -27,8 +27,10 @@ Public import: `import { TimeInput } from '@wow-two-beta/ui-vue/presentation/for
 | `minuteStep`   | `number`                     | no       | `5`         | The minute interval offered in the popover. Default 5. Ignored when `native`.                                                                                                                                                                                                                                                      |
 | `placeholder`  | `string`                     | no       | `'--:--'`   | The empty-state text. Ignored when `native` — that control renders its own mask.                                                                                                                                                                                                                                                   |
 | `id`           | `string`                     | no       | —           | The control's id. Auto-filled from `FormControl` context when omitted.                                                                                                                                                                                                                                                             |
-| `disabled`     | `boolean`                    | no       | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`.                                                                                                                                                                                                                                                     |
-| `required`     | `boolean`                    | no       | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`.                                                                                                                                                                                                                                                     |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
+| `isRequired` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding field's `isRequired`. |
+| `required` | `boolean` | no | `undefined` | Deprecated alias of `isRequired`; removed next release. |
 
 ## Emits
 

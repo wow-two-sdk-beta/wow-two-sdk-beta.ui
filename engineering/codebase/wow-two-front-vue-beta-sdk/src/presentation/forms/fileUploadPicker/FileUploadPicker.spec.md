@@ -22,7 +22,8 @@ Public import: `import { FileUploadPicker } from '@wow-two-beta/ui-vue/presentat
 | `isInvalid` | `boolean`          | no       | `undefined`                             | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
 | `label`     | `string \| number` | no       | `'Drop files here, or click to browse'` | The zone's headline. Fill the `label` slot for richer content.                          |
 | `hint`      | `string \| number` | no       | —                                       | The zone's sub-line. Fill the `hint` slot for richer content.                           |
-| `disabled`  | `boolean`          | no       | `undefined`                             | The disabled state. Falls back to the surrounding form control's `isDisabled`.          |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
 | `name`      | `string`           | no       | —                                       | The native input name.                                                                  |
 | `id`        | `string`           | no       | —                                       | The control's id. Auto-filled from `FormControl` context when omitted.                  |
 

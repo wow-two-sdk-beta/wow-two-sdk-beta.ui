@@ -28,10 +28,13 @@ Public import: `import { MarkdownEditor } from '@wow-two-beta/ui-vue/presentatio
 | `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
 | `minHeight` | `string` | no | `'18rem'` | The CSS minHeight on the surface (default `18rem`). |
 | `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `readOnly` | `boolean` | no | `undefined` | The read-only state — the legacy alias. Falls back to the form control's `isReadOnly`. |
-| `readonly` | `boolean` | no | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
-| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
+| `isReadOnly` | `boolean` | no | `undefined` | Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. |
+| `readOnly` | `boolean` | no | `undefined` | Deprecated alias of `isReadOnly`; removed next release. |
+| `readonly` | `boolean` | no | `undefined` | Deprecated alias of `isReadOnly`; removed next release. |
+| `isRequired` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding field's `isRequired`. |
+| `required` | `boolean` | no | `undefined` | Deprecated alias of `isRequired`; removed next release. |
 
 ## Emits
 

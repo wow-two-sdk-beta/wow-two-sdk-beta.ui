@@ -55,13 +55,19 @@ export interface TagsInputProps {
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
-  /** The read-only state. Falls back to the form control's `isReadOnly`. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readOnly?: boolean;
 
-  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 }
 </script>
@@ -91,8 +97,10 @@ const inputProps = withDefaults(defineProps<TagsInputProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
   isInvalid: undefined,
+  isDisabled: undefined,
   disabled: undefined,
   readOnly: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 const props = useLocaleDefaults(inputProps, 'TagsInput', { placeholder: 'Add tag…' });
@@ -130,8 +138,8 @@ const pendingDelete = ref(false);
 
 /* FormControlContext adoption — explicit props stay as overrides. */
 const ctx = useFormControl();
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
 const invalid = computed(() => props.isInvalid ?? ctx?.isInvalid);
 const finalState = computed(() => props.state ?? (invalid.value ? InputStateValue.Invalid : InputStateValue.Default));
 
@@ -156,7 +164,7 @@ function onInput(event: Event): void {
 /* Runs after any caller-supplied `@keydown` — declared after `v-bind`. */
 function onKeydown(event: KeyboardEvent): void {
   if (event.isComposing) return;
-  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) return;
+  if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) return;
   if (event.key === 'Enter' || (event.key === 'Tab' && text.value)) {
     if (text.value) {
       if (event.key === 'Enter') event.preventDefault();
@@ -204,7 +212,7 @@ function isPendingDelete(index: number): boolean {
  * empty when closing is off.
  */
 function tagListeners(index: number): Record<string, () => void> {
-  if (isDisabled.value || isReadOnly.value) return {};
+  if (finalDisabled.value || finalReadOnly.value) return {};
   return { close: () => removeAt(index) };
 }
 
@@ -235,7 +243,7 @@ const rootClass = computed(() =>
   cn(
     inputBaseVariants({ size: props.size, state: finalState.value }),
     'h-auto min-h-10 flex-wrap items-center gap-1.5 py-1.5',
-    isDisabled.value && 'cursor-not-allowed opacity-60',
+    finalDisabled.value && 'cursor-not-allowed opacity-60',
     attrs.class as ClassValue,
   ),
 );
@@ -254,8 +262,8 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
   <div
     :key="formResetRevision"
     role="group"
-    :data-disabled="isDisabled || undefined"
-    :data-readonly="isReadOnly || undefined"
+    :data-disabled="finalDisabled || undefined"
+    :data-readonly="finalReadOnly || undefined"
     :data-invalid="invalid || undefined"
     :class="rootClass"
     @click="onContainerClick"
@@ -276,8 +284,8 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
       :id="inputId"
       :value="text"
       :placeholder="inputPlaceholder"
-      :disabled="isDisabled"
-      :readonly="isReadOnly"
+      :disabled="finalDisabled"
+      :readonly="finalReadOnly"
       :aria-invalid="invalid || undefined"
       :aria-describedby="describedBy"
       :aria-required="requiredAttr"
@@ -291,7 +299,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     <input
       v-if="name"
       type="hidden"
-      :disabled="isDisabled"
+      :disabled="finalDisabled"
       :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
       :name="name"
       :value="hiddenValue"

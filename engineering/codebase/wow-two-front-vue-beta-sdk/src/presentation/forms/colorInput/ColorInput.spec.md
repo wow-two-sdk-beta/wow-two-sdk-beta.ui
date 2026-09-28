@@ -26,8 +26,10 @@ Public import: `import { ColorInput } from '@wow-two-beta/ui-vue/presentation/fo
 | `swatchShape`  | `SwatchShape`    | no       | `SwatchShapeValue.Square` | The swatch outline shape shown inside the field.                               |
 | `hasAlpha`     | `boolean`        | no       | `false`                   | Whether a committed hex keeps its alpha channel (`#RRGGBBAA`).                 |
 | `id`           | `string`         | no       | —                         | The control's id. Auto-filled from `FormControl` context when omitted.         |
-| `disabled`     | `boolean`        | no       | `undefined`               | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `required`     | `boolean`        | no       | `undefined`               | The required state. Falls back to the surrounding form control's `isRequired`. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
+| `isRequired` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding field's `isRequired`. |
+| `required` | `boolean` | no | `undefined` | Deprecated alias of `isRequired`; removed next release. |
 
 ## Emits
 

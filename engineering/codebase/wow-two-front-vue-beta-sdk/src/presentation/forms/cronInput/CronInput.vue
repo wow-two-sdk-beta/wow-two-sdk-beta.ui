@@ -26,16 +26,25 @@ export interface CronInputProps {
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
-  /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readOnly?: boolean;
 
-  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 
   /** The hidden input name; the hidden input emits the cron string. */
@@ -236,9 +245,12 @@ const props = withDefaults(defineProps<CronInputProps>(), {
      absent `boolean` prop to `false` — which would shadow the form control context. */
   modelValue: undefined,
   isInvalid: undefined,
+  isDisabled: undefined,
   disabled: undefined,
   readOnly: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
+  isRequired: undefined,
   required: undefined,
 });
 
@@ -280,9 +292,9 @@ function onInput(event: Event): void {
 const ariaDescribedBy = computed(() => attrs[AriaAttribute.DescribedBy] as string | undefined);
 
 const inputId = computed(() => props.id ?? ctx?.id);
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
 const describedBy = computed(() => ariaDescribedBy.value ?? ctx?.describedBy);
 
 const OwnedAttributes: ReadonlySet<string> = new Set(['class', AriaAttribute.DescribedBy]);
@@ -312,9 +324,9 @@ defineExpose({ el: input });
       :id="inputId"
       :value="cron"
       :placeholder="placeholder"
-      :disabled="isDisabled"
-      :readonly="isReadOnly"
-      :required="isRequired"
+      :disabled="finalDisabled"
+      :readonly="finalReadOnly"
+      :required="finalRequired"
       :aria-invalid="isError || undefined"
       :aria-describedby="describedBy"
       :spellcheck="false"
@@ -327,7 +339,7 @@ defineExpose({ el: input });
     <input
       v-if="name"
       type="hidden"
-      :disabled="isDisabled"
+      :disabled="finalDisabled"
       :form="typeof $attrs.form === 'string' ? $attrs.form : undefined"
       :name="name"
       :value="cron"

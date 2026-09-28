@@ -25,10 +25,13 @@ Public import: `import { CronInput } from '@wow-two-beta/ui-vue/presentation/for
 | `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
 | `hasPreview` | `boolean` | no | `true` | Whether the human-readable readout renders under the input. Default `true`. |
 | `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
-| `disabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding form control's `isDisabled`. |
-| `readOnly` | `boolean` | no | `undefined` | The read-only state — the legacy alias. Falls back to the form control's `isReadOnly`. |
-| `readonly` | `boolean` | no | `undefined` | Controlled axes use their canonical Vue model names; each update event requests caller state. |
-| `required` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding form control's `isRequired`. |
+| `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
+| `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
+| `isReadOnly` | `boolean` | no | `undefined` | Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. |
+| `readOnly` | `boolean` | no | `undefined` | Deprecated alias of `isReadOnly`; removed next release. |
+| `readonly` | `boolean` | no | `undefined` | Deprecated alias of `isReadOnly`; removed next release. |
+| `isRequired` | `boolean` | no | `undefined` | The required state. Falls back to the surrounding field's `isRequired`. |
+| `required` | `boolean` | no | `undefined` | Deprecated alias of `isRequired`; removed next release. |
 | `name` | `string` | no | — | The hidden input name; the hidden input emits the cron string. |
 
 ## Emits

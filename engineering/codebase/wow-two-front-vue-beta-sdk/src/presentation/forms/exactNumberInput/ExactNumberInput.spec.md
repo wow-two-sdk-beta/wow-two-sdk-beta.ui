@@ -23,7 +23,7 @@ Source: [ExactNumberInput.vue](ExactNumberInput.vue).
 ## Props and events
 
 - Value props: `modelValue?`, `defaultValue?`: `ExactNumber | null`.
-- Shared input props: `size`, `state`, `border`, `ring`, `id`, `disabled`, `required`, `readonly` (`readOnly` alias).
+- Shared input props: `size`, `state`, `border`, `ring`, `id`, `isDisabled`, `isRequired`, `isReadOnly` (deprecated aliases `disabled`, `required`, `readonly`, `readOnly` are removed next release).
 - `invalidMessage?`: native validity text; omitted text resolves from `ExactNumberInput.invalidMessage`.
 - `update:modelValue(value)` reports a committed model update.
 - `draft-change(text)` reports editable text without claiming numeric validity.

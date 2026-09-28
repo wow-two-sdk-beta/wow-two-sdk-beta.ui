@@ -20,12 +20,21 @@ export interface SliderInputProps {
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Prevents editing while preserving native form submission. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 }
 
@@ -57,8 +66,11 @@ const props = withDefaults(defineProps<SliderInputProps>(), {
   max: 100,
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
+  isRequired: undefined,
   required: undefined,
 });
 
@@ -83,7 +95,7 @@ const controlled = useControlled<string | number>({
 const currentValue = controlled.value;
 
 function onInput(event: Event): void {
-  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) {
+  if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) {
     (event.target as HTMLInputElement).value = String(currentValue.value);
     return;
   }
@@ -92,9 +104,9 @@ function onInput(event: Event): void {
 }
 
 const inputId = computed(() => props.id ?? ctx?.id);
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? ctx?.isReadOnly ?? false);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
@@ -133,8 +145,8 @@ defineExpose({ el: root });
     ref="root"
     type="range"
     :id="inputId"
-    :disabled="isDisabled"
-    :required="isRequired"
+    :disabled="finalDisabled"
+    :required="finalRequired"
     :min="min"
     :max="max"
     :value="currentValue"
@@ -143,9 +155,9 @@ defineExpose({ el: root });
     :class="rootClass"
     v-bind="passthroughAttrs"
     @input="onInput"
-    :aria-readonly="isReadOnly || undefined"
-    @pointerdown="isReadOnly && $event.preventDefault()"
-    @keydown="isReadOnly && $event.preventDefault()"
+    :aria-readonly="finalReadOnly || undefined"
+    @pointerdown="finalReadOnly && $event.preventDefault()"
+    @keydown="finalReadOnly && $event.preventDefault()"
     @compositionend="onInput"
   />
 </template>

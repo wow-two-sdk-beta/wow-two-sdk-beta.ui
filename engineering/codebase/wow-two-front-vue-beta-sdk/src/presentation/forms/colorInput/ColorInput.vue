@@ -28,12 +28,21 @@ export interface ColorInputProps extends /* @vue-ignore */ NativeInputAttributes
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
-  /** Prevents editing while preserving native form submission. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 }
 </script>
@@ -61,8 +70,11 @@ const props = withDefaults(defineProps<ColorInputProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow the
      context with a hard "not disabled / not required". */
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
+  isRequired: undefined,
   required: undefined,
 });
 
@@ -104,7 +116,7 @@ function commitHex(text: string, hasAlpha: boolean): string | null {
 }
 
 function commit(): void {
-  if (isDisabled.value || isReadOnly.value) return;
+  if (finalDisabled.value || finalReadOnly.value) return;
   if (!draft.value) {
     controlled.setValue(null);
     return;
@@ -120,7 +132,7 @@ function commit(): void {
 }
 
 function onInput(event: Event): void {
-  if (event.defaultPrevented || isDisabled.value || isReadOnly.value) {
+  if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) {
     (event.target as HTMLInputElement).value = String(committed.value ?? '');
     return;
   }
@@ -146,9 +158,9 @@ function onKeydown(event: KeyboardEvent): void {
 const swatchColor = computed(() => committed.value ?? '#00000000');
 
 const inputId = computed(() => props.id ?? ctx?.id);
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled);
-const isReadOnly = computed(() => props.readonly ?? ctx?.isReadOnly ?? false);
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? ctx?.isReadOnly ?? false);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
@@ -189,9 +201,9 @@ defineExpose({ el: root });
       ref="root"
       type="text"
       :id="inputId"
-      :disabled="isDisabled"
-      :required="isRequired"
-      :readonly="isReadOnly"
+      :disabled="finalDisabled"
+      :required="finalRequired"
+      :readonly="finalReadOnly"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
       :spellcheck="false"

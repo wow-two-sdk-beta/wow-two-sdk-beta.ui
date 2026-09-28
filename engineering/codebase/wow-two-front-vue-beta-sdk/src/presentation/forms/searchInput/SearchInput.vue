@@ -24,16 +24,25 @@ export interface SearchInputProps extends /* @vue-ignore */ NativeInputAttribute
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
-  /** The disabled state. Falls back to the surrounding form control's `isDisabled`. */
+  /** The disabled state. Falls back to the surrounding field's `isDisabled`. */
+  readonly isDisabled?: boolean;
+
+  /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
-  /** The required state. Falls back to the surrounding form control's `isRequired`. */
+  /** The required state. Falls back to the surrounding field's `isRequired`. */
+  readonly isRequired?: boolean;
+
+  /** @deprecated Use `isRequired`; this alias is removed next release. */
   readonly required?: boolean;
 
-  /** The read-only state — React's spelling. Falls back to the form control's `isReadOnly`. */
+  /** Keeps the value but blocks changes. Falls back to the surrounding field's `isReadOnly`. */
+  readonly isReadOnly?: boolean;
+
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readOnly?: boolean;
 
-  /** Controlled axes use their canonical Vue model names; each update event requests caller state. */
+  /** @deprecated Use `isReadOnly`; this alias is removed next release. */
   readonly readonly?: boolean;
 }
 </script>
@@ -64,9 +73,12 @@ const props = withDefaults(defineProps<SearchInputProps>(), {
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
      control context, and Vue casts an absent `boolean` prop to `false` — which would
      shadow the context with a hard "not disabled / not required / not read-only". */
+  isDisabled: undefined,
   disabled: undefined,
+  isRequired: undefined,
   required: undefined,
   readOnly: undefined,
+  isReadOnly: undefined,
   readonly: undefined,
 });
 
@@ -119,9 +131,9 @@ function handleClear(): void {
 const finalState = computed(() => props.state ?? (ctx?.isInvalid ? InputStateValue.Invalid : InputStateValue.Default));
 
 const inputId = computed(() => props.id ?? ctx?.id);
-const isDisabled = computed(() => props.disabled ?? ctx?.isDisabled ?? false);
-const isRequired = computed(() => props.required ?? ctx?.isRequired);
-const isReadOnly = computed(() => props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
+const finalDisabled = computed(() => props.isDisabled ?? props.disabled ?? ctx?.isDisabled ?? false);
+const finalRequired = computed(() => props.isRequired ?? props.required ?? ctx?.isRequired);
+const finalReadOnly = computed(() => props.isReadOnly ?? props.readonly ?? props.readOnly ?? ctx?.isReadOnly);
 const isInvalid = computed(() => ctx?.isInvalid || undefined);
 const describedBy = computed(() => ctx?.describedBy);
 
@@ -164,9 +176,9 @@ const locale = useLocale();
       type="search"
       :id="inputId"
       :value="currentValue"
-      :disabled="isDisabled"
-      :required="isRequired"
-      :readonly="isReadOnly"
+      :disabled="finalDisabled"
+      :required="finalRequired"
+      :readonly="finalReadOnly"
       :aria-invalid="isInvalid"
       :aria-describedby="describedBy"
       :class="inputClass"
@@ -177,7 +189,7 @@ const locale = useLocale();
     <button
       v-if="showClear"
       type="button"
-      :disabled="isDisabled"
+      :disabled="finalDisabled"
       :aria-label="locale.t('SearchInput.clearSearch', undefined, 'Clear search')"
       class="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded text-subtle-foreground hover:bg-muted hover:text-muted-foreground"
       @click="handleClear"

@@ -410,17 +410,17 @@ const stamp = ref<Temporal.PlainDateTime | null>(
           <div class="flex items-center gap-3">
             <CheckboxInput v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-value />
             <CheckboxInput is-indeterminate />
-            <CheckboxInput disabled />
-            <CheckboxInput default-value disabled />
+            <CheckboxInput is-disabled />
+            <CheckboxInput default-value is-disabled />
           </div>
           <div class="flex items-center gap-3">
             <RadioInput v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-value />
-            <RadioInput disabled />
+            <RadioInput is-disabled />
           </div>
           <div class="flex items-center gap-3">
             <SwitchInput v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s as never" default-value />
             <SwitchInput v-model="switched" />
-            <SwitchInput disabled />
+            <SwitchInput is-disabled />
           </div>
         </div>
       </Demo>
@@ -434,7 +434,7 @@ const stamp = ref<Temporal.PlainDateTime | null>(
             <TextInput state="invalid" placeholder="you@example.com" />
           </Field>
           <Field label="Disabled" is-disabled>
-            <TextInput disabled placeholder="disabled" />
+            <TextInput is-disabled placeholder="disabled" />
           </Field>
         </div>
       </Demo>
