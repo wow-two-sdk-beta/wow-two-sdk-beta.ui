@@ -66,9 +66,10 @@ const CloseIcon = X;
 </script>
 
 <template>
-  <!-- `muted-foreground` (not `subtle-foreground`): the trigger surface is muted, where
-       subtle is only 4.2:1 (see index.css). -->
   <span v-if="ctx.values.length === 0" class="text-muted-foreground">
+    <!-- `muted-foreground` (not `subtle-foreground`): the trigger surface is muted, where
+         subtle is only 4.2:1 (see index.css). Kept inside the element: a comment ahead of the root makes the
+         root a fragment in development builds, which drops fallthrough attributes there and nowhere else. -->
     <slot name="placeholder">{{ placeholder }}</slot>
   </span>
   <span v-else :class="stripClass">
