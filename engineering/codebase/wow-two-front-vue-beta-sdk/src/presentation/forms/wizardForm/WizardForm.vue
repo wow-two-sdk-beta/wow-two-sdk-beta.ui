@@ -24,6 +24,7 @@ import { computed, provide, ref, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
+import { useId } from '../../../foundation/identifiers';
 import { wizardContextKey, type StepInfo, type WizardFormContextValue } from './WizardFormContext';
 
 /**
@@ -84,6 +85,15 @@ const visited = computed<ReadonlySet<string>>(() => {
 });
 
 const isPending = ref(false);
+const idBase = useId('wizard');
+const stripCount = ref(0);
+
+function registerStrip(): () => void {
+  stripCount.value += 1;
+  return () => {
+    stripCount.value -= 1;
+  };
+}
 
 const currentIndex = computed(() => steps.value.findIndex((s) => s.id === activeStepId.value));
 const currentStepInfo = computed<StepInfo | undefined>(() => steps.value[currentIndex.value]);
@@ -177,6 +187,11 @@ provide<WizardFormContextValue>(wizardContextKey, {
   get isPending() {
     return isPending.value;
   },
+  idBase,
+  get hasStrip() {
+    return stripCount.value > 0;
+  },
+  registerStrip,
 });
 
 const OwnedAttributes: ReadonlySet<string> = new Set(['class']);

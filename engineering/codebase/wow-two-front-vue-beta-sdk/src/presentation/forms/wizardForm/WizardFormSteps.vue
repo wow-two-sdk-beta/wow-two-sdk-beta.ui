@@ -7,10 +7,10 @@ export interface WizardFormStepsProps {}
 
 <script setup lang="ts">
 import { useLocale } from '../../../foundation/i18n';
-import { computed, useAttrs, useTemplateRef } from 'vue';
+import { computed, onBeforeUnmount, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
-import { useWizard, type StepInfo } from './WizardFormContext';
+import { useWizard, wizardPartId, type StepInfo } from './WizardFormContext';
 
 /** Renders the clickable step strip, where already-visited steps stay re-selectable while `canGoBack`. */
 defineOptions({ name: 'WizardFormSteps', inheritAttrs: false });
@@ -20,6 +20,44 @@ const el = useTemplateRef<HTMLDivElement>('el');
 
 /* `ctx` is a live-getter object — read fields off it, never destructure. */
 const ctx = useWizard();
+
+/* Registered in setup, so the panels name themselves after this strip's tabs from the first render. */
+onBeforeUnmount(ctx.registerStrip());
+
+function tabId(step: StepInfo): string {
+  return wizardPartId(ctx.idBase, 'tab', step.id);
+}
+
+/** Only the active step's panel is rendered, so only its tab can point at one. */
+function controls(index: number): string | undefined {
+  const step = ctx.steps[index];
+  return step && ctx.currentIndex === index ? wizardPartId(ctx.idBase, 'panel', step.id) : undefined;
+}
+
+/** One tab stop: the active step, or the first tab before any step registers as active. */
+function tabIndex(index: number): number {
+  const stop = ctx.currentIndex >= 0 ? ctx.currentIndex : 0;
+  return index === stop ? 0 : -1;
+}
+
+const NextKeys: Readonly<Record<string, 1 | -1>> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+
+/** Moves focus along the strip (APG tabs, manual activation): arrows wrap, Home/End jump; Enter/Space activate. */
+function onKeydown(event: KeyboardEvent): void {
+  const tabs = [...(el.value?.querySelectorAll<HTMLButtonElement>('[role=tab]') ?? [])];
+  const index = tabs.indexOf(event.target as HTMLButtonElement);
+  if (index < 0) return;
+  const isRtl = el.value ? getComputedStyle(el.value).direction === 'rtl' : false;
+  const step = NextKeys[event.key];
+  const horizontal = event.key === 'ArrowRight' || event.key === 'ArrowLeft';
+  let target: number;
+  if (step !== undefined) target = index + (isRtl && horizontal ? -step : step);
+  else if (event.key === 'Home') target = 0;
+  else if (event.key === 'End') target = tabs.length - 1;
+  else return;
+  event.preventDefault();
+  tabs[(target + tabs.length) % tabs.length]?.focus();
+}
 
 function canJump(step: StepInfo): boolean {
   return ctx.canGoBack && ctx.visited.has(step.id);
@@ -62,12 +100,16 @@ const locale = useLocale();
     :aria-label="locale.t('WizardFormSteps.wizardformSteps', undefined, 'WizardForm steps')"
     :class="stripClass"
     v-bind="passthroughAttrs"
+    @keydown="onKeydown"
   >
     <button
       v-for="(step, i) in ctx.steps"
+      :id="tabId(step)"
       :key="step.id"
       type="button"
       role="tab"
+      :tabindex="tabIndex(i)"
+      :aria-controls="controls(i)"
       :aria-selected="ctx.currentIndex === i"
       :aria-disabled="!canJump(step) || undefined"
       :class="tabClass(step, i)"

@@ -34,6 +34,17 @@ export interface WizardFormContextValue {
   registerValidator: (id: string, validator: () => boolean | Promise<boolean>) => void;
   unregisterValidator: (id: string) => void;
   readonly isPending: boolean;
+  /** The wizard-scoped prefix for its tab and panel ids, so two wizards never share one. */
+  readonly idBase: string;
+  /** Whether a `WizardFormSteps` strip is mounted — only then does a tab exist to name each panel. */
+  readonly hasStrip: boolean;
+  /** Registers a mounted step strip; returns its release. */
+  registerStrip: () => () => void;
+}
+
+/** The id of a step's tab in the strip, or of its panel — the pair that names and controls each other. */
+export function wizardPartId(idBase: string, part: 'tab' | 'panel', stepId: string): string {
+  return `${idBase}-${part}-${stepId}`;
 }
 
 export const wizardContextKey: InjectionKey<WizardFormContextValue> = Symbol('wow-two.wizard');

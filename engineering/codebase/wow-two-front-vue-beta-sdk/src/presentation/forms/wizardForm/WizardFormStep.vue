@@ -26,7 +26,7 @@ export interface WizardFormStepProps {
 import { computed, onBeforeUnmount, useAttrs, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
-import { useWizard } from './WizardFormContext';
+import { useWizard, wizardPartId } from './WizardFormContext';
 
 /** Renders one wizard panel while its step is active, registering the step's metadata and validator. */
 defineOptions({ name: 'WizardFormStep', inheritAttrs: false });
@@ -78,7 +78,10 @@ const passthroughAttrs = computed(() =>
 
 const panelClass = computed(() => cn('flex flex-col gap-3', attrs.class as ClassValue));
 
-const labelledBy = computed(() => `wizard-step-${props.id}`);
+const panelId = computed(() => wizardPartId(ctx.idBase, 'panel', props.id));
+/* The strip's tab for this step names the panel; without a strip the panel stays unnamed rather than
+   pointing at a missing node. */
+const labelledBy = computed(() => (ctx.hasStrip ? wizardPartId(ctx.idBase, 'tab', props.id) : undefined));
 
 defineExpose({ el });
 </script>
@@ -87,6 +90,7 @@ defineExpose({ el });
   <div
     v-if="isCurrent"
     ref="el"
+    :id="panelId"
     role="tabpanel"
     :aria-labelledby="labelledBy"
     :class="panelClass"

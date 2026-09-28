@@ -11,6 +11,13 @@ Public import: `import { WizardFormSteps } from '@wow-two-beta/ui-vue/presentati
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- Each tab carries a wizard-scoped id; the active tab's `aria-controls` names the rendered panel, which is labelled by it.
+- One tab stop: the active step's tab. ArrowRight/ArrowDown and ArrowLeft/ArrowUp move focus and wrap (mirrored in RTL);
+  Home and End jump to the ends. Activation is manual: Enter, Space or a click re-opens a visited step while `canGoBack`.
+- Regression: `tests/unit/presentation/forms/WizardForm.dom.test.ts`.
+
 ## Props
 
 No declared props.
