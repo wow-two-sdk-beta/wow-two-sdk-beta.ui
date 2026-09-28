@@ -102,6 +102,7 @@ const {
   SignatureInput,
   TransferPicker,
   TreeSelectPicker,
+  CascaderPicker,
 } = forms;
 
 const covered = [
@@ -176,6 +177,7 @@ const covered = [
   'SignatureInput',
   'TransferPicker',
   'TreeSelectPicker',
+  'CascaderPicker',
   'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
@@ -297,6 +299,27 @@ const FOLDERS = [
   { value: 'archive', label: 'Archive', isDisabled: true },
 ];
 const folder = ref<string | null>('marketing/print/flyers');
+/** The region tree the cascader demo walks. */
+const REGIONS = [
+  {
+    value: 'uz',
+    label: 'Uzbekistan',
+    children: [
+      {
+        value: 'tashkent',
+        label: 'Tashkent',
+        children: [
+          { value: 'yunusabad', label: 'Yunusabad' },
+          { value: 'chilanzar', label: 'Chilanzar' },
+        ],
+      },
+      { value: 'samarkand', label: 'Samarkand', children: [{ value: 'registan', label: 'Registan' }] },
+    ],
+  },
+  { value: 'kz', label: 'Kazakhstan', children: [{ value: 'almaty', label: 'Almaty' }] },
+  { value: 'other', label: 'Somewhere else' },
+];
+const region = ref<string[] | null>(null);
 const priceRange = ref<readonly [number, number]>([20, 80]);
 const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
@@ -482,6 +505,13 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         <div class="flex flex-col items-start gap-2">
           <TreeSelectPicker v-model="folder" :nodes="FOLDERS" is-path-shown aria-label="Folder" class="w-64" />
           <p class="text-xs text-subtle-foreground">folder = {{ folder ?? 'null' }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="CascaderPicker" note="each pick opens the next column · arrows travel across columns">
+        <div class="flex flex-col items-start gap-2">
+          <CascaderPicker v-model="region" :options="REGIONS" aria-label="Region" class="w-72" />
+          <p class="text-xs text-subtle-foreground">path = {{ region?.join(' → ') ?? 'null' }}</p>
         </div>
       </Demo>
 

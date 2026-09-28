@@ -36,6 +36,7 @@ in their capability specifications and are not inferred by this catalogue.
 | `CarouselSlides.slide` | slide | [CarouselSlides.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/carousel/CarouselSlides.vue) |
 | `CarouselViewport.carousel` | carousel | [CarouselViewport.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/carousel/CarouselViewport.vue) |
 | `CarouselViewport.label` | Carousel | [CarouselViewport.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/carousel/CarouselViewport.vue) |
+| `CascaderPicker.placeholder` | Pick an option | [CascaderPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/cascaderPicker/CascaderPicker.vue) |
 | `CategoryNav.emojiCategories` | Emoji categories | [CategoryNav.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/emojiPicker/CategoryNav.vue) |
 | `CellEditor.false` | false | [CellEditor.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/dataGridEditor/CellEditor.vue) |
 | `CellEditor.true` | true | [CellEditor.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/dataGridEditor/CellEditor.vue) |

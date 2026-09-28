@@ -13,7 +13,7 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 |---|---|
 | Menus (`presentation/nav`) | `MenuCheckboxItem`, `MenuRadioGroup` + `MenuRadioItem`, `MenuSub` + `MenuSubTrigger` + `MenuSubContent` — usable in `DropdownMenuContent`, `ContextMenuContent` and `MenubarContent` |
 | App navigation | `BottomNavMenu` + `BottomNavMenuItem` (mobile bottom bar, `asChild` router links, badges); `SidebarMenu` + `SidebarMenuItem` / `SidebarMenuGroup` / `SidebarMenuSection` (icon rail via `isCollapsed`) |
-| Forms | `RatingPicker` (whole/half steps, clearable), `RangeSliderInput` (two thumbs, `commit` event), `TimezonePicker` (IANA ids, offset-labelled), `MonthPicker` (`Temporal.PlainYearMonth`), `YearPicker`, `DurationInput` (`Temporal.Duration`, unit segments), `SignatureInput` (pointer-drawn, SVG or PNG data URL), `TransferPicker` (dual list), `TreeSelectPicker` (leaf pick from a tree) |
+| Forms | `RatingPicker` (whole/half steps, clearable), `RangeSliderInput` (two thumbs, `commit` event), `TimezonePicker` (IANA ids, offset-labelled), `MonthPicker` (`Temporal.PlainYearMonth`), `YearPicker`, `DurationInput` (`Temporal.Duration`, unit segments), `SignatureInput` (pointer-drawn, SVG or PNG data URL), `TransferPicker` (dual list), `TreeSelectPicker` (leaf pick from a tree), `CascaderPicker` (path pick across columns) |
 | Overlays | `ConfirmPopover` — inline confirm that awaits a promise from `@confirm`; `LightboxModal` — full-screen image viewer (buttons, arrows, swipe) |
 | Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary`, `OverflowGroup` (first N items + counted marker) |
 | Layout | `StickyLayout` (pinned state), `VirtualScrollArea` (windowed list, `end-reached`), `MasonryLayout` |
