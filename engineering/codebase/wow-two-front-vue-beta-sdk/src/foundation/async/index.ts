@@ -31,3 +31,4 @@ export { debounceAsync, throttleAsync, type DebouncedAsync, type ThrottledAsync 
 export { sequential, allSettledValues } from './Combinators';
 
 export * from './UseDebounceHandler';
+export { useDebouncedValue } from './UseDebouncedValue';

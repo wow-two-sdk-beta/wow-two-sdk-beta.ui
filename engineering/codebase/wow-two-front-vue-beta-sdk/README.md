@@ -93,6 +93,24 @@ accessors, sparse arrays, circular references and native non-integer numbers ins
 data. Encode domain values such as dates explicitly. `NumberLimits` and `JsonLimits` document centralized
 resource budgets; exceeding them returns a failure rather than rounding, wrapping or truncating a value.
 
+## Cookie sessions and write advisories
+
+The backend SDK's SPA antiforgery issues a readable `XSRF-TOKEN` cookie; the client echoes it on unsafe
+requests. A token issued before a sign-in or sign-out is refreshed once through `refreshPath`, then retried.
+Writes that return `ApiResponse<T>.Ok(data, warnings)` decode with `decodeWarned` and `unwrap: false`:
+
+```ts
+import { createApiClient, decodeWarned, wowTwoEnvelope } from '@wow-two-beta/ui-vue/foundation/http';
+
+const api = createApiClient({
+  envelope: wowTwoEnvelope,
+  credentials: 'same-origin',
+  antiforgery: { refreshPath: '/api/runtime-config' },
+});
+const saved = await api.post('/api/codes', { body, unwrap: false, decode: decodeWarned(decodeCode) });
+// saved.value → { data, warnings: [{ property, message, code, severity }] }
+```
+
 ## Architecture
 
 | Layer                | Responsibility                                                     |

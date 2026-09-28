@@ -1,6 +1,7 @@
 import { isAbortError, isTimeoutError } from '../errors';
 import { computeRetryDelay, shouldRetry, type RetryPolicy } from '../resilience';
 import { ResultExtensions, type Result } from '../results';
+import { AntiforgeryDefaults, AntiforgeryExtensions, type ApiAntiforgeryOptions } from './Antiforgery';
 import { ApiError } from './ApiError';
 import type { ApiJsonCodec } from './ApiJsonCodec';
 import { ApiFailureFactory, type ApiFailure } from './ApiFailure';
@@ -48,6 +49,8 @@ export interface ApiClientOptions {
   readonly fetch?: typeof globalThis.fetch;
   /** Overrides request/response JSON conversion, including non-success diagnostics. Native JSON is the default. */
   readonly json?: ApiJsonCodec;
+  /** Echoes the readable antiforgery cookie on unsafe requests, refreshing a stale token once when a path is given. */
+  readonly antiforgery?: ApiAntiforgeryOptions;
 }
 /** Typed payloads require a decoder; an empty response must be requested explicitly. */
 export interface ApiMethod {
@@ -128,7 +131,33 @@ function wait(ms: number, signal?: AbortSignal | null): Promise<void> {
 }
 /** Returns expected transport/protocol failures; application decoder bugs still throw. */
 export function createApiClient(options: ApiClientOptions = {}): ApiClient {
-  const { baseUrl = '', getAuthToken, credentials, defaultHeaders, envelope = wowTwoEnvelope, retry = false } = options;
+  const {
+    baseUrl = '',
+    getAuthToken,
+    credentials,
+    defaultHeaders,
+    envelope = wowTwoEnvelope,
+    retry = false,
+    antiforgery,
+  } = options;
+  /** Reads the antiforgery refresh path once, so a stale token is replaced before the one retry. */
+  const refreshAntiforgery = async (signal: AbortSignal): Promise<void> => {
+    if (!antiforgery?.refreshPath) return;
+    try {
+      await awaitRequest(
+        () =>
+          (options.fetch ?? globalThis.fetch)(`${baseUrl}${antiforgery.refreshPath}`, {
+            method: 'GET',
+            cache: 'no-store',
+            signal,
+            ...(credentials !== undefined ? { credentials } : {}),
+          }),
+        signal,
+      );
+    } catch {
+      // The retry reports the outcome; a failed refresh leaves the rejection to surface.
+    }
+  };
   const attempt = async (
     url: string,
     init: RequestOptions,
@@ -145,6 +174,10 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
     if (hasJsonBody) headers.set('Content-Type', 'application/json');
     if (defaultHeaders) new Headers(defaultHeaders).forEach((value, key) => headers.set(key, value));
     if (token != null) headers.set('Authorization', `Bearer ${token}`);
+    if (antiforgery && AntiforgeryExtensions.isUnsafe(init.method)) {
+      const xsrf = AntiforgeryExtensions.readToken(antiforgery.cookieName ?? AntiforgeryDefaults.cookieName);
+      if (xsrf != null) headers.set(antiforgery.headerName ?? AntiforgeryDefaults.headerName, xsrf);
+    }
     if (init.headers) new Headers(init.headers).forEach((value, key) => headers.set(key, value));
     let response: Response;
     try {
@@ -274,12 +307,25 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
       }
       let retries = 0;
       let previousDelayMs = 0;
+      let refreshedAntiforgery = false;
       for (;;) {
         const result = await attempt(url, init, body, init.body !== undefined && !isFormData, json, token);
         const aborted = interruption(init.signal);
         if (aborted) return ResultExtensions.fail(aborted);
         if (result.ok) return result;
         const failure = result.failure;
+        if (
+          antiforgery?.refreshPath &&
+          !refreshedAntiforgery &&
+          AntiforgeryExtensions.isUnsafe(init.method) &&
+          (antiforgery.isRejection ?? AntiforgeryExtensions.isRejection)(failure)
+        ) {
+          refreshedAntiforgery = true;
+          await refreshAntiforgery(init.signal);
+          const interrupted = interruption(init.signal);
+          if (interrupted) return ResultExtensions.fail(interrupted);
+          continue;
+        }
         const retryable = failure.code === 'http' || failure.code === 'transport';
         const idempotent = ['GET', 'HEAD', 'OPTIONS'].includes((init.method ?? 'GET').toUpperCase());
         if (retry !== false && retryable && idempotent && shouldRetry(retry, retries, failure.status)) {

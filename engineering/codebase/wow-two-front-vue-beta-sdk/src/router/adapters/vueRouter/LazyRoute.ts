@@ -1,4 +1,5 @@
-import type { Component } from 'vue';
+import { defineComponent, h, type Component } from 'vue';
+import { useRoute, useRouter, type RouteLocationNormalizedLoaded, type Router } from 'vue-router';
 
 import type { LazyRoute } from './RouteConfig';
 
@@ -34,6 +35,36 @@ export function lazyRoute(importer: LazyRoute): LazyRoute {
       return importer();
     }
   };
+}
+
+/**
+ * Code-splits a page and renders it with props decoded from the active route — the page never reads the
+ * router, so it renders the same for a direct hit, a reload or in-app navigation, and navigation arrives
+ * as callback props. Retries a failed chunk once, as {@link lazyRoute} does.
+ * ```ts
+ * { path: 'codes/:id', lazy: lazyPage(() => import('./CodePage.vue'), (route, router) => ({
+ *     codeId: String(route.params.id),
+ *     onBack: () => void router.push('/codes'),
+ *   })) }
+ * ```
+ */
+export function lazyPage<TProps extends Record<string, unknown>>(
+  importer: () => Promise<{ default: Component }>,
+  decode: (route: RouteLocationNormalizedLoaded, router: Router) => TProps,
+): LazyRoute {
+  return lazyRoute(async () => {
+    const page = (await importer()).default;
+    return {
+      default: defineComponent({
+        name: 'LazyPageProps',
+        setup() {
+          const route = useRoute();
+          const router = useRouter();
+          return () => h(page, decode(route, router));
+        },
+      }),
+    };
+  });
 }
 
 /**

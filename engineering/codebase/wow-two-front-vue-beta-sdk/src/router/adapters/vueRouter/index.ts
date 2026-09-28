@@ -73,4 +73,4 @@ export { default as AppNavLink, type AppNavLinkProps } from './appNavLink/AppNav
 export { useBreadcrumbs, type Breadcrumb } from './hooks/UseBreadcrumbs';
 export { usePrefetch, prefetch, prefetchProps, type PrefetchProps } from './hooks/UsePrefetch';
 export { useNavigationBlocker, BlockerState, type NavigationBlocker } from './hooks/UseNavigationBlocker';
-export { lazyRoute, reloadOnChunkError } from './LazyRoute';
+export { lazyPage, lazyRoute, reloadOnChunkError } from './LazyRoute';
