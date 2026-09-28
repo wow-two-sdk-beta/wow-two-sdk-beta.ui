@@ -33,9 +33,11 @@ import {
   Section,
   SpacerLayout,
   StackLayout,
+  StickyLayout,
   SurfaceLayout,
   TwoColumnLayout,
   VStackLayout,
+  VirtualScrollArea,
 } from '../../../../../src/presentation/layout';
 import { h, type VNode } from 'vue';
 import { Orientation } from '../../../../../src/foundation/styles';
@@ -128,4 +130,9 @@ export const layoutExamples: readonly SmokeCase[] = [
   smokeCase('SwipeActionsLayout', SwipeActionsLayout, {}, { slot: true }),
 
   smokeCase('TiltLayout', TiltLayout, {}, { slot: true }),
+
+  smokeCase('StickyLayout', StickyLayout, { offset: 8 }, { slot: true }),
+
+  // No slot probe: rows render only once the client measures a viewport.
+  smokeCase('VirtualScrollArea', VirtualScrollArea, { items: ['First', 'Second'], itemSize: 24 }),
 ];

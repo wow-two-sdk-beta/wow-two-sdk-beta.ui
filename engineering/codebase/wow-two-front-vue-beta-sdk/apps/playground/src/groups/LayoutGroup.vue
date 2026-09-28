@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, useTemplateRef } from 'vue';
 import { ControlGroupField } from '@wow-two-beta/ui-vue/presentation/forms';
 import * as layout from '@wow-two-beta/ui-vue/presentation/layout';
 import { cn } from '@wow-two-beta/ui-vue/foundation/styles';
@@ -31,6 +32,8 @@ const {
   ResizablePanel,
   ResizableSeparator,
   AnchorLayout,
+  StickyLayout,
+  VirtualScrollArea,
 } = layout;
 
 /** Names every component the curated section below renders. */
@@ -59,7 +62,14 @@ const covered = [
   'ResizablePanel',
   'ResizableSeparator',
   'AnchorLayout',
+  'StickyLayout',
+  'VirtualScrollArea',
 ];
+
+/** Ten thousand rows, so the windowing is visible in the DOM inspector. */
+const MANY_ROWS = Array.from({ length: 10_000 }, (_, index) => `Scan event #${index + 1}`);
+const stickyRoot = useTemplateRef<HTMLElement>('stickyRoot');
+const endReached = ref(false);
 
 const SURFACE_VARIANTS = [
   'solid',
@@ -290,6 +300,42 @@ const FLEX_CASES = [
            organism), so the scrollbar paints inside the element's own border box. Putting the
            border + rounding on the scroller therefore drew the bar across the rounded corners
            and read as overflow. The border belongs on a wrapper; the scroller sits inside it. -->
+      <Demo name="StickyLayout" note="scroll the box — the header pins and gains a shadow while stuck">
+        <div class="h-40 overflow-auto rounded-md border border-border" ref="stickyRoot">
+          <p class="p-2 text-xs text-subtle-foreground">Intro copy above the pinned header.</p>
+          <StickyLayout v-slot="{ isStuck }" :root="stickyRoot">
+            <div :class="cn('bg-background px-2 py-1 text-xs font-medium', isStuck && 'shadow-md')">
+              Header {{ isStuck ? '(stuck)' : '' }}
+            </div>
+          </StickyLayout>
+          <p v-for="n in 30" :key="n" class="px-2 text-xs">row {{ n }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="VirtualScrollArea" note="10,000 rows — only a screenful exists in the DOM">
+        <div class="overflow-hidden rounded-md border border-border">
+          <VirtualScrollArea
+            :items="MANY_ROWS"
+            :item-size="28"
+            class="h-40"
+            role="list"
+            @end-reached="endReached = true"
+          >
+            <template #default="{ item, index }">
+              <div
+                role="listitem"
+                :aria-posinset="index + 1"
+                :aria-setsize="MANY_ROWS.length"
+                class="flex h-7 items-center px-2 text-xs"
+              >
+                {{ item }}
+              </div>
+            </template>
+          </VirtualScrollArea>
+        </div>
+        <p class="mt-1 text-[10px] text-subtle-foreground">end reached = {{ endReached }}</p>
+      </Demo>
+
       <Demo name="ScrollArea" note="vertical — native scrollbar, border on the wrapper">
         <div class="overflow-hidden rounded-md border border-border">
           <ScrollArea class="h-24">

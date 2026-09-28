@@ -27,3 +27,5 @@ export * from './inputGroup';
 export * from './separatorLayout';
 export * from './tiltLayout';
 export * from './swipeActionsLayout';
+export * from './stickyLayout';
+export * from './virtualScrollArea';
