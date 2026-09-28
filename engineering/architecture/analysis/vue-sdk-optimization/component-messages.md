@@ -1,6 +1,6 @@
 # Vue component message catalogue
 
-*Source snapshot: 2026-09-25 full SDK sweep.*
+*Source snapshot: 2026-09-25 full SDK sweep; gap-close keys added 2026-09-26.*
 
 Static component keys and English fallbacks extracted from source. Supply overrides through
 `LocaleProvider.messages`. Placeholders retain their names; complete messages can reorder them.
@@ -50,6 +50,9 @@ in their capability specifications and are not inferred by this catalogue.
 | `ColorPicker.hue` | Hue | [ColorPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/colorPicker/ColorPicker.vue) |
 | `Comment.collapse` | Collapse | [Comment.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/commentThreadGroup/Comment.vue) |
 | `CommentThreadGroup.comments` | Comments | [CommentThreadGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/commentThreadGroup/CommentThreadGroup.vue) |
+| `ConfirmPopover.cancelLabel` | Cancel | [ConfirmPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/confirmPopover/ConfirmPopover.vue) |
+| `ConfirmPopover.confirmLabel` | Confirm | [ConfirmPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/confirmPopover/ConfirmPopover.vue) |
+| `CountdownText.days` | {days}d | [CountdownText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/countdownText/CountdownText.vue) |
 | `DataTable.emptyContent` | No results. | [DataTable.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/dataTable/DataTable.vue) |
 | `DateInput.chooseDate` | Choose date | [DateInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/dateInput/DateInput.vue) |
 | `DatePicker.placeholder` | Pick a date | [DatePicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/datePicker/DatePicker.vue) |
@@ -65,6 +68,8 @@ in their capability specifications and are not inferred by this catalogue.
 | `EmojiPicker.none` | None | [EmojiPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/emojiPicker/EmojiPicker.vue) |
 | `EmojiPicker.searchEmoji` | Search emoji… | [EmojiPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/emojiPicker/EmojiPicker.vue) |
 | `EmojiPickerPopover.chooseEmoji` | Choose emoji | [EmojiPickerPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/emojiPicker/EmojiPickerPopover.vue) |
+| `ErrorBoundary.retryLabel` | Try again | [ErrorBoundary.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/errorBoundary/ErrorBoundary.vue) |
+| `ErrorBoundary.title` | Something went wrong | [ErrorBoundary.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/errorBoundary/ErrorBoundary.vue) |
 | `EventCalendarViewer.allDay` | All day | [AgendaView.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/eventCalendarViewer/AgendaView.vue) |
 | `EventCalendarViewer.eventAt` | {title} at {time} | [MonthView.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/eventCalendarViewer/MonthView.vue) |
 | `EventCalendarViewer.next` | Next | [EventCalendarViewer.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/eventCalendarViewer/EventCalendarViewer.vue) |
@@ -95,14 +100,18 @@ in their capability specifications and are not inferred by this catalogue.
 | `GradientText.resumeLabel` | Resume animation | [GradientText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/gradientText/GradientText.vue) |
 | `HeatmapCalendarGrid.less` | Less | [HeatmapCalendarGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/heatmapCalendarGrid/HeatmapCalendarGrid.vue) |
 | `HeatmapCalendarGrid.more` | More | [HeatmapCalendarGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/heatmapCalendarGrid/HeatmapCalendarGrid.vue) |
+| `IconPicker.icons` | Icons | [IconPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/iconPicker/IconPicker.vue) |
 | `IconPicker.noIconsMatch` | No icons match. | [IconPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/iconPicker/IconPicker.vue) |
 | `IconPicker.placeholder` | Search icons… | [IconPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/iconPicker/IconPicker.vue) |
 | `InlineSpinner.loading` | Loading… | [InlineSpinner.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/inlineSpinner/InlineSpinner.vue) |
 | `JsonEditor.jsonMode` | JSON mode | [JsonEditor.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditor.vue) |
 | `JsonEditorTextView.jsonSource` | JSON source | [JsonEditorTextView.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditorTextView.vue) |
+| `JsonEditorTreeNode.collapse` | Collapse | [JsonEditorTreeNode.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditorTreeNode.vue) |
 | `JsonEditorTreeNode.editValue` | Edit value | [JsonEditorTreeNode.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditorTreeNode.vue) |
+| `JsonEditorTreeNode.expand` | Expand | [JsonEditorTreeNode.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditorTreeNode.vue) |
 | `KeyboardShortcutPicker.placeholder` | Click to record | [KeyboardShortcutPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/keyboardShortcutPicker/KeyboardShortcutPicker.vue) |
 | `KeyboardShortcutPicker.recordLabel` | Press keys… | [KeyboardShortcutPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/keyboardShortcutPicker/KeyboardShortcutPicker.vue) |
+| `KnobInput.label` | Knob | [KnobInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/knobInput/KnobInput.vue) |
 | `LoadingOverlay.label` | Loading… | [LoadingOverlay.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/loadingOverlay/LoadingOverlay.vue) |
 | `LoadingOverlay.loading` | Loading | [LoadingOverlay.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/loadingOverlay/LoadingOverlay.vue) |
 | `LoadingState.title` | Loading… | [LoadingState.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/loadingState/LoadingState.vue) |
@@ -140,6 +149,10 @@ in their capability specifications and are not inferred by this catalogue.
 | `PinInput.character` | Character {index} of {length} | [PinInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/pinInput/PinInput.vue) |
 | `PinInput.digit` | Digit {index} of {length} | [PinInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/pinInput/PinInput.vue) |
 | `PricingCard.badgeLabel` | Most popular | [PricingCard.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/pricingCard/PricingCard.vue) |
+| `RangeSliderInput.endLabel` | Maximum | [RangeSliderInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/rangeSliderInput/RangeSliderInput.vue) |
+| `RangeSliderInput.startLabel` | Minimum | [RangeSliderInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/rangeSliderInput/RangeSliderInput.vue) |
+| `RatingPicker.noRating` | No rating | [RatingPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/ratingPicker/RatingPicker.vue) |
+| `RatingPicker.valueText` | {value} of {max} | [RatingPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/ratingPicker/RatingPicker.vue) |
 | `ReactionBar.addReaction` | Add reaction | [ReactionBar.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/reactionBar/ReactionBar.vue) |
 | `ReactionBar.reactions` | Reactions | [ReactionBar.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/reactionBar/ReactionBar.vue) |
 | `ReactionPicker.moreReactions` | More reactions | [ReactionPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/reactionPicker/ReactionPicker.vue) |
@@ -182,6 +195,8 @@ in their capability specifications and are not inferred by this catalogue.
 | `ToastHost.notifications` | Notifications | [ToastHost.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/toastHost/ToastHost.vue) |
 | `TourPopover.back` | Back | [TourPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/tourPopover/TourPopover.vue) |
 | `TourPopover.skip` | Skip | [TourPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/tourPopover/TourPopover.vue) |
+| `TruncatedText.lessLabel` | Show less | [TruncatedText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/truncatedText/TruncatedText.vue) |
+| `TruncatedText.moreLabel` | Show more | [TruncatedText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/truncatedText/TruncatedText.vue) |
 | `TypewriterText.pauseLabel` | Pause animation | [TypewriterText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/typewriterText/TypewriterText.vue) |
 | `TypewriterText.resumeLabel` | Resume animation | [TypewriterText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/typewriterText/TypewriterText.vue) |
 | `TypingIndicator.named` | {name} is typing | [TypingIndicator.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/typingIndicator/TypingIndicator.vue) |

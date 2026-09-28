@@ -30,8 +30,9 @@ is verified locally: 2,025 unit/DOM/SSR tests, 57 Chromium/WebKit browser checks
 playground builds, seven-family gallery smoke and a clean packed npm consumer pass. Results and limits:
 [full-sweep-implementation.md](../architecture/analysis/vue-sdk-optimization/full-sweep-implementation.md).
 Firefox launch is blocked by the local macOS runtime; the expanded Linux CI matrix remains unverified.
-Source and release-check batches are committed locally; the candidate remains unpublished.
+The sweep shipped as `@wow-two-beta/ui-vue@0.0.7` (npm `latest`, verified 2026-09-26).
 The [component inventory](../architecture/analysis/forever-pin-vue-readiness.md) remains the API map.
+Remaining component gaps: [gap analysis](../architecture/analysis/vue-sdk-gap-analysis.md) → § *Gap-close queue*.
 
 Playground, sandbox and theme-app optimization follow the ForeverPin migration.
 
@@ -155,6 +156,11 @@ package RED for ~10 minutes.
 commit — the tanstack engine fired 7 effect runs for 2 writes. Back each state member and each field slice
 with its own `computed` so a sibling field's edit leaves an unrelated control asleep.
 
+12. **Vue drops an event stamped in the millisecond its listener attached.** The invoker compares the
+    event's first-handler timestamp with its own attach time, so a DOM test that mounts a surface and
+    dispatches into it within one millisecond loses the event intermittently. Wait for `Date.now()` to
+    advance after mounting before dispatching — `MenuVector.dom.test.ts` `settle()`.
+
 `/* @vue-ignore */` on `VariantProps`-derived heritage keeps the SFC compiler off `typeof someVariants`
 entirely — a simpler alternative to rule 2's spelled-out union + `AssertExact`.
 | W3 | `forms-engine` + `house` + `tanstack`(vue-form) | 2,529 LOC | ✅ |
@@ -230,7 +236,7 @@ Manual component-by-component review is no longer the prerequisite; mechanical c
 | FP-13 | Single class-merge owner and minimal-consumer bundle budgets (A21) | ✅ Implemented; combined local gates pass |
 | FP-14 | LocaleProvider adoption for component defaults, reactive locale and RTL verification (A23) | ✅ Implemented; combined local gates pass |
 | FP-15 | Packed Vue templates, cross-vector scenarios, browser matrix (A25) | ✅ Packed/cross-vector/Chromium/WebKit pass; Firefox Linux CI result pending |
-| FP-11 | Combined verification and human-published Vue candidate | ⬜ |
+| FP-11 | Combined verification and human-published Vue candidate | ✅ Published as `0.0.7` (npm `latest`) |
 | FP-10 | `smart-qr` visual validation during the subsequent ForeverPin migration | ⬜ |
 
 Implementation grouping: session ownership → forms/validators → Google Identity → HTTP → interaction safety
@@ -256,3 +262,33 @@ New reusable surfaces include exact-number editing, request/session scopes, deta
 provider-owned Google identity and reactive component locale defaults. Their source specs define the contracts.
 A source inventory or smoke render does not establish every interaction; final coverage records name
 reviewed groups, focused behavior tests, combined gates and remaining limits separately.
+
+---
+
+## Gap-close queue
+
+Source: [gap analysis](../architecture/analysis/vue-sdk-gap-analysis.md). Each row ships source, spec, gallery
+fixture, focused DOM tests and the SSR/mount breadth cases, and passes the package gates.
+
+G1–G6 local gates (2026-09-26): typecheck + 423 SFCs · lint · format · 168 files / 2,153 unit/DOM/SSR tests
+(107 new here) · Chromium, forced-colors and WebKit 21 files / 81 tests (24 new) · build, packed consumer
+(79 exports, budgets held), playground build and seven-group gallery smoke. The last three-line
+`DropdownMenuContent` fix and demo tweaks postdate that build; a concurrent lane was editing packaging, so the
+rebuild waits for the next release run. Firefox still cannot launch on the macOS host; CI owns it.
+Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-beta-sdk/MIGRATION.md).
+
+| It | Scope | Status |
+|---|---|---|
+| G1 | Menu vector — `MenuCheckboxItem`, `MenuRadioGroup`/`MenuRadioItem`, `MenuSub`/`MenuSubTrigger`/`MenuSubContent` across dropdown, context and menubar; `DropdownMenuContent` stray-surface fix | ✅ 20 DOM + 3 browser tests |
+| G2 | Controls — `RatingPicker`, `RangeSliderInput` | ✅ 17 DOM tests |
+| G3 | Overlay — `ConfirmPopover` with async confirm | ✅ 7 DOM + 1 browser test |
+| G4 | Display and state — `TruncatedText`, `CountdownText`, `ErrorBoundary` | ✅ 16 DOM + 2 browser tests |
+| G5 | Layout — `StickyLayout`, `VirtualScrollArea` | ✅ 7 DOM + 2 browser tests |
+| G6 | Localized accessible names — `KnobInput`, `IconPicker`, `JsonEditorTreeNode` | ✅ 3 DOM tests |
+| G7 | `DataTable` depth — selection, expandable rows, sticky header, loading state on `foundation/selection` | ⬜ |
+| G8 | Hierarchical pickers — `TreeSelectPicker`, `CascaderPicker`, `TransferPicker` | ⬜ |
+| G9 | Period pickers — `MonthPicker`, `YearPicker` | ⬜ |
+| G10 | App navigation — `SidebarMenu`, `BottomNavMenu` | ⬜ |
+| G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignaturePad` | ⬜ |
+| G12 | `MentionInput` | ⬜ |
+| G13 | Small gaps — removable `Tag`, `KanbanBoard`, `MasonryLayout`, `OverflowGroup`, `TimezonePicker`, `DurationInput` | ⬜ |

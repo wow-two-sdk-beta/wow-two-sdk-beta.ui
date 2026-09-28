@@ -1,13 +1,37 @@
 # Vue convention-sweep migration
 
-*Last updated: 2026-09-25*
+*Last updated: 2026-09-26*
 
-This records the published `0.0.6` migration and the unreleased full-sweep changes below.
+This records the published `0.0.6` and `0.0.7` migrations and the unreleased gap-close batch below.
 React is parked and has a different public API; importing the Vue package is not a symbol-for-symbol package swap.
 
-## Unreleased full SDK sweep
+## Unreleased gap-close batch
 
-This candidate is not published. Consumer changes are intentional: the Vue SDK is owned internally,
+Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-gap-analysis.md); no import moves.
+
+| Area | Added |
+|---|---|
+| Menus (`presentation/nav`) | `MenuCheckboxItem`, `MenuRadioGroup` + `MenuRadioItem`, `MenuSub` + `MenuSubTrigger` + `MenuSubContent` — usable in `DropdownMenuContent`, `ContextMenuContent` and `MenubarContent` |
+| Forms | `RatingPicker` (whole/half steps, clearable), `RangeSliderInput` (two thumbs, `commit` event) |
+| Overlays | `ConfirmPopover` — inline confirm that awaits a promise from `@confirm` |
+| Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary` |
+| Layout | `StickyLayout` (pinned state), `VirtualScrollArea` (windowed list, `end-reached`) |
+
+Behavioral changes to existing parts:
+
+- A mouse moving over a menu row now focuses it, so pointer and keyboard share one highlight; leaving a row
+  returns focus to the menu surface. Touch and pen only activate.
+- `MenuItem` gains `closeOnSelect` (default `true`). Inside a submenu, activation and Tab close the whole tree.
+- `MenuContextValue` gains `moveFocus`, `navigate`, `focusSurface` and the submenu-tracking members; code that
+  builds its own menu context object must add them.
+- `DropdownMenuContent` removes its surface once the panel's exit completes, including exits that never
+  animate; an immediate open-then-close no longer leaves an empty, focus-trapping surface.
+- `KnobInput`'s fallback accessible name is the localized `KnobInput.label` (`"Knob"`), no longer the component
+  name. `IconPicker.icons` and `JsonEditorTreeNode.collapse` / `.expand` are now localizable.
+
+## 0.0.7 full SDK sweep
+
+Published as `0.0.7`. Consumer changes are intentional: the Vue SDK is owned internally,
 and no production consumer requires compatibility shims. React is outside this pass.
 
 | Capability | Consumer change |
