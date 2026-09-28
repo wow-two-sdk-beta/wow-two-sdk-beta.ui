@@ -14,6 +14,10 @@ const Views = {
   board: defineAsyncComponent(() => import('../screens/BoardScreen.vue')),
   settings: defineAsyncComponent(() => import('../screens/SettingsScreen.vue')),
   inbox: defineAsyncComponent(() => import('../screens/InboxScreen.vue')),
+  wizard: defineAsyncComponent(() => import('../screens/WizardScreen.vue')),
+  'data-console': defineAsyncComponent(() => import('../screens/DataConsoleScreen.vue')),
+  docs: defineAsyncComponent(() => import('../screens/DocsScreen.vue')),
+  canvas: defineAsyncComponent(() => import('../screens/CanvasScreen.vue')),
 } as const;
 
 const screen = computed(() => findScreen(route.value.id) ?? Screens[0]!);

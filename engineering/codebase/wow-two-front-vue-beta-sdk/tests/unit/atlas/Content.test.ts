@@ -5,6 +5,7 @@ import { Guides, recommend, type Guide } from '../../../apps/atlas/src/content/g
 import { PatternGroups } from '../../../apps/atlas/src/content/patterns';
 import { SpecKeys, SpecOptions, specFromQuery, specToQuery } from '../../../apps/atlas/src/content/specQuery';
 import { contrastReport } from '../../../apps/atlas/src/content/contrast';
+import { Screens, screenFor } from '../../../apps/atlas/src/content/screens';
 import {
   DefaultSeed,
   GeneratedThemeId,
@@ -164,6 +165,18 @@ describe('studio contrast report', () => {
       const margins = report.tightest.map((pair) => pair.ratio / pair.min);
       expect(margins).toEqual([...margins].sort((a, b) => a - b));
       expect(report.pairs.length).toBeGreaterThan(report.tightest.length);
+    }
+  });
+});
+
+describe('real-component screens', () => {
+  it('realize distinct, existing archetypes under unique ids', () => {
+    expect(new Set(Screens.map((screen) => screen.id)).size).toBe(Screens.length);
+    expect(new Set(Screens.map((screen) => screen.archetype)).size).toBe(Screens.length);
+    for (const screen of Screens) {
+      expect(findArchetype(screen.archetype), screen.id).toBeDefined();
+      expect(screenFor(screen.archetype)).toBe(screen);
+      expect(screen.components.length).toBeGreaterThan(2);
     }
   });
 });

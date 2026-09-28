@@ -13,6 +13,10 @@ import DashboardScreen from '../../../apps/atlas/src/screens/DashboardScreen.vue
 import BoardScreen from '../../../apps/atlas/src/screens/BoardScreen.vue';
 import SettingsScreen from '../../../apps/atlas/src/screens/SettingsScreen.vue';
 import InboxScreen from '../../../apps/atlas/src/screens/InboxScreen.vue';
+import WizardScreen from '../../../apps/atlas/src/screens/WizardScreen.vue';
+import DataConsoleScreen from '../../../apps/atlas/src/screens/DataConsoleScreen.vue';
+import DocsScreen from '../../../apps/atlas/src/screens/DocsScreen.vue';
+import CanvasScreen from '../../../apps/atlas/src/screens/CanvasScreen.vue';
 import { Archetypes } from '../../../apps/atlas/src/content/layouts';
 import { GeneratedThemeId } from '../../../apps/atlas/src/content/seedQuery';
 import { Sections, route } from '../../../apps/atlas/src/router';
@@ -220,5 +224,79 @@ describe('atlas screens', () => {
     await settle();
     expect(wrapper.get('section').text()).toContain('Open Members, then Invite.');
     expect(third.text()).toContain('Open Members, then Invite.');
+  });
+
+  it('holds the wizard on a step until its fields validate, then reviews the answers', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout'] });
+    const wrapper = render(WizardScreen);
+    await settle();
+    button(wrapper, 'Next').click();
+    await settle();
+    expect(wrapper.text()).toContain('Enter your name.');
+    const [name, email] = wrapper.findAll<HTMLInputElement>('input:not([type=hidden])');
+    await type(name!.element, 'Aziza');
+    await type(email!.element, 'aziza@example.com');
+    // Account, plan and invite steps each move on with Next.
+    for (let step = 0; step < 3; step += 1) {
+      button(wrapper, 'Next').click();
+      await settle();
+    }
+    expect(wrapper.get('[role=tabpanel]').text()).toContain('aziza@example.com');
+    button(wrapper, 'Finish').click();
+    await settle();
+    await vi.advanceTimersByTimeAsync(500);
+    await settle();
+    expect(wrapper.text()).toContain('Workspace created');
+    vi.useRealTimers();
+  });
+
+  it('pages the console, returns to page one on a filter, and bulk-edits only the picked rows', async () => {
+    const wrapper = render(DataConsoleScreen);
+    await settle();
+    expect(wrapper.findAll('tbody tr')).toHaveLength(8);
+    button(wrapper, '2').click();
+    await settle();
+    expect(wrapper.get('tbody tr td:nth-child(2)').text()).toBe('L-1009');
+    button(wrapper, 'Draft').click();
+    await settle();
+    expect(wrapper.get('[aria-current=page]').text()).toBe('1');
+    const rows = wrapper.findAll('tbody tr');
+    const picked = rows[0]!.get('td:nth-child(2)').text();
+    await rows[0]!.get('input[type=checkbox]').trigger('click');
+    await settle();
+    expect(wrapper.get('[aria-label="Bulk actions"]').text()).toContain('1 selected');
+    button(wrapper, 'Publish').click();
+    await settle();
+    expect(wrapper.find('[aria-label="Bulk actions"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain(picked);
+  });
+
+  it('follows the docs outline in place, keeping the atlas route', async () => {
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = vi.fn();
+    await go('#/screens/docs');
+    const wrapper = render(DocsScreen);
+    await settle();
+    wrapper.get<HTMLAnchorElement>('nav[aria-label="Table of contents"] a[href="#docs-apply"]').element.click();
+    await settle();
+    expect(location.hash).toBe('#/screens/docs');
+    expect(document.activeElement?.id).toBe('docs-apply');
+    Element.prototype.scrollIntoView = original;
+  });
+
+  it('keeps one tool pressed and folds the canvas inspector away', async () => {
+    const wrapper = render(CanvasScreen);
+    await settle();
+    const tools = (): string[] =>
+      wrapper.findAll('[role=toolbar] button').map((tool) => tool.attributes('aria-pressed') ?? '');
+    expect(tools()).toEqual(['true', 'false', 'false', 'false']);
+    await wrapper.findAll('[role=toolbar] button')[2]!.trigger('click');
+    expect(tools()).toEqual(['false', 'false', 'true', 'false']);
+    await wrapper.get('[aria-label="Hide inspector"]').trigger('click');
+    expect(wrapper.find('[aria-label=Inspector]').exists()).toBe(false);
+    await wrapper.get('[aria-label="Show inspector"]').trigger('click');
+    expect(wrapper.find('[aria-label=Inspector]').exists()).toBe(true);
+    await wrapper.get('[aria-label="Zoom in"]').trigger('click');
+    expect(wrapper.find('[aria-label="125%, reset zoom"]').exists()).toBe(true);
   });
 });
