@@ -7,6 +7,8 @@ import { SpecKeys, SpecOptions, specFromQuery, specToQuery } from '../content/sp
 import { href, replaceQuery, route } from '../router';
 import ChoiceChips from '../shell/ChoiceChips.vue';
 import LayoutWire from '../wire/LayoutWire.vue';
+import ExportBlock from '../shell/ExportBlock.vue';
+import { scaffold } from '../content/scaffold';
 
 const Labels: Readonly<Record<(typeof SpecKeys)[number], string>> = {
   nav: 'Navigation',
@@ -58,6 +60,9 @@ const nearest = computed(() =>
     .sort((a, b) => b.score - a.score)
     .slice(0, 3),
 );
+
+/** The composition as starter code — regenerated on every change. */
+const starter = computed(() => scaffold(spec.value));
 
 const copied = ref(false);
 async function copyLink(): Promise<void> {
@@ -152,6 +157,13 @@ const frameWidth = computed(() =>
             </a>
           </li>
         </ul>
+      </div>
+      <div>
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Starter code</h2>
+        <p class="mb-2 text-sm text-muted-foreground">
+          This composition as a single-file component built from the SDK — named regions, placeholder data.
+        </p>
+        <ExportBlock label="Starter SFC" :text="starter" />
       </div>
     </section>
   </div>

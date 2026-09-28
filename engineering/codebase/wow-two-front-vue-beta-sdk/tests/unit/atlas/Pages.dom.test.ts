@@ -87,6 +87,21 @@ describe('atlas pages', () => {
     expect(detail.get('a[href^="#/lab?"]').attributes('href')).toContain('from=inbox');
   });
 
+  it('writes starter code for the lab composition and rewrites it on change', async () => {
+    await go('#/lab?from=board');
+    const wrapper = render(LabPage);
+    await settle();
+    const code = (): string => wrapper.findAll('pre').at(-1)!.text();
+    expect(code()).toContain('<KanbanBoard');
+    const table = [...(wrapper.element as HTMLElement).querySelectorAll<HTMLButtonElement>('[role=radio]')].find(
+      (node) => node.textContent?.trim() === 'Table',
+    )!;
+    table.click();
+    await settle();
+    expect(code()).toContain('<DataTable');
+    expect(code()).not.toContain('<KanbanBoard');
+  });
+
   it('keeps a lab composition in the link', async () => {
     await go('#/lab?from=board');
     const wrapper = render(LabPage);
