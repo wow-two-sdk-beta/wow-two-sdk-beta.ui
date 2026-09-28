@@ -291,4 +291,4 @@ Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-
 | G10 | App navigation — `SidebarMenu` (+ `Item`/`Group`/`Section`, icon rail), `BottomNavMenu` | ✅ 8 DOM tests |
 | G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignaturePad` | ⬜ |
 | G12 | `MentionInput` | ⬜ |
-| G13 | Small gaps — `KanbanBoard`, `MasonryLayout`, `OverflowGroup`, `TimezonePicker`, `DurationInput` (`Tag` already closes via `@close`) | 🟡 masonry · overflow · time zone ✅ 9 DOM tests · `KanbanBoard`, `DurationInput` ⬜ |
+| G13 | Small gaps — `KanbanBoard`, `MasonryLayout`, `OverflowGroup`, `TimezonePicker`, `DurationInput` (`Tag` already closes via `@close`) | 🟡 masonry · overflow · time zone ✅ 9 DOM tests · duration ✅ 5 DOM tests · `KanbanBoard` ⬜ |

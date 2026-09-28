@@ -82,3 +82,4 @@ export * from './rangeSliderInput';
 export * from './timezonePicker';
 export * from './monthPicker';
 export * from './yearPicker';
+export * from './durationInput';

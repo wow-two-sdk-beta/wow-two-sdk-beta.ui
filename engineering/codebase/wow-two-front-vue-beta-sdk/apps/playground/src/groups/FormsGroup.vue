@@ -98,6 +98,7 @@ const {
   TimezonePicker,
   MonthPicker,
   YearPicker,
+  DurationInput,
 } = forms;
 
 const covered = [
@@ -168,6 +169,7 @@ const covered = [
   'TimezonePicker',
   'MonthPicker',
   'YearPicker',
+  'DurationInput',
   'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
@@ -263,6 +265,7 @@ const rating = ref<number | null>(3.5);
 const timeZone = ref<string | null>('Asia/Tashkent');
 const billingMonth = ref<Temporal.PlainYearMonth | null>(Temporal.PlainYearMonth.from('2026-09'));
 const fiscalYear = ref<number | null>(null);
+const meetingLength = ref<Temporal.Duration | null>(Temporal.Duration.from({ minutes: 45 }));
 const priceRange = ref<readonly [number, number]>([20, 80]);
 const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
@@ -408,6 +411,14 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         <div class="flex flex-col items-start gap-2">
           <YearPicker v-model="fiscalYear" :max="2030" aria-label="Fiscal year" class="w-40" />
           <p class="text-xs text-subtle-foreground">year = {{ fiscalYear ?? 'null' }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="DurationInput" note="type 90 in minutes, then leave the field · arrows step, Shift × 10">
+        <div class="flex flex-col items-start gap-2">
+          <DurationInput v-model="meetingLength" aria-label="Meeting length" class="w-40" />
+          <DurationInput :units="['days', 'hours']" aria-label="Retention" class="w-40" />
+          <p class="text-xs text-subtle-foreground">length = {{ meetingLength?.toString() ?? 'null' }}</p>
         </div>
       </Demo>
 
