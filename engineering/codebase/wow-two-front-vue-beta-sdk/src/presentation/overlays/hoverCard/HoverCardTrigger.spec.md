@@ -11,6 +11,12 @@ Public import: `import { HoverCardTrigger } from '@wow-two-beta/ui-vue/presentat
 - Mount within the owner supplying `useHoverCardContext`; a compound part is not an independent root.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- Mouse and pen pointers open the card after `openDelay` and close it after `closeDelay`; focus does the same.
+- Touch pointers are ignored — a tap has no hover to end it — so the trigger's own tap action runs alone.
+- Regression: `tests/unit/presentation/overlays/SheetsAndHoverCard.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |

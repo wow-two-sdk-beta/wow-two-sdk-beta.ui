@@ -13,6 +13,14 @@ Public import: `import { BottomSheet } from '@wow-two-beta/ui-vue/presentation/o
 - The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- The drag handle is the keyboard affordance and takes initial focus: ArrowUp raises the snap, ArrowDown lowers it and,
+  from the lowest snap with `dragToDismiss`, closes the sheet.
+- The handle is a named, focusable separator (`BottomSheet.resize`) whose `aria-valuetext` speaks the height as
+  `BottomSheet.snapPosition` ("Height {index} of {count}").
+- Regression: `tests/unit/presentation/overlays/SheetsAndHoverCard.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |

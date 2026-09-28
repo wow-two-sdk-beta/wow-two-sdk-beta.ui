@@ -98,11 +98,17 @@ const hasDescription = computed(() => props.description !== undefined || slots.d
 const classes = computed(() =>
   cn('mx-auto max-w-md rounded-t-xl bg-card p-2 text-card-foreground', attrs.class as string | undefined),
 );
+
+/* Every other attribute reaches the dialog panel — an `aria-label` is how a sheet without a title gets its name. */
+const rest = computed(() => {
+  const { class: _class, ...others } = attrs;
+  return others;
+});
 </script>
 
 <template>
   <Drawer :open="resolvedOpen" side="bottom" @update:open="controlled.setValue">
-    <DrawerContent :class="classes">
+    <DrawerContent v-bind="rest" :class="classes">
       <div v-if="hasTitle || hasDescription" class="px-3 py-2 text-center">
         <OverlayTitle v-if="hasTitle" class="text-sm font-medium text-muted-foreground">
           <slot name="title">{{ props.title }}</slot>

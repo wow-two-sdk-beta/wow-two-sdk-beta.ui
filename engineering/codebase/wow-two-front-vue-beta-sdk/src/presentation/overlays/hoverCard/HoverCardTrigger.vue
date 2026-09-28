@@ -38,6 +38,16 @@ watch(
   { immediate: true, flush: 'post' },
 );
 
+/* A touch has no hover: a tap would open the card late and leave it hanging over the page, so touch pointers
+   neither open nor close it — the trigger's own tap action (a link, a button) runs as usual. */
+function onPointerEnter(event: PointerEvent): void {
+  if (event.pointerType !== 'touch') context.show();
+}
+
+function onPointerLeave(event: PointerEvent): void {
+  if (event.pointerType !== 'touch') context.hide();
+}
+
 /** `Primitive` renders the real element, so its `$el` is this component's root. */
 const el = computed(() => (inner.value?.$el ?? null) as HTMLElement | null);
 
@@ -54,8 +64,8 @@ defineExpose({ el });
     as="span"
     :as-child="props.asChild"
     v-bind="attrs"
-    @pointerenter="context.show()"
-    @pointerleave="context.hide()"
+    @pointerenter="onPointerEnter"
+    @pointerleave="onPointerLeave"
     @focus="context.show()"
     @blur="context.hide()"
   >

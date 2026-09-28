@@ -107,6 +107,7 @@ import { DismissableLayer, FocusScope, Portal, Presence, ScrollLockProvider } fr
 import BackdropOverlay from '../backdropOverlay/BackdropOverlay.vue';
 import { overlayChromeContextKey } from '../OverlayChrome';
 import { OverlayExtensions } from '../OverlayExtensions';
+import { useLocale } from '../../../foundation/i18n';
 
 /**
  * Renders a mobile bottom sheet with a drag handle and snap points.
@@ -147,6 +148,7 @@ const controlled = useControlled<boolean>({
 const resolvedOpen = controlled.value;
 const currentSnap = ref(Math.min(props.initialSnap, props.snapPoints.length - 1));
 const dragHeight = shallowRef<number | null>(null);
+const locale = useLocale();
 const titleId = useId('bottom-sheet-title');
 const descriptionId = useId('bottom-sheet-description');
 
@@ -249,6 +251,15 @@ function handleMountAutoFocus(event: CustomEvent): void {
   handle.value?.focus();
 }
 
+/** The handle's spoken position, so the snap it moves between is announced, not just an index. */
+const handleValueText = computed(() =>
+  locale.t(
+    'BottomSheet.snapPosition',
+    { index: currentSnap.value + 1, count: props.snapPoints.length },
+    'Height {index} of {count}',
+  ),
+);
+
 function handleBackdropClick(): void {
   if (props.dismissOnOutsideClick) controlled.setValue(false);
 }
@@ -347,6 +358,8 @@ defineExpose({ el });
               :aria-valuenow="currentSnap"
               :aria-valuemin="0"
               :aria-valuemax="props.snapPoints.length - 1"
+              :aria-valuetext="handleValueText"
+              :aria-label="locale.t('BottomSheet.resize', undefined, 'Resize sheet')"
               tabindex="0"
               class="flex h-7 cursor-ns-resize items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
               @pointerdown="handlePointerDown"

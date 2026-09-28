@@ -12,6 +12,13 @@ Public import: `import { ActionSheet } from '@wow-two-beta/ui-vue/presentation/o
 - The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- Picking an `ActionSheetAction` fires its `select`, then closes the sheet; `ActionSheetCancel` only closes it.
+- The dialog is named by `title`; every attribute but `class` (an `aria-label` for a title-less sheet, `data-*`)
+  reaches the dialog panel.
+- Regression: `tests/unit/presentation/overlays/SheetsAndHoverCard.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |
