@@ -130,9 +130,9 @@ describe('supported text and translucent-surface contrast', () => {
         ),
       ),
     ]);
-    expect(createHash('sha256').update(JSON.stringify(palette)).digest('hex')).toBe(
-      'e01402f172c10bd2f366af614480c1d79b430b84badcbf9a0fcebb2fa13d4c48',
-    );
+    const hash = createHash('sha256').update(JSON.stringify(palette)).digest('hex');
+    // Adding a theme changes this on purpose; re-pin it from the message, never for an edit to an existing theme.
+    expect(hash, `palette hash ${hash}`).toBe('7a06a5d03fe50dfc964db157473d5f1248340377d21ac0a05e6133e6209d7ed0');
   });
 
   it('uses independently tested soft foregrounds for every colored glass recipe', () => {

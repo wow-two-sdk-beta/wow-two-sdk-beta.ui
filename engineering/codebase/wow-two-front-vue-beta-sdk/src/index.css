@@ -261,6 +261,13 @@ body {
     0 2px 6px -3px color-mix(in srgb, var(--color-foreground) 14%, transparent);
 }
 
+/* A glass theme's page backdrop — the coloured light its translucent surfaces blur. Themes without an
+   ambient leave `--theme-ambient` unset, so the class is a no-op there. */
+.surface-ambient {
+  background-image: var(--theme-ambient, none);
+  background-attachment: fixed;
+}
+
 /* Enter/exit primitives — paired with the `--animate-*` tokens above. Subtle (8px) slides for
  * popovers/menus/toasts; full-edge drawer/sheet slides use component-level translate utilities. */
 @keyframes fade-in {

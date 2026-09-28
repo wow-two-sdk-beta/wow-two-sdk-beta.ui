@@ -8,6 +8,7 @@ import {
   parseColor,
   SemanticTokens,
   THEMES,
+  themeToCss,
   ThemeStatus,
   validateTheme,
 } from '@src/foundation/themes';
@@ -88,4 +89,19 @@ it('resolves catalog entries consistently through lookup and array access', () =
   expect(THEMES.find((entry) => entry.id === 'wow')).toBe(theme);
   expect(getTheme('wow')).toBe(theme);
   expect(getTheme('missing-theme')).toBeUndefined();
+});
+
+it('ships the Wheelhouse directions with their glass backdrops, AA in both modes', () => {
+  const ids = ['glass-harbor', 'frost', 'bento-deck', 'harbor-frost'];
+  for (const id of ids) {
+    const theme = getTheme(id);
+    expect(theme, id).toBeDefined();
+    expect(theme!.meta.contrastAA, `${id}: ${theme!.meta.failures?.join('; ')}`).toBe(true);
+  }
+  const css = themeToCss(getTheme('harbor-frost')!);
+  const [light, dark] = css.split('\n\n');
+  expect(light).toContain('--theme-ambient: radial-gradient(');
+  expect(dark).toContain('--theme-ambient: radial-gradient(');
+  expect(light).not.toEqual(dark);
+  expect(themeToCss(getTheme('bento-deck')!)).not.toContain('--theme-ambient');
 });

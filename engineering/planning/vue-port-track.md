@@ -312,7 +312,7 @@ owns and publishes"); 59 hand-written Field fallbacks; 22 files carry `eslint-di
 | S2 | Focused tests for interactive parts without one (toolbar, tree, carousel, editable, combobox, date range, disclosure, tag, toast, progress) | ⬜ |
 | S3 | `eslint-disable` audit — remove or justify each | ⬜ |
 | S4 | Playground: overlays render on request; link to the atlas | ✅ 0 dialogs open on load (was 7); `?smoke=1` still mounts all |
-| S5 | Themes: port the Wheelhouse glass themes and the ambient token from React | ⬜ |
+| S5 | Themes: port the Wheelhouse glass themes and the ambient token from React | ✅ 188 themes; glass foregrounds corrected to this SDK's stricter AA pairs; existing palettes byte-identical |
 | S6 | Atlas: theme generator + CSS export (was the React theme studio) | ⬜ |
 | S7 | Atlas: real-component screens beside the wireframes (was the React showcase) and atlas tests | ⬜ |
 | S8 | Unprefixed idioms (`closeOnSelect`, `dismissOnEscape`, `hideBackdrop`, `hideFirstLast`, …) — names need a decision | ⬜ decision |

@@ -36,6 +36,11 @@ function radiusDeclarations(theme: Theme, indent = '  '): string {
   );
 }
 
+/** Render the optional ambient backdrop as a declaration line (empty string when unset). */
+function ambientDeclaration(layers: string | undefined, indent = '  '): string {
+  return layers ? `\n${indent}--theme-ambient: ${layers};` : '';
+}
+
 /**
  * Emit the CSS for a single theme: a light `.theme-{id}` block + a
  * `.dark.theme-{id}` block. Returns a string (no trailing newline).
@@ -44,8 +49,8 @@ export function themeToCss(theme: Theme): string {
   const radius = radiusDeclarations(theme);
   const id = theme.id.replace(/[^a-zA-Z0-9_-]/gu, (character) => `\\${character.codePointAt(0)!.toString(16)} `);
   const selector = `.theme-${id}`;
-  const light = `${selector} {\n${declarations(theme.light)}${radius}\n}`;
-  const dark = `.dark${selector}, .dark ${selector} {\n${declarations(theme.dark)}\n}`;
+  const light = `${selector} {\n${declarations(theme.light)}${radius}${ambientDeclaration(theme.ambient?.light)}\n}`;
+  const dark = `.dark${selector}, .dark ${selector} {\n${declarations(theme.dark)}${ambientDeclaration(theme.ambient?.dark)}\n}`;
   return `${light}\n\n${dark}`;
 }
 
