@@ -13,6 +13,14 @@ Public import: `import { CronInput } from '@wow-two-beta/ui-vue/presentation/for
 - The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- Five POSIX fields; each takes `*`, `N`, `*/N`, `N-M` or `N,M,…`. The weekday field accepts 0–7, where 0 and 7 are Sunday.
+- The preview names common shapes (every N minutes or hours, daily at a time, at a time on listed or ranged weekdays)
+  and otherwise describes each constrained field. A malformed expression sets `aria-invalid`; an empty one does not —
+  emptiness is `isRequired`'s call — and shows no preview.
+- Regression: `tests/unit/presentation/forms/CronInput.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |

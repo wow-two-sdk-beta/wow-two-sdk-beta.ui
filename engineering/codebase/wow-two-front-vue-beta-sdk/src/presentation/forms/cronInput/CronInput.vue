@@ -54,7 +54,8 @@ export interface CronInputProps {
    axes — but never forwarded them to `inputBaseVariants`, so they were dead props that landed
    on the DOM as unknown attributes. Only the two axes the original consumed are declared here. */
 
-const WeekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+/* Index 7 is Sunday again: POSIX cron accepts both 0 and 7 for it. */
+const WeekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const MonthNames = [
   'January',
   'February',
@@ -152,7 +153,7 @@ function parseCron(value: string): string {
   const hour = parseField(hourRaw, 0, 23);
   const dom = parseField(domRaw, 1, 31);
   const month = parseField(monRaw, 1, 12);
-  const dow = parseField(dowRaw, 0, 6);
+  const dow = parseField(dowRaw, 0, 7);
 
   if ([minute, hour, dom, month, dow].some((f) => f.kind === CronFieldKind.Invalid)) {
     return 'Invalid cron expression.';
@@ -191,7 +192,7 @@ function parseCron(value: string): string {
     hour.kind === CronFieldKind.Specific &&
     dom.kind === CronFieldKind.Every &&
     month.kind === CronFieldKind.Every &&
-    (dow.kind === CronFieldKind.List || dow.kind === CronFieldKind.Specific)
+    (dow.kind === CronFieldKind.List || dow.kind === CronFieldKind.Specific || dow.kind === CronFieldKind.Range)
   ) {
     return `At ${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')} on ${describeField(dow, WeekdayNames)}`;
   }
@@ -274,10 +275,14 @@ const controlled = useControlled<string>({
 
 const cron = controlled.value;
 
-const preview = computed(() => parseCron(cron.value));
+/* An empty field has nothing to describe and is not malformed — emptiness is `required`'s call. */
+const isEmpty = computed(() => cron.value.trim() === '');
+const preview = computed(() => (isEmpty.value ? '' : parseCron(cron.value)));
 
 const isError = computed(
-  () => (props.isInvalid ?? ctx?.isInvalid) || preview.value.startsWith('Invalid') || preview.value.startsWith('Cron'),
+  () =>
+    (props.isInvalid ?? ctx?.isInvalid) ||
+    (!isEmpty.value && (preview.value.startsWith('Invalid') || preview.value.startsWith('Cron'))),
 );
 
 const inputState = computed(() => (isError.value ? InputStateValue.Invalid : (props.state ?? InputStateValue.Default)));
