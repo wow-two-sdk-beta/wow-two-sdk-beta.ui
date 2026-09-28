@@ -19,7 +19,17 @@ import NumberInput from '../numberInput/NumberInput.vue';
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'PercentInput', inheritAttrs: false });
 
-const props = defineProps<PercentInputProps>();
+const props = withDefaults(defineProps<PercentInputProps>(), {
+  /* Explicit `undefined` for every inherited boolean: Vue casts an absent `boolean` prop to `false`, and this
+     wrapper forwards its props — a cast `false` would override the inner input's own default and the Field context. */
+  isDisabled: undefined,
+  disabled: undefined,
+  isReadOnly: undefined,
+  readOnly: undefined,
+  readonly: undefined,
+  isRequired: undefined,
+  required: undefined,
+});
 
 const attrs = useAttrs();
 

@@ -24,6 +24,16 @@ export interface RadioGroupContextValue {
   readonly isDisabled: () => boolean | undefined;
   /** The group-level invalid flag, cascaded to every item. */
   readonly isInvalid: () => boolean;
+  /**
+   * The group-level required flag, cascaded to every item: a required radio name asks for one pick in the group,
+   * which is exactly the group's meaning.
+   */
+  readonly isRequired: () => boolean | undefined;
+  /**
+   * Counts picks, declined ones included. The browser moves the checked dot before a controlled owner answers, so
+   * each item re-applies the model to its radio after every pick — a declined pick then leaves nothing moved.
+   */
+  readonly pickCount: () => number;
 }
 
 export const RadioGroupKey: InjectionKey<RadioGroupContextValue> = Symbol('wow-two.radioGroup');

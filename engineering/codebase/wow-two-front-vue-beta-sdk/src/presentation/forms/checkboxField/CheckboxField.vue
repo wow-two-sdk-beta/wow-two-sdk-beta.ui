@@ -42,9 +42,16 @@ import CheckboxInput from '../checkboxInput/CheckboxInput.vue';
 defineOptions({ name: 'CheckboxField', inheritAttrs: false });
 
 const props = withDefaults(defineProps<CheckboxFieldProps>(), {
+  /* Explicit `undefined` for every inherited boolean: Vue casts an absent `boolean` prop to `false`, and this
+     wrapper forwards its props — a cast `false` would override the inner input's own default and the Field context. */
   modelValue: undefined,
   defaultValue: undefined,
+  isIndeterminate: undefined,
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
+  readonly: undefined,
+  isRequired: undefined,
   required: undefined,
 });
 
@@ -66,7 +73,7 @@ const inputId = computed(() => props.id ?? (group ? generated : (ctx?.id ?? gene
 
 const isInGroup = computed(() => group !== null);
 const groupChecked = computed(() => group?.isSelected(props.value) ?? false);
-const groupDisabled = computed(() => props.disabled ?? group?.isDisabled());
+const groupDisabled = computed(() => props.isDisabled ?? props.disabled ?? group?.isDisabled());
 const groupInvalid = computed(() => group?.isInvalid() ?? false);
 
 function onGroupChange(): void {

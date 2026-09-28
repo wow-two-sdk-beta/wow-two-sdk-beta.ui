@@ -28,7 +28,7 @@ export interface RadioFieldProps extends RadioInputProps {
 </script>
 
 <script setup lang="ts">
-import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
+import { computed, useAttrs, useSlots, useTemplateRef, watch } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn } from '../../../foundation/styles';
 import { useId } from '../../../foundation/identifiers';
@@ -42,9 +42,15 @@ import RadioInput from '../radioInput/RadioInput.vue';
 defineOptions({ name: 'RadioField', inheritAttrs: false });
 
 const props = withDefaults(defineProps<RadioFieldProps>(), {
+  /* Explicit `undefined` for every inherited boolean: Vue casts an absent `boolean` prop to `false`, and this
+     wrapper forwards its props — a cast `false` would override the inner input's own default and the Field context. */
   modelValue: undefined,
   defaultValue: undefined,
+  isDisabled: undefined,
   disabled: undefined,
+  isReadOnly: undefined,
+  readonly: undefined,
+  isRequired: undefined,
   required: undefined,
 });
 
@@ -67,8 +73,9 @@ const inputId = computed(() => props.id ?? (group ? generated : (ctx?.id ?? gene
 const isInGroup = computed(() => group !== null);
 const groupName = computed(() => group?.name());
 const groupChecked = computed(() => group?.isSelected(props.value) ?? false);
-const groupDisabled = computed(() => props.disabled ?? group?.isDisabled());
+const groupDisabled = computed(() => props.isDisabled ?? props.disabled ?? group?.isDisabled());
 const groupInvalid = computed(() => group?.isInvalid() ?? false);
+const groupRequired = computed(() => props.isRequired ?? props.required ?? group?.isRequired() ?? false);
 
 function onGroupChange(): void {
   group?.select(props.value);
@@ -101,6 +108,17 @@ const radioClass = computed(() => attrs.class as ClassValue);
 
 const inner = useTemplateRef<{ el: HTMLInputElement | null }>('inner');
 
+/* After every pick in the group — this item's or a sibling's — put this radio back on the model once the owner has
+   answered: a controlled owner that declines leaves the DOM where the model is, not where the click moved it. */
+watch(
+  () => group?.pickCount(),
+  () => {
+    const radio = inner.value?.el;
+    if (radio) radio.checked = groupChecked.value;
+  },
+  { flush: 'post' },
+);
+
 /** The rendered `<input>` — the Vue stand-in for the React original's forwarded ref. */
 defineExpose({ el: computed(() => inner.value?.el ?? null) });
 </script>
@@ -110,7 +128,12 @@ defineExpose({ el: computed(() => inner.value?.el ?? null) });
     <!-- Inside a group the item gets a FRESH provider — React wrapped each cloned child in
          one so siblings never adopt the surrounding Field's id or `describedBy`, while the
          group's disabled/invalid flags still cascade. -->
-    <FormControlProvider v-if="isInGroup" :is-disabled="groupDisabled" :is-invalid="groupInvalid">
+    <FormControlProvider
+      v-if="isInGroup"
+      :is-disabled="groupDisabled"
+      :is-invalid="groupInvalid"
+      :is-required="groupRequired"
+    >
       <RadioInput
         ref="inner"
         v-bind="{ ...radioProps, ...passthroughAttrs }"

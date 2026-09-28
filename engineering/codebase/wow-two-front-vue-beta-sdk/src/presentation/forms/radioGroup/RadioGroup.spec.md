@@ -14,6 +14,15 @@ Public import: `import { RadioGroup } from '@wow-two-beta/ui-vue/presentation/fo
 - The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- Every item shares the group `name` (generated when omitted), so the browser roves the arrow keys between radios.
+- Inside a `Field`, the group takes the id, label, description and invalid state; disabled and required cascade to
+  every item — a required radio name asks for one pick in the group.
+- While controlled, a pick only requests the change: after the owner answers, every radio is put back on the model,
+  so a declined pick leaves the checked dot where it was.
+- Regression: `tests/unit/presentation/forms/RadioGroup.dom.test.ts`, `FieldWrappers.dom.test.ts`.
+
 ## Props
 
 | Prop | Type | Required | Default | Meaning |

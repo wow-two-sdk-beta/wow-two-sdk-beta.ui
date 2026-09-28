@@ -27,7 +27,7 @@ export interface RadioGroupProps {
 
 <script setup lang="ts">
 import { useNativeFormReset } from '../UseNativeFormReset';
-import { computed, provide, useAttrs, useSlots, useTemplateRef } from 'vue';
+import { computed, provide, shallowRef, useAttrs, useSlots, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn, Orientation as OrientationValue } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
@@ -94,13 +94,19 @@ const controlled = useControlled<string | null>({
 });
 
 const selected = controlled.value;
+const pickCount = shallowRef(0);
 
 const context: RadioGroupContextValue = {
   name: () => groupName.value,
   isSelected: (value) => value !== undefined && selected.value === value,
-  select: (value) => controlled.setValue(value ?? null),
+  select: (value) => {
+    controlled.setValue(value ?? null);
+    pickCount.value += 1;
+  },
   isDisabled: () => isGroupDisabled.value,
   isInvalid: () => isGroupInvalid.value,
+  isRequired: () => ctx?.isRequired,
+  pickCount: () => pickCount.value,
 };
 
 provide(RadioGroupKey, context);

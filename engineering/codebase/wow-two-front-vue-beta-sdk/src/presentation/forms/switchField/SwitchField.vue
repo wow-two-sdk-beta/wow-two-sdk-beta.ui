@@ -36,7 +36,19 @@ import SwitchInput from '../switchInput/SwitchInput.vue';
    than landing on the `<label>`. */
 defineOptions({ name: 'SwitchField', inheritAttrs: false });
 
-const props = withDefaults(defineProps<SwitchFieldProps>(), { side: SideValue.Left });
+const props = withDefaults(defineProps<SwitchFieldProps>(), {
+  side: SideValue.Left,
+  /* Explicit `undefined` for every inherited boolean: Vue casts an absent `boolean` prop to `false`, and this
+     wrapper forwards its props — a cast `false` would override the inner input's own default and the Field context. */
+  modelValue: undefined,
+  defaultValue: undefined,
+  isDisabled: undefined,
+  disabled: undefined,
+  isReadOnly: undefined,
+  readonly: undefined,
+  isRequired: undefined,
+  required: undefined,
+});
 
 defineSlots<{
   label?(): unknown;
