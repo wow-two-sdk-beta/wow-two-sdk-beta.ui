@@ -30,6 +30,8 @@ Behavioral changes to existing parts:
   animate; an immediate open-then-close no longer leaves an empty, focus-trapping surface.
 - `DataTable.rowKey(row, index)` now receives the row's data index, not its sorted display index, so keys stay
   stable under sorting; `onRowClick` and the `cell` slot still receive the display index.
+- `DataTable` orders cell values with the shared `foundation/selection` comparator: empty cells now sort last when
+  descending too, booleans compare as booleans, and `Temporal.Instant` values compare in time.
 - `CheckboxInput`, `SwitchInput` and `RadioInput` restore the native box when a controlled owner declines a change.
 - `KnobInput`'s fallback accessible name is the localized `KnobInput.label` (`"Knob"`), no longer the component
   name. `IconPicker.icons` and `JsonEditorTreeNode.collapse` / `.expand` are now localizable.

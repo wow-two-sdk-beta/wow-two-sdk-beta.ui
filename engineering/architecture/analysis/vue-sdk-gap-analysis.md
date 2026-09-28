@@ -88,7 +88,7 @@ the menu vector, `RatingPicker`, `RangeSliderInput`, `ConfirmPopover`, `Truncate
 | Accessible name falls back to the component name `'KnobInput'` | `forms/knobInput/KnobInput.vue` | localized `KnobInput.label` |
 | Unlocalized `'Icons'` listbox name | `forms/iconPicker/IconPicker.vue` | localized `IconPicker.icons` |
 | Unlocalized `'Collapse'` / `'Expand'` toggles | `forms/jsonEditor/JsonEditorTreeNode.vue` | localized `JsonEditorTreeNode.*` |
-| `DataTable` keeps its own sort model | `display/dataTable` | adopt `foundation/selection` with the selection work |
+| `DataTable` keeps its own sort model | `display/dataTable` | ✅ 2026-09-28: selection and the value ordering now come from `foundation/selection`; absent values sort last in both directions |
 | Unprefixed booleans predate the props rule | `Pagination.hideFirstLast` · `CommandPaletteModalItem.closeOnSelect` | rename on the next breaking pass |
 | Carried from the sweep | Firefox CI result · `smart-qr` visual acceptance · NodeEditor read-only · calendar week start · large-diff paging | owned by their existing rows |
 

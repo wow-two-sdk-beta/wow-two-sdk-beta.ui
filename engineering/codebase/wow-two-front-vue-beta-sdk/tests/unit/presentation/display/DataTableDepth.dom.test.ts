@@ -180,3 +180,30 @@ describe('DataTable expansion, pinning and loading', () => {
     expect(wrapper.get('tbody button[aria-expanded]').attributes('aria-label')).toBe('Mehr');
   });
 });
+
+describe('DataTable ordering', () => {
+  it('keeps absent values last in both directions, on the shared foundation ordering', () => {
+    const scored = [
+      { id: 's1', name: 'Mid', age: 30 },
+      { id: 's2', name: 'None', age: null },
+      { id: 's3', name: 'High', age: 50 },
+      { id: 's4', name: 'Low', age: 10 },
+    ];
+    const ageColumns = [
+      { key: 'name', header: 'Name', accessor: (row: (typeof scored)[number]) => row.name },
+      { key: 'age', header: 'Age', accessor: (row: (typeof scored)[number]) => row.age, isSortable: true },
+    ];
+    const names = (direction: 'asc' | 'desc'): string[] =>
+      bodyRows(
+        mountTable({
+          data: scored,
+          columns: ageColumns,
+          rowKey: (row: (typeof scored)[number]) => row.id,
+          defaultSortBy: { columnKey: 'age', direction },
+        }),
+      ).map((row) => row.cells[0]!.textContent?.trim() ?? '');
+    expect(names('asc')).toEqual(['Low', 'Mid', 'High', 'None']);
+    document.body.innerHTML = '';
+    expect(names('desc')).toEqual(['High', 'Mid', 'Low', 'None']);
+  });
+});

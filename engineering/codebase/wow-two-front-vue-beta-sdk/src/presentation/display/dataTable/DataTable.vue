@@ -1,7 +1,4 @@
 <script lang="ts">
-import { Temporal } from 'temporal-polyfill';
-import { compareStrings } from '../../../foundation/i18n';
-import { ExactNumber } from '../../../foundation/numbers';
 import type { SelectionKey, SelectionMode } from '../../../foundation/selection';
 import type { TableDensity } from '../table';
 
@@ -117,29 +114,6 @@ function sameKeys(a: ReadonlyArray<SelectionKey>, b: ReadonlyArray<SelectionKey>
   const lookup = new Set(b);
   return a.every((key) => lookup.has(key));
 }
-
-function defaultCompare(a: unknown, b: unknown, locale: string): number {
-  if (a === b) return 0;
-  if (a === null || a === undefined) return 1;
-  if (b === null || b === undefined) return -1;
-  if (ExactNumber.isExactNumber(a) && ExactNumber.isExactNumber(b)) {
-    const result = a.compare(b);
-    if (result.ok) return result.value;
-  }
-  if (typeof a === 'bigint' && typeof b === 'bigint') return a < b ? -1 : 1;
-  if (typeof a === 'number' && typeof b === 'number') return a - b;
-  if (a instanceof Temporal.PlainDate && b instanceof Temporal.PlainDate) return Temporal.PlainDate.compare(a, b);
-  if (a instanceof Temporal.PlainTime && b instanceof Temporal.PlainTime) return Temporal.PlainTime.compare(a, b);
-  if (a instanceof Temporal.PlainDateTime && b instanceof Temporal.PlainDateTime)
-    return Temporal.PlainDateTime.compare(a, b);
-  if (a instanceof Temporal.ZonedDateTime && b instanceof Temporal.ZonedDateTime)
-    return Temporal.ZonedDateTime.compare(a, b);
-  // Native `Date` retained: DataTable cells hold arbitrary consumer values, so a
-  // consumer may still put a `Date` in a column — this is a generic value
-  // comparator, not a date-value API surface.
-  if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
-  return compareStrings(String(a), String(b), locale);
-}
 </script>
 
 <script setup lang="ts" generic="T">
@@ -148,9 +122,11 @@ import { useLocale } from '../../../foundation/i18n';
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronRight } from 'lucide-vue-next';
 import { useId } from '../../../foundation/identifiers';
 import {
+  compareValues,
   createSelection,
   deselect,
   extendSelection,
+  isNullish,
   isSelected,
   select,
   selectionStatus,
@@ -281,9 +257,15 @@ const sortedRows = computed(() => {
   return keyedRows.value
     .map((entry) => ({ entry, value: column?.compare ? undefined : accessor?.(entry.row) }))
     .sort((a, b) => {
-      const result = column?.compare
-        ? column.compare(a.entry.row, b.entry.row)
-        : defaultCompare(a.value, b.value, locale.locale.value);
+      if (column?.compare) {
+        const result = column.compare(a.entry.row, b.entry.row);
+        return active.direction === SortDirection.Asc ? result : -result;
+      }
+      /* The shared foundation ordering: absent values land last in both directions, outside the flip. */
+      const isLeftAbsent = isNullish(a.value);
+      const isRightAbsent = isNullish(b.value);
+      if (isLeftAbsent || isRightAbsent) return isLeftAbsent === isRightAbsent ? 0 : isLeftAbsent ? 1 : -1;
+      const result = compareValues(a.value, b.value, { locale: locale.locale.value });
       return active.direction === SortDirection.Asc ? result : -result;
     })
     .map(({ entry }) => entry);
