@@ -87,3 +87,4 @@ export * from './signatureInput';
 export * from './transferPicker';
 export * from './treeSelectPicker';
 export * from './cascaderPicker';
+export * from './imageCropEditor';

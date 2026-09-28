@@ -113,6 +113,7 @@ import {
   TransferPicker,
   TreeSelectPicker,
   CascaderPicker,
+  ImageCropEditor,
 } from '../../../../../src/presentation/forms';
 import { ExactNumber } from '../../../../../src/foundation/numbers';
 const exactNumberExample = ExactNumber.parse('9223372036854775807.125');
@@ -232,6 +233,11 @@ export const formsExamples: readonly SmokeCase[] = [
   smokeCase('CascaderPicker', CascaderPicker, {
     options: [{ value: 'uz', label: 'Uzbekistan', children: [{ value: 'tas', label: 'Tashkent' }] }],
     defaultValue: ['uz', 'tas'],
+  }),
+
+  smokeCase('ImageCropEditor', ImageCropEditor, {
+    src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
+    aspectRatio: 1,
   }),
 
   smokeCase('TimezonePicker', TimezonePicker, { defaultValue: 'Asia/Tashkent', timeZones: ['UTC', 'Asia/Tashkent'] }),

@@ -111,6 +111,9 @@ in their capability specifications and are not inferred by this catalogue.
 | `IconPicker.icons` | Icons | [IconPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/iconPicker/IconPicker.vue) |
 | `IconPicker.noIconsMatch` | No icons match. | [IconPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/iconPicker/IconPicker.vue) |
 | `IconPicker.placeholder` | Search icons… | [IconPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/iconPicker/IconPicker.vue) |
+| `ImageCropEditor.hint` | Arrow keys move the crop; Alt with arrow keys resizes it; Shift moves ten times farther. | [ImageCropEditor.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/imageCropEditor/ImageCropEditor.vue) |
+| `ImageCropEditor.label` | Crop area | [ImageCropEditor.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/imageCropEditor/ImageCropEditor.vue) |
+| `ImageCropEditor.status` | {width} × {height} at {x}, {y} | [ImageCropEditor.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/imageCropEditor/ImageCropEditor.vue) |
 | `InlineSpinner.loading` | Loading… | [InlineSpinner.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/inlineSpinner/InlineSpinner.vue) |
 | `JsonEditor.jsonMode` | JSON mode | [JsonEditor.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditor.vue) |
 | `JsonEditorTextView.jsonSource` | JSON source | [JsonEditorTextView.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditorTextView.vue) |

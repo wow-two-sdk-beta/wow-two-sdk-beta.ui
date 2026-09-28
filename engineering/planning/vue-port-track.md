@@ -289,6 +289,6 @@ Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-
 | G8 | Hierarchical pickers — `TreeSelectPicker`, `CascaderPicker`, `TransferPicker` | ✅ 11 DOM tests |
 | G9 | Period pickers — `MonthPicker`, `YearPicker` on a shared index-space `PeriodGrid` | ✅ 6 DOM tests |
 | G10 | App navigation — `SidebarMenu` (+ `Item`/`Group`/`Section`, icon rail), `BottomNavMenu` | ✅ 8 DOM tests |
-| G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignatureInput` (was `SignaturePad`; `*Input` holds a form value) | 🟡 `SignatureInput` ✅ 3 DOM + 1 browser test · `LightboxModal` ✅ 4 DOM + 1 browser test · `ImageCropEditor` ⬜ |
+| G11 | Media — `LightboxModal`, `ImageCropEditor`, `SignatureInput` (was `SignaturePad`; `*Input` holds a form value) | ✅ 11 DOM + 3 browser tests |
 | G12 | `MentionInput` | ⬜ |
 | G13 | Small gaps — `KanbanBoard`, `MasonryLayout`, `OverflowGroup`, `TimezonePicker`, `DurationInput` (`Tag` already closes via `@close`) | 🟡 masonry · overflow · time zone ✅ 9 DOM tests · duration ✅ 5 DOM tests · `KanbanBoard` ⬜ |

@@ -14,6 +14,7 @@ import {
   CharacterCountCallout,
   PasswordStrengthCallout,
 } from '@wow-two-beta/ui-vue/presentation/feedback';
+import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
 import { FieldsetLayout, InputAddonLayout, InputGroup } from '@wow-two-beta/ui-vue/presentation/layout';
 import { computed, ref } from 'vue';
 import { Temporal } from 'temporal-polyfill';
@@ -103,6 +104,7 @@ const {
   TransferPicker,
   TreeSelectPicker,
   CascaderPicker,
+  ImageCropEditor,
 } = forms;
 
 const covered = [
@@ -178,6 +180,7 @@ const covered = [
   'TransferPicker',
   'TreeSelectPicker',
   'CascaderPicker',
+  'ImageCropEditor',
   'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
@@ -320,6 +323,16 @@ const REGIONS = [
   { value: 'other', label: 'Somewhere else' },
 ];
 const region = ref<string[] | null>(null);
+/** An inline SVG "photo", so the crop demo needs no network. */
+const CROP_PHOTO = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640"><defs><linearGradient id="s" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#fde68a"/></linearGradient></defs>' +
+    '<rect width="960" height="640" fill="url(#s)"/><circle cx="700" cy="200" r="90" fill="#f97316"/>' +
+    '<path d="M0 520 L240 300 L420 480 L600 260 L960 560 V640 H0Z" fill="#166534"/></svg>',
+)}`;
+const cropArea = ref<{ x: number; y: number; width: number; height: number } | null>(null);
+const cropEditor = ref<{ toDataURL: () => string | null } | null>(null);
+const croppedPreview = ref<string | null>(null);
 const priceRange = ref<readonly [number, number]>([20, 80]);
 const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
@@ -512,6 +525,24 @@ const stamp = ref<Temporal.PlainDateTime | null>(
         <div class="flex flex-col items-start gap-2">
           <CascaderPicker v-model="region" :options="REGIONS" aria-label="Region" class="w-72" />
           <p class="text-xs text-subtle-foreground">path = {{ region?.join(' → ') ?? 'null' }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="ImageCropEditor" note="drag the box or a corner · arrows move, Alt+arrows resize · square ratio">
+        <div class="flex w-full flex-col items-start gap-2">
+          <ImageCropEditor ref="cropEditor" v-model="cropArea" :src="CROP_PHOTO" :aspect-ratio="1" max-height="14rem" />
+          <div class="flex items-center gap-2">
+            <Button size="sm" variant="soft" @click="croppedPreview = cropEditor?.toDataURL() ?? null">Crop</Button>
+            <img
+              v-if="croppedPreview"
+              :src="croppedPreview"
+              alt="Cropped preview"
+              class="size-12 rounded border border-border"
+            />
+            <span class="text-xs text-subtle-foreground">{{
+              cropArea ? `${cropArea.width}×${cropArea.height} @ ${cropArea.x},${cropArea.y}` : 'default crop'
+            }}</span>
+          </div>
         </div>
       </Demo>
 
