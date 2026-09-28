@@ -28,7 +28,7 @@ import { useLocale } from '../../../foundation/i18n';
 import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { cn, Size as SizeToken } from '../../../foundation/styles';
-import { Presence } from '../../../foundation/primitives';
+import { FocusScope, Presence } from '../../../foundation/primitives';
 import BackdropOverlay from '../../overlays/backdropOverlay/BackdropOverlay.vue';
 import Spinner from '../spinner/Spinner.vue';
 import { SpinnerTone as SpinnerToneToken } from '../spinner/Spinner.variants';
@@ -77,8 +77,8 @@ const spinnerLabel = computed(() => props.label || locale.t('LoadingOverlay.load
  */
 const classes = computed(() =>
   cn(
-    'flex flex-col items-center justify-center gap-3',
-    'motion-safe:data-[state=isOpen]:animate-(--animate-fade-in)',
+    'flex flex-col items-center justify-center gap-3 outline-hidden',
+    'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
     'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
     'motion-reduce:animate-none',
     props.isInline
@@ -98,11 +98,22 @@ defineExpose({ el });
 </script>
 
 <template>
-  <!-- `BackdropOverlay` self-wraps in `Presence`; driving `is-isOpen` with `isOpen` lets its
+  <!-- `BackdropOverlay` self-wraps in `Presence`; driving its `isOpen` from ours lets its
        fade-out play before it defers its own unmount. -->
   <BackdropOverlay v-if="!props.isInline" :isOpen="props.isOpen" :is-blurred="props.hasBlur" class="bg-background/70" />
   <Presence :is-present="props.isOpen">
-    <div ref="el" role="status" v-bind="rest" :class="classes">
+    <!-- The viewport scrim blocks the pointer; the trap blocks the keyboard the same way, so Tab cannot reach — and
+         Enter cannot trigger — the controls under it. Focus returns where it was when the scrim lifts. -->
+    <FocusScope v-if="!props.isInline" as-child trapped loop>
+      <div ref="el" role="status" tabindex="-1" v-bind="rest" :class="classes">
+        <Spinner :size="props.spinnerSize" :tone="props.spinnerTone" :label="spinnerLabel" />
+        <div v-if="hasLabel" class="text-sm text-foreground">
+          <slot name="label">{{ props.label }}</slot>
+        </div>
+        <slot />
+      </div>
+    </FocusScope>
+    <div v-else ref="el" role="status" v-bind="rest" :class="classes">
       <Spinner :size="props.spinnerSize" :tone="props.spinnerTone" :label="spinnerLabel" />
       <div v-if="hasLabel" class="text-sm text-foreground">
         <slot name="label">{{ props.label }}</slot>

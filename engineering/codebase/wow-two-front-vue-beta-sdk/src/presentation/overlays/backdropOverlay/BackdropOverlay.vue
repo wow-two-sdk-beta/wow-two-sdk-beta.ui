@@ -65,7 +65,7 @@ const attrs = useAttrs();
 const classes = computed(() =>
   cn(
     'ui-backdrop-overlay fixed inset-0 z-overlay bg-black/50',
-    'motion-safe:data-[state=isOpen]:animate-(--animate-fade-in)',
+    'motion-safe:data-[state=open]:animate-(--animate-fade-in)',
     'motion-safe:data-[state=closed]:animate-(--animate-fade-out)',
     props.isBlurred && 'ui-backdrop-overlay-blurred backdrop-blur-sm',
     attrs.class as string | undefined,
