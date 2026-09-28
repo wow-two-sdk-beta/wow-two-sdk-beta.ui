@@ -285,7 +285,7 @@ Unpublished; consumer notes are in [MIGRATION.md](../codebase/wow-two-front-vue-
 | G4 | Display and state — `TruncatedText`, `CountdownText`, `ErrorBoundary` | ✅ 16 DOM + 2 browser tests |
 | G5 | Layout — `StickyLayout`, `VirtualScrollArea` | ✅ 7 DOM + 2 browser tests |
 | G6 | Localized accessible names — `KnobInput`, `IconPicker`, `JsonEditorTreeNode` | ✅ 3 DOM tests |
-| G7 | `DataTable` depth — selection, expandable rows, sticky header, loading state on `foundation/selection` | ⬜ |
+| G7 | `DataTable` depth — selection, expandable rows, sticky header, loading state on `foundation/selection`; declined controlled toggles revert | ✅ 12 DOM tests |
 | G8 | Hierarchical pickers — `TreeSelectPicker`, `CascaderPicker`, `TransferPicker` | ⬜ |
 | G9 | Period pickers — `MonthPicker`, `YearPicker` | ⬜ |
 | G10 | App navigation — `SidebarMenu`, `BottomNavMenu` | ⬜ |

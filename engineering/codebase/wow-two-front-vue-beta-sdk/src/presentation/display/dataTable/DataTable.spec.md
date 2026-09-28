@@ -27,6 +27,17 @@ Public import: `import { DataTable } from '@wow-two-beta/ui-vue/presentation/dis
 | `density` | `TableDensity` | no | `undefined` | Declared by the source contract. |
 | `isBare` | `boolean` | no | `undefined` | Declared by the source contract. |
 | `emptyContent` | `string \| number` | no | `'No results.'` | The empty-state text. Default `No results.`; override richly via the `emptyContent` slot. |
+| `selectionMode` | `SelectionMode` | no | `'none'` | `single` or `multiple` adds a checkbox column; `multiple` adds select-all. |
+| `selection` | `ReadonlyArray<SelectionKey>` | no | `undefined` | The selected row keys, controlled. The `v-model:selection` binding target. |
+| `defaultSelection` | `ReadonlyArray<SelectionKey>` | no | `[]` | The initially selected row keys when uncontrolled. |
+| `isRowSelectable` | `(row: T, index: number) => boolean` | no | every row | Whether a row can be selected, given its data index. |
+| `expanded` | `ReadonlyArray<SelectionKey>` | no | `undefined` | The expanded row keys, controlled. The `v-model:expanded` binding target. |
+| `defaultExpanded` | `ReadonlyArray<SelectionKey>` | no | `[]` | The initially expanded row keys when uncontrolled. |
+| `isRowExpandable` | `(row: T, index: number) => boolean` | no | every row | Whether a row can expand when the `expanded` slot is set. |
+| `hasStickyHeader` | `boolean` | no | `false` | Pins the header while the body scrolls inside the container. |
+| `isLoading` | `boolean` | no | `false` | Marks the table busy; an empty table draws skeleton rows instead of the empty state. |
+| `loadingRowCount` | `number` | no | `5` | The skeleton rows drawn while an empty table loads. |
+| `containerClassName` | `string` | no | `undefined` | Classes for the scroll container; a height such as `max-h-96` lets the sticky header pin. |
 
 ## Column sorting and row interaction
 
@@ -37,11 +48,26 @@ Rows with `onRowClick` are keyboard focusable and activate through Enter/Space. 
 their own keyboard behavior. Supply a stable `rowKey` for rows that reorder.
 Regression: `tests/unit/presentation/display/CalendarAndTable.dom.test.ts`.
 
+## Selection, expansion and loading
+
+- Row keys come from `rowKey(row, dataIndex)`, or the data index without one; sorting never changes a key.
+- Selection uses `foundation/selection`: select-all and Shift ranges cover the selectable rows in display order.
+- A declined controlled selection or expansion leaves the rendered state unchanged.
+- The checkbox and expand cells are row controls: they never trigger `onRowClick`.
+- Selected rows carry `aria-selected` and `data-selected`; expand toggles carry `aria-expanded` and `aria-controls`.
+- The sticky header pins inside the table's own scroll container, so give it a height through `containerClassName`.
+- Loading sets `aria-busy` on the table; rows already present stay visible while it refreshes.
+- Control labels are localized: `DataTable.selectAll`, `.selectRow`, `.selectColumn`, `.expandRow`, `.collapseRow`,
+  `.expandColumn`.
+Regression: `tests/unit/presentation/display/DataTableDepth.dom.test.ts`.
+
 ## Emits
 
 | Event | Signature | Meaning |
 |---|---|---|
 | `update:sortBy` | `'update:sortBy': [sort: DataTableSort \| null];` | Fires when the reader clicks a sortable header, with the next sort or `null` once cleared. |
+| `update:selection` | `'update:selection': [keys: SelectionKey[]];` | Fires when the reader selects or deselects rows, with every selected key. |
+| `update:expanded` | `'update:expanded': [keys: SelectionKey[]];` | Fires when the reader expands or collapses a row, with every expanded key. |
 
 ## Slots
 
@@ -50,6 +76,8 @@ Regression: `tests/unit/presentation/display/CalendarAndTable.dom.test.ts`.
 | `header` | `header(props: { column: DataTableColumn<T> }): unknown;` | Overrides a column header. Falls back to the column's own `header`. |
 | `cell` | `cell(props: { row: T; column: DataTableColumn<T>; index: number }): unknown;` | Overrides a body cell. Falls back to the column's `cell`, then its `accessor`. |
 | `emptyContent` | `emptyContent(): unknown;` | Overrides the empty-state content. Falls back to the `emptyContent` prop. |
+| `expanded` | `expanded?(props: { row: T; index: number }): unknown;` | The detail row under an expanded row; its presence adds the expand toggle column. |
+| `loading` | `loading?(): unknown;` | Replaces the skeleton rows drawn while an empty table loads. |
 
 ## Exposed handle
 

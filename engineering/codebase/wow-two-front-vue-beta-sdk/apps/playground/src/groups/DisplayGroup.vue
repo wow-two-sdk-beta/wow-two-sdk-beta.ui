@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { SeparatorLayout } from '@wow-two-beta/ui-vue/presentation/layout';
 import { Tooltip } from '@wow-two-beta/ui-vue/presentation/overlays';
 import * as display from '@wow-two-beta/ui-vue/presentation/display';
@@ -186,6 +187,19 @@ const ROWS = [
   { name: 'Grace Hopper', role: 'Admiral', commits: 941 },
   { name: 'Alan Turing', role: 'Cryptanalyst', commits: 77 },
 ];
+type DemoRow = (typeof ROWS)[number];
+const ROW_COLUMNS = [
+  { key: 'name', header: 'Name', isSortable: true, accessor: (row: DemoRow) => row.name },
+  { key: 'role', header: 'Role', accessor: (row: DemoRow) => row.role },
+  {
+    key: 'commits',
+    header: 'Commits',
+    align: 'right' as const,
+    isSortable: true,
+    accessor: (row: DemoRow) => row.commits,
+  },
+];
+const selectedRows = ref<Array<string | number>>([]);
 </script>
 
 <template>
@@ -422,17 +436,22 @@ const ROWS = [
         </div>
       </Demo>
 
-      <Demo name="DataTable" note="sortable columns — click a header">
+      <Demo name="DataTable" note="sort, select (Shift for a range), expand a row — the header pins">
         <DataTable
-          :columns="[
-            { key: 'name', header: 'Name', isSortable: true },
-            { key: 'role', header: 'Role' },
-            { key: 'commits', header: 'Commits', align: 'right', isSortable: true },
-          ]"
+          v-model:selection="selectedRows"
+          :columns="ROW_COLUMNS"
           :data="ROWS"
-          is-striped
+          :row-key="(row: DemoRow) => row.name"
+          selection-mode="multiple"
+          has-sticky-header
+          container-class-name="max-h-48"
           is-hoverable
-        />
+        >
+          <template #expanded="{ row }">
+            <p class="text-xs text-muted-foreground">{{ row.name }} has {{ row.commits }} commits as {{ row.role }}.</p>
+          </template>
+        </DataTable>
+        <p class="mt-1 text-xs text-subtle-foreground">selected = {{ selectedRows.join(', ') || 'none' }}</p>
       </Demo>
 
       <Demo name="TabsGroup" note="horizontal + vertical, click to switch">

@@ -16,6 +16,7 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 | Overlays | `ConfirmPopover` — inline confirm that awaits a promise from `@confirm` |
 | Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary` |
 | Layout | `StickyLayout` (pinned state), `VirtualScrollArea` (windowed list, `end-reached`) |
+| `DataTable` | `selectionMode` + `v-model:selection`, `expanded` slot + `v-model:expanded`, `hasStickyHeader`, `isLoading` |
 
 Behavioral changes to existing parts:
 
@@ -26,6 +27,9 @@ Behavioral changes to existing parts:
   builds its own menu context object must add them.
 - `DropdownMenuContent` removes its surface once the panel's exit completes, including exits that never
   animate; an immediate open-then-close no longer leaves an empty, focus-trapping surface.
+- `DataTable.rowKey(row, index)` now receives the row's data index, not its sorted display index, so keys stay
+  stable under sorting; `onRowClick` and the `cell` slot still receive the display index.
+- `CheckboxInput`, `SwitchInput` and `RadioInput` restore the native box when a controlled owner declines a change.
 - `KnobInput`'s fallback accessible name is the localized `KnobInput.label` (`"Knob"`), no longer the component
   name. `IconPicker.icons` and `JsonEditorTreeNode.collapse` / `.expand` are now localizable.
 

@@ -2,6 +2,7 @@
 import { Temporal } from 'temporal-polyfill';
 import { compareStrings } from '../../../foundation/i18n';
 import { ExactNumber } from '../../../foundation/numbers';
+import type { SelectionKey, SelectionMode } from '../../../foundation/selection';
 import type { TableDensity } from '../table';
 
 /** Defines the sort order of a DataTable column. */
@@ -72,6 +73,49 @@ export interface DataTableProps<T> {
   readonly isBare?: boolean;
   /** The empty-state text. Default `No results.`; override richly via the `emptyContent` slot. */
   readonly emptyContent?: string | number;
+
+  /** How many rows the reader may select. Default `none`; `single` and `multiple` add a checkbox column. */
+  readonly selectionMode?: SelectionMode;
+
+  /** The selected row keys, controlled. The `v-model:selection` binding target. */
+  readonly selection?: ReadonlyArray<SelectionKey>;
+
+  /** The initially selected row keys when uncontrolled. Default none. */
+  readonly defaultSelection?: ReadonlyArray<SelectionKey>;
+
+  /** Whether a row can be selected, given its data index. Default every row. */
+  readonly isRowSelectable?: (row: T, index: number) => boolean;
+
+  /** The expanded row keys, controlled. The `v-model:expanded` binding target. */
+  readonly expanded?: ReadonlyArray<SelectionKey>;
+
+  /** The initially expanded row keys when uncontrolled. Default none. */
+  readonly defaultExpanded?: ReadonlyArray<SelectionKey>;
+
+  /** Whether a row can expand when the `expanded` slot is set, given its data index. Default every row. */
+  readonly isRowExpandable?: (row: T, index: number) => boolean;
+
+  /** Whether the header row stays pinned while the body scrolls inside `containerClassName`'s height. */
+  readonly hasStickyHeader?: boolean;
+
+  /** Whether data is loading — marks the table busy and draws skeleton rows while it is empty. */
+  readonly isLoading?: boolean;
+
+  /** The skeleton rows drawn while an empty table loads. Default 5. */
+  readonly loadingRowCount?: number;
+
+  /** Classes for the scroll container — a height such as `max-h-96` lets a sticky header pin. */
+  readonly containerClassName?: string;
+}
+
+/** @internal The skeleton rows drawn while an empty table loads, when `loadingRowCount` is not set. */
+const DefaultLoadingRows = 5;
+
+/** @internal Whether two key lists hold the same members. */
+function sameKeys(a: ReadonlyArray<SelectionKey>, b: ReadonlyArray<SelectionKey>): boolean {
+  if (a.length !== b.length) return false;
+  const lookup = new Set(b);
+  return a.every((key) => lookup.has(key));
 }
 
 function defaultCompare(a: unknown, b: unknown, locale: string): number {
@@ -101,13 +145,29 @@ function defaultCompare(a: unknown, b: unknown, locale: string): number {
 <script setup lang="ts" generic="T">
 import { computed } from 'vue';
 import { useLocale } from '../../../foundation/i18n';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-vue-next';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronRight } from 'lucide-vue-next';
+import { useId } from '../../../foundation/identifiers';
+import {
+  createSelection,
+  deselect,
+  extendSelection,
+  isSelected,
+  select,
+  selectionStatus,
+  toggle,
+  toggleAll,
+  SelectionMode as SelectionModeToken,
+  SelectionStatus,
+  type SelectionState,
+} from '../../../foundation/selection';
 import { cn } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
+import CheckboxInput from '../../forms/checkboxInput/CheckboxInput.vue';
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from '../table';
 
 /**
- * Renders a sortable table from a `columns` descriptor, wrapping the `Table` primitives.
+ * Renders a sortable table from a `columns` descriptor, wrapping the `Table` primitives, with optional row
+ * selection, expandable detail rows, a pinned header and a loading state.
  *
  * `class` and `aria-label` reach the inner `<table>` by fallthrough, which is why this component keeps `inheritAttrs`
  * on.
@@ -125,24 +185,47 @@ const props = withDefaults(defineProps<DataTableProps<T>>(), {
   isHoverable: undefined,
   density: undefined,
   isBare: undefined,
+  selectionMode: SelectionModeToken.None,
+  selection: undefined,
+  defaultSelection: undefined,
+  isRowSelectable: undefined,
+  expanded: undefined,
+  defaultExpanded: undefined,
+  isRowExpandable: undefined,
+  hasStickyHeader: false,
+  isLoading: false,
+  loadingRowCount: DefaultLoadingRows,
+  containerClassName: undefined,
 });
-
-const locale = useLocale();
-const emptyText = computed(() => props.emptyContent ?? locale.t('DataTable.emptyContent', undefined, 'No results.'));
 
 const emit = defineEmits<{
   /** Fires when the reader clicks a sortable header, with the next sort or `null` once cleared. */
   'update:sortBy': [sort: DataTableSort | null];
+
+  /** Fires when the reader selects or deselects rows, with every selected row key. */
+  'update:selection': [keys: SelectionKey[]];
+
+  /** Fires when the reader expands or collapses a row, with every expanded row key. */
+  'update:expanded': [keys: SelectionKey[]];
 }>();
 
-defineSlots<{
+const slots = defineSlots<{
   /** Overrides a column header. Falls back to the column's own `header`. */
   header(props: { column: DataTableColumn<T> }): unknown;
   /** Overrides a body cell. Falls back to the column's `cell`, then its `accessor`. */
   cell(props: { row: T; column: DataTableColumn<T>; index: number }): unknown;
   /** Overrides the empty-state content. Falls back to the `emptyContent` prop. */
   emptyContent(): unknown;
+  /** The detail row under an expanded row; its presence adds the expand toggle column. */
+  expanded?(props: { row: T; index: number }): unknown;
+  /** Replaces the skeleton rows drawn while an empty table loads. */
+  loading?(): unknown;
 }>();
+
+const locale = useLocale();
+const tableId = useId();
+
+const emptyText = computed(() => props.emptyContent ?? locale.t('DataTable.emptyContent', undefined, 'No results.'));
 
 const { value: sort, setValue: setSort } = useControlled<DataTableSort | null>({
   controlled: () => props.sortBy,
@@ -150,25 +233,123 @@ const { value: sort, setValue: setSort } = useControlled<DataTableSort | null>({
   onChange: (next) => emit('update:sortBy', next),
 });
 
+const { value: selectedKeys, setValue: setSelectedKeys } = useControlled<ReadonlyArray<SelectionKey>>({
+  controlled: () => props.selection,
+  default: props.defaultSelection ?? [],
+  onChange: (next) => emit('update:selection', [...next]),
+});
+
+const { value: expandedKeys, setValue: setExpandedKeys } = useControlled<ReadonlyArray<SelectionKey>>({
+  controlled: () => props.expanded,
+  default: props.defaultExpanded ?? [],
+  onChange: (next) => emit('update:expanded', [...next]),
+});
+
+/** @internal The fixed end of a shift-click range — interaction state, never part of the model. */
+let selectionAnchor: SelectionKey | null = null;
+
+/** @internal Whether the pointer press that toggles a row checkbox held Shift. */
+let isRangeGesture = false;
+
 /** React seeded `isHoverable` from `!!onRowClick`; kept as an explicit fallback. */
 const resolvedHoverable = computed(() => props.isHoverable ?? props.onRowClick != null);
 
-const sortedData = computed<ReadonlyArray<T>>(() => {
+const hasSelection = computed(() => props.selectionMode !== SelectionModeToken.None);
+const hasExpansion = computed(() => slots.expanded !== undefined);
+
+/** Every body column, including the selection and expansion control columns. */
+const columnCount = computed(() => props.columns.length + (hasSelection.value ? 1 : 0) + (hasExpansion.value ? 1 : 0));
+
+const selectedLookup = computed(() => new Set(selectedKeys.value));
+const expandedLookup = computed(() => new Set(expandedKeys.value));
+
+/** The rows with their stable keys, which come from the data order so sorting never changes them. */
+const keyedRows = computed(() =>
+  props.data.map((row, dataIndex) => ({
+    row,
+    dataIndex,
+    key: props.rowKey ? props.rowKey(row, dataIndex) : dataIndex,
+  })),
+);
+
+const sortedRows = computed(() => {
   const active = sort.value;
-  if (!active) return props.data;
+  if (!active) return keyedRows.value;
   const column = props.columns.find((entry) => entry.key === active.columnKey);
   const accessor = column?.accessor;
-  if (!accessor && !column?.compare) return props.data;
-  return props.data
-    .map((row) => ({ row, value: column?.compare ? undefined : accessor?.(row) }))
+  if (!accessor && !column?.compare) return keyedRows.value;
+  return keyedRows.value
+    .map((entry) => ({ entry, value: column?.compare ? undefined : accessor?.(entry.row) }))
     .sort((a, b) => {
       const result = column?.compare
-        ? column.compare(a.row, b.row)
+        ? column.compare(a.entry.row, b.entry.row)
         : defaultCompare(a.value, b.value, locale.locale.value);
       return active.direction === SortDirection.Asc ? result : -result;
     })
-    .map(({ row }) => row);
+    .map(({ entry }) => entry);
 });
+
+const rows = computed(() =>
+  sortedRows.value.map(({ row, key, dataIndex }, index) => {
+    const isRowSelected = selectedLookup.value.has(key);
+    return {
+      key,
+      row,
+      index,
+      isSelected: isRowSelected,
+      isSelectable: hasSelection.value && (props.isRowSelectable?.(row, dataIndex) ?? true),
+      isExpandable: hasExpansion.value && (props.isRowExpandable?.(row, dataIndex) ?? true),
+      isExpanded: expandedLookup.value.has(key),
+      detailId: `${tableId}-detail-${dataIndex}`,
+      /* `onClick` only exists when a handler was supplied — React's `onClick={onRowClick ? … : undefined}`. */
+      attrs: {
+        ...(hasSelection.value
+          ? { 'aria-selected': isRowSelected, 'data-selected': isRowSelected ? '' : undefined }
+          : {}),
+        ...(props.onRowClick
+          ? {
+              tabindex: 0,
+              onClick: (event: MouseEvent): void => {
+                if (event.defaultPrevented || (event.target as Element | null)?.closest('[data-row-control]')) return;
+                props.onRowClick?.(row, index);
+              },
+              onKeydown: (event: KeyboardEvent): void => {
+                if (
+                  event.target !== event.currentTarget ||
+                  event.defaultPrevented ||
+                  !['Enter', ' '].includes(event.key)
+                )
+                  return;
+                event.preventDefault();
+                props.onRowClick?.(row, index);
+              },
+            }
+          : {}),
+      },
+      class: cn(
+        props.onRowClick &&
+          'cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2',
+        isRowSelected && 'bg-primary-soft/40 hover:bg-primary-soft/60',
+      ),
+    };
+  }),
+);
+
+/** The keys of every selectable row, in display order — the scope of select-all and shift ranges. */
+const selectableKeys = computed(() => rows.value.filter((entry) => entry.isSelectable).map((entry) => entry.key));
+
+/** The header checkbox's tri-state over the selectable rows. */
+const headerStatus = computed(() =>
+  selectionStatus(createSelection(SelectionModeToken.Multiple, selectedKeys.value), selectableKeys.value),
+);
+
+const skeletonRows = computed(() =>
+  Array.from({ length: Math.max(1, Math.round(props.loadingRowCount) || DefaultLoadingRows) }, (_, index) => index),
+);
+
+const isShowingSkeleton = computed(() => props.isLoading && rows.value.length === 0);
+
+const headClass = computed(() => cn(props.hasStickyHeader && 'sticky top-0 z-raised bg-muted'));
 
 function cycleSort(columnKey: string): void {
   const active = sort.value;
@@ -209,33 +390,6 @@ const headerCells = computed(() =>
   }),
 );
 
-const rows = computed(() =>
-  sortedData.value.map((row, index) => ({
-    key: props.rowKey ? props.rowKey(row, index) : index,
-    row,
-    index,
-    /* `onClick` only exists when a handler was supplied — React's `onClick={onRowClick ? … : undefined}`. */
-    attrs: props.onRowClick
-      ? {
-          tabindex: 0,
-          onClick: (event: MouseEvent): void => {
-            if (!event.defaultPrevented) props.onRowClick?.(row, index);
-          },
-          onKeydown: (event: KeyboardEvent): void => {
-            if (event.target !== event.currentTarget || event.defaultPrevented || !['Enter', ' '].includes(event.key))
-              return;
-            event.preventDefault();
-            props.onRowClick?.(row, index);
-          },
-        }
-      : ({} as Record<string, never>),
-    class: cn(
-      props.onRowClick &&
-        'cursor-pointer focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2',
-    ),
-  })),
-);
-
 /** The column's own renderer, then its accessor — the fallback under the `cell` slot. */
 function renderCell(column: DataTableColumn<T>, row: T, index: number): unknown {
   if (column.cell) return column.cell(row, index);
@@ -243,14 +397,85 @@ function renderCell(column: DataTableColumn<T>, row: T, index: number): unknown 
   return null;
 }
 
+/** The current selection as a model state, carrying the range anchor. */
+function selectionState(): SelectionState<SelectionKey> {
+  return createSelection(props.selectionMode, selectedKeys.value, selectionAnchor);
+}
+
+/** Requests the next selection, keeping its anchor and emitting only a real change. */
+function commitSelection(next: SelectionState<SelectionKey>): void {
+  selectionAnchor = next.anchor;
+  const keys = [...next.keys];
+  if (!sameKeys(keys, selectedKeys.value)) setSelectedKeys(keys);
+}
+
+/** Records whether the press about to toggle a row checkbox held Shift. */
+function rememberGesture(event: MouseEvent): void {
+  isRangeGesture = event.shiftKey;
+}
+
+/** Toggles one row — a Shift press in multiple mode selects the range from the anchor. */
+function toggleRow(key: SelectionKey): void {
+  const state = selectionState();
+  const isRange = isRangeGesture && props.selectionMode === SelectionModeToken.Multiple;
+  isRangeGesture = false;
+  if (isRange) commitSelection(extendSelection(state, key, selectableKeys.value));
+  else if (props.selectionMode === SelectionModeToken.Single)
+    commitSelection(isSelected(state, key) ? deselect(state, key) : select(state, key));
+  else commitSelection(toggle(state, key));
+}
+
+/** Selects every selectable row, or clears them when all are selected. */
+function toggleAllRows(): void {
+  commitSelection(toggleAll(selectionState(), selectableKeys.value));
+}
+
+/** Expands a collapsed row or collapses an expanded one. */
+function toggleExpanded(key: SelectionKey): void {
+  const next = new Set(expandedKeys.value);
+  if (next.has(key)) next.delete(key);
+  else next.add(key);
+  setExpandedKeys([...next]);
+}
+
+/** The expand chevron's classes — it points down once its row is expanded, and mirrors right to left. */
+function expandIconClass(isExpanded: boolean): string {
+  return cn('size-4 transition-transform rtl:-scale-x-100', isExpanded && 'rotate-90 rtl:scale-x-100');
+}
+
 const SortButtonClass =
   'inline-flex items-center gap-1 rounded-sm transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring';
+
+const ExpandButtonClass =
+  'inline-flex size-6 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring';
 </script>
 
 <template>
-  <Table :is-striped="isStriped" :is-hoverable="resolvedHoverable" :density="density" :is-bare="isBare">
-    <TableHead>
+  <Table
+    :is-striped="isStriped"
+    :is-hoverable="resolvedHoverable"
+    :density="density"
+    :is-bare="isBare"
+    :container-class-name="containerClassName"
+    :aria-busy="isLoading || undefined"
+  >
+    <TableHead :class="headClass">
       <TableRow>
+        <TableHeaderCell v-if="hasExpansion" class="w-10">
+          <span class="sr-only">{{ locale.t('DataTable.expandColumn', undefined, 'Details') }}</span>
+        </TableHeaderCell>
+        <TableHeaderCell v-if="hasSelection" class="w-10" data-row-control>
+          <CheckboxInput
+            v-if="selectionMode === SelectionModeToken.Multiple"
+            size="sm"
+            :model-value="headerStatus === SelectionStatus.All"
+            :is-indeterminate="headerStatus === SelectionStatus.Some"
+            :disabled="selectableKeys.length === 0"
+            :aria-label="locale.t('DataTable.selectAll', undefined, 'Select all rows')"
+            @update:model-value="toggleAllRows"
+          />
+          <span v-else class="sr-only">{{ locale.t('DataTable.selectColumn', undefined, 'Select') }}</span>
+        </TableHeaderCell>
         <TableHeaderCell
           v-for="cell in headerCells"
           :key="cell.key"
@@ -271,21 +496,63 @@ const SortButtonClass =
       </TableRow>
     </TableHead>
     <TableBody>
-      <template v-if="rows.length === 0">
+      <template v-if="isShowingSkeleton">
+        <slot name="loading">
+          <TableRow v-for="index in skeletonRows" :key="`skeleton-${index}`" data-skeleton-row>
+            <TableCell v-for="column in columnCount" :key="column">
+              <span class="block h-4 w-full max-w-48 animate-pulse rounded-sm bg-muted motion-reduce:animate-none" />
+            </TableCell>
+          </TableRow>
+        </slot>
+      </template>
+      <template v-else-if="rows.length === 0">
         <TableRow>
-          <TableCell :colspan="columns.length" class="py-8 text-center text-muted-foreground">
+          <TableCell :colspan="columnCount" class="py-8 text-center text-muted-foreground">
             <slot name="emptyContent">{{ emptyText }}</slot>
           </TableCell>
         </TableRow>
       </template>
       <template v-else>
-        <TableRow v-for="row in rows" :key="row.key" v-bind="row.attrs" :class="row.class">
-          <TableCell v-for="column in columns" :key="column.key" :class="alignClass(column.align)">
-            <slot name="cell" :row="row.row" :column="column" :index="row.index">{{
-              renderCell(column, row.row, row.index)
-            }}</slot>
-          </TableCell>
-        </TableRow>
+        <template v-for="row in rows" :key="row.key">
+          <TableRow v-bind="row.attrs" :class="row.class">
+            <TableCell v-if="hasExpansion" class="w-10" data-row-control>
+              <button
+                v-if="row.isExpandable"
+                type="button"
+                :class="ExpandButtonClass"
+                :aria-expanded="row.isExpanded"
+                :aria-controls="row.isExpanded ? row.detailId : undefined"
+                :aria-label="
+                  row.isExpanded
+                    ? locale.t('DataTable.collapseRow', undefined, 'Hide details')
+                    : locale.t('DataTable.expandRow', undefined, 'Show details')
+                "
+                @click="toggleExpanded(row.key)"
+              >
+                <ChevronRight :class="expandIconClass(row.isExpanded)" />
+              </button>
+            </TableCell>
+            <TableCell v-if="hasSelection" class="w-10" data-row-control @click.capture="rememberGesture">
+              <CheckboxInput
+                size="sm"
+                :model-value="row.isSelected"
+                :disabled="!row.isSelectable"
+                :aria-label="locale.t('DataTable.selectRow', undefined, 'Select row')"
+                @update:model-value="toggleRow(row.key)"
+              />
+            </TableCell>
+            <TableCell v-for="column in columns" :key="column.key" :class="alignClass(column.align)">
+              <slot name="cell" :row="row.row" :column="column" :index="row.index">{{
+                renderCell(column, row.row, row.index)
+              }}</slot>
+            </TableCell>
+          </TableRow>
+          <TableRow v-if="row.isExpandable && row.isExpanded" :id="row.detailId" data-detail-row>
+            <TableCell :colspan="columnCount" class="bg-muted/30">
+              <slot name="expanded" :row="row.row" :index="row.index" />
+            </TableCell>
+          </TableRow>
+        </template>
       </template>
     </TableBody>
   </Table>
