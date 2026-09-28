@@ -80,3 +80,5 @@ export * from './pointControl';
 export * from './ratingPicker';
 export * from './rangeSliderInput';
 export * from './timezonePicker';
+export * from './monthPicker';
+export * from './yearPicker';

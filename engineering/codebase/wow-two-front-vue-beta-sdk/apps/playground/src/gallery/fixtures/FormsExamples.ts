@@ -1,3 +1,4 @@
+import { Temporal } from 'temporal-polyfill';
 import {
   ControlGroupField,
   ToggleInput,
@@ -105,6 +106,8 @@ import {
   WizardFormStep,
   WizardFormSteps,
   TimezonePicker,
+  MonthPicker,
+  YearPicker,
 } from '../../../../../src/presentation/forms';
 import { ExactNumber } from '../../../../../src/foundation/numbers';
 const exactNumberExample = ExactNumber.parse('9223372036854775807.125');
@@ -199,6 +202,10 @@ export const formsExamples: readonly SmokeCase[] = [
   smokeCase('RangeSliderInput', RangeSliderInput, { defaultValue: [20, 80] }),
 
   smokeCase('RatingPicker', RatingPicker, { defaultValue: 3, step: 0.5 }),
+
+  smokeCase('MonthPicker', MonthPicker, { defaultValue: Temporal.PlainYearMonth.from('2026-09') }),
+
+  smokeCase('YearPicker', YearPicker, { defaultValue: 2026, max: 2030 }),
 
   smokeCase('TimezonePicker', TimezonePicker, { defaultValue: 'Asia/Tashkent', timeZones: ['UTC', 'Asia/Tashkent'] }),
 

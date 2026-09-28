@@ -96,6 +96,8 @@ const {
   EditableInputSubmit,
   EditableInputCancel,
   TimezonePicker,
+  MonthPicker,
+  YearPicker,
 } = forms;
 
 const covered = [
@@ -164,6 +166,8 @@ const covered = [
   'KnobInput',
   'RatingPicker',
   'TimezonePicker',
+  'MonthPicker',
+  'YearPicker',
   'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
@@ -257,6 +261,8 @@ const color = ref('#7c3aed');
 const knob = ref(35);
 const rating = ref<number | null>(3.5);
 const timeZone = ref<string | null>('Asia/Tashkent');
+const billingMonth = ref<Temporal.PlainYearMonth | null>(Temporal.PlainYearMonth.from('2026-09'));
+const fiscalYear = ref<number | null>(null);
 const priceRange = ref<readonly [number, number]>([20, 80]);
 const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
@@ -382,6 +388,26 @@ const stamp = ref<Temporal.PlainDateTime | null>(
           <RatingPicker v-model="rating" :step="0.5" aria-label="Quality" />
           <RatingPicker :model-value="rating" is-read-only size="sm" tone="primary" />
           <p class="text-xs text-subtle-foreground">rating = {{ rating ?? 'null' }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="MonthPicker" note="year page of months · Mar 2025 – Dec 2026 selectable · arrows cross years">
+        <div class="flex flex-col items-start gap-2">
+          <MonthPicker
+            v-model="billingMonth"
+            :min="Temporal.PlainYearMonth.from('2025-03')"
+            :max="Temporal.PlainYearMonth.from('2026-12')"
+            aria-label="Billing month"
+            class="w-56"
+          />
+          <p class="text-xs text-subtle-foreground">month = {{ billingMonth?.toString() ?? 'null' }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="YearPicker" note="decade page framed by its neighbours · PageUp/Down turn decades">
+        <div class="flex flex-col items-start gap-2">
+          <YearPicker v-model="fiscalYear" :max="2030" aria-label="Fiscal year" class="w-40" />
+          <p class="text-xs text-subtle-foreground">year = {{ fiscalYear ?? 'null' }}</p>
         </div>
       </Demo>
 

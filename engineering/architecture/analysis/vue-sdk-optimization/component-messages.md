@@ -130,6 +130,7 @@ in their capability specifications and are not inferred by this catalogue.
 | `MessageGroup.jumpToLatest` | Jump to latest | [MessageGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/messageGroup/MessageGroup.vue) |
 | `MonthGrid.nextMonth` | Next month | [MonthGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/MonthGrid.vue) |
 | `MonthGrid.previousMonth` | Previous month | [MonthGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/MonthGrid.vue) |
+| `MonthPicker.placeholder` | Pick a month | [MonthPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/monthPicker/MonthPicker.vue) |
 | `MonthView.more` | +{count} more | [MonthView.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/eventCalendarViewer/MonthView.vue) |
 | `NotificationCenterGroup.notifications` | Notifications | [NotificationCenterGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/notificationCenterGroup/NotificationCenterGroup.vue) |
 | `NotificationCenterGroup.title` | Notifications | [NotificationCenterGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/notificationCenterGroup/NotificationCenterGroup.vue) |
@@ -154,6 +155,10 @@ in their capability specifications and are not inferred by this catalogue.
 | `PdfViewer.title` | PDF document | [PdfViewer.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/pdfViewer/PdfViewer.vue) |
 | `PdfViewer.zoomIn` | Zoom in | [PdfViewer.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/pdfViewer/PdfViewer.vue) |
 | `PdfViewer.zoomOut` | Zoom out | [PdfViewer.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/pdfViewer/PdfViewer.vue) |
+| `PeriodGrid.nextDecade` | Next decade | [PeriodGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/PeriodGrid.vue) |
+| `PeriodGrid.nextYear` | Next year | [PeriodGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/PeriodGrid.vue) |
+| `PeriodGrid.previousDecade` | Previous decade | [PeriodGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/PeriodGrid.vue) |
+| `PeriodGrid.previousYear` | Previous year | [PeriodGrid.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/PeriodGrid.vue) |
 | `PhoneInput.country` | Country | [PhoneInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/phoneInput/PhoneInput.vue) |
 | `PinInput.character` | Character {index} of {length} | [PinInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/pinInput/PinInput.vue) |
 | `PinInput.digit` | Digit {index} of {length} | [PinInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/pinInput/PinInput.vue) |
@@ -220,3 +225,4 @@ in their capability specifications and are not inferred by this catalogue.
 | `VideoPlayer.videoPlayer` | Video player | [VideoPlayer.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/videoPlayer/VideoPlayer.vue) |
 | `WizardFormSteps.optional` | (optional) | [WizardFormSteps.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/wizardForm/WizardFormSteps.vue) |
 | `WizardFormSteps.wizardformSteps` | WizardForm steps | [WizardFormSteps.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/wizardForm/WizardFormSteps.vue) |
+| `YearPicker.placeholder` | Pick a year | [YearPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/yearPicker/YearPicker.vue) |
