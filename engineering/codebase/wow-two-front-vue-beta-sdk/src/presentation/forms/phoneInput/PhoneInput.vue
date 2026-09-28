@@ -176,16 +176,25 @@ const iso = computed(() => split.value.iso);
 const national = computed(() => split.value.national);
 const country = computed(() => PhoneCountries.find((c) => c.iso === iso.value) ?? PhoneCountries[0]!);
 
+/* A dial code alone is not a phone number: with no national digits the value is empty, so a blank field submits
+   nothing and fails `required` — the selected country survives in `selectedIso`. */
+function e164For(dial: string, digits: string): string {
+  return digits ? `${dial}${digits}` : '';
+}
+
 function setCountry(event: Event): void {
   const nextIso = (event.target as HTMLSelectElement).value;
   const next = PhoneCountries.find((c) => c.iso === nextIso) ?? country.value;
   selectedIso.value = next.iso;
-  controlled.setValue(`${next.dial}${national.value}`);
+  const nextValue = e164For(next.dial, national.value);
+  if (nextValue !== e164.value) controlled.setValue(nextValue);
 }
 
 function setNational(event: Event): void {
   const digits = (event.target as HTMLInputElement).value.replace(/\D/g, '');
-  controlled.setValue(`${country.value.dial}${digits}`);
+  /* Deriving the country before the write keeps a shared dial code (+1 US / CA) on the reader's pick. */
+  selectedIso.value = country.value.iso;
+  controlled.setValue(e164For(country.value.dial, digits));
 }
 
 const OwnedAttributes: ReadonlySet<string> = new Set(['class']);

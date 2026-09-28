@@ -14,6 +14,14 @@ Public import: `import { PhoneInput } from '@wow-two-beta/ui-vue/presentation/fo
 - The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
+## Behavior
+
+- The value is E.164: the selected dial code joined to the national digits (non-digits are dropped).
+- With no national digits the value is empty — a dial code alone never submits or satisfies `required`. The chosen
+  country is kept, including a shared dial code (`+1` for the US or Canada).
+- A value's country is read from its longest matching dial code (`+420` before `+42…`).
+- Regression: `tests/unit/presentation/forms/PhoneInput.dom.test.ts`.
+
 ## Props
 
 | Prop             | Type      | Required | Default            | Meaning                                                                                  |
