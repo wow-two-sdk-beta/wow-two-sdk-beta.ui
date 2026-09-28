@@ -14,16 +14,19 @@ export interface MenuItemProps {
 
   /** The disabled state — blocks activation. */
   readonly isDisabled?: boolean;
+
+  /** The close-after-activate toggle. Default `true`; `false` keeps the menu open for repeated actions. */
+  readonly closeOnSelect?: boolean;
 }
 </script>
 
 <script setup lang="ts">
-import { DomOrderExtensions } from '../../../foundation/dom';
 import { computed, onScopeDispose, shallowRef, useAttrs, watch } from 'vue';
 import { cn } from '../../../foundation/styles';
 import { dataAttr } from '../../../foundation/dom';
 import { useId } from '../../../foundation/identifiers';
 import { useMenuContext } from './MenuContext';
+import { MenuExtensions } from './MenuExtensions';
 import { MenuItemState as MenuItemStateToken, menuItemVariants } from './Menu.variants';
 
 /** Renders one activatable menu row; the arrow keys walk the enabled siblings. */
@@ -36,10 +39,11 @@ defineSlots<{ default(): unknown }>();
 const props = withDefaults(defineProps<MenuItemProps>(), {
   state: undefined,
   isDisabled: undefined,
+  closeOnSelect: true,
 });
 
 const emit = defineEmits<{
-  /** Fires when the reader activates the row with Enter, Space, or a click; the menu closes after. */
+  /** Fires when the reader activates the row with Enter, Space, or a click; the menu closes after by default. */
   select: [];
 }>();
 
@@ -47,6 +51,18 @@ const attrs = useAttrs();
 const menu = useMenuContext();
 const id = useId();
 const el = shallowRef<HTMLButtonElement | null>(null);
+
+const itemState = computed(
+  () => props.state ?? (props.isDisabled ? MenuItemStateToken.Disabled : MenuItemStateToken.Default),
+);
+
+const classes = computed(() => cn(menuItemVariants({ state: itemState.value }), attrs.class as string | undefined));
+
+/** Everything but `class`, which is re-applied through `cn` above. */
+const rest = computed(() => {
+  const { class: _class, ...others } = attrs;
+  return others;
+});
 
 /* React re-registered from an effect keyed on `[ctx, id, isDisabled]`; the same
    two inputs are watched here, so a disabled toggle re-registers and the arrow
@@ -61,69 +77,37 @@ watch(
 
 onScopeDispose(() => menu.unregisterItem(id));
 
-function moveFocus(target: 1 | -1 | 'first' | 'last'): void {
-  const list = DomOrderExtensions.inDocumentOrder(
-    menu.items.filter((i) => !i.disabled),
-    (item) => item.el,
-  );
-  if (list.length === 0) return;
-  if (target === 'first' || target === 'last') {
-    list[target === 'first' ? 0 : list.length - 1]?.el?.focus();
-    return;
-  }
-  const index = list.findIndex((i) => i.id === id);
-  let nextIndex = index + target;
-  if (index === -1) nextIndex = target === 1 ? 0 : list.length - 1;
-  if (nextIndex < 0) nextIndex = list.length - 1;
-  if (nextIndex >= list.length) nextIndex = 0;
-  list[nextIndex]?.el?.focus();
+/** Emits `select`, then closes the menu tree unless the row keeps it open. */
+function activate(): void {
+  emit('select');
+  if (props.closeOnSelect) menu.close();
 }
 
 function handleKeydown(event: KeyboardEvent): void {
   if (event.defaultPrevented || props.isDisabled) return;
-  switch (event.key) {
-    case 'ArrowDown':
-      event.preventDefault();
-      moveFocus(1);
-      break;
-    case 'ArrowUp':
-      event.preventDefault();
-      moveFocus(-1);
-      break;
-    case 'Home':
-      event.preventDefault();
-      moveFocus('first');
-      break;
-    case 'End':
-      event.preventDefault();
-      moveFocus('last');
-      break;
-    case 'Enter':
-    case ' ':
-      event.preventDefault();
-      emit('select');
-      menu.close();
-      break;
+  if (menu.navigate(id, event)) return;
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    activate();
   }
 }
 
 function handleClick(event: MouseEvent): void {
   if (event.defaultPrevented || props.isDisabled) return;
-  emit('select');
-  menu.close();
+  activate();
 }
 
-const itemState = computed(
-  () => props.state ?? (props.isDisabled ? MenuItemStateToken.Disabled : MenuItemStateToken.Default),
-);
+/** Moves focus to the row under a mouse pointer, so pointer and keyboard share one highlight. */
+function handlePointerMove(event: PointerEvent): void {
+  if (!MenuExtensions.isMousePointer(event)) return;
+  menu.hoverItem(null);
+  if (props.isDisabled) menu.focusSurface();
+  else MenuExtensions.focusRow(el.value);
+}
 
-const classes = computed(() => cn(menuItemVariants({ state: itemState.value }), attrs.class as string | undefined));
-
-/** Everything but `class`, which is re-applied through `cn` above. */
-const rest = computed(() => {
-  const { class: _class, ...others } = attrs;
-  return others;
-});
+function handlePointerLeave(event: PointerEvent): void {
+  if (MenuExtensions.isMousePointer(event)) menu.focusSurface();
+}
 
 defineExpose({ el });
 </script>
@@ -144,6 +128,8 @@ defineExpose({ el });
     :class="classes"
     @click="handleClick"
     @keydown="handleKeydown"
+    @pointermove="handlePointerMove"
+    @pointerleave="handlePointerLeave"
   >
     <slot />
   </button>

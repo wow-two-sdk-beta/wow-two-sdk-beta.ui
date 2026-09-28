@@ -24,6 +24,16 @@ export const menuSeparatorVariants = tv({
   base: '-mx-1 my-1 h-px bg-border',
 });
 
+/** The fixed leading column a checkbox or radio row draws its check mark in. */
+export const menuItemIndicatorVariants = tv({
+  base: 'inline-flex size-4 shrink-0 items-center justify-center',
+});
+
+/** The trailing chevron a submenu trigger row points at its submenu with; it mirrors in right-to-left. */
+export const menuSubIndicatorVariants = tv({
+  base: 'ms-auto size-4 shrink-0 text-muted-foreground rtl:-scale-x-100',
+});
+
 export type MenuVariants = VariantProps<typeof menuVariants>;
 export type MenuItemVariants = VariantProps<typeof menuItemVariants>;
 

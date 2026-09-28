@@ -45,7 +45,10 @@ const panelEl = shallowRef<HTMLElement | null>(null);
    pop-out plays — `Menu` unmounts with this component, which would kill the exit.
    Opening flips this true synchronously; closing defers the unmount until the
    panel's exit animation ends (`animationend` below). Under reduced motion no
-   animation fires, so drop it on the next frame instead. */
+   animation fires, so drop it on the next frame instead. Presence removing the
+   closed panel also drops it (`setPanel` below): an exit that never animates —
+   a close inside the enter frames, or no animation support — must not leave an
+   empty, focus-trapping surface behind. */
 const mounted = shallowRef(context.open.value);
 
 watch(
@@ -67,13 +70,13 @@ watch(
   { immediate: true, flush: 'post' },
 );
 
-/* ArrowUp-open focuses the LAST enabled item (APG menu-button pattern); the
-   trigger arms `openFocus` per gesture and this consumes it. Other opens leave
-   it at 'first' and FocusScope's default first-tabbable autofocus applies. */
+/* ArrowUp-open focuses the LAST enabled row of any kind — plain, checkbox, radio or submenu
+   trigger (APG menu-button pattern); the trigger arms `openFocus` per gesture and this consumes
+   it. Other opens leave it at 'first' and FocusScope's default first-tabbable autofocus applies. */
 function focusLastEnabledItem(panel: HTMLElement): void {
   if (context.openFocus.current !== 'last') return;
   context.openFocus.current = 'first';
-  const items = panel.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])');
+  const items = panel.querySelectorAll<HTMLElement>('[role^="menuitem"]:not([disabled])');
   items[items.length - 1]?.focus();
 }
 
@@ -92,6 +95,8 @@ watch(
 
 function setPanel(node: unknown): void {
   panelEl.value = (node ?? null) as HTMLElement | null;
+  /* The panel left the DOM after its exit: drop `Menu` with it. */
+  if (node === null && !context.open.value) mounted.value = false;
 }
 
 function handleClose(): void {

@@ -26,6 +26,12 @@ const {
   MenuLabel,
   MenuGroup,
   MenuSeparator,
+  MenuCheckboxItem,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSub,
+  MenuSubTrigger,
+  MenuSubContent,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -55,6 +61,12 @@ const covered = [
   'MenuLabel',
   'MenuGroup',
   'MenuSeparator',
+  'MenuCheckboxItem',
+  'MenuRadioGroup',
+  'MenuRadioItem',
+  'MenuSub',
+  'MenuSubTrigger',
+  'MenuSubContent',
   'DropdownMenu',
   'DropdownMenuTrigger',
   'DropdownMenuContent',
@@ -86,6 +98,8 @@ const covered = [
 const page = ref(4);
 const paletteOpen = ref(false);
 const menuOpen = ref(false);
+const showHidden = ref(false);
+const sortBy = ref<string | null>('name');
 const menuAnchor = ref<HTMLElement | null>(null);
 </script>
 
@@ -149,19 +163,33 @@ const menuAnchor = ref<HTMLElement | null>(null);
         </Menu>
       </Demo>
 
-      <Demo name="DropdownMenu" note="click the trigger — content is portalled">
+      <Demo name="DropdownMenu" note="checkbox, radio and submenu rows — hover or ArrowRight opens Share">
         <DropdownMenu v-model:open="menuOpen">
           <DropdownMenuTrigger>
             <Button variant="outline" size="sm">Open menu</Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent class="w-56">
             <MenuItem>New file</MenuItem>
-            <MenuItem>New folder</MenuItem>
+            <MenuSub>
+              <MenuSubTrigger>Share</MenuSubTrigger>
+              <MenuSubContent class="w-44">
+                <MenuItem>Copy link</MenuItem>
+                <MenuItem>Email</MenuItem>
+              </MenuSubContent>
+            </MenuSub>
+            <MenuSeparator />
+            <MenuCheckboxItem v-model="showHidden">Show hidden files</MenuCheckboxItem>
+            <MenuRadioGroup v-model="sortBy" label="Sort by">
+              <MenuRadioItem value="name">Name</MenuRadioItem>
+              <MenuRadioItem value="date">Date modified</MenuRadioItem>
+            </MenuRadioGroup>
             <MenuSeparator />
             <MenuItem state="destructive">Delete</MenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <p class="mt-1 text-xs text-subtle-foreground">open = {{ menuOpen }}</p>
+        <p class="mt-1 text-xs text-subtle-foreground">
+          open = {{ menuOpen }} · hidden = {{ showHidden }} · sort = {{ sortBy }}
+        </p>
       </Demo>
 
       <Demo name="ContextMenu" note="right-click the grey box">

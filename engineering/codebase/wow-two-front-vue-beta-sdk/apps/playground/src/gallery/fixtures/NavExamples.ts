@@ -12,10 +12,16 @@ import {
   MenubarContent,
   MenubarMenu,
   MenubarTrigger,
+  MenuCheckboxItem,
   MenuGroup,
   MenuItem,
   MenuLabel,
+  MenuRadioGroup,
+  MenuRadioItem,
   MenuSeparator,
+  MenuSub,
+  MenuSubContent,
+  MenuSubTrigger,
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
@@ -35,6 +41,8 @@ import { smokeCase, type SmokeCase } from './Example';
    the port's `boolean` cast bug — a root that lost its explicit `undefined` default reads as
    controlled-and-closed, and every part below it would render nothing. */
 const inMenu = (node: VNode): VNode => h(Menu, { anchor: null, open: true }, () => node);
+const inMenuRadioGroup = (node: VNode): VNode => inMenu(h(MenuRadioGroup, { defaultValue: 'a' }, () => node));
+const inMenuSub = (node: VNode): VNode => inMenu(h(MenuSub, { defaultOpen: true }, () => node));
 
 const inDropdownMenu = (node: VNode): VNode => h(DropdownMenu, { defaultOpen: true }, () => node);
 
@@ -71,6 +79,20 @@ export const navExamples: readonly SmokeCase[] = [
   smokeCase('MenuLabel', MenuLabel, {}, { slot: true, wrap: inMenu }),
 
   smokeCase('MenuSeparator', MenuSeparator, {}, { wrap: inMenu }),
+
+  smokeCase('MenuCheckboxItem', MenuCheckboxItem, { defaultValue: true }, { slot: true, wrap: inMenu }),
+
+  smokeCase('MenuRadioGroup', MenuRadioGroup, { label: 'Sort by' }, { slot: true, wrap: inMenu }),
+
+  smokeCase('MenuRadioItem', MenuRadioItem, { value: 'a' }, { slot: true, wrap: inMenuRadioGroup }),
+
+  smokeCase('MenuSub', MenuSub, {}, { slot: true, wrap: inMenu }),
+
+  smokeCase('MenuSubTrigger', MenuSubTrigger, {}, { slot: true, wrap: inMenuSub }),
+
+  // No slot probe: the surface is a second portal that lands a tick after its parent menu's, so its
+  // open-state rendering is covered by the focused submenu tests instead.
+  smokeCase('MenuSubContent', MenuSubContent, {}, { wrap: inMenuSub }),
 
   smokeCase('DropdownMenu', DropdownMenu, {}, { slot: true }),
 
