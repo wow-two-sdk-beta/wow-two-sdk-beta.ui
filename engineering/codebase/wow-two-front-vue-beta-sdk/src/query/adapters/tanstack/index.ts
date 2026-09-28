@@ -60,6 +60,7 @@ export {
   type UseAppPaginatedQueryReturn,
 } from './hooks/UseAppPaginatedQuery';
 export { PageExtensions } from '../../PageExtensions';
+export { useRefresh, type UseRefreshOptions, type UseRefreshReturn } from '../../UseRefresh';
 export { useAppLazyQuery, type UseAppLazyQueryOptions, type UseAppLazyQueryReturn } from './hooks/UseAppLazyQuery';
 export { useQueryCache, type QueryCacheApi, type QueryCachePrefetch } from './hooks/UseQueryCache';
 

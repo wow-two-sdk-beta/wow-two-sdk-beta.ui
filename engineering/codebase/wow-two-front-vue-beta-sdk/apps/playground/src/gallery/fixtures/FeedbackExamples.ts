@@ -19,6 +19,9 @@ import {
   ProgressCircleIndicator,
   ProgressStepsIndicator,
   SkeletonState,
+  SkeletonStateGroup,
+  SkeletonStateSlot,
+  SkeletonStateText,
   Spinner,
   StatusIndicator,
   Toast,
@@ -39,6 +42,12 @@ export const feedbackExamples: readonly SmokeCase[] = [
   smokeCase('Spinner', Spinner, {}),
 
   smokeCase('SkeletonState', SkeletonState, {}, { slot: true }),
+
+  smokeCase('SkeletonStateSlot', SkeletonStateSlot, { isLoading: true }, { slot: true }),
+
+  smokeCase('SkeletonStateGroup', SkeletonStateGroup, { isLoading: true }, { slot: true }),
+
+  smokeCase('SkeletonStateText', SkeletonStateText, { lines: 2 }),
 
   smokeCase('ProgressBar', ProgressBar, {}),
 

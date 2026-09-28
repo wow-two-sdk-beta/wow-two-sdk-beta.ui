@@ -9,6 +9,7 @@ Public import: `import { SkeletonState } from '@wow-two-beta/ui-vue/presentation
 ## Contract
 
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
+- A placeholder whose layout is known stays a sized block; a value inside a layout that stays belongs in `SkeletonStateSlot`, and a region that loads as one belongs in `SkeletonStateGroup`.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
 ## Props
@@ -16,6 +17,7 @@ Public import: `import { SkeletonState } from '@wow-two-beta/ui-vue/presentation
 | Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
 | `shape` | `SkeletonStateShape` | no | — | The placeholder shape. |
+| `animation` | `SkeletonStateAnimation` | no | — | How the placeholder moves; defaults to the nearest `SkeletonStateGroup`'s, else `pulse`. |
 
 ## Emits
 
