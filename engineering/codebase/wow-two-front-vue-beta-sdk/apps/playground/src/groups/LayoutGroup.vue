@@ -34,6 +34,7 @@ const {
   AnchorLayout,
   StickyLayout,
   VirtualScrollArea,
+  MasonryLayout,
 } = layout;
 
 /** Names every component the curated section below renders. */
@@ -64,12 +65,15 @@ const covered = [
   'AnchorLayout',
   'StickyLayout',
   'VirtualScrollArea',
+  'MasonryLayout',
 ];
 
 /** Ten thousand rows, so the windowing is visible in the DOM inspector. */
 const MANY_ROWS = Array.from({ length: 10_000 }, (_, index) => `Scan event #${index + 1}`);
 const stickyRoot = useTemplateRef<HTMLElement>('stickyRoot');
 const endReached = ref(false);
+/** Card heights for the masonry demo — uneven on purpose. */
+const MASONRY_HEIGHTS = [64, 96, 48, 120, 72, 56, 104, 40];
 
 const SURFACE_VARIANTS = [
   'solid',
@@ -334,6 +338,19 @@ const FLEX_CASES = [
           </VirtualScrollArea>
         </div>
         <p class="mt-1 text-[10px] text-subtle-foreground">end reached = {{ endReached }}</p>
+      </Demo>
+
+      <Demo name="MasonryLayout" note="uneven cards flow down 3 balanced columns (fewer below 7rem each)">
+        <MasonryLayout :columns="3" min-column-width="7rem" gap="0.5rem">
+          <div
+            v-for="(height, index) in MASONRY_HEIGHTS"
+            :key="index"
+            class="flex items-center justify-center rounded-md bg-muted text-xs"
+            :style="{ height: `${height}px` }"
+          >
+            card {{ index + 1 }}
+          </div>
+        </MasonryLayout>
       </Demo>
 
       <Demo name="ScrollArea" note="vertical — native scrollbar, border on the wrapper">

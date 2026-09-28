@@ -38,6 +38,7 @@ import {
   TwoColumnLayout,
   VStackLayout,
   VirtualScrollArea,
+  MasonryLayout,
 } from '../../../../../src/presentation/layout';
 import { h, type VNode } from 'vue';
 import { Orientation } from '../../../../../src/foundation/styles';
@@ -135,4 +136,6 @@ export const layoutExamples: readonly SmokeCase[] = [
 
   // No slot probe: rows render only once the client measures a viewport.
   smokeCase('VirtualScrollArea', VirtualScrollArea, { items: ['First', 'Second'], itemSize: 24 }),
+
+  smokeCase('MasonryLayout', MasonryLayout, { columns: 2, gap: '0.5rem' }, { slot: true }),
 ];

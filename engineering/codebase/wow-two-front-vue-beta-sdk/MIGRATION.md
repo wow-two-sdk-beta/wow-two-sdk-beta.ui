@@ -12,10 +12,11 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 | Area | Added |
 |---|---|
 | Menus (`presentation/nav`) | `MenuCheckboxItem`, `MenuRadioGroup` + `MenuRadioItem`, `MenuSub` + `MenuSubTrigger` + `MenuSubContent` — usable in `DropdownMenuContent`, `ContextMenuContent` and `MenubarContent` |
-| Forms | `RatingPicker` (whole/half steps, clearable), `RangeSliderInput` (two thumbs, `commit` event) |
+| App navigation | `BottomNavMenu` + `BottomNavMenuItem` (mobile bottom bar, `asChild` router links, badges) |
+| Forms | `RatingPicker` (whole/half steps, clearable), `RangeSliderInput` (two thumbs, `commit` event), `TimezonePicker` (IANA ids, offset-labelled) |
 | Overlays | `ConfirmPopover` — inline confirm that awaits a promise from `@confirm` |
-| Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary` |
-| Layout | `StickyLayout` (pinned state), `VirtualScrollArea` (windowed list, `end-reached`) |
+| Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary`, `OverflowGroup` (first N items + counted marker) |
+| Layout | `StickyLayout` (pinned state), `VirtualScrollArea` (windowed list, `end-reached`), `MasonryLayout` |
 | `DataTable` | `selectionMode` + `v-model:selection`, `expanded` slot + `v-model:expanded`, `hasStickyHeader`, `isLoading` |
 
 Behavioral changes to existing parts:

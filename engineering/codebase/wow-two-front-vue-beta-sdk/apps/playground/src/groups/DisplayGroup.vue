@@ -87,7 +87,11 @@ const {
   CarouselDots,
   ActivityTimeline,
   ActivityItem,
+  OverflowGroup,
 } = display;
+
+/** Tags for the overflow row. */
+const STACK_TAGS = ['vue', 'tailwind', 'temporal', 'vitest', 'pnpm'];
 
 const covered = [
   'Badge',
@@ -97,6 +101,7 @@ const covered = [
   'AvatarGroup',
   'Text',
   'TruncatedText',
+  'OverflowGroup',
   'CountdownText',
   'Heading',
   'EyebrowText',
@@ -233,6 +238,24 @@ const selectedRows = ref<Array<string | number>>([]);
     <div class="grid grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-3">
       <Demo name="TruncatedText" note="clamped to 2 lines — the toggle only appears when the copy overflows">
         <TruncatedText :lines="2" class="text-sm text-muted-foreground">{{ LONG_COPY }}</TruncatedText>
+      </Demo>
+
+      <Demo name="OverflowGroup" note="first 3 tags, the rest counted in one marker; custom marker below">
+        <div class="flex flex-col gap-2">
+          <OverflowGroup :items="STACK_TAGS" :max="3">
+            <template #default="{ item }">
+              <span class="rounded-full border border-border px-2 py-0.5 text-xs">{{ item }}</span>
+            </template>
+          </OverflowGroup>
+          <OverflowGroup :items="STACK_TAGS" :max="1">
+            <template #default="{ item }">
+              <span class="rounded-full border border-border px-2 py-0.5 text-xs">{{ item }}</span>
+            </template>
+            <template #overflow="{ hidden }">
+              <span class="text-xs text-subtle-foreground">and {{ hidden.join(', ') }}</span>
+            </template>
+          </OverflowGroup>
+        </div>
       </Demo>
 
       <Demo name="CountdownText" note="ticks on second boundaries; custom format below">

@@ -12,6 +12,7 @@ import {
 import { ref } from 'vue';
 import * as nav from '@wow-two-beta/ui-vue/presentation/nav';
 import { Button } from '@wow-two-beta/ui-vue/presentation/actions';
+import { CountBadge } from '@wow-two-beta/ui-vue/presentation/display';
 import { Home, Inbox, Settings } from 'lucide-vue-next';
 import Demo from '../gallery/Demo.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
@@ -50,6 +51,8 @@ const {
   NavigationMenuLink,
   ScrollSpy,
   TableOfContents,
+  BottomNavMenu,
+  BottomNavMenuItem,
 } = nav;
 
 const covered = [
@@ -65,6 +68,8 @@ const covered = [
   'MenuRadioGroup',
   'MenuRadioItem',
   'MenuSub',
+  'BottomNavMenu',
+  'BottomNavMenuItem',
   'MenuSubTrigger',
   'MenuSubContent',
   'DropdownMenu',
@@ -277,6 +282,26 @@ const menuAnchor = ref<HTMLElement | null>(null);
             </div>
           </template>
         </ScrollSpy>
+      </Demo>
+
+      <Demo name="BottomNavMenu" note="in flow here (is-fixed=false) · Inbox carries a badge">
+        <div class="overflow-hidden rounded-md border border-border">
+          <BottomNavMenu :is-fixed="false">
+            <BottomNavMenuItem href="#home" is-active>
+              <template #icon><Home class="size-5" /></template>
+              Home
+            </BottomNavMenuItem>
+            <BottomNavMenuItem href="#inbox">
+              <template #icon><Inbox class="size-5" /></template>
+              <template #badge><CountBadge :value="3" /></template>
+              Inbox
+            </BottomNavMenuItem>
+            <BottomNavMenuItem href="#settings">
+              <template #icon><Settings class="size-5" /></template>
+              Settings
+            </BottomNavMenuItem>
+          </BottomNavMenu>
+        </div>
       </Demo>
 
       <Demo name="TableOfContents">

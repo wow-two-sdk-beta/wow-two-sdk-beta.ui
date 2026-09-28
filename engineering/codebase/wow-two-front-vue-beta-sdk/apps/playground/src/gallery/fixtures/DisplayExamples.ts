@@ -118,6 +118,7 @@ import {
   TypewriterText,
   VerticalBarsGlyph,
   VideoPlayer,
+  OverflowGroup,
 } from '../../../../../src/presentation/display';
 import { h, type VNode } from 'vue';
 import { Temporal } from 'temporal-polyfill';
@@ -175,6 +176,8 @@ export const displayExamples: readonly SmokeCase[] = [
   smokeCase('Text', Text, {}, { slot: true }),
 
   smokeCase('TruncatedText', TruncatedText, { lines: 2 }, { slot: true }),
+
+  smokeCase('OverflowGroup', OverflowGroup, { items: ['vue', 'tailwind', 'pnpm'], max: 2 }, { slot: true }),
 
   smokeCase('CountdownText', CountdownText, { to: 1_790_000_000_000, isPaused: true }),
 

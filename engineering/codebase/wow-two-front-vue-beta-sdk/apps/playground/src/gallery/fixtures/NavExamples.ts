@@ -32,6 +32,8 @@ import {
   Pagination,
   ScrollSpy,
   TableOfContents,
+  BottomNavMenu,
+  BottomNavMenuItem,
 } from '../../../../../src/presentation/nav';
 import { h, type VNode } from 'vue';
 import { smokeCase, type SmokeCase } from './Example';
@@ -43,6 +45,7 @@ import { smokeCase, type SmokeCase } from './Example';
 const inMenu = (node: VNode): VNode => h(Menu, { anchor: null, open: true }, () => node);
 const inMenuRadioGroup = (node: VNode): VNode => inMenu(h(MenuRadioGroup, { defaultValue: 'a' }, () => node));
 const inMenuSub = (node: VNode): VNode => inMenu(h(MenuSub, { defaultOpen: true }, () => node));
+const inBottomNav = (node: VNode): VNode => h(BottomNavMenu, { isFixed: false }, () => node);
 
 const inDropdownMenu = (node: VNode): VNode => h(DropdownMenu, { defaultOpen: true }, () => node);
 
@@ -93,6 +96,10 @@ export const navExamples: readonly SmokeCase[] = [
   // No slot probe: the surface is a second portal that lands a tick after its parent menu's, so its
   // open-state rendering is covered by the focused submenu tests instead.
   smokeCase('MenuSubContent', MenuSubContent, {}, { wrap: inMenuSub }),
+
+  smokeCase('BottomNavMenu', BottomNavMenu, { isFixed: false }, { slot: true }),
+
+  smokeCase('BottomNavMenuItem', BottomNavMenuItem, { isActive: true }, { slot: true, wrap: inBottomNav }),
 
   smokeCase('DropdownMenu', DropdownMenu, {}, { slot: true }),
 

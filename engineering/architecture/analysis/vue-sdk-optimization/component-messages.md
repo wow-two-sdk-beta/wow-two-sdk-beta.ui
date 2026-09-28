@@ -1,6 +1,6 @@
 # Vue component message catalogue
 
-*Source snapshot: 2026-09-25 full SDK sweep; gap-close keys added 2026-09-26.*
+*Source snapshot: 2026-09-25 full SDK sweep; gap-close keys added 2026-09-26 and 2026-09-28.*
 
 Static component keys and English fallbacks extracted from source. Supply overrides through
 `LocaleProvider.messages`. Placeholders retain their names; complete messages can reorder them.
@@ -25,6 +25,7 @@ in their capability specifications and are not inferred by this catalogue.
 | `AudioWaveformPreview.audioWaveform` | Audio waveform | [AudioWaveformPreview.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/audioWaveformPreview/AudioWaveformPreview.vue) |
 | `BackToTopButton.label` | Back to top | [BackToTopButton.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/actions/backToTopButton/BackToTopButton.vue) |
 | `Banner.closeLabel` | Dismiss | [Banner.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/banner/Banner.vue) |
+| `BottomNavMenu.label` | Primary | [BottomNavMenu.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/nav/bottomNavMenu/BottomNavMenu.vue) |
 | `Breadcrumb.breadcrumb` | Breadcrumb | [Breadcrumb.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/nav/breadcrumb/Breadcrumb.vue) |
 | `Carousel.pauseLabel` | Pause slides | [Carousel.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/carousel/Carousel.vue) |
 | `Carousel.resumeLabel` | Resume slides | [Carousel.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/carousel/Carousel.vue) |
@@ -53,7 +54,13 @@ in their capability specifications and are not inferred by this catalogue.
 | `ConfirmPopover.cancelLabel` | Cancel | [ConfirmPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/confirmPopover/ConfirmPopover.vue) |
 | `ConfirmPopover.confirmLabel` | Confirm | [ConfirmPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/confirmPopover/ConfirmPopover.vue) |
 | `CountdownText.days` | {days}d | [CountdownText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/countdownText/CountdownText.vue) |
+| `DataTable.collapseRow` | Hide details | [DataTable.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/dataTable/DataTable.vue) |
 | `DataTable.emptyContent` | No results. | [DataTable.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/dataTable/DataTable.vue) |
+| `DataTable.expandColumn` | Details | [DataTable.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/dataTable/DataTable.vue) |
+| `DataTable.expandRow` | Show details | [DataTable.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/dataTable/DataTable.vue) |
+| `DataTable.selectAll` | Select all rows | [DataTable.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/dataTable/DataTable.vue) |
+| `DataTable.selectColumn` | Select | [DataTable.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/dataTable/DataTable.vue) |
+| `DataTable.selectRow` | Select row | [DataTable.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/dataTable/DataTable.vue) |
 | `DateInput.chooseDate` | Choose date | [DateInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/dateInput/DateInput.vue) |
 | `DatePicker.placeholder` | Pick a date | [DatePicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/datePicker/DatePicker.vue) |
 | `DateRangePicker.placeholder` | Pick a range | [DateRangePicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/dateRangePicker/DateRangePicker.vue) |
@@ -132,6 +139,8 @@ in their capability specifications and are not inferred by this catalogue.
 | `NumberInput.incrementLabel` | Increment | [NumberInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/numberInput/NumberInput.vue) |
 | `OnboardingChecklistCard.progress` | {done} of {total} tasks complete | [OnboardingChecklistCard.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/onboardingChecklistCard/OnboardingChecklistCard.vue) |
 | `OnboardingChecklistCard.title` | Get started | [OnboardingChecklistCard.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/onboardingChecklistCard/OnboardingChecklistCard.vue) |
+| `OverflowGroup.hiddenItems` | {count} more | [OverflowGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/overflowGroup/OverflowGroup.vue) |
+| `OverflowGroup.overflowLabel` | +{count} | [OverflowGroup.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/overflowGroup/OverflowGroup.vue) |
 | `OverlayCloseButton.close` | Close | [OverlayCloseButton.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/OverlayCloseButton.vue) |
 | `Pagination.firstPage` | First page | [Pagination.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/nav/pagination/Pagination.vue) |
 | `Pagination.lastPage` | Last page | [Pagination.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/nav/pagination/Pagination.vue) |
@@ -191,6 +200,8 @@ in their capability specifications and are not inferred by this catalogue.
 | `TimeColumns.minutes` | Minutes | [TimeColumns.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/TimeColumns.vue) |
 | `TimeInput.chooseTime` | Choose time | [TimeInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/timeInput/TimeInput.vue) |
 | `TimePicker.placeholder` | Pick a time | [TimePicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/timePicker/TimePicker.vue) |
+| `TimezonePicker.placeholder` | Pick a time zone | [TimezonePicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/timezonePicker/TimezonePicker.vue) |
+| `TimezonePicker.searchPlaceholder` | Search time zones… | [TimezonePicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/timezonePicker/TimezonePicker.vue) |
 | `Toast.closeLabel` | Dismiss | [Toast.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/toast/Toast.vue) |
 | `ToastHost.notifications` | Notifications | [ToastHost.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/feedback/toastHost/ToastHost.vue) |
 | `TourPopover.back` | Back | [TourPopover.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/overlays/tourPopover/TourPopover.vue) |

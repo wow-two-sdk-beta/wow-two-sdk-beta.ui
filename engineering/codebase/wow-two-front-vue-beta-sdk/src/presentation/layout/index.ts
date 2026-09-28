@@ -29,3 +29,4 @@ export * from './tiltLayout';
 export * from './swipeActionsLayout';
 export * from './stickyLayout';
 export * from './virtualScrollArea';
+export * from './masonryLayout';

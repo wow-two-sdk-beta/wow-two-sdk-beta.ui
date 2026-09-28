@@ -48,10 +48,11 @@ the menu vector, `RatingPicker`, `RangeSliderInput`, `ConfirmPopover`, `Truncate
 | `SliderInput` | two-thumb range | price/date-span filters need a range value |
 | `DataTable` | row selection, expandable rows, sticky header, loading state | admin lists rebuild selection per product |
 | `DatePicker` | month/year granularity | billing periods and reports pick a month |
-| `Tag` | removable chip | filter pills rebuild the close affordance |
 | `ImagePreview` | zoom/lightbox | galleries need a full-screen viewer |
 
 `foundation/selection` already carries the headless selection/sort/filter models `DataTable` should adopt.
+
+`Tag` was listed as lacking removal; it already closes through `@close` + `closeLabel`, so that row was dropped (2026-09-28).
 
 ---
 
