@@ -22,7 +22,10 @@ defineSlots<{ default(): unknown }>();
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const classes = computed(() => cn('text-sm text-foreground', attrs.class as string | undefined));
+/* In a height-capped panel the body is what scrolls; the inline padding keeps focus rings inside its clip. */
+const classes = computed(() =>
+  cn('-mx-1 min-h-0 flex-1 overflow-y-auto px-1 text-sm text-foreground', attrs.class as string | undefined),
+);
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {

@@ -8,6 +8,7 @@ Public import: `import { ModalContent } from '@wow-two-beta/ui-vue/presentation/
 
 ## Contract
 
+- The panel caps at the viewport (`100dvh - 2rem`) as a flex column: its `ModalBody` scrolls between a fixed header and footer, and a panel without a body scrolls whole.
 - A modal FocusScope traps/loops focus and owns modal background isolation.
 - Label and description IDs come from the owning Modal root; provide matching title/description parts or explicit accessible attributes.
 - Mount within the owner supplying `useModalContext`; a compound part is not an independent root.

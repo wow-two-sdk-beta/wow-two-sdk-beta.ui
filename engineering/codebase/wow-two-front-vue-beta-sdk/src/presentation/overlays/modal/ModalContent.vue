@@ -78,6 +78,9 @@ provide(overlayChromeContextKey, {
 const classes = computed(() =>
   cn(
     'ui-modal-content relative w-full max-w-lg',
+    /* The panel never outgrows the window: it caps at the viewport and its body scrolls under a fixed header and
+       footer. A panel without a body part scrolls whole. */
+    'flex max-h-[calc(100dvh-2rem)] flex-col overflow-y-auto overscroll-contain',
     'motion-safe:group-data-[state=open]:animate-(--animate-pop-in)',
     'motion-safe:group-data-[state=closed]:animate-(--animate-pop-out)',
     surfaceVariants({

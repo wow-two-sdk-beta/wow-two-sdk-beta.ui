@@ -8,6 +8,7 @@ Internal implementation: compose through the family’s public exports in [index
 
 ## Contract
 
+- Inside a height-capped overlay panel the body takes the remaining height and scrolls; its inline padding keeps focus rings inside the clip.
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 

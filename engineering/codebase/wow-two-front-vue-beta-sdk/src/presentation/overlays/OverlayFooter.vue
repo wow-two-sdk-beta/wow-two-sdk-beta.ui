@@ -23,7 +23,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
 const classes = computed(() =>
-  cn('mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', attrs.class as string | undefined),
+  cn('mt-6 flex shrink-0 flex-col-reverse gap-2 sm:flex-row sm:justify-end', attrs.class as string | undefined),
 );
 
 /** Everything but `class`, which is re-applied through `cn` above. */

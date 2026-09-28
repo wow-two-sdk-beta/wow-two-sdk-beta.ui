@@ -33,6 +33,8 @@ Behavioral changes to existing parts:
 - `Button` `isLoading` keeps the label: the spinner replaces the leading icon, or centers over a transparent label
   when there is none, and the button dims. `loadingText` still replaces the label.
 - `NavItem` inside a horizontal `Navbar` sizes to its label instead of filling the row.
+- `ModalContent` caps at the viewport and its `ModalBody` scrolls under a fixed header and footer; the overlay
+  layer no longer grows past the window.
 
 - Form state flags follow the props convention (`isDisabled`, `isReadOnly`, `isRequired`) on the 30 inputs that
   owned `disabled` / `readonly` / `readOnly` / `required`. The old names still work this release and are removed in
