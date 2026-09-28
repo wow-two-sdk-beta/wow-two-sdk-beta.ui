@@ -109,6 +109,7 @@ import {
   MonthPicker,
   YearPicker,
   DurationInput,
+  SignatureInput,
 } from '../../../../../src/presentation/forms';
 import { ExactNumber } from '../../../../../src/foundation/numbers';
 const exactNumberExample = ExactNumber.parse('9223372036854775807.125');
@@ -209,6 +210,8 @@ export const formsExamples: readonly SmokeCase[] = [
   smokeCase('YearPicker', YearPicker, { defaultValue: 2026, max: 2030 }),
 
   smokeCase('DurationInput', DurationInput, { defaultValue: Temporal.Duration.from({ minutes: 90 }) }),
+
+  smokeCase('SignatureInput', SignatureInput, { penWidth: 3 }),
 
   smokeCase('TimezonePicker', TimezonePicker, { defaultValue: 'Asia/Tashkent', timeZones: ['UTC', 'Asia/Tashkent'] }),
 

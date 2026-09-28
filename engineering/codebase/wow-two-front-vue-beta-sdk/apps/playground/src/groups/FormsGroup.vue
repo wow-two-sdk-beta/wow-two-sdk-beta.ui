@@ -99,6 +99,7 @@ const {
   MonthPicker,
   YearPicker,
   DurationInput,
+  SignatureInput,
 } = forms;
 
 const covered = [
@@ -170,6 +171,7 @@ const covered = [
   'MonthPicker',
   'YearPicker',
   'DurationInput',
+  'SignatureInput',
   'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
@@ -266,6 +268,7 @@ const timeZone = ref<string | null>('Asia/Tashkent');
 const billingMonth = ref<Temporal.PlainYearMonth | null>(Temporal.PlainYearMonth.from('2026-09'));
 const fiscalYear = ref<number | null>(null);
 const meetingLength = ref<Temporal.Duration | null>(Temporal.Duration.from({ minutes: 45 }));
+const signature = ref<string | null>(null);
 const priceRange = ref<readonly [number, number]>([20, 80]);
 const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
@@ -419,6 +422,18 @@ const stamp = ref<Temporal.PlainDateTime | null>(
           <DurationInput v-model="meetingLength" aria-label="Meeting length" class="w-40" />
           <DurationInput :units="['days', 'hours']" aria-label="Retention" class="w-40" />
           <p class="text-xs text-subtle-foreground">length = {{ meetingLength?.toString() ?? 'null' }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="SignatureInput" note="draw with mouse, pen or finger · the SVG preview updates when a stroke ends">
+        <div class="flex w-full flex-col gap-2">
+          <SignatureInput v-model="signature" aria-label="Customer signature" />
+          <img
+            v-if="signature"
+            :src="signature"
+            alt="Signature preview"
+            class="h-12 self-start rounded border border-border"
+          />
         </div>
       </Demo>
 

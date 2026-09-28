@@ -192,6 +192,12 @@ in their capability specifications and are not inferred by this catalogue.
 | `SelectPickerContent.noResultsLabel` | No results | [SelectPickerContent.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/selectPicker/SelectPickerContent.vue) |
 | `SelectPickerContent.searchPlaceholder` | Search… | [SelectPickerContent.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/selectPicker/SelectPickerContent.vue) |
 | `SidebarMenu.label` | Sidebar | [SidebarMenu.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/nav/sidebarMenu/SidebarMenu.vue) |
+| `SignatureInput.clear` | Clear | [SignatureInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/signatureInput/SignatureInput.vue) |
+| `SignatureInput.label` | Signature | [SignatureInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/signatureInput/SignatureInput.vue) |
+| `SignatureInput.placeholder` | Sign here | [SignatureInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/signatureInput/SignatureInput.vue) |
+| `SignatureInput.signed` | Signed | [SignatureInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/signatureInput/SignatureInput.vue) |
+| `SignatureInput.undo` | Undo | [SignatureInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/signatureInput/SignatureInput.vue) |
+| `SignatureInput.unsigned` | Not signed | [SignatureInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/signatureInput/SignatureInput.vue) |
 | `SortableGroupHandle.dragToReorder` | Drag to reorder | [SortableGroupHandle.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/sortableGroup/SortableGroupHandle.vue) |
 | `Sparkline.ariaLabel` | Trend | [Sparkline.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/sparkline/Sparkline.vue) |
 | `SpeedDialGroupTrigger.label` | Toggle actions | [SpeedDialGroupTrigger.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/actions/speedDialGroup/SpeedDialGroupTrigger.vue) |
