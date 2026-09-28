@@ -88,10 +88,40 @@ const {
   ActivityTimeline,
   ActivityItem,
   OverflowGroup,
+  KanbanBoard,
+  KanbanColumn,
+  KanbanCard,
 } = display;
 
 /** Tags for the overflow row. */
 const STACK_TAGS = ['vue', 'tailwind', 'temporal', 'vitest', 'pnpm'];
+
+/** The kanban demo's columns — the demo owns them and applies each requested move. */
+const board = ref([
+  {
+    key: 'todo',
+    title: 'To do',
+    cards: [
+      { key: 'k1', text: 'Draft launch post' },
+      { key: 'k2', text: 'Record demo' },
+    ],
+  },
+  { key: 'doing', title: 'Doing', cards: [{ key: 'k3', text: 'Pricing page' }] },
+  { key: 'done', title: 'Done', cards: [{ key: 'k4', text: 'Logo refresh' }] },
+]);
+
+/** Applies a requested card move to the demo's columns. */
+function applyMove(move: {
+  itemKey: string;
+  fromColumn: string;
+  fromIndex: number;
+  toColumn: string;
+  toIndex: number;
+}): void {
+  const from = board.value.find((column) => column.key === move.fromColumn)!;
+  const [card] = from.cards.splice(move.fromIndex, 1);
+  board.value.find((column) => column.key === move.toColumn)!.cards.splice(move.toIndex, 0, card!);
+}
 
 const covered = [
   'Badge',
@@ -102,6 +132,9 @@ const covered = [
   'Text',
   'TruncatedText',
   'OverflowGroup',
+  'KanbanBoard',
+  'KanbanColumn',
+  'KanbanCard',
   'CountdownText',
   'Heading',
   'EyebrowText',
@@ -233,6 +266,19 @@ const selectedRows = ref<Array<string | number>>([]);
           <Text :size="row as never" :color="col as never">Sample</Text>
         </template>
       </Matrix>
+    </Demo>
+
+    <Demo name="KanbanBoard" note="drag cards between columns · or focus one and press Alt with the arrow keys">
+      <KanbanBoard @move="applyMove">
+        <KanbanColumn v-for="column in board" :key="column.key" :column-key="column.key" :title="column.title">
+          <template #header>
+            <span class="text-xs text-muted-foreground tabular-nums">{{ column.cards.length }}</span>
+          </template>
+          <KanbanCard v-for="(card, index) in column.cards" :key="card.key" :item-key="card.key" :index="index">
+            {{ card.text }}
+          </KanbanCard>
+        </KanbanColumn>
+      </KanbanBoard>
     </Demo>
 
     <div class="grid grid-cols-[repeat(auto-fill,minmax(330px,1fr))] gap-3">

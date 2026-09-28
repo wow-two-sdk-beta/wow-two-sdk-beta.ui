@@ -15,7 +15,7 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 | App navigation | `BottomNavMenu` + `BottomNavMenuItem` (mobile bottom bar, `asChild` router links, badges); `SidebarMenu` + `SidebarMenuItem` / `SidebarMenuGroup` / `SidebarMenuSection` (icon rail via `isCollapsed`) |
 | Forms | `RatingPicker` (whole/half steps, clearable), `RangeSliderInput` (two thumbs, `commit` event), `TimezonePicker` (IANA ids, offset-labelled), `MonthPicker` (`Temporal.PlainYearMonth`), `YearPicker`, `DurationInput` (`Temporal.Duration`, unit segments), `SignatureInput` (pointer-drawn, SVG or PNG data URL), `TransferPicker` (dual list), `TreeSelectPicker` (leaf pick from a tree), `CascaderPicker` (path pick across columns), `ImageCropEditor` (natural-pixel crop, `toDataURL()`) |
 | Overlays | `ConfirmPopover` — inline confirm that awaits a promise from `@confirm`; `LightboxModal` — full-screen image viewer (buttons, arrows, swipe) |
-| Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary`, `OverflowGroup` (first N items + counted marker) |
+| Display / feedback | `TruncatedText`, `CountdownText`, `ErrorBoundary`, `OverflowGroup` (first N items + counted marker), `KanbanBoard` + `KanbanColumn` / `KanbanCard` (drag or Alt+arrows; caller applies `move`) |
 | Layout | `StickyLayout` (pinned state), `VirtualScrollArea` (windowed list, `end-reached`), `MasonryLayout` |
 | `DataTable` | `selectionMode` + `v-model:selection`, `expanded` slot + `v-model:expanded`, `hasStickyHeader`, `isLoading` |
 

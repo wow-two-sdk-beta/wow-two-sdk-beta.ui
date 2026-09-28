@@ -119,8 +119,15 @@ import {
   VerticalBarsGlyph,
   VideoPlayer,
   OverflowGroup,
+  KanbanBoard,
+  KanbanColumn,
+  KanbanCard,
 } from '../../../../../src/presentation/display';
 import { h, type VNode } from 'vue';
+
+const inKanban = (node: VNode): VNode => h(KanbanBoard, null, () => node);
+const inKanbanColumn = (node: VNode): VNode =>
+  inKanban(h(KanbanColumn, { columnKey: 'todo', title: 'To do' }, () => node));
 import { Temporal } from 'temporal-polyfill';
 import { smokeCase, type SmokeCase } from './Example';
 
@@ -178,6 +185,12 @@ export const displayExamples: readonly SmokeCase[] = [
   smokeCase('TruncatedText', TruncatedText, { lines: 2 }, { slot: true }),
 
   smokeCase('OverflowGroup', OverflowGroup, { items: ['vue', 'tailwind', 'pnpm'], max: 2 }, { slot: true }),
+
+  smokeCase('KanbanBoard', KanbanBoard, {}, { slot: true }),
+
+  smokeCase('KanbanColumn', KanbanColumn, { columnKey: 'todo', title: 'To do' }, { slot: true, wrap: inKanban }),
+
+  smokeCase('KanbanCard', KanbanCard, { itemKey: 'card-1', index: 0 }, { slot: true, wrap: inKanbanColumn }),
 
   smokeCase('CountdownText', CountdownText, { to: 1_790_000_000_000, isPaused: true }),
 

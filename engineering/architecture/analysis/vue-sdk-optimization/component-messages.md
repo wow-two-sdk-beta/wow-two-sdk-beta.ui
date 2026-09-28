@@ -120,6 +120,8 @@ in their capability specifications and are not inferred by this catalogue.
 | `JsonEditorTreeNode.collapse` | Collapse | [JsonEditorTreeNode.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditorTreeNode.vue) |
 | `JsonEditorTreeNode.editValue` | Edit value | [JsonEditorTreeNode.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditorTreeNode.vue) |
 | `JsonEditorTreeNode.expand` | Expand | [JsonEditorTreeNode.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/jsonEditor/JsonEditorTreeNode.vue) |
+| `KanbanBoard.hint` | Press Alt with the arrow keys to move this card. | [KanbanBoard.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/kanbanBoard/KanbanBoard.vue) |
+| `KanbanBoard.moved` | Moved {card} to {column}, position {position} of {total} | [KanbanBoard.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/kanbanBoard/KanbanBoard.vue) |
 | `KeyboardShortcutPicker.placeholder` | Click to record | [KeyboardShortcutPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/keyboardShortcutPicker/KeyboardShortcutPicker.vue) |
 | `KeyboardShortcutPicker.recordLabel` | Press keys… | [KeyboardShortcutPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/keyboardShortcutPicker/KeyboardShortcutPicker.vue) |
 | `KnobInput.label` | Knob | [KnobInput.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/knobInput/KnobInput.vue) |

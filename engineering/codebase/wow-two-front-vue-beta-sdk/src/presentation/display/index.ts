@@ -76,3 +76,4 @@ export * from './onboardingChecklistCard';
 export * from './truncatedText';
 export * from './countdownText';
 export * from './overflowGroup';
+export * from './kanbanBoard';
