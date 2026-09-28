@@ -10,6 +10,7 @@ export * from './spacerLayout';
 export * from './centerLayout';
 export * from './dividerLayout';
 export * from './scrollArea';
+export * from './canvasArea';
 export * from './inlineLayout';
 export * from './clusterLayout';
 export * from './frameLayout';

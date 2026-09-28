@@ -14,6 +14,7 @@ import {
   AppShellSidebar,
   AspectRatioLayout,
   BoxLayout,
+  CanvasArea,
   CenterLayout,
   ClusterLayout,
   ContainerLayout,
@@ -79,6 +80,8 @@ export const layoutExamples: readonly SmokeCase[] = [
   smokeCase('DividerLayout', DividerLayout, { orientation: Orientation.Horizontal }),
 
   smokeCase('ScrollArea', ScrollArea, {}, { slot: true }),
+
+  smokeCase('CanvasArea', CanvasArea, {}, { slot: true }),
 
   smokeCase('InlineLayout', InlineLayout, {}, { slot: true }),
 
