@@ -111,6 +111,7 @@ import {
   DurationInput,
   SignatureInput,
   TransferPicker,
+  TreeSelectPicker,
 } from '../../../../../src/presentation/forms';
 import { ExactNumber } from '../../../../../src/foundation/numbers';
 const exactNumberExample = ExactNumber.parse('9223372036854775807.125');
@@ -220,6 +221,11 @@ export const formsExamples: readonly SmokeCase[] = [
       { key: 'write', label: 'Write' },
     ],
     defaultValue: ['read'],
+  }),
+
+  smokeCase('TreeSelectPicker', TreeSelectPicker, {
+    nodes: [{ value: 'docs', label: 'Docs', children: [{ value: 'guide', label: 'Guide' }] }],
+    defaultValue: 'guide',
   }),
 
   smokeCase('TimezonePicker', TimezonePicker, { defaultValue: 'Asia/Tashkent', timeZones: ['UTC', 'Asia/Tashkent'] }),

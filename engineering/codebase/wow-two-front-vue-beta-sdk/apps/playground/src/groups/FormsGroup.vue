@@ -101,6 +101,7 @@ const {
   DurationInput,
   SignatureInput,
   TransferPicker,
+  TreeSelectPicker,
 } = forms;
 
 const covered = [
@@ -174,6 +175,7 @@ const covered = [
   'DurationInput',
   'SignatureInput',
   'TransferPicker',
+  'TreeSelectPicker',
   'RangeSliderInput',
   'StepperGroup',
   'StepperGroupList',
@@ -281,6 +283,20 @@ const PERMISSIONS = [
   { key: 'team.invite', label: 'Invite members' },
 ];
 const granted = ref<string[]>(['codes.read']);
+/** The folder tree the tree-select demo picks from. */
+const FOLDERS = [
+  {
+    value: 'marketing',
+    label: 'Marketing',
+    children: [
+      { value: 'marketing/print', label: 'Print', children: [{ value: 'marketing/print/flyers', label: 'Flyers' }] },
+      { value: 'marketing/events', label: 'Events' },
+    ],
+  },
+  { value: 'menus', label: 'Menus', children: [{ value: 'menus/summer', label: 'Summer menu' }] },
+  { value: 'archive', label: 'Archive', isDisabled: true },
+];
+const folder = ref<string | null>('marketing/print/flyers');
 const priceRange = ref<readonly [number, number]>([20, 80]);
 const committedRange = ref<readonly [number, number]>([20, 80]);
 const editable = ref('click to edit');
@@ -459,6 +475,13 @@ const stamp = ref<Temporal.PlainDateTime | null>(
             is-searchable
           />
           <p class="text-xs text-subtle-foreground">granted = {{ granted.join(', ') || '—' }}</p>
+        </div>
+      </Demo>
+
+      <Demo name="TreeSelectPicker" note="branches expand, leaves pick · the trigger shows the full path">
+        <div class="flex flex-col items-start gap-2">
+          <TreeSelectPicker v-model="folder" :nodes="FOLDERS" is-path-shown aria-label="Folder" class="w-64" />
+          <p class="text-xs text-subtle-foreground">folder = {{ folder ?? 'null' }}</p>
         </div>
       </Demo>
 

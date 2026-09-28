@@ -232,6 +232,7 @@ in their capability specifications and are not inferred by this catalogue.
 | `TransferPicker.search` | Filter | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
 | `TransferPicker.sourceLabel` | Available | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
 | `TransferPicker.targetLabel` | Selected | [TransferPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/transferPicker/TransferPicker.vue) |
+| `TreeSelectPicker.placeholder` | Pick an item | [TreeSelectPicker.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/forms/treeSelectPicker/TreeSelectPicker.vue) |
 | `TruncatedText.lessLabel` | Show less | [TruncatedText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/truncatedText/TruncatedText.vue) |
 | `TruncatedText.moreLabel` | Show more | [TruncatedText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/truncatedText/TruncatedText.vue) |
 | `TypewriterText.pauseLabel` | Pause animation | [TypewriterText.vue](../../../codebase/wow-two-front-vue-beta-sdk/src/presentation/display/typewriterText/TypewriterText.vue) |
