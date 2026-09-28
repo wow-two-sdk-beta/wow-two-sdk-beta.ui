@@ -119,7 +119,7 @@ const IndeterminateCheckedClass: Record<
 
 <script setup lang="ts">
 import { useNativeFormReset } from '../UseNativeFormReset';
-import { computed, useAttrs, useTemplateRef, watch, type StyleValue } from 'vue';
+import { computed, nextTick, useAttrs, useTemplateRef, watch, type StyleValue } from 'vue';
 import type { ClassValue } from 'clsx';
 import { Check, Minus } from 'lucide-vue-next';
 import { cn, ColorExtensions, CssExtensions, ColorTone as ColorToneValue } from '../../../foundation/styles';
@@ -171,7 +171,13 @@ function onChange(event: Event): void {
     (event.target as HTMLInputElement).checked = isChecked.value;
     return;
   }
-  controlled.setValue((event.target as HTMLInputElement).checked);
+  const box = event.target as HTMLInputElement;
+  controlled.setValue(box.checked);
+  /* A controlled owner that declines the change keeps its prop, and Vue skips an unchanged binding — so the
+     native box would keep the reader's toggle. Re-syncs it once the owner's update has flushed. */
+  void nextTick(() => {
+    box.checked = isChecked.value;
+  });
 }
 
 const input = useTemplateRef<HTMLInputElement>('input');

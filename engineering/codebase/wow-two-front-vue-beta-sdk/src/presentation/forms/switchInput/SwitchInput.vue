@@ -44,7 +44,7 @@ const TrackCheckedClass: Partial<Record<Size, string>> = {
 
 <script setup lang="ts">
 import { useNativeFormReset } from '../UseNativeFormReset';
-import { computed, useAttrs, useTemplateRef } from 'vue';
+import { computed, nextTick, useAttrs, useTemplateRef } from 'vue';
 import type { ClassValue } from 'clsx';
 import { cn, Size as SizeValue } from '../../../foundation/styles';
 import { useControlled } from '../../../foundation/state';
@@ -91,7 +91,13 @@ function onChange(event: Event): void {
     (event.target as HTMLInputElement).checked = isChecked.value;
     return;
   }
-  controlled.setValue((event.target as HTMLInputElement).checked);
+  const box = event.target as HTMLInputElement;
+  controlled.setValue(box.checked);
+  /* A controlled owner that declines the change keeps its prop, and Vue skips an unchanged binding — so the
+     native box would keep the reader's toggle. Re-syncs it once the owner's update has flushed. */
+  void nextTick(() => {
+    box.checked = isChecked.value;
+  });
 }
 
 const inputId = computed(() => props.id ?? ctx?.id);
