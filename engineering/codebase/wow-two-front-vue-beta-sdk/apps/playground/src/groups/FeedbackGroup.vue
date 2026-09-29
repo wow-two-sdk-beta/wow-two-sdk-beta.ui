@@ -36,6 +36,7 @@ const {
   TypingIndicator,
   LoadingOverlay,
   LoadingState,
+  SplashScreen,
   UndoBar,
   LiveCursorIndicator,
   ErrorBoundary,
@@ -63,6 +64,7 @@ const covered = [
   'TypingIndicator',
   'LoadingOverlay',
   'LoadingState',
+  'SplashScreen',
   'NotificationCenterGroup',
   'NotificationItem',
   'OnboardingChecklistCard',
@@ -81,6 +83,20 @@ const PROGRESS_TONES = ['brand', 'success', 'warning', 'danger', 'neutral'] as c
 const undoOpen = ref(false);
 const overlayOn = ref(false);
 const widgetBroken = ref(false);
+const splashOpen = ref(false);
+const splashValue = ref(0);
+
+/** Plays a first load: the overlay fills its bar in steps, then lifts. */
+function playSplash(): void {
+  splashValue.value = 0;
+  splashOpen.value = true;
+  const timer = setInterval(() => {
+    splashValue.value = Math.min(100, splashValue.value + 25);
+    if (splashValue.value < 100) return;
+    clearInterval(timer);
+    setTimeout(() => (splashOpen.value = false), 300);
+  }, 400);
+}
 
 /** A widget that throws while rendering once broken, to exercise the boundary. */
 const FragileWidget = defineComponent({
@@ -294,6 +310,18 @@ function repair(reset: () => void): void {
         <Button variant="ghost" size="sm" class="mt-2" @click="overlayOn = !overlayOn">
           toggle ({{ overlayOn }})
         </Button>
+      </Demo>
+
+      <Demo name="SplashScreen" note="page in a box · overlay on demand">
+        <div class="h-40 overflow-hidden rounded-md border border-border">
+          <SplashScreen :value="40" class="h-full min-h-0">
+            <template #logo><span class="text-lg font-semibold">Product</span></template>
+          </SplashScreen>
+        </div>
+        <Button variant="ghost" size="sm" class="mt-2" @click="playSplash">play the overlay</Button>
+        <SplashScreen :is-open="splashOpen" is-overlay :value="splashValue">
+          <template #logo><span class="text-2xl font-semibold">Product</span></template>
+        </SplashScreen>
       </Demo>
 
       <Demo name="NotificationCenterGroup / NotificationItem">

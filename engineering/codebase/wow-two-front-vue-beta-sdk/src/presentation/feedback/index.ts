@@ -19,6 +19,7 @@ export * from './reportAction';
 export * from './toastHost';
 export * from './feedbackToastHost';
 export * from './loadingOverlay';
+export * from './splashScreen';
 export * from './undoBar';
 export * from './typingIndicator';
 export * from './presenceIndicator';

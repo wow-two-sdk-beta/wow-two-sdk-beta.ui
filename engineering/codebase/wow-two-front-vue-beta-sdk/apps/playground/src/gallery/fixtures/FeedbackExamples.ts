@@ -24,6 +24,7 @@ import {
   SkeletonStateSlot,
   SkeletonStateText,
   Spinner,
+  SplashScreen,
   StatusIndicator,
   Toast,
   ToastHost,
@@ -89,6 +90,8 @@ export const feedbackExamples: readonly SmokeCase[] = [
   smokeCase('FeedbackToastHost', FeedbackToastHost, {}),
 
   smokeCase('LoadingOverlay', LoadingOverlay, {}, { slot: true }),
+
+  smokeCase('SplashScreen', SplashScreen, { value: 40 }, { slot: true }),
 
   smokeCase('UndoBar', UndoBar, { open: true }),
 

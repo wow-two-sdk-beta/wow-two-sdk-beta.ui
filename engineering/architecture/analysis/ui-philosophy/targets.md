@@ -1,6 +1,6 @@
 # UI Implementation Targets — what we'll build
 
-*Last updated: 2026-07-04*
+*Last updated: 2026-09-29*
 
 > Companion: [`ideas.md`](./ideas.md) — universe of options.
 >
@@ -306,6 +306,7 @@ See §4 below for the canonized list — that's the verdict per delegate.
 |---|---|
 | EmptyState (L3 atom) | **DONE** |
 | LoadingState | **NEXT** — molecule pair to EmptyState |
+| SplashScreen | **DONE** (Vue, 2026-09-29) — first-load logo over a progress bar; page or overlay |
 | ErrorState | **NEXT** — molecule with retry CTA |
 | Skeleton | **DONE** |
 | Optimistic update support | **MAYBE** — depends on data lib (TanStack Query, etc.) |

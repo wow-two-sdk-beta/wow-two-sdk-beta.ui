@@ -1,6 +1,6 @@
 # UI World Catalog — what exists in Web2
 
-*Last updated: 2026-05-04*
+*Last updated: 2026-09-29*
 
 > Companion: [`targets.md`](./targets.md) — what *we'll* implement, prioritized.
 >
@@ -647,6 +647,7 @@ Per category, the hidden complexity *beyond* "render pixels".
 | Sheet | Bottom-sheet (mobile) · expandable heights · drag-handle |
 | Spinner | Size · color · `role="status"` + visually-hidden label |
 | LoadingOverlay | Local vs global · blur backdrop · cancel button · long-load message escalation |
+| SplashScreen | First load · centred product logo · stage-driven progress · page vs overlay · static HTML twin before scripts |
 | EmptyState | Icon · title · description · CTA · per-context illustration |
 | ErrorBoundary | Fallback · reset · error reporter · per-route boundaries |
 
