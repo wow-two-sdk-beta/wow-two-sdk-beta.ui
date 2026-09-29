@@ -113,3 +113,18 @@ These files are not exported from the group barrel — they're consumed by the g
 ```
 
 Spec before code. Stories cover every visual state in spec. Components without visual variants may omit `*.variants.ts`. Primitives (foundation) typically omit `*.stories.tsx` since they're headless.
+
+## Vue package
+
+`@wow-two-beta/ui-vue` (`engineering/codebase/wow-two-front-vue-beta-sdk/`) is the active package; React
+implementation and release are parked. Settled decisions:
+
+- Package `@wow-two-beta/ui-vue`, `0.x.y` beta-forever — the React package's release contract.
+- Vue 3.5+ `<script setup>` SFCs, not TSX — the DX gain is the point of the port.
+- Vite library mode + `@vitejs/plugin-vue` + `vite-plugin-dts` — `tsup` cannot compile SFCs.
+- Self-contained: the package copies the agnostic layer; no shared `core` package with React.
+- Every public component has a spec and a playground fixture; risky behavior gets focused tests.
+- `release-vue.yml` carries a `paths:` filter, separate from `release.yml` — a React push never publishes Vue.
+- The package carries the full React capability surface, `router` and `query` included.
+- Exact decimal and int64 wire representations are agreed per endpoint with the backend; the SDK sets no global
+  coercion policy.

@@ -1,12 +1,13 @@
 # Vue SDK gap analysis
 
-*Last updated: 2026-09-26*
+*Last updated: 2026-09-29*
 
 > What `@wow-two-beta/ui-vue` lacks after the published `0.0.7` sweep — missing components, shallow families and
-> small defects — ranked for the gap-close queue in [`vue-port-track.md`](../../planning/vue-port-track.md).
+> small defects — ranked for the gap-close iteration in [`v0.1`](../../planning/version-track/v0.1/v0.1.md).
 > React is out of scope; the React package is parked.
 >
-> Status 2026-09-28: every queued gap (G1–G13) is built and locally verified, unpublished — see the track.
+> Status 2026-09-28: every queued gap (G1–G13) is built and locally verified, unpublished — see
+> [`v0.1`](../../planning/version-track/v0.1/v0.1.md); open items live in the [backlog](../../planning/backlog.md).
 
 ## Method
 
@@ -35,7 +36,7 @@ standard components every mainstream Vue library ships, and three unlocalized ac
 
 ## Status
 
-Shipped locally 2026-09-26 as G1–G6 of the [gap-close queue](../../planning/vue-port-track.md#gap-close-queue):
+Shipped locally 2026-09-26 as G1–G6 of the [gap-close iteration](../../planning/version-track/v0.1/v0.1.md):
 the menu vector, `RatingPicker`, `RangeSliderInput`, `ConfirmPopover`, `TruncatedText`, `CountdownText`,
 `ErrorBoundary`, `StickyLayout`, `VirtualScrollArea` and the three localized names. The same pass fixed a
 `DropdownMenuContent` exit that could leave an empty, focus-trapping surface. The remaining rows are G7–G13.

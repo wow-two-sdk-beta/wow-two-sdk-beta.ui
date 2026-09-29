@@ -20,8 +20,8 @@ Fresh-chat handoff. Repo is GREEN and mid-way through **vector-improvement** wor
 
 ## Live planning (source of truth)
 
-- [`planning.md`](./planning.md) — vectors table + iterations (active/queued) + **Backlog (trigger-gated)**.
-- [`version-track/v0.1.md`](./version-track/v0.1.md) — v0.1 iterations **1–7 DONE**, iter 8 scheduled.
+- [`backlog.md`](./backlog.md) — every unbuilt item, grouped.
+- [`version-track/v0.1/v0.1.md`](./version-track/v0.1/v0.1.md) — v0.1 iterations **1–7 DONE**, iter 8 scheduled.
 - [`../architecture/vector-registry.md`](../architecture/vector-registry.md) — every vector (shipped subpaths · §2 cross-cutting · module waves · deferred).
 - [`../architecture/component-catalog.md`](../architecture/component-catalog.md) — 248 components, **derived** (`node ../architecture/gen-catalog.mjs` to regen).
 

@@ -1,6 +1,6 @@
 # Vue SDK deeper audit
 
-*Last updated: 2026-09-25*
+*Last updated: 2026-09-29*
 
 > Historical characterization baseline. Implementation and final verification are tracked in
 > [full-sweep-implementation.md](full-sweep-implementation.md); defect descriptions below preserve the original evidence.
@@ -12,7 +12,7 @@ builds, but targeted compositions expose failures that existing isolated tests d
 readiness inventory establishes component availability, specifications and fixtures; it does not establish
 behavioral completeness.
 
-The improvement queue remains in [vue-port-track.md](../../../planning/vue-port-track.md).
+Open improvements live in the [backlog](../../../planning/backlog.md).
 This report supplies evidence and acceptance criteria, not a new approval queue.
 The SDK owns reusable controls; ForeverPin owns QR rendering. React and the later playground/sandbox/theme-app
 sweep remain outside this pass. Automated consumer fixtures described below belong to SDK verification.

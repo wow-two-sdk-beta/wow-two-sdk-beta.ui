@@ -83,6 +83,8 @@ Templates exist at [`engineering/architecture/templates/component-standard.md`](
 - `engineering/architecture/vector-registry.md` — master list of all vectors (shipped modules + cross-cutting + possible-unbuilt); indexes `targets.md`/`frontend-modules.md`
 - `engineering/architecture/testing.md` — test-layer plan, tiers, iteration tracker, findings
 - `engineering/architecture/decisions/` — cross-component ADRs
+- `engineering/planning/backlog.md` — every unbuilt item · `engineering/planning/version-track/v{X.Y}/v{X.Y}.md` — one per version, newest = active
+- `engineering/development/rules.md` — agent working rules: Vue house rules, parallel lanes, sweep method
 - `.storybook/` — catalog config (+ `vitest.setup.ts` for story tests)
 - `apps/playground/` — Vite sandbox for ad-hoc prototyping
 
