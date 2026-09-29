@@ -1,7 +1,9 @@
 <script lang="ts">
 /** Defines the props for {@link RouteAnnouncer}. */
 export interface RouteAnnouncerProps {
-  /** Whether to skip the focus reset and announcement on the very first mount. Default `true`. */
+  /** Whether the very first mount resets focus and announces the route too. Default `false`. */
+  readonly canAnnounceInitial?: boolean;
+  /** @deprecated Use `canAnnounceInitial` (inverted); this alias is removed next release. */
   readonly skipInitial?: boolean;
 }
 
@@ -32,7 +34,10 @@ import { deepestHandleValue, resolveHandleValue } from '../RouteHandles';
  */
 defineOptions({ name: 'RouteAnnouncer' });
 
-const props = withDefaults(defineProps<RouteAnnouncerProps>(), { skipInitial: true });
+const props = withDefaults(defineProps<RouteAnnouncerProps>(), {
+  canAnnounceInitial: undefined,
+  skipInitial: undefined,
+});
 
 const route = useRoute();
 const message = shallowRef('');
@@ -50,8 +55,9 @@ onScopeDispose(() => {
 
 // `onMounted` never runs on the server, which is what this needs: it reads and focuses the DOM.
 onMounted(() => {
-  lastPath = props.skipInitial ? route.path : null;
-  if (!props.skipInitial) void announce(route.path);
+  const announcesInitial = props.canAnnounceInitial ?? !(props.skipInitial ?? true);
+  lastPath = announcesInitial ? null : route.path;
+  if (announcesInitial) void announce(route.path);
 });
 
 watch(

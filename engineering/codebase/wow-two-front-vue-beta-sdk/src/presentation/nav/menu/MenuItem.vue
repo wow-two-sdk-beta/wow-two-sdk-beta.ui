@@ -16,6 +16,8 @@ export interface MenuItemProps {
   readonly isDisabled?: boolean;
 
   /** The close-after-activate toggle. Default `true`; `false` keeps the menu open for repeated actions. */
+  readonly canCloseOnSelect?: boolean;
+  /** @deprecated Use `canCloseOnSelect`; this alias is removed next release. */
   readonly closeOnSelect?: boolean;
 }
 </script>
@@ -39,7 +41,8 @@ defineSlots<{ default(): unknown }>();
 const props = withDefaults(defineProps<MenuItemProps>(), {
   state: undefined,
   isDisabled: undefined,
-  closeOnSelect: true,
+  canCloseOnSelect: undefined,
+  closeOnSelect: undefined,
 });
 
 const emit = defineEmits<{
@@ -80,7 +83,7 @@ onScopeDispose(() => menu.unregisterItem(id));
 /** Emits `select`, then closes the menu tree unless the row keeps it open. */
 function activate(): void {
   emit('select');
-  if (props.closeOnSelect) menu.close();
+  if (props.canCloseOnSelect ?? props.closeOnSelect ?? true) menu.close();
 }
 
 function handleKeydown(event: KeyboardEvent): void {

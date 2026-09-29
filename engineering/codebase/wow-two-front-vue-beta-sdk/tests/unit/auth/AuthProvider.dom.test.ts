@@ -19,7 +19,7 @@ function setup(strategy: AuthStrategy<string, string>) {
     },
   });
   const wrapper = mount(AuthProvider, {
-    props: { strategy, resolveOnMount: false },
+    props: { strategy, canResolveOnMount: false },
     slots: { default: () => h(Child) },
   });
   return { wrapper, auth };

@@ -16,7 +16,8 @@ Public import: `import { DrawerContent } from '@wow-two-beta/ui-vue/presentation
 
 | Prop | Type | Required | Default | Meaning |
 |---|---|---|---|---|
-| `hideBackdrop` | `boolean` | no | — | The backdrop-hide toggle — disables the default backdrop when true. |
+| `showBackdrop` | `boolean` | no | `true` | Shows the default backdrop behind the panel. Default `true`.        |
+| `hideBackdrop` | `boolean` | no | — | Deprecated — use `showBackdrop` (inverted); removed next release.   |
 | `isBlurred` | `boolean` | no | — | The backdrop-blur toggle. |
 | `size` | `DrawerSize` | no | `'md'` | The per-side max-size token. Default `md`. |
 | `variant` | `SurfaceVariant` | no | — | The visual recipe. Default `elevated`. |

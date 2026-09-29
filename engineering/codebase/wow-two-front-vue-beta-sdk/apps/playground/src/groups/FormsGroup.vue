@@ -786,7 +786,7 @@ const stamp = ref<Temporal.PlainDateTime | null>(
       <Demo name="DateInput" note="typed YYYY-MM-DD + CalendarPicker popover — `native` is the opt-out">
         <div class="space-y-2">
           <DateInput v-model="day" class="w-44" />
-          <DateInput native class="w-44" />
+          <DateInput is-native class="w-44" />
           <p class="text-xs text-subtle-foreground">{{ day?.toString() ?? 'null' }}</p>
         </div>
       </Demo>
@@ -794,7 +794,7 @@ const stamp = ref<Temporal.PlainDateTime | null>(
       <Demo name="TimeInput" note="typed HH:MM + our popover — `native` is the opt-out">
         <div class="space-y-2">
           <TimeInput v-model="clock" class="w-40" />
-          <TimeInput native class="w-40" />
+          <TimeInput is-native class="w-40" />
           <p class="text-xs text-subtle-foreground">{{ clock?.toString() ?? 'null' }}</p>
         </div>
       </Demo>
@@ -802,7 +802,7 @@ const stamp = ref<Temporal.PlainDateTime | null>(
       <Demo name="DateTimeInput" note="typed date + time with a CalendarPicker/columns popover">
         <div class="space-y-2">
           <DateTimeInput v-model="stamp" class="w-60" />
-          <DateTimeInput native class="w-60" />
+          <DateTimeInput is-native class="w-60" />
           <p class="text-xs text-subtle-foreground">{{ stamp?.toString() ?? 'null' }}</p>
         </div>
       </Demo>

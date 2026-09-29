@@ -16,6 +16,8 @@ export interface ControlGroupFieldProps {
   readonly orientation?: Orientation;
 
   /** The hairline between this and the next group (settings-list look). Default `true`. */
+  readonly hasDivider?: boolean;
+  /** @deprecated Use `hasDivider`; this alias is removed next release. */
   readonly divided?: boolean;
 
   /** The fixed label width in the horizontal layout, e.g. `"6rem"` — aligns rows. Omit for content-driven width. */
@@ -31,7 +33,7 @@ import { controlGroupVariants } from './ControlGroupField.variants';
 /**
  * Renders a labelled group of controls — a muted label bound to its control(s),
  * laid out horizontally (label beside) or vertically (label above). Stacked
- * groups auto-divide via a hairline unless `:divided="false"`.
+ * groups auto-divide via a hairline unless `:has-divider="false"`.
  */
 defineOptions({ name: 'ControlGroupField', inheritAttrs: false });
 
@@ -44,14 +46,17 @@ defineSlots<{
 
 const props = withDefaults(defineProps<ControlGroupFieldProps>(), {
   orientation: Orientation.Horizontal,
-  divided: true,
+  hasDivider: undefined,
+  divided: undefined,
   labelWidth: undefined,
 });
 
 const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 
-const styles = computed(() => controlGroupVariants({ orientation: props.orientation, divided: props.divided }));
+const styles = computed(() =>
+  controlGroupVariants({ orientation: props.orientation, divided: props.hasDivider ?? props.divided ?? true }),
+);
 
 const rootClasses = computed(() => cn(styles.value.root(), attrs.class as string | undefined));
 

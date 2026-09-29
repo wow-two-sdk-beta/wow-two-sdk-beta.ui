@@ -14,13 +14,17 @@ export interface NavbarProps {
   /** The band height. Default `md`. */
   readonly height?: NavbarHeight;
   /** The sticky pinning of the bar to the top of the scroll container. Default `false` (non-sticky). */
+  readonly isSticky?: boolean;
+  /** @deprecated Use `isSticky`; this alias is removed next release. */
   readonly sticky?: boolean;
   /**
    * The tinted background tone for the band — applies the shadow-less `subtle`
-   * surface treatment. Omit for a transparent bar (relies on `bordered` / page bg).
+   * surface treatment. Omit for a transparent bar (relies on `hasBorder` / page bg).
    */
   readonly tone?: SurfaceTone;
   /** The bottom border under the bar. Default `true`. */
+  readonly hasBorder?: boolean;
+  /** @deprecated Use `hasBorder`; this alias is removed next release. */
   readonly bordered?: boolean;
   /** Which way the bar runs: a full-width top bar or a full-height side rail. Default `horizontal`. */
   readonly orientation?: NavbarOrientation;
@@ -40,7 +44,7 @@ import { navbarContextKey } from './NavbarContext';
  * Renders a lightweight header band (`<header>`) with `start` / `center` / `end` slots
  * laid out in a row inside a centered `ContainerLayout`. The everyday "navbar +
  * centered content" need that `AppShell` (a 5-slot dashboard grid w/ sidebar)
- * overshoots. Non-sticky by default; pass `sticky` to pin it.
+ * overshoots. Non-sticky by default; pass `isSticky` to pin it.
  */
 defineOptions({ name: 'Navbar', inheritAttrs: false });
 
@@ -60,8 +64,10 @@ defineSlots<{
 }>();
 
 const props = withDefaults(defineProps<NavbarProps>(), {
-  sticky: false,
-  bordered: true,
+  isSticky: undefined,
+  sticky: undefined,
+  hasBorder: undefined,
+  bordered: undefined,
   orientation: Orientation.Horizontal,
   variant: 'solid',
 });
@@ -76,8 +82,13 @@ const el = useTemplateRef<HTMLElement>('el');
 
 const classes = computed(() =>
   cn(
-    navbarVariants({ orientation: props.orientation, sticky: props.sticky, height: props.height }),
-    props.bordered && (isVertical.value ? 'border-e border-border' : 'border-b border-border'),
+    navbarVariants({
+      orientation: props.orientation,
+      sticky: props.isSticky ?? props.sticky ?? false,
+      height: props.height,
+    }),
+    (props.hasBorder ?? props.bordered ?? true) &&
+      (isVertical.value ? 'border-e border-border' : 'border-b border-border'),
     props.tone
       ? surfaceVariants({ variant: 'subtle', tone: props.tone, radius: 'none' })
       : NavbarSurfaceClass[props.variant],

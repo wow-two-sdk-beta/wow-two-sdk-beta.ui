@@ -27,7 +27,8 @@ Public import: `import { ComboboxPicker } from '@wow-two-beta/ui-vue/presentatio
 | `name`              | `string`  | no       | —           | The hidden input name; the hidden input emits the selected value.                                          |
 | `defaultOpen`       | `boolean` | no       | `false`     | The initial open state of the panel when uncontrolled.                                                     |
 | `open`              | `boolean` | no       | `undefined` | The panel open state, controlled. The `v-model:open` binding target.                                       |
-| `fillInputOnSelect` | `boolean` | no       | `true`      | The fill-on-select behavior — when the user picks an item, set the input value to its label. Default true. |
+| `canFillInputOnSelect` | `boolean` | no       | `true`      | The fill-on-select behavior — when the user picks an item, set the input value to its label. Default true. |
+| `fillInputOnSelect` | `boolean` | no       | —           | Deprecated — use `canFillInputOnSelect`; removed next release.                                             |
 
 ## Emits
 

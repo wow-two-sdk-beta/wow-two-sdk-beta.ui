@@ -42,9 +42,13 @@ export interface DrawerProps {
   readonly side?: Side;
 
   /** The outside-click dismissal toggle. Default `true`. */
+  readonly canDismissOnOutsideClick?: boolean;
+  /** @deprecated Use `canDismissOnOutsideClick`; this alias is removed next release. */
   readonly dismissOnOutsideClick?: boolean;
 
   /** The Escape dismissal toggle. Default `true`. */
+  readonly canDismissOnEscape?: boolean;
+  /** @deprecated Use `canDismissOnEscape`; this alias is removed next release. */
   readonly dismissOnEscape?: boolean;
 }
 </script>
@@ -73,8 +77,10 @@ const props = withDefaults(defineProps<DrawerProps>(), {
   open: undefined,
   defaultOpen: false,
   side: 'right',
-  dismissOnOutsideClick: true,
-  dismissOnEscape: true,
+  canDismissOnOutsideClick: undefined,
+  dismissOnOutsideClick: undefined,
+  canDismissOnEscape: undefined,
+  dismissOnEscape: undefined,
 });
 
 const emit = defineEmits<{
@@ -101,8 +107,8 @@ provide(drawerContextKey, {
   titleId,
   descriptionId,
   side: computed(() => props.side),
-  dismissOnOutsideClick: computed(() => props.dismissOnOutsideClick),
-  dismissOnEscape: computed(() => props.dismissOnEscape),
+  dismissOnOutsideClick: computed(() => props.canDismissOnOutsideClick ?? props.dismissOnOutsideClick ?? true),
+  dismissOnEscape: computed(() => props.canDismissOnEscape ?? props.dismissOnEscape ?? true),
 });
 </script>
 

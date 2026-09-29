@@ -140,7 +140,7 @@ describe('checkable menu rows', () => {
         {
           modelValue: false,
           isIndeterminate: true,
-          closeOnSelect: false,
+          canCloseOnSelect: false,
           'onUpdate:modelValue': (next: boolean) => changes.push(next),
         },
         () => 'Select all',
@@ -183,8 +183,8 @@ describe('checkable menu rows', () => {
           'onUpdate:modelValue': (value: string | null) => picks.push(value),
         },
         () => [
-          h(MenuRadioItem, { value: 'name', closeOnSelect: false }, () => 'Name'),
-          h(MenuRadioItem, { value: 'date', closeOnSelect: false }, () => 'Date'),
+          h(MenuRadioItem, { value: 'name', canCloseOnSelect: false }, () => 'Name'),
+          h(MenuRadioItem, { value: 'date', canCloseOnSelect: false }, () => 'Date'),
         ],
       ),
     ]);

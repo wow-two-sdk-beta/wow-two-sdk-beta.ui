@@ -63,12 +63,18 @@ export interface BottomSheetProps {
   readonly initialSnap?: number;
 
   /** The outside-click dismissal toggle. Default `true`. */
+  readonly canDismissOnOutsideClick?: boolean;
+  /** @deprecated Use `canDismissOnOutsideClick`; this alias is removed next release. */
   readonly dismissOnOutsideClick?: boolean;
 
   /** The Escape dismissal toggle. Default `true`. */
+  readonly canDismissOnEscape?: boolean;
+  /** @deprecated Use `canDismissOnEscape`; this alias is removed next release. */
   readonly dismissOnEscape?: boolean;
 
   /** The drag-below-lowest-snap dismissal toggle. Default `true`. */
+  readonly canDragToDismiss?: boolean;
+  /** @deprecated Use `canDragToDismiss`; this alias is removed next release. */
   readonly dragToDismiss?: boolean;
 
   /** The visual recipe. Default `elevated`. */
@@ -112,7 +118,7 @@ import { useLocale } from '../../../foundation/i18n';
 /**
  * Renders a mobile bottom sheet with a drag handle and snap points.
  * Pointer-event drag moves between heights; releasing snaps to the nearest point. Past the lowest
- * snap with `dragToDismiss`, the sheet closes.
+ * snap with `canDragToDismiss`, the sheet closes.
  */
 defineOptions({ name: 'BottomSheet', inheritAttrs: false });
 
@@ -125,10 +131,18 @@ const props = withDefaults(defineProps<BottomSheetProps>(), {
   defaultOpen: false,
   snapPoints: () => ['40vh', '90vh'],
   initialSnap: 0,
-  dismissOnOutsideClick: true,
-  dismissOnEscape: true,
-  dragToDismiss: true,
+  canDismissOnOutsideClick: undefined,
+  dismissOnOutsideClick: undefined,
+  canDismissOnEscape: undefined,
+  dismissOnEscape: undefined,
+  canDragToDismiss: undefined,
+  dragToDismiss: undefined,
 });
+
+/* Each flag reads its `can*` name first, then the deprecated alias. */
+const dismissesOnOutsideClick = computed(() => props.canDismissOnOutsideClick ?? props.dismissOnOutsideClick ?? true);
+const dismissesOnEscape = computed(() => props.canDismissOnEscape ?? props.dismissOnEscape ?? true);
+const dismissesOnDrag = computed(() => props.canDragToDismiss ?? props.dragToDismiss ?? true);
 
 const emit = defineEmits<{
   /** Fires when the sheet opens or closes — the `v-model:open` half. */
@@ -213,7 +227,7 @@ function handlePointerUp(event: PointerEvent): void {
   dragHeight.value = null;
 
   // Below lowest snap by 60px → dismiss.
-  if (props.dragToDismiss && liveHeight < (heights[0] ?? 0) - 60) {
+  if (dismissesOnDrag.value && liveHeight < (heights[0] ?? 0) - 60) {
     controlled.setValue(false);
     return;
   }
@@ -237,7 +251,7 @@ function handleKeyDown(event: KeyboardEvent): void {
   } else if (event.key === 'ArrowDown') {
     event.preventDefault();
     if (currentSnap.value > 0) currentSnap.value -= 1;
-    else if (props.dragToDismiss) controlled.setValue(false);
+    else if (dismissesOnDrag.value) controlled.setValue(false);
   }
 }
 
@@ -261,7 +275,7 @@ const handleValueText = computed(() =>
 );
 
 function handleBackdropClick(): void {
-  if (props.dismissOnOutsideClick) controlled.setValue(false);
+  if (dismissesOnOutsideClick.value) controlled.setValue(false);
 }
 
 function handleEscape(): void {
@@ -337,10 +351,10 @@ defineExpose({ el });
           and forwarded `data-state` down to the inner one. Collapsing them keeps
           every attribute of React's panel on the node `Presence` clones.
         -->
-        <FocusScope as-child trapped loop modal :on-mount-auto-focus="handleMountAutoFocus">
+        <FocusScope as-child is-trapped can-loop is-modal :on-mount-auto-focus="handleMountAutoFocus">
           <DismissableLayer
             ref="panel"
-            :is-escape-disabled="!props.dismissOnEscape"
+            :is-escape-disabled="!dismissesOnEscape"
             is-outside-click-disabled
             :on-escape="handleEscape"
             role="dialog"

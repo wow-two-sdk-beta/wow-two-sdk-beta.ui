@@ -20,7 +20,8 @@ Public import: `import { PricingCard } from '@wow-two-beta/ui-vue/presentation/d
 | `cadence` | `string \| number` | no | `undefined` | The billing cadence beside the price (e.g. "/mo"). |
 | `tagline` | `string \| number` | no | `undefined` | The short positioning line below the price. |
 | `features` | `ReadonlyArray<string \| number>` | yes | — | The feature bullets — each rendered with a leading `Check`. The scoped `feature` slot overrides a row. |
-| `featured` | `boolean` | no | `false` | The featured state — highlights this tier with a primary border + shadow + a badge. |
+| `isFeatured` | `boolean` | no | `false` | The featured state — highlights this tier with a primary border + shadow + a badge. |
+| `featured` | `boolean` | no | —       | Deprecated — use `isFeatured`; removed next release.                                |
 | `badgeLabel` | `string \| number` | no | `'Most popular'` | The badge label shown when `featured`. Default "Most popular". |
 
 ## Emits

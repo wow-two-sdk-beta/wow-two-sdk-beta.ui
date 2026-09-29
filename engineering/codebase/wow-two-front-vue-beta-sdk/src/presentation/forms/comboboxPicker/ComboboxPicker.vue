@@ -30,6 +30,8 @@ export interface ComboboxPickerProps {
   readonly open?: boolean;
 
   /** The fill-on-select behavior — when the user picks an item, set the input value to its label. Default true. */
+  readonly canFillInputOnSelect?: boolean;
+  /** @deprecated Use `canFillInputOnSelect`; this alias is removed next release. */
   readonly fillInputOnSelect?: boolean;
 }
 </script>
@@ -57,7 +59,8 @@ const props = withDefaults(defineProps<ComboboxPickerProps>(), {
   isDisabled: undefined,
   isReadOnly: undefined,
   defaultOpen: false,
-  fillInputOnSelect: true,
+  canFillInputOnSelect: undefined,
+  fillInputOnSelect: undefined,
   /* Explicit `undefined` defaults are load-bearing: `useControlled` keys on `=== undefined`,
      and Vue casts an absent `boolean` prop to `false` — without these, `open` would
      read as "controlled, and closed", pinning the panel shut and making `defaultOpen` dead. */
@@ -144,7 +147,7 @@ function unregisterItem(id: string): void {
 function selectItem(entry: ComboboxPickerItemEntry, options?: { close?: boolean }): void {
   if (inactive.value || entry.isDisabled) return;
   valueCtl.setValue(entry.value);
-  if (props.fillInputOnSelect) {
+  if (props.canFillInputOnSelect ?? props.fillInputOnSelect ?? true) {
     const text = typeof entry.label === 'string' ? entry.label : entry.value;
     inputCtl.setValue(text);
   }

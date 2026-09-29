@@ -18,7 +18,8 @@ Public import: `import { MenuItem } from '@wow-two-beta/ui-vue/presentation/nav'
 |---|---|---|---|---|
 | `state` | `MenuItemState` | no | `undefined` | The visual state of the item. |
 | `isDisabled` | `boolean` | no | `undefined` | The disabled state — blocks activation. |
-| `closeOnSelect` | `boolean` | no | `true` | Closes the whole menu tree after activation; `false` keeps it open for repeated actions. |
+| `canCloseOnSelect` | `boolean` | no | `true` | Closes the whole menu tree after activation; `false` keeps it open for repeated actions. |
+| `closeOnSelect` | `boolean` | no | —      | Deprecated — use `canCloseOnSelect`; removed next release.                               |
 
 ## Emits
 

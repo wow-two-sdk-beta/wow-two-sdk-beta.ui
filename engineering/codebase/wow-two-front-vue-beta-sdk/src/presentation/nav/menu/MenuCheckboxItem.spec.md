@@ -23,7 +23,8 @@ Public import: `import { MenuCheckboxItem } from '@wow-two-beta/ui-vue/presentat
 | `isIndeterminate` | `boolean` | no | `false` | The mixed state; the next toggle checks the row. |
 | `state` | `MenuItemState` | no | `undefined` | The visual state of the row. |
 | `isDisabled` | `boolean` | no | `undefined` | The disabled state — blocks toggling and removes the row from the arrow walk. |
-| `closeOnSelect` | `boolean` | no | `true` | Closes the whole menu tree after a toggle; `false` keeps it open to flip several rows. |
+| `canCloseOnSelect` | `boolean` | no | `true` | Closes the whole menu tree after a toggle; `false` keeps it open to flip several rows. |
+| `closeOnSelect` | `boolean` | no | —      | Deprecated — use `canCloseOnSelect`; removed next release.                             |
 
 ## Emits
 

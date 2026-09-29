@@ -17,7 +17,8 @@ Public import: `import { ControlGroupField } from '@wow-two-beta/ui-vue/presenta
 |---|---|---|---|---|
 | `label` | `string \| number` | yes | — | The group's label — muted; sits beside the control(s) when horizontal, above them when vertical. a Vue prop renders text, so richer content goes through the same-named `label` slot, which overrides this value. |
 | `orientation` | `Orientation` | no | `Orientation.Horizontal` | The label-to-control layout — `horizontal` (label beside) or `vertical` (label above). Default `horizontal`. |
-| `divided` | `boolean` | no | `true` | The hairline between this and the next group (settings-list look). Default `true`. |
+| `hasDivider` | `boolean` | no | `true` | The hairline between this and the next group (settings-list look). Default `true`. |
+| `divided` | `boolean` | no | —      | Deprecated — use `hasDivider`; removed next release.                               |
 | `labelWidth` | `string` | no | `undefined` | The fixed label width in the horizontal layout, e.g. `"6rem"` — aligns rows. Omit for content-driven width. |
 
 ## Emits

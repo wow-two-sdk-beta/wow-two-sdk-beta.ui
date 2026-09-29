@@ -20,9 +20,11 @@ Public import: `import { Navbar } from '@wow-two-beta/ui-vue/presentation/layout
 | `containerClass` | `HTMLAttributes['class']` | no | — | Convenience class for the inner `ContainerLayout`, merged after `containerAttrs.class`. |
 | `containerSize` | `ContainerLayoutProps['size']` | no | — | The max-width of the inner centered `ContainerLayout`. Passthrough to `ContainerLayout.size`. Default `lg`. |
 | `height` | `NavbarHeight` | no | — | The band height. Default `md`. |
-| `sticky` | `boolean` | no | `false` | The sticky pinning of the bar to the top of the scroll container. Default `false` (non-sticky). |
+| `isSticky` | `boolean` | no | `false` | The sticky pinning of the bar to the top of the scroll container. Default `false` (non-sticky). |
+| `sticky` | `boolean` | no | —       | Deprecated — use `isSticky`; removed next release.                                              |
 | `tone` | `SurfaceTone` | no | — | The tinted background tone for the band — applies the shadow-less `subtle` surface treatment. Omit for a transparent bar (relies on `bordered` / page bg). |
-| `bordered` | `boolean` | no | `true` | The bottom border under the bar (the end border for a rail). Default `true`. |
+| `hasBorder` | `boolean` | no | `true` | The bottom border under the bar (the end border for a rail). Default `true`. |
+| `bordered` | `boolean` | no | —      | Deprecated — use `hasBorder`; removed next release.                          |
 | `orientation` | `NavbarOrientation` | no | `horizontal` | A full-width top bar (`start` / `center` / `end` in a row) or a full-height rail (`start` at the top, `center` scrolling, `end` at the foot). |
 | `variant` | `NavbarVariant` | no | `solid` | The surface: `solid`, `glass` (blurred, opaque where blur or transparency is unavailable or unwanted) or `transparent`. A `tone` overrides it. |
 

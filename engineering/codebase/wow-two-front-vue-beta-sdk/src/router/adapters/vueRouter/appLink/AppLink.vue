@@ -13,6 +13,8 @@ export interface AppLinkProps extends /* @vue-ignore */ AppLinkAttributes {
   readonly to: RouteLocationRaw;
 
   /** Whether only the exact destination, not its descendant paths, marks the link active. */
+  readonly isExact?: boolean;
+  /** @deprecated Use `isExact`; this alias is removed next release. */
   readonly end?: boolean;
 
   /** Whether to replace the current history entry instead of pushing. */
@@ -40,6 +42,7 @@ import { prefetchProps } from '../hooks/UsePrefetch';
 defineOptions({ name: 'AppLink' });
 
 const props = withDefaults(defineProps<AppLinkProps>(), {
+  isExact: undefined,
   end: undefined,
   replace: undefined,
   viewTransition: undefined,
@@ -56,7 +59,7 @@ const link = useLink({
   replace: computed(() => props.replace),
 });
 
-const isActive = computed(() => (props.end ? link.isExactActive.value : link.isActive.value));
+const isActive = computed(() => ((props.isExact ?? props.end) ? link.isExactActive.value : link.isActive.value));
 
 const intent = computed(() => (props.prefetch ? prefetchProps(props.prefetch) : undefined));
 </script>

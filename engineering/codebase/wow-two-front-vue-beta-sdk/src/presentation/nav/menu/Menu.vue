@@ -367,8 +367,8 @@ function handleKeydown(event: KeyboardEvent): void {
       <Presence :is-present="isMenuOpen">
         <FocusScope
           as-child
-          :trapped="!isSubmenu"
-          loop
+          :is-trapped="!isSubmenu"
+          can-loop
           :return-focus="props.returnFocus"
           :on-mount-auto-focus="handleMountAutoFocus"
         >

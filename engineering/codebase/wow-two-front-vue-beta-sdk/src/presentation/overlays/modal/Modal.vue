@@ -47,9 +47,13 @@ export interface ModalProps {
   readonly defaultOpen?: boolean;
 
   /** The outside-click dismissal toggle. Default `true`. */
+  readonly canDismissOnOutsideClick?: boolean;
+  /** @deprecated Use `canDismissOnOutsideClick`; this alias is removed next release. */
   readonly dismissOnOutsideClick?: boolean;
 
   /** The Escape dismissal toggle. Default `true`. */
+  readonly canDismissOnEscape?: boolean;
+  /** @deprecated Use `canDismissOnEscape`; this alias is removed next release. */
   readonly dismissOnEscape?: boolean;
 
   /** The ARIA dialog role. Internal — `AlertModal` overrides this. */
@@ -81,8 +85,10 @@ defineSlots<{ default(): unknown }>();
 const props = withDefaults(defineProps<ModalProps>(), {
   open: undefined,
   defaultOpen: false,
-  dismissOnOutsideClick: true,
-  dismissOnEscape: true,
+  canDismissOnOutsideClick: undefined,
+  dismissOnOutsideClick: undefined,
+  canDismissOnEscape: undefined,
+  dismissOnEscape: undefined,
   role: 'dialog',
 });
 
@@ -110,8 +116,8 @@ provide(modalContextKey, {
   titleId,
   descriptionId,
   role: computed(() => props.role),
-  dismissOnOutsideClick: computed(() => props.dismissOnOutsideClick),
-  dismissOnEscape: computed(() => props.dismissOnEscape),
+  dismissOnOutsideClick: computed(() => props.canDismissOnOutsideClick ?? props.dismissOnOutsideClick ?? true),
+  dismissOnEscape: computed(() => props.canDismissOnEscape ?? props.dismissOnEscape ?? true),
 });
 </script>
 

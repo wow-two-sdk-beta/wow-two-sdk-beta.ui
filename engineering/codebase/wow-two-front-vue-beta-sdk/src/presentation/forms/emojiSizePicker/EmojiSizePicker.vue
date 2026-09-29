@@ -88,7 +88,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
 </script>
 
 <template>
-  <ControlGroupField :key="formResetRevision" label="Size" orientation="vertical" :divided="false">
+  <ControlGroupField :key="formResetRevision" label="Size" orientation="vertical" :has-divider="false">
     <OptionTileGroupField label="Emoji size">
       <OptionTilePicker
         v-for="entry in presets"

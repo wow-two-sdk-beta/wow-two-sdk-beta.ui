@@ -17,7 +17,8 @@ Public import: `import { InlineLayout } from '@wow-two-beta/ui-vue/presentation/
 |---|---|---|---|---|
 | `gap` | `'0' \| '1' \| '2' \| '3' \| '4' \| '6' \| '8'` | no | `'2'` | The gap between children (Tailwind spacing). Default `2`. |
 | `align` | `InlineLayoutAlign` | no | `InlineLayoutAlign.Center` | The vertical alignment. Default `center`. |
-| `wrap` | `boolean` | no | `true` | The child wrapping onto multiple lines. Default `true` (`flex-wrap`). Set `false` (`flex-nowrap`) for tight single-line rows that should truncate. |
+| `canWrap` | `boolean` | no | `true` | The child wrapping onto multiple lines. Default `true` (`flex-wrap`). Set `false` (`flex-nowrap`) for tight single-line rows that should truncate. |
+| `wrap` | `boolean` | no | —      | Deprecated — use `canWrap`; removed next release.                                                                                                  |
 
 ## Emits
 

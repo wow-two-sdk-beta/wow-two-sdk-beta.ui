@@ -13,6 +13,8 @@ export interface MenuRadioItemProps {
   readonly isDisabled?: boolean;
 
   /** The close-after-select toggle. Default `true`; `false` keeps the menu open. */
+  readonly canCloseOnSelect?: boolean;
+  /** @deprecated Use `canCloseOnSelect`; this alias is removed next release. */
   readonly closeOnSelect?: boolean;
 }
 </script>
@@ -41,7 +43,8 @@ defineSlots<{
 const props = withDefaults(defineProps<MenuRadioItemProps>(), {
   state: undefined,
   isDisabled: undefined,
-  closeOnSelect: true,
+  canCloseOnSelect: undefined,
+  closeOnSelect: undefined,
 });
 
 const emit = defineEmits<{
@@ -88,7 +91,7 @@ onScopeDispose(() => menu.unregisterItem(id));
 function choose(): void {
   group.select(props.value);
   emit('select');
-  if (props.closeOnSelect) menu.close();
+  if (props.canCloseOnSelect ?? props.closeOnSelect ?? true) menu.close();
 }
 
 function handleKeydown(event: KeyboardEvent): void {

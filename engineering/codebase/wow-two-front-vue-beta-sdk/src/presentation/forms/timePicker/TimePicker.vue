@@ -189,7 +189,7 @@ const formResetRevision = useNativeFormReset(formResetAnchor, () => {
     </PopoverTrigger>
     <PopoverContent is-bare>
       <TimeColumns
-        :disabled="finalDisabled || finalReadOnly"
+        :is-disabled="finalDisabled || finalReadOnly"
         :min="min"
         :max="max"
         :model-value="time"

@@ -31,7 +31,9 @@ export interface TagsInputProps {
    */
   readonly validate?: (tag: string) => boolean;
 
-  /** Whether the same tag may be committed twice. */
+  /** Whether the same tag may be committed twice. Default `false`. */
+  readonly canAddDuplicates?: boolean;
+  /** @deprecated Use `canAddDuplicates`; this alias is removed next release. */
   readonly allowsDuplicates?: boolean;
 
   /** The cap on committed tags. */
@@ -92,7 +94,8 @@ defineOptions({ name: 'TagsInput', inheritAttrs: false });
 const inputProps = withDefaults(defineProps<TagsInputProps>(), {
   delimiters: () => [','],
   validate: (t: string) => t.trim().length > 0,
-  allowsDuplicates: false,
+  canAddDuplicates: undefined,
+  allowsDuplicates: undefined,
   tagVariant: 'neutral',
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form control
      context, and Vue casts an absent `boolean` prop to `false` — which would shadow it. */
@@ -146,7 +149,7 @@ const finalState = computed(() => props.state ?? (invalid.value ? InputStateValu
 function commit(raw: string): void {
   const trimmed = raw.trim();
   if (!trimmed || !props.validate(trimmed)) return;
-  if (!props.allowsDuplicates && tags.value.includes(trimmed)) return;
+  if (!(props.canAddDuplicates ?? props.allowsDuplicates ?? false) && tags.value.includes(trimmed)) return;
   if (props.max != null && tags.value.length >= props.max) return;
   tagsControlled.setValue([...tags.value, trimmed]);
   textControlled.setValue('');

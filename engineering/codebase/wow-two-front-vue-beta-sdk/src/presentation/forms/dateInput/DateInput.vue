@@ -32,9 +32,11 @@ export interface DateInputProps extends /* @vue-ignore */ NativeInputAttributes<
    * lands a system-chrome popup in the middle of a design-system form. Reach for it when the
    * platform picker is the point (a mobile-first form wanting the OS wheels, for instance).
    */
+  readonly isNative?: boolean;
+  /** @deprecated Use `isNative`; this alias is removed next release. */
   readonly native?: boolean;
 
-  /** The empty-state text. Ignored when `native` — that control renders its own mask. */
+  /** The empty-state text. Ignored when `isNative` — that control renders its own mask. */
   readonly placeholder?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
@@ -79,7 +81,7 @@ import CalendarPicker from '../calendarPicker/CalendarPicker.vue';
  * Accepts and emits `Temporal.PlainDate`.
  *
  * The popover is ours, not the browser's: an `<input type="date">` opens an unstylable system
- * panel, which is what `native` is for. `DatePicker` is the trigger-shaped peer — reach for
+ * panel, which is what `isNative` is for. `DatePicker` is the trigger-shaped peer — reach for
  * this one when the form wants a text field the user can type into.
  */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
@@ -87,7 +89,8 @@ import CalendarPicker from '../calendarPicker/CalendarPicker.vue';
 defineOptions({ name: 'DateInput', inheritAttrs: false });
 
 const props = withDefaults(defineProps<DateInputProps>(), {
-  native: false,
+  isNative: undefined,
+  native: undefined,
   placeholder: 'YYYY-MM-DD',
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
      control context, and Vue casts an absent `boolean` prop to `false` — which would
@@ -99,6 +102,9 @@ const props = withDefaults(defineProps<DateInputProps>(), {
   isRequired: undefined,
   required: undefined,
 });
+
+/** `isNative` first, then the deprecated `native`. */
+const usesNativeControl = computed(() => props.isNative ?? props.native ?? false);
 
 const emit = defineEmits<{
   /** Fires when the reader types a date or picks one in the calendar — the `v-model` half. */
@@ -169,7 +175,7 @@ function onKeydown(event: KeyboardEvent): void {
   }
 }
 
-/** The `native` path keeps the original ISO-string round trip. */
+/** The `isNative` path keeps the original ISO-string round trip. */
 function onNativeInput(event: Event): void {
   if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) return;
   const input = event.target as HTMLInputElement;
@@ -222,7 +228,7 @@ const inputClass = computed(() =>
       border: props.border,
       ring: props.ring,
     }),
-    !props.native && 'pr-10',
+    !usesNativeControl.value && 'pr-10',
   ),
 );
 
@@ -242,7 +248,7 @@ const locale = useLocale();
   <div :class="wrapperClass">
     <!-- The unstylable-system-panel path, kept for callers that want the platform picker. -->
     <input
-      v-if="native"
+      v-if="usesNativeControl"
       ref="root"
       type="date"
       :id="inputId"

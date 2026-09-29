@@ -8,7 +8,7 @@ const AnonymousSession = { status: AuthStatus.Anonymous, user: null } as const;
 export interface AuthProviderProps<TUser = unknown, TSignInInput = unknown> {
   /**
    * The transport strategy (cookie / bearer / redirect factory, or bespoke delegates). Read live
-   * on every call. A swap cancels old work and re-resolves when resolveOnMount is enabled.
+   * on every call. A swap cancels old work and re-resolves when canResolveOnMount is enabled.
    */
   readonly strategy: AuthStrategy<TUser, TSignInInput>;
 
@@ -19,6 +19,8 @@ export interface AuthProviderProps<TUser = unknown, TSignInInput = unknown> {
    * Whether to run the me-resolve on mount. Default `true`; with `false` the session stays
    * `unknown` until `refresh()` or an action settles it.
    */
+  readonly canResolveOnMount?: boolean;
+  /** @deprecated Use `canResolveOnMount`; this alias is removed next release. */
   readonly resolveOnMount?: boolean;
 
   /** Fires after a bridged 401 flips the session to `anonymous` — wire redirect-to-login here. */
@@ -57,7 +59,8 @@ defineSlots<{
 
 const props = withDefaults(defineProps<AuthProviderProps<TUser, TSignInInput>>(), {
   bridge: undefined,
-  resolveOnMount: true,
+  canResolveOnMount: undefined,
+  resolveOnMount: undefined,
   onUnauthorized: undefined,
   onResolveError: undefined,
   onSessionChange: undefined,
@@ -147,11 +150,11 @@ function runResolve(): Promise<Result<TUser | null, AppError>> {
   return promise;
 }
 async function resolveInitialSession(): Promise<void> {
-  if (props.resolveOnMount) await runResolve();
+  if (props.canResolveOnMount ?? props.resolveOnMount ?? true) await runResolve();
 }
 onMounted(resolveInitialSession);
 watch(
-  () => props.resolveOnMount,
+  () => props.canResolveOnMount ?? props.resolveOnMount ?? true,
   (enabled) => {
     if (enabled) return resolveInitialSession();
   },

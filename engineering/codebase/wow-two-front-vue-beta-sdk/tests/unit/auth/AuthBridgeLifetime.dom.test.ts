@@ -61,7 +61,7 @@ describe('auth bridge ownership', () => {
       },
     });
     const wrapper = mount(AuthProvider<string, string>, {
-      props: { bridge, resolveOnMount: false, strategy: { resolveUser: async () => R.ok(null) } },
+      props: { bridge, canResolveOnMount: false, strategy: { resolveUser: async () => R.ok(null) } },
       slots: { default: () => h(Child) },
     });
     auth.setUser('alice');
@@ -92,7 +92,7 @@ describe('auth bridge ownership', () => {
       },
     });
     const wrapper = mount(AuthProvider, {
-      props: { bridge, resolveOnMount: false, strategy: { resolveUser: () => new Promise<never>(() => {}) } },
+      props: { bridge, canResolveOnMount: false, strategy: { resolveUser: () => new Promise<never>(() => {}) } },
       slots: { default: () => h(Child) },
     });
     const pending = auth.refresh();

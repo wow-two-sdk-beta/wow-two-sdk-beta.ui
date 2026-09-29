@@ -8,7 +8,8 @@ it; `AppNavLink` stays the navigation row with `NavItem` styling.
 | Prop             | Type               | Required | Default     | Meaning                                                          |
 | ---------------- | ------------------ | -------- | ----------- | ---------------------------------------------------------------- |
 | `to`             | `RouteLocationRaw` | yes      | —           | The destination — a path, or a full route location.              |
-| `end`            | `boolean`          | no       | `undefined` | Whether only the exact destination marks the link active.        |
+| `isExact`        | `boolean`          | no       | `undefined` | Whether only the exact destination marks the link active.        |
+| `end`            | `boolean`          | no       | —           | Deprecated — use `isExact`; removed next release.                |
 | `replace`        | `boolean`          | no       | `undefined` | Whether to replace the current history entry instead of pushing. |
 | `viewTransition` | `boolean`          | no       | `undefined` | Whether to animate the navigation with the View Transitions API. |
 | `prefetch`       | `LazyRoute`        | no       | `undefined` | The destination's lazy module, warmed on hover and focus.        |

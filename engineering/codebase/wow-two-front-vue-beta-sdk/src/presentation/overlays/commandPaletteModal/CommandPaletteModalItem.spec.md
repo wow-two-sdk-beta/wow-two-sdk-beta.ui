@@ -19,7 +19,8 @@ Public import: `import { CommandPaletteModalItem } from '@wow-two-beta/ui-vue/pr
 | `value` | `string` | yes | — | Declared by the source contract. |
 | `searchText` | `string` | no | `undefined` | The text used by the filter; defaults to `value`. A Vue slot's text cannot be read at setup time without invoking the slot outside the render function (which Vue warns about, and which would not work at all for an item filtered out of the DOM), so the fallback is `value` — pass `searchText` whenever the visible label differs from it. |
 | `isDisabled` | `boolean` | no | `undefined` | Declared by the source contract. |
-| `closeOnSelect` | `boolean` | no | `true` | The close-on-activate toggle. Default `true`. |
+| `canCloseOnSelect` | `boolean` | no | `true` | The close-on-activate toggle. Default `true`. |
+| `closeOnSelect` | `boolean` | no | —      | Deprecated — use `canCloseOnSelect`; removed next release. |
 
 ## Emits
 

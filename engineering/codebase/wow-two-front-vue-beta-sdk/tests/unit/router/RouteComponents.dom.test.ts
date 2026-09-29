@@ -33,7 +33,7 @@ describe('router root components', () => {
     const focus = vi.spyOn(main, 'focus');
     const wrapper = mount(RouteAnnouncer, {
       attachTo: document.body,
-      props: { skipInitial: false },
+      props: { canAnnounceInitial: true },
       global: { plugins: [router] },
     });
     await nextTick();

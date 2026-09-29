@@ -19,8 +19,10 @@ Public import: `import { Drawer } from '@wow-two-beta/ui-vue/presentation/overla
 | `open` | `boolean` | no | `undefined` | The open state, controlled. The `v-model:open` binding target. |
 | `defaultOpen` | `boolean` | no | `false` | The initial open state when uncontrolled. Default `false`. |
 | `side` | `Side` | no | `'right'` | The edge the panel slides in from. Default `right`. |
-| `dismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
-| `dismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
+| `canDismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
+| `dismissOnOutsideClick` | `boolean` | no | —      | Deprecated — use `canDismissOnOutsideClick`; removed next release. |
+| `canDismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
+| `dismissOnEscape` | `boolean` | no | —      | Deprecated — use `canDismissOnEscape`; removed next release. |
 
 ## Emits
 

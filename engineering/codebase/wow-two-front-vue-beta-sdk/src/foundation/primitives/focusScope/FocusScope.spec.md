@@ -1,6 +1,6 @@
 # FocusScope
 
-`loop` wraps Tab at the scope edges; `trapped` recovers escaped focus. Both default false. `modal` defaults false and adds native background `inert` management; modal owners supply `trapped` and `loop` as well. Nonmodal scopes remain reachable alongside the page.
+`canLoop` wraps Tab at the scope edges; `isTrapped` recovers escaped focus. Both default false. `isModal` defaults false and adds native background `inert` management; modal owners supply `isTrapped` and `canLoop` as well. The unprefixed `loop`, `trapped` and `modal` remain one release as deprecated aliases. Nonmodal scopes remain reachable alongside the page.
 
 Vue injection records logical scope ancestry across Teleport. An outer trap accepts focus in its nonmodal descendant portals; a nested trapped scope becomes the active trap. Keyboard routing uses the owner document so Tab at a portal edge still reaches the active scope. Parent registration preserves child priority when children mount first.
 

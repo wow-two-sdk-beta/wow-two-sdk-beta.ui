@@ -7,4 +7,4 @@ It renders the caller's `fallback` slot first, the deepest route `errorComponent
 status/message/home-link fallback last. Both custom fallbacks receive the caught error and `reset()`.
 
 `homePath` defaults to `/`. A successful route change clears the error by default; set
-`resetOnNavigate="false"` when recovery must be explicit. The router error subscription is removed on unmount.
+`:can-reset-on-navigate="false"` when recovery must be explicit (`resetOnNavigate` is its deprecated alias). The router error subscription is removed on unmount.

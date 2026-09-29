@@ -122,7 +122,7 @@ describe('BottomSheet', () => {
     await settle();
     expect(wrapper.emitted('update:open')).toEqual([[false]]);
 
-    const pinned = mountSheet({ dragToDismiss: false });
+    const pinned = mountSheet({ canDragToDismiss: false });
     await settle();
     key(document.querySelectorAll<HTMLElement>('[role=separator]')[1]!, 'ArrowDown');
     await settle();
@@ -130,15 +130,30 @@ describe('BottomSheet', () => {
   });
 
   it('closes on Escape only while Escape dismissal is on', async () => {
-    const wrapper = mountSheet({ dismissOnEscape: false });
+    const wrapper = mountSheet({ canDismissOnEscape: false });
     await settle();
     key(handle(), 'Escape');
     await settle();
     expect(wrapper.emitted('update:open')).toBeUndefined();
-    await wrapper.setProps({ dismissOnEscape: true });
+    await wrapper.setProps({ canDismissOnEscape: true });
     key(handle(), 'Escape');
     await settle();
     expect(wrapper.emitted('update:open')).toEqual([[false]]);
+  });
+
+  it('still honours the deprecated dismissal names, the prefixed name winning when both are set', async () => {
+    const legacy = mountSheet({ dismissOnEscape: false, dragToDismiss: false });
+    await settle();
+    key(handle(), 'Escape');
+    key(handle(), 'ArrowDown');
+    await settle();
+    expect(legacy.emitted('update:open')).toBeUndefined();
+
+    const both = mountSheet({ canDismissOnEscape: true, dismissOnEscape: false });
+    await settle();
+    key(document.querySelectorAll<HTMLElement>('[role=separator]')[1]!, 'Escape');
+    await settle();
+    expect(both.emitted('update:open')).toEqual([[false]]);
   });
 });
 

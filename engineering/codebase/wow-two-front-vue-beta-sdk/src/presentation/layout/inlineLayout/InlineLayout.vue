@@ -27,6 +27,8 @@ export interface InlineLayoutProps {
    * The child wrapping onto multiple lines. Default `true` (`flex-wrap`).
    * Set `false` (`flex-nowrap`) for tight single-line rows that should truncate.
    */
+  readonly canWrap?: boolean;
+  /** @deprecated Use `canWrap`; this alias is removed next release. */
   readonly wrap?: boolean;
 }
 
@@ -60,7 +62,8 @@ defineOptions({ name: 'InlineLayout', inheritAttrs: false });
 const props = withDefaults(defineProps<InlineLayoutProps>(), {
   gap: '2',
   align: InlineLayoutAlign.Center,
-  wrap: true,
+  canWrap: undefined,
+  wrap: undefined,
 });
 
 defineSlots<{
@@ -74,7 +77,7 @@ const el = useTemplateRef<HTMLDivElement>('el');
 const classes = computed(() =>
   cn(
     'flex',
-    props.wrap ? 'flex-wrap' : 'flex-nowrap',
+    (props.canWrap ?? props.wrap ?? true) ? 'flex-wrap' : 'flex-nowrap',
     GapClass[props.gap],
     AlignClass[props.align],
     attrs.class as string | undefined,

@@ -29,9 +29,12 @@ Public import: `import { BottomSheet } from '@wow-two-beta/ui-vue/presentation/o
 | `defaultOpen` | `boolean` | no | `false` | The initial open state when uncontrolled. Default `false`. |
 | `snapPoints` | `ReadonlyArray<SnapPoint>` | no | `() => ['40vh', '90vh']` | The heights the sheet snaps between — px numbers or CSS lengths. Default `['40vh', '90vh']`. |
 | `initialSnap` | `number` | no | `0` | The snap index the sheet opens at. Default 0. |
-| `dismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
-| `dismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
-| `dragToDismiss` | `boolean` | no | `true` | The drag-below-lowest-snap dismissal toggle. Default `true`. |
+| `canDismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
+| `dismissOnOutsideClick` | `boolean` | no | —      | Deprecated — use `canDismissOnOutsideClick`; removed next release. |
+| `canDismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
+| `dismissOnEscape` | `boolean` | no | —      | Deprecated — use `canDismissOnEscape`; removed next release. |
+| `canDragToDismiss` | `boolean` | no | `true` | The drag-below-lowest-snap dismissal toggle. Default `true`. |
+| `dragToDismiss` | `boolean` | no | —      | Deprecated — use `canDragToDismiss`; removed next release.   |
 | `variant` | `SurfaceVariant` | no | — | The visual recipe. Default `elevated`. |
 | `tone` | `SurfaceTone` | no | — | The color tone the recipe is tinted with. |
 | `radius` | `SurfaceRadius` | no | — | The corner rounding. Default `none`. |

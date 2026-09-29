@@ -17,7 +17,9 @@ import type {
  * `surfaceVariants` config there, so the two cannot drift.
  */
 export interface ModalContentProps {
-  /** The backdrop-hide toggle — disables the default backdrop when true. */
+  /** Shows the default backdrop behind the panel. Default `true`. */
+  readonly showBackdrop?: boolean;
+  /** @deprecated Use `showBackdrop` (inverted); this alias is removed next release. */
   readonly hideBackdrop?: boolean;
 
   /** The backdrop-blur toggle. */
@@ -54,7 +56,10 @@ defineOptions({ name: 'ModalContent', inheritAttrs: false });
 /** The panel content — chrome subcomponents and the dialog body. React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = defineProps<ModalContentProps>();
+const props = withDefaults(defineProps<ModalContentProps>(), { showBackdrop: undefined, hideBackdrop: undefined });
+
+/** `showBackdrop` first, then the inverted deprecated `hideBackdrop`. */
+const hasBackdrop = computed(() => props.showBackdrop ?? !(props.hideBackdrop ?? false));
 
 const attrs = useAttrs();
 const context = useModalContext();
@@ -120,7 +125,7 @@ defineExpose({ el });
            fade-out plays before it unmounts. React wrapped it in a second, outer
            `Presence`, whose injected `data-state` the inner one then overwrote —
            passing the state straight in is the same intent without the masking. -->
-      <BackdropOverlay v-if="!props.hideBackdrop" is-inline :is-open="isOpen" :is-blurred="props.isBlurred" />
+      <BackdropOverlay v-if="hasBackdrop" is-inline :is-open="isOpen" :is-blurred="props.isBlurred" />
       <!-- Outside-click dismissal lives on the centering wrapper (it covers the
            backdrop): a click on the padding (`.self`) = outside. The wrapper is the
            Presence-animated node — `Presence` injects `data-state` + `ref` onto it and
@@ -139,7 +144,7 @@ defineExpose({ el });
           "
           @click.self="handleOutsideClick"
         >
-          <FocusScope as-child trapped loop modal>
+          <FocusScope as-child is-trapped can-loop is-modal>
             <DismissableLayer
               :is-escape-disabled="!dismissOnEscape"
               is-outside-click-disabled

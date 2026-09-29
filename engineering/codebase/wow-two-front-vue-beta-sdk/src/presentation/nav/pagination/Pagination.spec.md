@@ -19,7 +19,8 @@ Public import: `import { Pagination } from '@wow-two-beta/ui-vue/presentation/na
 | `total`         | `number`  | yes      | —       | The total page count (1-based).                                                           |
 | `page`          | `number`  | yes      | —       | The current page (1-based). The `v-model:page` binding target.                            |
 | `siblings`      | `number`  | no       | `1`     | The number of page buttons surrounding the current. Default `1` (so 1 + current + 1 = 3). |
-| `hideFirstLast` | `boolean` | no       | `false` | The hide-first/last toggle (just show prev/next + numbers).                               |
+| `showFirstLast` | `boolean` | no       | `true`  | Shows the first/last buttons beside prev/next and the numbers. Default `true`.            |
+| `hideFirstLast` | `boolean` | no       | —       | Deprecated — use `showFirstLast` (inverted); removed next release.                        |
 
 ## Emits
 

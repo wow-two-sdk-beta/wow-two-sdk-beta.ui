@@ -14,7 +14,7 @@ export interface EmojiTileProps {
   readonly entry: EmojiCatalogEntry;
 
   /** Whether this tile is the active selection. */
-  readonly selected: boolean;
+  readonly isSelected: boolean;
 
   /** The tile scale. */
   readonly size: EmojiPickerSize;
@@ -45,7 +45,7 @@ const tokens = computed(() => EmojiPickerSizes[props.size]);
 const isCircle = computed(() => props.shape === EmojiTileShapeValue.Circle);
 
 const stateClass = computed(() =>
-  props.selected ? 'border-primary bg-primary/10' : 'border-transparent hover:bg-muted',
+  props.isSelected ? 'border-primary bg-primary/10' : 'border-transparent hover:bg-muted',
 );
 
 const tileClass = computed(
@@ -75,7 +75,7 @@ const tileStyle = computed<CSSProperties>(() =>
     role="option"
     :title="entry.label"
     :aria-label="entry.label"
-    :aria-selected="selected"
+    :aria-selected="isSelected"
     :tabindex="isActive ? 0 : -1"
     :class="tileClass"
     :style="tileStyle"

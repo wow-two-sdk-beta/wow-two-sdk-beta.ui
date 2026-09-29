@@ -73,7 +73,7 @@ describe('overlay focus ownership', () => {
     );
     const second = track(
       mount(FocusScope, {
-        props: { trapped: true },
+        props: { isTrapped: true },
         slots: { default: '<button>new</button>' },
         attachTo: document.body,
       }),

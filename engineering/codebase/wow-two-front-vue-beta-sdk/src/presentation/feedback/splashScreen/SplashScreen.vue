@@ -82,7 +82,7 @@ defineExpose({ el });
   <Presence :is-present="props.isOpen">
     <!-- The overlay covers the pointer; the trap covers the keyboard, so Tab cannot reach the app mounting
          beneath it. Focus returns where it was when the overlay lifts. -->
-    <FocusScope v-if="props.isOverlay" as-child trapped loop>
+    <FocusScope v-if="props.isOverlay" as-child is-trapped can-loop>
       <div ref="el" role="status" tabindex="-1" v-bind="rest" :class="classes">
         <slot name="logo" />
         <ProgressBar

@@ -43,7 +43,7 @@ function mountDropdown(): { open: ReturnType<typeof ref<boolean>>; picked: strin
                   h(MenuItem, { onSelect: () => picked.push('Link') }, () => 'Link'),
                 ]),
               ]),
-              h(MenuCheckboxItem, { closeOnSelect: false }, () => 'Pinned'),
+              h(MenuCheckboxItem, { canCloseOnSelect: false }, () => 'Pinned'),
             ]),
           ]),
         ]),

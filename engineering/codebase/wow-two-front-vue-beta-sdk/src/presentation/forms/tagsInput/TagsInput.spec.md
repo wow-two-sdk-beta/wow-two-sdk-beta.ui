@@ -28,7 +28,8 @@ Public import: `import { TagsInput } from '@wow-two-beta/ui-vue/presentation/for
 | `placeholder` | `string` | no | `'Add tag…'` | The empty-state placeholder. |
 | `delimiters` | `ReadonlyArray<string>` | no | `() => [',']` | The characters that commit the current input. Enter and Tab always do. |
 | `validate` | `(tag: string) => boolean` | no | `(t: string) => t.trim().length > 0` | The predicate gating committed tags. Default: non-empty after trim. Kept a PROP, not an emit: it RETURNS a verdict, which an emit cannot do. |
-| `allowsDuplicates` | `boolean` | no | `false` | Whether the same tag may be committed twice. |
+| `canAddDuplicates` | `boolean` | no | `false` | Whether the same tag may be committed twice. Default `false`. |
+| `allowsDuplicates` | `boolean` | no | —       | Deprecated — use `canAddDuplicates`; removed next release. |
 | `max` | `number` | no | — | The cap on committed tags. |
 | `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
 | `name` | `string` | no | — | The hidden input name; the hidden input emits the comma-joined value. |

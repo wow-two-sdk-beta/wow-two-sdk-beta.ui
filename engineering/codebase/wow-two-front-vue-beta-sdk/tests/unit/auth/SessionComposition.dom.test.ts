@@ -90,7 +90,7 @@ describe('session composition', () => {
       },
     });
     const wrapper = mount(AuthProvider<Profile>, {
-      props: { bridge, resolveOnMount: false, strategy: { resolveUser: () => resolveIdentity.promise } },
+      props: { bridge, canResolveOnMount: false, strategy: { resolveUser: () => resolveIdentity.promise } },
       slots: { default: () => h(Child) },
       global: { plugins: [queryPlugin(queries), router] },
     });

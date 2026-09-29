@@ -53,6 +53,8 @@ const FlipKeyAttribute = 'data-flip-key';
 /** Props for `AnimatedLayout`. */
 export interface AnimatedLayoutProps extends FlipOptions {
   /** Whether layout animation is active. Defaults to `true`. */
+  readonly isEnabled?: boolean;
+  /** @deprecated Use `isEnabled`; this alias is removed next release. */
   readonly enabled?: boolean;
 
   /** Class for the container element. */
@@ -68,7 +70,7 @@ export interface AnimatedLayoutProps extends FlipOptions {
  * Renders one plain `<div>` wrapper and clones each slot child with a `data-flip-key`; all layout (flex, grid,
  * list) stays with the consumer via `class` / `style`, which fall through as ordinary attributes.
  *
- * Under `prefers-reduced-motion` — or `:enabled="false"`, or an explicit `reducedMotion` — children jump
+ * Under `prefers-reduced-motion` — or `:is-enabled="false"`, or an explicit `reducedMotion` — children jump
  * straight to their new positions with no transform applied and no residue left behind.
  */
 export const AnimatedLayout = defineComponent({
@@ -76,7 +78,9 @@ export const AnimatedLayout = defineComponent({
 
   props: {
     /** Whether layout animation is active. Defaults to `true`. */
-    enabled: { type: Boolean, default: true },
+    isEnabled: { type: Boolean, default: undefined },
+    /** @deprecated Use `isEnabled`; this alias is removed next release. */
+    enabled: { type: Boolean, default: undefined },
     /** Animation duration in milliseconds. Falls through to `playFlip`. */
     duration: { type: Number, default: undefined },
     /** Timing function. Falls through to `playFlip`. */
@@ -118,7 +122,7 @@ export const AnimatedLayout = defineComponent({
       rects.clear();
       for (const { key, rect } of measured) rects.set(key, rect);
 
-      if (!props.enabled) return;
+      if (!(props.isEnabled ?? props.enabled ?? true)) return;
 
       // Pass 2 — play. A child with no previous rect is new; it stays put at its final position.
       for (const { element: child, key } of measured) {

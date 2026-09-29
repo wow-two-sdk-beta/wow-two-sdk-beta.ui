@@ -16,6 +16,8 @@ export interface CommandPaletteModalItemProps {
   readonly isDisabled?: boolean;
 
   /** The close-on-activate toggle. Default `true`. */
+  readonly canCloseOnSelect?: boolean;
+  /** @deprecated Use `canCloseOnSelect`; this alias is removed next release. */
   readonly closeOnSelect?: boolean;
 }
 </script>
@@ -37,7 +39,8 @@ defineSlots<{ default(): unknown }>();
 const props = withDefaults(defineProps<CommandPaletteModalItemProps>(), {
   searchText: undefined,
   isDisabled: undefined,
-  closeOnSelect: true,
+  canCloseOnSelect: undefined,
+  closeOnSelect: undefined,
 });
 
 const emit = defineEmits<{
@@ -53,7 +56,12 @@ const id = useId();
 const resolvedSearch = computed(() => props.searchText ?? props.value);
 
 watch(
-  [() => props.value, resolvedSearch, () => props.isDisabled, () => props.closeOnSelect],
+  [
+    () => props.value,
+    resolvedSearch,
+    () => props.isDisabled,
+    () => props.canCloseOnSelect ?? props.closeOnSelect ?? true,
+  ],
   ([value, searchText, isDisabled, closeOnSelect]) => {
     context.registerItem({
       id,
@@ -81,7 +89,7 @@ const state = computed(() => (props.isDisabled ? 'disabled' : isActive.value ? '
 function handleClick(event: MouseEvent): void {
   if (event.defaultPrevented || props.isDisabled) return;
   emit('select');
-  if (props.closeOnSelect) context.setOpen(false);
+  if (props.canCloseOnSelect ?? props.closeOnSelect ?? true) context.setOpen(false);
 }
 
 function handlePointerEnter(): void {

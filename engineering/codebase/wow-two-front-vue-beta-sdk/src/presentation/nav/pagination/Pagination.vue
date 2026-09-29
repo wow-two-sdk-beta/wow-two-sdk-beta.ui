@@ -9,7 +9,9 @@ export interface PaginationProps {
   /** The number of page buttons surrounding the current. Default `1`. At most 50 neighbors per side are rendered. */
   readonly siblings?: number;
 
-  /** The hide-first/last toggle (just show prev/next + numbers). */
+  /** Shows the first/last buttons beside prev/next and the numbers. Default `true`. */
+  readonly showFirstLast?: boolean;
+  /** @deprecated Use `showFirstLast` (inverted); this alias is removed next release. */
   readonly hideFirstLast?: boolean;
 }
 
@@ -50,8 +52,12 @@ defineOptions({ name: 'Pagination', inheritAttrs: false });
 
 const props = withDefaults(defineProps<PaginationProps>(), {
   siblings: 1,
-  hideFirstLast: false,
+  showFirstLast: undefined,
+  hideFirstLast: undefined,
 });
+
+/** `showFirstLast` first, then the inverted deprecated `hideFirstLast`. */
+const hasFirstLast = computed(() => props.showFirstLast ?? !(props.hideFirstLast ?? false));
 
 const emit = defineEmits<{
   /** Fires when the reader lands on a different page — the `v-model:page` half. */
@@ -90,7 +96,7 @@ defineExpose({ el });
 <template>
   <nav ref="el" :aria-label="locale.t('Pagination.pagination', undefined, 'Pagination')" v-bind="rest" :class="classes">
     <button
-      v-if="!props.hideFirstLast"
+      v-if="hasFirstLast"
       type="button"
       :aria-label="locale.t('Pagination.firstPage', undefined, 'First page')"
       :disabled="page <= 1"
@@ -131,7 +137,7 @@ defineExpose({ el });
       <Icon :icon="ChevronRight" :size="16" />
     </button>
     <button
-      v-if="!props.hideFirstLast"
+      v-if="hasFirstLast"
       type="button"
       :aria-label="locale.t('Pagination.lastPage', undefined, 'Last page')"
       :disabled="page >= total"

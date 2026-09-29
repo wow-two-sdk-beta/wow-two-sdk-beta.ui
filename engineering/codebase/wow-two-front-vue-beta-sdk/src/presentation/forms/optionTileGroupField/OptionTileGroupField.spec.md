@@ -18,7 +18,8 @@ Public import: `import { OptionTileGroupField } from '@wow-two-beta/ui-vue/prese
 | `label` | `string` | yes | — | The group's accessible name. |
 | `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |
 | `disabled` | `boolean` | no | `undefined` | Deprecated alias of `isDisabled`; removed next release. |
-| `wrap` | `boolean` | no | `undefined` | The wrap state — tiles flow onto multiple rows. Default `false` (single row). |
+| `canWrap` | `boolean` | no | `undefined` | Lets tiles flow onto multiple rows. Default `false` (single row).             |
+| `wrap` | `boolean` | no | —           | Deprecated — use `canWrap`; removed next release.                             |
 | `align` | `Align` | no | — | The main-axis alignment of the tiles. Default `start`. |
 
 ## Emits

@@ -20,7 +20,8 @@ Public import: `import { MenuRadioItem } from '@wow-two-beta/ui-vue/presentation
 | `value` | `string` | yes | — | The value this row selects. |
 | `state` | `MenuItemState` | no | `undefined` | The visual state of the row. |
 | `isDisabled` | `boolean` | no | `undefined` | The disabled state; falls back to the group's. |
-| `closeOnSelect` | `boolean` | no | `true` | Closes the whole menu tree after a pick; `false` keeps it open. |
+| `canCloseOnSelect` | `boolean` | no | `true` | Closes the whole menu tree after a pick; `false` keeps it open. |
+| `closeOnSelect` | `boolean` | no | —      | Deprecated — use `canCloseOnSelect`; removed next release.      |
 
 ## Emits
 

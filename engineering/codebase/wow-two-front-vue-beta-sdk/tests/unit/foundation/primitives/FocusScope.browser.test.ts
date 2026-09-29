@@ -43,7 +43,10 @@ describe('FocusScope browser contract', () => {
     const wrapper = render(
       defineComponent({
         setup: () => () =>
-          h(FocusScope, { trapped: true, modal: true, loop: true }, () => [h('button', 'first'), h('button', 'last')]),
+          h(FocusScope, { isTrapped: true, isModal: true, canLoop: true }, () => [
+            h('button', 'first'),
+            h('button', 'last'),
+          ]),
       }),
     );
     await nextTick();
@@ -81,7 +84,7 @@ describe('FocusScope browser contract', () => {
     render(
       defineComponent({
         setup: () => () =>
-          h(FocusScope, { trapped: true, modal: true, loop: true }, () => [
+          h(FocusScope, { isTrapped: true, isModal: true, canLoop: true }, () => [
             h('button', 'parent first'),
             h(
               Teleport,
@@ -109,7 +112,7 @@ describe('FocusScope browser contract', () => {
       defineComponent({
         setup: () => () =>
           outerOpen.value
-            ? h(FocusScope, { trapped: true, modal: true, loop: true }, () => [
+            ? h(FocusScope, { isTrapped: true, isModal: true, canLoop: true }, () => [
                 h(
                   'button',
                   {
@@ -123,7 +126,9 @@ describe('FocusScope browser contract', () => {
                   ? h(
                       Teleport,
                       { to: 'body' },
-                      h(FocusScope, { trapped: true, modal: true, loop: true }, () => h('button', 'inner action')),
+                      h(FocusScope, { isTrapped: true, isModal: true, canLoop: true }, () =>
+                        h('button', 'inner action'),
+                      ),
                     )
                   : null,
               ])
@@ -152,12 +157,12 @@ describe('FocusScope browser contract', () => {
       defineComponent({
         setup: () => () =>
           opened.value
-            ? h(FocusScope, { trapped: true, modal: true }, () => [
+            ? h(FocusScope, { isTrapped: true, isModal: true }, () => [
                 h('button', 'outer tree action'),
                 h(
                   Teleport,
                   { to: 'body' },
-                  h(FocusScope, { trapped: true, modal: true }, () => h('button', 'inner tree action')),
+                  h(FocusScope, { isTrapped: true, isModal: true }, () => h('button', 'inner tree action')),
                 ),
               ])
             : null,
@@ -175,7 +180,7 @@ describe('FocusScope browser contract', () => {
   it('isolates late background nodes and restores their previous attributes on close', async () => {
     const wrapper = render(
       defineComponent({
-        setup: () => () => h(FocusScope, { modal: true, trapped: true }, () => h('button', 'active modal')),
+        setup: () => () => h(FocusScope, { isModal: true, isTrapped: true }, () => h('button', 'active modal')),
       }),
     );
     await nextTick();
@@ -207,7 +212,7 @@ describe('FocusScope browser contract', () => {
     ownedDocument.body.append(target);
     const wrapper = mount(
       defineComponent({
-        setup: () => () => h(FocusScope, { modal: true, trapped: true }, () => h('button', 'iframe action')),
+        setup: () => () => h(FocusScope, { isModal: true, isTrapped: true }, () => h('button', 'iframe action')),
       }),
       { attachTo: target },
     );
@@ -226,7 +231,7 @@ describe('FocusScope browser contract', () => {
     render(
       defineComponent({
         setup: () => () =>
-          h(FocusScope, { trapped: true, modal: true }, () => [
+          h(FocusScope, { isTrapped: true, isModal: true }, () => [
             h('button', { style: { visibility: 'hidden' } }, 'invisible'),
             h('fieldset', { disabled: true }, h('button', 'fieldset disabled')),
             h('button', { tabindex: -2 }, 'negative tab index'),

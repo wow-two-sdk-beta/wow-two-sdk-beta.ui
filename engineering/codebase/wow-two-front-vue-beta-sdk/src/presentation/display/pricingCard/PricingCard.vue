@@ -21,9 +21,11 @@ export interface PricingCardProps {
   readonly features: ReadonlyArray<string | number>;
 
   /** The featured state — highlights this tier with a primary border + shadow + a badge. */
+  readonly isFeatured?: boolean;
+  /** @deprecated Use `isFeatured`; this alias is removed next release. */
   readonly featured?: boolean;
 
-  /** The badge label shown when `featured`. Default "Most popular". */
+  /** The badge label shown when `isFeatured`. Default "Most popular". */
   readonly badgeLabel?: string | number;
 }
 </script>
@@ -43,7 +45,7 @@ import Text from '../text/Text.vue';
 /**
  * Renders a pricing tier: name, price baseline, tagline, checked feature list, bottom-pinned CTA.
  *
- * Content-only — the CTA is the default slot, never baked routing. `featured` adds a primary border, a shadow, and a
+ * Content-only — the CTA is the default slot, never baked routing. `isFeatured` adds a primary border, a shadow, and a
  * "Most popular" badge.
  */
 defineOptions({ name: 'PricingCard', inheritAttrs: false });
@@ -73,9 +75,13 @@ defineSlots<{
 const componentProps = withDefaults(defineProps<PricingCardProps>(), {
   cadence: undefined,
   tagline: undefined,
-  featured: false,
+  isFeatured: undefined,
+  featured: undefined,
 });
 const props = useLocaleDefaults(componentProps, 'PricingCard', { badgeLabel: 'Most popular' });
+
+/** `isFeatured` first, then the deprecated `featured`. */
+const isFeaturedTier = computed(() => props.isFeatured ?? props.featured ?? false);
 
 const attrs = useAttrs();
 const el = useTemplateRef<ComponentElement>('el');
@@ -83,7 +89,7 @@ const el = useTemplateRef<ComponentElement>('el');
 const classes = computed(() =>
   cn(
     'relative flex flex-col bg-card p-6',
-    props.featured ? 'border-primary shadow-lg shadow-primary/10' : 'border-border',
+    isFeaturedTier.value ? 'border-primary shadow-lg shadow-primary/10' : 'border-border',
     attrs.class as string | undefined,
   ),
 );
@@ -107,7 +113,7 @@ defineExpose({ el: rootElement });
 <template>
   <Card ref="el" variant="outline" radius="2xl" :elevation="0" v-bind="rest" :class="classes">
     <Badge
-      v-if="props.featured"
+      v-if="isFeaturedTier"
       variant="brand"
       size="md"
       class="absolute -top-3 left-6 bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"

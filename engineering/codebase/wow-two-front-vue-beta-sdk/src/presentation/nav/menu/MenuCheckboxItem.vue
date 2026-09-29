@@ -19,6 +19,8 @@ export interface MenuCheckboxItemProps {
   readonly isDisabled?: boolean;
 
   /** The close-after-toggle toggle. Default `true`; `false` keeps the menu open to flip several rows. */
+  readonly canCloseOnSelect?: boolean;
+  /** @deprecated Use `canCloseOnSelect`; this alias is removed next release. */
   readonly closeOnSelect?: boolean;
 }
 </script>
@@ -54,7 +56,8 @@ const props = withDefaults(defineProps<MenuCheckboxItemProps>(), {
   isIndeterminate: false,
   state: undefined,
   isDisabled: undefined,
-  closeOnSelect: true,
+  canCloseOnSelect: undefined,
+  closeOnSelect: undefined,
 });
 
 const emit = defineEmits<{
@@ -110,7 +113,7 @@ onScopeDispose(() => menu.unregisterItem(id));
 function toggle(): void {
   controlled.setValue(props.isIndeterminate ? true : !isChecked.value);
   emit('select');
-  if (props.closeOnSelect) menu.close();
+  if (props.canCloseOnSelect ?? props.closeOnSelect ?? true) menu.close();
 }
 
 function handleKeydown(event: KeyboardEvent): void {

@@ -14,6 +14,8 @@ export interface AppNavLinkProps {
   readonly to: RouteLocationRaw;
 
   /** Whether to match the destination exactly (no descendant paths) for the active state. */
+  readonly isExact?: boolean;
+  /** @deprecated Use `isExact`; this alias is removed next release. */
   readonly end?: boolean;
 
   /** Whether to replace the current history entry instead of pushing. */
@@ -50,11 +52,12 @@ defineSlots<{
 }>();
 
 /*
- * `end` / `replace` / `viewTransition` default to `undefined`, not `false`: an optional boolean prop
+ * `isExact` / `end` / `replace` / `viewTransition` default to `undefined`, not `false`: an optional boolean prop
  * with no default is cast to `false`, which would pin `replace` off and forbid a consumer's own
  * fallthrough from ever reading as absent.
  */
 const props = withDefaults(defineProps<AppNavLinkProps>(), {
+  isExact: undefined,
   end: undefined,
   replace: undefined,
   viewTransition: undefined,
@@ -64,14 +67,14 @@ const props = withDefaults(defineProps<AppNavLinkProps>(), {
 const attrs = useAttrs();
 
 // react-router resolved the active state with `useMatch({ path, end })`; `useLink` is the vue-router
-// counterpart and hands back both flags off one resolved location. `end` picks the exact one — the
+// counterpart and hands back both flags off one resolved location. `isExact` picks the exact one — the
 // same `end ?? false` default react-router had, since `isActive` already covers descendants.
 const link = useLink({
   to: computed(() => props.to),
   replace: computed(() => props.replace),
 });
 
-const isActive = computed(() => (props.end ? link.isExactActive.value : link.isActive.value));
+const isActive = computed(() => ((props.isExact ?? props.end) ? link.isExactActive.value : link.isActive.value));
 
 const intent = computed(() => (props.prefetch ? prefetchProps(props.prefetch) : undefined));
 </script>

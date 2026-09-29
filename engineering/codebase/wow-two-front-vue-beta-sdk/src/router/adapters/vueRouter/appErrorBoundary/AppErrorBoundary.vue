@@ -5,6 +5,8 @@ export interface AppErrorBoundaryProps {
   readonly homePath?: string;
 
   /** Whether to clear the caught error on the next successful navigation. Default `true`. */
+  readonly canResetOnNavigate?: boolean;
+  /** @deprecated Use `canResetOnNavigate`; this alias is removed next release. */
   readonly resetOnNavigate?: boolean;
 }
 
@@ -50,7 +52,8 @@ defineSlots<{
 
 const props = withDefaults(defineProps<AppErrorBoundaryProps>(), {
   homePath: '/',
-  resetOnNavigate: true,
+  canResetOnNavigate: undefined,
+  resetOnNavigate: undefined,
 });
 
 const route = useRoute();
@@ -80,7 +83,7 @@ const reset = (): void => {
 watch(
   () => route.fullPath,
   () => {
-    if (props.resetOnNavigate) reset();
+    if (props.canResetOnNavigate ?? props.resetOnNavigate ?? true) reset();
   },
 );
 

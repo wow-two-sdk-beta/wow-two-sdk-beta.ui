@@ -48,9 +48,13 @@ export interface PopoverProps {
   readonly isModal?: boolean;
 
   /** The outside-click dismissal toggle. Default `true`. */
+  readonly canDismissOnOutsideClick?: boolean;
+  /** @deprecated Use `canDismissOnOutsideClick`; this alias is removed next release. */
   readonly dismissOnOutsideClick?: boolean;
 
   /** The Escape dismissal toggle. Default `true`. */
+  readonly canDismissOnEscape?: boolean;
+  /** @deprecated Use `canDismissOnEscape`; this alias is removed next release. */
   readonly dismissOnEscape?: boolean;
 }
 </script>
@@ -75,8 +79,10 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   placement: 'bottom',
   offset: 8,
   isModal: false,
-  dismissOnOutsideClick: true,
-  dismissOnEscape: true,
+  canDismissOnOutsideClick: undefined,
+  dismissOnOutsideClick: undefined,
+  canDismissOnEscape: undefined,
+  dismissOnEscape: undefined,
 });
 
 const emit = defineEmits<{
@@ -101,8 +107,8 @@ provide(popoverContextKey, {
   placement: computed(() => props.placement),
   offset: computed(() => props.offset),
   isModal: computed(() => props.isModal),
-  dismissOnOutsideClick: computed(() => props.dismissOnOutsideClick),
-  dismissOnEscape: computed(() => props.dismissOnEscape),
+  dismissOnOutsideClick: computed(() => props.canDismissOnOutsideClick ?? props.dismissOnOutsideClick ?? true),
+  dismissOnEscape: computed(() => props.canDismissOnEscape ?? props.dismissOnEscape ?? true),
 });
 </script>
 

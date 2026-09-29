@@ -104,7 +104,7 @@ defineExpose({ el });
   <Presence :is-present="props.isOpen">
     <!-- The viewport scrim blocks the pointer; the trap blocks the keyboard the same way, so Tab cannot reach — and
          Enter cannot trigger — the controls under it. Focus returns where it was when the scrim lifts. -->
-    <FocusScope v-if="!props.isInline" as-child trapped loop>
+    <FocusScope v-if="!props.isInline" as-child is-trapped can-loop>
       <div ref="el" role="status" tabindex="-1" v-bind="rest" :class="classes">
         <Spinner :size="props.spinnerSize" :tone="props.spinnerTone" :label="spinnerLabel" />
         <div v-if="hasLabel" class="text-sm text-foreground">

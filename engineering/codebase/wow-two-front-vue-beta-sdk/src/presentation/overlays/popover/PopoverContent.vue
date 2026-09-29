@@ -132,7 +132,7 @@ function handleOutsidePointerDown(event: PointerEvent): void {
             two share a box, and collapsing them puts `role`, the surface classes and
             the outside-click boundary on one node.
           -->
-          <FocusScope as-child :trapped="isModal" :loop="isModal" :modal="isModal">
+          <FocusScope as-child :is-trapped="isModal" :can-loop="isModal" :is-modal="isModal">
             <DismissableLayer
               :is-escape-disabled="!dismissOnEscape"
               :is-outside-click-disabled="!dismissOnOutsideClick"

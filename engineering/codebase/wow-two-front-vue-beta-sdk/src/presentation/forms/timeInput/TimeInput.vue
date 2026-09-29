@@ -26,15 +26,17 @@ export interface TimeInputProps extends /* @vue-ignore */ NativeInputAttributes<
    * lands a system-chrome popup in the middle of a design-system form. Reach for it when the
    * platform picker is the point (a mobile-first form wanting the OS wheel, for instance).
    */
+  readonly isNative?: boolean;
+  /** @deprecated Use `isNative`; this alias is removed next release. */
   readonly native?: boolean;
 
-  /** The minute interval offered in the popover. Default 5. Ignored when `native`. */
+  /** The minute interval offered in the popover. Default 5. Ignored when `isNative`. */
   readonly minuteStep?: number;
   /** Inclusive same-day time bounds. */
   readonly min?: Temporal.PlainTime | null;
   readonly max?: Temporal.PlainTime | null;
 
-  /** The empty-state text. Ignored when `native` — that control renders its own mask. */
+  /** The empty-state text. Ignored when `isNative` — that control renders its own mask. */
   readonly placeholder?: string;
 
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
@@ -83,14 +85,15 @@ import TimeColumns from '../TimeColumns.vue';
  * Accepts and emits `Temporal.PlainTime`.
  *
  * The popover is ours (`TimeColumns` inside `overlays/popover`), not the browser's: an
- * `<input type="time">` opens an unstylable system panel, which is what `native` is for.
+ * `<input type="time">` opens an unstylable system panel, which is what `isNative` is for.
  */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'TimeInput', inheritAttrs: false });
 
 const props = withDefaults(defineProps<TimeInputProps>(), {
-  native: false,
+  isNative: undefined,
+  native: undefined,
   minuteStep: 5,
   placeholder: '--:--',
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
@@ -103,6 +106,9 @@ const props = withDefaults(defineProps<TimeInputProps>(), {
   isRequired: undefined,
   required: undefined,
 });
+
+/** `isNative` first, then the deprecated `native`. */
+const usesNativeControl = computed(() => props.isNative ?? props.native ?? false);
 
 const emit = defineEmits<{
   /** Fires when the reader types a time or picks one in the popover — the `v-model` half. */
@@ -179,7 +185,7 @@ function onKeydown(event: KeyboardEvent): void {
   }
 }
 
-/** The `native` path keeps the original `HH:MM`-string round trip. */
+/** The `isNative` path keeps the original `HH:MM`-string round trip. */
 function onNativeInput(event: Event): void {
   if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) return;
   const input = event.target as HTMLInputElement;
@@ -227,7 +233,7 @@ const inputClass = computed(() =>
       border: props.border,
       ring: props.ring,
     }),
-    !props.native && 'pr-10',
+    !usesNativeControl.value && 'pr-10',
   ),
 );
 
@@ -247,7 +253,7 @@ const locale = useLocale();
   <div :class="wrapperClass">
     <!-- The unstylable-system-panel path, kept for callers that want the platform picker. -->
     <input
-      v-if="native"
+      v-if="usesNativeControl"
       ref="root"
       type="time"
       :min="formatISOTime(min)"
@@ -295,7 +301,7 @@ const locale = useLocale();
       </PopoverTrigger>
       <PopoverContent is-bare>
         <TimeColumns
-          :disabled="finalDisabled || finalReadOnly"
+          :is-disabled="finalDisabled || finalReadOnly"
           :min="min"
           :max="max"
           :model-value="committed"

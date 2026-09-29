@@ -72,7 +72,9 @@ const VerticalSize: Record<DrawerSize, string> = {
  * `surfaceVariants` config there, so the two cannot drift.
  */
 export interface DrawerContentProps {
-  /** The backdrop-hide toggle — disables the default backdrop when true. */
+  /** Shows the default backdrop behind the panel. Default `true`. */
+  readonly showBackdrop?: boolean;
+  /** @deprecated Use `showBackdrop` (inverted); this alias is removed next release. */
   readonly hideBackdrop?: boolean;
 
   /** The backdrop-blur toggle. */
@@ -112,7 +114,14 @@ defineOptions({ name: 'DrawerContent', inheritAttrs: false });
 /** The panel content — chrome subcomponents and the drawer body. React's `children`. */
 defineSlots<{ default(): unknown }>();
 
-const props = withDefaults(defineProps<DrawerContentProps>(), { size: 'md' });
+const props = withDefaults(defineProps<DrawerContentProps>(), {
+  size: 'md',
+  showBackdrop: undefined,
+  hideBackdrop: undefined,
+});
+
+/** `showBackdrop` first, then the inverted deprecated `hideBackdrop`. */
+const hasBackdrop = computed(() => props.showBackdrop ?? !(props.hideBackdrop ?? false));
 
 const attrs = useAttrs();
 const context = useDrawerContext();
@@ -185,7 +194,7 @@ function handleEscape(): void {
       <!-- The scrim runs on `BackdropOverlay`'s own `Presence` (its `isOpen` prop); React
            mirrored the panel's `data-state` onto it by hand for the same effect. -->
       <BackdropOverlay
-        v-if="!props.hideBackdrop"
+        v-if="hasBackdrop"
         is-inline
         :is-open="isOpen"
         :is-blurred="props.isBlurred"
@@ -202,7 +211,7 @@ function handleEscape(): void {
           surface classes) on one node, which is also the node `Presence` clones
           and whose `transition-transform` end defers the unmount.
         -->
-        <FocusScope as-child trapped loop modal>
+        <FocusScope as-child is-trapped can-loop is-modal>
           <DismissableLayer
             :is-escape-disabled="!dismissOnEscape"
             is-outside-click-disabled

@@ -23,7 +23,8 @@ Public import: `import { SelectPickerContent } from '@wow-two-beta/ui-vue/presen
 | `isSearchable` | `boolean` | no | `false` | The searchable state, rendering a search input above the items and filtering by label substring. |
 | `searchPlaceholder` | `string` | no | `'Search…'` | The placeholder of the search input. |
 | `noResultsLabel` | `string \| number` | no | `'No results'` | The label rendered when the search yields no matches. |
-| `matchWidth` | `boolean` | no | `false` | The match-width behavior, locking the surface width to the trigger's and truncating long items. |
+| `hasTriggerWidth` | `boolean` | no | `false` | Locks the surface width to the trigger's, truncating long items. Default `false`.               |
+| `matchWidth` | `boolean` | no | —       | Deprecated — use `hasTriggerWidth`; removed next release.                                       |
 
 ## Emits
 

@@ -12,7 +12,9 @@ export interface OptionTileGroupFieldProps {
   /** @deprecated Use `isDisabled`; this alias is removed next release. */
   readonly disabled?: boolean;
 
-  /** The wrap state — tiles flow onto multiple rows. Default `false` (single row). */
+  /** Lets tiles flow onto multiple rows. Default `false` (single row). */
+  readonly canWrap?: boolean;
+  /** @deprecated Use `canWrap`; this alias is removed next release. */
   readonly wrap?: boolean;
 
   /** The main-axis alignment of the tiles. Default `start`. */
@@ -35,10 +37,11 @@ defineOptions({ name: 'OptionTileGroupField', inheritAttrs: false });
 /* `children` has no prop counterpart — the `OptionTilePicker` children are the default slot — and the
    React `className` prop is Vue's `class` fallthrough attr. */
 /* Explicit `undefined` defaults keep Vue's boolean casting from turning an absent prop into
-   `false` — `wrap` must stay undefined so the variants config's own default decides. */
+   `false` — `canWrap` and `wrap` must stay undefined so the variants config's own default decides. */
 const props = withDefaults(defineProps<OptionTileGroupFieldProps>(), {
   isDisabled: undefined,
   disabled: undefined,
+  canWrap: undefined,
   wrap: undefined,
 });
 
@@ -59,7 +62,7 @@ const passthroughAttrs = computed(() =>
 /* `FieldsetLayout` owns the `m-0 min-w-0 border-0 p-0` reset, so only the layout variants are
    composed here — the same split the React original had. */
 const rootClass = computed(() =>
-  cn(optionTileGroupVariants({ wrap: props.wrap, align: props.align }), attrs.class as ClassValue),
+  cn(optionTileGroupVariants({ wrap: props.canWrap ?? props.wrap, align: props.align }), attrs.class as ClassValue),
 );
 
 const root = useTemplateRef<{ el: HTMLFieldSetElement | null }>('root');

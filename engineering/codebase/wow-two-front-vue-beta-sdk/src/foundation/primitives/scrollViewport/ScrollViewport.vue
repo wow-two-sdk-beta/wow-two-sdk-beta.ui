@@ -20,6 +20,8 @@ export interface ScrollViewportProps extends /* @vue-ignore */ HTMLAttributes {
    * `prefers-reduced-motion` — the transition is dropped when the user opts out.
    * @default false
    */
+  readonly isAnimated?: boolean;
+  /** @deprecated Use `isAnimated`; this alias is removed next release. */
   readonly animate?: boolean;
 }
 </script>
@@ -36,7 +38,7 @@ import { useReducedMotion } from '../../device/hooks/UseReducedMotion';
  * - `scrollbar-gutter: stable` — reserves the scrollbar's track so content
  *   doesn't shift horizontally when the bar appears/disappears (an overflow-y
  *   toggle that would otherwise reflow the row).
- * - optional height/opacity transition (`animate`) that short-circuits under
+ * - optional height/opacity transition (`isAnimated`) that short-circuits under
  *   `prefers-reduced-motion`, so motion-sensitive users get an instant swap.
  *
  * No visual styling beyond layout — border/padding/rounding stay with the
@@ -50,9 +52,10 @@ const props = withDefaults(
   defineProps<{
     height?: number | string;
     maxHeight?: number | string;
+    isAnimated?: boolean;
     animate?: boolean;
   }>(),
-  { animate: false },
+  { isAnimated: undefined, animate: undefined },
 );
 
 defineSlots<{
@@ -64,7 +67,7 @@ const attrs = useAttrs();
 const el = useTemplateRef<HTMLDivElement>('el');
 const reducedMotion = useReducedMotion();
 
-const transitionsOn = computed(() => props.animate && !reducedMotion.value);
+const transitionsOn = computed(() => (props.isAnimated ?? props.animate ?? false) && !reducedMotion.value);
 
 const sizeStyle = computed(() =>
   normalizeStyle([

@@ -26,6 +26,37 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 | Toasts | `ToastHost` `timer` + toast `timer` (`ToastTimer`: `none` · `bar` · `ring` · `seconds`); `durations` per severity (`DefaultToastDurations`); severity glyphs (`showSeverityIcon`, `SeverityIcons` in `foundation/icons`); toast `report` → `ReportAction`; `Toast` `trailing` slot |
 | Reporting | `/reporting` — `createReporter` (trail, `wrapFetch`, `trackRouter`, `trackNotices`, `captureClicks`, `captureErrors`, `capture(error).send`), `IncidentReport` schema 1, `httpReportSink` · `memoryReportSink` · `consoleReportSink`; `feedbackQueryErrors(bus, { reporter })`; `FeedbackNotice.report`; `ApiFailure.request`; `redactUrl` (`foundation/logger`) |
 
+Boolean props renamed to the `is` / `has` / `can` / `show` vocabulary. The old names still work this release
+and are removed in the next; the new name wins when both are set.
+
+| Component | Old → new |
+|---|---|
+| `Modal`, `Drawer`, `Popover`, `BottomSheet` | `dismissOnEscape` → `canDismissOnEscape`, `dismissOnOutsideClick` → `canDismissOnOutsideClick` |
+| `BottomSheet` | `dragToDismiss` → `canDragToDismiss` |
+| `ModalContent`, `DrawerContent` | `hideBackdrop` → `showBackdrop` (inverted, default `true`) |
+| `MenuItem`, `MenuCheckboxItem`, `MenuRadioItem`, `CommandPaletteModalItem` | `closeOnSelect` → `canCloseOnSelect` |
+| `ComboboxPicker` | `fillInputOnSelect` → `canFillInputOnSelect` |
+| `TagsInput` | `allowsDuplicates` → `canAddDuplicates` |
+| `SelectPickerContent` | `matchWidth` → `hasTriggerWidth` |
+| `ControlGroupField` | `divided` → `hasDivider` |
+| `OptionTileGroupField`, `InlineLayout` | `wrap` → `canWrap` |
+| `DateInput`, `TimeInput`, `DateTimeInput` | `native` → `isNative` |
+| `Section` | `bleed` → `isFullBleed` |
+| `Navbar` | `sticky` → `isSticky`, `bordered` → `hasBorder` |
+| `PricingCard` | `featured` → `isFeatured` |
+| `Pagination` | `hideFirstLast` → `showFirstLast` (inverted, default `true`) |
+| `FocusScope` | `loop` → `canLoop`, `trapped` → `isTrapped`, `modal` → `isModal` |
+| `ScrollViewport` | `animate` → `isAnimated` |
+| `AnimatedLayout` | `enabled` → `isEnabled` |
+| `AppLink`, `AppNavLink` | `end` → `isExact` |
+| `AppErrorBoundary` | `resetOnNavigate` → `canResetOnNavigate` |
+| `AuthProvider` | `resolveOnMount` → `canResolveOnMount` |
+| `RouteAnnouncer` | `skipInitial` → `canAnnounceInitial` (inverted, default `false`) |
+
+Kept, as carve-outs of the props convention: controlled roots (`open`, `modelValue`, `editing`, `sidebarOpen`),
+native attributes the media and file inputs forward (`autoPlay`, `loop`, `muted`, `multiple`), and the
+`RouterLink` / devtools props passed through (`replace`, `viewTransition`, `initialIsOpen`).
+
 Behavioral changes to existing parts:
 
 - `ToastHost` keeps `danger` toasts 8 seconds (`DefaultToastDurations`) while other severities keep `defaultDuration`.

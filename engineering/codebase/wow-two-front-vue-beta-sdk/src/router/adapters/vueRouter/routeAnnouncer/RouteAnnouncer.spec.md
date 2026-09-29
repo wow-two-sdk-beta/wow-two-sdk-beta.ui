@@ -6,7 +6,7 @@
 `#app-shell-main`, the first `main`, or the first `h1`, then announces the deepest resolved route title.
 Search-only and hash-only changes do not move focus or announce again.
 
-`skipInitial` defaults to `true`. Set it to `false` when the first client render must focus and announce.
+`canAnnounceInitial` defaults to `false`. Set it when the first client render must focus and announce (`skipInitial` is its inverted, deprecated alias).
 The component performs no document work during server rendering.
 
 ## Navigation timing

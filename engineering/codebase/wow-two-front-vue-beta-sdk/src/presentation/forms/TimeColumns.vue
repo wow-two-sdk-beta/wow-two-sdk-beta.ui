@@ -8,8 +8,8 @@ export interface TimeColumnsProps {
   readonly minuteStep?: number;
   readonly min?: Temporal.PlainTime | null;
   readonly max?: Temporal.PlainTime | null;
-  readonly disabled?: boolean;
-  readonly readonly?: boolean;
+  readonly isDisabled?: boolean;
+  readonly isReadOnly?: boolean;
 }
 </script>
 
@@ -37,7 +37,7 @@ const minuteList = computed(() => {
   for (const time of [props.modelValue, props.min, props.max]) if (time) rows.push(time.minute);
   return [...new Set(rows)].sort((a, b) => a - b);
 });
-const inactive = computed(() => props.disabled || props.readonly);
+const inactive = computed(() => props.isDisabled || props.isReadOnly);
 const activeHour = ref<number | null>(null);
 const activeMinute = ref<number | null>(null);
 const timeAt = (hour: number, minute: number): Temporal.PlainTime => new TemporalValue.PlainTime(hour, minute);
@@ -151,9 +151,9 @@ defineExpose({ el: root });
       ref="hoursEl"
       role="listbox"
       :aria-label="locale.t('TimeColumns.hours', undefined, 'Hours')"
-      :tabindex="disabled ? -1 : 0"
-      :aria-disabled="disabled || undefined"
-      :aria-readonly="readonly || undefined"
+      :tabindex="isDisabled ? -1 : 0"
+      :aria-disabled="isDisabled || undefined"
+      :aria-readonly="isReadOnly || undefined"
       :aria-activedescendant="activeHour === null ? undefined : `${id}-h-${activeHour}`"
       class="flex max-h-56 flex-col gap-0.5 overflow-y-auto pr-1 outline-none"
       @keydown="onKeydown($event, 'hour')"
@@ -179,9 +179,9 @@ defineExpose({ el: root });
       ref="minutesEl"
       role="listbox"
       :aria-label="locale.t('TimeColumns.minutes', undefined, 'Minutes')"
-      :tabindex="disabled ? -1 : 0"
-      :aria-disabled="disabled || undefined"
-      :aria-readonly="readonly || undefined"
+      :tabindex="isDisabled ? -1 : 0"
+      :aria-disabled="isDisabled || undefined"
+      :aria-readonly="isReadOnly || undefined"
       :aria-activedescendant="activeMinute === null ? undefined : `${id}-m-${activeMinute}`"
       class="flex max-h-56 flex-col gap-0.5 overflow-y-auto outline-none"
       @keydown="onKeydown($event, 'minute')"

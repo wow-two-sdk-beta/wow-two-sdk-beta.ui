@@ -78,7 +78,6 @@ Every unbuilt item, grouped; top of each group = next. Shipped work lives in [`v
 | Item | Type | Notes |
 |---|---|---|
 | Confirm Firefox passes the Linux CI browser matrix | engineering | Firefox cannot launch on the macOS host; the next hosted run decides |
-| Decide names for the unprefixed boolean idioms, then rename them | engineering | `closeOnSelect`, `dismissOnEscape`, `hideBackdrop`, `hideFirstLast`; a breaking pass |
 | Add focused tests to parts covered only by the render smoke | engineering | 223 SFCs lacked one at the 2026-09-28 scan; re-measure first |
 | Sweep the remaining small convention breaches | engineering | `Avatar`'s 68 raw palette classes, 4 inline `defineProps<{…}>`; re-measure the rest |
 | Ability to make the node editor read-only as a whole | feature | whole-control read-only API and Field adoption |

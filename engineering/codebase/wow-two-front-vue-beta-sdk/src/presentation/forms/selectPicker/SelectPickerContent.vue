@@ -40,7 +40,9 @@ export interface SelectPickerContentProps {
   /** The label rendered when the search yields no matches. */
   readonly noResultsLabel?: string | number;
 
-  /** The match-width behavior, locking the surface width to the trigger's and truncating long items. */
+  /** Locks the surface width to the trigger's, truncating long items. Default `false`. */
+  readonly hasTriggerWidth?: boolean;
+  /** @deprecated Use `hasTriggerWidth`; this alias is removed next release. */
   readonly matchWidth?: boolean;
 }
 
@@ -70,7 +72,8 @@ defineSlots<{ default(): unknown }>();
 const inputProps = withDefaults(defineProps<SelectPickerContentProps>(), {
   isSearchable: false,
 
-  matchWidth: false,
+  hasTriggerWidth: undefined,
+  matchWidth: undefined,
 });
 const props = useLocaleDefaults(inputProps, 'SelectPickerContent', {
   searchPlaceholder: 'Search…',
@@ -126,7 +129,7 @@ const contentClass = computed(() =>
     /* Truncate the option's first content child (the label) so trailing meta stays visible.
        Targets ListboxPickerItem's stable `data-listbox-item-content` wrapper rather than a deep
        `[role=option]>span.flex-1>:first-child` chain that breaks if the markup shifts. */
-    props.matchWidth
+    (props.hasTriggerWidth ?? props.matchWidth ?? false)
       ? 'w-(--anchor-width) [&_[data-listbox-item-content]>:first-child]:truncate'
       : 'w-auto min-w-(--anchor-width)',
   ),

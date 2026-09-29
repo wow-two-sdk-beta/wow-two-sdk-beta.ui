@@ -32,12 +32,14 @@ export interface DateTimeInputProps extends /* @vue-ignore */ NativeInputAttribu
    * lands a system-chrome popup in the middle of a design-system form. Reach for it when the
    * platform picker is the point (a mobile-first form wanting the OS wheels, for instance).
    */
+  readonly isNative?: boolean;
+  /** @deprecated Use `isNative`; this alias is removed next release. */
   readonly native?: boolean;
 
-  /** The minute interval offered in the popover. Default 5. Ignored when `native`. */
+  /** The minute interval offered in the popover. Default 5. Ignored when `isNative`. */
   readonly minuteStep?: number;
 
-  /** The empty-state text. Ignored when `native` — that control renders its own mask. */
+  /** The empty-state text. Ignored when `isNative` — that control renders its own mask. */
   readonly placeholder?: string;
 
   /** The hidden input name; when set, a hidden input ships the ISO value with form submission. */
@@ -95,14 +97,15 @@ import TimeColumns from '../TimeColumns.vue';
  * Accepts and emits `Temporal.PlainDateTime` (calendar wall-clock, no zone).
  *
  * The popover is ours, not the browser's: an `<input type="datetime-local">` opens an
- * unstylable system panel, which is what `native` is for.
+ * unstylable system panel, which is what `isNative` is for.
  */
 /* `inheritAttrs: false` so `class` folds into the wrapper's own `cn()` call — plain fallthrough
    appends outside it and loses tailwind-merge conflict resolution. */
 defineOptions({ name: 'DateTimeInput', inheritAttrs: false });
 
 const props = withDefaults(defineProps<DateTimeInputProps>(), {
-  native: false,
+  isNative: undefined,
+  native: undefined,
   minuteStep: 5,
   placeholder: 'YYYY-MM-DD HH:MM',
   /* Explicit `undefined` defaults are load-bearing: each flag falls back to the form
@@ -115,6 +118,9 @@ const props = withDefaults(defineProps<DateTimeInputProps>(), {
   isRequired: undefined,
   required: undefined,
 });
+
+/** `isNative` first, then the deprecated `native`. */
+const usesNativeControl = computed(() => props.isNative ?? props.native ?? false);
 
 const emit = defineEmits<{
   /** Fires when the reader types or picks a date and time — the `v-model` half. */
@@ -197,7 +203,7 @@ function onKeydown(event: KeyboardEvent): void {
   }
 }
 
-/** The `native` path keeps the original ISO-string round trip. */
+/** The `isNative` path keeps the original ISO-string round trip. */
 function onNativeInput(event: Event): void {
   if (event.defaultPrevented || finalDisabled.value || finalReadOnly.value) return;
   const input = event.target as HTMLInputElement;
@@ -271,7 +277,7 @@ const inputClass = computed(() =>
       border: props.border,
       ring: props.ring,
     }),
-    !props.native && 'pr-10',
+    !usesNativeControl.value && 'pr-10',
   ),
 );
 
@@ -291,7 +297,7 @@ const locale = useLocale();
   <div :class="wrapperClass">
     <!-- The unstylable-system-panel path, kept for callers that want the platform picker. -->
     <input
-      v-if="native"
+      v-if="usesNativeControl"
       ref="root"
       type="datetime-local"
       :step="normalizeMinuteStep(minuteStep) * 60"
@@ -347,7 +353,7 @@ const locale = useLocale();
             @update:modelValue="onCalendarChange"
           />
           <TimeColumns
-            :disabled="finalDisabled || finalReadOnly"
+            :is-disabled="finalDisabled || finalReadOnly"
             :min="minTime"
             :max="maxTime"
             :model-value="timeValue"

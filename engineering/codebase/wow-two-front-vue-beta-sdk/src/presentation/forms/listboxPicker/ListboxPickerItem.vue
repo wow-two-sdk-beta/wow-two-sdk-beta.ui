@@ -138,7 +138,7 @@ defineExpose({ el: root });
 
     <!--
       `data-listbox-item-content` is a stable hook for hosts that need to target the option's
-      content wrapper (e.g. SelectPicker's `matchWidth` truncation) without a brittle structural selector.
+      content wrapper (e.g. SelectPicker's `hasTriggerWidth` truncation) without a brittle structural selector.
     -->
     <span data-listbox-item-content class="flex min-w-0 flex-1 items-center gap-2">
       <slot />

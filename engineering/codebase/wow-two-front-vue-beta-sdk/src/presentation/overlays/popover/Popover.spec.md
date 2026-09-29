@@ -23,8 +23,10 @@ Public import: `import { Popover } from '@wow-two-beta/ui-vue/presentation/overl
 | `placement` | `Placement` | no | `'bottom'` | The Floating UI placement. Default `bottom`. |
 | `offset` | `number` | no | `8` | The distance between anchor and panel in px. Default 8. |
 | `isModal` | `boolean` | no | `false` | Whether the panel is modal and traps focus. Default false. |
-| `dismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
-| `dismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
+| `canDismissOnOutsideClick` | `boolean` | no | `true` | The outside-click dismissal toggle. Default `true`. |
+| `dismissOnOutsideClick` | `boolean` | no | —      | Deprecated — use `canDismissOnOutsideClick`; removed next release. |
+| `canDismissOnEscape` | `boolean` | no | `true` | The Escape dismissal toggle. Default `true`. |
+| `dismissOnEscape` | `boolean` | no | —      | Deprecated — use `canDismissOnEscape`; removed next release. |
 
 ## Emits
 

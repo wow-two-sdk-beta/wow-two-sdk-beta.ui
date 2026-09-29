@@ -138,7 +138,7 @@ const menuAnchor = ref<HTMLElement | null>(null);
       <Demo name="Pagination" note="page 4 of 12 — siblings 1, first/last visible">
         <div class="space-y-2">
           <Pagination v-model:page="page" :total="12" />
-          <Pagination :page="page" :total="12" :siblings="2" hide-first-last />
+          <Pagination :page="page" :total="12" :siblings="2" :show-first-last="false" />
           <p class="text-xs text-subtle-foreground">page = {{ page }}</p>
         </div>
       </Demo>

@@ -18,7 +18,8 @@ Public import: `import { Section } from '@wow-two-beta/ui-vue/presentation/layou
 | `tone` | `SurfaceTone` | no | — | The tinted background tone for the band. Applies the shadow-less `subtle` surface treatment (low-alpha tinted fill + `border-border`). Omit for a transparent band (no fill, no border). |
 | `containerSize` | `ContainerLayoutProps['size']` | no | — | The max-width of the inner centered `ContainerLayout`. Passthrough to `ContainerLayout.size`. Default `lg`. |
 | `py` | `SectionPaddingY` | no | — | The vertical padding (the band's top/bottom rhythm). Default `md`. |
-| `bleed` | `boolean` | no | `false` | The full-bleed mode — renders a `<section>` with no inner `ContainerLayout` (edge-to-edge content). |
+| `isFullBleed` | `boolean` | no | `false` | The full-bleed mode — renders a `<section>` with no inner `ContainerLayout` (edge-to-edge content). |
+| `bleed` | `boolean` | no | —       | Deprecated — use `isFullBleed`; removed next release.                                               |
 
 ## Emits
 

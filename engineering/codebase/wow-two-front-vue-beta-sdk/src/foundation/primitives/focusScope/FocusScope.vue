@@ -1,10 +1,16 @@
 <script lang="ts">
 export interface FocusScopeProps {
   /** Wrap Tab and Shift+Tab at the scope edges. Default false. */
+  readonly canLoop?: boolean;
+  /** @deprecated Use `canLoop`; this alias is removed next release. */
   readonly loop?: boolean;
   /** Recover focus when it leaves this scope and its logical portal descendants. */
+  readonly isTrapped?: boolean;
+  /** @deprecated Use `isTrapped`; this alias is removed next release. */
   readonly trapped?: boolean;
   /** Make background content inert while this modal scope is mounted. Default false. */
+  readonly isModal?: boolean;
+  /** @deprecated Use `isModal`; this alias is removed next release. */
   readonly modal?: boolean;
   /** Cancel the initial focus move with preventDefault(). */
   readonly onMountAutoFocus?: (event: CustomEvent) => void;
@@ -46,11 +52,20 @@ import {
 /** Renders a focus scope with logical portal ancestry, modal background isolation and focus restoration. */
 defineOptions({ name: 'FocusScope' });
 const props = withDefaults(defineProps<FocusScopeProps>(), {
-  loop: false,
-  trapped: false,
-  modal: false,
+  canLoop: undefined,
+  loop: undefined,
+  isTrapped: undefined,
+  trapped: undefined,
+  isModal: undefined,
+  modal: undefined,
   asChild: false,
 });
+
+/* Each flag reads its prefixed name first, then the deprecated alias. */
+const loops = (): boolean => props.canLoop ?? props.loop ?? false;
+const traps = (): boolean => props.isTrapped ?? props.trapped ?? false;
+const isModalScope = (): boolean => props.isModal ?? props.modal ?? false;
+
 defineSlots<{ default(): unknown }>();
 const scope = useTemplateRef<ComponentElement>('scope');
 const parent = inject(FocusScopeKey, null);
@@ -84,8 +99,8 @@ function focusFirst(): void {
 const entry: FocusScopeEntry = {
   parent,
   node: containerEl,
-  trapped: () => props.trapped,
-  modal: () => props.modal,
+  trapped: traps,
+  modal: isModalScope,
   recover: focusFirst,
   onKeydown,
   captureReturnFocus: (document) => {
@@ -137,7 +152,7 @@ onScopeDispose(() => {
 });
 
 watch(
-  () => [props.trapped, props.modal],
+  () => [traps(), isModalScope()],
   () => refreshFocusScope(entry),
   { flush: 'post' },
 );
@@ -147,7 +162,7 @@ function onFocusin(event: FocusEvent): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
-  if (event.key !== 'Tab' || event.defaultPrevented || (!props.loop && !props.trapped)) return;
+  if (event.key !== 'Tab' || event.defaultPrevented || (!loops() && !traps())) return;
   const container = containerEl();
   if (!container) return;
   const top = topFocusScope(container.ownerDocument);
@@ -156,14 +171,14 @@ function onKeydown(event: KeyboardEvent): void {
   const first = items[0];
   const last = items[items.length - 1];
   if (!first || !last) {
-    if (props.trapped) event.preventDefault();
+    if (traps()) event.preventDefault();
     return;
   }
   const active = container.ownerDocument.activeElement;
   const atEdge = event.shiftKey ? active === first || active === container : active === last || active === container;
   if (!atEdge) return;
   event.preventDefault();
-  if (props.loop) (event.shiftKey ? last : first).focus({ preventScroll: true });
+  if (loops()) (event.shiftKey ? last : first).focus({ preventScroll: true });
 }
 </script>
 

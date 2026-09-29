@@ -5,7 +5,7 @@ import { ProgressProvider } from '@src/router';
 import { smokeCase, type SmokeCase } from '../../support/Smoke';
 
 /* The narrowest strategy that satisfies the contract: one required delegate, resolving signed
-   out. `resolveOnMount: false` keeps the smoke case from depending on a promise settling. */
+   out. `canResolveOnMount: false` keeps the smoke case from depending on a promise settling. */
 const signedOutStrategy = {
   resolveUser: () => Promise.resolve(ResultExtensions.ok(null)),
 };
@@ -19,7 +19,7 @@ const signedOutStrategy = {
  * every route under it fails rather than one component.
  */
 export const providersCases: readonly SmokeCase[] = [
-  smokeCase('AuthProvider', AuthProvider, { strategy: signedOutStrategy, resolveOnMount: false }, { slot: true }),
+  smokeCase('AuthProvider', AuthProvider, { strategy: signedOutStrategy, canResolveOnMount: false }, { slot: true }),
   smokeCase('FlagsProvider', FlagsProvider, {}, { slot: true }),
   smokeCase('ProgressProvider', ProgressProvider, {}, { slot: true }),
 ];

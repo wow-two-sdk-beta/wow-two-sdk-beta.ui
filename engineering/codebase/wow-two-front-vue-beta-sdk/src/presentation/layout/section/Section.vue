@@ -18,6 +18,8 @@ export interface SectionProps {
   readonly py?: SectionPaddingY;
 
   /** The full-bleed mode — renders a `<section>` with no inner `ContainerLayout` (edge-to-edge content). */
+  readonly isFullBleed?: boolean;
+  /** @deprecated Use `isFullBleed`; this alias is removed next release. */
   readonly bleed?: boolean;
 }
 </script>
@@ -31,7 +33,7 @@ import { sectionVariants } from './Section.variants';
 /**
  * Renders a full-bleed `<section>` band with an inner centered `ContainerLayout`. The repetitive
  * marketing "section band" pattern: optional tinted (shadow-less) background,
- * passthrough container width, and vertical padding. Pass `bleed` to drop the
+ * passthrough container width, and vertical padding. Pass `isFullBleed` to drop the
  * inner ContainerLayout for edge-to-edge content.
  */
 /* `<section>` is a live HTML element, but SFC templates are case-sensitive
@@ -39,10 +41,10 @@ import { sectionVariants } from './Section.variants';
    globally registered. Renaming it would break parity with the React package. */
 defineOptions({ name: 'Section', inheritAttrs: false });
 
-const props = withDefaults(defineProps<SectionProps>(), { bleed: false });
+const props = withDefaults(defineProps<SectionProps>(), { isFullBleed: undefined, bleed: undefined });
 
 defineSlots<{
-  /** The band content — wrapped in a `ContainerLayout` unless `bleed` is set. */
+  /** The band content — wrapped in a `ContainerLayout` unless `isFullBleed` is set. */
   default?(): unknown;
 }>();
 
@@ -68,7 +70,7 @@ defineExpose({ el });
 
 <template>
   <section ref="el" v-bind="rest" :class="classes">
-    <slot v-if="props.bleed" />
+    <slot v-if="props.isFullBleed ?? props.bleed ?? false" />
     <ContainerLayout v-else :size="props.containerSize"><slot /></ContainerLayout>
   </section>
 </template>
