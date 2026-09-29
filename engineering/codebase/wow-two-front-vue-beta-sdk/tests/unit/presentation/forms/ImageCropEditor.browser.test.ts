@@ -81,8 +81,11 @@ it('keeps its size inside a shrink-wrapping parent and lays the crop over the re
   });
   const image = wrapper.get('img').element as HTMLImageElement;
   await expect.poll(() => image.getBoundingClientRect().width).toBeGreaterThan(100);
+  // The crop box is placed once the image has loaded, which WebKit reports after it lays the image out.
+  const box = wrapper.get('[data-crop-box]').element as HTMLElement;
+  await expect.poll(() => Math.round(box.getBoundingClientRect().width)).toBeGreaterThan(0);
   const imageBox = image.getBoundingClientRect();
-  const crop = wrapper.get('[data-crop-box]').element.getBoundingClientRect();
+  const crop = box.getBoundingClientRect();
   // The default free crop is the middle 80% of the rendered image.
   expect(crop.width).toBeCloseTo(imageBox.width * 0.8, 0);
   expect(crop.left).toBeCloseTo(imageBox.left + imageBox.width * 0.1, 0);
