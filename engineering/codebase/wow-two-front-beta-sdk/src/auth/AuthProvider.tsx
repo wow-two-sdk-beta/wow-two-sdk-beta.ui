@@ -99,7 +99,7 @@ export function AuthProvider<TUser = unknown, TSignInInput = unknown>({
 
   const runResolve = useCallback((): Promise<TUser | null> => {
     // Shared in-flight promise: StrictMode's double-effect and concurrent `refresh()` calls ride
-    // one me-request instead of racing duplicates (the drydock dedupe, per-provider).
+    // one me-request instead of racing duplicates (the wheelhouse dedupe, per-provider).
     if (inflightRef.current) return inflightRef.current;
 
     const generation = ++generationRef.current;

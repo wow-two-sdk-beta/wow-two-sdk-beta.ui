@@ -32,7 +32,7 @@ export interface CreateCookieStrategyOptions<TUser, TSignInInput = unknown> {
 /**
  * Creates the cookie-session strategy — the session cookie is owned by the backend; the client
  * only resolves `GET {mePath}` on mount (401 → anonymous, other failures settle anonymous and are
- * reported) and posts `{signOutPath}` on sign-out. Covers the drydock and smart-qr shapes; pair
+ * reported) and posts `{signOutPath}` on sign-out. Covers the wheelhouse and smart-qr shapes; pair
  * with `isAnonymous`/`signIn` for guest gates, or use `createRedirectStrategy` for OAuth sign-in.
  */
 export function createCookieStrategy<TUser, TSignInInput = unknown>(
@@ -47,7 +47,7 @@ export function createCookieStrategy<TUser, TSignInInput = unknown>(
         user = await client.get<TUser>(mePath, context.signal ? { signal: context.signal } : undefined);
       } catch (error) {
         // 401 = simply signed out — not a failure. Anything else propagates: the provider settles
-        // anonymous and reports it via `onResolveError` (the drydock/smart-qr posture).
+        // anonymous and reports it via `onResolveError` (the wheelhouse/smart-qr posture).
         if (error instanceof ApiError && error.status === 401) return null;
         throw error;
       }

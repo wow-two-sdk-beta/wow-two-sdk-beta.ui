@@ -15,17 +15,17 @@ From the real form code in the 4 API products — what shipped screens actually 
 | # | Requirement | Evidence |
 |---|---|---|
 | R1 | **Controlled values** feeding SDK controlled inputs (`value`/`onChange`) | every product uses SDK `TextInput`/`Select`/pickers — all controlled (`useControlled` pattern) |
-| R2 | **Sync field validation** — on change *and* at submit | drydock `RegisterProductForm.tsx:46–57` (repo parse per keystroke blocks submit) · smart-qr `CreateCodeScreen.tsx:166–169` (mobileApp guard at submit) |
-| R3 | **Field transform on change** | drydock repo input: URL → `owner/repo` rewrite-on-paste (`onRepoChange`) |
+| R2 | **Sync field validation** — on change *and* at submit | wheelhouse `RegisterProductForm.tsx:46–57` (repo parse per keystroke blocks submit) · smart-qr `CreateCodeScreen.tsx:166–169` (mobileApp guard at submit) |
+| R3 | **Field transform on change** | wheelhouse repo input: URL → `owner/repo` rewrite-on-paste (`onRepoChange`) |
 | R4 | **Submit pipeline**: `submitting` flag · async call · success callback | all 4 — `saving`/`submitting` + `try/catch/finally` blocks |
-| R5 | **Server error → form**: `ApiError` → form-level message today; per-field wanted | drydock `:73–74`, smart-qr `:199–200` catch → single string + inline `Alert`; backend contract carries per-field `ProblemDetails.errors` — `fieldErrors()` already ships in `foundation/http` |
-| R6 | **Edit-mode prefill**, incl. async load-then-populate | smart-qr edit: `useEffect` → **13 setters** (`:99–132`); drydock: props-seeded defaults + immutable `slug` on edit |
-| R7 | **Reset** to defaults / to loaded entity | smart-qr `reset()` `:206–209`, drydock cancel |
+| R5 | **Server error → form**: `ApiError` → form-level message today; per-field wanted | wheelhouse `:73–74`, smart-qr `:199–200` catch → single string + inline `Alert`; backend contract carries per-field `ProblemDetails.errors` — `fieldErrors()` already ships in `foundation/http` |
+| R6 | **Edit-mode prefill**, incl. async load-then-populate | smart-qr edit: `useEffect` → **13 setters** (`:99–132`); wheelhouse: props-seeded defaults + immutable `slug` on edit |
+| R7 | **Reset** to defaults / to loaded entity | smart-qr `reset()` `:206–209`, wheelhouse cancel |
 | R8 | **Array fields** — add / remove / reorder rows | smart-qr `rules: RuleDraft[]` + `RuleBuilder` (order, per-row fields) |
 | R9 | **Nested objects + discriminated unions** in values | smart-qr `content: CodeContent` (union by `type`) + `style` object |
 | R10 | **Derived state from live values** (no render tax) | smart-qr live QR preview (`previewStyle` memo over 8 fields) · transcript-forge line/URL counts |
 | R11 | **Dirty / touched** state | needed for unsaved-changes guard (router `useNavigationBlocker` exists) + error-display timing; hand-rolled nowhere today because it's too tedious — the glue gap itself |
-| R12 | **Per-mode field flags** (disabled/readonly per edit-create) | slug locked on edit in drydock + smart-qr |
+| R12 | **Per-mode field flags** (disabled/readonly per edit-create) | slug locked on edit in wheelhouse + smart-qr |
 | R13 | **Form-level error surface** | all 4 render inline `Alert` from a string state |
 | — | **Non-requirements** (cut): SSR/server actions · uncontrolled-ref perf for 100+ field forms (largest real form: ~20 fields) · multi-step engine (`Wizard`/`useWizard` shipped) · debounced async field validation (no product uses one) · i18n'd messages (rides the later `LocaleProvider`) | |
 
@@ -164,7 +164,7 @@ export interface FormEngine {
 
 ---
 
-## 6. App usage sketch (drydock `RegisterProductForm` rewritten)
+## 6. App usage sketch (wheelhouse `RegisterProductForm` rewritten)
 
 ```tsx
 // src/form.ts — the app's engine pin (the only vendor-touching line in the app)
@@ -211,7 +211,7 @@ const form = useAppForm({
 2. `tanstack` adapter (default) — optional peer + ESLint boundary + exports wiring.
 3. `house` micro-adapter — `useSyncExternalStore` store, dot-path get/set, Standard Schema validate, arrays, dirty/touched (scope ceiling documented in-module).
 4. Conformance suite green over both + interaction stories (login, register-product, array-rows) + docs page with the `src/form.ts` convention.
-5. Proof migration: drydock `RegisterProductForm` + secrets-vault `LoginForm` (simple tier) on `tanstack`.
+5. Proof migration: wheelhouse `RegisterProductForm` + secrets-vault `LoginForm` (simple tier) on `tanstack`.
 
 **v1.1:** smart-qr `CreateCodeScreen` migration — the stress case (R6 async prefill via `reset`, R8 rules array, R9 content union, R10 preview off `Subscribe`); focus-first-invalid polish; unsaved-changes recipe (`isDirty` × router `useNavigationBlocker`); `create-repo` template stamps `src/form.ts`.
 

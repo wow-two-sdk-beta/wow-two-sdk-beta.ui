@@ -6,13 +6,13 @@ What `@wow-two-beta/ui` should ship next, derived from auditing every active pro
 
 **SDK baseline (v0.0.89):** presentation groups (actions/display/feedback/forms/layout/nav/overlays) · `/router` (createAppRouter, definePath typed paths, guards + returnTo, lazyRoute, prefetch, nav progress, DocumentTitle/Meta, RoutePersistence, PageViewTracker, AppErrorBoundary via root) · `/query` (createQueryClient + retry policy, useAppQuery/Mutation/Queries/Paginated/Lazy/Infinite/Suspense, cache accessor, prefetch, localStorage persistence, devtools, progress bridge — **passive mutations only**) · `foundation/http` (**types + `ApiError` + `parseJson`/temporal reviver only — no fetch client**) · `foundation/storage` (StorageBroker + localStorage/memory impls) · `foundation/resilience` (RetryPolicy, backoff/jitter) · `foundation/hooks` (usePersistentState, useRecentItems, useClipboard, useDebounceHandler, …).
 
-Audited products (7): drydock, secrets-vault, smart-qr, transcript-forge, prism, whiteout (game + zone-builder + lookdev), arcade. Not auditable: **hijinx** (`ventures/ventures.hijinx/` = README-only stub, no code), fun-vault (content repo, no app).
+Audited products (7): wheelhouse, secrets-vault, smart-qr, transcript-forge, prism, whiteout (game + zone-builder + lookdev), arcade. Not auditable: **hijinx** (`ventures/ventures.hijinx/` = README-only stub, no code), fun-vault (content repo, no app).
 
 ---
 
 ## 1. Per-product inventory
 
-### 1.1 drydock — `wow-two-platform.drydock/engineering/codebase/drydock.frontend-services/`
+### 1.1 wheelhouse — `wow-two-platform.wheelhouse/engineering/codebase/wheelhouse.frontend-services/`
 
 Pins `@wow-two-beta/ui` **0.0.68**. No router, no query lib — single-screen SPA, ~1,500 LOC. Uses SDK components heavily.
 
@@ -27,11 +27,11 @@ Pins `@wow-two-beta/ui` **0.0.68**. No router, no query lib — single-screen SP
 
 ### 1.2 secrets-vault — `wow-two-platform.secrets-vault/engineering/codebase/secrets-vault.frontend-services/`
 
-Pins `@wow-two-beta/ui` **0.0.68**. No router, no query lib. `src/api/client.ts` is a **near-verbatim copy of drydock's** — the duplication is already happening organically.
+Pins `@wow-two-beta/ui` **0.0.68**. No router, no query lib. `src/api/client.ts` is a **near-verbatim copy of wheelhouse's** — the duplication is already happening organically.
 
 | Hand-rolled | Evidence | SDK-module candidate |
 |---|---|---|
-| Fetch API client (drydock copy) **+ bearer-token injection + settable 401 handler** | `src/api/client.ts` (204 LOC; `setAuthToken`/`setUnauthorizedHandler`/`Authorization` at 66–89) | **api-client** (with auth hooks) |
+| Fetch API client (wheelhouse copy) **+ bearer-token injection + settable 401 handler** | `src/api/client.ts` (204 LOC; `setAuthToken`/`setUnauthorizedHandler`/`Authorization` at 66–89) | **api-client** (with auth hooks) |
 | Auth context: in-memory admin token (deliberately not persisted), login/logout, 401 → drop to gate; gate component | `src/auth/AuthContext.tsx` (57), `src/auth/AuthGate.tsx` (9) | **auth/session** (bearer mode) |
 | Query-shaped roster hook + last-selected namespace in raw `localStorage` | `src/hooks/useNamespaceRoster.ts` (76; raw localStorage at 7–20) | `/query` adoption + `usePersistentState` adoption |
 | Clipboard copy with failure fallback (SDK `useClipboard` exists but pin predates it/unused) | `src/components/TokenRevealModal.tsx:26,76` | adoption |
@@ -117,10 +117,10 @@ Bare scaffold: 78 LOC total, **no SDK dependency**, no router/query/state lib.
 
 | Rank | Hand-rolled concern | Products (count) | Duplicated LOC (approx) |
 |---|---|---|---|
-| 1 | **API client over fetch** (ApiError build, ProblemDetails parse, envelope unwrap, headers, abort, base URL) | drydock · secrets-vault (near-verbatim copy of drydock's) · smart-qr · transcript-forge · arcade (**5**) | ~640 |
-| 2 | **Form state + validation glue** (N× useState, inline validators, submitting/error, inline Alert) | drydock · secrets-vault · smart-qr · transcript-forge (**4**) | ~500 (state portions) |
-| 3 | **Query-shaped data fetching** (manual loading/error/reload hooks, or a vendored query layer) | drydock · secrets-vault · smart-qr · arcade hand-roll; transcript-forge vendored ~830 LOC now shipped as SDK `/query`+resilience (**5**) | ~1,100 |
-| 4 | **Auth/session client** (me-resolve → gate → signIn/signOut; three transport flavors: cookie+OAuth redirect / in-memory bearer / cookie+guest+Google ID token) | drydock · secrets-vault · smart-qr (**3**) | ~270 |
+| 1 | **API client over fetch** (ApiError build, ProblemDetails parse, envelope unwrap, headers, abort, base URL) | wheelhouse · secrets-vault (near-verbatim copy of wheelhouse's) · smart-qr · transcript-forge · arcade (**5**) | ~640 |
+| 2 | **Form state + validation glue** (N× useState, inline validators, submitting/error, inline Alert) | wheelhouse · secrets-vault · smart-qr · transcript-forge (**4**) | ~500 (state portions) |
+| 3 | **Query-shaped data fetching** (manual loading/error/reload hooks, or a vendored query layer) | wheelhouse · secrets-vault · smart-qr · arcade hand-roll; transcript-forge vendored ~830 LOC now shipped as SDK `/query`+resilience (**5**) | ~1,100 |
+| 4 | **Auth/session client** (me-resolve → gate → signIn/signOut; three transport flavors: cookie+OAuth redirect / in-memory bearer / cookie+guest+Google ID token) | wheelhouse · secrets-vault · smart-qr (**3**) | ~270 |
 | 5 | **localStorage beyond the broker** (raw reads, versioned keys/migrations, zustand persist, autosave) | secrets-vault · transcript-forge · prism · whiteout-lookdev (**4**) | ~490 (prism ~400) |
 | 6 | **Keyboard shortcuts** (raw window keydown + copy-pasted typing-target guards + per-app registries — 5+ listener sites in whiteout alone) | prism · whiteout game · whiteout zone-builder (**3 products, ~7 sites**) | ~250 |
 | 7 | **Env/config access** (raw `import.meta.env`, no typing/validation) | smart-qr · transcript-forge · arcade-implicit (**3**) | ~30 (small but every new product re-decides it) |
@@ -139,17 +139,17 @@ Also observed, adoption debt rather than missing modules: version pins scatter (
 
 | # | Module | Scope (one line) | Immediate adopters | Size |
 |---|---|---|---|---|
-| 1 | `foundation/http` **api-client** | `createApiClient({ baseUrl, auth, onUnauthorized })` → typed `get/post/put/del`: JSON headers, AbortSignal, `ApiResponse` envelope unwrap, ProblemDetails→`ApiError` with validation-errors→message (smart-qr's `problemMessage` covers both `errors[]` and ModelState shapes), temporal reviver, bearer/cookie modes, 401 hook, network-failure normalization. Kills 5 divergent copies; feeds `/query` `queryFn`s directly. | drydock, secrets-vault, smart-qr, transcript-forge, arcade | **M** |
-| 2 | `auth` **session module** | Headless `AuthProvider`/`useAuth` over a me-endpoint: checking→gate→ready machine, StrictMode-deduped session resolve, signIn/signOut, 401→signed-out wiring into api-client, strategies (OAuth redirect · in-memory bearer · cookie + guest + Google ID-token exchange), plugs into router `requireAuth`/returnTo. Optional gate/screen shells later. | drydock, secrets-vault, smart-qr | **L** |
-| 3 | `forms` **form-state glue** | `useAppForm`: values/errors/submitting/submitError, field binding for SDK inputs, validator combinators, and `ApiError` validation-errors → per-field errors. Deliberately light (targets.md verdict: no validation engine) — this is the glue every product rewrites, not RHF. | drydock, secrets-vault, smart-qr, transcript-forge | **M/L** |
-| 4 | `query` **optimistic mutation** | `useOptimisticMutation`: snapshot → cache patch → rollback on error → invalidate, plus list helpers (remove/toggle row). Closes the "passive mutations only" gap the products are already working around by hand. | smart-qr (delete/toggle), drydock (roster mutators), prism-style undo later | **S/M** |
-| 5 | **feedback bus** (`feedback/notify`) | App-level `notify.success/error/info` + `onQueryError` bridge wiring `ApiError` → SDK `Toaster` (dedupe, retry action, offline banner hook). Fills the transcript-forge TODO and replaces inline-Alert-only UX in every API product. | transcript-forge, drydock, secrets-vault, smart-qr | **S/M** |
+| 1 | `foundation/http` **api-client** | `createApiClient({ baseUrl, auth, onUnauthorized })` → typed `get/post/put/del`: JSON headers, AbortSignal, `ApiResponse` envelope unwrap, ProblemDetails→`ApiError` with validation-errors→message (smart-qr's `problemMessage` covers both `errors[]` and ModelState shapes), temporal reviver, bearer/cookie modes, 401 hook, network-failure normalization. Kills 5 divergent copies; feeds `/query` `queryFn`s directly. | wheelhouse, secrets-vault, smart-qr, transcript-forge, arcade | **M** |
+| 2 | `auth` **session module** | Headless `AuthProvider`/`useAuth` over a me-endpoint: checking→gate→ready machine, StrictMode-deduped session resolve, signIn/signOut, 401→signed-out wiring into api-client, strategies (OAuth redirect · in-memory bearer · cookie + guest + Google ID-token exchange), plugs into router `requireAuth`/returnTo. Optional gate/screen shells later. | wheelhouse, secrets-vault, smart-qr | **L** |
+| 3 | `forms` **form-state glue** | `useAppForm`: values/errors/submitting/submitError, field binding for SDK inputs, validator combinators, and `ApiError` validation-errors → per-field errors. Deliberately light (targets.md verdict: no validation engine) — this is the glue every product rewrites, not RHF. | wheelhouse, secrets-vault, smart-qr, transcript-forge | **M/L** |
+| 4 | `query` **optimistic mutation** | `useOptimisticMutation`: snapshot → cache patch → rollback on error → invalidate, plus list helpers (remove/toggle row). Closes the "passive mutations only" gap the products are already working around by hand. | smart-qr (delete/toggle), wheelhouse (roster mutators), prism-style undo later | **S/M** |
+| 5 | **feedback bus** (`feedback/notify`) | App-level `notify.success/error/info` + `onQueryError` bridge wiring `ApiError` → SDK `Toaster` (dedupe, retry action, offline banner hook). Fills the transcript-forge TODO and replaces inline-Alert-only UX in every API product. | transcript-forge, wheelhouse, secrets-vault, smart-qr | **S/M** |
 | 6 | `foundation/config` **typed env** | `defineConfig(schema)` over `import.meta.env`: typed, defaulted, fail-fast at boot, test-overridable — one place for `VITE_API_BASE` / client IDs instead of scattered raw reads. | smart-qr, transcript-forge, arcade (+ every `create-repo` stamp) | **S** |
 | 7 | `foundation/storage` **v2: versioned + adapters** | Versioned keys with `migrate` hooks (prism's v1→v3 model migrations, key renames; lookdev's hand-versioned `-v2` preset key), debounced autosave + `beforeunload` flush helper, and a zustand `persist` storage adapter over `StorageBroker`. | prism (~400 LOC), secrets-vault (last-selected), transcript-forge (lastRoute read), whiteout-lookdev (presets) | **M** |
 | 8 | `shortcuts` **hotkey registry** | Scoped global shortcut layer: declarative `useShortcuts({ 'mod+z': … })`, input-focus guard (copy-pasted by hand at 5+ whiteout sites today), platform modifier mapping, conflict-safe layers (editor vs overlay), registry that can later feed CommandPalette + KeyboardShortcut display. | prism, whiteout game, whiteout zone-builder, showcase | **M** |
 | 9 | `foundation/files` **file transfer** | `downloadFile` (Blob→anchor), `downloadJson`/`downloadText`, `pickFile`/`importJson` with shape validation — the export/import ritual both document-shaped apps hand-roll (and zone-builder needs but hasn't built: engine codec types unimplemented). | transcript-forge, prism; zone-builder (zone export) next | **S** |
 | 10 | `foundation/format` **format utils** | Intl-based duration (incl. C# `TimeSpan` parse — a backend-SDK artifact every .NET-backed product will meet), relative time, currency, truncate. | transcript-forge, prism; every dashboard after | **S** |
 
-**Not new modules — adoption debt to schedule alongside:** migrate drydock/secrets-vault/smart-qr to `/query` (their manual hooks are the module's exact use case) and smart-qr to `/router` (gets DocumentMeta, ScrollToTop-for-free, AppErrorBoundary — deletes `meta.ts` + `ScrollToTop.tsx`); delete transcript-forge's vendored `bootstrap/query/` + `foundation/resilience/` (~830 LOC) now that the SDK ships both; converge version pins (0.0.62 / 0.0.68 / 0.0.89 → current); swap per-product duplicates for existing SDK pieces (`UsageRing`→ProgressCircle, `ErrorBanner`→Alert, raw clipboard→`useClipboard`, `cn`/`useElementSize`→foundation).
+**Not new modules — adoption debt to schedule alongside:** migrate wheelhouse/secrets-vault/smart-qr to `/query` (their manual hooks are the module's exact use case) and smart-qr to `/router` (gets DocumentMeta, ScrollToTop-for-free, AppErrorBoundary — deletes `meta.ts` + `ScrollToTop.tsx`); delete transcript-forge's vendored `bootstrap/query/` + `foundation/resilience/` (~830 LOC) now that the SDK ships both; converge version pins (0.0.62 / 0.0.68 / 0.0.89 → current); swap per-product duplicates for existing SDK pieces (`UsageRing`→ProgressCircle, `ErrorBanner`→Alert, raw clipboard→`useClipboard`, `cn`/`useElementSize`→foundation).
 
 **Sequencing note:** #1 api-client unblocks #2 auth (token/401 wiring) and #5 feedback bus (ApiError shape), and makes `/query` adoption mechanical — build it first. transcript-forge's vendor-then-extract history (`src/bootstrap/query/index.ts` barrel: "matures then combines into the front SDK") is the working pipeline: the api-client and auth modules are at exactly that maturity point today, hand-rolled in 5 and 3 products respectively.

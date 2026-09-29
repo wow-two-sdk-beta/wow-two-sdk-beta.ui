@@ -39,7 +39,7 @@ export interface CreateCookieStrategyOptions<TUser, TSignInInput = unknown> {
 /**
  * Creates the cookie-session strategy — the session cookie is owned by the backend; the client
  * only resolves `GET {mePath}` on mount (401 → anonymous, other failures settle anonymous and are
- * reported) and posts `{signOutPath}` on sign-out. Covers the drydock and smart-qr shapes; pair
+ * reported) and posts `{signOutPath}` on sign-out. Covers the wheelhouse and smart-qr shapes; pair
  * with `isAnonymous`/`signIn` for guest gates, or use `createRedirectStrategy` for OAuth sign-in.
  */
 export function createCookieStrategy<TUser, TSignInInput = unknown>(

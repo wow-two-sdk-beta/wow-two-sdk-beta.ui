@@ -3,7 +3,7 @@
 *Last updated: 2026-07-03*
 
 > Handoff: migrate a frontend consumer onto the updated `@wow-two-beta/ui` + the new model/type conventions.
-> **Order:** `smart-qr` first (current task), then `drydock` · `secrets-vault` · `sift`. Each is one focused session.
+> **Order:** `smart-qr` first (current task), then `wheelhouse` · `secrets-vault` · `sift`. Each is one focused session.
 
 ---
 
@@ -41,8 +41,8 @@
 | Product | FE model file | Key deltas |
 |---|---|---|
 | **smart-qr** (first) | `src/types/index.ts` + `src/types/content/*` | see below |
-| drydock | `src/api/types.ts` | positional-record backend DTOs; `ApiResponse<T>` here; flagship |
-| secrets-vault | `src/api/types.ts` | mirrors drydock |
+| wheelhouse | `src/api/types.ts` | positional-record backend DTOs; `ApiResponse<T>` here; flagship |
+| secrets-vault | `src/api/types.ts` | mirrors wheelhouse |
 | sift | `src/lib/types.ts` | `readonly`-heavy; bare-named wire models |
 
 ### smart-qr specifics (the current task)

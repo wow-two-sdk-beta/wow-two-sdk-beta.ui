@@ -210,7 +210,7 @@ Why v7 specifically here:
 
 **Not blocking — adopt opportunistically.** Current state across the frontends:
 
-- `drydock.frontend-services` and `secrets-vault.frontend-services` type every id as plain **`id: string`** in `src/api/types.ts`; no client-side id generation anywhere.
+- `wheelhouse.frontend-services` and `secrets-vault.frontend-services` type every id as plain **`id: string`** in `src/api/types.ts`; no client-side id generation anywhere.
 - **Zero** `crypto.randomUUID` / `getRandomValues` / `uuid` usage in any product frontend or in the SDK `src/` today — nobody mints ids on the client yet.
 - The SDK already ships `useOptimisticMutation` (`src/query/`), whose tests fabricate `{ id: string }` inline — the natural first consumer of `Guid.createV7()` once optimistic **inserts** (vs updates/removes) land in a product.
 

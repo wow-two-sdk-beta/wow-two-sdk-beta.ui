@@ -44,7 +44,7 @@ import { users } from '../../fixtures';
 /* Deterministic profile defaults — derived from the fixture owner (usr-001). */
 const owner = users.find((u) => u.role === 'owner');
 const DEFAULT_NAME = owner?.name ?? 'Sora Tanaka';
-const DEFAULT_EMAIL = owner?.email ?? 'sora@drydock.dev';
+const DEFAULT_EMAIL = owner?.email ?? 'sora@wheelhouse.dev';
 const DEFAULT_HANDLE = owner?.handle ?? 'sora';
 
 const TIMEZONES = [
@@ -85,7 +85,7 @@ function ProfileTab() {
   const [displayName, setDisplayName] = useState(DEFAULT_HANDLE);
   const [fullName, setFullName] = useState(DEFAULT_NAME);
   const [email, setEmail] = useState(DEFAULT_EMAIL);
-  const [website, setWebsite] = useState('https://drydock.dev');
+  const [website, setWebsite] = useState('https://wheelhouse.dev');
   const [phone, setPhone] = useState('+15550104242');
   const [avatarFileName, setAvatarFileName] = useState<string | null>(null);
 
@@ -366,16 +366,16 @@ function PreferencesTab() {
 
 function WorkspaceTab() {
   const { toast } = useToaster();
-  const [workspaceName, setWorkspaceName] = useState('Drydock Ops');
+  const [workspaceName, setWorkspaceName] = useState('Wheelhouse Ops');
   /* Intentionally invalid out of the box — uppercase + space + bang. */
-  const [slug, setSlug] = useState('Drydock Ops!');
+  const [slug, setSlug] = useState('Wheelhouse Ops!');
   const [topics, setTopics] = useState<string[]>(['deploys', 'incidents', 'runbooks']);
   const [memberQuery, setMemberQuery] = useState('');
   const [confirmText, setConfirmText] = useState('');
 
   const slugError = SLUG_PATTERN.test(slug)
     ? undefined
-    : 'Lowercase letters, numbers and single dashes only — try "drydock-ops".';
+    : 'Lowercase letters, numbers and single dashes only — try "wheelhouse-ops".';
 
   const memberMatches = useMemo(() => {
     const q = memberQuery.trim().toLowerCase();
@@ -405,7 +405,7 @@ function WorkspaceTab() {
             <TextInput
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
-              placeholder="drydock-ops"
+              placeholder="wheelhouse-ops"
             />
           </FormField>
         </Fieldset>

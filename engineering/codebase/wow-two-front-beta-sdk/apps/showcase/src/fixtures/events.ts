@@ -23,7 +23,7 @@ export interface CalendarEvent {
 
 export const events: CalendarEvent[] = [
   { id: 'evt-001', title: 'Sprint 24 planning', start: '2026-06-01T09:00:00Z', end: '2026-06-01T10:30:00Z', kind: 'meeting', ownerId: 'usr-001' },
-  { id: 'evt-002', title: 'drydock-api v2.7.0 deploy', start: '2026-06-02T10:00:00Z', end: '2026-06-02T11:00:00Z', kind: 'deploy', ownerId: 'usr-004' },
+  { id: 'evt-002', title: 'wheelhouse-api v2.7.0 deploy', start: '2026-06-02T10:00:00Z', end: '2026-06-02T11:00:00Z', kind: 'deploy', ownerId: 'usr-004' },
   { id: 'evt-003', title: 'On-call: Felix', start: '2026-06-01T00:00:00Z', end: '2026-06-08T00:00:00Z', kind: 'oncall', allDay: true, ownerId: 'usr-006' },
   { id: 'evt-004', title: 'Design review — onboarding flow', start: '2026-06-04T14:00:00Z', end: '2026-06-04T15:00:00Z', kind: 'review', ownerId: 'usr-005' },
   { id: 'evt-005', title: 'Billing reconciliation (May)', start: '2026-06-05T09:00:00Z', end: '2026-06-05T12:00:00Z', kind: 'meeting', ownerId: 'usr-009' },
@@ -34,7 +34,7 @@ export const events: CalendarEvent[] = [
   { id: 'evt-010', title: 'Customer call — Kestrel Systems', start: '2026-06-15T11:00:00Z', end: '2026-06-15T11:45:00Z', kind: 'meeting', ownerId: 'usr-007' },
   { id: 'evt-011', title: 'Sprint 24 review + retro', start: '2026-06-15T15:00:00Z', end: '2026-06-15T16:30:00Z', kind: 'meeting', ownerId: 'usr-001' },
   { id: 'evt-012', title: 'DB maintenance — srv-us-1', start: '2026-06-18T02:00:00Z', end: '2026-06-18T04:00:00Z', kind: 'maintenance', ownerId: 'usr-002' },
-  { id: 'evt-013', title: 'drydock-api v2.8.1 deploy', start: '2026-06-19T10:00:00Z', end: '2026-06-19T12:00:00Z', kind: 'deploy', ownerId: 'usr-010' },
+  { id: 'evt-013', title: 'wheelhouse-api v2.8.1 deploy', start: '2026-06-19T10:00:00Z', end: '2026-06-19T12:00:00Z', kind: 'deploy', ownerId: 'usr-010' },
   { id: 'evt-014', title: 'Roadmap sync — Q3 planning', start: '2026-06-24T09:30:00Z', end: '2026-06-24T11:00:00Z', kind: 'meeting', ownerId: 'usr-001' },
   { id: 'evt-015', title: 'secrets-vault v0.9.0 release', start: '2026-06-26T09:00:00Z', end: '2026-06-26T13:00:00Z', kind: 'release', ownerId: 'usr-003' },
 ];

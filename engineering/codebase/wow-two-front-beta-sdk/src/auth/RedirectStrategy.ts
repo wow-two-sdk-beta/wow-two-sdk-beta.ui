@@ -6,7 +6,7 @@ export interface CreateRedirectStrategyOptions<TUser> extends Omit<CreateCookieS
   /** The sign-in challenge endpoint the browser navigates to. Default `/api/identity/sign-in` — the backend SDK identity baseline. */
   readonly signInPath?: string;
 
-  /** The query param carrying the post-login return path. Default `returnUrl` (the drydock shape). */
+  /** The query param carrying the post-login return path. Default `returnUrl` (the wheelhouse shape). */
   readonly returnUrlParam?: string;
 
   /** Builds the full challenge URL from the return path — overrides `signInPath` + `returnUrlParam` entirely. */
@@ -20,7 +20,7 @@ export interface CreateRedirectStrategyOptions<TUser> extends Omit<CreateCookieS
  * Creates the external-redirect OAuth strategy — a cookie session whose `signIn(returnUrl?)`
  * navigates the browser to the backend's sign-in challenge (`{signInPath}?{returnUrlParam}=…`);
  * the OAuth callback is handled server-side, which sets the cookie and redirects back. `returnUrl`
- * defaults to the current `pathname + search`. Covers the drydock shape.
+ * defaults to the current `pathname + search`. Covers the wheelhouse shape.
  */
 export function createRedirectStrategy<TUser>(options: CreateRedirectStrategyOptions<TUser>): AuthStrategy<TUser, string | undefined> {
   const { signInPath = '/api/identity/sign-in', returnUrlParam = 'returnUrl', buildSignInUrl, navigate, ...cookieOptions } = options;

@@ -164,7 +164,7 @@ targets.md is scoped as a *component-library* catalog and now lags the SDK's app
 2. **§3.8 "Fetch — SKIP — consumer brings TanStack Query"** — the SDK now *is* the TanStack Query bringer (`/query`), plus `/foundation/http` ships the error contract. Consistent in spirit; the row reads wrong.
 3. **§2.21 telemetry LATER vs shipped `PageViewTracker`; §2.22 error boundary MAYBE vs shipped `AppErrorBoundary`** — reality is ahead of the doc in both rows.
 4. **§8 companion table has no app-infra pattern.** It only lists heavy component packages. The `/router`-`/query` subpath-with-optional-peer pattern is the proven vehicle for infra modules and deserves codification alongside §8.
-5. **`/forms-engine` gating.** §2.7 says "ship adapter only if real consumer asks" — smart-qr / drydock / transcript-forge each hand-wire form validation today; whether that satisfies the gate is the user's call, flagged here rather than assumed.
+5. **`/forms-engine` gating.** §2.7 says "ship adapter only if real consumer asks" — smart-qr / wheelhouse / transcript-forge each hand-wire form validation today; whether that satisfies the gate is the user's call, flagged here rather than assumed.
 
 **Recommended doc action** (when the user agrees): add an "App infrastructure" section to targets.md (or a pointer to this doc) with verdicts for `/router`, `/query`, `/auth`, `/flags`, `/analytics`, `/commands`, `/errors`, `/forms-engine`, config — and refresh rows 1–3 above. Sync `ideas.md` per the paired-source-of-truth rule.
 

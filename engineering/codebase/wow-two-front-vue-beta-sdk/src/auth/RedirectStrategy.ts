@@ -10,7 +10,7 @@ export interface CreateRedirectStrategyOptions<TUser> extends Omit<
   /** The sign-in challenge endpoint the browser navigates to. Default `/api/identity/sign-in` (SDK baseline). */
   readonly signInPath?: string;
 
-  /** The query param carrying the post-login return path. Default `returnUrl` (the drydock shape). */
+  /** The query param carrying the post-login return path. Default `returnUrl` (the wheelhouse shape). */
   readonly returnUrlParam?: string;
 
   /** Builds the full challenge URL from the return path — overrides `signInPath` + `returnUrlParam` entirely. */
@@ -36,7 +36,7 @@ function currentPath(): string {
  * Creates the external-redirect OAuth strategy — a cookie session whose `signIn(returnUrl?)`
  * navigates the browser to the backend's sign-in challenge (`{signInPath}?{returnUrlParam}=…`);
  * the OAuth callback is handled server-side, which sets the cookie and redirects back. `returnUrl`
- * defaults to the current `pathname + search`. Covers the drydock shape.
+ * defaults to the current `pathname + search`. Covers the wheelhouse shape.
  *
  * Construction is SSR-safe — every browser global is read inside `signIn`, never at factory time —
  * but `signIn` itself is a browser-only operation, and says so with a real message instead of a

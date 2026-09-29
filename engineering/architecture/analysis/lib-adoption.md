@@ -40,7 +40,7 @@
 
 Subpath `@wow-two-beta/ui/forms-engine`; `@tanstack/react-form` as optional peer (exact `/query` pattern), every other entry stays form-lib-free.
 House API: `useAppForm` binds field state into the existing `FormControlContext`/`FormField` (label/error/describedBy auto-wired), Standard Schema pass-through, and `ApiError.problem.errors` → per-field errors — the .NET validation contract closed end-to-end.
-Deletes the ~500 LOC of `useState` form glue in drydock/secrets-vault/smart-qr/transcript-forge; validators remain the consumer's (§9 lock respected).
+Deletes the ~500 LOC of `useState` form glue in wheelhouse/secrets-vault/smart-qr/transcript-forge; validators remain the consumer's (§9 lock respected).
 
 ### 2. `@tanstack/react-virtual` → internal dep — P6, Table batch 6
 

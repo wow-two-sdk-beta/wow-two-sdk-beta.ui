@@ -30,7 +30,7 @@ export const activityItems: ActivityItem[] = [
   { id: 'act-004', actorId: 'usr-010', verb: 'commented', target: 'incident OPS-441', at: '2026-06-11T12:02:00Z', read: true },
   { id: 'act-005', actorId: 'usr-009', verb: 'paid', target: 'invoice INV-2026-0117 — Granite Capital', at: '2026-05-13T11:30:00Z', read: true },
   { id: 'act-006', actorId: 'usr-002', verb: 'updated', target: 'maintenance window — srv-us-1 (Jun 18)', at: '2026-06-12T07:15:00Z', read: false },
-  { id: 'act-007', actorId: 'usr-001', verb: 'invited', target: 'owen@drydock.dev as viewer', at: '2026-06-09T14:05:00Z', read: true },
+  { id: 'act-007', actorId: 'usr-001', verb: 'invited', target: 'owen@wheelhouse.dev as viewer', at: '2026-06-09T14:05:00Z', read: true },
   { id: 'act-008', actorId: 'usr-007', verb: 'closed', target: 'ticket SUP-1208 — webhook delays', at: '2026-06-11T10:20:00Z', read: true },
   { id: 'act-009', actorId: 'usr-006', verb: 'restarted', target: 'webhook-worker pool (3 nodes)', at: '2026-06-11T09:55:00Z', read: true },
   { id: 'act-010', actorId: 'usr-005', verb: 'updated', target: 'docs/rate-limits.md → 120 rpm', at: '2026-06-12T08:30:00Z', read: false },

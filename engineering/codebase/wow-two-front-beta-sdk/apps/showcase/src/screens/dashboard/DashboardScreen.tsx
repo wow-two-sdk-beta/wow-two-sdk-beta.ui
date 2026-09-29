@@ -103,22 +103,22 @@ interface Deployment {
 }
 
 const deployments: Deployment[] = [
-  { id: 'dep-3041', service: 'drydock-api', env: 'prod', version: 'v2.8.1', actorId: 'usr-004', status: 'in-progress', durationSec: 64, at: '2026-06-12T09:40:00Z' },
+  { id: 'dep-3041', service: 'wheelhouse-api', env: 'prod', version: 'v2.8.1', actorId: 'usr-004', status: 'in-progress', durationSec: 64, at: '2026-06-12T09:40:00Z' },
   { id: 'dep-3040', service: 'edge-gateway', env: 'staging', version: 'v0.14.2', actorId: 'usr-010', status: 'success', durationSec: 92, at: '2026-06-12T08:05:00Z' },
   { id: 'dep-3039', service: 'smart-qr', env: 'prod', version: 'v1.4.0', actorId: 'usr-004', status: 'success', durationSec: 143, at: '2026-06-11T13:25:00Z' },
   { id: 'dep-3038', service: 'billing-worker', env: 'prod', version: 'v3.2.7', actorId: 'usr-009', status: 'failed', durationSec: 38, at: '2026-06-11T10:50:00Z' },
-  { id: 'dep-3037', service: 'drydock-web', env: 'staging', version: 'v2.9.0-rc.1', actorId: 'usr-005', status: 'success', durationSec: 210, at: '2026-06-10T16:12:00Z' },
+  { id: 'dep-3037', service: 'wheelhouse-web', env: 'staging', version: 'v2.9.0-rc.1', actorId: 'usr-005', status: 'success', durationSec: 210, at: '2026-06-10T16:12:00Z' },
   { id: 'dep-3036', service: 'secrets-vault', env: 'prod', version: 'v0.8.3', actorId: 'usr-003', status: 'success', durationSec: 117, at: '2026-06-10T11:30:00Z' },
-  { id: 'dep-3035', service: 'drydock-api', env: 'prod', version: 'v2.8.0', actorId: 'usr-010', status: 'rolled-back', durationSec: 301, at: '2026-06-09T14:45:00Z' },
+  { id: 'dep-3035', service: 'wheelhouse-api', env: 'prod', version: 'v2.8.0', actorId: 'usr-010', status: 'rolled-back', durationSec: 301, at: '2026-06-09T14:45:00Z' },
   { id: 'dep-3034', service: 'edge-gateway', env: 'prod', version: 'v0.14.1', actorId: 'usr-002', status: 'success', durationSec: 88, at: '2026-06-09T09:20:00Z' },
-  { id: 'dep-3033', service: 'drydock-web', env: 'prod', version: 'v2.8.4', actorId: 'usr-005', status: 'success', durationSec: 195, at: '2026-06-08T15:02:00Z' },
+  { id: 'dep-3033', service: 'wheelhouse-web', env: 'prod', version: 'v2.8.4', actorId: 'usr-005', status: 'success', durationSec: 195, at: '2026-06-08T15:02:00Z' },
   { id: 'dep-3032', service: 'billing-worker', env: 'staging', version: 'v3.2.7-rc.2', actorId: 'usr-009', status: 'success', durationSec: 51, at: '2026-06-08T10:18:00Z' },
   { id: 'dep-3031', service: 'smart-qr', env: 'staging', version: 'v1.4.0-rc.3', actorId: 'usr-006', status: 'failed', durationSec: 44, at: '2026-06-05T17:33:00Z' },
-  { id: 'dep-3030', service: 'drydock-api', env: 'staging', version: 'v2.8.0-rc.4', actorId: 'usr-004', status: 'success', durationSec: 132, at: '2026-06-05T12:07:00Z' },
+  { id: 'dep-3030', service: 'wheelhouse-api', env: 'staging', version: 'v2.8.0-rc.4', actorId: 'usr-004', status: 'success', durationSec: 132, at: '2026-06-05T12:07:00Z' },
   { id: 'dep-3029', service: 'secrets-vault', env: 'staging', version: 'v0.8.3-rc.1', actorId: 'usr-003', status: 'success', durationSec: 109, at: '2026-06-04T09:55:00Z' },
   { id: 'dep-3028', service: 'edge-gateway', env: 'prod', version: 'v0.14.0', actorId: 'usr-010', status: 'success', durationSec: 97, at: '2026-06-03T13:41:00Z' },
-  { id: 'dep-3027', service: 'drydock-web', env: 'prod', version: 'v2.8.3', actorId: 'usr-001', status: 'success', durationSec: 178, at: '2026-06-02T11:26:00Z' },
-  { id: 'dep-3026', service: 'drydock-api', env: 'prod', version: 'v2.7.9', actorId: 'usr-002', status: 'success', durationSec: 121, at: '2026-06-01T08:14:00Z' },
+  { id: 'dep-3027', service: 'wheelhouse-web', env: 'prod', version: 'v2.8.3', actorId: 'usr-001', status: 'success', durationSec: 178, at: '2026-06-02T11:26:00Z' },
+  { id: 'dep-3026', service: 'wheelhouse-api', env: 'prod', version: 'v2.7.9', actorId: 'usr-002', status: 'success', durationSec: 121, at: '2026-06-01T08:14:00Z' },
 ];
 
 const DEPLOY_BADGE: Record<DeployStatus, 'success' | 'danger' | 'warning' | 'info'> = {
@@ -404,7 +404,7 @@ export default function DashboardScreen() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Drydock Ops</h1>
+          <h1 className="text-xl font-semibold text-foreground">Wheelhouse Ops</h1>
           <p className="text-sm text-muted-foreground">
             Deploys, revenue and on-call health — June 12, 2026.
           </p>

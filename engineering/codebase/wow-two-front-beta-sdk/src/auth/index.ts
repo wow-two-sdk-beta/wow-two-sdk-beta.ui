@@ -5,8 +5,8 @@
 // `bridge.onUnauthorized` to `createApiClient` so a 401 flips the session, and
 // `bridge.isAuthenticated` to the router's `requireAuth(...)` guard so protected routes await the
 // resolve before redirecting. Strategies cover the three evidenced product shapes: cookie
-// me-resolve (drydock, smart-qr incl. guest/`isAnonymous`), in-memory bearer (secrets-vault —
-// `getAuthToken` feeds `createApiClient`), and external OAuth redirect (drydock sign-in). This
+// me-resolve (wheelhouse, smart-qr incl. guest/`isAnonymous`), in-memory bearer (secrets-vault —
+// `getAuthToken` feeds `createApiClient`), and external OAuth redirect (wheelhouse sign-in). This
 // subpath carries NO peer dependency (plain React + `foundation/http` types) and NO UI — gates,
 // splash screens, and login pages stay app-side.
 

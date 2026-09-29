@@ -2,7 +2,7 @@
 
 *Last updated: 2026-07-11*
 
-> Deep-dive on the three architectural items [`forms-vector-next.md` §F-2h](./forms-vector-next.md#f-2h-contract-backlog-seeded-by-f-2def--2026-07-11) marked **deferred — architectural** (documented, not blocking maturity). The engine is mature: two adapters (`house`, `tanstack`), 94-case conformance, all `AppForm` members wired, three product proofs (drydock, secrets-vault simple tier · smart-qr stress). These are the remaining hard problems — grounded in the shipped code (`src/forms-engine/**`) and the smart-qr F-2g strains, not generic form-library advice.
+> Deep-dive on the three architectural items [`forms-vector-next.md` §F-2h](./forms-vector-next.md#f-2h-contract-backlog-seeded-by-f-2def--2026-07-11) marked **deferred — architectural** (documented, not blocking maturity). The engine is mature: two adapters (`house`, `tanstack`), 94-case conformance, all `AppForm` members wired, three product proofs (wheelhouse, secrets-vault simple tier · smart-qr stress). These are the remaining hard problems — grounded in the shipped code (`src/forms-engine/**`) and the smart-qr F-2g strains, not generic form-library advice.
 >
 > Reads: `AppForm.ts` (contract) · `FormGlue.tsx` (engine-free `Field`/`Subscribe`) · `house/HouseFormCore.ts` · `tanstack/UseAppForm.tsx` + `TanstackFormOverlay.ts` · `Paths.ts` · `SchemaValidation.ts` · `SubmitErrors.ts` · `foundation/http/FieldErrors.ts` · smart-qr `CreateCodeForm.ts` / `ContentView.tsx` / `RuleControls.tsx`.
 
@@ -123,7 +123,7 @@ export function fieldErrors(error: unknown): Record<string, string[]> {
 }
 ```
 
-A non-`ApiError` throw yields `{}`, so in `resolveSubmitFailure` (`SubmitErrors.ts:48–71`) `hasMatches` is false and the whole error coerces to the form-level `submitError` via `toApiError` — the failure still surfaces (banner), but **per-field routing silently no-ops**. Evidence: drydock/secrets-vault *"had to re-throw the SDK `ApiError`"*; the smart-qr F-2g note — *"it only worked because a prior iteration had already routed errors through `ApiError`."*
+A non-`ApiError` throw yields `{}`, so in `resolveSubmitFailure` (`SubmitErrors.ts:48–71`) `hasMatches` is false and the whole error coerces to the form-level `submitError` via `toApiError` — the failure still surfaces (banner), but **per-field routing silently no-ops**. Evidence: wheelhouse/secrets-vault *"had to re-throw the SDK `ApiError`"*; the smart-qr F-2g note — *"it only worked because a prior iteration had already routed errors through `ApiError`."*
 
 **Key mitigating fact:** the contract is **already per-form configurable** — `mapSubmitError?: (error) => Record<string,string[]>` (`AppForm.ts:26`) overrides the instanceof default. A product whose client throws a look-alike (fetch `Response`, axios error, custom `HttpError`) can pass its own shape-checking mapper today. The only footgun is that the *default* is a strict type guard rather than a duck-type, so a look-alike silently degrades to form-level instead of routing per-field — and **every current product throws the real `ApiError`**, so no product actually hits this.
 

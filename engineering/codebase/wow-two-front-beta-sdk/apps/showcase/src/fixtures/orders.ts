@@ -1,4 +1,4 @@
-/** Billing fixtures — invoices for Drydock-hosted products. Deterministic. */
+/** Billing fixtures — invoices for Wheelhouse-hosted products. Deterministic. */
 
 export type OrderStatus =
   | 'draft'

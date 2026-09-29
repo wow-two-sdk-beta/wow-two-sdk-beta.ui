@@ -28,13 +28,13 @@ Every list endpoint across all three products returns a **plain, unpaged array**
 
 | Product | Frontend consume | Backend return | File |
 |---|---|---|---|
-| drydock | `listServers(): Promise<ServerDto[]>` · `listProducts(): Promise<ProductDto[]>` | `ApiResponse<IReadOnlyList<ServerDto>>` · `…<ProductDto>>` | `…/src/api/client.ts:111,124` · `ServersController.cs:20` · `ProductsController.cs:24` |
+| wheelhouse | `listServers(): Promise<ServerDto[]>` · `listProducts(): Promise<ProductDto[]>` | `ApiResponse<IReadOnlyList<ServerDto>>` · `…<ProductDto>>` | `…/src/api/client.ts:111,124` · `ServersController.cs:20` · `ProductsController.cs:24` |
 | secrets-vault | `searchSecrets({ns?,key?}): Promise<SecretDto[]>` · `listNamespaces()` · `listTokens()` | `ApiResponse<IReadOnlyList<SecretDto>>` · `…<NamespaceDto>>` · `…<TokenDto>>` | `…/src/api/client.ts:136,161,174` · `SearchSecretsResult.cs` · `ListNamespacesResult.cs` |
 | smart-qr | (codes list) | `ApiResponse<IReadOnlyList<CodeDto>>` | `CodesController.cs:89` · `CodeListResult.cs:9` |
 
 Findings:
-- **Paradigm today: neither offset nor cursor — unbounded arrays.** No `Skip`/`Take`, no `pageSize`, no `totalCount`, no cursor/token in any of the 94 (drydock) / 195 (smart-qr) / 109 (secrets-vault) `.cs` files, nor in the frontend `types.ts`. `searchSecrets` is the closest to a list query and it carries only **filter** params (`ns`, `key`), no paging.
-- **The one `limit`** is drydock's GitHub-releases passthrough `GetReleasesAsync(string repo, int limit, …)` (`FakeGitHubClient.cs:46`) — a proxy to GitHub's own API, not a first-class wow-two paged contract (no total, no cursor).
+- **Paradigm today: neither offset nor cursor — unbounded arrays.** No `Skip`/`Take`, no `pageSize`, no `totalCount`, no cursor/token in any of the 94 (wheelhouse) / 195 (smart-qr) / 109 (secrets-vault) `.cs` files, nor in the frontend `types.ts`. `searchSecrets` is the closest to a list query and it carries only **filter** params (`ns`, `key`), no paging.
+- **The one `limit`** is wheelhouse's GitHub-releases passthrough `GetReleasesAsync(string repo, int limit, …)` (`FakeGitHubClient.cs:46`) — a proxy to GitHub's own API, not a first-class wow-two paged contract (no total, no cursor).
 - The **backend SDK** (`wow-two-sdk.backend.beta`) also ships **no paged type** — greenfield on both sides of the wire.
 
 **Consequence:** this is a clean-slate contract, not a retrofit. Zero existing consumers constrain the shape — the design defines the paradigm rather than mirroring one. Products will add pagination as list sizes grow (codes, secrets, audit logs); the SDK should have the shape waiting (SDK doctrine: build the whole vector before the product needs it).
