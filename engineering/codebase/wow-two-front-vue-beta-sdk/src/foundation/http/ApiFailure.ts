@@ -10,6 +10,14 @@ export const ApiFailureCode = {
 } as const;
 export type ApiFailureCode = (typeof ApiFailureCode)[keyof typeof ApiFailureCode];
 
+/** Identifies the request behind a failure — what a report or a log line names it by. */
+export interface ApiFailureRequest {
+  /** The upper-case HTTP method. */
+  readonly method: string;
+  /** The requested URL without its query or fragment — the endpoint, never its parameters or credentials. */
+  readonly url: string;
+}
+
 /** A display-safe failure with transport diagnostics kept separately. */
 export interface ApiFailure extends AppError {
   readonly code: ApiFailureCode;
@@ -17,6 +25,8 @@ export interface ApiFailure extends AppError {
   readonly headers: Readonly<Record<string, string>>;
   /** Unvalidated response diagnostics; numeric values follow the configured JSON codec. */
   readonly problem: Readonly<Record<string, unknown>> | null;
+  /** The request that failed; absent when the client never reached the transport. */
+  readonly request?: ApiFailureRequest;
 }
 export const ApiFailureFactory = {
   create(

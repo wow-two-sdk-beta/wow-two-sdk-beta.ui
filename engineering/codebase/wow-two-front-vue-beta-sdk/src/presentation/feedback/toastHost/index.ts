@@ -2,6 +2,8 @@ export {
   default as ToastHost,
   toastHost,
   useToastHost,
+  ToastTimer,
+  DefaultToastDurations,
   type ToastHostProps,
   type ToastOptions,
   type ToastContent,

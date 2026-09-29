@@ -15,6 +15,7 @@ export * from './progressStepsIndicator';
 export * from './statusIndicator';
 export * from './meterBar';
 export * from './trendIndicator';
+export * from './reportAction';
 export * from './toastHost';
 export * from './feedbackToastHost';
 export * from './loadingOverlay';

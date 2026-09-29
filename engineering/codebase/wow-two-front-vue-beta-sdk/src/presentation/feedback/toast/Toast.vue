@@ -14,6 +14,11 @@ export interface ToastProps {
   readonly actions?: string;
   /** The accessible label for the close button. Default `"Dismiss"`. */
   readonly closeLabel?: string;
+  /**
+   * Shows the severity's own glyph when no `icon` is given — a distinct shape per severity, so the meaning
+   * never rests on colour alone. `neutral` has none. Default `true`.
+   */
+  readonly showSeverityIcon?: boolean;
 }
 </script>
 
@@ -21,8 +26,8 @@ export interface ToastProps {
 import { useLocaleDefaults } from '../../../foundation/i18n';
 import { computed, getCurrentInstance, useAttrs, useSlots, useTemplateRef } from 'vue';
 import { X } from 'lucide-vue-next';
-import { cn } from '../../../foundation/styles';
-import { Icon } from '../../../foundation/icons';
+import { cn, Severity as SeverityToken } from '../../../foundation/styles';
+import { Icon, SeverityIconClasses, SeverityIcons } from '../../../foundation/icons';
 import ToastSimple from '../toastSimple/ToastSimple.vue';
 
 const CloseIcon = X;
@@ -36,7 +41,7 @@ const CloseIcon = X;
  */
 defineOptions({ name: 'Toast', inheritAttrs: false });
 
-const componentProps = withDefaults(defineProps<ToastProps>(), {});
+const componentProps = withDefaults(defineProps<ToastProps>(), { showSeverityIcon: true });
 const props = useLocaleDefaults(componentProps, 'Toast', { closeLabel: 'Dismiss' });
 
 /** Replaces React's `onClose`; omitting `@close` omits the close button. */
@@ -56,6 +61,8 @@ defineSlots<{
   description?(): unknown;
   /** The action row. Falls back to the `actions` prop. */
   actions?(): unknown;
+  /** The adornment beside the close button — a countdown, a timestamp. */
+  trailing?(): unknown;
 }>();
 
 const attrs = useAttrs();
@@ -70,14 +77,27 @@ const inner = useTemplateRef<InstanceType<typeof ToastSimple>>('inner');
  */
 const hasClose = () => Boolean(instance?.vnode.props?.onClose);
 
-const hasIcon = computed(() => Boolean(props.icon) || Boolean(slots.icon));
-const hasTitle = computed(() => Boolean(props.title) || Boolean(slots.title));
-const hasDescription = computed(() => Boolean(props.description) || Boolean(slots.description));
-const hasActions = computed(() => Boolean(props.actions) || Boolean(slots.actions));
+/**
+ * The glyph standing in for a missing `icon` — `null` when switched off, or for a neutral toast. An `icon`
+ * slot replaces it as the slot's fallback content, so slot presence stays out of this cached value.
+ */
+const severityIcon = computed(() =>
+  props.showSeverityIcon && !props.icon ? SeverityIcons[props.severity ?? SeverityToken.Neutral] : null,
+);
+const severityIconClass = computed(() => SeverityIconClasses[props.severity ?? SeverityToken.Neutral]);
+
+/*
+ * Slot presence is read through calls, not cached computeds: `slots` is not reactive, and a host that updates a
+ * toast in place (a promise settling, a dedup refresh) adds or drops slots between renders.
+ */
+const hasIcon = () => Boolean(props.icon) || Boolean(slots.icon) || severityIcon.value !== null;
+const hasTitle = () => Boolean(props.title) || Boolean(slots.title);
+const hasDescription = () => Boolean(props.description) || Boolean(slots.description);
+const hasActions = () => Boolean(props.actions) || Boolean(slots.actions);
 
 const classes = computed(() => cn('flex items-start gap-3', attrs.class as string | undefined));
 
-const descriptionClasses = computed(() => cn('text-sm', hasTitle.value && 'mt-0.5 text-muted-foreground'));
+const descriptionClasses = () => cn('text-sm', hasTitle() && 'mt-0.5 text-muted-foreground');
 
 /** Everything but `class`, which is re-applied through `cn` above. */
 const rest = computed(() => {
@@ -93,21 +113,27 @@ defineExpose({ el });
 
 <template>
   <ToastSimple ref="inner" :severity="props.severity" v-bind="rest" :class="classes">
-    <span v-if="hasIcon" class="mt-0.5 shrink-0">
-      <slot name="icon">{{ props.icon }}</slot>
+    <span v-if="hasIcon()" data-toast-icon class="mt-0.5 shrink-0">
+      <slot name="icon">
+        <Icon v-if="severityIcon" :icon="severityIcon" :size="16" :class="severityIconClass" />
+        <template v-else>{{ props.icon }}</template>
+      </slot>
     </span>
     <div class="min-w-0 flex-1">
-      <div v-if="hasTitle" class="font-medium">
+      <div v-if="hasTitle()" class="font-medium">
         <slot name="title">{{ props.title }}</slot>
       </div>
-      <div v-if="hasDescription" :class="descriptionClasses">
+      <div v-if="hasDescription()" :class="descriptionClasses()">
         <slot name="description">{{ props.description }}</slot>
       </div>
-      <div v-if="hasActions" class="mt-2 flex flex-wrap items-center gap-2">
+      <div v-if="hasActions()" class="mt-2 flex flex-wrap items-center gap-2">
         <slot name="actions">{{ props.actions }}</slot>
       </div>
       <slot />
     </div>
+    <span v-if="slots.trailing" class="flex h-5 shrink-0 items-center">
+      <slot name="trailing" />
+    </span>
     <button
       v-if="hasClose()"
       type="button"

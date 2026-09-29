@@ -118,6 +118,10 @@ export default tseslint.config(
         // foundation only (Severity vocabulary, ApiError type) — NEVER presentation.
         // Presentation adapters (FeedbackToastHost) import it, not the other way round.
         { type: 'feedback', pattern: 'src/feedback/**' },
+        // Reporting = standalone top-level subpath incident capture; peer-free, composes foundation only
+        // (errors, http failure shapes, logger redaction). Feedback offers its send on a notice and
+        // presentation binds it to a Report action — both import it, never the other way round.
+        { type: 'reporting', pattern: 'src/reporting/**' },
         // Forms-engine = standalone top-level subpath forms facade (contract + engine
         // adapters); composes foundation only (FormControl provide/inject, http error
         // seams) — NEVER presentation: label/error chrome (presentation `Field`,
@@ -148,12 +152,14 @@ export default tseslint.config(
             // Cross-group composition is allowed at all layers. Convention: L3 atoms /
             // L4 molecules stay in-group when natural; L5+ organisms compose freely.
             // The lint rule is permissive.
-            // `feedback` here = the headless bus module a presentation adapter may subscribe to.
-            { from: ['presentation'], allow: ['foundation', 'domain', 'presentation', 'feedback'] },
+            // `feedback` here = the headless bus module a presentation adapter may subscribe to;
+            // `reporting` = the incident send a toast binds to its Report action.
+            { from: ['presentation'], allow: ['foundation', 'domain', 'presentation', 'feedback', 'reporting'] },
             { from: ['router'], allow: ['foundation', 'domain', 'presentation', 'router'] },
             { from: ['query'], allow: ['foundation', 'router', 'query'] },
             { from: ['auth'], allow: ['foundation', 'auth'] },
-            { from: ['feedback'], allow: ['foundation', 'feedback'] },
+            { from: ['feedback'], allow: ['foundation', 'feedback', 'reporting'] },
+            { from: ['reporting'], allow: ['foundation', 'reporting'] },
             { from: ['formsEngine'], allow: ['foundation', 'formsEngine'] },
             { from: ['analytics'], allow: ['foundation', 'analytics'] },
             { from: ['flags'], allow: ['foundation', 'flags'] },

@@ -257,7 +257,8 @@ try {
     join(scratch, 'toast-host.css'),
     `@import 'tailwindcss' source(none);\n` +
       `@import '${published.name}/presentation/feedback/toast-host/styles.css';\n` +
-      `@theme { --color-popover: #fff; --color-popover-foreground: #111; --color-border: #ccc; --color-primary: #000; }\n`,
+      `@theme { --color-popover: #fff; --color-popover-foreground: #111; --color-border: #ccc; --color-primary: #000; ` +
+      `--color-destructive-soft-foreground: #900; }\n`,
   );
   writeFileSync(join(scratch, 'toast-host.ts'), `import './toast-host.css';\n`);
   const toastBundles = await build({
@@ -277,7 +278,16 @@ try {
     .filter((item) => item.type === 'asset' && item.fileName.endsWith('.css'))
     .map((item) => String(item.source))
     .join('\n');
-  for (const token of ['.w-80', '.bg-popover', '.z-toast', '.origin-left', '--animate-slide-in-right']) {
+  for (const token of [
+    '.w-80',
+    '.bg-popover',
+    '.z-toast',
+    '.origin-left',
+    '--animate-slide-in-right',
+    '.stroke-primary',
+    '.text-destructive-soft-foreground',
+    '.min-h-6',
+  ]) {
     if (!toastCss.includes(token)) throw new Error(`ToastHost CSS omits component styling: ${token}`);
   }
   if (toastCss.includes('.h-9')) throw new Error('ToastHost CSS scanned unrelated SDK controls.');

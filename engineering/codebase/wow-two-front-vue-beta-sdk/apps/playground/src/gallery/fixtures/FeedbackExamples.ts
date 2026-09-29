@@ -18,6 +18,7 @@ import {
   ProgressBar,
   ProgressCircleIndicator,
   ProgressStepsIndicator,
+  ReportAction,
   SkeletonState,
   SkeletonStateGroup,
   SkeletonStateSlot,
@@ -82,6 +83,8 @@ export const feedbackExamples: readonly SmokeCase[] = [
   smokeCase('TrendIndicator', TrendIndicator, { value: 5 }),
 
   smokeCase('ToastHost', ToastHost, {}),
+
+  smokeCase('ReportAction', ReportAction, { send: () => Promise.resolve({ id: 'FB-1' }) }),
 
   smokeCase('FeedbackToastHost', FeedbackToastHost, {}),
 

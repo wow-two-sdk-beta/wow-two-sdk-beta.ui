@@ -1,6 +1,7 @@
 import type { VNode } from 'vue';
 
 import { Severity } from '../foundation/styles';
+import type { ReportSend } from '../reporting';
 
 /** Defines the tone of a notice — the house `Severity` vocabulary minus `neutral` (a notice always carries intent). */
 export const NoticeTone = {
@@ -40,6 +41,12 @@ export interface FeedbackNotice {
 
   /** An optional action slot (e.g. a retry button) — passed through to the rendering surface. */
   readonly action?: NoticeNode;
+
+  /**
+   * Sends a one-click report of the failure behind this notice — a captured incident's `send` from
+   * `/reporting`. The rendering surface shows it as a Report action beside `action`.
+   */
+  readonly report?: ReportSend;
 
   /** An optional stable identity, assigned by the bus (`n_<seq>`) when omitted. Set it to dedupe later. */
   readonly id?: string;

@@ -1,9 +1,29 @@
 <script lang="ts">
 import type { VNode } from 'vue';
 import type { OverlayPosition } from '../../../foundation/styles';
+import type { ReportSend } from '../../../reporting';
 import type { ToastSimpleVariants } from '../toastSimple/ToastSimple.variants';
 
 export type ToastSeverity = NonNullable<ToastSimpleVariants['severity']>;
+
+/** Defines how a toast shows the time left before it dismisses itself. */
+export const ToastTimer = {
+  /** Refers to no countdown — the toast still expires on time. */
+  None: 'none',
+  /** Refers to a bar draining along the toast's bottom edge. */
+  Bar: 'bar',
+  /** Refers to a ring draining beside the close button. */
+  Ring: 'ring',
+  /** Refers to the whole seconds left, counted beside the close button. */
+  Seconds: 'seconds',
+} as const;
+
+export type ToastTimer = (typeof ToastTimer)[keyof typeof ToastTimer];
+
+/** Provides the per-severity expiry a `ToastHost` starts from — an error stays long enough to read and report. */
+export const DefaultToastDurations: Readonly<Partial<Record<ToastSeverity, number>>> = Object.freeze({
+  danger: 8000,
+});
 
 /**
  * A renderable slice of a toast. These travel through the imperative
@@ -17,9 +37,19 @@ export interface ToastOptions {
   description?: ToastNode;
   icon?: ToastNode;
   severity?: ToastSeverity;
-  /** ms before auto-dismiss. Default: ToastHost's `defaultDuration`. `Infinity` = sticky. */
+  /**
+   * ms before auto-dismiss. Default: the ToastHost's `durations` entry for the severity, then its
+   * `defaultDuration`. `Infinity` = sticky.
+   */
   duration?: number;
   action?: ToastNode;
+  /**
+   * Sends a one-click report of the failure this toast shows; the toast renders a Report action that walks
+   * sending → reported (with the reference) → retry on failure. Pairs with `/reporting`'s `capture(error).send`.
+   */
+  report?: ReportSend;
+  /** Shows the severity's own glyph when no `icon` is given. Default: the ToastHost's `showSeverityIcon`. */
+  showSeverityIcon?: boolean;
   /**
    * Fully custom body — replaces the default `Toast` chrome (icon/title/description/close).
    * Still animates + auto-dismisses; the content owns its close via the returned id.
@@ -35,7 +65,12 @@ export interface ToastOptions {
    * refreshing its timer instead of stacking a duplicate.
    */
   key?: string;
-  /** Shows or hides this toast's countdown bar; defaults to the ToastHost's `showProgress`. */
+  /** How this toast shows its time left. Default: the ToastHost's `timer`. */
+  timer?: ToastTimer;
+  /**
+   * Shows or hides this toast's countdown bar.
+   * @deprecated Use `timer` — `ToastTimer.Bar` or `ToastTimer.None`.
+   */
   progress?: boolean;
 }
 
@@ -190,22 +225,39 @@ const MotionClasses: Record<OverlayPosition, string> = {
 export interface ToastHostProps {
   readonly position?: OverlayPosition;
   readonly max?: number;
-  /** The default auto-dismiss delay in ms; per-toast `duration` overrides. Default 5000. `Infinity` to disable. */
+  /**
+   * The auto-dismiss delay in ms for a severity missing from `durations`; per-toast `duration` overrides.
+   * Default 5000. `Infinity` to disable.
+   */
   readonly defaultDuration?: number;
+  /**
+   * The auto-dismiss delay in ms per severity; per-toast `duration` overrides, and a severity left out falls
+   * back to `defaultDuration`. Default `DefaultToastDurations` — errors stay 8 seconds. Replaces, never merges.
+   */
+  readonly durations?: Readonly<Partial<Record<ToastSeverity, number>>>;
   readonly canPauseOnHover?: boolean;
   readonly gap?: number;
   /**
-   * Shows a countdown bar along the bottom of each auto-dismissing toast. It pauses with the
-   * expiry timer, restarts when the toast updates, and is omitted for sticky toasts and reduced motion.
+   * How each auto-dismissing toast shows its time left; a toast's `timer` overrides. Every display pauses with
+   * the expiry timer and restarts when the toast updates; sticky toasts show none, and reduced motion drops the
+   * bar and the ring. Custom `content` has no close button to sit beside, so it takes the bar for a ring or
+   * seconds. Default `ToastTimer.None`.
+   */
+  readonly timer?: ToastTimer;
+  /**
+   * Shows a countdown bar along the bottom of each auto-dismissing toast.
+   * @deprecated Use `timer` — `ToastTimer.Bar`.
    */
   readonly showProgress?: boolean;
+  /** Shows each severity's glyph on toasts given no `icon`; a toast's `showSeverityIcon` overrides. Default `true`. */
+  readonly showSeverityIcon?: boolean;
 }
 
 interface VisibleToast extends ToastEntry {
   resolvedDuration: number;
 }
 
-/** Countdown-bar fill per severity; the neutral bar uses the brand primary. */
+/** Countdown fill per severity; the neutral countdown uses the brand primary. */
 const ProgressClasses: Record<ToastSeverity, string> = {
   neutral: 'bg-primary',
   info: 'bg-info',
@@ -213,6 +265,22 @@ const ProgressClasses: Record<ToastSeverity, string> = {
   warning: 'bg-warning',
   danger: 'bg-destructive',
 };
+
+/** Countdown-ring stroke per severity — the bar's tones, drawn as an arc. */
+const RingClasses: Record<ToastSeverity, string> = {
+  neutral: 'stroke-primary',
+  info: 'stroke-info',
+  success: 'stroke-success',
+  warning: 'stroke-warning',
+  danger: 'stroke-destructive',
+};
+
+/** The ring's radius in the 16×16 view box; the circumference is the dash the countdown drains. */
+const RingRadius = 6;
+const RingCircumference = 2 * Math.PI * RingRadius;
+
+/** How often the seconds display re-reads its clock — a quarter second keeps a whole-second flip on time. */
+const SecondsTickMs = 250;
 </script>
 
 <script setup lang="ts">
@@ -232,6 +300,7 @@ import {
 import { cn, OverlayPosition as OverlayPositionToken } from '../../../foundation/styles';
 import { Announce, Portal, Presence } from '../../../foundation/primitives';
 import Toast from '../toast/Toast.vue';
+import ReportAction from '../reportAction/ReportAction.vue';
 
 const locale = useLocale();
 
@@ -242,38 +311,46 @@ const ToastNodeView = defineComponent({
   setup: (nodeProps) => () => nodeProps.node,
 });
 
+/** The props every countdown display shares — it mirrors the host's expiry timer, never drives it. */
+const CountdownProps = {
+  duration: { type: Number, required: true },
+  paused: { type: Boolean, default: false },
+  severity: { type: String as PropType<ToastSeverity>, default: 'neutral' },
+} as const;
+
 /**
- * The countdown bar. It animates a scale transform with the Web Animations API so the bar pauses
- * and resumes in step with the host's expiry timer; environments without `animate` show it static.
+ * Runs one Web Animations API countdown on a template ref, paused and resumed in step with the host's expiry
+ * timer; environments without `animate` leave the element static at full.
  */
+function useCountdownAnimation(
+  element: () => Element | null,
+  keyframes: Keyframe[],
+  countdown: { readonly duration: number; readonly paused: boolean },
+): void {
+  let animation: Animation | undefined;
+  onMounted(() => {
+    const target = element();
+    if (!target || typeof target.animate !== 'function') return;
+    animation = target.animate(keyframes, { duration: countdown.duration, easing: 'linear', fill: 'forwards' });
+    if (countdown.paused) animation.pause();
+  });
+  watch(
+    () => countdown.paused,
+    (isPaused) => {
+      if (isPaused) animation?.pause();
+      else animation?.play();
+    },
+  );
+  onUnmounted(() => animation?.cancel());
+}
+
+/** The countdown bar — a scale transform draining along the toast's bottom edge. */
 const ToastProgress = defineComponent({
   name: 'ToastProgress',
-  props: {
-    duration: { type: Number, required: true },
-    paused: { type: Boolean, default: false },
-    severity: { type: String as PropType<ToastSeverity>, default: 'neutral' },
-  },
-  setup(progressProps) {
+  props: CountdownProps,
+  setup(countdown) {
     const fill = ref<HTMLElement | null>(null);
-    let animation: Animation | undefined;
-    onMounted(() => {
-      const element = fill.value;
-      if (!element || typeof element.animate !== 'function') return;
-      animation = element.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], {
-        duration: progressProps.duration,
-        easing: 'linear',
-        fill: 'forwards',
-      });
-      if (progressProps.paused) animation.pause();
-    });
-    watch(
-      () => progressProps.paused,
-      (isPaused) => {
-        if (isPaused) animation?.pause();
-        else animation?.play();
-      },
-    );
-    onUnmounted(() => animation?.cancel());
+    useCountdownAnimation(() => fill.value, [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], countdown);
     return () =>
       h(
         'div',
@@ -285,9 +362,97 @@ const ToastProgress = defineComponent({
         [
           h('div', {
             ref: fill,
-            class: cn('h-full w-full origin-left opacity-80', ProgressClasses[progressProps.severity]),
+            class: cn('h-full w-full origin-left opacity-80', ProgressClasses[countdown.severity]),
           }),
         ],
+      );
+  },
+});
+
+/** The countdown ring — an arc draining clockwise from twelve o'clock, drawn beside the close button. */
+const ToastRing = defineComponent({
+  name: 'ToastRing',
+  props: CountdownProps,
+  setup(countdown) {
+    const arc = ref<SVGCircleElement | null>(null);
+    useCountdownAnimation(
+      () => arc.value,
+      [{ strokeDashoffset: '0' }, { strokeDashoffset: `${RingCircumference}` }],
+      countdown,
+    );
+    return () =>
+      h(
+        'svg',
+        {
+          'aria-hidden': 'true',
+          'data-toast-timer': ToastTimer.Ring,
+          viewBox: '0 0 16 16',
+          class: 'size-4 -rotate-90 motion-reduce:hidden',
+        },
+        [
+          h('circle', { cx: 8, cy: 8, r: RingRadius, fill: 'none', 'stroke-width': 2, class: 'stroke-border' }),
+          h('circle', {
+            ref: arc,
+            cx: 8,
+            cy: 8,
+            r: RingRadius,
+            fill: 'none',
+            'stroke-width': 2,
+            'stroke-linecap': 'round',
+            'stroke-dasharray': `${RingCircumference}`,
+            class: RingClasses[countdown.severity],
+          }),
+        ],
+      );
+  },
+});
+
+/**
+ * The seconds display — the whole seconds left, rounded up so it reads `1s` until the toast goes. It keeps its
+ * own clock, advancing only while unpaused; the announcement region already carries the toast, so it is hidden.
+ */
+const ToastSeconds = defineComponent({
+  name: 'ToastSeconds',
+  props: CountdownProps,
+  setup(countdown) {
+    const left = ref(countdown.duration);
+    let lastTick = 0;
+    let handle: number | undefined;
+    const tick = () => {
+      const now = Date.now();
+      left.value = Math.max(0, left.value - (now - lastTick));
+      lastTick = now;
+    };
+    const start = () => {
+      if (handle !== undefined) return;
+      lastTick = Date.now();
+      handle = window.setInterval(tick, SecondsTickMs);
+    };
+    const stop = () => {
+      if (handle === undefined) return;
+      tick();
+      window.clearInterval(handle);
+      handle = undefined;
+    };
+    onMounted(() => {
+      if (!countdown.paused) start();
+    });
+    watch(
+      () => countdown.paused,
+      (isPaused) => (isPaused ? stop() : start()),
+    );
+    onUnmounted(() => {
+      if (handle !== undefined) window.clearInterval(handle);
+    });
+    return () =>
+      h(
+        'span',
+        {
+          'aria-hidden': 'true',
+          'data-toast-timer': ToastTimer.Seconds,
+          class: 'text-xs tabular-nums text-muted-foreground',
+        },
+        `${Math.ceil(left.value / 1000)}s`,
       );
   },
 });
@@ -304,9 +469,12 @@ const props = withDefaults(defineProps<ToastHostProps>(), {
   position: OverlayPositionToken.BottomRight,
   max: 5,
   defaultDuration: 5000,
+  durations: () => DefaultToastDurations,
   canPauseOnHover: true,
   gap: 8,
+  timer: undefined,
   showProgress: false,
+  showSeverityIcon: true,
 });
 
 const attrs = useAttrs();
@@ -333,7 +501,7 @@ onMounted(() => {
 const visible = computed<ReadonlyArray<VisibleToast>>(() =>
   items.value.slice(0, props.max).map((t) => ({
     ...t,
-    resolvedDuration: t.duration ?? props.defaultDuration,
+    resolvedDuration: t.duration ?? props.durations[t.severity ?? 'neutral'] ?? props.defaultDuration,
   })),
 );
 const visibleIds = computed(() => new Set(visible.value.map((v) => v.id)));
@@ -380,7 +548,7 @@ const latestTitle = computed(() => {
 
 // Schedule auto-dismiss timers.
 watch(
-  [items, () => props.max, () => props.defaultDuration, paused],
+  [items, () => props.max, () => props.defaultDuration, () => props.durations, paused],
   () => {
     const ids = visibleIds.value;
     // Clear timers for items that are no longer visible.
@@ -471,9 +639,26 @@ const itemClasses = computed(() =>
   cn('pointer-events-auto relative w-80 overflow-hidden rounded-md', MotionClasses[props.position]),
 );
 
-/** A present, auto-dismissing toast shows the bar when its own flag or the host default asks for it. */
-const hasProgress = (t: VisibleToast & { present: boolean }): boolean =>
-  t.present && Number.isFinite(t.resolvedDuration) && (t.progress ?? props.showProgress);
+/** The display a toast asked for — its own `timer`, its deprecated `progress`, then the host's two. */
+function requestedTimer(t: VisibleToast): ToastTimer {
+  if (t.timer !== undefined) return t.timer;
+  if (t.progress !== undefined) return t.progress ? ToastTimer.Bar : ToastTimer.None;
+  if (props.timer !== undefined) return props.timer;
+  return props.showProgress ? ToastTimer.Bar : ToastTimer.None;
+}
+
+/**
+ * The display a toast gets — none while exiting or sticky, and the bar for custom `content`, which has no close
+ * button for a ring or seconds to sit beside.
+ */
+function timerFor(t: VisibleToast & { present: boolean }): ToastTimer {
+  if (!t.present || !Number.isFinite(t.resolvedDuration)) return ToastTimer.None;
+  const requested = requestedTimer(t);
+  return t.content && requested !== ToastTimer.None ? ToastTimer.Bar : requested;
+}
+
+/** Whether a toast's display sits beside the close button rather than along the bottom edge. */
+const isTrailingTimer = (timer: ToastTimer): boolean => timer === ToastTimer.Ring || timer === ToastTimer.Seconds;
 
 /** Vue does not auto-suffix numeric style values with `px`. */
 const stackStyle = computed(() => ({ gap: `${props.gap}px` }));
@@ -500,16 +685,40 @@ const stackStyle = computed(() => ({ gap: `${props.gap}px` }));
         -->
         <div :class="itemClasses" @vue:unmounted="t.present ? undefined : removeExiting(t.id)">
           <ToastNodeView v-if="t.content" :node="t.content" />
-          <Toast v-else :severity="t.severity" @close="toastHost.dismiss(t.id)">
+          <Toast
+            v-else
+            :severity="t.severity"
+            :show-severity-icon="t.showSeverityIcon ?? props.showSeverityIcon"
+            @close="toastHost.dismiss(t.id)"
+          >
             <template v-if="t.icon" #icon><ToastNodeView :node="t.icon" /></template>
             <template v-if="t.title" #title><ToastNodeView :node="t.title" /></template>
             <template v-if="t.description" #description>
               <ToastNodeView :node="t.description" />
             </template>
-            <template v-if="t.action" #actions><ToastNodeView :node="t.action" /></template>
+            <template v-if="t.action || t.report" #actions>
+              <ToastNodeView v-if="t.action" :node="t.action" />
+              <ReportAction v-if="t.report" :send="t.report" />
+            </template>
+            <template v-if="isTrailingTimer(timerFor(t))" #trailing>
+              <ToastRing
+                v-if="timerFor(t) === ToastTimer.Ring"
+                :key="`${t.id}:${t.nonce}`"
+                :duration="t.resolvedDuration"
+                :paused="paused"
+                :severity="t.severity ?? 'neutral'"
+              />
+              <ToastSeconds
+                v-else
+                :key="`${t.id}:${t.nonce}`"
+                :duration="t.resolvedDuration"
+                :paused="paused"
+                :severity="t.severity ?? 'neutral'"
+              />
+            </template>
           </Toast>
           <ToastProgress
-            v-if="hasProgress(t)"
+            v-if="timerFor(t) === ToastTimer.Bar"
             :key="`${t.id}:${t.nonce}`"
             :duration="t.resolvedDuration"
             :paused="paused"

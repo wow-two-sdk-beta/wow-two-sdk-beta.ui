@@ -23,9 +23,20 @@ Additive components from the [gap analysis](../../architecture/analysis/vue-sdk-
 | Loading | `SkeletonStateSlot`, `SkeletonStateGroup`, `SkeletonStateText`, the `animation` prop (`pulse` · `shimmer` · `none`) and `useRefresh` (`query`) — values turn into placeholders while labels and layout stay |
 | Navigation | `Navbar` `orientation` (`horizontal` top bar · `vertical` rail) and `variant` (`solid` · `glass` · `transparent`); `AppShell` `scroll` and `navigation` |
 | Canvas | `CanvasArea` (`presentation/layout`) — the shared pan-and-zoom plane |
+| Toasts | `ToastHost` `timer` + toast `timer` (`ToastTimer`: `none` · `bar` · `ring` · `seconds`); `durations` per severity (`DefaultToastDurations`); severity glyphs (`showSeverityIcon`, `SeverityIcons` in `foundation/icons`); toast `report` → `ReportAction`; `Toast` `trailing` slot |
+| Reporting | `/reporting` — `createReporter` (trail, `wrapFetch`, `trackRouter`, `trackNotices`, `captureClicks`, `captureErrors`, `capture(error).send`), `IncidentReport` schema 1, `httpReportSink` · `memoryReportSink` · `consoleReportSink`; `feedbackQueryErrors(bus, { reporter })`; `FeedbackNotice.report`; `ApiFailure.request`; `redactUrl` (`foundation/logger`) |
 
 Behavioral changes to existing parts:
 
+- `ToastHost` keeps `danger` toasts 8 seconds (`DefaultToastDurations`) while other severities keep `defaultDuration`.
+  Pass `durations` to set the table; it replaces the default rather than merging.
+- Non-neutral toasts show a severity glyph when given no `icon`; pass `showSeverityIcon: false` to the host or a
+  toast for the previous bare card.
+- `showProgress` (host) and `progress` (toast) are deprecated for `timer`; they still resolve to the bar this
+  release and are removed in the next.
+- A toast updated in place (`update`, a settled `promise`, a dedup `key`) now renders a description, action or
+  icon it gained; the card used to keep the slots it first rendered with.
+- A failed `createApiClient` request carries `request` (`method` + URL without its query) on its `ApiFailure`.
 - `AppShell` fills the viewport and scrolls only `AppShellMain` (`scroll: 'region'`, the new default), so the header
   and sidebar span the full window beside a classic scrollbar. Pass `scroll="document"` for the old page scrolling.
   `AppShellContent` no longer nests its own scroll container.

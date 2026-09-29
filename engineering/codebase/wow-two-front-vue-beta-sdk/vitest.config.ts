@@ -18,7 +18,7 @@ const smokeSuffixes = ['**/*.ssr.test.ts', '**/*.dom.test.ts'];
 /*
  * Four projects:
  *  - unit    — node, pure logic: the framework-agnostic engines under the components
- *              (`foundation/*`, `domain/*`, `feedback` / `analytics` / `flags` / `auth`,
+ *              (`foundation/*`, `domain/*`, `feedback` / `reporting` / `analytics` / `flags` / `auth`,
  *              `formsEngine`). Node is load-bearing here too, not just in `ssr`: with no
  *              `localStorage` and no `indexedDB`, a slice that forgot its capability guard
  *              throws on the first read rather than degrading.
@@ -48,7 +48,7 @@ export default defineConfig({
           include: [
             'tests/unit/foundation/**/*.test.ts',
             'tests/unit/domain/**/*.test.ts',
-            'tests/unit/{router,query,auth,feedback,formsEngine,analytics,flags}/**/*.test.ts',
+            'tests/unit/{router,query,auth,feedback,reporting,formsEngine,analytics,flags}/**/*.test.ts',
             // The atlas app's content graph and link codecs — pure data, no DOM.
             'tests/unit/atlas/**/*.test.ts',
           ],

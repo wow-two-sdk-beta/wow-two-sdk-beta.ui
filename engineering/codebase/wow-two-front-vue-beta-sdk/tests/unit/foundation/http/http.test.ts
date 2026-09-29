@@ -107,6 +107,18 @@ describe('HTTP outcomes', () => {
     expect(onUnauthorized).toHaveBeenCalledOnce();
     if (!outcome.ok) expect(fieldErrors(outcome.failure)).toEqual({ name: ['Required'] });
   });
+  it('names the endpoint behind a failure, never its parameters', async () => {
+    const outcome = await createApiClient({
+      baseUrl: 'https://api.test',
+      fetch: vi.fn().mockResolvedValue(json({ title: 'down' }, 503)),
+    }).delete('/servers/42', { query: { token: 'secret', force: true } });
+    expect(outcome).toMatchObject({
+      ok: false,
+      failure: { request: { method: 'DELETE', url: 'https://api.test/servers/42' } },
+    });
+    const offline = await createApiClient({ fetch: vi.fn().mockRejectedValue(new TypeError('network')) }).get('/x');
+    expect(offline).toMatchObject({ ok: false, failure: { code: 'transport', request: { method: 'GET', url: '/x' } } });
+  });
   it('distinguishes network, caller cancellation, and timeout', async () => {
     expect(
       await createApiClient({ fetch: vi.fn().mockRejectedValue(new TypeError('network')) }).get('/x'),

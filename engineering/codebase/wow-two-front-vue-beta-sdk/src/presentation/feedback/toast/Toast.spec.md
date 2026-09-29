@@ -8,6 +8,9 @@ Public import: `import { Toast } from '@wow-two-beta/ui-vue/presentation/feedbac
 
 ## Contract
 
+- A non-neutral toast without an `icon` shows its severity's glyph (`SeverityIcons` from `foundation/icons`), coloured with the tone's `-soft-foreground` token, so severity never rests on colour alone. `showSeverityIcon: false` removes it; an `icon` prop or slot replaces it.
+- Slot presence is read on every render, so a host that updates a toast in place may add or drop a title, description, action or trailing adornment.
+- The `trailing` slot sits between the body and the close button — a countdown or a timestamp.
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 
@@ -21,6 +24,7 @@ Public import: `import { Toast } from '@wow-two-beta/ui-vue/presentation/feedbac
 | `description` | `string` | no | — | The body text below the title. Rich content → the `description` slot. |
 | `actions` | `string` | no | — | The action area below the body. Rich content → the `actions` slot. |
 | `closeLabel` | `string` | no | `'Dismiss'` | The accessible label for the close button. Default `"Dismiss"`. |
+| `showSeverityIcon` | `boolean` | no | `true` | Shows the severity's own glyph when no `icon` is given; `neutral` has none. |
 
 ## Emits
 
@@ -37,6 +41,7 @@ Public import: `import { Toast } from '@wow-two-beta/ui-vue/presentation/feedbac
 | `title` | `title?(): unknown;` | The heading line. Falls back to the `title` prop. |
 | `description` | `description?(): unknown;` | The body text below the title. Falls back to the `description` prop. |
 | `actions` | `actions?(): unknown;` | The action row. Falls back to the `actions` prop. |
+| `trailing` | `trailing?(): unknown;` | The adornment beside the close button — a countdown, a timestamp. |
 
 ## Exposed handle
 

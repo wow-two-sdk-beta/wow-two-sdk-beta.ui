@@ -13,6 +13,7 @@ import Demo from '../gallery/Demo.vue';
 import Matrix from '../gallery/Matrix.vue';
 import AutoGroup from '../gallery/AutoGroup.vue';
 import { feedbackExamples } from '../gallery/fixtures/FeedbackExamples';
+import ToastReportDemo from './ToastReportDemo.vue';
 
 const {
   Alert,
@@ -68,6 +69,9 @@ const covered = [
   'OnboardingChecklistCardTask',
   'UndoBar',
   'LiveCursorIndicator',
+  'ToastHost',
+  'FeedbackToastHost',
+  'ReportAction',
 ];
 
 const SEVERITIES = ['neutral', 'info', 'success', 'warning', 'danger'] as const;
@@ -157,6 +161,10 @@ function repair(reset: () => void): void {
           />
           <ToastSimple severity="success">ToastSimple</ToastSimple>
         </div>
+      </Demo>
+
+      <Demo name="ToastHost / ReportAction" note="timer display, severity glyphs, one-click report of a failure">
+        <ToastReportDemo />
       </Demo>
 
       <Demo name="Spinner" note="size × tone">

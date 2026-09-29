@@ -27,6 +27,7 @@ function toToastOptions(notice: PublishedNotice): ToastOptions {
     severity: notice.tone,
     duration: notice.durationMs,
     action: notice.action,
+    report: notice.report,
   };
 }
 </script>

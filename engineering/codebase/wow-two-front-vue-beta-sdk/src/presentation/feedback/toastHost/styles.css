@@ -1,5 +1,9 @@
 /* Scan the compiled host-and-card chunk; consumers provide Tailwind and semantic theme tokens. */
 @source '../../../chunks/ToastHost.vue*.js';
+/* The severity glyph colours, and the Report action's button with its busy spinner, compile to their own chunks. */
+@source '../../../chunks/SeverityIcons-*.js';
+@source '../../../chunks/Button.vue*.js';
+@source '../../../chunks/Spinner.vue*.js';
 /* The card atom's surface classes live in the shared feedback chunk, so they are listed rather than scanned. */
 @source inline('pointer-events-auto text-sm outline-hidden transition-colors border rounded-md p-3 shadow-lg border-border bg-popover text-popover-foreground border-info/40 border-success/40 border-warning/40 border-destructive/40');
 

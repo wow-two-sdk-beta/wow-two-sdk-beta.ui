@@ -118,7 +118,7 @@ const saved = await api.post('/api/codes', { body, unwrap: false, decode: decode
 | `foundation/*`       | Primitives, infrastructure and browser capabilities                |
 | `domain/*`           | Color and emoji models and operations                              |
 | `presentation/*`     | Actions, display, feedback, forms, layout, navigation and overlays |
-| Application adapters | Router, query, auth, feedback, forms, analytics and flags          |
+| Application adapters | Router, query, auth, feedback, reporting, forms, analytics, flags  |
 
 ESLint enforces dependency direction. Foundation cannot import higher layers.
 Application adapters have separate entries to scope optional vendor dependencies.
@@ -243,6 +243,7 @@ Server evidence labels: **fixtures** means only the named suite's concrete rende
 | `./query/testing`              | import only                                                                        | @tanstack/vue-query + @vue/test-utils peers; DOM for mounting helpers                     |
 | `./auth`                       | fixtures: `tests/unit/providers/Providers.ssr.test.ts` (registered cases only)     | Per-app strategy/bridge; browser storage/redirect operations are strategy-specific        |
 | `./feedback`                   | import only                                                                        | Vue provider/host; mounted DOM for rendered notices                                       |
+| `./reporting`                  | import only                                                                        | Caller-owned sink/ingest; click, error and page capture require DOM; screenshot app-owned |
 | `./forms-engine`               | import only                                                                        | Vue + Standard Schema contract; focus helpers require DOM                                 |
 | `./forms-engine/house`         | import only                                                                        | Vue-owned form scope; transport signal handled by caller                                  |
 | `./forms-engine/tanstack`      | import only                                                                        | @tanstack/vue-form peer; Vue-owned form scope and caller transport                        |

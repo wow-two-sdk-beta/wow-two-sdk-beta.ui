@@ -8,6 +8,7 @@ Public import: `import { FeedbackToastHost } from '@wow-two-beta/ui-vue/presenta
 
 ## Contract
 
+- Each notice becomes one toast: `tone` → `severity`, `durationMs` → `duration`, and `title`, `description`, `action` and `report` pass through — a notice carrying `report` shows the one-click Report action.
 - Compose using the props, slots and events below. Preserve the rendered element’s native semantics and provide the required content/data.
 - Automatic attribute inheritance is disabled; the source explicitly forwards and merges supported fallthrough attributes.
 

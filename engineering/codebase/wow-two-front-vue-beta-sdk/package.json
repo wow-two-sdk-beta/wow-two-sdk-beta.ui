@@ -372,6 +372,11 @@
       "import": "./dist/feedback/index.js",
       "default": "./dist/feedback/index.js"
     },
+    "./reporting": {
+      "types": "./dist/reporting/index.d.ts",
+      "import": "./dist/reporting/index.js",
+      "default": "./dist/reporting/index.js"
+    },
     "./forms-engine": {
       "types": "./dist/formsEngine/index.d.ts",
       "import": "./dist/formsEngine/index.js",

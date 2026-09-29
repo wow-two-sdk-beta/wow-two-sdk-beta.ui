@@ -158,7 +158,7 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
       // The retry reports the outcome; a failed refresh leaves the rejection to surface.
     }
   };
-  const attempt = async (
+  const attemptOnce = async (
     url: string,
     init: RequestOptions,
     body: BodyInit | undefined,
@@ -273,6 +273,20 @@ export function createApiClient(options: ApiClientOptions = {}): ApiClient {
     const decoded = init.decode ? init.decode(payload.value) : payload;
     const interrupted = interruption(init.signal);
     return interrupted ? ResultExtensions.fail(interrupted) : decoded.ok ? success(decoded.value) : decoded;
+  };
+  /** Sends one attempt and tags its failure with the endpoint, so a report or log names it without the transport. */
+  const attempt = async (
+    url: string,
+    init: RequestOptions,
+    body: BodyInit | undefined,
+    hasJsonBody: boolean,
+    json: ApiJsonCodec | undefined,
+    token: string | null,
+  ): Promise<Result<ApiResponseValue<unknown>, ApiFailure>> => {
+    const result = await attemptOnce(url, init, body, hasJsonBody, json, token);
+    if (result.ok) return result;
+    const request = { method: (init.method ?? 'GET').toUpperCase(), url: url.split(/[?#]/u)[0] ?? url };
+    return ResultExtensions.fail({ ...result.failure, request });
   };
   const execute = async (
     path: string,

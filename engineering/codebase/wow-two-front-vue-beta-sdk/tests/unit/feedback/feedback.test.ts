@@ -166,4 +166,36 @@ describe('safe query feedback', () => {
     feedbackQueryErrors(bus)({ type: 'cancelled', message: 'Cancelled.' });
     expect(seen).toHaveLength(1);
   });
+  it('offers a one-click report only for failures that point at a defect or an outage', () => {
+    const bus = createFeedbackBus();
+    const seen: PublishedNotice[] = [];
+    bus.subscribe((notice) => seen.push(notice));
+    const captured: unknown[] = [];
+    const reporter = {
+      capture: (error?: unknown) => {
+        captured.push(error);
+        return { id: 'i', occurredAt: '', send: async () => ({ id: 'i' }), build: async () => ({}) as never };
+      },
+    };
+    const onError = feedbackQueryErrors(bus, { reporter });
+
+    onError(new ApiError(500, null).failure);
+    onError(new ApiError(404, null).failure);
+    onError({ type: 'timeout', message: 'Timed out.' });
+
+    expect(seen.map((notice) => typeof notice.report)).toEqual(['function', 'undefined', 'function']);
+    expect(captured).toHaveLength(2);
+  });
+  it('lets the app decide which failures are reportable', () => {
+    const bus = createFeedbackBus();
+    const seen: PublishedNotice[] = [];
+    bus.subscribe((notice) => seen.push(notice));
+    const reporter = {
+      capture: () => ({ id: 'i', occurredAt: '', send: async () => ({ id: 'i' }), build: async () => ({}) as never }),
+    };
+    feedbackQueryErrors(bus, { reporter, isReportable: (error) => error.type === 'conflict' })(
+      new ApiError(409, null).failure,
+    );
+    expect(seen[0]!.report).toBeTypeOf('function');
+  });
 });

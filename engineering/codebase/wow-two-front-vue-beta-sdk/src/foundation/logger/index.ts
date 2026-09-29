@@ -49,6 +49,9 @@ export {
   TruncatedMarker,
 } from './Redaction';
 
+// URL redaction — credentials in user-info, query and fragment, for any URL shipped off the device
+export { redactUrl, DefaultRedactUrlParams } from './UrlRedaction';
+
 // Built-in sinks — dev console + test double
 export { consoleLogSink, type ConsoleLogSinkOptions } from './ConsoleLogSink';
 export { memoryLogSink, type MemoryLogSink } from './MemoryLogSink';
