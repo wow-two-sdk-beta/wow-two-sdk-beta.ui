@@ -114,6 +114,7 @@ import {
   TreeSelectPicker,
   CascaderPicker,
   ImageCropEditor,
+  ImageEditor,
   MentionInput,
 } from '../../../../../src/presentation/forms';
 import { ExactNumber } from '../../../../../src/foundation/numbers';
@@ -234,6 +235,12 @@ export const formsExamples: readonly SmokeCase[] = [
   smokeCase('CascaderPicker', CascaderPicker, {
     options: [{ value: 'uz', label: 'Uzbekistan', children: [{ value: 'tas', label: 'Tashkent' }] }],
     defaultValue: ['uz', 'tas'],
+  }),
+
+  smokeCase('ImageEditor', ImageEditor, {
+    src: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="400" height="600" fill="#2563eb"/><rect x="400" width="400" height="600" fill="#eab308"/></svg>')}`,
+    naturalWidth: 800,
+    naturalHeight: 600,
   }),
 
   smokeCase('ImageCropEditor', ImageCropEditor, {

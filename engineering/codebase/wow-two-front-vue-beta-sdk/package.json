@@ -410,6 +410,11 @@
       "types": "./dist/foundation/optionals/index.d.ts",
       "import": "./dist/foundation/optionals/index.js",
       "default": "./dist/foundation/optionals/index.js"
+    },
+    "./domain/imageEditing": {
+      "types": "./dist/domain/imageEditing/index.d.ts",
+      "import": "./dist/domain/imageEditing/index.js",
+      "default": "./dist/domain/imageEditing/index.js"
     }
   },
   "scripts": {

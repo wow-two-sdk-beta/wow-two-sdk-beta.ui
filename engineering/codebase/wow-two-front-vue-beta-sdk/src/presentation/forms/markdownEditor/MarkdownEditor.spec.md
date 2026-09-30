@@ -12,6 +12,8 @@ Public import: `import { MarkdownEditor } from '@wow-two-beta/ui-vue/presentatio
 - Native form reset requests the original seed through the outer state owner. Nested controls reconcile without issuing their own default requests. Composite drafts remount from the resolved state. A cancelled reset changes nothing.
 
 - Default preview escapes raw HTML and filters link/image URL schemes with UrlExtensions.
+- `showImages=false` renders Markdown image alternative text only; the default preview creates no image elements.
+  Raw HTML remains escaped. The custom preview slot is caller-owned and is not filtered by this option.
 - The preview slot replaces this renderer; its caller owns the trust policy for any custom HTML.
 - URL bindings select an allowed scheme through UrlExtensions before rendering. Custom slots remain caller-owned content.
 - The committed state uses the shared controlled-state helper: supplied controlled state is read from props; user changes report intent. The default seeds uncontrolled state. External prop updates do not themselves emit user changes.
@@ -26,6 +28,7 @@ Public import: `import { MarkdownEditor } from '@wow-two-beta/ui-vue/presentatio
 | `view` | `MarkdownEditorView` | no | `undefined` | The pane layout, controlled. The `v-model:view` binding target. |
 | `defaultView` | `MarkdownEditorView` | no | `undefined` | The initial pane layout when uncontrolled. Default `split`. |
 | `isInvalid` | `boolean` | no | `undefined` | The invalid surface override. Falls back to the surrounding form control's `isInvalid`. |
+| `showImages` | `boolean` | no | `true` | Allows image elements in the built-in preview; false renders alternative text only. |
 | `minHeight` | `string` | no | `'18rem'` | The CSS minHeight on the surface (default `18rem`). |
 | `id` | `string` | no | — | The control's id. Auto-filled from `FormControl` context when omitted. |
 | `isDisabled` | `boolean` | no | `undefined` | The disabled state. Falls back to the surrounding field's `isDisabled`. |

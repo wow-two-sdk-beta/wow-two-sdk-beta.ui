@@ -43,6 +43,9 @@ export interface MarkdownEditorProps {
   /** The CSS minHeight on the surface (default `18rem`). */
   readonly minHeight?: string;
 
+  /** Allows image elements in the built-in preview; false renders their alternative text only. */
+  readonly showImages?: boolean;
+
   /** The control's id. Auto-filled from `FormControl` context when omitted. */
   readonly id?: string;
 
@@ -131,26 +134,28 @@ const escapeHtml = (html: string) =>
 // and whose link/image URLs are protocol-filtered (no `javascript:` links).
 // Markdown formatting is unaffected. Consumers needing real HTML fill the
 // `preview` slot and sanitize themselves.
-const previewMarked = new Marked({
-  renderer: {
-    html({ text }) {
-      return escapeHtml(text);
+const createPreviewMarked = (showImages: boolean) =>
+  new Marked({
+    renderer: {
+      html({ text }) {
+        return escapeHtml(text);
+      },
+      link({ href, title, tokens }) {
+        const url = UrlExtensions.safeNavigation(href);
+        const text = this.parser.parseInline(tokens);
+        if (url === undefined) return text;
+        const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+        return `<a href="${escapeHtml(url)}"${titleAttr}>${text}</a>`;
+      },
+      image({ href, title, text }) {
+        if (!showImages) return escapeHtml(text);
+        const url = UrlExtensions.safeResource(href);
+        if (url === undefined) return escapeHtml(text);
+        const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+        return `<img src="${escapeHtml(url)}" alt="${escapeHtml(text)}"${titleAttr}>`;
+      },
     },
-    link({ href, title, tokens }) {
-      const url = UrlExtensions.safeNavigation(href);
-      const text = this.parser.parseInline(tokens);
-      if (url === undefined) return text;
-      const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
-      return `<a href="${escapeHtml(url)}"${titleAttr}>${text}</a>`;
-    },
-    image({ href, title, text }) {
-      const url = UrlExtensions.safeResource(href);
-      if (url === undefined) return escapeHtml(text);
-      const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
-      return `<img src="${escapeHtml(url)}" alt="${escapeHtml(text)}"${titleAttr}>`;
-    },
-  },
-});
+  });
 
 const ToolbarActions: ReadonlyArray<ToolbarAction> = [
   { key: 'h1', label: 'Heading 1', icon: Heading1, apply: linePrefix('# ') },
@@ -193,6 +198,7 @@ defineOptions({ name: 'MarkdownEditor', inheritAttrs: false });
 
 const props = withDefaults(defineProps<MarkdownEditorProps>(), {
   minHeight: '18rem',
+  showImages: true,
   /* Explicit `undefined` defaults: `useControlled` keys on `=== undefined`, and Vue casts an
      absent `boolean` prop to `false` — which would shadow the form control context. */
   modelValue: undefined,
@@ -261,7 +267,7 @@ const hasPreviewSlot = computed(() => Boolean(slots.preview));
 const previewHtml = computed(() => {
   if (hasPreviewSlot.value) return null;
   try {
-    return previewMarked.parse(markdown.value, { async: false }) as string;
+    return createPreviewMarked(props.showImages).parse(markdown.value, { async: false }) as string;
   } catch {
     return '<p>Failed to render preview.</p>';
   }

@@ -37,3 +37,20 @@ it('does not forward executable link or frame URLs', () => {
     frame.unmount();
   }
 });
+
+it('renders image alternatives without image elements when images are disabled', () => {
+  const wrapper = mount(MarkdownEditor, {
+    props: {
+      defaultView: 'preview',
+      showImages: false,
+      defaultValue: '![Pattern](https://example.com/pattern.jpg)\n\n<img src="https://example.com/raw.jpg">',
+    },
+  });
+  try {
+    expect(wrapper.find('img').exists()).toBe(false);
+    expect(wrapper.text()).toContain('Pattern');
+    expect(wrapper.text()).toContain('<img src="https://example.com/raw.jpg">');
+  } finally {
+    wrapper.unmount();
+  }
+});

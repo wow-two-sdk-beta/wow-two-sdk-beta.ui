@@ -67,6 +67,7 @@ Every unbuilt item, grouped; top of each group = next. Shipped work lives in [`v
 | Display components | shipped v0.1 | — |
 | Feedback components | shipped v0.1 | — |
 | Form components | shipped v0.1 | — |
+| Image editing intent (Vue) | implemented; release verification pending | [Vector map](../architecture/analysis/image-editing-vector.md) |
 | Layout components | shipped v0.1 | — |
 | Navigation components | shipped v0.1 | — |
 | Overlay components | shipped v0.1 | — |
